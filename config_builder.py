@@ -2,14 +2,31 @@ import yaml
 from cryptofeed.symbols import gen_symbols
 from cryptofeed.defines import BINANCE
 
+from ccxt.binance import binance
+
 CONFIG_PATH = 'cryptostore_config.yaml'
 PARQUETE_PATH = '/Users/anov/IdeaProjects/svoe/parquet'
 
 def get_binance_pairs():
-    return list(gen_symbols(BINANCE).keys())[:10] # TODO
+    # TOP pairs by volume, only USDT quote
+    b = binance()
+    items = list(b.fetch_tickers().items())
+    res = list(filter(lambda item: ((item[1]['symbol']).split('/'))[1] == 'USDT', items))
+
+    # sort by USDT volume
+    sorted(res, key=lambda item: item[1]['quoteVolume'])
+    pairs = list(map(lambda item: item[1]['info']['symbol'], res))
+
+    # find those supported by Cryptostore/Cryptofeed
+    cryptostore_pairs_map = gen_symbols(BINANCE)
+    cryptostore_pairs = list(cryptostore_pairs_map.values())
+    intersect = set(pairs) & set(cryptostore_pairs)
+
+    # get Cryptostore keys for pairs
+    return list(filter(lambda key: cryptostore_pairs_map[key] in intersect, list(cryptostore_pairs_map.keys())))
 
 def build_cryptostore_config():
-    binance_pairs = get_binance_pairs()
+    binance_pairs = get_binance_pairs()[:50]
     data = dict(
         cache = 'kafka',
         kafka = dict(
