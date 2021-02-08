@@ -5,6 +5,7 @@ from cryptofeed.defines import BINANCE
 from ccxt.binance import binance
 
 CONFIG_PATH = 'cryptostore_config.yaml'
+AWS_CREDS_PATH = 'aws_creds.yaml'
 PARQUETE_PATH = '/Users/anov/IdeaProjects/svoe/parquet'
 
 def get_binance_pairs():
@@ -25,8 +26,15 @@ def get_binance_pairs():
     # get Cryptostore keys for pairs
     return list(filter(lambda key: cryptostore_pairs_map[key] in intersect, list(cryptostore_pairs_map.keys())))
 
+def read_aws_creds():
+    with open(AWS_CREDS_PATH) as file:
+        data = yaml.load(file, Loader=yaml.FullLoader)
+
+    return [data['key_id'], data['secret']]
+
 def build_cryptostore_config():
-    binance_pairs = get_binance_pairs()[:50]
+    aws_creds = read_aws_creds()
+    binance_pairs = get_binance_pairs()[:10]
     data = dict(
         cache = 'kafka',
         kafka = dict(
@@ -39,14 +47,20 @@ def build_cryptostore_config():
         storage_retry_wait = 30,
         parquet = dict(
             del_file = True,
-            append_counter = 4,
+            append_counter = 0,
             file_format = ['exchange', 'symbol', 'data_type', 'timestamp'],
             compression = dict(
                 codec = 'BROTLI',
                 level = 6,
             ),
             prefix_date = True,
-            path = PARQUETE_PATH,
+            # path = PARQUETE_PATH,
+            S3 = dict(
+                key_id = aws_creds[0],
+                secret = aws_creds[1],
+                bucket = 'svoe.test.1',
+                prefix = 'parquet'
+            ),
         ),
         storage_interval = 60,
         exchanges = dict(

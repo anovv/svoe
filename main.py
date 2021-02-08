@@ -7,6 +7,7 @@ from cryptofeed.exchanges import Binance
 from cryptofeed.defines import TRADES, TICKER, L2_BOOK, L3_BOOK, BOOK_DELTA
 from config_builder import build_cryptostore_config
 from config_builder import get_binance_pairs
+from config_builder import read_aws_creds
 
 from cryptostore import Cryptostore
 
@@ -33,13 +34,13 @@ def main():
     # print(len(binance_pairs()));
     # print(coinbase_pairs());
     cryptostore_config_path = build_cryptostore_config()
-    print('Created Cryptostore config')
     cs = Cryptostore(config=cryptostore_config_path)
     try:
         cs.run()
     except KeyboardInterrupt:
         pass
     # print(get_binance_pairs())
+    # print(read_aws_creds())
 
 if __name__ == '__main__':
     main()
