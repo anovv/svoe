@@ -30,7 +30,7 @@ def read_aws_creds():
     with open(AWS_CREDS_PATH) as file:
         data = yaml.load(file, Loader=yaml.FullLoader)
 
-    return [data['key_id'], data['secret']]
+    return [data['key_id'], data['secret'], data['bucket']]
 
 def build_cryptostore_config():
     aws_creds = read_aws_creds()
@@ -58,7 +58,7 @@ def build_cryptostore_config():
             S3 = dict(
                 key_id = aws_creds[0],
                 secret = aws_creds[1],
-                bucket = 'svoe.test.1',
+                bucket = aws_creds[2],
                 prefix = 'parquet'
             ),
         ),
