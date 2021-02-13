@@ -14,8 +14,8 @@ PARQUETE_PATH = '/Users/anov/IdeaProjects/svoe/parquet'
 
 def build_exchanges_config(exchange_list):
     supported_exchanges_with_pairs = {
-        'BINANCE': [BINANCE, get_binance_pairs]
-        # 'COINBASE' : COINBASE,
+        'BINANCE': [BINANCE, get_binance_pairs],
+        'COINBASE' : [COINBASE, get_coinbase_pairs],
         # 'HUOBI' : HUOBI,
         # 'BITFINEX' : BITFINEX,
         # 'KRAKEN' : KRAKEN,
@@ -38,20 +38,29 @@ def build_exchanges_config(exchange_list):
     return config
 
 def get_coinbase_pairs():
-    # return gen_symbols(COINBASE)
-
     c = coinbase()
-    return c.fetch_markets()
+    markets = c.fetch_markets()
+    # USD quote only
+    usd_only_map = list(filter(lambda item: item['quote'] == 'USD', markets))
+    usd_only = list(map(lambda item: item['id'], usd_only_map))
+
+    # find those supported by Cryptostore/Cryptofeed
+    cryptostore_pairs_map = gen_symbols(COINBASE)
+    cryptostore_pairs = list(cryptostore_pairs_map.values())
+    intersect = set(usd_only) & set(cryptostore_pairs)
+
+    # get Cryptostore keys for pairs
+    return list(filter(lambda key: cryptostore_pairs_map[key] in intersect, list(cryptostore_pairs_map.keys())))
 
 def get_binance_pairs():
     # TOP pairs by volume, only USDT quote
     b = binance()
-    items = list(b.fetch_tickers().items())
-    res = list(filter(lambda item: ((item[1]['symbol']).split('/'))[1] == 'USDT', items))
+    tickers = list(b.fetch_tickers().items())
+    usdt_only = list(filter(lambda item: ((item[1]['symbol']).split('/'))[1] == 'USDT', tickers))
 
     # sort by USDT volume
-    sorted(res, key=lambda item: item[1]['quoteVolume'])
-    pairs = list(map(lambda item: item[1]['info']['symbol'], res))
+    sorted(usdt_only, key=lambda item: item[1]['quoteVolume'])
+    pairs = list(map(lambda item: item[1]['info']['symbol'], usdt_only))
 
     # find those supported by Cryptostore/Cryptofeed
     cryptostore_pairs_map = gen_symbols(BINANCE)
