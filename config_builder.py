@@ -1,12 +1,47 @@
 import yaml
 from cryptofeed.symbols import gen_symbols
-from cryptofeed.defines import BINANCE
+from cryptofeed.defines import BINANCE, COINBASE, HUOBI, BITFINEX, KRAKEN
 
 from ccxt.binance import binance
+from ccxt.coinbase import coinbase
+from ccxt.huobipro import huobipro
+from ccxt.kraken import kraken
+from ccxt.bitfinex import bitfinex
 
 CONFIG_PATH = 'cryptostore_config.yaml'
 AWS_CREDS_PATH = 'aws_creds.yaml'
 PARQUETE_PATH = '/Users/anov/IdeaProjects/svoe/parquet'
+
+def build_exchanges_config(exchange_list):
+    supported_exchanges_with_pairs = {
+        'BINANCE': [BINANCE, get_binance_pairs]
+        # 'COINBASE' : COINBASE,
+        # 'HUOBI' : HUOBI,
+        # 'BITFINEX' : BITFINEX,
+        # 'KRAKEN' : KRAKEN,
+    }
+
+    config = dict()
+    for exchange in exchange_list:
+        if exchange not in supported_exchanges_with_pairs:
+            raise Exception('Exchange {} is not supported'.format(exchange))
+        pairs = supported_exchanges_with_pairs[exchange][1]()
+        config[supported_exchanges_with_pairs[exchange][0]] = dict(
+            retries = -1,
+            l2_book = dict(
+                symbols = pairs,
+            ),
+            ticker = pairs,
+            trades = pairs,
+        )
+
+    return config
+
+def get_coinbase_pairs():
+    # return gen_symbols(COINBASE)
+
+    c = coinbase()
+    return c.fetch_markets()
 
 def get_binance_pairs():
     # TOP pairs by volume, only USDT quote
@@ -32,9 +67,8 @@ def read_aws_creds():
 
     return [data['key_id'], data['secret'], data['bucket']]
 
-def build_cryptostore_config():
+def build_cryptostore_config(exchange_list):
     aws_creds = read_aws_creds()
-    binance_pairs = get_binance_pairs()[:10]
     data = dict(
         cache = 'kafka',
         kafka = dict(
@@ -54,7 +88,6 @@ def build_cryptostore_config():
                 level = 6,
             ),
             prefix_date = True,
-            # path = PARQUETE_PATH,
             S3 = dict(
                 key_id = aws_creds[0],
                 secret = aws_creds[1],
@@ -63,16 +96,7 @@ def build_cryptostore_config():
             ),
         ),
         storage_interval = 60,
-        exchanges = dict(
-            BINANCE = dict(
-                retries = -1,
-                l2_book = dict(
-                    symbols = binance_pairs,
-                ),
-                ticker = binance_pairs,
-                trades = binance_pairs,
-            )
-        )
+        exchanges = build_exchanges_config(exchange_list)
     )
 
     with open(CONFIG_PATH, 'w+') as outfile:
