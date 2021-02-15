@@ -11,6 +11,8 @@ from config_builder import read_aws_creds
 
 from cryptostore import Cryptostore
 
+from kafka_handler import handle_l2
+
 async def trade(feed, pair, order_id, timestamp, side, amount, price, receipt_timestamp):
     print("Ts: {} Feed: {} Pair: {} ID: {} Side: {} Amount: {} Price: {} Rec Ts: {}".format(timestamp, feed, pair, order_id, side, amount, price, receipt_timestamp))
 
@@ -41,11 +43,13 @@ def main():
     parser.add_argument('--ex', nargs='+', dest='exchanges')
     opts = parser.parse_args()
     cryptostore_config_path = build_cryptostore_config(opts.exchanges)
-    # cs = Cryptostore(config=cryptostore_config_path)
-    # try:
-    #     cs.run()
-    # except KeyboardInterrupt:
-    #     pass
+    cs = Cryptostore(config=cryptostore_config_path)
+    try:
+        cs.run()
+    except KeyboardInterrupt:
+        pass
+
+    # handle_l2()
     # print(get_binance_pairs())
     # print(read_aws_creds())
 
