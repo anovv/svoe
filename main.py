@@ -38,8 +38,7 @@ def main():
     # f.add_feed(Kraken(symbols=symbols, channels=[TICKER], callbacks={TICKER: TickerCallback(ticker)}))
     # f.add_feed(Kraken(symbols=['BTC-USD'], channels=[L2_BOOK], callbacks={L2_BOOK: BookCallback(book)}))
     # f.run()
-    # print(list(binance_pairs().keys()))
-    # print(len(binance_pairs()))
+
     parser = argparse.ArgumentParser(description='SVOE')
     parser.add_argument('--ex', nargs='+', dest='exchanges')
     opts = parser.parse_args()
@@ -53,7 +52,6 @@ def main():
         pass
 
     # handle_l2()
-    # print(read_aws_creds())
 
 if __name__ == '__main__':
     main()

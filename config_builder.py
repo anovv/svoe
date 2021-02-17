@@ -49,19 +49,10 @@ def get_kraken_pairs():
     return list(filter(lambda item: item.split('-')[1] == 'USD', list(symbols.keys())))
 
 def get_coinbase_pairs():
-    c = coinbase()
-    markets = c.fetch_markets()
+    symbols = gen_symbols(KRAKEN)
+
     # USD quote only
-    usd_only_map = list(filter(lambda item: item['quote'] == 'USD', markets))
-    usd_only = list(map(lambda item: item['id'], usd_only_map))
-
-    # find those supported by Cryptostore/Cryptofeed
-    cryptostore_pairs_map = gen_symbols(COINBASE)
-    cryptostore_pairs = list(cryptostore_pairs_map.values())
-    intersect = set(usd_only) & set(cryptostore_pairs)
-
-    # get Cryptostore keys for pairs
-    return list(filter(lambda key: cryptostore_pairs_map[key] in intersect, list(cryptostore_pairs_map.keys())))
+    return list(filter(lambda item: item.split('-')[1] == 'USD', list(symbols.keys())))
 
 def get_binance_pairs():
     # TOP pairs by volume, only USDT quote
