@@ -14,11 +14,12 @@ PARQUETE_PATH = '/Users/anov/IdeaProjects/svoe/parquet'
 
 def build_exchanges_config(exchange_list):
     supported_exchanges_with_pairs = {
-        'BINANCE': [BINANCE, get_binance_pairs],
-        'COINBASE' : [COINBASE, get_coinbase_pairs],
-        # 'HUOBI' : HUOBI,
+        # name, pair gen, max_depth_l2
+        'BINANCE': [BINANCE, get_binance_pairs, -1],
+        'COINBASE' : [COINBASE, get_coinbase_pairs, -1],
+        'KRAKEN' : [KRAKEN, get_kraken_pairs, 1000],
         # 'BITFINEX' : BITFINEX,
-        # 'KRAKEN' : KRAKEN,
+        # 'HUOBI' : HUOBI,
     }
 
     config = dict()
@@ -26,16 +27,26 @@ def build_exchanges_config(exchange_list):
         if exchange not in supported_exchanges_with_pairs:
             raise Exception('Exchange {} is not supported'.format(exchange))
         pairs = supported_exchanges_with_pairs[exchange][1]()
+        max_depth = supported_exchanges_with_pairs[exchange][2]
+        l2_book = dict(
+            symbols = pairs,
+        )
+        if (max_depth > 0) :
+            l2_book['max_depth'] = max_depth
         config[supported_exchanges_with_pairs[exchange][0]] = dict(
             retries = -1,
-            l2_book = dict(
-                symbols = pairs,
-            ),
+            l2_book = l2_book,
             ticker = pairs,
             trades = pairs,
         )
 
     return config
+
+def get_kraken_pairs():
+    symbols = gen_symbols(KRAKEN)
+
+    # USD quote only
+    return list(filter(lambda item: item.split('-')[1] == 'USD', list(symbols.keys())))
 
 def get_coinbase_pairs():
     c = coinbase()
@@ -104,7 +115,7 @@ def build_cryptostore_config(exchange_list):
                 prefix = 'parquet'
             ),
         ),
-        storage_interval = 60,
+        storage_interval = 120,
         exchanges = build_exchanges_config(exchange_list)
     )
 

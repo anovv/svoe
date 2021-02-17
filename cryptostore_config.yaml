@@ -1,45 +1,66 @@
 cache: kafka
 exchanges:
-  COINBASE:
+  KRAKEN:
     l2_book:
+      max_depth: 1000
       symbols: &id001
-      - CGLD-USD
-      - LTC-USD
-      - REN-USD
-      - COMP-USD
-      - MKR-USD
-      - ETC-USD
-      - LINK-USD
-      - OXT-USD
-      - BAND-USD
-      - GRT-USD
-      - BNT-USD
-      - XLM-USD
-      - SNX-USD
-      - XTZ-USD
-      - ALGO-USD
-      - ETH-USD
-      - ZEC-USD
-      - KNC-USD
-      - ZRX-USD
-      - UMA-USD
-      - NU-USD
       - AAVE-USD
-      - BCH-USD
-      - DAI-USD
-      - EOS-USD
-      - BAL-USD
-      - OMG-USD
-      - LRC-USD
-      - FIL-USD
-      - DASH-USD
-      - WBTC-USD
-      - NMR-USD
-      - YFI-USD
+      - ADA-USD
+      - ALGO-USD
+      - ANT-USD
       - ATOM-USD
+      - AUD-USD
+      - BAL-USD
+      - BAT-USD
+      - BCH-USD
+      - COMP-USD
+      - CRV-USD
+      - DAI-USD
+      - DASH-USD
+      - DOT-USD
+      - EOS-USD
+      - FIL-USD
+      - FLOW-USD
+      - GNO-USD
+      - GRT-USD
+      - ICX-USD
+      - KAVA-USD
+      - KEEP-USD
+      - KNC-USD
+      - KSM-USD
+      - LINK-USD
+      - LSK-USD
+      - MANA-USD
+      - NANO-USD
+      - OMG-USD
+      - OXT-USD
+      - PAXG-USD
+      - QTUM-USD
+      - REPV2-USD
+      - SC-USD
+      - SNX-USD
+      - STORJ-USD
+      - TBTC-USD
+      - TRX-USD
       - UNI-USD
-      - BTC-USD
+      - USDC-USD
+      - USDT-USD
+      - WAVES-USD
+      - DOG-USD
+      - ETC-USD
+      - ETH-USD
+      - LTC-USD
+      - MLN-USD
       - REP-USD
+      - XTZ-USD
+      - BTC-USD
+      - XLM-USD
+      - XMR-USD
+      - XRP-USD
+      - ZEC-USD
+      - YFI-USD
+      - EUR-USD
+      - GBP-USD
     retries: -1
     ticker: *id001
     trades: *id001
@@ -66,6 +87,6 @@ parquet:
   prefix_date: true
 storage:
 - parquet
-storage_interval: 60
+storage_interval: 120
 storage_retries: 5
 storage_retry_wait: 30

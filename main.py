@@ -3,10 +3,10 @@ import argparse
 
 from cryptofeed.callback import TickerCallback, BookUpdateCallback, TradeCallback, BookCallback
 from cryptofeed import FeedHandler
-from cryptofeed.exchanges import Binance
+from cryptofeed.exchanges import Binance, Kraken
 from cryptofeed.defines import TRADES, TICKER, L2_BOOK, L3_BOOK, BOOK_DELTA
 from config_builder import build_cryptostore_config
-from config_builder import get_binance_pairs, get_coinbase_pairs
+from config_builder import get_binance_pairs, get_coinbase_pairs, get_kraken_pairs
 from config_builder import read_aws_creds
 
 from cryptostore import Cryptostore
@@ -33,16 +33,19 @@ def read_parquet():
 def main():
 
     # f = FeedHandler()
-    # f.add_feed(Binance(pairs=[get_binance_pairs()], channels=[TRADES, TICKER, L2_BOOK], callbacks={TRADES: TradeCallback(trade), TICKER: TickerCallback(ticker), L2_BOOK: BookCallback(book)}))
-    # #
+    # symbols = get_kraken_pairs()
+    # f.add_feed(Kraken(symbols=symbols, channels=[TRADES], callbacks={TRADES: TradeCallback(trade)}))
+    # f.add_feed(Kraken(symbols=symbols, channels=[TICKER], callbacks={TICKER: TickerCallback(ticker)}))
+    # f.add_feed(Kraken(symbols=['BTC-USD'], channels=[L2_BOOK], callbacks={L2_BOOK: BookCallback(book)}))
     # f.run()
     # print(list(binance_pairs().keys()))
     # print(len(binance_pairs()))
-    # print(get_coinbase_pairs())
     parser = argparse.ArgumentParser(description='SVOE')
     parser.add_argument('--ex', nargs='+', dest='exchanges')
     opts = parser.parse_args()
-    cryptostore_config_path = build_cryptostore_config(opts.exchanges)
+    exchanges = opts.exchanges
+    # exchanges = ['KRAKEN']
+    cryptostore_config_path = build_cryptostore_config(exchanges)
     cs = Cryptostore(config=cryptostore_config_path)
     try:
         cs.run()
@@ -50,7 +53,6 @@ def main():
         pass
 
     # handle_l2()
-    # print(get_binance_pairs())
     # print(read_aws_creds())
 
 if __name__ == '__main__':
