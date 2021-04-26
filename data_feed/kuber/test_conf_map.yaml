@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: svoe-test-config
+  namespace: default
+data:
+  KEY1: val123
+  KEY2: val2

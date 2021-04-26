@@ -1,0 +1,4 @@
+cryptostore
+boto3
+aiokafka
+confluent-kafka

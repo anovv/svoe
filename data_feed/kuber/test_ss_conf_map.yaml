@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: svoe-test-ss-conf-map
+data:
+  run.sh: |
+    #!/bin/sh
+    SET_INDEX=${HOSTNAME##*-}
+    echo "Starting initializing for pod $SET_INDEX"
+    if [ "$SET_INDEX" = "0" ]; then
+      cp /mnt/scripts/set-0.conf /mnt/data/set.conf
+    elif [ "$SET_INDEX" = "1" ]; then
+      cp /mnt/scripts/set-1.conf /mnt/data/set.conf
+    elif [ "$SET_INDEX" = "2" ]; then
+      cp /mnt/scripts/set-2.conf /mnt/data/set.conf
+    else
+      echo "Invalid statefulset index"
+      exit 1
+    fi
+  set-0.conf: |
+    hello
+  set-1.conf: |
+    stateful
+  set-2.conf: |
+    set

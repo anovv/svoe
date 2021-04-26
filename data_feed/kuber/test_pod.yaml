@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: svoe-test-config-pod
+spec:
+  containers:
+    - name: svoe-test-container
+      image: busybox
+      command:
+        - sleep
+        - "3600"
+      volumeMounts:
+        - name: config-volume
+          mountPath: /etc/config
+      imagePullPolicy: IfNotPresent
+  volumes:
+    - name: config-volume
+      configMap:
+        # Provide the name of the ConfigMap containing the files you want
+        # to add to the container
+        name: svoe-test-config
+#      envFrom:
+#        - configMapRef:
+#            name: svoe-test-config
+  restartPolicy: Never
