@@ -17,10 +17,10 @@ class ConfigBuilder(object):
         self.exchanges = exchanges
         self.exchanges_config = {
             # pair_gen, max_depth_l2, include_ticker
-            BINANCE : [self._get_binance_pairs()[:6], 100, True], #max_depth 5000 # https://github.com/bmoscon/cryptostore/issues/156 set limit to num pairs to avoid rate limit?
-            COINBASE: [self._get_coinbase_pairs()[:2], 100, True],
-            KRAKEN: [self._get_kraken_pairs()[:1], 100, True], #max_depth 1000
-            HUOBI: [self._get_huobi_pairs()[:1], 100, False],
+            BINANCE : [self._get_binance_pairs()[:10], 100, True], #max_depth 5000 # https://github.com/bmoscon/cryptostore/issues/156 set limit to num pairs to avoid rate limit?
+            COINBASE: [self._get_coinbase_pairs()[:10], 100, True],
+            KRAKEN: [self._get_kraken_pairs()[:10], 100, True], #max_depth 1000
+            HUOBI: [self._get_huobi_pairs()[:10], 100, False],
             # 'BITMEX' : BITMEX,
             # 'DERIBIT' : DERIBIT
         }
@@ -111,50 +111,49 @@ class ConfigBuilder(object):
 
             return pods_to_pairs
 
-    # TODO refactor dict() -> {} and list() -> [] for consistency
     def build_cryptostore_config(self) -> str:
         aws_credentials = self._read_aws_credentials()
-        data = dict(
-            cache=MEDIUM,
+        data = {
+            'cache' : MEDIUM,
             # https://stackoverflow.com/questions/52996028/accessing-local-kafka-from-within-services-deployed-in-local-docker-for-mac-inc
-            kafka=dict(
+            'kafka' : {
                 # ip='host.docker.internal', # for Docker on Mac use host.docker.internal:19092
                 # port=19092,
-                ip='127.0.0.1',
-                port=9092,
-                start_flush=True,
-            ),
-            redis=dict(
-                ip='127.0.0.1',
-                port=6379,
-                socket=None,
-                del_after_read=True,
-                retention_time=None,
-                start_flush=True,
-            ),
-            storage=['parquet'],
-            storage_retries=5,
-            storage_retry_wait=30,
-            parquet=dict(
-                del_file=True,
-                append_counter=0,
-                file_format=['exchange', 'symbol', 'data_type', 'timestamp'],
-                compression=dict(
-                    codec='BROTLI',
-                    level=6,
-                ),
-                prefix_date=True,
-                S3=dict(
-                    key_id=aws_credentials[0],
-                    secret=aws_credentials[1],
-                    bucket=aws_credentials[2],
-                    prefix='parquet'
-                ),
+                'ip' : '127.0.0.1',
+                'port' : 9092,
+                'start_flush' : True,
+            },
+            'redis' : {
+                'ip' : '127.0.0.1',
+                'port' : 6379,
+                'socket' : None,
+                'del_after_read' : True,
+                'retention_time' : None,
+                'start_flush' : True,
+            },
+            'storage' : ['parquet'],
+            'storage_retries' : 5,
+            'storage_retry_wait' : 30,
+            'parquet' : {
+                'del_file' : True,
+                'append_counter' : 0,
+                'file_format' : ['exchange', 'symbol', 'data_type', 'timestamp'],
+                'compression' : {
+                    'codec' : 'BROTLI',
+                    'level' : 6,
+                },
+                'prefix_date' : True,
+                'S3' : {
+                    'key_id' : aws_credentials[0],
+                    'secret' : aws_credentials[1],
+                    'bucket' : aws_credentials[2],
+                    'prefix' : 'parquet',
+                },
                 # path=TEMP_FILES_PATH,
-            ),
-            storage_interval=90,
-            exchanges=self._build_exchanges_config()
-        )
+            },
+            'storage_interval' : 90,
+            'exchanges' : self._build_exchanges_config()
+        }
 
         with open(CONFIG_PATH, 'w+') as outfile:
             yaml.dump(data, outfile, default_flow_style=False)
@@ -162,7 +161,7 @@ class ConfigBuilder(object):
         return CONFIG_PATH
 
     def _build_exchanges_config(self) -> dict[str, Any]:
-        config = dict()
+        config = {}
         for exchange in self.exchanges:
             if exchange not in self.exchanges_config:
                 raise Exception('Exchange {} is not supported'.format(exchange))
@@ -171,19 +170,19 @@ class ConfigBuilder(object):
             pairs = self.exchanges_config[exchange][0]
 
             # book
-            l2_book = dict(
-                symbols=pairs,
-                book_delta=True,
-            )
+            l2_book = {
+                'symbols' : pairs,
+                'book_delta' : True,
+            }
             max_depth = self.exchanges_config[exchange][1]
             if max_depth > 0:
                 l2_book['max_depth'] = max_depth
 
-            config[exchange] = dict(
-                retries=-1,
-                l2_book=l2_book,
-                trades=pairs,
-            )
+            config[exchange] = {
+                'retries' : -1,
+                'l2_book' : l2_book,
+                'trades' : pairs,
+            }
 
             include_ticker = self.exchanges_config[exchange][2]
 
