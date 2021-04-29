@@ -28,6 +28,8 @@ class ConfigBuilder(object):
             # 'DERIBIT' : DERIBIT
         }
 
+    # TODO Figure out path for debug config
+    # DEBUG ONLY
     def cryptostore_single_config(self) -> str:
         ex_to_pairs = {}
         for exchange in self.exchanges_config.keys():
@@ -101,7 +103,7 @@ class ConfigBuilder(object):
 
         return config
 
-    def pairs_to_kuber_pods(self) -> dict[int, dict[str, list[str]]]:
+    def _pairs_to_kuber_pods(self) -> dict[int, dict[str, list[str]]]:
 
         # e1: p1 p2 p3 p4 p5 p6  | pairs: 6 cost: 3.6 round: 3
         #
@@ -243,7 +245,7 @@ class ConfigBuilder(object):
         return [data['key_id'], data['secret'], data['bucket']]
 
     @staticmethod
-    def _dump_yaml_config(dict: config, str: path) -> str:
+    def _dump_yaml_config(config: dict, path: str) -> str:
         with open(path, 'w+') as outfile:
             yaml.dump(config, outfile, default_flow_style=False)
 

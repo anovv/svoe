@@ -7,9 +7,9 @@ from data_feed.config_builder import ConfigBuilder
 
 def test():
 
-    cb = ConfigBuilder()
-    print(cb.pairs_to_kuber_pods())
-    # DataFeedService.run()
+    # cb = ConfigBuilder()
+    # print(cb._pairs_to_kuber_pods())
+    DataFeedService.run()
     # read_s3()
     # ConfigBuilder.get_bitmex_pairs()
 

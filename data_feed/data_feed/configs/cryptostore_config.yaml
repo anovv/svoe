@@ -6,6 +6,15 @@ exchanges:
       max_depth: 100
       symbols: &id001
       - BTC-USDT
+      - ETH-USDT
+      - BNB-USDT
+      - NEO-USDT
+      - LTC-USDT
+      - QTUM-USDT
+      - ADA-USDT
+      - XRP-USDT
+      - EOS-USDT
+      - TUSD-USDT
     retries: -1
     ticker: *id001
     trades: *id001
@@ -15,6 +24,15 @@ exchanges:
       max_depth: 100
       symbols: &id002
       - ETH-USD
+      - MATIC-USD
+      - NU-USD
+      - CRV-USD
+      - EOS-USD
+      - SUSHI-USD
+      - DASH-USD
+      - FIL-USD
+      - SKL-USD
+      - ETC-USD
     retries: -1
     ticker: *id002
     trades: *id002
@@ -23,7 +41,16 @@ exchanges:
       book_delta: true
       max_depth: 100
       symbols: &id003
-      - NEXO-USDT
+      - APN-USDT
+      - MASS-USDT
+      - BADGER-USDT
+      - FILDA-USDT
+      - VALUE-USDT
+      - DF-USDT
+      - ABT-USDT
+      - HPT-USDT
+      - FRONT-USDT
+      - POND-USDT
     retries: -1
     trades: *id003
   KRAKEN:
@@ -32,6 +59,15 @@ exchanges:
       max_depth: 100
       symbols: &id004
       - AAVE-USD
+      - ADA-USD
+      - ALGO-USD
+      - ANT-USD
+      - ATOM-USD
+      - AUD-USD
+      - BAL-USD
+      - BAT-USD
+      - BCH-USD
+      - COMP-USD
     retries: -1
     ticker: *id004
     trades: *id004
@@ -56,13 +92,6 @@ parquet:
   - data_type
   - timestamp
   prefix_date: true
-redis:
-  del_after_read: true
-  ip: 127.0.0.1
-  port: 6379
-  retention_time: null
-  socket: null
-  start_flush: true
 storage:
 - parquet
 storage_interval: 90

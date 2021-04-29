@@ -1,3 +1,0 @@
-[console_scripts]
-svoe_data_feed_launch = data_feed.bin.launcher:main
-
