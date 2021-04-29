@@ -1,4 +1,8 @@
 import yaml
+from yaml.resolver import BaseResolver
+
+import textwrap
+
 import numpy
 import math
 from pathlib import Path
@@ -12,21 +16,96 @@ MEDIUM = 'kafka'
 KAFKA_IP = '127.0.0.1' # ip='host.docker.internal', # for Docker on Mac use host.docker.internal:19092
 KAFKA_PORT = 9092 # port=19092
 
-CONFIG_PATH = str(Path(__file__).parent / 'configs/cryptostore_config.yaml')
+# TODO figure out production paths
+CRYPTOSTORE_CONFIG_PATH = str(Path(__file__).parent / 'configs/cryptostore_config.yaml')
 AWS_CREDENTIALS_PATH = str(Path(__file__).parent / 'configs/aws_credentials.yaml')
+KUBER_CONFIG_MAP_PATH = str(Path(__file__).parent / 'configs/svoe_config_map.yaml')
 
 class ConfigBuilder(object):
 
     def __init__(self):
         self.exchanges_config = {
             # pair_gen, max_depth_l2, include_ticker
-            BINANCE : [self._get_binance_pairs()[:10], 100, True], #max_depth 5000 # https://github.com/bmoscon/cryptostore/issues/156 set limit to num pairs to avoid rate limit?
-            COINBASE: [self._get_coinbase_pairs()[:10], 100, True],
-            KRAKEN: [self._get_kraken_pairs()[:10], 100, True], #max_depth 1000
-            HUOBI: [self._get_huobi_pairs()[:10], 100, False],
+            BINANCE : [self._get_binance_pairs()[:20], 100, True], #max_depth 5000 # https://github.com/bmoscon/cryptostore/issues/156 set limit to num pairs to avoid rate limit?
+            COINBASE: [self._get_coinbase_pairs()[:20], 100, True],
+            KRAKEN: [self._get_kraken_pairs()[:20], 100, True], #max_depth 1000
+            HUOBI: [self._get_huobi_pairs()[:20], 100, False],
             # 'BITMEX' : BITMEX,
             # 'DERIBIT' : DERIBIT
         }
+
+    # TODO decouple kuber logic
+    def kuber_config_map(self) -> str:
+        # yaml wodoo, move to separate class later
+        # https://stackoverflow.com/questions/67080308/how-do-i-add-a-pipe-the-vertical-bar-into-a-yaml-file-from-python
+
+        class AsLiteral(str):
+            pass
+
+        def represent_literal(dumper, data):
+            return dumper.represent_scalar(BaseResolver.DEFAULT_SCALAR_TAG,
+                                           data, style="|")
+        yaml.add_representer(AsLiteral, represent_literal)
+
+        cs_conf = self._build_kuber_cryptostore_config()
+
+        launch_script = \
+            textwrap.dedent(
+                """
+                #!/bin/sh
+                SET_INDEX=${HOSTNAME##*-}
+                echo "Starting initializing for pod $SET_INDEX"
+                if [ "$SET_INDEX" = "0" ]; then
+                    cp /mnt/scripts/set-0.conf /mnt/data/set.conf"""
+            )
+
+        for pod in cs_conf.keys():
+            if pod == 0:
+                continue
+            s = \
+                textwrap.dedent(
+                    """
+                    elif [ "$SET_INDEX" = "{}" ]; then
+                        cp /mnt/scripts/set-{}.conf /mnt/data/set.conf""".format(pod, pod)
+                )
+            launch_script += s
+
+        launch_script += \
+            textwrap.dedent(
+                """
+                else
+                    echo "Invalid statefulset index"
+                    exit 1
+                fi"""
+            )
+
+        print(launch_script)
+
+        config = {
+            'apiVersion' : 'v1',
+            'kind' : 'ConfigMap',
+            'metadata': {
+                'name' : 'svoe-test-ss-conf-map'
+            },
+            'data' : {
+              'run.sh' : AsLiteral(yaml.dump(launch_script))
+            }
+        }
+
+        for pod in cs_conf.keys():
+            key = 'set-' + str(pod) + '.conf'
+            config[key] = AsLiteral(yaml.dump(cs_conf[pod]))
+
+        return self._dump_yaml_config(config, KUBER_CONFIG_MAP_PATH)
+
+    # Maps pods to their cryptostore configs
+    def _build_kuber_cryptostore_config(self) -> dict[int, dict]:
+        config = {}
+        pods_to_pairs = self._kuber_pods_to_pairs()
+        for pod in pods_to_pairs.keys():
+            ex_to_pairs = pods_to_pairs[pod]
+            config[pod] = self._build_cryptostore_config(ex_to_pairs)
+        return config
 
     # TODO Figure out path for debug config
     # DEBUG ONLY
@@ -35,7 +114,7 @@ class ConfigBuilder(object):
         for exchange in self.exchanges_config.keys():
             ex_to_pairs[exchange] = self.exchanges_config[exchange][0]
         config = self._build_cryptostore_config(ex_to_pairs)
-        return self._dump_yaml_config(config, CONFIG_PATH)
+        return self._dump_yaml_config(config, CRYPTOSTORE_CONFIG_PATH)
 
     def _build_cryptostore_config(self, ex_to_pairs: dict[str, list[str]]) -> dict:
         aws_credentials = self._read_aws_credentials()
@@ -103,7 +182,7 @@ class ConfigBuilder(object):
 
         return config
 
-    def _pairs_to_kuber_pods(self) -> dict[int, dict[str, list[str]]]:
+    def _kuber_pods_to_pairs(self) -> dict[int, dict[str, list[str]]]:
 
         # e1: p1 p2 p3 p4 p5 p6  | pairs: 6 cost: 3.6 round: 3
         #
@@ -115,7 +194,7 @@ class ConfigBuilder(object):
         #
         # num_pods = 6
 
-        num_pods = 10
+        num_pods = 70
         pods = [*range(0, num_pods)]
         num_exchanges = len(self.exchanges_config)
         num_pairs = sum(len(val[0]) for val in self.exchanges_config.values())
