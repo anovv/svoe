@@ -6,15 +6,18 @@ from typing import Any
 from cryptofeed.symbols import gen_symbols
 from cryptofeed.defines import BINANCE, COINBASE, KRAKEN, HUOBI, DERIBIT, BITMEX
 
-MEDIUM = 'kafka' # 'redis' or 'kafka'
+MEDIUM = 'kafka'
+
+# https://stackoverflow.com/questions/52996028/accessing-local-kafka-from-within-services-deployed-in-local-docker-for-mac-inc
+KAFKA_IP = '127.0.0.1' # ip='host.docker.internal', # for Docker on Mac use host.docker.internal:19092
+KAFKA_PORT = 9092 # port=19092
 
 CONFIG_PATH = str(Path(__file__).parent / 'configs/cryptostore_config.yaml')
 AWS_CREDENTIALS_PATH = str(Path(__file__).parent / 'configs/aws_credentials.yaml')
 
 class ConfigBuilder(object):
 
-    def __init__(self, exchanges: list[str]):
-        self.exchanges = exchanges
+    def __init__(self):
         self.exchanges_config = {
             # pair_gen, max_depth_l2, include_ticker
             BINANCE : [self._get_binance_pairs()[:10], 100, True], #max_depth 5000 # https://github.com/bmoscon/cryptostore/issues/156 set limit to num pairs to avoid rate limit?
@@ -24,6 +27,79 @@ class ConfigBuilder(object):
             # 'BITMEX' : BITMEX,
             # 'DERIBIT' : DERIBIT
         }
+
+    def cryptostore_single_config(self) -> str:
+        ex_to_pairs = {}
+        for exchange in self.exchanges_config.keys():
+            ex_to_pairs[exchange] = self.exchanges_config[exchange][0]
+        config = self._build_cryptostore_config(ex_to_pairs)
+        return self._dump_yaml_config(config, CONFIG_PATH)
+
+    def _build_cryptostore_config(self, ex_to_pairs: dict[str, list[str]]) -> dict:
+        aws_credentials = self._read_aws_credentials()
+        config = {
+            'cache' : MEDIUM,
+            'kafka' : {
+                'ip' : KAFKA_IP,
+                'port' : 9092,
+                'start_flush' : True,
+            },
+            'storage' : ['parquet'],
+            'storage_retries' : 5,
+            'storage_retry_wait' : 30,
+            'parquet' : {
+                'del_file' : True,
+                'append_counter' : 0,
+                'file_format' : ['exchange', 'symbol', 'data_type', 'timestamp'],
+                'compression' : {
+                    'codec' : 'BROTLI',
+                    'level' : 6,
+                },
+                'prefix_date' : True,
+                'S3' : {
+                    'key_id' : aws_credentials[0],
+                    'secret' : aws_credentials[1],
+                    'bucket' : aws_credentials[2],
+                    'prefix' : 'parquet',
+                },
+                # path=TEMP_FILES_PATH,
+            },
+            'storage_interval' : 90,
+            'exchanges' : self._build_exchanges_config(ex_to_pairs)
+        }
+
+        return config
+
+    def _build_exchanges_config(self, ex_to_pairs: dict[str, list[str]]) -> dict[str, Any]:
+        config = {}
+        for exchange in ex_to_pairs.keys():
+            if exchange not in self.exchanges_config:
+                raise Exception('Exchange {} is not supported'.format(exchange))
+
+            # pairs
+            pairs = ex_to_pairs[exchange]
+
+            # book
+            l2_book = {
+                'symbols' : pairs,
+                'book_delta' : True,
+            }
+            max_depth = self.exchanges_config[exchange][1]
+            if max_depth > 0:
+                l2_book['max_depth'] = max_depth
+
+            config[exchange] = {
+                'retries' : -1,
+                'l2_book' : l2_book,
+                'trades' : pairs,
+            }
+
+            include_ticker = self.exchanges_config[exchange][2]
+
+            if include_ticker:
+                config[exchange]['ticker'] = pairs
+
+        return config
 
     def pairs_to_kuber_pods(self) -> dict[int, dict[str, list[str]]]:
 
@@ -111,87 +187,7 @@ class ConfigBuilder(object):
 
             return pods_to_pairs
 
-    def build_cryptostore_config(self) -> str:
-        aws_credentials = self._read_aws_credentials()
-        data = {
-            'cache' : MEDIUM,
-            # https://stackoverflow.com/questions/52996028/accessing-local-kafka-from-within-services-deployed-in-local-docker-for-mac-inc
-            'kafka' : {
-                # ip='host.docker.internal', # for Docker on Mac use host.docker.internal:19092
-                # port=19092,
-                'ip' : '127.0.0.1',
-                'port' : 9092,
-                'start_flush' : True,
-            },
-            'redis' : {
-                'ip' : '127.0.0.1',
-                'port' : 6379,
-                'socket' : None,
-                'del_after_read' : True,
-                'retention_time' : None,
-                'start_flush' : True,
-            },
-            'storage' : ['parquet'],
-            'storage_retries' : 5,
-            'storage_retry_wait' : 30,
-            'parquet' : {
-                'del_file' : True,
-                'append_counter' : 0,
-                'file_format' : ['exchange', 'symbol', 'data_type', 'timestamp'],
-                'compression' : {
-                    'codec' : 'BROTLI',
-                    'level' : 6,
-                },
-                'prefix_date' : True,
-                'S3' : {
-                    'key_id' : aws_credentials[0],
-                    'secret' : aws_credentials[1],
-                    'bucket' : aws_credentials[2],
-                    'prefix' : 'parquet',
-                },
-                # path=TEMP_FILES_PATH,
-            },
-            'storage_interval' : 90,
-            'exchanges' : self._build_exchanges_config()
-        }
-
-        with open(CONFIG_PATH, 'w+') as outfile:
-            yaml.dump(data, outfile, default_flow_style=False)
-
-        return CONFIG_PATH
-
-    def _build_exchanges_config(self) -> dict[str, Any]:
-        config = {}
-        for exchange in self.exchanges:
-            if exchange not in self.exchanges_config:
-                raise Exception('Exchange {} is not supported'.format(exchange))
-
-            # pairs
-            pairs = self.exchanges_config[exchange][0]
-
-            # book
-            l2_book = {
-                'symbols' : pairs,
-                'book_delta' : True,
-            }
-            max_depth = self.exchanges_config[exchange][1]
-            if max_depth > 0:
-                l2_book['max_depth'] = max_depth
-
-            config[exchange] = {
-                'retries' : -1,
-                'l2_book' : l2_book,
-                'trades' : pairs,
-            }
-
-            include_ticker = self.exchanges_config[exchange][2]
-
-            if include_ticker:
-                config[exchange]['ticker'] = pairs
-
-        return config
-
-    # TODO refactor below to remove dependency on exchnage specific logic
+    # TODO refactor below to remove dependency on exchnage specific logic, move to separate class
     @staticmethod
     def _get_kraken_pairs() -> list[str]:
         symbols = gen_symbols(KRAKEN)
@@ -245,3 +241,10 @@ class ConfigBuilder(object):
             data = yaml.load(file, Loader = yaml.FullLoader)
 
         return [data['key_id'], data['secret'], data['bucket']]
+
+    @staticmethod
+    def _dump_yaml_config(dict: config, str: path) -> str:
+        with open(path, 'w+') as outfile:
+            yaml.dump(config, outfile, default_flow_style=False)
+
+        return path
