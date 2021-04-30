@@ -20,7 +20,8 @@ metadata:
     name: svoe-test-stateful-set
 spec:
   serviceName: svoe-test-stateful-set-svc
-  replicas: 3
+  replicas: 35
+  podManagementPolicy: Parallel
   selector:
     matchLabels:
       name: svoe-test-stateful-set

@@ -21,22 +21,24 @@ CRYPTOSTORE_CONFIG_PATH = str(Path(__file__).parent / 'configs/cryptostore_confi
 AWS_CREDENTIALS_PATH = str(Path(__file__).parent / 'configs/aws_credentials.yaml')
 KUBER_CONFIG_MAP_PATH = str(Path(__file__).parent / 'configs/svoe_config_map.yaml')
 
+NUM_PODS = 35
+
 class ConfigBuilder(object):
 
     def __init__(self):
         self.exchanges_config = {
             # pair_gen, max_depth_l2, include_ticker
-            BINANCE : [self._get_binance_pairs()[:20], 100, True], #max_depth 5000 # https://github.com/bmoscon/cryptostore/issues/156 set limit to num pairs to avoid rate limit?
-            COINBASE: [self._get_coinbase_pairs()[:20], 100, True],
-            KRAKEN: [self._get_kraken_pairs()[:20], 100, True], #max_depth 1000
-            HUOBI: [self._get_huobi_pairs()[:20], 100, False],
+            BINANCE : [self._get_binance_pairs()[:100], 100, True], #max_depth 5000 # https://github.com/bmoscon/cryptostore/issues/156 set limit to num pairs to avoid rate limit?
+            COINBASE: [self._get_coinbase_pairs()[:100], 100, True],
+            KRAKEN: [self._get_kraken_pairs()[:100], 100, True], #max_depth 1000
+            HUOBI: [self._get_huobi_pairs()[:100], 100, False],
             # 'BITMEX' : BITMEX,
             # 'DERIBIT' : DERIBIT
         }
 
     # TODO decouple kuber logic
     def kuber_config_map(self) -> str:
-        # yaml wodoo, move to separate class later
+        # yaml woodoo, move to separate class later
         # https://stackoverflow.com/questions/67080308/how-do-i-add-a-pipe-the-vertical-bar-into-a-yaml-file-from-python
 
         class AsLiteral(str):
@@ -88,13 +90,13 @@ class ConfigBuilder(object):
                 'name' : 'svoe-test-ss-conf-map'
             },
             'data' : {
-              'run.sh' : AsLiteral(yaml.dump(launch_script))
+              'run.sh' : AsLiteral(launch_script.strip())
             }
         }
 
         for pod in cs_conf.keys():
             key = 'set-' + str(pod) + '.conf'
-            config[key] = AsLiteral(yaml.dump(cs_conf[pod]))
+            config['data'][key] = AsLiteral(yaml.dump(cs_conf[pod]))
 
         return self._dump_yaml_config(config, KUBER_CONFIG_MAP_PATH)
 
@@ -194,7 +196,7 @@ class ConfigBuilder(object):
         #
         # num_pods = 6
 
-        num_pods = 70
+        num_pods = NUM_PODS
         pods = [*range(0, num_pods)]
         num_exchanges = len(self.exchanges_config)
         num_pairs = sum(len(val[0]) for val in self.exchanges_config.values())
@@ -326,6 +328,6 @@ class ConfigBuilder(object):
     @staticmethod
     def _dump_yaml_config(config: dict, path: str) -> str:
         with open(path, 'w+') as outfile:
-            yaml.dump(config, outfile, default_flow_style=False)
+            yaml.dump(config, outfile, default_flow_style=False, default_style=None)
 
         return path
