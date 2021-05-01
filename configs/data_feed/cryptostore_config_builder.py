@@ -11,12 +11,15 @@ KAFKA_IP = '127.0.0.1' # ip='host.docker.internal', # for Docker on Mac use host
 KAFKA_PORT = 9092 # port=19092
 
 # TODO figure out production paths
-CRYPTOSTORE_CONFIG_PATH = str(Path(__file__).parent / 'cryptostore_config.yaml')
 AWS_CREDENTIALS_PATH = str(Path(__file__).parent / 'aws_credentials.yaml')
 
 
 # Cryptostore specific configs
 class CryptostoreConfigBuilder(BaseConfigBuilder):
+    CRYPTOSTORE_CONFIG_DIR = '/etc/svoe/data_feed/configs'
+
+    # SHOULD BE IN SYNC WITH PATH IN data_feed_service
+    CRYPTOSTORE_CONFIG_PATH = CRYPTOSTORE_CONFIG_DIR + '/data-feed-config.yaml'
 
     # TODO Figure out path for debug config
     # DEBUG ONLY
@@ -25,39 +28,39 @@ class CryptostoreConfigBuilder(BaseConfigBuilder):
         for exchange in self.exchanges_config.keys():
             ex_to_pairs[exchange] = self.exchanges_config[exchange][0]
         config = self._build_cryptostore_config(ex_to_pairs)
-        return self._dump_yaml_config(config, CRYPTOSTORE_CONFIG_PATH)
+        return self._dump_yaml_config(config, self.CRYPTOSTORE_CONFIG_PATH)
 
     def _build_cryptostore_config(self, ex_to_pairs: dict[str, list[str]]) -> dict:
         aws_credentials = self._read_aws_credentials()
         config = {
-            'cache' : MEDIUM,
-            'kafka' : {
-                'ip' : KAFKA_IP,
-                'port' : 9092,
-                'start_flush' : True,
+            'cache': MEDIUM,
+            'kafka': {
+                'ip': KAFKA_IP,
+                'port': 9092,
+                'start_flush': True,
             },
-            'storage' : ['parquet'],
-            'storage_retries' : 5,
-            'storage_retry_wait' : 30,
-            'parquet' : {
-                'del_file' : True,
-                'append_counter' : 0,
-                'file_format' : ['exchange', 'symbol', 'data_type', 'timestamp'],
-                'compression' : {
-                    'codec' : 'BROTLI',
-                    'level' : 6,
+            'storage': ['parquet'],
+            'storage_retries': 5,
+            'storage_retry_wait': 30,
+            'parquet': {
+                'del_file': True,
+                'append_counter': 0,
+                'file_format': ['exchange', 'symbol', 'data_type', 'timestamp'],
+                'compression': {
+                    'codec': 'BROTLI',
+                    'level': 6,
                 },
-                'prefix_date' : True,
-                'S3' : {
-                    'key_id' : aws_credentials[0],
-                    'secret' : aws_credentials[1],
-                    'bucket' : aws_credentials[2],
-                    'prefix' : 'parquet',
+                'prefix_date': True,
+                'S3': {
+                    'key_id': aws_credentials[0],
+                    'secret': aws_credentials[1],
+                    'bucket': aws_credentials[2],
+                    'prefix': 'parquet',
                 },
                 # path=TEMP_FILES_PATH,
             },
-            'storage_interval' : 90,
-            'exchanges' : self._build_exchanges_config(ex_to_pairs)
+            'storage_interval': 90,
+            'exchanges': self._build_exchanges_config(ex_to_pairs)
         }
 
         return config
@@ -73,25 +76,25 @@ class CryptostoreConfigBuilder(BaseConfigBuilder):
 
             # l2 book
             l2_book = {
-                'symbols' : pairs,
-                'book_delta' : True,
+                'symbols': pairs,
+                'book_delta': True,
             }
             max_depth_l2 = self.exchanges_config[exchange][1]
             if max_depth_l2 > 0:
                 l2_book['max_depth'] = max_depth_l2
 
             config[exchange] = {
-                'retries' : -1,
-                'l2_book' : l2_book,
-                'trades' : pairs,
+                'retries': -1,
+                'l2_book': l2_book,
+                'trades': pairs,
             }
 
             # l3 book
             include_l3 = self.exchanges_config[exchange][3]
             if include_l3:
                 l3_book = {
-                    'symbols' : pairs,
-                    'book_delta' : True,
+                    'symbols': pairs,
+                    'book_delta': True,
                 }
                 config[exchange]['l3_book'] = l3_book
 

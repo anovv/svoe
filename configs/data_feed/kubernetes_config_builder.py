@@ -10,15 +10,147 @@ import numpy
 import math
 import yaml
 
-KUBER_CONFIG_MAP_PATH = str(Path(__file__).parent / 'svoe_config_map.yaml')
+# TODO figure out prod paths
+# ConfigMap
+DATA_FEED_CONFIG_MAP_PATH = str(Path(__file__).parent / 'svoe_data_feed_config_map.yaml')
+DATA_FEED_CONFIG_MAP_NAME = 'svoe-data-feed-config-map'
 
-NUM_PODS = 35
+# Stateful Set
+DATA_FEED_STATEFUL_SET_CONFIG_PATH = str(Path(__file__).parent / 'svoe_data_feed_stateful_set.yaml')
+DATA_FEED_STATEFUL_SET_NAME = 'svoe-data-feed-stateful-set'
+DATA_FEED_HEADLESS_SERVICE_NAME = 'svoe-data-feed-stateful-set-service'
+
+# Container
+DATA_FEED_CONTAINER_NAME = 'svoe-data-feed-container'
+DATA_FEED_IMAGE = 'busybox' # TODO
+
+# Init Container
+DATA_FEED_INIT_CONTAINER_NAME = 'svoe-data-feed-init-container'
+DATA_FEED_INIT_IMAGE = 'busybox'
+
+# Volumes
+DATA_FEED_SCRIPTS_VOLUME_NAME = 'svoe-data-feed-scripts-vol'
+DATA_FEED_CONFIGS_VOLUME_NAME = 'svoe-data-feed-conf-vol'
+
+# Pods
+NUM_PODS = 10
 
 
 # Kubernetes specific configs
+# https://faun.pub/unique-configuration-per-pod-in-a-statefulset-1415e0c80258
 class KubernetesConfigBuilder(CryptostoreConfigBuilder):
 
-    def kuber_config_map(self) -> str:
+    def data_feed_stateful_set(self) -> str:
+        headless_service_config = {
+            'apiVersion': 'v1',
+            'kind': 'Service',
+            'metadata': {
+                'name': DATA_FEED_HEADLESS_SERVICE_NAME,
+                'labels': {
+                    'name': DATA_FEED_HEADLESS_SERVICE_NAME,
+                },
+            },
+            'spec': {
+                'clusterIP': 'None',
+                'ports': [
+                    {
+                        'name': 'http',
+                        'port': 80,
+                    },
+                ],
+                'selector': {
+                    'name': DATA_FEED_STATEFUL_SET_NAME,
+                },
+            },
+        }
+
+        stateful_set_config = {
+            'apiVersion': 'apps/v1',
+            'kind': 'StatefulSet',
+            'metadata': {
+                'name': DATA_FEED_STATEFUL_SET_NAME,
+                'labels': {
+                    'name': DATA_FEED_STATEFUL_SET_NAME,
+                },
+            },
+            'spec': {
+                'serviceName': DATA_FEED_HEADLESS_SERVICE_NAME,
+                'replicas': NUM_PODS,
+                'podManagementPolicy': 'Parallel',
+                'selector': {
+                    'matchLabels': {
+                        'name': DATA_FEED_STATEFUL_SET_NAME,
+                    }
+                },
+                'template': {
+                    'metadata': {
+                        'labels': {
+                            'name': DATA_FEED_STATEFUL_SET_NAME
+                        },
+                    },
+                    'spec': {
+                        'containers': [
+                            {
+                                'name': DATA_FEED_CONTAINER_NAME,
+                                'image': DATA_FEED_IMAGE,
+                                'imagePullPolicy': 'IfNotPresent',
+                                'command': ['/bin/sh', '-c'],
+                                'args': ['echo "Starting statefulset pod"; cat /etc/svoe/data_feed/configs/data-feed-config.yaml; while true; do sleep 600; done'],
+                                'volumeMounts': [
+                                    {
+                                        'name': DATA_FEED_CONFIGS_VOLUME_NAME,
+                                        'mountPath': self.CRYPTOSTORE_CONFIG_DIR,
+                                    },
+                                ]
+                            },
+                        ],
+                        'initContainers': [
+                            {
+                                'name': DATA_FEED_INIT_CONTAINER_NAME,
+                                'image': DATA_FEED_INIT_IMAGE,
+                                'command': ['/mnt/scripts/run.sh'],
+                                'volumeMounts': [
+                                    {
+                                        'name': DATA_FEED_SCRIPTS_VOLUME_NAME,
+                                        'mountPath': '/mnt/scripts',
+                                    },
+                                    {
+                                        'name': DATA_FEED_CONFIGS_VOLUME_NAME,
+                                        'mountPath': '/mnt/data',
+                                    },
+                                ],
+                            },
+                        ],
+                        'volumes': [
+                            {
+                                'name': DATA_FEED_SCRIPTS_VOLUME_NAME,
+                                'configMap': {
+                                    'name': DATA_FEED_CONFIG_MAP_NAME,
+                                    'defaultMode': 0o555,
+                                },
+                            },
+                            {
+                                'name': DATA_FEED_CONFIGS_VOLUME_NAME,
+                                'emptyDir': {},
+                            },
+                        ],
+                    },
+                },
+            },
+        }
+
+        with open(DATA_FEED_STATEFUL_SET_CONFIG_PATH, 'w+') as outfile:
+            yaml.dump_all(
+                [headless_service_config, stateful_set_config],
+                outfile,
+                default_flow_style=False,
+            )
+
+        return DATA_FEED_STATEFUL_SET_CONFIG_PATH
+
+    # ConfigMap containing Cryptostore configs for each pod
+    # Assigned to pods using initContainer
+    def data_feed_config_map(self) -> str:
         # yaml woodoo, move to separate class later
         # https://stackoverflow.com/questions/67080308/how-do-i-add-a-pipe-the-vertical-bar-into-a-yaml-file-from-python
 
@@ -39,8 +171,10 @@ class KubernetesConfigBuilder(CryptostoreConfigBuilder):
                 SET_INDEX=${HOSTNAME##*-}
                 echo "Starting initializing for pod $SET_INDEX"
                 if [ "$SET_INDEX" = "0" ]; then
-                    cp /mnt/scripts/set-0.conf /mnt/data/set.conf"""
+                    cp /mnt/scripts/data-feed-config-0.yaml /mnt/data/data-feed-config.yaml"""
             )
+
+        # TODO move config name to const
 
         for pod in cs_conf.keys():
             if pod == 0:
@@ -49,7 +183,7 @@ class KubernetesConfigBuilder(CryptostoreConfigBuilder):
                 textwrap.dedent(
                     """
                     elif [ "$SET_INDEX" = "{}" ]; then
-                        cp /mnt/scripts/set-{}.conf /mnt/data/set.conf""".format(pod, pod)
+                        cp /mnt/scripts/data-feed-config-{}.yaml /mnt/data/data-feed-config.yaml""".format(pod, pod)
                 )
             launch_script += s
 
@@ -57,29 +191,27 @@ class KubernetesConfigBuilder(CryptostoreConfigBuilder):
             textwrap.dedent(
                 """
                 else
-                    echo "Invalid statefulset index"
+                    echo "Invalid stateful set index"
                     exit 1
                 fi"""
             )
 
-        print(launch_script)
-
         config = {
-            'apiVersion' : 'v1',
-            'kind' : 'ConfigMap',
+            'apiVersion': 'v1',
+            'kind': 'ConfigMap',
             'metadata': {
-                'name' : 'svoe-test-ss-conf-map'
+                'name': DATA_FEED_CONFIG_MAP_NAME
             },
-            'data' : {
-                'run.sh' : AsLiteral(launch_script.strip())
+            'data': {
+                'run.sh': AsLiteral(launch_script.strip())
             }
         }
 
         for pod in cs_conf.keys():
-            key = 'set-' + str(pod) + '.conf'
+            key = 'data-feed-config-' + str(pod) + '.yaml'
             config['data'][key] = AsLiteral(yaml.dump(cs_conf[pod]))
 
-        return self._dump_yaml_config(config, KUBER_CONFIG_MAP_PATH)
+        return self._dump_yaml_config(config, DATA_FEED_CONFIG_MAP_PATH)
 
     # Maps pods to their cryptostore configs
     def _build_kuber_cryptostore_config(self) -> dict[int, dict]:
