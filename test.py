@@ -2,13 +2,12 @@
 # sys.path.append('/Users/anov/IdeaProjects/cryptofeed')
 # sys.path.append('/Users/anov/IdeaProjects/cryptostore')
 
-from data_feed.data_feed_service import DataFeedService
-from data_feed.config_builder import ConfigBuilder
+from configs.data_feed.kubernetes_config_builder import KubernetesConfigBuilder
 
 def test():
-
-    cb = ConfigBuilder()
-    print(cb.kuber_config_map())
+    #
+    kcb = KubernetesConfigBuilder()
+    print(kcb.kuber_config_map())
     # DataFeedService.run()
     # read_s3()
     # ConfigBuilder.get_bitmex_pairs()

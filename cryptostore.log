@@ -6234,3 +6234,1190 @@
 2021-04-29 10:44:11,436 : INFO : l2_book-BINANCE-BTC-USDT: Read 0 messages from Kafka
 2021-04-29 10:44:11,437 : INFO : No data for BINANCE-l2_book-BTC-USDT
 2021-04-29 10:44:11,437 : INFO : Reading BINANCE-l2_book-ETH-USDT
+2021-04-30 11:31:06,710 : INFO : Starting cryptostore
+2021-04-30 11:31:06,712 : INFO : Cryptostore running on PID 22844
+2021-04-30 11:31:06,719 : INFO : Spawner started
+2021-04-30 11:31:06,724 : INFO : Aggregator started
+2021-04-30 11:31:06,731 : INFO : Cryptostore started
+2021-04-30 11:31:06,734 : INFO : loading config file locally: /Users/anov/IdeaProjects/svoe/data_feed/data_feed/configs/cryptostore_config.yaml at 2021-04-30 08:31:06.734209
+2021-04-30 11:31:06,748 : INFO : applying local config file: /Users/anov/IdeaProjects/svoe/data_feed/data_feed/configs/cryptostore_config.yaml at 2021-04-30 08:31:06.748355
+2021-04-30 11:31:06,748 : INFO : start: ['COINBASE'] stop: []
+2021-04-30 11:31:08,224 : INFO : Aggregator running on PID 22848
+2021-04-30 11:31:08,225 : INFO : loading config file locally: /Users/anov/IdeaProjects/svoe/data_feed/data_feed/configs/cryptostore_config.yaml at 2021-04-30 08:31:08.225202
+2021-04-30 11:31:08,233 : INFO : Spawner running on PID 22847
+2021-04-30 11:31:08,234 : INFO : applying local config file: /Users/anov/IdeaProjects/svoe/data_feed/data_feed/configs/cryptostore_config.yaml at 2021-04-30 08:31:08.234105
+2021-04-30 11:31:08,233 : INFO : message: {"op": "start", "exchange": "COINBASE", "collector": {"l2_book": {"book_delta": true, "max_depth": 100, "symbols": ["MKR-USD", "REP-USD", "ANKR-USD", "DASH-USD", "FIL-USD", "LTC-USD", "ETC-USD", "STORJ-USD", "WBTC-USD", "SKL-USD"]}, "retries": -1, "ticker": ["MKR-USD", "REP-USD", "ANKR-USD", "DASH-USD", "FIL-USD", "LTC-USD", "ETC-USD", "STORJ-USD", "WBTC-USD", "SKL-USD"], "trades": ["MKR-USD", "REP-USD", "ANKR-USD", "DASH-USD", "FIL-USD", "LTC-USD", "ETC-USD", "STORJ-USD", "WBTC-USD", "SKL-USD"]}, "config": {"cache": "kafka", "kafka": {"ip": "127.0.0.1", "port": 9092, "start_flush": true}, "parquet": {"S3": {"bucket": "svoe.test.1", "key_id": "AKIAJXSXXFCA3HN3T7GQ", "prefix": "parquet", "secret": "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"}, "append_counter": 0, "compression": {"codec": "BROTLI", "level": 6}, "del_file": true, "file_format": ["exchange", "symbol", "data_type", "timestamp"], "prefix_date": true}, "storage": ["parquet"], "storage_interval": 90, "storage_retries": 5, "storage_retry_wait": 30}}
+2021-04-30 11:31:08,236 : INFO : Starting {'op': 'start', 'exchange': 'COINBASE', 'collector': {'l2_book': {'book_delta': True, 'max_depth': 100, 'symbols': ['MKR-USD', 'REP-USD', 'ANKR-USD', 'DASH-USD', 'FIL-USD', 'LTC-USD', 'ETC-USD', 'STORJ-USD', 'WBTC-USD', 'SKL-USD']}, 'retries': -1, 'ticker': ['MKR-USD', 'REP-USD', 'ANKR-USD', 'DASH-USD', 'FIL-USD', 'LTC-USD', 'ETC-USD', 'STORJ-USD', 'WBTC-USD', 'SKL-USD'], 'trades': ['MKR-USD', 'REP-USD', 'ANKR-USD', 'DASH-USD', 'FIL-USD', 'LTC-USD', 'ETC-USD', 'STORJ-USD', 'WBTC-USD', 'SKL-USD']}, 'config': {'cache': 'kafka', 'kafka': {'ip': '127.0.0.1', 'port': 9092, 'start_flush': True}, 'parquet': {'S3': {'bucket': 'svoe.test.1', 'key_id': 'AKIAJXSXXFCA3HN3T7GQ', 'prefix': 'parquet', 'secret': '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'}, 'append_counter': 0, 'compression': {'codec': 'BROTLI', 'level': 6}, 'del_file': True, 'file_format': ['exchange', 'symbol', 'data_type', 'timestamp'], 'prefix_date': True}, 'storage': ['parquet'], 'storage_interval': 90, 'storage_retries': 5, 'storage_retry_wait': 30}}
+2021-04-30 11:31:09,612 : INFO : Collector for COINBASE running on PID 22849
+2021-04-30 11:38:39,765 : INFO : Starting cryptostore
+2021-04-30 11:38:39,766 : INFO : Cryptostore running on PID 23826
+2021-04-30 11:38:39,776 : INFO : Spawner started
+2021-04-30 11:38:39,787 : INFO : Aggregator started
+2021-04-30 11:38:39,792 : INFO : Cryptostore started
+2021-04-30 11:38:39,795 : INFO : loading config file locally: /Users/anov/IdeaProjects/svoe/data_feed/data_feed/configs/cryptostore_config.yaml at 2021-04-30 08:38:39.795088
+2021-04-30 11:38:39,813 : INFO : applying local config file: /Users/anov/IdeaProjects/svoe/data_feed/data_feed/configs/cryptostore_config.yaml at 2021-04-30 08:38:39.813574
+2021-04-30 11:38:39,814 : INFO : start: ['COINBASE'] stop: []
+2021-04-30 11:38:41,185 : INFO : Spawner running on PID 23828
+2021-04-30 11:38:41,190 : INFO : message: {"op": "start", "exchange": "COINBASE", "collector": {"l2_book": {"book_delta": true, "max_depth": 100, "symbols": ["WBTC-USD", "EOS-USD"]}, "retries": -1, "ticker": ["WBTC-USD", "EOS-USD"], "trades": ["WBTC-USD", "EOS-USD"]}, "config": {"cache": "kafka", "kafka": {"ip": "127.0.0.1", "port": 9092, "start_flush": true}, "parquet": {"S3": {"bucket": "svoe.test.1", "key_id": "AKIAJXSXXFCA3HN3T7GQ", "prefix": "parquet", "secret": "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"}, "append_counter": 0, "compression": {"codec": "BROTLI", "level": 6}, "del_file": true, "file_format": ["exchange", "symbol", "data_type", "timestamp"], "prefix_date": true}, "storage": ["parquet"], "storage_interval": 90, "storage_retries": 5, "storage_retry_wait": 30}}
+2021-04-30 11:38:41,194 : INFO : Starting {'op': 'start', 'exchange': 'COINBASE', 'collector': {'l2_book': {'book_delta': True, 'max_depth': 100, 'symbols': ['WBTC-USD', 'EOS-USD']}, 'retries': -1, 'ticker': ['WBTC-USD', 'EOS-USD'], 'trades': ['WBTC-USD', 'EOS-USD']}, 'config': {'cache': 'kafka', 'kafka': {'ip': '127.0.0.1', 'port': 9092, 'start_flush': True}, 'parquet': {'S3': {'bucket': 'svoe.test.1', 'key_id': 'AKIAJXSXXFCA3HN3T7GQ', 'prefix': 'parquet', 'secret': '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'}, 'append_counter': 0, 'compression': {'codec': 'BROTLI', 'level': 6}, 'del_file': True, 'file_format': ['exchange', 'symbol', 'data_type', 'timestamp'], 'prefix_date': True}, 'storage': ['parquet'], 'storage_interval': 90, 'storage_retries': 5, 'storage_retry_wait': 30}}
+2021-04-30 11:38:41,196 : INFO : Aggregator running on PID 23829
+2021-04-30 11:38:41,198 : INFO : loading config file locally: /Users/anov/IdeaProjects/svoe/data_feed/data_feed/configs/cryptostore_config.yaml at 2021-04-30 08:38:41.198167
+2021-04-30 11:38:41,211 : INFO : applying local config file: /Users/anov/IdeaProjects/svoe/data_feed/data_feed/configs/cryptostore_config.yaml at 2021-04-30 08:38:41.211177
+2021-04-30 11:38:42,637 : INFO : Collector for COINBASE running on PID 23830
+2021-04-30 11:38:42,748 : INFO : Topic l2_book-COINBASE-FIL-USD deleted
+2021-04-30 11:38:42,748 : INFO : Topic l2_book-COINBASE-STORJ-USD deleted
+2021-04-30 11:38:42,748 : INFO : Topic ticker-COINBASE-SKL-USD deleted
+2021-04-30 11:38:42,748 : INFO : Topic trades-COINBASE-REP-USD deleted
+2021-04-30 11:38:42,748 : INFO : Topic __consumer_offsets deleted
+2021-04-30 11:38:42,748 : INFO : Topic l2_book-COINBASE-DASH-USD deleted
+2021-04-30 11:38:42,749 : INFO : Topic ticker-COINBASE-STORJ-USD deleted
+2021-04-30 11:38:42,749 : INFO : Topic l2_book-COINBASE-ANKR-USD deleted
+2021-04-30 11:38:42,749 : INFO : Topic trades-COINBASE-MKR-USD deleted
+2021-04-30 11:38:42,749 : INFO : Topic trades-COINBASE-LTC-USD deleted
+2021-04-30 11:38:42,749 : INFO : Topic trades-COINBASE-ETC-USD deleted
+2021-04-30 11:38:42,749 : INFO : Topic ticker-COINBASE-FIL-USD deleted
+2021-04-30 11:38:42,749 : INFO : Topic ticker-COINBASE-DASH-USD deleted
+2021-04-30 11:38:42,749 : INFO : Topic trades-COINBASE-SKL-USD deleted
+2021-04-30 11:38:42,749 : INFO : Topic ticker-COINBASE-MKR-USD deleted
+2021-04-30 11:38:42,749 : INFO : Topic l2_book-COINBASE-ETC-USD deleted
+2021-04-30 11:38:42,750 : INFO : Topic ticker-COINBASE-REP-USD deleted
+2021-04-30 11:38:42,750 : INFO : Topic l2_book-COINBASE-MKR-USD deleted
+2021-04-30 11:38:42,750 : INFO : Topic l2_book-COINBASE-REP-USD deleted
+2021-04-30 11:38:42,751 : INFO : Topic trades-COINBASE-ANKR-USD deleted
+2021-04-30 11:38:42,751 : INFO : Topic trades-COINBASE-DASH-USD deleted
+2021-04-30 11:38:42,751 : INFO : Topic ticker-COINBASE-ANKR-USD deleted
+2021-04-30 11:38:42,751 : INFO : Topic l2_book-COINBASE-WBTC-USD deleted
+2021-04-30 11:38:42,751 : INFO : Topic ticker-COINBASE-LTC-USD deleted
+2021-04-30 11:38:42,751 : INFO : Topic trades-COINBASE-WBTC-USD deleted
+2021-04-30 11:38:42,751 : INFO : Topic ticker-COINBASE-WBTC-USD deleted
+2021-04-30 11:38:42,751 : INFO : Topic ticker-COINBASE-ETC-USD deleted
+2021-04-30 11:38:42,752 : INFO : Topic trades-COINBASE-FIL-USD deleted
+2021-04-30 11:38:42,752 : INFO : Topic l2_book-COINBASE-LTC-USD deleted
+2021-04-30 11:38:42,752 : INFO : Topic l2_book-COINBASE-SKL-USD deleted
+2021-04-30 11:38:42,752 : INFO : Topic trades-COINBASE-STORJ-USD deleted
+2021-04-30 11:38:42,753 : INFO : Reading COINBASE-l2_book-WBTC-USD
+2021-04-30 11:38:43,257 : INFO : l2_book-COINBASE-WBTC-USD: Read 0 messages from Kafka
+2021-04-30 11:38:43,257 : INFO : No data for COINBASE-l2_book-WBTC-USD
+2021-04-30 11:38:43,257 : INFO : Reading COINBASE-l2_book-EOS-USD
+2021-04-30 11:38:43,760 : INFO : l2_book-COINBASE-EOS-USD: Read 0 messages from Kafka
+2021-04-30 11:38:43,762 : INFO : No data for COINBASE-l2_book-EOS-USD
+2021-04-30 11:38:43,763 : INFO : Reading COINBASE-ticker-WBTC-USD
+2021-04-30 11:38:44,268 : INFO : ticker-COINBASE-WBTC-USD: Read 0 messages from Kafka
+2021-04-30 11:38:44,269 : INFO : No data for COINBASE-ticker-WBTC-USD
+2021-04-30 11:38:44,269 : INFO : Reading COINBASE-ticker-EOS-USD
+2021-04-30 11:38:44,775 : INFO : ticker-COINBASE-EOS-USD: Read 0 messages from Kafka
+2021-04-30 11:38:44,775 : INFO : No data for COINBASE-ticker-EOS-USD
+2021-04-30 11:38:44,775 : INFO : Reading COINBASE-trades-WBTC-USD
+2021-04-30 11:38:45,278 : INFO : trades-COINBASE-WBTC-USD: Read 0 messages from Kafka
+2021-04-30 11:38:45,279 : INFO : No data for COINBASE-trades-WBTC-USD
+2021-04-30 11:38:45,280 : INFO : Reading COINBASE-trades-EOS-USD
+2021-04-30 11:38:45,783 : INFO : trades-COINBASE-EOS-USD: Read 0 messages from Kafka
+2021-04-30 11:38:45,786 : INFO : No data for COINBASE-trades-EOS-USD
+2021-04-30 11:40:12,758 : INFO : Reading COINBASE-l2_book-WBTC-USD
+2021-04-30 11:40:13,264 : INFO : l2_book-COINBASE-WBTC-USD: Read 2 messages from Kafka
+2021-04-30 11:40:15,741 : INFO : l2_book-COINBASE-WBTC-USD: Committing offset 2536
+2021-04-30 11:40:15,742 : INFO : Write Complete COINBASE-l2_book-WBTC-USD
+2021-04-30 11:40:15,742 : INFO : Reading COINBASE-l2_book-EOS-USD
+2021-04-30 11:40:16,245 : INFO : l2_book-COINBASE-EOS-USD: Read 4 messages from Kafka
+2021-04-30 11:40:17,965 : INFO : l2_book-COINBASE-EOS-USD: Committing offset 4810
+2021-04-30 11:40:17,965 : INFO : Write Complete COINBASE-l2_book-EOS-USD
+2021-04-30 11:40:17,966 : INFO : Reading COINBASE-ticker-WBTC-USD
+2021-04-30 11:40:18,469 : INFO : ticker-COINBASE-WBTC-USD: Read 0 messages from Kafka
+2021-04-30 11:40:18,470 : INFO : No data for COINBASE-ticker-WBTC-USD
+2021-04-30 11:40:18,471 : INFO : Reading COINBASE-ticker-EOS-USD
+2021-04-30 11:40:18,972 : INFO : ticker-COINBASE-EOS-USD: Read 0 messages from Kafka
+2021-04-30 11:40:18,972 : INFO : No data for COINBASE-ticker-EOS-USD
+2021-04-30 11:40:18,972 : INFO : Reading COINBASE-trades-WBTC-USD
+2021-04-30 11:40:19,473 : INFO : trades-COINBASE-WBTC-USD: Read 0 messages from Kafka
+2021-04-30 11:40:19,474 : INFO : No data for COINBASE-trades-WBTC-USD
+2021-04-30 11:40:19,474 : INFO : Reading COINBASE-trades-EOS-USD
+2021-04-30 11:40:19,976 : INFO : trades-COINBASE-EOS-USD: Read 0 messages from Kafka
+2021-04-30 11:40:19,976 : INFO : No data for COINBASE-trades-EOS-USD
+2021-04-30 11:41:42,766 : INFO : Reading COINBASE-l2_book-WBTC-USD
+2021-04-30 11:41:43,291 : INFO : l2_book-COINBASE-WBTC-USD: Read 2055 messages from Kafka
+2021-04-30 11:41:47,472 : INFO : l2_book-COINBASE-WBTC-USD: Committing offset 4591
+2021-04-30 11:41:47,473 : INFO : Write Complete COINBASE-l2_book-WBTC-USD
+2021-04-30 11:41:47,473 : INFO : Reading COINBASE-l2_book-EOS-USD
+2021-04-30 11:41:47,999 : INFO : l2_book-COINBASE-EOS-USD: Read 5589 messages from Kafka
+2021-04-30 11:41:53,503 : INFO : l2_book-COINBASE-EOS-USD: Committing offset 10399
+2021-04-30 11:41:53,504 : INFO : Write Complete COINBASE-l2_book-EOS-USD
+2021-04-30 11:41:53,504 : INFO : Reading COINBASE-ticker-WBTC-USD
+2021-04-30 11:41:54,009 : INFO : ticker-COINBASE-WBTC-USD: Read 1 messages from Kafka
+2021-04-30 11:41:55,861 : INFO : ticker-COINBASE-WBTC-USD: Committing offset 2
+2021-04-30 11:41:55,861 : INFO : Write Complete COINBASE-ticker-WBTC-USD
+2021-04-30 11:41:55,862 : INFO : Reading COINBASE-ticker-EOS-USD
+2021-04-30 11:41:56,366 : INFO : ticker-COINBASE-EOS-USD: Read 16 messages from Kafka
+2021-04-30 11:41:58,559 : INFO : ticker-COINBASE-EOS-USD: Committing offset 37
+2021-04-30 11:41:58,560 : INFO : Write Complete COINBASE-ticker-EOS-USD
+2021-04-30 11:41:58,560 : INFO : Reading COINBASE-trades-WBTC-USD
+2021-04-30 11:41:59,062 : INFO : trades-COINBASE-WBTC-USD: Read 1 messages from Kafka
+2021-04-30 11:42:01,161 : INFO : trades-COINBASE-WBTC-USD: Committing offset 2
+2021-04-30 11:42:01,163 : INFO : Write Complete COINBASE-trades-WBTC-USD
+2021-04-30 11:42:01,164 : INFO : Reading COINBASE-trades-EOS-USD
+2021-04-30 11:42:01,667 : INFO : trades-COINBASE-EOS-USD: Read 16 messages from Kafka
+2021-04-30 11:42:03,779 : INFO : trades-COINBASE-EOS-USD: Committing offset 37
+2021-04-30 11:42:03,780 : INFO : Write Complete COINBASE-trades-EOS-USD
+2021-04-30 11:43:12,768 : INFO : Reading COINBASE-l2_book-WBTC-USD
+2021-04-30 11:43:13,292 : INFO : l2_book-COINBASE-WBTC-USD: Read 1253 messages from Kafka
+2021-04-30 11:43:17,254 : INFO : l2_book-COINBASE-WBTC-USD: Committing offset 5844
+2021-04-30 11:43:17,254 : INFO : Write Complete COINBASE-l2_book-WBTC-USD
+2021-04-30 11:43:17,254 : INFO : Reading COINBASE-l2_book-EOS-USD
+2021-04-30 11:43:17,764 : INFO : l2_book-COINBASE-EOS-USD: Read 4376 messages from Kafka
+2021-04-30 11:43:22,543 : INFO : l2_book-COINBASE-EOS-USD: Committing offset 14775
+2021-04-30 11:43:22,544 : INFO : Write Complete COINBASE-l2_book-EOS-USD
+2021-04-30 11:43:22,544 : INFO : Reading COINBASE-ticker-WBTC-USD
+2021-04-30 11:43:23,047 : INFO : ticker-COINBASE-WBTC-USD: Read 2 messages from Kafka
+2021-04-30 11:43:24,791 : INFO : ticker-COINBASE-WBTC-USD: Committing offset 4
+2021-04-30 11:43:24,792 : INFO : Write Complete COINBASE-ticker-WBTC-USD
+2021-04-30 11:43:24,792 : INFO : Reading COINBASE-ticker-EOS-USD
+2021-04-30 11:43:25,295 : INFO : ticker-COINBASE-EOS-USD: Read 8 messages from Kafka
+2021-04-30 11:43:27,224 : INFO : ticker-COINBASE-EOS-USD: Committing offset 45
+2021-04-30 11:43:27,224 : INFO : Write Complete COINBASE-ticker-EOS-USD
+2021-04-30 11:43:27,225 : INFO : Reading COINBASE-trades-WBTC-USD
+2021-04-30 11:43:27,728 : INFO : trades-COINBASE-WBTC-USD: Read 2 messages from Kafka
+2021-04-30 11:43:29,856 : INFO : trades-COINBASE-WBTC-USD: Committing offset 4
+2021-04-30 11:43:29,856 : INFO : Write Complete COINBASE-trades-WBTC-USD
+2021-04-30 11:43:29,856 : INFO : Reading COINBASE-trades-EOS-USD
+2021-04-30 11:43:30,359 : INFO : trades-COINBASE-EOS-USD: Read 8 messages from Kafka
+2021-04-30 11:43:32,423 : INFO : trades-COINBASE-EOS-USD: Committing offset 45
+2021-04-30 11:43:32,424 : INFO : Write Complete COINBASE-trades-EOS-USD
+2021-04-30 11:44:42,772 : INFO : Reading COINBASE-l2_book-WBTC-USD
+2021-04-30 11:44:43,292 : INFO : l2_book-COINBASE-WBTC-USD: Read 1598 messages from Kafka
+2021-04-30 11:44:47,272 : INFO : l2_book-COINBASE-WBTC-USD: Committing offset 7442
+2021-04-30 11:44:47,272 : INFO : Write Complete COINBASE-l2_book-WBTC-USD
+2021-04-30 11:44:47,273 : INFO : Reading COINBASE-l2_book-EOS-USD
+2021-04-30 11:44:47,794 : INFO : l2_book-COINBASE-EOS-USD: Read 5743 messages from Kafka
+2021-04-30 11:44:53,212 : INFO : l2_book-COINBASE-EOS-USD: Committing offset 20518
+2021-04-30 11:44:53,213 : INFO : Write Complete COINBASE-l2_book-EOS-USD
+2021-04-30 11:44:53,213 : INFO : Reading COINBASE-ticker-WBTC-USD
+2021-04-30 11:44:53,714 : INFO : ticker-COINBASE-WBTC-USD: Read 0 messages from Kafka
+2021-04-30 11:44:53,717 : INFO : No data for COINBASE-ticker-WBTC-USD
+2021-04-30 11:44:53,717 : INFO : Reading COINBASE-ticker-EOS-USD
+2021-04-30 11:44:54,219 : INFO : ticker-COINBASE-EOS-USD: Read 8 messages from Kafka
+2021-04-30 11:44:56,102 : INFO : ticker-COINBASE-EOS-USD: Committing offset 53
+2021-04-30 11:44:56,102 : INFO : Write Complete COINBASE-ticker-EOS-USD
+2021-04-30 11:44:56,102 : INFO : Reading COINBASE-trades-WBTC-USD
+2021-04-30 11:44:56,608 : INFO : trades-COINBASE-WBTC-USD: Read 0 messages from Kafka
+2021-04-30 11:44:56,609 : INFO : No data for COINBASE-trades-WBTC-USD
+2021-04-30 11:44:56,610 : INFO : Reading COINBASE-trades-EOS-USD
+2021-04-30 11:44:57,114 : INFO : trades-COINBASE-EOS-USD: Read 8 messages from Kafka
+2021-04-30 11:44:59,191 : INFO : trades-COINBASE-EOS-USD: Committing offset 53
+2021-04-30 11:44:59,191 : INFO : Write Complete COINBASE-trades-EOS-USD
+2021-04-30 11:46:12,777 : INFO : Reading COINBASE-l2_book-WBTC-USD
+2021-04-30 11:46:13,427 : INFO : l2_book-COINBASE-WBTC-USD: Read 1757 messages from Kafka
+2021-04-30 11:46:17,685 : INFO : l2_book-COINBASE-WBTC-USD: Committing offset 9199
+2021-04-30 11:46:17,685 : INFO : Write Complete COINBASE-l2_book-WBTC-USD
+2021-04-30 11:46:17,686 : INFO : Reading COINBASE-l2_book-EOS-USD
+2021-04-30 11:46:18,216 : INFO : l2_book-COINBASE-EOS-USD: Read 6934 messages from Kafka
+2021-04-30 11:46:23,982 : INFO : l2_book-COINBASE-EOS-USD: Committing offset 27452
+2021-04-30 11:46:23,983 : INFO : Write Complete COINBASE-l2_book-EOS-USD
+2021-04-30 11:46:23,984 : INFO : Reading COINBASE-ticker-WBTC-USD
+2021-04-30 11:46:24,488 : INFO : ticker-COINBASE-WBTC-USD: Read 2 messages from Kafka
+2021-04-30 11:46:26,294 : INFO : ticker-COINBASE-WBTC-USD: Committing offset 6
+2021-04-30 11:46:26,295 : INFO : Write Complete COINBASE-ticker-WBTC-USD
+2021-04-30 11:46:26,295 : INFO : Reading COINBASE-ticker-EOS-USD
+2021-04-30 11:46:26,799 : INFO : ticker-COINBASE-EOS-USD: Read 20 messages from Kafka
+2021-04-30 11:46:28,863 : INFO : ticker-COINBASE-EOS-USD: Committing offset 73
+2021-04-30 11:46:28,863 : INFO : Write Complete COINBASE-ticker-EOS-USD
+2021-04-30 11:46:28,863 : INFO : Reading COINBASE-trades-WBTC-USD
+2021-04-30 11:46:29,368 : INFO : trades-COINBASE-WBTC-USD: Read 2 messages from Kafka
+2021-04-30 11:46:31,835 : INFO : trades-COINBASE-WBTC-USD: Committing offset 6
+2021-04-30 11:46:31,836 : INFO : Write Complete COINBASE-trades-WBTC-USD
+2021-04-30 11:46:31,836 : INFO : Reading COINBASE-trades-EOS-USD
+2021-04-30 11:46:32,341 : INFO : trades-COINBASE-EOS-USD: Read 20 messages from Kafka
+2021-04-30 11:46:34,651 : INFO : trades-COINBASE-EOS-USD: Committing offset 73
+2021-04-30 11:46:34,653 : INFO : Write Complete COINBASE-trades-EOS-USD
+2021-04-30 11:47:42,783 : INFO : Reading COINBASE-l2_book-WBTC-USD
+2021-04-30 11:47:43,295 : INFO : l2_book-COINBASE-WBTC-USD: Read 1248 messages from Kafka
+2021-04-30 11:47:47,029 : INFO : l2_book-COINBASE-WBTC-USD: Committing offset 10447
+2021-04-30 11:47:47,030 : INFO : Write Complete COINBASE-l2_book-WBTC-USD
+2021-04-30 11:47:47,030 : INFO : Reading COINBASE-l2_book-EOS-USD
+2021-04-30 11:47:47,584 : INFO : l2_book-COINBASE-EOS-USD: Read 6336 messages from Kafka
+2021-04-30 11:47:53,580 : INFO : l2_book-COINBASE-EOS-USD: Committing offset 33788
+2021-04-30 11:47:53,581 : INFO : Write Complete COINBASE-l2_book-EOS-USD
+2021-04-30 11:47:53,581 : INFO : Reading COINBASE-ticker-WBTC-USD
+2021-04-30 11:47:54,085 : INFO : ticker-COINBASE-WBTC-USD: Read 1 messages from Kafka
+2021-04-30 11:47:56,079 : INFO : ticker-COINBASE-WBTC-USD: Committing offset 7
+2021-04-30 11:47:56,079 : INFO : Write Complete COINBASE-ticker-WBTC-USD
+2021-04-30 11:47:56,079 : INFO : Reading COINBASE-ticker-EOS-USD
+2021-04-30 11:47:56,582 : INFO : ticker-COINBASE-EOS-USD: Read 13 messages from Kafka
+2021-04-30 11:47:58,378 : INFO : ticker-COINBASE-EOS-USD: Committing offset 86
+2021-04-30 11:47:58,378 : INFO : Write Complete COINBASE-ticker-EOS-USD
+2021-04-30 11:47:58,378 : INFO : Reading COINBASE-trades-WBTC-USD
+2021-04-30 11:47:58,879 : INFO : trades-COINBASE-WBTC-USD: Read 1 messages from Kafka
+2021-04-30 11:48:00,972 : INFO : trades-COINBASE-WBTC-USD: Committing offset 7
+2021-04-30 11:48:00,974 : INFO : Write Complete COINBASE-trades-WBTC-USD
+2021-04-30 11:48:00,974 : INFO : Reading COINBASE-trades-EOS-USD
+2021-04-30 11:48:01,476 : INFO : trades-COINBASE-EOS-USD: Read 13 messages from Kafka
+2021-04-30 11:48:03,757 : INFO : trades-COINBASE-EOS-USD: Committing offset 86
+2021-04-30 11:48:03,757 : INFO : Write Complete COINBASE-trades-EOS-USD
+2021-04-30 11:49:12,783 : INFO : Reading COINBASE-l2_book-WBTC-USD
+2021-04-30 11:49:13,301 : INFO : l2_book-COINBASE-WBTC-USD: Read 1711 messages from Kafka
+2021-04-30 11:49:17,327 : INFO : l2_book-COINBASE-WBTC-USD: Committing offset 12158
+2021-04-30 11:49:17,328 : INFO : Write Complete COINBASE-l2_book-WBTC-USD
+2021-04-30 11:49:17,328 : INFO : Reading COINBASE-l2_book-EOS-USD
+2021-04-30 11:49:17,847 : INFO : l2_book-COINBASE-EOS-USD: Read 6511 messages from Kafka
+2021-04-30 11:49:23,715 : INFO : l2_book-COINBASE-EOS-USD: Committing offset 40299
+2021-04-30 11:49:23,717 : INFO : Write Complete COINBASE-l2_book-EOS-USD
+2021-04-30 11:49:23,717 : INFO : Reading COINBASE-ticker-WBTC-USD
+2021-04-30 11:49:24,218 : INFO : ticker-COINBASE-WBTC-USD: Read 1 messages from Kafka
+2021-04-30 11:49:25,905 : INFO : ticker-COINBASE-WBTC-USD: Committing offset 8
+2021-04-30 11:49:25,906 : INFO : Write Complete COINBASE-ticker-WBTC-USD
+2021-04-30 11:49:25,906 : INFO : Reading COINBASE-ticker-EOS-USD
+2021-04-30 11:49:26,411 : INFO : ticker-COINBASE-EOS-USD: Read 22 messages from Kafka
+2021-04-30 11:49:28,542 : INFO : ticker-COINBASE-EOS-USD: Committing offset 108
+2021-04-30 11:49:28,542 : INFO : Write Complete COINBASE-ticker-EOS-USD
+2021-04-30 11:49:28,543 : INFO : Reading COINBASE-trades-WBTC-USD
+2021-04-30 11:49:29,046 : INFO : trades-COINBASE-WBTC-USD: Read 1 messages from Kafka
+2021-04-30 11:49:31,181 : INFO : trades-COINBASE-WBTC-USD: Committing offset 8
+2021-04-30 11:49:31,182 : INFO : Write Complete COINBASE-trades-WBTC-USD
+2021-04-30 11:49:31,183 : INFO : Reading COINBASE-trades-EOS-USD
+2021-04-30 11:49:31,685 : INFO : trades-COINBASE-EOS-USD: Read 22 messages from Kafka
+2021-04-30 11:49:33,725 : INFO : trades-COINBASE-EOS-USD: Committing offset 108
+2021-04-30 11:49:33,725 : INFO : Write Complete COINBASE-trades-EOS-USD
+2021-04-30 11:50:42,788 : INFO : Reading COINBASE-l2_book-WBTC-USD
+2021-04-30 11:50:43,306 : INFO : l2_book-COINBASE-WBTC-USD: Read 2916 messages from Kafka
+2021-04-30 11:50:48,439 : INFO : l2_book-COINBASE-WBTC-USD: Committing offset 15074
+2021-04-30 11:50:48,439 : INFO : Write Complete COINBASE-l2_book-WBTC-USD
+2021-04-30 11:50:48,440 : INFO : Reading COINBASE-l2_book-EOS-USD
+2021-04-30 11:50:48,962 : INFO : l2_book-COINBASE-EOS-USD: Read 7779 messages from Kafka
+2021-04-30 11:50:54,546 : INFO : l2_book-COINBASE-EOS-USD: Committing offset 48078
+2021-04-30 11:50:54,546 : INFO : Write Complete COINBASE-l2_book-EOS-USD
+2021-04-30 11:50:54,547 : INFO : Reading COINBASE-ticker-WBTC-USD
+2021-04-30 11:50:55,052 : INFO : ticker-COINBASE-WBTC-USD: Read 15 messages from Kafka
+2021-04-30 11:50:57,108 : INFO : ticker-COINBASE-WBTC-USD: Committing offset 23
+2021-04-30 11:50:57,108 : INFO : Write Complete COINBASE-ticker-WBTC-USD
+2021-04-30 11:50:57,109 : INFO : Reading COINBASE-ticker-EOS-USD
+2021-04-30 11:50:57,610 : INFO : ticker-COINBASE-EOS-USD: Read 25 messages from Kafka
+2021-04-30 11:50:59,793 : INFO : ticker-COINBASE-EOS-USD: Committing offset 133
+2021-04-30 11:50:59,794 : INFO : Write Complete COINBASE-ticker-EOS-USD
+2021-04-30 11:50:59,794 : INFO : Reading COINBASE-trades-WBTC-USD
+2021-04-30 11:51:00,295 : INFO : trades-COINBASE-WBTC-USD: Read 15 messages from Kafka
+2021-04-30 11:51:02,314 : INFO : trades-COINBASE-WBTC-USD: Committing offset 23
+2021-04-30 11:51:02,315 : INFO : Write Complete COINBASE-trades-WBTC-USD
+2021-04-30 11:51:02,315 : INFO : Reading COINBASE-trades-EOS-USD
+2021-04-30 11:51:02,820 : INFO : trades-COINBASE-EOS-USD: Read 27 messages from Kafka
+2021-04-30 11:51:04,771 : INFO : trades-COINBASE-EOS-USD: Committing offset 135
+2021-04-30 11:51:04,771 : INFO : Write Complete COINBASE-trades-EOS-USD
+2021-04-30 11:52:12,793 : INFO : Reading COINBASE-l2_book-WBTC-USD
+2021-04-30 11:52:13,304 : INFO : l2_book-COINBASE-WBTC-USD: Read 2181 messages from Kafka
+2021-04-30 11:52:17,568 : INFO : l2_book-COINBASE-WBTC-USD: Committing offset 17255
+2021-04-30 11:52:17,568 : INFO : Write Complete COINBASE-l2_book-WBTC-USD
+2021-04-30 11:52:17,568 : INFO : Reading COINBASE-l2_book-EOS-USD
+2021-04-30 11:52:18,084 : INFO : l2_book-COINBASE-EOS-USD: Read 6159 messages from Kafka
+2021-04-30 11:52:23,355 : INFO : l2_book-COINBASE-EOS-USD: Committing offset 54237
+2021-04-30 11:52:23,356 : INFO : Write Complete COINBASE-l2_book-EOS-USD
+2021-04-30 11:52:23,356 : INFO : Reading COINBASE-ticker-WBTC-USD
+2021-04-30 11:52:23,860 : INFO : ticker-COINBASE-WBTC-USD: Read 6 messages from Kafka
+2021-04-30 11:52:25,990 : INFO : ticker-COINBASE-WBTC-USD: Committing offset 29
+2021-04-30 11:52:25,992 : INFO : Write Complete COINBASE-ticker-WBTC-USD
+2021-04-30 11:52:25,994 : INFO : Reading COINBASE-ticker-EOS-USD
+2021-04-30 11:52:26,498 : INFO : ticker-COINBASE-EOS-USD: Read 8 messages from Kafka
+2021-04-30 11:52:28,324 : INFO : ticker-COINBASE-EOS-USD: Committing offset 141
+2021-04-30 11:52:28,325 : INFO : Write Complete COINBASE-ticker-EOS-USD
+2021-04-30 11:52:28,325 : INFO : Reading COINBASE-trades-WBTC-USD
+2021-04-30 11:52:28,826 : INFO : trades-COINBASE-WBTC-USD: Read 6 messages from Kafka
+2021-04-30 11:52:30,992 : INFO : trades-COINBASE-WBTC-USD: Committing offset 29
+2021-04-30 11:52:30,993 : INFO : Write Complete COINBASE-trades-WBTC-USD
+2021-04-30 11:52:30,993 : INFO : Reading COINBASE-trades-EOS-USD
+2021-04-30 11:52:31,498 : INFO : trades-COINBASE-EOS-USD: Read 7 messages from Kafka
+2021-04-30 11:52:33,710 : INFO : trades-COINBASE-EOS-USD: Committing offset 142
+2021-04-30 11:52:33,711 : INFO : Write Complete COINBASE-trades-EOS-USD
+2021-04-30 11:53:42,799 : INFO : Reading COINBASE-l2_book-WBTC-USD
+2021-04-30 11:53:43,315 : INFO : l2_book-COINBASE-WBTC-USD: Read 1545 messages from Kafka
+2021-04-30 11:53:47,233 : INFO : l2_book-COINBASE-WBTC-USD: Committing offset 18800
+2021-04-30 11:53:47,234 : INFO : Write Complete COINBASE-l2_book-WBTC-USD
+2021-04-30 11:53:47,234 : INFO : Reading COINBASE-l2_book-EOS-USD
+2021-04-30 11:53:47,753 : INFO : l2_book-COINBASE-EOS-USD: Read 5937 messages from Kafka
+2021-04-30 11:53:53,284 : INFO : l2_book-COINBASE-EOS-USD: Committing offset 60174
+2021-04-30 11:53:53,284 : INFO : Write Complete COINBASE-l2_book-EOS-USD
+2021-04-30 11:53:53,284 : INFO : Reading COINBASE-ticker-WBTC-USD
+2021-04-30 11:53:53,787 : INFO : ticker-COINBASE-WBTC-USD: Read 0 messages from Kafka
+2021-04-30 11:53:53,791 : INFO : No data for COINBASE-ticker-WBTC-USD
+2021-04-30 11:53:53,791 : INFO : Reading COINBASE-ticker-EOS-USD
+2021-04-30 11:53:54,295 : INFO : ticker-COINBASE-EOS-USD: Read 8 messages from Kafka
+2021-04-30 11:53:56,004 : INFO : ticker-COINBASE-EOS-USD: Committing offset 149
+2021-04-30 11:53:56,005 : INFO : Write Complete COINBASE-ticker-EOS-USD
+2021-04-30 11:53:56,005 : INFO : Reading COINBASE-trades-WBTC-USD
+2021-04-30 11:53:56,510 : INFO : trades-COINBASE-WBTC-USD: Read 0 messages from Kafka
+2021-04-30 11:53:56,510 : INFO : No data for COINBASE-trades-WBTC-USD
+2021-04-30 11:53:56,510 : INFO : Reading COINBASE-trades-EOS-USD
+2021-04-30 11:53:57,015 : INFO : trades-COINBASE-EOS-USD: Read 8 messages from Kafka
+2021-04-30 11:53:59,071 : INFO : trades-COINBASE-EOS-USD: Committing offset 150
+2021-04-30 11:53:59,071 : INFO : Write Complete COINBASE-trades-EOS-USD
+2021-04-30 11:55:12,804 : INFO : Reading COINBASE-l2_book-WBTC-USD
+2021-04-30 11:55:13,313 : INFO : l2_book-COINBASE-WBTC-USD: Read 1598 messages from Kafka
+2021-04-30 11:55:17,088 : INFO : l2_book-COINBASE-WBTC-USD: Committing offset 20398
+2021-04-30 11:55:17,088 : INFO : Write Complete COINBASE-l2_book-WBTC-USD
+2021-04-30 11:55:17,088 : INFO : Reading COINBASE-l2_book-EOS-USD
+2021-04-30 11:55:17,609 : INFO : l2_book-COINBASE-EOS-USD: Read 7081 messages from Kafka
+2021-04-30 11:55:23,069 : INFO : l2_book-COINBASE-EOS-USD: Committing offset 67255
+2021-04-30 11:55:23,070 : INFO : Write Complete COINBASE-l2_book-EOS-USD
+2021-04-30 11:55:23,070 : INFO : Reading COINBASE-ticker-WBTC-USD
+2021-04-30 11:55:23,575 : INFO : ticker-COINBASE-WBTC-USD: Read 2 messages from Kafka
+2021-04-30 11:55:25,192 : INFO : ticker-COINBASE-WBTC-USD: Committing offset 31
+2021-04-30 11:55:25,193 : INFO : Write Complete COINBASE-ticker-WBTC-USD
+2021-04-30 11:55:25,193 : INFO : Reading COINBASE-ticker-EOS-USD
+2021-04-30 11:55:25,696 : INFO : ticker-COINBASE-EOS-USD: Read 12 messages from Kafka
+2021-04-30 11:55:27,561 : INFO : ticker-COINBASE-EOS-USD: Committing offset 161
+2021-04-30 11:55:27,561 : INFO : Write Complete COINBASE-ticker-EOS-USD
+2021-04-30 11:55:27,561 : INFO : Reading COINBASE-trades-WBTC-USD
+2021-04-30 11:55:28,065 : INFO : trades-COINBASE-WBTC-USD: Read 2 messages from Kafka
+2021-04-30 11:55:30,030 : INFO : trades-COINBASE-WBTC-USD: Committing offset 31
+2021-04-30 11:55:30,031 : INFO : Write Complete COINBASE-trades-WBTC-USD
+2021-04-30 11:55:30,031 : INFO : Reading COINBASE-trades-EOS-USD
+2021-04-30 11:55:30,536 : INFO : trades-COINBASE-EOS-USD: Read 11 messages from Kafka
+2021-04-30 11:55:32,836 : INFO : trades-COINBASE-EOS-USD: Committing offset 161
+2021-04-30 11:55:32,837 : INFO : Write Complete COINBASE-trades-EOS-USD
+2021-04-30 11:56:42,806 : INFO : Reading COINBASE-l2_book-WBTC-USD
+2021-04-30 11:56:43,316 : INFO : l2_book-COINBASE-WBTC-USD: Read 1399 messages from Kafka
+2021-04-30 11:56:46,763 : INFO : l2_book-COINBASE-WBTC-USD: Committing offset 21797
+2021-04-30 11:56:46,764 : INFO : Write Complete COINBASE-l2_book-WBTC-USD
+2021-04-30 11:56:46,764 : INFO : Reading COINBASE-l2_book-EOS-USD
+2021-04-30 11:56:47,277 : INFO : l2_book-COINBASE-EOS-USD: Read 6076 messages from Kafka
+2021-04-30 11:56:52,514 : INFO : l2_book-COINBASE-EOS-USD: Committing offset 73331
+2021-04-30 11:56:52,515 : INFO : Write Complete COINBASE-l2_book-EOS-USD
+2021-04-30 11:56:52,515 : INFO : Reading COINBASE-ticker-WBTC-USD
+2021-04-30 11:56:53,017 : INFO : ticker-COINBASE-WBTC-USD: Read 0 messages from Kafka
+2021-04-30 11:56:53,019 : INFO : No data for COINBASE-ticker-WBTC-USD
+2021-04-30 11:56:53,019 : INFO : Reading COINBASE-ticker-EOS-USD
+2021-04-30 11:56:53,523 : INFO : ticker-COINBASE-EOS-USD: Read 17 messages from Kafka
+2021-04-30 11:56:55,555 : INFO : ticker-COINBASE-EOS-USD: Committing offset 178
+2021-04-30 11:56:55,555 : INFO : Write Complete COINBASE-ticker-EOS-USD
+2021-04-30 11:56:55,555 : INFO : Reading COINBASE-trades-WBTC-USD
+2021-04-30 11:56:56,058 : INFO : trades-COINBASE-WBTC-USD: Read 0 messages from Kafka
+2021-04-30 11:56:56,058 : INFO : No data for COINBASE-trades-WBTC-USD
+2021-04-30 11:56:56,058 : INFO : Reading COINBASE-trades-EOS-USD
+2021-04-30 11:56:56,561 : INFO : trades-COINBASE-EOS-USD: Read 17 messages from Kafka
+2021-04-30 11:56:58,599 : INFO : trades-COINBASE-EOS-USD: Committing offset 178
+2021-04-30 11:56:58,599 : INFO : Write Complete COINBASE-trades-EOS-USD
+2021-04-30 11:58:12,812 : INFO : Reading COINBASE-l2_book-WBTC-USD
+2021-04-30 11:58:13,339 : INFO : l2_book-COINBASE-WBTC-USD: Read 1227 messages from Kafka
+2021-04-30 11:58:17,147 : INFO : l2_book-COINBASE-WBTC-USD: Committing offset 23024
+2021-04-30 11:58:17,147 : INFO : Write Complete COINBASE-l2_book-WBTC-USD
+2021-04-30 11:58:17,148 : INFO : Reading COINBASE-l2_book-EOS-USD
+2021-04-30 11:58:17,661 : INFO : l2_book-COINBASE-EOS-USD: Read 4957 messages from Kafka
+2021-04-30 11:58:23,011 : INFO : l2_book-COINBASE-EOS-USD: Committing offset 78288
+2021-04-30 11:58:23,011 : INFO : Write Complete COINBASE-l2_book-EOS-USD
+2021-04-30 11:58:23,012 : INFO : Reading COINBASE-ticker-WBTC-USD
+2021-04-30 11:58:23,516 : INFO : ticker-COINBASE-WBTC-USD: Read 2 messages from Kafka
+2021-04-30 11:58:25,276 : INFO : ticker-COINBASE-WBTC-USD: Committing offset 33
+2021-04-30 11:58:25,276 : INFO : Write Complete COINBASE-ticker-WBTC-USD
+2021-04-30 11:58:25,277 : INFO : Reading COINBASE-ticker-EOS-USD
+2021-04-30 11:58:25,779 : INFO : ticker-COINBASE-EOS-USD: Read 21 messages from Kafka
+2021-04-30 11:58:27,901 : INFO : ticker-COINBASE-EOS-USD: Committing offset 199
+2021-04-30 11:58:27,902 : INFO : Write Complete COINBASE-ticker-EOS-USD
+2021-04-30 11:58:27,902 : INFO : Reading COINBASE-trades-WBTC-USD
+2021-04-30 11:58:28,404 : INFO : trades-COINBASE-WBTC-USD: Read 2 messages from Kafka
+2021-04-30 11:58:30,739 : INFO : trades-COINBASE-WBTC-USD: Committing offset 33
+2021-04-30 11:58:30,739 : INFO : Write Complete COINBASE-trades-WBTC-USD
+2021-04-30 11:58:30,739 : INFO : Reading COINBASE-trades-EOS-USD
+2021-04-30 11:58:31,241 : INFO : trades-COINBASE-EOS-USD: Read 21 messages from Kafka
+2021-04-30 11:58:33,404 : INFO : trades-COINBASE-EOS-USD: Committing offset 199
+2021-04-30 11:58:33,404 : INFO : Write Complete COINBASE-trades-EOS-USD
+2021-04-30 11:59:42,816 : INFO : Reading COINBASE-l2_book-WBTC-USD
+2021-04-30 11:59:43,324 : INFO : l2_book-COINBASE-WBTC-USD: Read 909 messages from Kafka
+2021-04-30 11:59:46,571 : INFO : l2_book-COINBASE-WBTC-USD: Committing offset 23933
+2021-04-30 11:59:46,572 : INFO : Write Complete COINBASE-l2_book-WBTC-USD
+2021-04-30 11:59:46,572 : INFO : Reading COINBASE-l2_book-EOS-USD
+2021-04-30 11:59:47,091 : INFO : l2_book-COINBASE-EOS-USD: Read 5288 messages from Kafka
+2021-04-30 11:59:52,019 : INFO : l2_book-COINBASE-EOS-USD: Committing offset 83576
+2021-04-30 11:59:52,019 : INFO : Write Complete COINBASE-l2_book-EOS-USD
+2021-04-30 11:59:52,019 : INFO : Reading COINBASE-ticker-WBTC-USD
+2021-04-30 11:59:52,523 : INFO : ticker-COINBASE-WBTC-USD: Read 1 messages from Kafka
+2021-04-30 11:59:54,332 : INFO : ticker-COINBASE-WBTC-USD: Committing offset 34
+2021-04-30 11:59:54,332 : INFO : Write Complete COINBASE-ticker-WBTC-USD
+2021-04-30 11:59:54,332 : INFO : Reading COINBASE-ticker-EOS-USD
+2021-04-30 11:59:54,834 : INFO : ticker-COINBASE-EOS-USD: Read 8 messages from Kafka
+2021-04-30 12:04:17,211 : INFO : Starting cryptostore
+2021-04-30 12:04:17,213 : INFO : Cryptostore running on PID 24994
+2021-04-30 12:04:17,221 : INFO : Spawner started
+2021-04-30 12:04:17,227 : INFO : Aggregator started
+2021-04-30 12:04:17,231 : INFO : Cryptostore started
+2021-04-30 12:04:17,232 : INFO : loading config file locally: /Users/anov/IdeaProjects/svoe/data_feed/data_feed/configs/cryptostore_config.yaml at 2021-04-30 09:04:17.232737
+2021-04-30 12:04:17,244 : INFO : applying local config file: /Users/anov/IdeaProjects/svoe/data_feed/data_feed/configs/cryptostore_config.yaml at 2021-04-30 09:04:17.244049
+2021-04-30 12:04:17,244 : INFO : start: ['COINBASE'] stop: []
+2021-04-30 12:04:18,532 : INFO : Spawner running on PID 24996
+2021-04-30 12:04:18,533 : INFO : message: {"op": "start", "exchange": "COINBASE", "collector": {"l2_book": {"book_delta": true, "max_depth": 100, "symbols": ["UMA-USD", "YFI-USD"]}, "l3_book": {"book_delta": true, "symbols": ["UMA-USD", "YFI-USD"]}, "retries": -1, "ticker": ["UMA-USD", "YFI-USD"], "trades": ["UMA-USD", "YFI-USD"]}, "config": {"cache": "kafka", "kafka": {"ip": "127.0.0.1", "port": 9092, "start_flush": true}, "parquet": {"S3": {"bucket": "svoe.test.1", "key_id": "AKIAJXSXXFCA3HN3T7GQ", "prefix": "parquet", "secret": "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"}, "append_counter": 0, "compression": {"codec": "BROTLI", "level": 6}, "del_file": true, "file_format": ["exchange", "symbol", "data_type", "timestamp"], "prefix_date": true}, "storage": ["parquet"], "storage_interval": 90, "storage_retries": 5, "storage_retry_wait": 30}}
+2021-04-30 12:04:18,548 : INFO : Starting {'op': 'start', 'exchange': 'COINBASE', 'collector': {'l2_book': {'book_delta': True, 'max_depth': 100, 'symbols': ['UMA-USD', 'YFI-USD']}, 'l3_book': {'book_delta': True, 'symbols': ['UMA-USD', 'YFI-USD']}, 'retries': -1, 'ticker': ['UMA-USD', 'YFI-USD'], 'trades': ['UMA-USD', 'YFI-USD']}, 'config': {'cache': 'kafka', 'kafka': {'ip': '127.0.0.1', 'port': 9092, 'start_flush': True}, 'parquet': {'S3': {'bucket': 'svoe.test.1', 'key_id': 'AKIAJXSXXFCA3HN3T7GQ', 'prefix': 'parquet', 'secret': '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'}, 'append_counter': 0, 'compression': {'codec': 'BROTLI', 'level': 6}, 'del_file': True, 'file_format': ['exchange', 'symbol', 'data_type', 'timestamp'], 'prefix_date': True}, 'storage': ['parquet'], 'storage_interval': 90, 'storage_retries': 5, 'storage_retry_wait': 30}}
+2021-04-30 12:04:18,581 : INFO : Aggregator running on PID 24997
+2021-04-30 12:04:18,582 : INFO : loading config file locally: /Users/anov/IdeaProjects/svoe/data_feed/data_feed/configs/cryptostore_config.yaml at 2021-04-30 09:04:18.582455
+2021-04-30 12:04:18,599 : INFO : applying local config file: /Users/anov/IdeaProjects/svoe/data_feed/data_feed/configs/cryptostore_config.yaml at 2021-04-30 09:04:18.599762
+2021-04-30 12:04:18,936 : INFO : Topic l2_book-COINBASE-EOS-USD deleted
+2021-04-30 12:04:18,937 : INFO : Topic l2_book-COINBASE-WBTC-USD deleted
+2021-04-30 12:04:18,937 : INFO : Topic __consumer_offsets deleted
+2021-04-30 12:04:18,937 : INFO : Topic ticker-COINBASE-EOS-USD deleted
+2021-04-30 12:04:18,937 : INFO : Topic trades-COINBASE-EOS-USD deleted
+2021-04-30 12:04:18,937 : INFO : Topic trades-COINBASE-WBTC-USD deleted
+2021-04-30 12:04:18,938 : INFO : Topic ticker-COINBASE-WBTC-USD deleted
+2021-04-30 12:04:18,938 : INFO : Reading COINBASE-l2_book-UMA-USD
+2021-04-30 12:04:19,446 : INFO : l2_book-COINBASE-UMA-USD: Read 0 messages from Kafka
+2021-04-30 12:04:19,446 : INFO : No data for COINBASE-l2_book-UMA-USD
+2021-04-30 12:04:19,447 : INFO : Reading COINBASE-l2_book-YFI-USD
+2021-04-30 12:04:19,963 : INFO : l2_book-COINBASE-YFI-USD: Read 0 messages from Kafka
+2021-04-30 12:04:19,963 : INFO : No data for COINBASE-l2_book-YFI-USD
+2021-04-30 12:04:19,963 : INFO : Reading COINBASE-l3_book-UMA-USD
+2021-04-30 12:04:20,470 : INFO : l3_book-COINBASE-UMA-USD: Read 0 messages from Kafka
+2021-04-30 12:04:20,471 : INFO : No data for COINBASE-l3_book-UMA-USD
+2021-04-30 12:04:20,472 : INFO : Reading COINBASE-l3_book-YFI-USD
+2021-04-30 12:04:20,986 : INFO : l3_book-COINBASE-YFI-USD: Read 0 messages from Kafka
+2021-04-30 12:04:20,988 : INFO : No data for COINBASE-l3_book-YFI-USD
+2021-04-30 12:04:20,990 : INFO : Reading COINBASE-ticker-UMA-USD
+2021-04-30 12:04:21,228 : INFO : Collector for COINBASE running on PID 24998
+2021-04-30 12:04:21,494 : INFO : ticker-COINBASE-UMA-USD: Read 0 messages from Kafka
+2021-04-30 12:04:21,494 : INFO : No data for COINBASE-ticker-UMA-USD
+2021-04-30 12:04:21,495 : INFO : Reading COINBASE-ticker-YFI-USD
+2021-04-30 12:04:21,995 : INFO : ticker-COINBASE-YFI-USD: Read 0 messages from Kafka
+2021-04-30 12:04:21,996 : INFO : No data for COINBASE-ticker-YFI-USD
+2021-04-30 12:04:21,996 : INFO : Reading COINBASE-trades-UMA-USD
+2021-04-30 12:04:22,500 : INFO : trades-COINBASE-UMA-USD: Read 0 messages from Kafka
+2021-04-30 12:04:22,510 : INFO : No data for COINBASE-trades-UMA-USD
+2021-04-30 12:04:22,514 : INFO : Reading COINBASE-trades-YFI-USD
+2021-04-30 12:04:23,018 : INFO : trades-COINBASE-YFI-USD: Read 0 messages from Kafka
+2021-04-30 12:04:23,019 : INFO : No data for COINBASE-trades-YFI-USD
+2021-04-30 12:05:48,978 : INFO : Reading COINBASE-l2_book-UMA-USD
+2021-04-30 12:05:49,481 : INFO : l2_book-COINBASE-UMA-USD: Read 20 messages from Kafka
+2021-04-30 12:05:49,483 : INFO : No data for COINBASE-l2_book-UMA-USD
+2021-04-30 12:05:49,483 : INFO : Reading COINBASE-l2_book-YFI-USD
+2021-04-30 12:05:49,985 : INFO : l2_book-COINBASE-YFI-USD: Read 49 messages from Kafka
+2021-04-30 12:05:49,985 : INFO : No data for COINBASE-l2_book-YFI-USD
+2021-04-30 12:05:49,985 : INFO : Reading COINBASE-l3_book-UMA-USD
+2021-04-30 12:05:50,487 : INFO : l3_book-COINBASE-UMA-USD: Read 19 messages from Kafka
+2021-04-30 12:05:50,487 : INFO : No data for COINBASE-l3_book-UMA-USD
+2021-04-30 12:05:50,487 : INFO : Reading COINBASE-l3_book-YFI-USD
+2021-04-30 12:05:50,988 : INFO : l3_book-COINBASE-YFI-USD: Read 89 messages from Kafka
+2021-04-30 12:05:50,988 : INFO : No data for COINBASE-l3_book-YFI-USD
+2021-04-30 12:05:50,989 : INFO : Reading COINBASE-ticker-UMA-USD
+2021-04-30 12:05:51,493 : INFO : ticker-COINBASE-UMA-USD: Read 0 messages from Kafka
+2021-04-30 12:05:51,493 : INFO : No data for COINBASE-ticker-UMA-USD
+2021-04-30 12:05:51,493 : INFO : Reading COINBASE-ticker-YFI-USD
+2021-04-30 12:05:51,999 : INFO : ticker-COINBASE-YFI-USD: Read 1 messages from Kafka
+2021-04-30 12:05:51,999 : INFO : No data for COINBASE-ticker-YFI-USD
+2021-04-30 12:05:51,999 : INFO : Reading COINBASE-trades-UMA-USD
+2021-04-30 12:05:52,504 : INFO : trades-COINBASE-UMA-USD: Read 0 messages from Kafka
+2021-04-30 12:05:52,504 : INFO : No data for COINBASE-trades-UMA-USD
+2021-04-30 12:05:52,504 : INFO : Reading COINBASE-trades-YFI-USD
+2021-04-30 12:05:53,005 : INFO : trades-COINBASE-YFI-USD: Read 1 messages from Kafka
+2021-04-30 12:05:53,005 : INFO : No data for COINBASE-trades-YFI-USD
+2021-04-30 12:07:18,993 : INFO : Reading COINBASE-l2_book-UMA-USD
+2021-04-30 12:07:19,503 : INFO : l2_book-COINBASE-UMA-USD: Read 3165 messages from Kafka
+2021-04-30 12:07:24,322 : INFO : l2_book-COINBASE-UMA-USD: Committing offset 6531
+2021-04-30 12:07:24,323 : INFO : Write Complete COINBASE-l2_book-UMA-USD
+2021-04-30 12:07:24,323 : INFO : Reading COINBASE-l2_book-YFI-USD
+2021-04-30 12:07:24,932 : INFO : l2_book-COINBASE-YFI-USD: Read 9890 messages from Kafka
+2021-04-30 12:07:31,303 : INFO : l2_book-COINBASE-YFI-USD: Committing offset 18215
+2021-04-30 12:07:31,304 : INFO : Write Complete COINBASE-l2_book-YFI-USD
+2021-04-30 12:07:31,304 : INFO : Reading COINBASE-l3_book-UMA-USD
+2021-04-30 12:07:31,813 : INFO : l3_book-COINBASE-UMA-USD: Read 3592 messages from Kafka
+2021-04-30 12:07:38,837 : INFO : l3_book-COINBASE-UMA-USD: Committing offset 7216
+2021-04-30 12:07:38,838 : INFO : Write Complete COINBASE-l3_book-UMA-USD
+2021-04-30 12:07:38,838 : INFO : Reading COINBASE-l3_book-YFI-USD
+2021-04-30 12:07:39,371 : INFO : l3_book-COINBASE-YFI-USD: Read 11222 messages from Kafka
+2021-04-30 12:07:48,263 : INFO : l3_book-COINBASE-YFI-USD: Committing offset 19743
+2021-04-30 12:07:48,264 : INFO : Write Complete COINBASE-l3_book-YFI-USD
+2021-04-30 12:07:48,264 : INFO : Reading COINBASE-ticker-UMA-USD
+2021-04-30 12:07:48,770 : INFO : ticker-COINBASE-UMA-USD: Read 37 messages from Kafka
+2021-04-30 12:07:51,863 : INFO : ticker-COINBASE-UMA-USD: Committing offset 84
+2021-04-30 12:07:51,864 : INFO : Write Complete COINBASE-ticker-UMA-USD
+2021-04-30 12:07:51,864 : INFO : Reading COINBASE-ticker-YFI-USD
+2021-04-30 12:07:52,368 : INFO : ticker-COINBASE-YFI-USD: Read 7 messages from Kafka
+2021-04-30 12:08:08,851 : INFO : ticker-COINBASE-YFI-USD: Committing offset 20
+2021-04-30 12:08:08,853 : INFO : Write Complete COINBASE-ticker-YFI-USD
+2021-04-30 12:08:08,853 : INFO : Reading COINBASE-trades-UMA-USD
+2021-04-30 12:08:09,354 : INFO : trades-COINBASE-UMA-USD: Read 37 messages from Kafka
+2021-04-30 12:08:13,536 : INFO : trades-COINBASE-UMA-USD: Committing offset 84
+2021-04-30 12:08:13,536 : INFO : Write Complete COINBASE-trades-UMA-USD
+2021-04-30 12:08:13,536 : INFO : Reading COINBASE-trades-YFI-USD
+2021-04-30 12:08:14,041 : INFO : trades-COINBASE-YFI-USD: Read 7 messages from Kafka
+2021-04-30 12:08:16,726 : INFO : trades-COINBASE-YFI-USD: Committing offset 20
+2021-04-30 12:08:16,726 : INFO : Write Complete COINBASE-trades-YFI-USD
+2021-04-30 12:08:48,995 : INFO : Reading COINBASE-l2_book-UMA-USD
+2021-04-30 12:08:49,510 : INFO : l2_book-COINBASE-UMA-USD: Read 3636 messages from Kafka
+2021-04-30 12:08:54,566 : INFO : l2_book-COINBASE-UMA-USD: Committing offset 10167
+2021-04-30 12:08:54,567 : INFO : Write Complete COINBASE-l2_book-UMA-USD
+2021-04-30 12:08:54,567 : INFO : Reading COINBASE-l2_book-YFI-USD
+2021-04-30 12:08:55,112 : INFO : l2_book-COINBASE-YFI-USD: Read 9001 messages from Kafka
+2021-04-30 12:09:03,582 : INFO : l2_book-COINBASE-YFI-USD: Committing offset 27216
+2021-04-30 12:09:03,583 : INFO : Write Complete COINBASE-l2_book-YFI-USD
+2021-04-30 12:09:03,584 : INFO : Reading COINBASE-l3_book-UMA-USD
+2021-04-30 12:09:04,101 : INFO : l3_book-COINBASE-UMA-USD: Read 4708 messages from Kafka
+2021-04-30 12:09:11,985 : INFO : Starting cryptostore
+2021-04-30 12:09:11,985 : INFO : Cryptostore running on PID 25658
+2021-04-30 12:09:11,992 : INFO : Spawner started
+2021-04-30 12:09:11,998 : INFO : Aggregator started
+2021-04-30 12:09:12,002 : INFO : Cryptostore started
+2021-04-30 12:09:12,004 : INFO : loading config file locally: /Users/anov/IdeaProjects/svoe/data_feed/data_feed/configs/cryptostore_config.yaml at 2021-04-30 09:09:12.004057
+2021-04-30 12:09:12,023 : INFO : applying local config file: /Users/anov/IdeaProjects/svoe/data_feed/data_feed/configs/cryptostore_config.yaml at 2021-04-30 09:09:12.023573
+2021-04-30 12:09:12,024 : INFO : start: ['KRAKEN'] stop: []
+2021-04-30 12:09:13,571 : INFO : Aggregator running on PID 25667
+2021-04-30 12:09:13,571 : INFO : Spawner running on PID 25666
+2021-04-30 12:09:13,572 : INFO : loading config file locally: /Users/anov/IdeaProjects/svoe/data_feed/data_feed/configs/cryptostore_config.yaml at 2021-04-30 09:09:13.572216
+2021-04-30 12:09:13,572 : INFO : message: {"op": "start", "exchange": "KRAKEN", "collector": {"l2_book": {"book_delta": true, "max_depth": 100, "symbols": ["AAVE-USD", "ADA-USD", "ALGO-USD", "ANT-USD", "ATOM-USD", "AUD-USD", "BAL-USD", "BAT-USD", "BCH-USD", "COMP-USD", "CRV-USD", "DAI-USD", "DASH-USD", "DOT-USD", "EOS-USD", "EWT-USD", "FIL-USD", "FLOW-USD", "GNO-USD", "GRT-USD", "ICX-USD", "KAVA-USD", "KEEP-USD", "KNC-USD", "KSM-USD", "LINK-USD", "LSK-USD", "MANA-USD", "NANO-USD", "OCEAN-USD", "OMG-USD", "OXT-USD", "PAXG-USD", "QTUM-USD", "REPV2-USD", "SC-USD", "SNX-USD", "STORJ-USD", "TBTC-USD", "TRX-USD", "UNI-USD", "USDC-USD", "USDT-USD", "WAVES-USD", "DOG-USD", "ETC-USD", "ETH-USD", "LTC-USD", "MLN-USD", "REP-USD", "XTZ-USD", "BTC-USD", "XLM-USD", "XMR-USD", "XRP-USD", "ZEC-USD", "YFI-USD", "EUR-USD", "GBP-USD"]}, "retries": -1, "ticker": ["AAVE-USD", "ADA-USD", "ALGO-USD", "ANT-USD", "ATOM-USD", "AUD-USD", "BAL-USD", "BAT-USD", "BCH-USD", "COMP-USD", "CRV-USD", "DAI-USD", "DASH-USD", "DOT-USD", "EOS-USD", "EWT-USD", "FIL-USD", "FLOW-USD", "GNO-USD", "GRT-USD", "ICX-USD", "KAVA-USD", "KEEP-USD", "KNC-USD", "KSM-USD", "LINK-USD", "LSK-USD", "MANA-USD", "NANO-USD", "OCEAN-USD", "OMG-USD", "OXT-USD", "PAXG-USD", "QTUM-USD", "REPV2-USD", "SC-USD", "SNX-USD", "STORJ-USD", "TBTC-USD", "TRX-USD", "UNI-USD", "USDC-USD", "USDT-USD", "WAVES-USD", "DOG-USD", "ETC-USD", "ETH-USD", "LTC-USD", "MLN-USD", "REP-USD", "XTZ-USD", "BTC-USD", "XLM-USD", "XMR-USD", "XRP-USD", "ZEC-USD", "YFI-USD", "EUR-USD", "GBP-USD"], "trades": ["AAVE-USD", "ADA-USD", "ALGO-USD", "ANT-USD", "ATOM-USD", "AUD-USD", "BAL-USD", "BAT-USD", "BCH-USD", "COMP-USD", "CRV-USD", "DAI-USD", "DASH-USD", "DOT-USD", "EOS-USD", "EWT-USD", "FIL-USD", "FLOW-USD", "GNO-USD", "GRT-USD", "ICX-USD", "KAVA-USD", "KEEP-USD", "KNC-USD", "KSM-USD", "LINK-USD", "LSK-USD", "MANA-USD", "NANO-USD", "OCEAN-USD", "OMG-USD", "OXT-USD", "PAXG-USD", "QTUM-USD", "REPV2-USD", "SC-USD", "SNX-USD", "STORJ-USD", "TBTC-USD", "TRX-USD", "UNI-USD", "USDC-USD", "USDT-USD", "WAVES-USD", "DOG-USD", "ETC-USD", "ETH-USD", "LTC-USD", "MLN-USD", "REP-USD", "XTZ-USD", "BTC-USD", "XLM-USD", "XMR-USD", "XRP-USD", "ZEC-USD", "YFI-USD", "EUR-USD", "GBP-USD"]}, "config": {"cache": "kafka", "kafka": {"ip": "127.0.0.1", "port": 9092, "start_flush": true}, "parquet": {"S3": {"bucket": "svoe.test.1", "key_id": "AKIAJXSXXFCA3HN3T7GQ", "prefix": "parquet", "secret": "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"}, "append_counter": 0, "compression": {"codec": "BROTLI", "level": 6}, "del_file": true, "file_format": ["exchange", "symbol", "data_type", "timestamp"], "prefix_date": true}, "storage": ["parquet"], "storage_interval": 90, "storage_retries": 5, "storage_retry_wait": 30}}
+2021-04-30 12:09:13,577 : INFO : Starting {'op': 'start', 'exchange': 'KRAKEN', 'collector': {'l2_book': {'book_delta': True, 'max_depth': 100, 'symbols': ['AAVE-USD', 'ADA-USD', 'ALGO-USD', 'ANT-USD', 'ATOM-USD', 'AUD-USD', 'BAL-USD', 'BAT-USD', 'BCH-USD', 'COMP-USD', 'CRV-USD', 'DAI-USD', 'DASH-USD', 'DOT-USD', 'EOS-USD', 'EWT-USD', 'FIL-USD', 'FLOW-USD', 'GNO-USD', 'GRT-USD', 'ICX-USD', 'KAVA-USD', 'KEEP-USD', 'KNC-USD', 'KSM-USD', 'LINK-USD', 'LSK-USD', 'MANA-USD', 'NANO-USD', 'OCEAN-USD', 'OMG-USD', 'OXT-USD', 'PAXG-USD', 'QTUM-USD', 'REPV2-USD', 'SC-USD', 'SNX-USD', 'STORJ-USD', 'TBTC-USD', 'TRX-USD', 'UNI-USD', 'USDC-USD', 'USDT-USD', 'WAVES-USD', 'DOG-USD', 'ETC-USD', 'ETH-USD', 'LTC-USD', 'MLN-USD', 'REP-USD', 'XTZ-USD', 'BTC-USD', 'XLM-USD', 'XMR-USD', 'XRP-USD', 'ZEC-USD', 'YFI-USD', 'EUR-USD', 'GBP-USD']}, 'retries': -1, 'ticker': ['AAVE-USD', 'ADA-USD', 'ALGO-USD', 'ANT-USD', 'ATOM-USD', 'AUD-USD', 'BAL-USD', 'BAT-USD', 'BCH-USD', 'COMP-USD', 'CRV-USD', 'DAI-USD', 'DASH-USD', 'DOT-USD', 'EOS-USD', 'EWT-USD', 'FIL-USD', 'FLOW-USD', 'GNO-USD', 'GRT-USD', 'ICX-USD', 'KAVA-USD', 'KEEP-USD', 'KNC-USD', 'KSM-USD', 'LINK-USD', 'LSK-USD', 'MANA-USD', 'NANO-USD', 'OCEAN-USD', 'OMG-USD', 'OXT-USD', 'PAXG-USD', 'QTUM-USD', 'REPV2-USD', 'SC-USD', 'SNX-USD', 'STORJ-USD', 'TBTC-USD', 'TRX-USD', 'UNI-USD', 'USDC-USD', 'USDT-USD', 'WAVES-USD', 'DOG-USD', 'ETC-USD', 'ETH-USD', 'LTC-USD', 'MLN-USD', 'REP-USD', 'XTZ-USD', 'BTC-USD', 'XLM-USD', 'XMR-USD', 'XRP-USD', 'ZEC-USD', 'YFI-USD', 'EUR-USD', 'GBP-USD'], 'trades': ['AAVE-USD', 'ADA-USD', 'ALGO-USD', 'ANT-USD', 'ATOM-USD', 'AUD-USD', 'BAL-USD', 'BAT-USD', 'BCH-USD', 'COMP-USD', 'CRV-USD', 'DAI-USD', 'DASH-USD', 'DOT-USD', 'EOS-USD', 'EWT-USD', 'FIL-USD', 'FLOW-USD', 'GNO-USD', 'GRT-USD', 'ICX-USD', 'KAVA-USD', 'KEEP-USD', 'KNC-USD', 'KSM-USD', 'LINK-USD', 'LSK-USD', 'MANA-USD', 'NANO-USD', 'OCEAN-USD', 'OMG-USD', 'OXT-USD', 'PAXG-USD', 'QTUM-USD', 'REPV2-USD', 'SC-USD', 'SNX-USD', 'STORJ-USD', 'TBTC-USD', 'TRX-USD', 'UNI-USD', 'USDC-USD', 'USDT-USD', 'WAVES-USD', 'DOG-USD', 'ETC-USD', 'ETH-USD', 'LTC-USD', 'MLN-USD', 'REP-USD', 'XTZ-USD', 'BTC-USD', 'XLM-USD', 'XMR-USD', 'XRP-USD', 'ZEC-USD', 'YFI-USD', 'EUR-USD', 'GBP-USD']}, 'config': {'cache': 'kafka', 'kafka': {'ip': '127.0.0.1', 'port': 9092, 'start_flush': True}, 'parquet': {'S3': {'bucket': 'svoe.test.1', 'key_id': 'AKIAJXSXXFCA3HN3T7GQ', 'prefix': 'parquet', 'secret': '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'}, 'append_counter': 0, 'compression': {'codec': 'BROTLI', 'level': 6}, 'del_file': True, 'file_format': ['exchange', 'symbol', 'data_type', 'timestamp'], 'prefix_date': True}, 'storage': ['parquet'], 'storage_interval': 90, 'storage_retries': 5, 'storage_retry_wait': 30}}
+2021-04-30 12:09:13,629 : INFO : applying local config file: /Users/anov/IdeaProjects/svoe/data_feed/data_feed/configs/cryptostore_config.yaml at 2021-04-30 09:09:13.629632
+2021-04-30 12:09:14,208 : INFO : Topic trades-COINBASE-UMA-USD deleted
+2021-04-30 12:09:14,211 : INFO : Topic l2_book-COINBASE-UMA-USD deleted
+2021-04-30 12:09:14,211 : INFO : Topic trades-COINBASE-YFI-USD deleted
+2021-04-30 12:09:14,211 : INFO : Topic __consumer_offsets deleted
+2021-04-30 12:09:14,211 : INFO : Topic l3_book-COINBASE-UMA-USD deleted
+2021-04-30 12:09:14,212 : INFO : Topic ticker-COINBASE-YFI-USD deleted
+2021-04-30 12:09:14,212 : INFO : Topic l3_book-COINBASE-YFI-USD deleted
+2021-04-30 12:09:14,213 : INFO : Topic l2_book-COINBASE-YFI-USD deleted
+2021-04-30 12:09:14,213 : INFO : Topic ticker-COINBASE-UMA-USD deleted
+2021-04-30 12:09:14,215 : INFO : Reading KRAKEN-l2_book-AAVE-USD
+2021-04-30 12:09:14,719 : INFO : l2_book-KRAKEN-AAVE-USD: Read 0 messages from Kafka
+2021-04-30 12:09:14,720 : INFO : No data for KRAKEN-l2_book-AAVE-USD
+2021-04-30 12:09:14,720 : INFO : Reading KRAKEN-l2_book-ADA-USD
+2021-04-30 12:09:15,226 : INFO : l2_book-KRAKEN-ADA-USD: Read 0 messages from Kafka
+2021-04-30 12:09:15,230 : INFO : No data for KRAKEN-l2_book-ADA-USD
+2021-04-30 12:09:15,230 : INFO : Reading KRAKEN-l2_book-ALGO-USD
+2021-04-30 12:09:15,737 : INFO : l2_book-KRAKEN-ALGO-USD: Read 0 messages from Kafka
+2021-04-30 12:09:15,741 : INFO : No data for KRAKEN-l2_book-ALGO-USD
+2021-04-30 12:09:15,745 : INFO : Reading KRAKEN-l2_book-ANT-USD
+2021-04-30 12:09:16,070 : INFO : Collector for KRAKEN running on PID 25668
+2021-04-30 12:09:16,248 : INFO : l2_book-KRAKEN-ANT-USD: Read 0 messages from Kafka
+2021-04-30 12:09:16,251 : INFO : No data for KRAKEN-l2_book-ANT-USD
+2021-04-30 12:09:16,252 : INFO : Reading KRAKEN-l2_book-ATOM-USD
+2021-04-30 12:09:16,764 : INFO : l2_book-KRAKEN-ATOM-USD: Read 0 messages from Kafka
+2021-04-30 12:09:16,764 : INFO : No data for KRAKEN-l2_book-ATOM-USD
+2021-04-30 12:09:16,764 : INFO : Reading KRAKEN-l2_book-AUD-USD
+2021-04-30 12:09:17,285 : INFO : l2_book-KRAKEN-AUD-USD: Read 0 messages from Kafka
+2021-04-30 12:09:17,285 : INFO : No data for KRAKEN-l2_book-AUD-USD
+2021-04-30 12:09:17,287 : INFO : Reading KRAKEN-l2_book-BAL-USD
+2021-04-30 12:09:17,797 : INFO : l2_book-KRAKEN-BAL-USD: Read 0 messages from Kafka
+2021-04-30 12:09:17,797 : INFO : No data for KRAKEN-l2_book-BAL-USD
+2021-04-30 12:09:17,797 : INFO : Reading KRAKEN-l2_book-BAT-USD
+2021-04-30 12:09:18,303 : INFO : l2_book-KRAKEN-BAT-USD: Read 0 messages from Kafka
+2021-04-30 12:09:18,305 : INFO : No data for KRAKEN-l2_book-BAT-USD
+2021-04-30 12:09:18,305 : INFO : Reading KRAKEN-l2_book-BCH-USD
+2021-04-30 12:09:18,814 : INFO : l2_book-KRAKEN-BCH-USD: Read 1 messages from Kafka
+2021-04-30 12:09:18,815 : INFO : No data for KRAKEN-l2_book-BCH-USD
+2021-04-30 12:09:18,815 : INFO : Reading KRAKEN-l2_book-COMP-USD
+2021-04-30 12:09:19,319 : INFO : l2_book-KRAKEN-COMP-USD: Read 1 messages from Kafka
+2021-04-30 12:09:19,322 : INFO : No data for KRAKEN-l2_book-COMP-USD
+2021-04-30 12:09:19,322 : INFO : Reading KRAKEN-l2_book-CRV-USD
+2021-04-30 12:09:19,827 : INFO : l2_book-KRAKEN-CRV-USD: Read 1 messages from Kafka
+2021-04-30 12:09:19,829 : INFO : No data for KRAKEN-l2_book-CRV-USD
+2021-04-30 12:09:19,830 : INFO : Reading KRAKEN-l2_book-DAI-USD
+2021-04-30 12:09:20,333 : INFO : l2_book-KRAKEN-DAI-USD: Read 1 messages from Kafka
+2021-04-30 12:09:20,334 : INFO : No data for KRAKEN-l2_book-DAI-USD
+2021-04-30 12:09:20,341 : INFO : Reading KRAKEN-l2_book-DASH-USD
+2021-04-30 12:09:20,847 : INFO : l2_book-KRAKEN-DASH-USD: Read 1 messages from Kafka
+2021-04-30 12:09:20,847 : INFO : No data for KRAKEN-l2_book-DASH-USD
+2021-04-30 12:09:20,847 : INFO : Reading KRAKEN-l2_book-DOT-USD
+2021-04-30 12:09:21,354 : INFO : l2_book-KRAKEN-DOT-USD: Read 1 messages from Kafka
+2021-04-30 12:09:21,355 : INFO : No data for KRAKEN-l2_book-DOT-USD
+2021-04-30 12:09:21,356 : INFO : Reading KRAKEN-l2_book-EOS-USD
+2021-04-30 12:09:21,862 : INFO : l2_book-KRAKEN-EOS-USD: Read 1 messages from Kafka
+2021-04-30 12:09:21,864 : INFO : No data for KRAKEN-l2_book-EOS-USD
+2021-04-30 12:09:21,864 : INFO : Reading KRAKEN-l2_book-EWT-USD
+2021-04-30 12:09:22,369 : INFO : l2_book-KRAKEN-EWT-USD: Read 1 messages from Kafka
+2021-04-30 12:09:22,370 : INFO : No data for KRAKEN-l2_book-EWT-USD
+2021-04-30 12:09:22,370 : INFO : Reading KRAKEN-l2_book-FIL-USD
+2021-04-30 12:09:22,876 : INFO : l2_book-KRAKEN-FIL-USD: Read 0 messages from Kafka
+2021-04-30 12:09:22,876 : INFO : No data for KRAKEN-l2_book-FIL-USD
+2021-04-30 12:09:22,877 : INFO : Reading KRAKEN-l2_book-FLOW-USD
+2021-04-30 12:09:23,381 : INFO : l2_book-KRAKEN-FLOW-USD: Read 0 messages from Kafka
+2021-04-30 12:09:23,381 : INFO : No data for KRAKEN-l2_book-FLOW-USD
+2021-04-30 12:09:23,382 : INFO : Reading KRAKEN-l2_book-GNO-USD
+2021-04-30 12:09:23,883 : INFO : l2_book-KRAKEN-GNO-USD: Read 1 messages from Kafka
+2021-04-30 12:09:23,884 : INFO : No data for KRAKEN-l2_book-GNO-USD
+2021-04-30 12:09:23,884 : INFO : Reading KRAKEN-l2_book-GRT-USD
+2021-04-30 12:09:24,387 : INFO : l2_book-KRAKEN-GRT-USD: Read 1 messages from Kafka
+2021-04-30 12:09:24,388 : INFO : No data for KRAKEN-l2_book-GRT-USD
+2021-04-30 12:09:24,388 : INFO : Reading KRAKEN-l2_book-ICX-USD
+2021-04-30 12:09:24,898 : INFO : l2_book-KRAKEN-ICX-USD: Read 0 messages from Kafka
+2021-04-30 12:09:24,899 : INFO : No data for KRAKEN-l2_book-ICX-USD
+2021-04-30 12:09:24,899 : INFO : Reading KRAKEN-l2_book-KAVA-USD
+2021-04-30 12:09:25,405 : INFO : l2_book-KRAKEN-KAVA-USD: Read 0 messages from Kafka
+2021-04-30 12:09:25,405 : INFO : No data for KRAKEN-l2_book-KAVA-USD
+2021-04-30 12:09:25,406 : INFO : Reading KRAKEN-l2_book-KEEP-USD
+2021-04-30 12:09:25,910 : INFO : l2_book-KRAKEN-KEEP-USD: Read 0 messages from Kafka
+2021-04-30 12:09:25,911 : INFO : No data for KRAKEN-l2_book-KEEP-USD
+2021-04-30 12:09:25,913 : INFO : Reading KRAKEN-l2_book-KNC-USD
+2021-04-30 12:09:26,418 : INFO : l2_book-KRAKEN-KNC-USD: Read 0 messages from Kafka
+2021-04-30 12:09:26,420 : INFO : No data for KRAKEN-l2_book-KNC-USD
+2021-04-30 12:09:26,421 : INFO : Reading KRAKEN-l2_book-KSM-USD
+2021-04-30 12:09:26,926 : INFO : l2_book-KRAKEN-KSM-USD: Read 0 messages from Kafka
+2021-04-30 12:09:26,926 : INFO : No data for KRAKEN-l2_book-KSM-USD
+2021-04-30 12:09:26,927 : INFO : Reading KRAKEN-l2_book-LINK-USD
+2021-04-30 12:09:27,434 : INFO : l2_book-KRAKEN-LINK-USD: Read 0 messages from Kafka
+2021-04-30 12:09:27,435 : INFO : No data for KRAKEN-l2_book-LINK-USD
+2021-04-30 12:09:27,436 : INFO : Reading KRAKEN-l2_book-LSK-USD
+2021-04-30 12:09:27,941 : INFO : l2_book-KRAKEN-LSK-USD: Read 0 messages from Kafka
+2021-04-30 12:09:27,943 : INFO : No data for KRAKEN-l2_book-LSK-USD
+2021-04-30 12:09:27,944 : INFO : Reading KRAKEN-l2_book-MANA-USD
+2021-04-30 12:09:28,450 : INFO : l2_book-KRAKEN-MANA-USD: Read 0 messages from Kafka
+2021-04-30 12:09:28,450 : INFO : No data for KRAKEN-l2_book-MANA-USD
+2021-04-30 12:09:28,450 : INFO : Reading KRAKEN-l2_book-NANO-USD
+2021-04-30 12:09:28,954 : INFO : l2_book-KRAKEN-NANO-USD: Read 0 messages from Kafka
+2021-04-30 12:09:28,959 : INFO : No data for KRAKEN-l2_book-NANO-USD
+2021-04-30 12:09:28,959 : INFO : Reading KRAKEN-l2_book-OCEAN-USD
+2021-04-30 12:09:29,463 : INFO : l2_book-KRAKEN-OCEAN-USD: Read 0 messages from Kafka
+2021-04-30 12:09:29,463 : INFO : No data for KRAKEN-l2_book-OCEAN-USD
+2021-04-30 12:09:29,470 : INFO : Reading KRAKEN-l2_book-OMG-USD
+2021-04-30 12:09:29,975 : INFO : l2_book-KRAKEN-OMG-USD: Read 0 messages from Kafka
+2021-04-30 12:09:29,977 : INFO : No data for KRAKEN-l2_book-OMG-USD
+2021-04-30 12:09:29,978 : INFO : Reading KRAKEN-l2_book-OXT-USD
+2021-04-30 12:09:30,487 : INFO : l2_book-KRAKEN-OXT-USD: Read 0 messages from Kafka
+2021-04-30 12:09:30,488 : INFO : No data for KRAKEN-l2_book-OXT-USD
+2021-04-30 12:09:30,489 : INFO : Reading KRAKEN-l2_book-PAXG-USD
+2021-04-30 12:09:30,994 : INFO : l2_book-KRAKEN-PAXG-USD: Read 0 messages from Kafka
+2021-04-30 12:09:30,994 : INFO : No data for KRAKEN-l2_book-PAXG-USD
+2021-04-30 12:09:30,994 : INFO : Reading KRAKEN-l2_book-QTUM-USD
+2021-04-30 12:09:31,497 : INFO : l2_book-KRAKEN-QTUM-USD: Read 2 messages from Kafka
+2021-04-30 12:09:33,840 : INFO : l2_book-KRAKEN-QTUM-USD: Committing offset 2
+2021-04-30 12:09:33,841 : INFO : Write Complete KRAKEN-l2_book-QTUM-USD
+2021-04-30 12:09:33,842 : INFO : Reading KRAKEN-l2_book-REPV2-USD
+2021-04-30 12:09:34,347 : INFO : l2_book-KRAKEN-REPV2-USD: Read 0 messages from Kafka
+2021-04-30 12:09:34,348 : INFO : No data for KRAKEN-l2_book-REPV2-USD
+2021-04-30 12:09:34,348 : INFO : Reading KRAKEN-l2_book-SC-USD
+2021-04-30 12:09:34,853 : INFO : l2_book-KRAKEN-SC-USD: Read 0 messages from Kafka
+2021-04-30 12:09:34,853 : INFO : No data for KRAKEN-l2_book-SC-USD
+2021-04-30 12:09:34,854 : INFO : Reading KRAKEN-l2_book-SNX-USD
+2021-04-30 12:09:35,360 : INFO : l2_book-KRAKEN-SNX-USD: Read 4 messages from Kafka
+2021-04-30 12:09:37,090 : INFO : l2_book-KRAKEN-SNX-USD: Committing offset 8
+2021-04-30 12:09:37,090 : INFO : Write Complete KRAKEN-l2_book-SNX-USD
+2021-04-30 12:09:37,091 : INFO : Reading KRAKEN-l2_book-STORJ-USD
+2021-04-30 12:09:37,596 : INFO : l2_book-KRAKEN-STORJ-USD: Read 2 messages from Kafka
+2021-04-30 12:09:39,322 : INFO : l2_book-KRAKEN-STORJ-USD: Committing offset 23
+2021-04-30 12:09:39,322 : INFO : Write Complete KRAKEN-l2_book-STORJ-USD
+2021-04-30 12:09:39,322 : INFO : Reading KRAKEN-l2_book-TBTC-USD
+2021-04-30 12:09:39,828 : INFO : l2_book-KRAKEN-TBTC-USD: Read 0 messages from Kafka
+2021-04-30 12:09:39,828 : INFO : No data for KRAKEN-l2_book-TBTC-USD
+2021-04-30 12:09:39,828 : INFO : Reading KRAKEN-l2_book-TRX-USD
+2021-04-30 12:09:40,332 : INFO : l2_book-KRAKEN-TRX-USD: Read 0 messages from Kafka
+2021-04-30 12:09:40,332 : INFO : No data for KRAKEN-l2_book-TRX-USD
+2021-04-30 12:09:40,333 : INFO : Reading KRAKEN-l2_book-UNI-USD
+2021-04-30 12:09:40,837 : INFO : l2_book-KRAKEN-UNI-USD: Read 0 messages from Kafka
+2021-04-30 12:09:40,837 : INFO : No data for KRAKEN-l2_book-UNI-USD
+2021-04-30 12:09:40,837 : INFO : Reading KRAKEN-l2_book-USDC-USD
+2021-04-30 12:09:41,342 : INFO : l2_book-KRAKEN-USDC-USD: Read 0 messages from Kafka
+2021-04-30 12:09:41,342 : INFO : No data for KRAKEN-l2_book-USDC-USD
+2021-04-30 12:09:41,343 : INFO : Reading KRAKEN-l2_book-USDT-USD
+2021-04-30 12:09:41,847 : INFO : l2_book-KRAKEN-USDT-USD: Read 0 messages from Kafka
+2021-04-30 12:09:41,848 : INFO : No data for KRAKEN-l2_book-USDT-USD
+2021-04-30 12:09:41,848 : INFO : Reading KRAKEN-l2_book-WAVES-USD
+2021-04-30 12:09:42,353 : INFO : l2_book-KRAKEN-WAVES-USD: Read 1 messages from Kafka
+2021-04-30 12:09:44,053 : INFO : l2_book-KRAKEN-WAVES-USD: Committing offset 193
+2021-04-30 12:09:44,053 : INFO : Write Complete KRAKEN-l2_book-WAVES-USD
+2021-04-30 12:09:44,053 : INFO : Reading KRAKEN-l2_book-DOG-USD
+2021-04-30 12:09:44,555 : INFO : l2_book-KRAKEN-DOG-USD: Read 0 messages from Kafka
+2021-04-30 12:09:44,555 : INFO : No data for KRAKEN-l2_book-DOG-USD
+2021-04-30 12:09:44,555 : INFO : Reading KRAKEN-l2_book-ETC-USD
+2021-04-30 12:09:45,063 : INFO : l2_book-KRAKEN-ETC-USD: Read 2 messages from Kafka
+2021-04-30 12:09:48,891 : INFO : l2_book-KRAKEN-ETC-USD: Committing offset 137
+2021-04-30 12:09:48,891 : INFO : Write Complete KRAKEN-l2_book-ETC-USD
+2021-04-30 12:09:48,891 : INFO : Reading KRAKEN-l2_book-ETH-USD
+2021-04-30 12:09:49,396 : INFO : l2_book-KRAKEN-ETH-USD: Read 0 messages from Kafka
+2021-04-30 12:09:49,397 : INFO : No data for KRAKEN-l2_book-ETH-USD
+2021-04-30 12:09:49,397 : INFO : Reading KRAKEN-l2_book-LTC-USD
+2021-04-30 12:09:49,903 : INFO : l2_book-KRAKEN-LTC-USD: Read 18 messages from Kafka
+2021-04-30 12:09:52,208 : INFO : l2_book-KRAKEN-LTC-USD: Committing offset 884
+2021-04-30 12:09:52,209 : INFO : Write Complete KRAKEN-l2_book-LTC-USD
+2021-04-30 12:09:52,209 : INFO : Reading KRAKEN-l2_book-MLN-USD
+2021-04-30 12:09:52,715 : INFO : l2_book-KRAKEN-MLN-USD: Read 0 messages from Kafka
+2021-04-30 12:09:52,715 : INFO : No data for KRAKEN-l2_book-MLN-USD
+2021-04-30 12:09:52,715 : INFO : Reading KRAKEN-l2_book-REP-USD
+2021-04-30 12:09:53,224 : INFO : l2_book-KRAKEN-REP-USD: Read 1 messages from Kafka
+2021-04-30 12:09:55,434 : INFO : l2_book-KRAKEN-REP-USD: Committing offset 31
+2021-04-30 12:09:55,435 : INFO : Write Complete KRAKEN-l2_book-REP-USD
+2021-04-30 12:09:55,435 : INFO : Reading KRAKEN-l2_book-XTZ-USD
+2021-04-30 12:09:55,936 : INFO : l2_book-KRAKEN-XTZ-USD: Read 0 messages from Kafka
+2021-04-30 12:09:55,937 : INFO : No data for KRAKEN-l2_book-XTZ-USD
+2021-04-30 12:09:55,937 : INFO : Reading KRAKEN-l2_book-BTC-USD
+2021-04-30 12:09:56,443 : INFO : l2_book-KRAKEN-BTC-USD: Read 0 messages from Kafka
+2021-04-30 12:09:56,443 : INFO : No data for KRAKEN-l2_book-BTC-USD
+2021-04-30 12:09:56,444 : INFO : Reading KRAKEN-l2_book-XLM-USD
+2021-04-30 12:09:56,947 : INFO : l2_book-KRAKEN-XLM-USD: Read 8 messages from Kafka
+2021-04-30 12:09:58,809 : INFO : l2_book-KRAKEN-XLM-USD: Committing offset 490
+2021-04-30 12:09:58,810 : INFO : Write Complete KRAKEN-l2_book-XLM-USD
+2021-04-30 12:09:58,810 : INFO : Reading KRAKEN-l2_book-XMR-USD
+2021-04-30 12:09:59,315 : INFO : l2_book-KRAKEN-XMR-USD: Read 0 messages from Kafka
+2021-04-30 12:09:59,317 : INFO : No data for KRAKEN-l2_book-XMR-USD
+2021-04-30 12:09:59,317 : INFO : Reading KRAKEN-l2_book-XRP-USD
+2021-04-30 12:09:59,819 : INFO : l2_book-KRAKEN-XRP-USD: Read 0 messages from Kafka
+2021-04-30 12:09:59,820 : INFO : No data for KRAKEN-l2_book-XRP-USD
+2021-04-30 12:09:59,820 : INFO : Reading KRAKEN-l2_book-ZEC-USD
+2021-04-30 12:10:00,324 : INFO : l2_book-KRAKEN-ZEC-USD: Read 0 messages from Kafka
+2021-04-30 12:10:00,325 : INFO : No data for KRAKEN-l2_book-ZEC-USD
+2021-04-30 12:10:00,325 : INFO : Reading KRAKEN-l2_book-YFI-USD
+2021-04-30 12:10:00,829 : INFO : l2_book-KRAKEN-YFI-USD: Read 7 messages from Kafka
+2021-04-30 12:10:02,529 : INFO : l2_book-KRAKEN-YFI-USD: Committing offset 333
+2021-04-30 12:10:02,529 : INFO : Write Complete KRAKEN-l2_book-YFI-USD
+2021-04-30 12:10:02,529 : INFO : Reading KRAKEN-l2_book-EUR-USD
+2021-04-30 12:10:03,034 : INFO : l2_book-KRAKEN-EUR-USD: Read 0 messages from Kafka
+2021-04-30 12:10:03,034 : INFO : No data for KRAKEN-l2_book-EUR-USD
+2021-04-30 12:10:03,035 : INFO : Reading KRAKEN-l2_book-GBP-USD
+2021-04-30 12:10:03,538 : INFO : l2_book-KRAKEN-GBP-USD: Read 0 messages from Kafka
+2021-04-30 12:10:03,539 : INFO : No data for KRAKEN-l2_book-GBP-USD
+2021-04-30 12:10:03,539 : INFO : Reading KRAKEN-ticker-AAVE-USD
+2021-04-30 12:10:04,040 : INFO : ticker-KRAKEN-AAVE-USD: Read 0 messages from Kafka
+2021-04-30 12:10:04,040 : INFO : No data for KRAKEN-ticker-AAVE-USD
+2021-04-30 12:10:04,040 : INFO : Reading KRAKEN-ticker-ADA-USD
+2021-04-30 12:10:04,544 : INFO : ticker-KRAKEN-ADA-USD: Read 0 messages from Kafka
+2021-04-30 12:10:04,545 : INFO : No data for KRAKEN-ticker-ADA-USD
+2021-04-30 12:10:04,545 : INFO : Reading KRAKEN-ticker-ALGO-USD
+2021-04-30 12:10:05,049 : INFO : ticker-KRAKEN-ALGO-USD: Read 0 messages from Kafka
+2021-04-30 12:10:05,050 : INFO : No data for KRAKEN-ticker-ALGO-USD
+2021-04-30 12:10:05,050 : INFO : Reading KRAKEN-ticker-ANT-USD
+2021-04-30 12:10:05,558 : INFO : ticker-KRAKEN-ANT-USD: Read 0 messages from Kafka
+2021-04-30 12:10:05,558 : INFO : No data for KRAKEN-ticker-ANT-USD
+2021-04-30 12:10:05,558 : INFO : Reading KRAKEN-ticker-ATOM-USD
+2021-04-30 12:10:06,064 : INFO : ticker-KRAKEN-ATOM-USD: Read 0 messages from Kafka
+2021-04-30 12:10:06,064 : INFO : No data for KRAKEN-ticker-ATOM-USD
+2021-04-30 12:10:06,064 : INFO : Reading KRAKEN-ticker-AUD-USD
+2021-04-30 12:10:06,572 : INFO : ticker-KRAKEN-AUD-USD: Read 0 messages from Kafka
+2021-04-30 12:10:06,572 : INFO : No data for KRAKEN-ticker-AUD-USD
+2021-04-30 12:10:06,572 : INFO : Reading KRAKEN-ticker-BAL-USD
+2021-04-30 12:10:07,073 : INFO : ticker-KRAKEN-BAL-USD: Read 0 messages from Kafka
+2021-04-30 12:10:07,074 : INFO : No data for KRAKEN-ticker-BAL-USD
+2021-04-30 12:10:07,074 : INFO : Reading KRAKEN-ticker-BAT-USD
+2021-04-30 12:10:07,578 : INFO : ticker-KRAKEN-BAT-USD: Read 0 messages from Kafka
+2021-04-30 12:10:07,578 : INFO : No data for KRAKEN-ticker-BAT-USD
+2021-04-30 12:10:07,578 : INFO : Reading KRAKEN-ticker-BCH-USD
+2021-04-30 12:10:08,081 : INFO : ticker-KRAKEN-BCH-USD: Read 0 messages from Kafka
+2021-04-30 12:10:08,082 : INFO : No data for KRAKEN-ticker-BCH-USD
+2021-04-30 12:10:08,082 : INFO : Reading KRAKEN-ticker-COMP-USD
+2021-04-30 12:10:08,586 : INFO : ticker-KRAKEN-COMP-USD: Read 0 messages from Kafka
+2021-04-30 12:10:08,587 : INFO : No data for KRAKEN-ticker-COMP-USD
+2021-04-30 12:10:08,587 : INFO : Reading KRAKEN-ticker-CRV-USD
+2021-04-30 12:10:09,090 : INFO : ticker-KRAKEN-CRV-USD: Read 0 messages from Kafka
+2021-04-30 12:10:09,091 : INFO : No data for KRAKEN-ticker-CRV-USD
+2021-04-30 12:10:09,091 : INFO : Reading KRAKEN-ticker-DAI-USD
+2021-04-30 12:10:09,595 : INFO : ticker-KRAKEN-DAI-USD: Read 0 messages from Kafka
+2021-04-30 12:10:09,597 : INFO : No data for KRAKEN-ticker-DAI-USD
+2021-04-30 12:10:09,598 : INFO : Reading KRAKEN-ticker-DASH-USD
+2021-04-30 12:10:10,099 : INFO : ticker-KRAKEN-DASH-USD: Read 0 messages from Kafka
+2021-04-30 12:10:10,099 : INFO : No data for KRAKEN-ticker-DASH-USD
+2021-04-30 12:10:10,099 : INFO : Reading KRAKEN-ticker-DOT-USD
+2021-04-30 12:10:10,604 : INFO : ticker-KRAKEN-DOT-USD: Read 0 messages from Kafka
+2021-04-30 12:10:10,605 : INFO : No data for KRAKEN-ticker-DOT-USD
+2021-04-30 12:10:10,605 : INFO : Reading KRAKEN-ticker-EOS-USD
+2021-04-30 12:10:11,106 : INFO : ticker-KRAKEN-EOS-USD: Read 0 messages from Kafka
+2021-04-30 12:10:11,107 : INFO : No data for KRAKEN-ticker-EOS-USD
+2021-04-30 12:10:11,107 : INFO : Reading KRAKEN-ticker-EWT-USD
+2021-04-30 12:10:11,608 : INFO : ticker-KRAKEN-EWT-USD: Read 0 messages from Kafka
+2021-04-30 12:10:11,608 : INFO : No data for KRAKEN-ticker-EWT-USD
+2021-04-30 12:10:11,608 : INFO : Reading KRAKEN-ticker-FIL-USD
+2021-04-30 12:10:12,110 : INFO : ticker-KRAKEN-FIL-USD: Read 0 messages from Kafka
+2021-04-30 12:10:12,110 : INFO : No data for KRAKEN-ticker-FIL-USD
+2021-04-30 12:10:12,111 : INFO : Reading KRAKEN-ticker-FLOW-USD
+2021-04-30 12:10:12,616 : INFO : ticker-KRAKEN-FLOW-USD: Read 0 messages from Kafka
+2021-04-30 12:10:12,617 : INFO : No data for KRAKEN-ticker-FLOW-USD
+2021-04-30 12:10:12,617 : INFO : Reading KRAKEN-ticker-GNO-USD
+2021-04-30 12:10:13,121 : INFO : ticker-KRAKEN-GNO-USD: Read 0 messages from Kafka
+2021-04-30 12:10:13,121 : INFO : No data for KRAKEN-ticker-GNO-USD
+2021-04-30 12:10:13,122 : INFO : Reading KRAKEN-ticker-GRT-USD
+2021-04-30 12:10:13,625 : INFO : ticker-KRAKEN-GRT-USD: Read 0 messages from Kafka
+2021-04-30 12:10:13,625 : INFO : No data for KRAKEN-ticker-GRT-USD
+2021-04-30 12:10:13,626 : INFO : Reading KRAKEN-ticker-ICX-USD
+2021-04-30 12:10:14,127 : INFO : ticker-KRAKEN-ICX-USD: Read 0 messages from Kafka
+2021-04-30 12:10:14,127 : INFO : No data for KRAKEN-ticker-ICX-USD
+2021-04-30 12:10:14,127 : INFO : Reading KRAKEN-ticker-KAVA-USD
+2021-04-30 12:10:14,632 : INFO : ticker-KRAKEN-KAVA-USD: Read 0 messages from Kafka
+2021-04-30 12:10:14,632 : INFO : No data for KRAKEN-ticker-KAVA-USD
+2021-04-30 12:10:14,633 : INFO : Reading KRAKEN-ticker-KEEP-USD
+2021-04-30 12:10:15,136 : INFO : ticker-KRAKEN-KEEP-USD: Read 0 messages from Kafka
+2021-04-30 12:10:15,137 : INFO : No data for KRAKEN-ticker-KEEP-USD
+2021-04-30 12:10:15,137 : INFO : Reading KRAKEN-ticker-KNC-USD
+2021-04-30 12:10:15,640 : INFO : ticker-KRAKEN-KNC-USD: Read 0 messages from Kafka
+2021-04-30 12:10:15,641 : INFO : No data for KRAKEN-ticker-KNC-USD
+2021-04-30 12:10:15,641 : INFO : Reading KRAKEN-ticker-KSM-USD
+2021-04-30 12:10:16,142 : INFO : ticker-KRAKEN-KSM-USD: Read 0 messages from Kafka
+2021-04-30 12:10:16,143 : INFO : No data for KRAKEN-ticker-KSM-USD
+2021-04-30 12:10:16,143 : INFO : Reading KRAKEN-ticker-LINK-USD
+2021-04-30 12:10:16,649 : INFO : ticker-KRAKEN-LINK-USD: Read 0 messages from Kafka
+2021-04-30 12:10:16,649 : INFO : No data for KRAKEN-ticker-LINK-USD
+2021-04-30 12:10:16,650 : INFO : Reading KRAKEN-ticker-LSK-USD
+2021-04-30 12:10:17,156 : INFO : ticker-KRAKEN-LSK-USD: Read 0 messages from Kafka
+2021-04-30 12:10:17,157 : INFO : No data for KRAKEN-ticker-LSK-USD
+2021-04-30 12:10:17,157 : INFO : Reading KRAKEN-ticker-MANA-USD
+2021-04-30 12:10:17,661 : INFO : ticker-KRAKEN-MANA-USD: Read 0 messages from Kafka
+2021-04-30 12:10:17,662 : INFO : No data for KRAKEN-ticker-MANA-USD
+2021-04-30 12:10:17,662 : INFO : Reading KRAKEN-ticker-NANO-USD
+2021-04-30 12:10:18,168 : INFO : ticker-KRAKEN-NANO-USD: Read 0 messages from Kafka
+2021-04-30 12:10:18,168 : INFO : No data for KRAKEN-ticker-NANO-USD
+2021-04-30 12:10:18,169 : INFO : Reading KRAKEN-ticker-OCEAN-USD
+2021-04-30 12:10:18,671 : INFO : ticker-KRAKEN-OCEAN-USD: Read 0 messages from Kafka
+2021-04-30 12:10:18,672 : INFO : No data for KRAKEN-ticker-OCEAN-USD
+2021-04-30 12:10:18,672 : INFO : Reading KRAKEN-ticker-OMG-USD
+2021-04-30 12:10:19,178 : INFO : ticker-KRAKEN-OMG-USD: Read 0 messages from Kafka
+2021-04-30 12:10:19,178 : INFO : No data for KRAKEN-ticker-OMG-USD
+2021-04-30 12:10:19,179 : INFO : Reading KRAKEN-ticker-OXT-USD
+2021-04-30 12:10:19,684 : INFO : ticker-KRAKEN-OXT-USD: Read 0 messages from Kafka
+2021-04-30 12:10:19,684 : INFO : No data for KRAKEN-ticker-OXT-USD
+2021-04-30 12:10:19,685 : INFO : Reading KRAKEN-ticker-PAXG-USD
+2021-04-30 12:10:20,187 : INFO : ticker-KRAKEN-PAXG-USD: Read 0 messages from Kafka
+2021-04-30 12:10:20,187 : INFO : No data for KRAKEN-ticker-PAXG-USD
+2021-04-30 12:10:20,187 : INFO : Reading KRAKEN-ticker-QTUM-USD
+2021-04-30 12:10:20,691 : INFO : ticker-KRAKEN-QTUM-USD: Read 0 messages from Kafka
+2021-04-30 12:10:20,691 : INFO : No data for KRAKEN-ticker-QTUM-USD
+2021-04-30 12:10:20,691 : INFO : Reading KRAKEN-ticker-REPV2-USD
+2021-04-30 12:10:21,196 : INFO : ticker-KRAKEN-REPV2-USD: Read 0 messages from Kafka
+2021-04-30 12:10:21,196 : INFO : No data for KRAKEN-ticker-REPV2-USD
+2021-04-30 12:10:21,196 : INFO : Reading KRAKEN-ticker-SC-USD
+2021-04-30 12:10:21,700 : INFO : ticker-KRAKEN-SC-USD: Read 0 messages from Kafka
+2021-04-30 12:10:21,700 : INFO : No data for KRAKEN-ticker-SC-USD
+2021-04-30 12:10:21,700 : INFO : Reading KRAKEN-ticker-SNX-USD
+2021-04-30 12:10:22,203 : INFO : ticker-KRAKEN-SNX-USD: Read 0 messages from Kafka
+2021-04-30 12:10:22,203 : INFO : No data for KRAKEN-ticker-SNX-USD
+2021-04-30 12:10:22,203 : INFO : Reading KRAKEN-ticker-STORJ-USD
+2021-04-30 12:10:22,704 : INFO : ticker-KRAKEN-STORJ-USD: Read 0 messages from Kafka
+2021-04-30 12:10:22,704 : INFO : No data for KRAKEN-ticker-STORJ-USD
+2021-04-30 12:10:22,705 : INFO : Reading KRAKEN-ticker-TBTC-USD
+2021-04-30 12:10:23,206 : INFO : ticker-KRAKEN-TBTC-USD: Read 0 messages from Kafka
+2021-04-30 12:10:23,206 : INFO : No data for KRAKEN-ticker-TBTC-USD
+2021-04-30 12:10:23,207 : INFO : Reading KRAKEN-ticker-TRX-USD
+2021-04-30 12:10:23,708 : INFO : ticker-KRAKEN-TRX-USD: Read 0 messages from Kafka
+2021-04-30 12:10:23,709 : INFO : No data for KRAKEN-ticker-TRX-USD
+2021-04-30 12:10:23,709 : INFO : Reading KRAKEN-ticker-UNI-USD
+2021-04-30 12:10:24,214 : INFO : ticker-KRAKEN-UNI-USD: Read 0 messages from Kafka
+2021-04-30 12:10:24,214 : INFO : No data for KRAKEN-ticker-UNI-USD
+2021-04-30 12:10:24,214 : INFO : Reading KRAKEN-ticker-USDC-USD
+2021-04-30 12:10:24,718 : INFO : ticker-KRAKEN-USDC-USD: Read 0 messages from Kafka
+2021-04-30 12:10:24,720 : INFO : No data for KRAKEN-ticker-USDC-USD
+2021-04-30 12:10:24,720 : INFO : Reading KRAKEN-ticker-USDT-USD
+2021-04-30 12:10:25,220 : INFO : ticker-KRAKEN-USDT-USD: Read 0 messages from Kafka
+2021-04-30 12:10:25,221 : INFO : No data for KRAKEN-ticker-USDT-USD
+2021-04-30 12:10:25,221 : INFO : Reading KRAKEN-ticker-WAVES-USD
+2021-04-30 12:10:25,725 : INFO : ticker-KRAKEN-WAVES-USD: Read 0 messages from Kafka
+2021-04-30 12:10:25,725 : INFO : No data for KRAKEN-ticker-WAVES-USD
+2021-04-30 12:10:25,726 : INFO : Reading KRAKEN-ticker-DOG-USD
+2021-04-30 12:10:26,230 : INFO : ticker-KRAKEN-DOG-USD: Read 0 messages from Kafka
+2021-04-30 12:10:26,230 : INFO : No data for KRAKEN-ticker-DOG-USD
+2021-04-30 12:10:26,231 : INFO : Reading KRAKEN-ticker-ETC-USD
+2021-04-30 12:10:26,734 : INFO : ticker-KRAKEN-ETC-USD: Read 0 messages from Kafka
+2021-04-30 12:10:26,734 : INFO : No data for KRAKEN-ticker-ETC-USD
+2021-04-30 12:10:26,734 : INFO : Reading KRAKEN-ticker-ETH-USD
+2021-04-30 12:10:27,237 : INFO : ticker-KRAKEN-ETH-USD: Read 0 messages from Kafka
+2021-04-30 12:10:27,238 : INFO : No data for KRAKEN-ticker-ETH-USD
+2021-04-30 12:10:27,239 : INFO : Reading KRAKEN-ticker-LTC-USD
+2021-04-30 12:10:27,740 : INFO : ticker-KRAKEN-LTC-USD: Read 0 messages from Kafka
+2021-04-30 12:10:27,740 : INFO : No data for KRAKEN-ticker-LTC-USD
+2021-04-30 12:10:27,741 : INFO : Reading KRAKEN-ticker-MLN-USD
+2021-04-30 12:10:28,243 : INFO : ticker-KRAKEN-MLN-USD: Read 0 messages from Kafka
+2021-04-30 12:10:28,243 : INFO : No data for KRAKEN-ticker-MLN-USD
+2021-04-30 12:10:28,243 : INFO : Reading KRAKEN-ticker-REP-USD
+2021-04-30 12:10:28,749 : INFO : ticker-KRAKEN-REP-USD: Read 0 messages from Kafka
+2021-04-30 12:10:28,750 : INFO : No data for KRAKEN-ticker-REP-USD
+2021-04-30 12:10:28,750 : INFO : Reading KRAKEN-ticker-XTZ-USD
+2021-04-30 12:10:29,252 : INFO : ticker-KRAKEN-XTZ-USD: Read 0 messages from Kafka
+2021-04-30 12:10:29,254 : INFO : No data for KRAKEN-ticker-XTZ-USD
+2021-04-30 12:10:29,254 : INFO : Reading KRAKEN-ticker-BTC-USD
+2021-04-30 12:10:29,756 : INFO : ticker-KRAKEN-BTC-USD: Read 0 messages from Kafka
+2021-04-30 12:10:29,757 : INFO : No data for KRAKEN-ticker-BTC-USD
+2021-04-30 12:10:29,757 : INFO : Reading KRAKEN-ticker-XLM-USD
+2021-04-30 12:10:30,262 : INFO : ticker-KRAKEN-XLM-USD: Read 0 messages from Kafka
+2021-04-30 12:10:30,262 : INFO : No data for KRAKEN-ticker-XLM-USD
+2021-04-30 12:10:30,262 : INFO : Reading KRAKEN-ticker-XMR-USD
+2021-04-30 12:10:30,765 : INFO : ticker-KRAKEN-XMR-USD: Read 0 messages from Kafka
+2021-04-30 12:10:30,765 : INFO : No data for KRAKEN-ticker-XMR-USD
+2021-04-30 12:10:30,765 : INFO : Reading KRAKEN-ticker-XRP-USD
+2021-04-30 12:10:31,271 : INFO : ticker-KRAKEN-XRP-USD: Read 0 messages from Kafka
+2021-04-30 12:10:31,271 : INFO : No data for KRAKEN-ticker-XRP-USD
+2021-04-30 12:10:31,271 : INFO : Reading KRAKEN-ticker-ZEC-USD
+2021-04-30 12:10:31,774 : INFO : ticker-KRAKEN-ZEC-USD: Read 0 messages from Kafka
+2021-04-30 12:10:31,774 : INFO : No data for KRAKEN-ticker-ZEC-USD
+2021-04-30 12:10:31,774 : INFO : Reading KRAKEN-ticker-YFI-USD
+2021-04-30 12:10:32,275 : INFO : ticker-KRAKEN-YFI-USD: Read 0 messages from Kafka
+2021-04-30 12:10:32,277 : INFO : No data for KRAKEN-ticker-YFI-USD
+2021-04-30 12:10:32,277 : INFO : Reading KRAKEN-ticker-EUR-USD
+2021-04-30 12:10:32,783 : INFO : ticker-KRAKEN-EUR-USD: Read 0 messages from Kafka
+2021-04-30 12:10:32,783 : INFO : No data for KRAKEN-ticker-EUR-USD
+2021-04-30 12:10:32,783 : INFO : Reading KRAKEN-ticker-GBP-USD
+2021-04-30 12:10:33,285 : INFO : ticker-KRAKEN-GBP-USD: Read 0 messages from Kafka
+2021-04-30 12:10:33,286 : INFO : No data for KRAKEN-ticker-GBP-USD
+2021-04-30 12:10:33,286 : INFO : Reading KRAKEN-trades-AAVE-USD
+2021-04-30 12:10:33,788 : INFO : trades-KRAKEN-AAVE-USD: Read 1 messages from Kafka
+2021-04-30 12:10:33,788 : INFO : No data for KRAKEN-trades-AAVE-USD
+2021-04-30 12:10:33,789 : INFO : Reading KRAKEN-trades-ADA-USD
+2021-04-30 12:10:34,291 : INFO : trades-KRAKEN-ADA-USD: Read 0 messages from Kafka
+2021-04-30 12:10:34,291 : INFO : No data for KRAKEN-trades-ADA-USD
+2021-04-30 12:10:34,291 : INFO : Reading KRAKEN-trades-ALGO-USD
+2021-04-30 12:10:34,792 : INFO : trades-KRAKEN-ALGO-USD: Read 1 messages from Kafka
+2021-04-30 12:10:34,793 : INFO : No data for KRAKEN-trades-ALGO-USD
+2021-04-30 12:10:34,793 : INFO : Reading KRAKEN-trades-ANT-USD
+2021-04-30 12:10:35,296 : INFO : trades-KRAKEN-ANT-USD: Read 1 messages from Kafka
+2021-04-30 12:10:35,296 : INFO : No data for KRAKEN-trades-ANT-USD
+2021-04-30 12:10:35,296 : INFO : Reading KRAKEN-trades-ATOM-USD
+2021-04-30 12:10:35,799 : INFO : trades-KRAKEN-ATOM-USD: Read 1 messages from Kafka
+2021-04-30 12:10:35,799 : INFO : No data for KRAKEN-trades-ATOM-USD
+2021-04-30 12:10:35,799 : INFO : Reading KRAKEN-trades-AUD-USD
+2021-04-30 12:10:36,303 : INFO : trades-KRAKEN-AUD-USD: Read 1 messages from Kafka
+2021-04-30 12:10:36,304 : INFO : No data for KRAKEN-trades-AUD-USD
+2021-04-30 12:10:36,304 : INFO : Reading KRAKEN-trades-BAL-USD
+2021-04-30 12:10:36,805 : INFO : trades-KRAKEN-BAL-USD: Read 1 messages from Kafka
+2021-04-30 12:10:36,806 : INFO : No data for KRAKEN-trades-BAL-USD
+2021-04-30 12:10:36,806 : INFO : Reading KRAKEN-trades-BAT-USD
+2021-04-30 12:10:37,308 : INFO : trades-KRAKEN-BAT-USD: Read 1 messages from Kafka
+2021-04-30 12:10:37,309 : INFO : No data for KRAKEN-trades-BAT-USD
+2021-04-30 12:10:37,309 : INFO : Reading KRAKEN-trades-BCH-USD
+2021-04-30 12:10:37,811 : INFO : trades-KRAKEN-BCH-USD: Read 0 messages from Kafka
+2021-04-30 12:10:37,811 : INFO : No data for KRAKEN-trades-BCH-USD
+2021-04-30 12:10:37,811 : INFO : Reading KRAKEN-trades-COMP-USD
+2021-04-30 12:10:38,312 : INFO : trades-KRAKEN-COMP-USD: Read 1 messages from Kafka
+2021-04-30 12:10:38,312 : INFO : No data for KRAKEN-trades-COMP-USD
+2021-04-30 12:10:38,312 : INFO : Reading KRAKEN-trades-CRV-USD
+2021-04-30 12:10:38,813 : INFO : trades-KRAKEN-CRV-USD: Read 1 messages from Kafka
+2021-04-30 12:10:38,814 : INFO : No data for KRAKEN-trades-CRV-USD
+2021-04-30 12:10:38,814 : INFO : Reading KRAKEN-trades-DAI-USD
+2021-04-30 12:10:39,315 : INFO : trades-KRAKEN-DAI-USD: Read 0 messages from Kafka
+2021-04-30 12:10:39,316 : INFO : No data for KRAKEN-trades-DAI-USD
+2021-04-30 12:10:39,316 : INFO : Reading KRAKEN-trades-DASH-USD
+2021-04-30 12:10:39,821 : INFO : trades-KRAKEN-DASH-USD: Read 0 messages from Kafka
+2021-04-30 12:10:39,822 : INFO : No data for KRAKEN-trades-DASH-USD
+2021-04-30 12:10:39,822 : INFO : Reading KRAKEN-trades-DOT-USD
+2021-04-30 12:10:40,325 : INFO : trades-KRAKEN-DOT-USD: Read 1 messages from Kafka
+2021-04-30 12:10:40,326 : INFO : No data for KRAKEN-trades-DOT-USD
+2021-04-30 12:10:40,326 : INFO : Reading KRAKEN-trades-EOS-USD
+2021-04-30 12:10:40,827 : INFO : trades-KRAKEN-EOS-USD: Read 0 messages from Kafka
+2021-04-30 12:10:40,827 : INFO : No data for KRAKEN-trades-EOS-USD
+2021-04-30 12:10:40,828 : INFO : Reading KRAKEN-trades-EWT-USD
+2021-04-30 12:10:41,332 : INFO : trades-KRAKEN-EWT-USD: Read 0 messages from Kafka
+2021-04-30 12:10:41,333 : INFO : No data for KRAKEN-trades-EWT-USD
+2021-04-30 12:10:41,333 : INFO : Reading KRAKEN-trades-FIL-USD
+2021-04-30 12:10:41,837 : INFO : trades-KRAKEN-FIL-USD: Read 0 messages from Kafka
+2021-04-30 12:10:41,837 : INFO : No data for KRAKEN-trades-FIL-USD
+2021-04-30 12:10:41,837 : INFO : Reading KRAKEN-trades-FLOW-USD
+2021-04-30 12:10:42,339 : INFO : trades-KRAKEN-FLOW-USD: Read 0 messages from Kafka
+2021-04-30 12:10:42,340 : INFO : No data for KRAKEN-trades-FLOW-USD
+2021-04-30 12:10:42,340 : INFO : Reading KRAKEN-trades-GNO-USD
+2021-04-30 12:10:42,841 : INFO : trades-KRAKEN-GNO-USD: Read 0 messages from Kafka
+2021-04-30 12:10:42,841 : INFO : No data for KRAKEN-trades-GNO-USD
+2021-04-30 12:10:42,841 : INFO : Reading KRAKEN-trades-GRT-USD
+2021-04-30 12:10:43,342 : INFO : trades-KRAKEN-GRT-USD: Read 0 messages from Kafka
+2021-04-30 12:10:43,343 : INFO : No data for KRAKEN-trades-GRT-USD
+2021-04-30 12:10:43,343 : INFO : Reading KRAKEN-trades-ICX-USD
+2021-04-30 12:10:43,846 : INFO : trades-KRAKEN-ICX-USD: Read 1 messages from Kafka
+2021-04-30 12:10:43,846 : INFO : No data for KRAKEN-trades-ICX-USD
+2021-04-30 12:10:43,846 : INFO : Reading KRAKEN-trades-KAVA-USD
+2021-04-30 12:10:44,349 : INFO : trades-KRAKEN-KAVA-USD: Read 0 messages from Kafka
+2021-04-30 12:10:44,349 : INFO : No data for KRAKEN-trades-KAVA-USD
+2021-04-30 12:10:44,350 : INFO : Reading KRAKEN-trades-KEEP-USD
+2021-04-30 12:10:44,851 : INFO : trades-KRAKEN-KEEP-USD: Read 1 messages from Kafka
+2021-04-30 12:10:44,851 : INFO : No data for KRAKEN-trades-KEEP-USD
+2021-04-30 12:10:44,851 : INFO : Reading KRAKEN-trades-KNC-USD
+2021-04-30 12:10:45,352 : INFO : trades-KRAKEN-KNC-USD: Read 1 messages from Kafka
+2021-04-30 12:10:45,353 : INFO : No data for KRAKEN-trades-KNC-USD
+2021-04-30 12:10:45,353 : INFO : Reading KRAKEN-trades-KSM-USD
+2021-04-30 12:10:45,858 : INFO : trades-KRAKEN-KSM-USD: Read 0 messages from Kafka
+2021-04-30 12:10:45,858 : INFO : No data for KRAKEN-trades-KSM-USD
+2021-04-30 12:10:45,858 : INFO : Reading KRAKEN-trades-LINK-USD
+2021-04-30 12:10:46,361 : INFO : trades-KRAKEN-LINK-USD: Read 0 messages from Kafka
+2021-04-30 12:10:46,361 : INFO : No data for KRAKEN-trades-LINK-USD
+2021-04-30 12:10:46,362 : INFO : Reading KRAKEN-trades-LSK-USD
+2021-04-30 12:10:46,865 : INFO : trades-KRAKEN-LSK-USD: Read 1 messages from Kafka
+2021-04-30 12:10:46,866 : INFO : No data for KRAKEN-trades-LSK-USD
+2021-04-30 12:10:46,866 : INFO : Reading KRAKEN-trades-MANA-USD
+2021-04-30 12:10:47,367 : INFO : trades-KRAKEN-MANA-USD: Read 0 messages from Kafka
+2021-04-30 12:10:47,367 : INFO : No data for KRAKEN-trades-MANA-USD
+2021-04-30 12:10:47,368 : INFO : Reading KRAKEN-trades-NANO-USD
+2021-04-30 12:10:47,871 : INFO : trades-KRAKEN-NANO-USD: Read 0 messages from Kafka
+2021-04-30 12:10:47,871 : INFO : No data for KRAKEN-trades-NANO-USD
+2021-04-30 12:10:47,872 : INFO : Reading KRAKEN-trades-OCEAN-USD
+2021-04-30 12:10:48,376 : INFO : trades-KRAKEN-OCEAN-USD: Read 1 messages from Kafka
+2021-04-30 12:10:48,376 : INFO : No data for KRAKEN-trades-OCEAN-USD
+2021-04-30 12:10:48,376 : INFO : Reading KRAKEN-trades-OMG-USD
+2021-04-30 12:10:48,882 : INFO : trades-KRAKEN-OMG-USD: Read 0 messages from Kafka
+2021-04-30 12:10:48,882 : INFO : No data for KRAKEN-trades-OMG-USD
+2021-04-30 12:10:48,882 : INFO : Reading KRAKEN-trades-OXT-USD
+2021-04-30 12:10:49,384 : INFO : trades-KRAKEN-OXT-USD: Read 1 messages from Kafka
+2021-04-30 12:10:49,385 : INFO : No data for KRAKEN-trades-OXT-USD
+2021-04-30 12:10:49,385 : INFO : Reading KRAKEN-trades-PAXG-USD
+2021-04-30 12:10:49,892 : INFO : trades-KRAKEN-PAXG-USD: Read 1 messages from Kafka
+2021-04-30 12:10:49,893 : INFO : No data for KRAKEN-trades-PAXG-USD
+2021-04-30 12:10:49,894 : INFO : Reading KRAKEN-trades-QTUM-USD
+2021-04-30 12:10:50,399 : INFO : trades-KRAKEN-QTUM-USD: Read 0 messages from Kafka
+2021-04-30 12:10:50,399 : INFO : No data for KRAKEN-trades-QTUM-USD
+2021-04-30 12:10:50,399 : INFO : Reading KRAKEN-trades-REPV2-USD
+2021-04-30 12:10:50,902 : INFO : trades-KRAKEN-REPV2-USD: Read 0 messages from Kafka
+2021-04-30 12:10:50,902 : INFO : No data for KRAKEN-trades-REPV2-USD
+2021-04-30 12:10:50,902 : INFO : Reading KRAKEN-trades-SC-USD
+2021-04-30 12:10:51,404 : INFO : trades-KRAKEN-SC-USD: Read 0 messages from Kafka
+2021-04-30 12:10:51,404 : INFO : No data for KRAKEN-trades-SC-USD
+2021-04-30 12:10:51,404 : INFO : Reading KRAKEN-trades-SNX-USD
+2021-04-30 12:10:51,909 : INFO : trades-KRAKEN-SNX-USD: Read 0 messages from Kafka
+2021-04-30 12:10:51,910 : INFO : No data for KRAKEN-trades-SNX-USD
+2021-04-30 12:10:51,910 : INFO : Reading KRAKEN-trades-STORJ-USD
+2021-04-30 12:10:52,415 : INFO : trades-KRAKEN-STORJ-USD: Read 0 messages from Kafka
+2021-04-30 12:10:52,418 : INFO : No data for KRAKEN-trades-STORJ-USD
+2021-04-30 12:10:52,426 : INFO : Reading KRAKEN-trades-TBTC-USD
+2021-04-30 12:10:52,928 : INFO : trades-KRAKEN-TBTC-USD: Read 1 messages from Kafka
+2021-04-30 12:10:52,929 : INFO : No data for KRAKEN-trades-TBTC-USD
+2021-04-30 12:10:52,929 : INFO : Reading KRAKEN-trades-TRX-USD
+2021-04-30 12:10:53,435 : INFO : trades-KRAKEN-TRX-USD: Read 0 messages from Kafka
+2021-04-30 12:10:53,435 : INFO : No data for KRAKEN-trades-TRX-USD
+2021-04-30 12:10:53,435 : INFO : Reading KRAKEN-trades-UNI-USD
+2021-04-30 12:10:53,936 : INFO : trades-KRAKEN-UNI-USD: Read 0 messages from Kafka
+2021-04-30 12:10:53,936 : INFO : No data for KRAKEN-trades-UNI-USD
+2021-04-30 12:10:53,936 : INFO : Reading KRAKEN-trades-USDC-USD
+2021-04-30 12:10:54,437 : INFO : trades-KRAKEN-USDC-USD: Read 0 messages from Kafka
+2021-04-30 12:10:54,438 : INFO : No data for KRAKEN-trades-USDC-USD
+2021-04-30 12:10:54,438 : INFO : Reading KRAKEN-trades-USDT-USD
+2021-04-30 12:10:54,941 : INFO : trades-KRAKEN-USDT-USD: Read 0 messages from Kafka
+2021-04-30 12:10:54,941 : INFO : No data for KRAKEN-trades-USDT-USD
+2021-04-30 12:10:54,941 : INFO : Reading KRAKEN-trades-WAVES-USD
+2021-04-30 12:10:55,446 : INFO : trades-KRAKEN-WAVES-USD: Read 1 messages from Kafka
+2021-04-30 12:10:55,446 : INFO : No data for KRAKEN-trades-WAVES-USD
+2021-04-30 12:10:55,447 : INFO : Reading KRAKEN-trades-DOG-USD
+2021-04-30 12:10:55,951 : INFO : trades-KRAKEN-DOG-USD: Read 0 messages from Kafka
+2021-04-30 12:10:55,952 : INFO : No data for KRAKEN-trades-DOG-USD
+2021-04-30 12:10:55,952 : INFO : Reading KRAKEN-trades-ETC-USD
+2021-04-30 12:10:56,455 : INFO : trades-KRAKEN-ETC-USD: Read 0 messages from Kafka
+2021-04-30 12:10:56,455 : INFO : No data for KRAKEN-trades-ETC-USD
+2021-04-30 12:10:56,455 : INFO : Reading KRAKEN-trades-ETH-USD
+2021-04-30 12:10:56,958 : INFO : trades-KRAKEN-ETH-USD: Read 0 messages from Kafka
+2021-04-30 12:10:56,958 : INFO : No data for KRAKEN-trades-ETH-USD
+2021-04-30 12:10:56,958 : INFO : Reading KRAKEN-trades-LTC-USD
+2021-04-30 12:10:57,460 : INFO : trades-KRAKEN-LTC-USD: Read 0 messages from Kafka
+2021-04-30 12:10:57,460 : INFO : No data for KRAKEN-trades-LTC-USD
+2021-04-30 12:10:57,461 : INFO : Reading KRAKEN-trades-MLN-USD
+2021-04-30 12:10:57,964 : INFO : trades-KRAKEN-MLN-USD: Read 1 messages from Kafka
+2021-04-30 12:10:57,965 : INFO : No data for KRAKEN-trades-MLN-USD
+2021-04-30 12:10:57,965 : INFO : Reading KRAKEN-trades-REP-USD
+2021-04-30 12:10:58,470 : INFO : trades-KRAKEN-REP-USD: Read 1 messages from Kafka
+2021-04-30 12:10:58,471 : INFO : No data for KRAKEN-trades-REP-USD
+2021-04-30 12:10:58,471 : INFO : Reading KRAKEN-trades-XTZ-USD
+2021-04-30 12:10:58,973 : INFO : trades-KRAKEN-XTZ-USD: Read 1 messages from Kafka
+2021-04-30 12:10:58,973 : INFO : No data for KRAKEN-trades-XTZ-USD
+2021-04-30 12:10:58,974 : INFO : Reading KRAKEN-trades-BTC-USD
+2021-04-30 12:10:59,478 : INFO : trades-KRAKEN-BTC-USD: Read 3 messages from Kafka
+2021-04-30 12:11:01,721 : INFO : trades-KRAKEN-BTC-USD: Committing offset 27
+2021-04-30 12:11:01,723 : INFO : Write Complete KRAKEN-trades-BTC-USD
+2021-04-30 12:11:01,723 : INFO : Reading KRAKEN-trades-XLM-USD
+2021-04-30 12:11:02,224 : INFO : trades-KRAKEN-XLM-USD: Read 0 messages from Kafka
+2021-04-30 12:11:02,224 : INFO : No data for KRAKEN-trades-XLM-USD
+2021-04-30 12:11:02,225 : INFO : Reading KRAKEN-trades-XMR-USD
+2021-04-30 12:11:02,726 : INFO : trades-KRAKEN-XMR-USD: Read 1 messages from Kafka
+2021-04-30 12:11:02,726 : INFO : No data for KRAKEN-trades-XMR-USD
+2021-04-30 12:11:02,726 : INFO : Reading KRAKEN-trades-XRP-USD
+2021-04-30 12:11:03,231 : INFO : trades-KRAKEN-XRP-USD: Read 0 messages from Kafka
+2021-04-30 12:11:03,231 : INFO : No data for KRAKEN-trades-XRP-USD
+2021-04-30 12:11:03,231 : INFO : Reading KRAKEN-trades-ZEC-USD
+2021-04-30 12:11:03,736 : INFO : trades-KRAKEN-ZEC-USD: Read 0 messages from Kafka
+2021-04-30 12:11:03,737 : INFO : No data for KRAKEN-trades-ZEC-USD
+2021-04-30 12:11:03,738 : INFO : Reading KRAKEN-trades-YFI-USD
+2021-04-30 12:11:04,239 : INFO : trades-KRAKEN-YFI-USD: Read 1 messages from Kafka
+2021-04-30 12:11:04,240 : INFO : No data for KRAKEN-trades-YFI-USD
+2021-04-30 12:11:04,240 : INFO : Reading KRAKEN-trades-EUR-USD
+2021-04-30 12:11:04,740 : INFO : trades-KRAKEN-EUR-USD: Read 0 messages from Kafka
+2021-04-30 12:11:04,741 : INFO : No data for KRAKEN-trades-EUR-USD
+2021-04-30 12:11:04,741 : INFO : Reading KRAKEN-trades-GBP-USD
+2021-04-30 12:11:05,242 : INFO : trades-KRAKEN-GBP-USD: Read 1 messages from Kafka
+2021-04-30 12:11:05,242 : INFO : No data for KRAKEN-trades-GBP-USD
+2021-04-30 12:11:05,242 : WARNING : Storage operations currently take 111.0 seconds, longer than the interval of 90
+2021-04-30 12:11:05,746 : INFO : Reading KRAKEN-l2_book-AAVE-USD
+2021-04-30 12:11:06,251 : INFO : l2_book-KRAKEN-AAVE-USD: Read 1 messages from Kafka
+2021-04-30 12:11:06,252 : INFO : No data for KRAKEN-l2_book-AAVE-USD
+2021-04-30 12:11:06,252 : INFO : Reading KRAKEN-l2_book-ADA-USD
+2021-04-30 12:11:06,753 : INFO : l2_book-KRAKEN-ADA-USD: Read 9 messages from Kafka
+2021-04-30 12:11:06,753 : INFO : No data for KRAKEN-l2_book-ADA-USD
+2021-04-30 12:11:06,753 : INFO : Reading KRAKEN-l2_book-ALGO-USD
+2021-04-30 12:11:07,254 : INFO : l2_book-KRAKEN-ALGO-USD: Read 6 messages from Kafka
+2021-04-30 12:11:07,254 : INFO : No data for KRAKEN-l2_book-ALGO-USD
+2021-04-30 12:11:07,255 : INFO : Reading KRAKEN-l2_book-ANT-USD
+2021-04-30 12:11:07,755 : INFO : l2_book-KRAKEN-ANT-USD: Read 4 messages from Kafka
+2021-04-30 12:11:07,756 : INFO : No data for KRAKEN-l2_book-ANT-USD
+2021-04-30 12:11:07,757 : INFO : Reading KRAKEN-l2_book-ATOM-USD
+2021-04-30 12:11:08,258 : INFO : l2_book-KRAKEN-ATOM-USD: Read 7 messages from Kafka
+2021-04-30 12:11:08,258 : INFO : No data for KRAKEN-l2_book-ATOM-USD
+2021-04-30 12:11:08,258 : INFO : Reading KRAKEN-l2_book-AUD-USD
+2021-04-30 12:11:08,761 : INFO : l2_book-KRAKEN-AUD-USD: Read 1 messages from Kafka
+2021-04-30 12:11:08,762 : INFO : No data for KRAKEN-l2_book-AUD-USD
+2021-04-30 12:11:08,762 : INFO : Reading KRAKEN-l2_book-BAL-USD
+2021-04-30 12:11:09,262 : INFO : l2_book-KRAKEN-BAL-USD: Read 5 messages from Kafka
+2021-04-30 12:11:09,263 : INFO : No data for KRAKEN-l2_book-BAL-USD
+2021-04-30 12:11:09,263 : INFO : Reading KRAKEN-l2_book-BAT-USD
+2021-04-30 12:11:09,766 : INFO : l2_book-KRAKEN-BAT-USD: Read 1 messages from Kafka
+2021-04-30 12:11:09,767 : INFO : No data for KRAKEN-l2_book-BAT-USD
+2021-04-30 12:11:09,767 : INFO : Reading KRAKEN-l2_book-BCH-USD
+2021-04-30 12:11:10,270 : INFO : l2_book-KRAKEN-BCH-USD: Read 6 messages from Kafka
+2021-04-30 12:11:12,319 : INFO : l2_book-KRAKEN-BCH-USD: Committing offset 2598
+2021-04-30 12:11:12,320 : INFO : Write Complete KRAKEN-l2_book-BCH-USD
+2021-04-30 12:11:12,320 : INFO : Reading KRAKEN-l2_book-COMP-USD
+2021-04-30 12:11:12,821 : INFO : l2_book-KRAKEN-COMP-USD: Read 1 messages from Kafka
+2021-04-30 12:11:14,673 : INFO : l2_book-KRAKEN-COMP-USD: Committing offset 1432
+2021-04-30 12:11:14,674 : INFO : Write Complete KRAKEN-l2_book-COMP-USD
+2021-04-30 12:11:14,674 : INFO : Reading KRAKEN-l2_book-CRV-USD
+2021-04-30 12:11:15,176 : INFO : l2_book-KRAKEN-CRV-USD: Read 1 messages from Kafka
+2021-04-30 12:11:17,003 : INFO : l2_book-KRAKEN-CRV-USD: Committing offset 354
+2021-04-30 12:11:17,004 : INFO : Write Complete KRAKEN-l2_book-CRV-USD
+2021-04-30 12:11:17,004 : INFO : Reading KRAKEN-l2_book-DAI-USD
+2021-04-30 12:11:17,507 : INFO : l2_book-KRAKEN-DAI-USD: Read 0 messages from Kafka
+2021-04-30 12:11:17,508 : INFO : No data for KRAKEN-l2_book-DAI-USD
+2021-04-30 12:11:17,508 : INFO : Reading KRAKEN-l2_book-DASH-USD
+2021-04-30 12:11:18,009 : INFO : l2_book-KRAKEN-DASH-USD: Read 3 messages from Kafka
+2021-04-30 12:11:19,968 : INFO : l2_book-KRAKEN-DASH-USD: Committing offset 1340
+2021-04-30 12:11:19,969 : INFO : Write Complete KRAKEN-l2_book-DASH-USD
+2021-04-30 12:11:19,969 : INFO : Reading KRAKEN-l2_book-DOT-USD
+2021-04-30 12:11:20,470 : INFO : l2_book-KRAKEN-DOT-USD: Read 4 messages from Kafka
+2021-04-30 12:11:22,318 : INFO : l2_book-KRAKEN-DOT-USD: Committing offset 3085
+2021-04-30 12:11:22,318 : INFO : Write Complete KRAKEN-l2_book-DOT-USD
+2021-04-30 12:11:22,319 : INFO : Reading KRAKEN-l2_book-EOS-USD
+2021-04-30 12:11:22,821 : INFO : l2_book-KRAKEN-EOS-USD: Read 9 messages from Kafka
+2021-04-30 12:11:24,564 : INFO : l2_book-KRAKEN-EOS-USD: Committing offset 1391
+2021-04-30 12:11:24,565 : INFO : Write Complete KRAKEN-l2_book-EOS-USD
+2021-04-30 12:11:24,565 : INFO : Reading KRAKEN-l2_book-EWT-USD
+2021-04-30 12:11:25,069 : INFO : l2_book-KRAKEN-EWT-USD: Read 0 messages from Kafka
+2021-04-30 12:11:25,069 : INFO : No data for KRAKEN-l2_book-EWT-USD
+2021-04-30 12:11:25,069 : INFO : Reading KRAKEN-l2_book-FIL-USD
+2021-04-30 12:11:25,573 : INFO : l2_book-KRAKEN-FIL-USD: Read 1 messages from Kafka
+2021-04-30 12:11:25,573 : INFO : No data for KRAKEN-l2_book-FIL-USD
+2021-04-30 12:11:25,573 : INFO : Reading KRAKEN-l2_book-FLOW-USD
+2021-04-30 12:11:26,078 : INFO : l2_book-KRAKEN-FLOW-USD: Read 0 messages from Kafka
+2021-04-30 12:11:26,078 : INFO : No data for KRAKEN-l2_book-FLOW-USD
+2021-04-30 12:11:26,079 : INFO : Reading KRAKEN-l2_book-GNO-USD
+2021-04-30 12:11:26,579 : INFO : l2_book-KRAKEN-GNO-USD: Read 0 messages from Kafka
+2021-04-30 12:11:26,580 : INFO : No data for KRAKEN-l2_book-GNO-USD
+2021-04-30 12:11:26,580 : INFO : Reading KRAKEN-l2_book-GRT-USD
+2021-04-30 12:11:27,082 : INFO : l2_book-KRAKEN-GRT-USD: Read 0 messages from Kafka
+2021-04-30 12:11:27,082 : INFO : No data for KRAKEN-l2_book-GRT-USD
+2021-04-30 12:11:27,082 : INFO : Reading KRAKEN-l2_book-ICX-USD
+2021-04-30 12:11:27,585 : INFO : l2_book-KRAKEN-ICX-USD: Read 741 messages from Kafka
+2021-04-30 12:11:31,004 : INFO : l2_book-KRAKEN-ICX-USD: Committing offset 741
+2021-04-30 12:11:31,004 : INFO : Write Complete KRAKEN-l2_book-ICX-USD
+2021-04-30 12:11:31,004 : INFO : Reading KRAKEN-l2_book-KAVA-USD
+2021-04-30 12:11:31,506 : INFO : l2_book-KRAKEN-KAVA-USD: Read 2 messages from Kafka
+2021-04-30 12:11:31,507 : INFO : No data for KRAKEN-l2_book-KAVA-USD
+2021-04-30 12:11:31,507 : INFO : Reading KRAKEN-l2_book-KEEP-USD
+2021-04-30 12:11:32,011 : INFO : l2_book-KRAKEN-KEEP-USD: Read 429 messages from Kafka
+2021-04-30 12:11:34,941 : INFO : l2_book-KRAKEN-KEEP-USD: Committing offset 429
+2021-04-30 12:11:34,942 : INFO : Write Complete KRAKEN-l2_book-KEEP-USD
+2021-04-30 12:11:34,942 : INFO : Reading KRAKEN-l2_book-KNC-USD
+2021-04-30 12:11:35,442 : INFO : l2_book-KRAKEN-KNC-USD: Read 2 messages from Kafka
+2021-04-30 12:11:37,188 : INFO : l2_book-KRAKEN-KNC-USD: Committing offset 816
+2021-04-30 12:11:37,188 : INFO : Write Complete KRAKEN-l2_book-KNC-USD
+2021-04-30 12:11:37,188 : INFO : Reading KRAKEN-l2_book-KSM-USD
+2021-04-30 12:11:37,691 : INFO : l2_book-KRAKEN-KSM-USD: Read 1 messages from Kafka
+2021-04-30 12:11:37,691 : INFO : No data for KRAKEN-l2_book-KSM-USD
+2021-04-30 12:11:37,691 : INFO : Reading KRAKEN-l2_book-LINK-USD
+2021-04-30 12:11:38,196 : INFO : l2_book-KRAKEN-LINK-USD: Read 1689 messages from Kafka
+2021-04-30 12:11:42,438 : INFO : l2_book-KRAKEN-LINK-USD: Committing offset 1689
+2021-04-30 12:11:42,439 : INFO : Write Complete KRAKEN-l2_book-LINK-USD
+2021-04-30 12:11:42,439 : INFO : Reading KRAKEN-l2_book-LSK-USD
+2021-04-30 12:11:42,942 : INFO : l2_book-KRAKEN-LSK-USD: Read 804 messages from Kafka
+2021-04-30 12:11:46,265 : INFO : l2_book-KRAKEN-LSK-USD: Committing offset 804
+2021-04-30 12:11:46,266 : INFO : Write Complete KRAKEN-l2_book-LSK-USD
+2021-04-30 12:11:46,266 : INFO : Reading KRAKEN-l2_book-MANA-USD
+2021-04-30 12:11:46,770 : INFO : l2_book-KRAKEN-MANA-USD: Read 1241 messages from Kafka
+2021-04-30 12:11:50,606 : INFO : l2_book-KRAKEN-MANA-USD: Committing offset 1241
+2021-04-30 12:11:50,607 : INFO : Write Complete KRAKEN-l2_book-MANA-USD
+2021-04-30 12:11:50,607 : INFO : Reading KRAKEN-l2_book-NANO-USD
+2021-04-30 12:11:51,116 : INFO : l2_book-KRAKEN-NANO-USD: Read 853 messages from Kafka
+2021-04-30 12:11:55,993 : INFO : l2_book-KRAKEN-NANO-USD: Committing offset 853
+2021-04-30 12:11:55,994 : INFO : Write Complete KRAKEN-l2_book-NANO-USD
+2021-04-30 12:11:55,994 : INFO : Reading KRAKEN-l2_book-OCEAN-USD
+2021-04-30 12:11:56,495 : INFO : l2_book-KRAKEN-OCEAN-USD: Read 230 messages from Kafka
+2021-04-30 12:11:59,198 : INFO : l2_book-KRAKEN-OCEAN-USD: Committing offset 230
+2021-04-30 12:11:59,199 : INFO : Write Complete KRAKEN-l2_book-OCEAN-USD
+2021-04-30 12:11:59,199 : INFO : Reading KRAKEN-l2_book-OMG-USD
+2021-04-30 12:11:59,701 : INFO : l2_book-KRAKEN-OMG-USD: Read 7 messages from Kafka
+2021-04-30 12:12:01,471 : INFO : l2_book-KRAKEN-OMG-USD: Committing offset 1500
+2021-04-30 12:12:01,471 : INFO : Write Complete KRAKEN-l2_book-OMG-USD
+2021-04-30 12:12:01,471 : INFO : Reading KRAKEN-l2_book-OXT-USD
+2021-04-30 12:12:01,975 : INFO : l2_book-KRAKEN-OXT-USD: Read 475 messages from Kafka
+2021-04-30 12:12:04,784 : INFO : l2_book-KRAKEN-OXT-USD: Committing offset 475
+2021-04-30 12:12:04,784 : INFO : Write Complete KRAKEN-l2_book-OXT-USD
+2021-04-30 12:12:04,785 : INFO : Reading KRAKEN-l2_book-PAXG-USD
+2021-04-30 12:12:05,286 : INFO : l2_book-KRAKEN-PAXG-USD: Read 539 messages from Kafka

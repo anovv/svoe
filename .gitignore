@@ -4,6 +4,6 @@ __pycache__/
 data_feed/cryptostore.log
 feedhandler.log
 utils/parquet/parquet_sample_files/
-data_feed/data_feed/configs/aws_credentials.yaml
+configs/data_feed/aws_credentials.yaml
 **/*.egg-info
 cryptostore.log
