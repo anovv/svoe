@@ -27,11 +27,11 @@ class ConfigBuilder(object):
 
     def __init__(self):
         self.exchanges_config = {
-            # pair_gen, max_depth_l2, include_ticker
-            BINANCE : [self._get_binance_pairs()[:100], 100, True], #max_depth 5000 # https://github.com/bmoscon/cryptostore/issues/156 set limit to num pairs to avoid rate limit?
-            COINBASE: [self._get_coinbase_pairs()[:100], 100, True],
-            KRAKEN: [self._get_kraken_pairs()[:100], 100, True], #max_depth 1000
-            HUOBI: [self._get_huobi_pairs()[:100], 100, False],
+            # pair_gen, max_depth_l2, include_ticker, include l3
+            # BINANCE : [self._get_binance_pairs()[:100], 100, True, False], #max_depth 5000 # https://github.com/bmoscon/cryptostore/issues/156 set limit to num pairs to avoid rate limit?
+            # COINBASE: [self._get_coinbase_pairs()[:2], 100, True, True],
+            KRAKEN: [self._get_kraken_pairs()[:100], 100, True, False], #max_depth 1000
+            # HUOBI: [self._get_huobi_pairs()[:100], 100, False, False],
             # 'BITMEX' : BITMEX,
             # 'DERIBIT' : DERIBIT
         }
@@ -162,14 +162,14 @@ class ConfigBuilder(object):
             # pairs
             pairs = ex_to_pairs[exchange]
 
-            # book
+            # l2 book
             l2_book = {
                 'symbols' : pairs,
                 'book_delta' : True,
             }
-            max_depth = self.exchanges_config[exchange][1]
-            if max_depth > 0:
-                l2_book['max_depth'] = max_depth
+            max_depth_l2 = self.exchanges_config[exchange][1]
+            if max_depth_l2 > 0:
+                l2_book['max_depth'] = max_depth_l2
 
             config[exchange] = {
                 'retries' : -1,
@@ -177,8 +177,17 @@ class ConfigBuilder(object):
                 'trades' : pairs,
             }
 
-            include_ticker = self.exchanges_config[exchange][2]
+            # l3 book
+            include_l3 = self.exchanges_config[exchange][3]
+            if include_l3:
+                l3_book = {
+                    'symbols' : pairs,
+                    'book_delta' : True,
+                }
+                config[exchange]['l3_book'] = l3_book
 
+            # ticker
+            include_ticker = self.exchanges_config[exchange][2]
             if include_ticker:
                 config[exchange]['ticker'] = pairs
 
