@@ -1,4 +1,3 @@
-cryptostore_debug_config.yaml
 svoe_data_feed_config_map.yaml
 svoe_data_feed_stateful_set.yaml
 .idea/

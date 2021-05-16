@@ -15,7 +15,6 @@ import yaml
 DATA_FEED_CONFIG_MAP_PATH = str(Path(__file__).parent / 'svoe_data_feed_config_map.yaml')
 DATA_FEED_CONFIG_MAP_NAME = 'svoe-data-feed-config-map'
 
-
 # Stateful Set
 DATA_FEED_STATEFUL_SET_CONFIG_PATH = str(Path(__file__).parent / 'svoe_data_feed_stateful_set.yaml')
 DATA_FEED_STATEFUL_SET_NAME = 'svoe-data-feed-stateful-set'
@@ -23,11 +22,7 @@ DATA_FEED_HEADLESS_SERVICE_NAME = 'svoe-data-feed-stateful-set-service'
 
 # Container
 DATA_FEED_CONTAINER_NAME = 'svoe-data-feed-container'
-
-DATA_FEED_IMAGE = '050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v1'
-# DATA_FEED_IMAGE = 'docker.io/anov/svoe_data_feed:v1'
-
-DATA_FEED_CONFIG_DIR = '/etc/svoe/data_feed/configs'
+DATA_FEED_IMAGE = 'busybox' # TODO
 
 # Init Container
 DATA_FEED_INIT_CONTAINER_NAME = 'svoe-data-feed-init-container'
@@ -38,7 +33,7 @@ DATA_FEED_SCRIPTS_VOLUME_NAME = 'svoe-data-feed-scripts-vol'
 DATA_FEED_CONFIGS_VOLUME_NAME = 'svoe-data-feed-conf-vol'
 
 # Pods
-NUM_PODS = 4
+NUM_PODS = 10
 
 
 # Kubernetes specific configs
@@ -99,12 +94,12 @@ class KubernetesConfigBuilder(CryptostoreConfigBuilder):
                                 'name': DATA_FEED_CONTAINER_NAME,
                                 'image': DATA_FEED_IMAGE,
                                 'imagePullPolicy': 'IfNotPresent',
-                                # 'command': ['/bin/sh', '-c'],
-                                # 'args': ['echo "Starting statefulset pod"; cat /etc/svoe/data_feed/configs/data-feed-config.yaml; while true; do sleep 600; done'],
+                                'command': ['/bin/sh', '-c'],
+                                'args': ['echo "Starting statefulset pod"; cat /etc/svoe/data_feed/configs/data-feed-config.yaml; while true; do sleep 600; done'],
                                 'volumeMounts': [
                                     {
                                         'name': DATA_FEED_CONFIGS_VOLUME_NAME,
-                                        'mountPath': DATA_FEED_CONFIG_DIR,
+                                        'mountPath': self.CRYPTOSTORE_CONFIG_DIR,
                                     },
                                 ]
                             },
