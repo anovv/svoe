@@ -4,31 +4,32 @@ from pathlib import Path
 from typing import Any
 import yaml
 
-MEDIUM = 'kafka'
+MEDIUM = 'redis'
 
 # https://stackoverflow.com/questions/52996028/accessing-local-kafka-from-within-services-deployed-in-local-docker-for-mac-inc
-KAFKA_IP = '127.0.0.1' # ip='host.docker.internal', # for Docker on Mac use host.docker.internal:19092
-KAFKA_PORT = 9092 # port=19092
+KAFKA_IP = '127.0.0.1'# ip='host.docker.internal', # for Docker on Mac use host.docker.internal:19092
+KAFKA_PORT = 9092# port=19092
+
+REDIS_IP = '127.0.0.1'
+REDIS_PORT = 6379
+
+START_FLUSH = True
 
 # TODO figure out production paths
 AWS_CREDENTIALS_PATH = str(Path(__file__).parent / 'aws_credentials.yaml')
 
+CRYPTOSTORE_DEBUG_CONFIG_PATH = str(Path(__file__).parent / 'cryptostore_debug_config.yaml')
 
 # Cryptostore specific configs
 class CryptostoreConfigBuilder(BaseConfigBuilder):
-    CRYPTOSTORE_CONFIG_DIR = '/etc/svoe/data_feed/configs'
 
-    # SHOULD BE IN SYNC WITH PATH IN data_feed_service
-    CRYPTOSTORE_CONFIG_PATH = CRYPTOSTORE_CONFIG_DIR + '/data-feed-config.yaml'
-
-    # TODO Figure out path for debug config
     # DEBUG ONLY
-    def cryptostore_single_config(self) -> str:
+    def cryptostore_single_config_DEBUG(self) -> str:
         ex_to_pairs = {}
         for exchange in self.exchanges_config.keys():
             ex_to_pairs[exchange] = self.exchanges_config[exchange][0]
         config = self._build_cryptostore_config(ex_to_pairs)
-        return self._dump_yaml_config(config, self.CRYPTOSTORE_CONFIG_PATH)
+        return self._dump_yaml_config(config, CRYPTOSTORE_DEBUG_CONFIG_PATH)
 
     def _build_cryptostore_config(self, ex_to_pairs: dict[str, list[str]]) -> dict:
         aws_credentials = self._read_aws_credentials()
@@ -36,8 +37,16 @@ class CryptostoreConfigBuilder(BaseConfigBuilder):
             'cache': MEDIUM,
             'kafka': {
                 'ip': KAFKA_IP,
-                'port': 9092,
-                'start_flush': True,
+                'port': KAFKA_PORT,
+                'start_flush': START_FLUSH,
+            },
+            'redis': {
+                'ip': REDIS_IP,
+                'port': REDIS_PORT,
+                'socket': None,
+                'del_after_read': True,
+                'retention_time': None,
+                'start_flush': START_FLUSH,
             },
             'storage': ['parquet'],
             'storage_retries': 5,
