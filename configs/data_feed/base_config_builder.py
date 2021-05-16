@@ -8,10 +8,10 @@ class BaseConfigBuilder(object):
     def __init__(self):
         self.exchanges_config = {
             # pair_gen, max_depth_l2, include_ticker, include l3
-            # BINANCE : [self._get_binance_pairs()[:100], 100, True, False], #max_depth 5000 # https://github.com/bmoscon/cryptostore/issues/156 set limit to num pairs to avoid rate limit?
-            # COINBASE: [self._get_coinbase_pairs()[:2], 100, True, True],
-            KRAKEN: [self._get_kraken_pairs()[:100], 100, True, False], #max_depth 1000
-            # HUOBI: [self._get_huobi_pairs()[:100], 100, False, False],
+            # BINANCE : [self._get_binance_pairs()[:4], 100, True, False], #max_depth 5000 # https://github.com/bmoscon/cryptostore/issues/156 set limit to num pairs to avoid rate limit?
+            # COINBASE: [self._get_coinbase_pairs()[:4], 100, True, True],
+            # KRAKEN: [self._get_kraken_pairs()[:4], 100, True, False], #max_depth 1000
+            HUOBI: [self._get_huobi_pairs()[:4], 100, False, False],
             # 'BITMEX' : BITMEX,
             # 'DERIBIT' : DERIBIT
         }
