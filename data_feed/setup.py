@@ -12,8 +12,8 @@ setup(
     install_requires=[
         "cryptostore",
         "boto3",
-        "aiokafka",
-        "confluent-kafka",
+        "redis",
+        "aioredis",
     ],
     entry_points={
         'console_scripts': ['svoe_data_feed_launch=data_feed.bin.launcher:main'],
