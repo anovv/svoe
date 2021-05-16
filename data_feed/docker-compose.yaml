@@ -1,0 +1,11 @@
+version: "3.9"
+services:
+  svoe_data_feed:
+    build:
+      context: .
+      dockerfile: Dockerfile
+  redis:
+    image: "redis:alpine"
+    expose:
+      - 6379
+    command: [ "redis-server", "--save", "''", "--appendonly", "no" ]

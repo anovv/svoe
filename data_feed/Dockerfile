@@ -7,7 +7,6 @@ RUN apt install gcc git
 
 RUN pip install --no-cache-dir git+https://github.com/bmoscon/cryptostore.git
 
-RUN pip install pyyaml
 RUN pip install boto3
 
 RUN pip install -e .
