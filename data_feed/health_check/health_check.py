@@ -9,7 +9,6 @@ import sys
 # TODO this path should be synced with cryptostore_config_builder consts
 DATA_FEED_CONFIG_PATH = '/etc/svoe/data_feed/configs/data-feed-config.yaml'
 CRYPTOSTORE_LOG_PATH = 'cryptostore.log'
-FEEDHANDLER_LOG_PATH = 'feedhandler.log'
 
 SUCCESS = 0
 FAILURE = 1
@@ -45,17 +44,11 @@ def check():
             print('[HEALTH CHECK FAILED][Redis]: Keys expected ' + str(num_redis_keys) + ' Keys read ' + str(len(r.keys())))
             sys.exit(FAILURE)
 
-        # verify feednandler.log and cryptostore.log
+        # verify cryptostore.log
         storage_interval_seconds = config['storage_interval']
-        mtime_feedhandler = os.path.getmtime(FEEDHANDLER_LOG_PATH)
         mtime_cryptostore = os.path.getmtime(CRYPTOSTORE_LOG_PATH)
         now = time.time()
-        fh_delta = now - mtime_feedhandler
         cs_delta = now - mtime_cryptostore
-
-        if fh_delta > storage_interval_seconds + 2:
-            print('[HEALTH CHECK FAILED][Feedhandler]: Log was updated ' + str(fh_delta) + ' seconds ago')
-            sys.exit(FAILURE)
 
         if cs_delta > storage_interval_seconds + 2:
             print('[HEALTH CHECK FAILED][Cryptostore]: Log was updated ' + str(cs_delta) + ' seconds ago')
