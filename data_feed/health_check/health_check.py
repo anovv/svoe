@@ -9,9 +9,14 @@ import sys
 # TODO this path should be synced with cryptostore_config_builder consts
 DATA_FEED_CONFIG_PATH = '/etc/svoe/data_feed/configs/data-feed-config.yaml'
 CRYPTOSTORE_LOG_PATH = 'cryptostore.log'
+FEEDHANDLER_LOG_PATH = 'feedhandler.log'
 
 SUCCESS = 0
 FAILURE = 1
+
+def tail(filename, n=20):
+    from collections import deque
+    return ''.join(deque(open(filename), n))
 
 def check():
     # read config
@@ -41,7 +46,9 @@ def check():
 
         r = redis.Redis(redis_ip, redis_port)
         if num_redis_keys != len(r.keys()):
-            print('[HEALTH CHECK FAILED][Redis]: Keys expected ' + str(num_redis_keys) + ' Keys read ' + str(len(r.keys())))
+            print('[HEALTH CHECK][FAILED][Redis]: Keys expected ' + str(num_redis_keys) + ' Keys read ' + str(len(r.keys())))
+            print('[HEALTH CHECK][feedhandler.log tail]:\n' + tail(FEEDHANDLER_LOG_PATH))
+            print('[HEALTH CHECK][cryptostore.log tail]:\n' + tail(CRYPTOSTORE_LOG_PATH))
             sys.exit(FAILURE)
 
         # verify cryptostore.log
@@ -51,7 +58,9 @@ def check():
         cs_delta = now - mtime_cryptostore
 
         if cs_delta > storage_interval_seconds + 2:
-            print('[HEALTH CHECK FAILED][Cryptostore]: Log was updated ' + str(cs_delta) + ' seconds ago')
+            print('[HEALTH CHECK][FAILED][Cryptostore]: Log was updated ' + str(cs_delta) + ' seconds ago')
+            print('[HEALTH CHECK][feedhandler.log tail]:\n' + tail(FEEDHANDLER_LOG_PATH))
+            print('[HEALTH CHECK][cryptostore.log tail]:\n' + tail(CRYPTOSTORE_LOG_PATH))
             sys.exit(FAILURE)
 
         sys.exit(SUCCESS)
