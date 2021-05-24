@@ -44,6 +44,16 @@ def check():
             if 'l3_book' in ex_conf:
                 num_redis_keys += len(ex_conf['l3_book']['symbols'])
 
+            if 'liquidations' in ex_conf:
+                num_redis_keys += len(ex_conf['liquidations']['symbols'])
+
+            if 'open_interest' in ex_conf:
+                num_redis_keys += len(ex_conf['open_interest']['symbols'])
+
+            if 'funding' in ex_conf:
+                num_redis_keys += len(ex_conf['funding']['symbols'])
+
+
         r = redis.Redis(redis_ip, redis_port)
         if num_redis_keys != len(r.keys()):
             print('[HEALTH CHECK][FAILED][Redis]: Keys expected ' + str(num_redis_keys) + ' Keys read ' + str(len(r.keys())))

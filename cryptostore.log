@@ -7421,3 +7421,1088 @@
 2021-04-30 12:12:04,784 : INFO : Write Complete KRAKEN-l2_book-OXT-USD
 2021-04-30 12:12:04,785 : INFO : Reading KRAKEN-l2_book-PAXG-USD
 2021-04-30 12:12:05,286 : INFO : l2_book-KRAKEN-PAXG-USD: Read 539 messages from Kafka
+2021-05-16 14:40:39,778 : INFO : Starting cryptostore
+2021-05-16 14:40:39,779 : INFO : Cryptostore running on PID 17044
+2021-05-16 14:40:39,787 : INFO : Spawner started
+2021-05-16 14:40:39,792 : INFO : Aggregator started
+2021-05-16 14:40:39,795 : INFO : Cryptostore started
+2021-05-16 14:40:39,796 : INFO : loading config file locally: /Users/anov/IdeaProjects/svoe/configs/data_feed/cryptostore_debug_config.yaml at 2021-05-16 11:40:39.795996
+2021-05-16 14:40:39,819 : INFO : applying local config file: /Users/anov/IdeaProjects/svoe/configs/data_feed/cryptostore_debug_config.yaml at 2021-05-16 11:40:39.819894
+2021-05-16 14:40:39,820 : INFO : start: ['KRAKEN'] stop: []
+2021-05-16 14:40:40,743 : INFO : Aggregator running on PID 17050
+2021-05-16 14:40:40,744 : INFO : loading config file locally: /Users/anov/IdeaProjects/svoe/configs/data_feed/cryptostore_debug_config.yaml at 2021-05-16 11:40:40.744193
+2021-05-16 14:40:40,746 : INFO : Spawner running on PID 17049
+2021-05-16 14:40:40,746 : INFO : message: {"op": "start", "exchange": "KRAKEN", "collector": {"l2_book": {"book_delta": true, "max_depth": 100, "symbols": ["AAVE-USD", "ADA-USD", "ALGO-USD", "ANT-USD", "ATOM-USD", "AUD-USD", "BAL-USD", "BAT-USD", "BCH-USD", "COMP-USD", "CRV-USD", "DAI-USD", "DASH-USD", "DOT-USD", "EOS-USD", "EWT-USD", "FIL-USD", "FLOW-USD", "GNO-USD", "GRT-USD", "ICX-USD", "KAVA-USD", "KEEP-USD", "KNC-USD", "KSM-USD", "LINK-USD", "LSK-USD", "MANA-USD", "MKR-USD", "NANO-USD", "OCEAN-USD", "OMG-USD", "OXT-USD", "PAXG-USD", "QTUM-USD", "REN-USD", "REPV2-USD", "SC-USD", "SNX-USD", "STORJ-USD", "TBTC-USD", "TRX-USD", "UNI-USD", "USDC-USD", "USDT-USD", "WAVES-USD", "DOG-USD", "ETC-USD", "ETH-USD", "LTC-USD", "MLN-USD", "REP-USD", "XTZ-USD", "BTC-USD", "XLM-USD", "XMR-USD", "XRP-USD", "ZEC-USD", "YFI-USD", "EUR-USD", "GBP-USD", "ZRX-USD"]}, "retries": -1, "ticker": ["AAVE-USD", "ADA-USD", "ALGO-USD", "ANT-USD", "ATOM-USD", "AUD-USD", "BAL-USD", "BAT-USD", "BCH-USD", "COMP-USD", "CRV-USD", "DAI-USD", "DASH-USD", "DOT-USD", "EOS-USD", "EWT-USD", "FIL-USD", "FLOW-USD", "GNO-USD", "GRT-USD", "ICX-USD", "KAVA-USD", "KEEP-USD", "KNC-USD", "KSM-USD", "LINK-USD", "LSK-USD", "MANA-USD", "MKR-USD", "NANO-USD", "OCEAN-USD", "OMG-USD", "OXT-USD", "PAXG-USD", "QTUM-USD", "REN-USD", "REPV2-USD", "SC-USD", "SNX-USD", "STORJ-USD", "TBTC-USD", "TRX-USD", "UNI-USD", "USDC-USD", "USDT-USD", "WAVES-USD", "DOG-USD", "ETC-USD", "ETH-USD", "LTC-USD", "MLN-USD", "REP-USD", "XTZ-USD", "BTC-USD", "XLM-USD", "XMR-USD", "XRP-USD", "ZEC-USD", "YFI-USD", "EUR-USD", "GBP-USD", "ZRX-USD"], "trades": ["AAVE-USD", "ADA-USD", "ALGO-USD", "ANT-USD", "ATOM-USD", "AUD-USD", "BAL-USD", "BAT-USD", "BCH-USD", "COMP-USD", "CRV-USD", "DAI-USD", "DASH-USD", "DOT-USD", "EOS-USD", "EWT-USD", "FIL-USD", "FLOW-USD", "GNO-USD", "GRT-USD", "ICX-USD", "KAVA-USD", "KEEP-USD", "KNC-USD", "KSM-USD", "LINK-USD", "LSK-USD", "MANA-USD", "MKR-USD", "NANO-USD", "OCEAN-USD", "OMG-USD", "OXT-USD", "PAXG-USD", "QTUM-USD", "REN-USD", "REPV2-USD", "SC-USD", "SNX-USD", "STORJ-USD", "TBTC-USD", "TRX-USD", "UNI-USD", "USDC-USD", "USDT-USD", "WAVES-USD", "DOG-USD", "ETC-USD", "ETH-USD", "LTC-USD", "MLN-USD", "REP-USD", "XTZ-USD", "BTC-USD", "XLM-USD", "XMR-USD", "XRP-USD", "ZEC-USD", "YFI-USD", "EUR-USD", "GBP-USD", "ZRX-USD"]}, "config": {"cache": "redis", "kafka": {"ip": "127.0.0.1", "port": 9092, "start_flush": true}, "parquet": {"S3": {"bucket": "svoe.test.1", "key_id": "AKIAJXSXXFCA3HN3T7GQ", "prefix": "parquet", "secret": "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"}, "append_counter": 0, "compression": {"codec": "BROTLI", "level": 6}, "del_file": true, "file_format": ["exchange", "symbol", "data_type", "timestamp"], "prefix_date": true}, "redis": {"del_after_read": true, "ip": "127.0.0.1", "port": 6379, "retention_time": null, "socket": null, "start_flush": true}, "storage": ["parquet"], "storage_interval": 90, "storage_retries": 5, "storage_retry_wait": 30}}
+2021-05-16 14:40:40,748 : INFO : Starting {'op': 'start', 'exchange': 'KRAKEN', 'collector': {'l2_book': {'book_delta': True, 'max_depth': 100, 'symbols': ['AAVE-USD', 'ADA-USD', 'ALGO-USD', 'ANT-USD', 'ATOM-USD', 'AUD-USD', 'BAL-USD', 'BAT-USD', 'BCH-USD', 'COMP-USD', 'CRV-USD', 'DAI-USD', 'DASH-USD', 'DOT-USD', 'EOS-USD', 'EWT-USD', 'FIL-USD', 'FLOW-USD', 'GNO-USD', 'GRT-USD', 'ICX-USD', 'KAVA-USD', 'KEEP-USD', 'KNC-USD', 'KSM-USD', 'LINK-USD', 'LSK-USD', 'MANA-USD', 'MKR-USD', 'NANO-USD', 'OCEAN-USD', 'OMG-USD', 'OXT-USD', 'PAXG-USD', 'QTUM-USD', 'REN-USD', 'REPV2-USD', 'SC-USD', 'SNX-USD', 'STORJ-USD', 'TBTC-USD', 'TRX-USD', 'UNI-USD', 'USDC-USD', 'USDT-USD', 'WAVES-USD', 'DOG-USD', 'ETC-USD', 'ETH-USD', 'LTC-USD', 'MLN-USD', 'REP-USD', 'XTZ-USD', 'BTC-USD', 'XLM-USD', 'XMR-USD', 'XRP-USD', 'ZEC-USD', 'YFI-USD', 'EUR-USD', 'GBP-USD', 'ZRX-USD']}, 'retries': -1, 'ticker': ['AAVE-USD', 'ADA-USD', 'ALGO-USD', 'ANT-USD', 'ATOM-USD', 'AUD-USD', 'BAL-USD', 'BAT-USD', 'BCH-USD', 'COMP-USD', 'CRV-USD', 'DAI-USD', 'DASH-USD', 'DOT-USD', 'EOS-USD', 'EWT-USD', 'FIL-USD', 'FLOW-USD', 'GNO-USD', 'GRT-USD', 'ICX-USD', 'KAVA-USD', 'KEEP-USD', 'KNC-USD', 'KSM-USD', 'LINK-USD', 'LSK-USD', 'MANA-USD', 'MKR-USD', 'NANO-USD', 'OCEAN-USD', 'OMG-USD', 'OXT-USD', 'PAXG-USD', 'QTUM-USD', 'REN-USD', 'REPV2-USD', 'SC-USD', 'SNX-USD', 'STORJ-USD', 'TBTC-USD', 'TRX-USD', 'UNI-USD', 'USDC-USD', 'USDT-USD', 'WAVES-USD', 'DOG-USD', 'ETC-USD', 'ETH-USD', 'LTC-USD', 'MLN-USD', 'REP-USD', 'XTZ-USD', 'BTC-USD', 'XLM-USD', 'XMR-USD', 'XRP-USD', 'ZEC-USD', 'YFI-USD', 'EUR-USD', 'GBP-USD', 'ZRX-USD'], 'trades': ['AAVE-USD', 'ADA-USD', 'ALGO-USD', 'ANT-USD', 'ATOM-USD', 'AUD-USD', 'BAL-USD', 'BAT-USD', 'BCH-USD', 'COMP-USD', 'CRV-USD', 'DAI-USD', 'DASH-USD', 'DOT-USD', 'EOS-USD', 'EWT-USD', 'FIL-USD', 'FLOW-USD', 'GNO-USD', 'GRT-USD', 'ICX-USD', 'KAVA-USD', 'KEEP-USD', 'KNC-USD', 'KSM-USD', 'LINK-USD', 'LSK-USD', 'MANA-USD', 'MKR-USD', 'NANO-USD', 'OCEAN-USD', 'OMG-USD', 'OXT-USD', 'PAXG-USD', 'QTUM-USD', 'REN-USD', 'REPV2-USD', 'SC-USD', 'SNX-USD', 'STORJ-USD', 'TBTC-USD', 'TRX-USD', 'UNI-USD', 'USDC-USD', 'USDT-USD', 'WAVES-USD', 'DOG-USD', 'ETC-USD', 'ETH-USD', 'LTC-USD', 'MLN-USD', 'REP-USD', 'XTZ-USD', 'BTC-USD', 'XLM-USD', 'XMR-USD', 'XRP-USD', 'ZEC-USD', 'YFI-USD', 'EUR-USD', 'GBP-USD', 'ZRX-USD']}, 'config': {'cache': 'redis', 'kafka': {'ip': '127.0.0.1', 'port': 9092, 'start_flush': True}, 'parquet': {'S3': {'bucket': 'svoe.test.1', 'key_id': 'AKIAJXSXXFCA3HN3T7GQ', 'prefix': 'parquet', 'secret': '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'}, 'append_counter': 0, 'compression': {'codec': 'BROTLI', 'level': 6}, 'del_file': True, 'file_format': ['exchange', 'symbol', 'data_type', 'timestamp'], 'prefix_date': True}, 'redis': {'del_after_read': True, 'ip': '127.0.0.1', 'port': 6379, 'retention_time': None, 'socket': None, 'start_flush': True}, 'storage': ['parquet'], 'storage_interval': 90, 'storage_retries': 5, 'storage_retry_wait': 30}}
+2021-05-16 14:40:40,756 : INFO : applying local config file: /Users/anov/IdeaProjects/svoe/configs/data_feed/cryptostore_debug_config.yaml at 2021-05-16 11:40:40.756441
+2021-05-16 14:40:40,785 : INFO : Flushing cache
+2021-05-16 14:40:40,806 : INFO : Reading KRAKEN-l2_book-AAVE-USD
+2021-05-16 14:40:40,808 : INFO : No data for KRAKEN-l2_book-AAVE-USD
+2021-05-16 14:40:40,808 : INFO : Reading KRAKEN-l2_book-ADA-USD
+2021-05-16 14:40:40,809 : INFO : No data for KRAKEN-l2_book-ADA-USD
+2021-05-16 14:40:40,809 : INFO : Reading KRAKEN-l2_book-ALGO-USD
+2021-05-16 14:40:40,809 : INFO : No data for KRAKEN-l2_book-ALGO-USD
+2021-05-16 14:40:40,809 : INFO : Reading KRAKEN-l2_book-ANT-USD
+2021-05-16 14:40:40,810 : INFO : No data for KRAKEN-l2_book-ANT-USD
+2021-05-16 14:40:40,810 : INFO : Reading KRAKEN-l2_book-ATOM-USD
+2021-05-16 14:40:40,810 : INFO : No data for KRAKEN-l2_book-ATOM-USD
+2021-05-16 14:40:40,810 : INFO : Reading KRAKEN-l2_book-AUD-USD
+2021-05-16 14:40:40,811 : INFO : No data for KRAKEN-l2_book-AUD-USD
+2021-05-16 14:40:40,811 : INFO : Reading KRAKEN-l2_book-BAL-USD
+2021-05-16 14:40:40,812 : INFO : No data for KRAKEN-l2_book-BAL-USD
+2021-05-16 14:40:40,812 : INFO : Reading KRAKEN-l2_book-BAT-USD
+2021-05-16 14:40:40,813 : INFO : No data for KRAKEN-l2_book-BAT-USD
+2021-05-16 14:40:40,813 : INFO : Reading KRAKEN-l2_book-BCH-USD
+2021-05-16 14:40:40,813 : INFO : No data for KRAKEN-l2_book-BCH-USD
+2021-05-16 14:40:40,814 : INFO : Reading KRAKEN-l2_book-COMP-USD
+2021-05-16 14:40:40,814 : INFO : No data for KRAKEN-l2_book-COMP-USD
+2021-05-16 14:40:40,814 : INFO : Reading KRAKEN-l2_book-CRV-USD
+2021-05-16 14:40:40,814 : INFO : No data for KRAKEN-l2_book-CRV-USD
+2021-05-16 14:40:40,815 : INFO : Reading KRAKEN-l2_book-DAI-USD
+2021-05-16 14:40:40,815 : INFO : No data for KRAKEN-l2_book-DAI-USD
+2021-05-16 14:40:40,815 : INFO : Reading KRAKEN-l2_book-DASH-USD
+2021-05-16 14:40:40,816 : INFO : No data for KRAKEN-l2_book-DASH-USD
+2021-05-16 14:40:40,816 : INFO : Reading KRAKEN-l2_book-DOT-USD
+2021-05-16 14:40:40,816 : INFO : No data for KRAKEN-l2_book-DOT-USD
+2021-05-16 14:40:40,817 : INFO : Reading KRAKEN-l2_book-EOS-USD
+2021-05-16 14:40:40,817 : INFO : No data for KRAKEN-l2_book-EOS-USD
+2021-05-16 14:40:40,817 : INFO : Reading KRAKEN-l2_book-EWT-USD
+2021-05-16 14:40:40,818 : INFO : No data for KRAKEN-l2_book-EWT-USD
+2021-05-16 14:40:40,818 : INFO : Reading KRAKEN-l2_book-FIL-USD
+2021-05-16 14:40:40,818 : INFO : No data for KRAKEN-l2_book-FIL-USD
+2021-05-16 14:40:40,818 : INFO : Reading KRAKEN-l2_book-FLOW-USD
+2021-05-16 14:40:40,819 : INFO : No data for KRAKEN-l2_book-FLOW-USD
+2021-05-16 14:40:40,819 : INFO : Reading KRAKEN-l2_book-GNO-USD
+2021-05-16 14:40:40,819 : INFO : No data for KRAKEN-l2_book-GNO-USD
+2021-05-16 14:40:40,820 : INFO : Reading KRAKEN-l2_book-GRT-USD
+2021-05-16 14:40:40,821 : INFO : No data for KRAKEN-l2_book-GRT-USD
+2021-05-16 14:40:40,821 : INFO : Reading KRAKEN-l2_book-ICX-USD
+2021-05-16 14:40:40,823 : INFO : No data for KRAKEN-l2_book-ICX-USD
+2021-05-16 14:40:40,824 : INFO : Reading KRAKEN-l2_book-KAVA-USD
+2021-05-16 14:40:40,824 : INFO : No data for KRAKEN-l2_book-KAVA-USD
+2021-05-16 14:40:40,824 : INFO : Reading KRAKEN-l2_book-KEEP-USD
+2021-05-16 14:40:40,825 : INFO : No data for KRAKEN-l2_book-KEEP-USD
+2021-05-16 14:40:40,825 : INFO : Reading KRAKEN-l2_book-KNC-USD
+2021-05-16 14:40:40,825 : INFO : No data for KRAKEN-l2_book-KNC-USD
+2021-05-16 14:40:40,825 : INFO : Reading KRAKEN-l2_book-KSM-USD
+2021-05-16 14:40:40,826 : INFO : No data for KRAKEN-l2_book-KSM-USD
+2021-05-16 14:40:40,826 : INFO : Reading KRAKEN-l2_book-LINK-USD
+2021-05-16 14:40:40,826 : INFO : No data for KRAKEN-l2_book-LINK-USD
+2021-05-16 14:40:40,826 : INFO : Reading KRAKEN-l2_book-LSK-USD
+2021-05-16 14:40:40,827 : INFO : No data for KRAKEN-l2_book-LSK-USD
+2021-05-16 14:40:40,827 : INFO : Reading KRAKEN-l2_book-MANA-USD
+2021-05-16 14:40:40,827 : INFO : No data for KRAKEN-l2_book-MANA-USD
+2021-05-16 14:40:40,827 : INFO : Reading KRAKEN-l2_book-MKR-USD
+2021-05-16 14:40:40,827 : INFO : No data for KRAKEN-l2_book-MKR-USD
+2021-05-16 14:40:40,828 : INFO : Reading KRAKEN-l2_book-NANO-USD
+2021-05-16 14:40:40,828 : INFO : No data for KRAKEN-l2_book-NANO-USD
+2021-05-16 14:40:40,828 : INFO : Reading KRAKEN-l2_book-OCEAN-USD
+2021-05-16 14:40:40,828 : INFO : No data for KRAKEN-l2_book-OCEAN-USD
+2021-05-16 14:40:40,828 : INFO : Reading KRAKEN-l2_book-OMG-USD
+2021-05-16 14:40:40,829 : INFO : No data for KRAKEN-l2_book-OMG-USD
+2021-05-16 14:40:40,829 : INFO : Reading KRAKEN-l2_book-OXT-USD
+2021-05-16 14:40:40,829 : INFO : No data for KRAKEN-l2_book-OXT-USD
+2021-05-16 14:40:40,829 : INFO : Reading KRAKEN-l2_book-PAXG-USD
+2021-05-16 14:40:40,830 : INFO : No data for KRAKEN-l2_book-PAXG-USD
+2021-05-16 14:40:40,830 : INFO : Reading KRAKEN-l2_book-QTUM-USD
+2021-05-16 14:40:40,830 : INFO : No data for KRAKEN-l2_book-QTUM-USD
+2021-05-16 14:40:40,830 : INFO : Reading KRAKEN-l2_book-REN-USD
+2021-05-16 14:40:40,830 : INFO : No data for KRAKEN-l2_book-REN-USD
+2021-05-16 14:40:40,830 : INFO : Reading KRAKEN-l2_book-REPV2-USD
+2021-05-16 14:40:40,831 : INFO : No data for KRAKEN-l2_book-REPV2-USD
+2021-05-16 14:40:40,831 : INFO : Reading KRAKEN-l2_book-SC-USD
+2021-05-16 14:40:40,831 : INFO : No data for KRAKEN-l2_book-SC-USD
+2021-05-16 14:40:40,831 : INFO : Reading KRAKEN-l2_book-SNX-USD
+2021-05-16 14:40:40,831 : INFO : No data for KRAKEN-l2_book-SNX-USD
+2021-05-16 14:40:40,832 : INFO : Reading KRAKEN-l2_book-STORJ-USD
+2021-05-16 14:40:40,832 : INFO : No data for KRAKEN-l2_book-STORJ-USD
+2021-05-16 14:40:40,832 : INFO : Reading KRAKEN-l2_book-TBTC-USD
+2021-05-16 14:40:40,832 : INFO : No data for KRAKEN-l2_book-TBTC-USD
+2021-05-16 14:40:40,832 : INFO : Reading KRAKEN-l2_book-TRX-USD
+2021-05-16 14:40:40,833 : INFO : No data for KRAKEN-l2_book-TRX-USD
+2021-05-16 14:40:40,833 : INFO : Reading KRAKEN-l2_book-UNI-USD
+2021-05-16 14:40:40,833 : INFO : No data for KRAKEN-l2_book-UNI-USD
+2021-05-16 14:40:40,833 : INFO : Reading KRAKEN-l2_book-USDC-USD
+2021-05-16 14:40:40,833 : INFO : No data for KRAKEN-l2_book-USDC-USD
+2021-05-16 14:40:40,833 : INFO : Reading KRAKEN-l2_book-USDT-USD
+2021-05-16 14:40:40,834 : INFO : No data for KRAKEN-l2_book-USDT-USD
+2021-05-16 14:40:40,834 : INFO : Reading KRAKEN-l2_book-WAVES-USD
+2021-05-16 14:40:40,834 : INFO : No data for KRAKEN-l2_book-WAVES-USD
+2021-05-16 14:40:40,834 : INFO : Reading KRAKEN-l2_book-DOG-USD
+2021-05-16 14:40:40,834 : INFO : No data for KRAKEN-l2_book-DOG-USD
+2021-05-16 14:40:40,835 : INFO : Reading KRAKEN-l2_book-ETC-USD
+2021-05-16 14:40:40,835 : INFO : No data for KRAKEN-l2_book-ETC-USD
+2021-05-16 14:40:40,835 : INFO : Reading KRAKEN-l2_book-ETH-USD
+2021-05-16 14:40:40,835 : INFO : No data for KRAKEN-l2_book-ETH-USD
+2021-05-16 14:40:40,835 : INFO : Reading KRAKEN-l2_book-LTC-USD
+2021-05-16 14:40:40,836 : INFO : No data for KRAKEN-l2_book-LTC-USD
+2021-05-16 14:40:40,836 : INFO : Reading KRAKEN-l2_book-MLN-USD
+2021-05-16 14:40:40,836 : INFO : No data for KRAKEN-l2_book-MLN-USD
+2021-05-16 14:40:40,836 : INFO : Reading KRAKEN-l2_book-REP-USD
+2021-05-16 14:40:40,837 : INFO : No data for KRAKEN-l2_book-REP-USD
+2021-05-16 14:40:40,837 : INFO : Reading KRAKEN-l2_book-XTZ-USD
+2021-05-16 14:40:40,837 : INFO : No data for KRAKEN-l2_book-XTZ-USD
+2021-05-16 14:40:40,837 : INFO : Reading KRAKEN-l2_book-BTC-USD
+2021-05-16 14:40:40,838 : INFO : No data for KRAKEN-l2_book-BTC-USD
+2021-05-16 14:40:40,838 : INFO : Reading KRAKEN-l2_book-XLM-USD
+2021-05-16 14:40:40,838 : INFO : No data for KRAKEN-l2_book-XLM-USD
+2021-05-16 14:40:40,838 : INFO : Reading KRAKEN-l2_book-XMR-USD
+2021-05-16 14:40:40,838 : INFO : No data for KRAKEN-l2_book-XMR-USD
+2021-05-16 14:40:40,838 : INFO : Reading KRAKEN-l2_book-XRP-USD
+2021-05-16 14:40:40,839 : INFO : No data for KRAKEN-l2_book-XRP-USD
+2021-05-16 14:40:40,839 : INFO : Reading KRAKEN-l2_book-ZEC-USD
+2021-05-16 14:40:40,839 : INFO : No data for KRAKEN-l2_book-ZEC-USD
+2021-05-16 14:40:40,839 : INFO : Reading KRAKEN-l2_book-YFI-USD
+2021-05-16 14:40:40,840 : INFO : No data for KRAKEN-l2_book-YFI-USD
+2021-05-16 14:40:40,840 : INFO : Reading KRAKEN-l2_book-EUR-USD
+2021-05-16 14:40:40,840 : INFO : No data for KRAKEN-l2_book-EUR-USD
+2021-05-16 14:40:40,840 : INFO : Reading KRAKEN-l2_book-GBP-USD
+2021-05-16 14:40:40,841 : INFO : No data for KRAKEN-l2_book-GBP-USD
+2021-05-16 14:40:40,841 : INFO : Reading KRAKEN-l2_book-ZRX-USD
+2021-05-16 14:40:40,841 : INFO : No data for KRAKEN-l2_book-ZRX-USD
+2021-05-16 14:40:40,841 : INFO : Reading KRAKEN-ticker-AAVE-USD
+2021-05-16 14:40:40,841 : INFO : No data for KRAKEN-ticker-AAVE-USD
+2021-05-16 14:40:40,841 : INFO : Reading KRAKEN-ticker-ADA-USD
+2021-05-16 14:40:40,842 : INFO : No data for KRAKEN-ticker-ADA-USD
+2021-05-16 14:40:40,842 : INFO : Reading KRAKEN-ticker-ALGO-USD
+2021-05-16 14:40:40,842 : INFO : No data for KRAKEN-ticker-ALGO-USD
+2021-05-16 14:40:40,842 : INFO : Reading KRAKEN-ticker-ANT-USD
+2021-05-16 14:40:40,843 : INFO : No data for KRAKEN-ticker-ANT-USD
+2021-05-16 14:40:40,843 : INFO : Reading KRAKEN-ticker-ATOM-USD
+2021-05-16 14:40:40,843 : INFO : No data for KRAKEN-ticker-ATOM-USD
+2021-05-16 14:40:40,843 : INFO : Reading KRAKEN-ticker-AUD-USD
+2021-05-16 14:40:40,843 : INFO : No data for KRAKEN-ticker-AUD-USD
+2021-05-16 14:40:40,843 : INFO : Reading KRAKEN-ticker-BAL-USD
+2021-05-16 14:40:40,844 : INFO : No data for KRAKEN-ticker-BAL-USD
+2021-05-16 14:40:40,844 : INFO : Reading KRAKEN-ticker-BAT-USD
+2021-05-16 14:40:40,844 : INFO : No data for KRAKEN-ticker-BAT-USD
+2021-05-16 14:40:40,844 : INFO : Reading KRAKEN-ticker-BCH-USD
+2021-05-16 14:40:40,845 : INFO : No data for KRAKEN-ticker-BCH-USD
+2021-05-16 14:40:40,845 : INFO : Reading KRAKEN-ticker-COMP-USD
+2021-05-16 14:40:40,845 : INFO : No data for KRAKEN-ticker-COMP-USD
+2021-05-16 14:40:40,845 : INFO : Reading KRAKEN-ticker-CRV-USD
+2021-05-16 14:40:40,846 : INFO : No data for KRAKEN-ticker-CRV-USD
+2021-05-16 14:40:40,846 : INFO : Reading KRAKEN-ticker-DAI-USD
+2021-05-16 14:40:40,846 : INFO : No data for KRAKEN-ticker-DAI-USD
+2021-05-16 14:40:40,846 : INFO : Reading KRAKEN-ticker-DASH-USD
+2021-05-16 14:40:40,846 : INFO : No data for KRAKEN-ticker-DASH-USD
+2021-05-16 14:40:40,847 : INFO : Reading KRAKEN-ticker-DOT-USD
+2021-05-16 14:40:40,847 : INFO : No data for KRAKEN-ticker-DOT-USD
+2021-05-16 14:40:40,847 : INFO : Reading KRAKEN-ticker-EOS-USD
+2021-05-16 14:40:40,847 : INFO : No data for KRAKEN-ticker-EOS-USD
+2021-05-16 14:40:40,848 : INFO : Reading KRAKEN-ticker-EWT-USD
+2021-05-16 14:40:40,848 : INFO : No data for KRAKEN-ticker-EWT-USD
+2021-05-16 14:40:40,848 : INFO : Reading KRAKEN-ticker-FIL-USD
+2021-05-16 14:40:40,848 : INFO : No data for KRAKEN-ticker-FIL-USD
+2021-05-16 14:40:40,848 : INFO : Reading KRAKEN-ticker-FLOW-USD
+2021-05-16 14:40:40,849 : INFO : No data for KRAKEN-ticker-FLOW-USD
+2021-05-16 14:40:40,849 : INFO : Reading KRAKEN-ticker-GNO-USD
+2021-05-16 14:40:40,849 : INFO : No data for KRAKEN-ticker-GNO-USD
+2021-05-16 14:40:40,849 : INFO : Reading KRAKEN-ticker-GRT-USD
+2021-05-16 14:40:40,849 : INFO : No data for KRAKEN-ticker-GRT-USD
+2021-05-16 14:40:40,850 : INFO : Reading KRAKEN-ticker-ICX-USD
+2021-05-16 14:40:40,850 : INFO : No data for KRAKEN-ticker-ICX-USD
+2021-05-16 14:40:40,850 : INFO : Reading KRAKEN-ticker-KAVA-USD
+2021-05-16 14:40:40,850 : INFO : No data for KRAKEN-ticker-KAVA-USD
+2021-05-16 14:40:40,850 : INFO : Reading KRAKEN-ticker-KEEP-USD
+2021-05-16 14:40:40,851 : INFO : No data for KRAKEN-ticker-KEEP-USD
+2021-05-16 14:40:40,851 : INFO : Reading KRAKEN-ticker-KNC-USD
+2021-05-16 14:40:40,851 : INFO : No data for KRAKEN-ticker-KNC-USD
+2021-05-16 14:40:40,851 : INFO : Reading KRAKEN-ticker-KSM-USD
+2021-05-16 14:40:40,851 : INFO : No data for KRAKEN-ticker-KSM-USD
+2021-05-16 14:40:40,852 : INFO : Reading KRAKEN-ticker-LINK-USD
+2021-05-16 14:40:40,852 : INFO : No data for KRAKEN-ticker-LINK-USD
+2021-05-16 14:40:40,852 : INFO : Reading KRAKEN-ticker-LSK-USD
+2021-05-16 14:40:40,852 : INFO : No data for KRAKEN-ticker-LSK-USD
+2021-05-16 14:40:40,852 : INFO : Reading KRAKEN-ticker-MANA-USD
+2021-05-16 14:40:40,853 : INFO : No data for KRAKEN-ticker-MANA-USD
+2021-05-16 14:40:40,853 : INFO : Reading KRAKEN-ticker-MKR-USD
+2021-05-16 14:40:40,853 : INFO : No data for KRAKEN-ticker-MKR-USD
+2021-05-16 14:40:40,853 : INFO : Reading KRAKEN-ticker-NANO-USD
+2021-05-16 14:40:40,853 : INFO : No data for KRAKEN-ticker-NANO-USD
+2021-05-16 14:40:40,854 : INFO : Reading KRAKEN-ticker-OCEAN-USD
+2021-05-16 14:40:40,854 : INFO : No data for KRAKEN-ticker-OCEAN-USD
+2021-05-16 14:40:40,854 : INFO : Reading KRAKEN-ticker-OMG-USD
+2021-05-16 14:40:40,854 : INFO : No data for KRAKEN-ticker-OMG-USD
+2021-05-16 14:40:40,854 : INFO : Reading KRAKEN-ticker-OXT-USD
+2021-05-16 14:40:40,855 : INFO : No data for KRAKEN-ticker-OXT-USD
+2021-05-16 14:40:40,855 : INFO : Reading KRAKEN-ticker-PAXG-USD
+2021-05-16 14:40:40,855 : INFO : No data for KRAKEN-ticker-PAXG-USD
+2021-05-16 14:40:40,855 : INFO : Reading KRAKEN-ticker-QTUM-USD
+2021-05-16 14:40:40,855 : INFO : No data for KRAKEN-ticker-QTUM-USD
+2021-05-16 14:40:40,855 : INFO : Reading KRAKEN-ticker-REN-USD
+2021-05-16 14:40:40,856 : INFO : No data for KRAKEN-ticker-REN-USD
+2021-05-16 14:40:40,856 : INFO : Reading KRAKEN-ticker-REPV2-USD
+2021-05-16 14:40:40,856 : INFO : No data for KRAKEN-ticker-REPV2-USD
+2021-05-16 14:40:40,856 : INFO : Reading KRAKEN-ticker-SC-USD
+2021-05-16 14:40:40,856 : INFO : No data for KRAKEN-ticker-SC-USD
+2021-05-16 14:40:40,857 : INFO : Reading KRAKEN-ticker-SNX-USD
+2021-05-16 14:40:40,857 : INFO : No data for KRAKEN-ticker-SNX-USD
+2021-05-16 14:40:40,857 : INFO : Reading KRAKEN-ticker-STORJ-USD
+2021-05-16 14:40:40,857 : INFO : No data for KRAKEN-ticker-STORJ-USD
+2021-05-16 14:40:40,857 : INFO : Reading KRAKEN-ticker-TBTC-USD
+2021-05-16 14:40:40,858 : INFO : No data for KRAKEN-ticker-TBTC-USD
+2021-05-16 14:40:40,858 : INFO : Reading KRAKEN-ticker-TRX-USD
+2021-05-16 14:40:40,858 : INFO : No data for KRAKEN-ticker-TRX-USD
+2021-05-16 14:40:40,858 : INFO : Reading KRAKEN-ticker-UNI-USD
+2021-05-16 14:40:40,858 : INFO : No data for KRAKEN-ticker-UNI-USD
+2021-05-16 14:40:40,858 : INFO : Reading KRAKEN-ticker-USDC-USD
+2021-05-16 14:40:40,859 : INFO : No data for KRAKEN-ticker-USDC-USD
+2021-05-16 14:40:40,859 : INFO : Reading KRAKEN-ticker-USDT-USD
+2021-05-16 14:40:40,859 : INFO : No data for KRAKEN-ticker-USDT-USD
+2021-05-16 14:40:40,859 : INFO : Reading KRAKEN-ticker-WAVES-USD
+2021-05-16 14:40:40,860 : INFO : No data for KRAKEN-ticker-WAVES-USD
+2021-05-16 14:40:40,860 : INFO : Reading KRAKEN-ticker-DOG-USD
+2021-05-16 14:40:40,860 : INFO : No data for KRAKEN-ticker-DOG-USD
+2021-05-16 14:40:40,860 : INFO : Reading KRAKEN-ticker-ETC-USD
+2021-05-16 14:40:40,860 : INFO : No data for KRAKEN-ticker-ETC-USD
+2021-05-16 14:40:40,861 : INFO : Reading KRAKEN-ticker-ETH-USD
+2021-05-16 14:40:40,861 : INFO : No data for KRAKEN-ticker-ETH-USD
+2021-05-16 14:40:40,861 : INFO : Reading KRAKEN-ticker-LTC-USD
+2021-05-16 14:40:40,861 : INFO : No data for KRAKEN-ticker-LTC-USD
+2021-05-16 14:40:40,861 : INFO : Reading KRAKEN-ticker-MLN-USD
+2021-05-16 14:40:40,862 : INFO : No data for KRAKEN-ticker-MLN-USD
+2021-05-16 14:40:40,862 : INFO : Reading KRAKEN-ticker-REP-USD
+2021-05-16 14:40:40,862 : INFO : No data for KRAKEN-ticker-REP-USD
+2021-05-16 14:40:40,862 : INFO : Reading KRAKEN-ticker-XTZ-USD
+2021-05-16 14:40:40,863 : INFO : No data for KRAKEN-ticker-XTZ-USD
+2021-05-16 14:40:40,863 : INFO : Reading KRAKEN-ticker-BTC-USD
+2021-05-16 14:40:40,863 : INFO : No data for KRAKEN-ticker-BTC-USD
+2021-05-16 14:40:40,863 : INFO : Reading KRAKEN-ticker-XLM-USD
+2021-05-16 14:40:40,863 : INFO : No data for KRAKEN-ticker-XLM-USD
+2021-05-16 14:40:40,863 : INFO : Reading KRAKEN-ticker-XMR-USD
+2021-05-16 14:40:40,864 : INFO : No data for KRAKEN-ticker-XMR-USD
+2021-05-16 14:40:40,864 : INFO : Reading KRAKEN-ticker-XRP-USD
+2021-05-16 14:40:40,864 : INFO : No data for KRAKEN-ticker-XRP-USD
+2021-05-16 14:40:40,864 : INFO : Reading KRAKEN-ticker-ZEC-USD
+2021-05-16 14:40:40,864 : INFO : No data for KRAKEN-ticker-ZEC-USD
+2021-05-16 14:40:40,865 : INFO : Reading KRAKEN-ticker-YFI-USD
+2021-05-16 14:40:40,865 : INFO : No data for KRAKEN-ticker-YFI-USD
+2021-05-16 14:40:40,865 : INFO : Reading KRAKEN-ticker-EUR-USD
+2021-05-16 14:40:40,865 : INFO : No data for KRAKEN-ticker-EUR-USD
+2021-05-16 14:40:40,865 : INFO : Reading KRAKEN-ticker-GBP-USD
+2021-05-16 14:40:40,866 : INFO : No data for KRAKEN-ticker-GBP-USD
+2021-05-16 14:40:40,866 : INFO : Reading KRAKEN-ticker-ZRX-USD
+2021-05-16 14:40:40,866 : INFO : No data for KRAKEN-ticker-ZRX-USD
+2021-05-16 14:40:40,866 : INFO : Reading KRAKEN-trades-AAVE-USD
+2021-05-16 14:40:40,867 : INFO : No data for KRAKEN-trades-AAVE-USD
+2021-05-16 14:40:40,867 : INFO : Reading KRAKEN-trades-ADA-USD
+2021-05-16 14:40:40,867 : INFO : No data for KRAKEN-trades-ADA-USD
+2021-05-16 14:40:40,867 : INFO : Reading KRAKEN-trades-ALGO-USD
+2021-05-16 14:40:40,868 : INFO : No data for KRAKEN-trades-ALGO-USD
+2021-05-16 14:40:40,868 : INFO : Reading KRAKEN-trades-ANT-USD
+2021-05-16 14:40:40,868 : INFO : No data for KRAKEN-trades-ANT-USD
+2021-05-16 14:40:40,868 : INFO : Reading KRAKEN-trades-ATOM-USD
+2021-05-16 14:40:40,868 : INFO : No data for KRAKEN-trades-ATOM-USD
+2021-05-16 14:40:40,868 : INFO : Reading KRAKEN-trades-AUD-USD
+2021-05-16 14:40:40,869 : INFO : No data for KRAKEN-trades-AUD-USD
+2021-05-16 14:40:40,869 : INFO : Reading KRAKEN-trades-BAL-USD
+2021-05-16 14:40:40,869 : INFO : No data for KRAKEN-trades-BAL-USD
+2021-05-16 14:40:40,869 : INFO : Reading KRAKEN-trades-BAT-USD
+2021-05-16 14:40:40,870 : INFO : No data for KRAKEN-trades-BAT-USD
+2021-05-16 14:40:40,870 : INFO : Reading KRAKEN-trades-BCH-USD
+2021-05-16 14:40:40,870 : INFO : No data for KRAKEN-trades-BCH-USD
+2021-05-16 14:40:40,870 : INFO : Reading KRAKEN-trades-COMP-USD
+2021-05-16 14:40:40,870 : INFO : No data for KRAKEN-trades-COMP-USD
+2021-05-16 14:40:40,871 : INFO : Reading KRAKEN-trades-CRV-USD
+2021-05-16 14:40:40,871 : INFO : No data for KRAKEN-trades-CRV-USD
+2021-05-16 14:40:40,871 : INFO : Reading KRAKEN-trades-DAI-USD
+2021-05-16 14:40:40,871 : INFO : No data for KRAKEN-trades-DAI-USD
+2021-05-16 14:40:40,871 : INFO : Reading KRAKEN-trades-DASH-USD
+2021-05-16 14:40:40,872 : INFO : No data for KRAKEN-trades-DASH-USD
+2021-05-16 14:40:40,872 : INFO : Reading KRAKEN-trades-DOT-USD
+2021-05-16 14:40:40,872 : INFO : No data for KRAKEN-trades-DOT-USD
+2021-05-16 14:40:40,872 : INFO : Reading KRAKEN-trades-EOS-USD
+2021-05-16 14:40:40,873 : INFO : No data for KRAKEN-trades-EOS-USD
+2021-05-16 14:40:40,873 : INFO : Reading KRAKEN-trades-EWT-USD
+2021-05-16 14:40:40,873 : INFO : No data for KRAKEN-trades-EWT-USD
+2021-05-16 14:40:40,873 : INFO : Reading KRAKEN-trades-FIL-USD
+2021-05-16 14:40:40,873 : INFO : No data for KRAKEN-trades-FIL-USD
+2021-05-16 14:40:40,873 : INFO : Reading KRAKEN-trades-FLOW-USD
+2021-05-16 14:40:40,874 : INFO : No data for KRAKEN-trades-FLOW-USD
+2021-05-16 14:40:40,874 : INFO : Reading KRAKEN-trades-GNO-USD
+2021-05-16 14:40:40,874 : INFO : No data for KRAKEN-trades-GNO-USD
+2021-05-16 14:40:40,874 : INFO : Reading KRAKEN-trades-GRT-USD
+2021-05-16 14:40:40,875 : INFO : No data for KRAKEN-trades-GRT-USD
+2021-05-16 14:40:40,875 : INFO : Reading KRAKEN-trades-ICX-USD
+2021-05-16 14:40:40,875 : INFO : No data for KRAKEN-trades-ICX-USD
+2021-05-16 14:40:40,875 : INFO : Reading KRAKEN-trades-KAVA-USD
+2021-05-16 14:40:40,876 : INFO : No data for KRAKEN-trades-KAVA-USD
+2021-05-16 14:40:40,876 : INFO : Reading KRAKEN-trades-KEEP-USD
+2021-05-16 14:40:40,876 : INFO : No data for KRAKEN-trades-KEEP-USD
+2021-05-16 14:40:40,876 : INFO : Reading KRAKEN-trades-KNC-USD
+2021-05-16 14:40:40,877 : INFO : No data for KRAKEN-trades-KNC-USD
+2021-05-16 14:40:40,877 : INFO : Reading KRAKEN-trades-KSM-USD
+2021-05-16 14:40:40,877 : INFO : No data for KRAKEN-trades-KSM-USD
+2021-05-16 14:40:40,877 : INFO : Reading KRAKEN-trades-LINK-USD
+2021-05-16 14:40:40,878 : INFO : No data for KRAKEN-trades-LINK-USD
+2021-05-16 14:40:40,878 : INFO : Reading KRAKEN-trades-LSK-USD
+2021-05-16 14:40:40,878 : INFO : No data for KRAKEN-trades-LSK-USD
+2021-05-16 14:40:40,878 : INFO : Reading KRAKEN-trades-MANA-USD
+2021-05-16 14:40:40,879 : INFO : No data for KRAKEN-trades-MANA-USD
+2021-05-16 14:40:40,879 : INFO : Reading KRAKEN-trades-MKR-USD
+2021-05-16 14:40:40,879 : INFO : No data for KRAKEN-trades-MKR-USD
+2021-05-16 14:40:40,879 : INFO : Reading KRAKEN-trades-NANO-USD
+2021-05-16 14:40:40,880 : INFO : No data for KRAKEN-trades-NANO-USD
+2021-05-16 14:40:40,880 : INFO : Reading KRAKEN-trades-OCEAN-USD
+2021-05-16 14:40:40,880 : INFO : No data for KRAKEN-trades-OCEAN-USD
+2021-05-16 14:40:40,880 : INFO : Reading KRAKEN-trades-OMG-USD
+2021-05-16 14:40:40,881 : INFO : No data for KRAKEN-trades-OMG-USD
+2021-05-16 14:40:40,881 : INFO : Reading KRAKEN-trades-OXT-USD
+2021-05-16 14:40:40,881 : INFO : No data for KRAKEN-trades-OXT-USD
+2021-05-16 14:40:40,881 : INFO : Reading KRAKEN-trades-PAXG-USD
+2021-05-16 14:40:40,882 : INFO : No data for KRAKEN-trades-PAXG-USD
+2021-05-16 14:40:40,882 : INFO : Reading KRAKEN-trades-QTUM-USD
+2021-05-16 14:40:40,882 : INFO : No data for KRAKEN-trades-QTUM-USD
+2021-05-16 14:40:40,882 : INFO : Reading KRAKEN-trades-REN-USD
+2021-05-16 14:40:40,882 : INFO : No data for KRAKEN-trades-REN-USD
+2021-05-16 14:40:40,882 : INFO : Reading KRAKEN-trades-REPV2-USD
+2021-05-16 14:40:40,883 : INFO : No data for KRAKEN-trades-REPV2-USD
+2021-05-16 14:40:40,883 : INFO : Reading KRAKEN-trades-SC-USD
+2021-05-16 14:40:40,883 : INFO : No data for KRAKEN-trades-SC-USD
+2021-05-16 14:40:40,883 : INFO : Reading KRAKEN-trades-SNX-USD
+2021-05-16 14:40:40,884 : INFO : No data for KRAKEN-trades-SNX-USD
+2021-05-16 14:40:40,884 : INFO : Reading KRAKEN-trades-STORJ-USD
+2021-05-16 14:40:40,884 : INFO : No data for KRAKEN-trades-STORJ-USD
+2021-05-16 14:40:40,884 : INFO : Reading KRAKEN-trades-TBTC-USD
+2021-05-16 14:40:40,884 : INFO : No data for KRAKEN-trades-TBTC-USD
+2021-05-16 14:40:40,884 : INFO : Reading KRAKEN-trades-TRX-USD
+2021-05-16 14:40:40,885 : INFO : No data for KRAKEN-trades-TRX-USD
+2021-05-16 14:40:40,885 : INFO : Reading KRAKEN-trades-UNI-USD
+2021-05-16 14:40:40,885 : INFO : No data for KRAKEN-trades-UNI-USD
+2021-05-16 14:40:40,885 : INFO : Reading KRAKEN-trades-USDC-USD
+2021-05-16 14:40:40,885 : INFO : No data for KRAKEN-trades-USDC-USD
+2021-05-16 14:40:40,886 : INFO : Reading KRAKEN-trades-USDT-USD
+2021-05-16 14:40:40,886 : INFO : No data for KRAKEN-trades-USDT-USD
+2021-05-16 14:40:40,886 : INFO : Reading KRAKEN-trades-WAVES-USD
+2021-05-16 14:40:40,886 : INFO : No data for KRAKEN-trades-WAVES-USD
+2021-05-16 14:40:40,886 : INFO : Reading KRAKEN-trades-DOG-USD
+2021-05-16 14:40:40,887 : INFO : No data for KRAKEN-trades-DOG-USD
+2021-05-16 14:40:40,887 : INFO : Reading KRAKEN-trades-ETC-USD
+2021-05-16 14:40:40,887 : INFO : No data for KRAKEN-trades-ETC-USD
+2021-05-16 14:40:40,887 : INFO : Reading KRAKEN-trades-ETH-USD
+2021-05-16 14:40:40,888 : INFO : No data for KRAKEN-trades-ETH-USD
+2021-05-16 14:40:40,888 : INFO : Reading KRAKEN-trades-LTC-USD
+2021-05-16 14:40:40,888 : INFO : No data for KRAKEN-trades-LTC-USD
+2021-05-16 14:40:40,888 : INFO : Reading KRAKEN-trades-MLN-USD
+2021-05-16 14:40:40,888 : INFO : No data for KRAKEN-trades-MLN-USD
+2021-05-16 14:40:40,889 : INFO : Reading KRAKEN-trades-REP-USD
+2021-05-16 14:40:40,889 : INFO : No data for KRAKEN-trades-REP-USD
+2021-05-16 14:40:40,889 : INFO : Reading KRAKEN-trades-XTZ-USD
+2021-05-16 14:40:40,889 : INFO : No data for KRAKEN-trades-XTZ-USD
+2021-05-16 14:40:40,889 : INFO : Reading KRAKEN-trades-BTC-USD
+2021-05-16 14:40:40,890 : INFO : No data for KRAKEN-trades-BTC-USD
+2021-05-16 14:40:40,890 : INFO : Reading KRAKEN-trades-XLM-USD
+2021-05-16 14:40:40,890 : INFO : No data for KRAKEN-trades-XLM-USD
+2021-05-16 14:40:40,890 : INFO : Reading KRAKEN-trades-XMR-USD
+2021-05-16 14:40:40,890 : INFO : No data for KRAKEN-trades-XMR-USD
+2021-05-16 14:40:40,891 : INFO : Reading KRAKEN-trades-XRP-USD
+2021-05-16 14:40:40,891 : INFO : No data for KRAKEN-trades-XRP-USD
+2021-05-16 14:40:40,891 : INFO : Reading KRAKEN-trades-ZEC-USD
+2021-05-16 14:40:40,891 : INFO : No data for KRAKEN-trades-ZEC-USD
+2021-05-16 14:40:40,891 : INFO : Reading KRAKEN-trades-YFI-USD
+2021-05-16 14:40:40,892 : INFO : No data for KRAKEN-trades-YFI-USD
+2021-05-16 14:40:40,892 : INFO : Reading KRAKEN-trades-EUR-USD
+2021-05-16 14:40:40,892 : INFO : No data for KRAKEN-trades-EUR-USD
+2021-05-16 14:40:40,892 : INFO : Reading KRAKEN-trades-GBP-USD
+2021-05-16 14:40:40,893 : INFO : No data for KRAKEN-trades-GBP-USD
+2021-05-16 14:40:40,893 : INFO : Reading KRAKEN-trades-ZRX-USD
+2021-05-16 14:40:40,893 : INFO : No data for KRAKEN-trades-ZRX-USD
+2021-05-16 14:40:41,570 : INFO : Collector for KRAKEN running on PID 17051
+2021-05-16 14:43:38,832 : INFO : Starting cryptostore
+2021-05-16 14:43:38,833 : INFO : Cryptostore running on PID 17087
+2021-05-16 14:43:38,838 : INFO : Spawner started
+2021-05-16 14:43:38,842 : INFO : Aggregator started
+2021-05-16 14:43:38,846 : INFO : Cryptostore started
+2021-05-16 14:43:38,847 : INFO : loading config file locally: /Users/anov/IdeaProjects/svoe/configs/data_feed/cryptostore_debug_config.yaml at 2021-05-16 11:43:38.847273
+2021-05-16 14:43:38,866 : INFO : applying local config file: /Users/anov/IdeaProjects/svoe/configs/data_feed/cryptostore_debug_config.yaml at 2021-05-16 11:43:38.866301
+2021-05-16 14:43:38,866 : INFO : start: ['KRAKEN', 'HUOBI', 'COINBASE', 'BINANCE'] stop: []
+2021-05-16 14:43:39,717 : INFO : Spawner running on PID 17090
+2021-05-16 14:43:39,717 : INFO : message: {"op": "start", "exchange": "KRAKEN", "collector": {"l2_book": {"book_delta": true, "max_depth": 100, "symbols": ["AAVE-USD", "ADA-USD", "ALGO-USD", "ANT-USD"]}, "retries": -1, "ticker": ["AAVE-USD", "ADA-USD", "ALGO-USD", "ANT-USD"], "trades": ["AAVE-USD", "ADA-USD", "ALGO-USD", "ANT-USD"]}, "config": {"cache": "redis", "kafka": {"ip": "127.0.0.1", "port": 9092, "start_flush": true}, "parquet": {"S3": {"bucket": "svoe.test.1", "key_id": "AKIAJXSXXFCA3HN3T7GQ", "prefix": "parquet", "secret": "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"}, "append_counter": 0, "compression": {"codec": "BROTLI", "level": 6}, "del_file": true, "file_format": ["exchange", "symbol", "data_type", "timestamp"], "prefix_date": true}, "redis": {"del_after_read": true, "ip": "127.0.0.1", "port": 6379, "retention_time": null, "socket": null, "start_flush": true}, "storage": ["parquet"], "storage_interval": 90, "storage_retries": 5, "storage_retry_wait": 30}}
+2021-05-16 14:43:39,719 : INFO : Aggregator running on PID 17091
+2021-05-16 14:43:39,719 : INFO : Starting {'op': 'start', 'exchange': 'KRAKEN', 'collector': {'l2_book': {'book_delta': True, 'max_depth': 100, 'symbols': ['AAVE-USD', 'ADA-USD', 'ALGO-USD', 'ANT-USD']}, 'retries': -1, 'ticker': ['AAVE-USD', 'ADA-USD', 'ALGO-USD', 'ANT-USD'], 'trades': ['AAVE-USD', 'ADA-USD', 'ALGO-USD', 'ANT-USD']}, 'config': {'cache': 'redis', 'kafka': {'ip': '127.0.0.1', 'port': 9092, 'start_flush': True}, 'parquet': {'S3': {'bucket': 'svoe.test.1', 'key_id': 'AKIAJXSXXFCA3HN3T7GQ', 'prefix': 'parquet', 'secret': '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'}, 'append_counter': 0, 'compression': {'codec': 'BROTLI', 'level': 6}, 'del_file': True, 'file_format': ['exchange', 'symbol', 'data_type', 'timestamp'], 'prefix_date': True}, 'redis': {'del_after_read': True, 'ip': '127.0.0.1', 'port': 6379, 'retention_time': None, 'socket': None, 'start_flush': True}, 'storage': ['parquet'], 'storage_interval': 90, 'storage_retries': 5, 'storage_retry_wait': 30}}
+2021-05-16 14:43:39,720 : INFO : loading config file locally: /Users/anov/IdeaProjects/svoe/configs/data_feed/cryptostore_debug_config.yaml at 2021-05-16 11:43:39.720134
+2021-05-16 14:43:39,722 : INFO : message: {"op": "start", "exchange": "HUOBI", "collector": {"l2_book": {"book_delta": true, "max_depth": 100, "symbols": ["INJ-USDT", "AE-USDT", "ALGO-USDT", "OGN-USDT"]}, "retries": -1, "trades": ["INJ-USDT", "AE-USDT", "ALGO-USDT", "OGN-USDT"]}, "config": {"cache": "redis", "kafka": {"ip": "127.0.0.1", "port": 9092, "start_flush": true}, "parquet": {"S3": {"bucket": "svoe.test.1", "key_id": "AKIAJXSXXFCA3HN3T7GQ", "prefix": "parquet", "secret": "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"}, "append_counter": 0, "compression": {"codec": "BROTLI", "level": 6}, "del_file": true, "file_format": ["exchange", "symbol", "data_type", "timestamp"], "prefix_date": true}, "redis": {"del_after_read": true, "ip": "127.0.0.1", "port": 6379, "retention_time": null, "socket": null, "start_flush": true}, "storage": ["parquet"], "storage_interval": 90, "storage_retries": 5, "storage_retry_wait": 30}}
+2021-05-16 14:43:39,723 : INFO : Starting {'op': 'start', 'exchange': 'HUOBI', 'collector': {'l2_book': {'book_delta': True, 'max_depth': 100, 'symbols': ['INJ-USDT', 'AE-USDT', 'ALGO-USDT', 'OGN-USDT']}, 'retries': -1, 'trades': ['INJ-USDT', 'AE-USDT', 'ALGO-USDT', 'OGN-USDT']}, 'config': {'cache': 'redis', 'kafka': {'ip': '127.0.0.1', 'port': 9092, 'start_flush': True}, 'parquet': {'S3': {'bucket': 'svoe.test.1', 'key_id': 'AKIAJXSXXFCA3HN3T7GQ', 'prefix': 'parquet', 'secret': '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'}, 'append_counter': 0, 'compression': {'codec': 'BROTLI', 'level': 6}, 'del_file': True, 'file_format': ['exchange', 'symbol', 'data_type', 'timestamp'], 'prefix_date': True}, 'redis': {'del_after_read': True, 'ip': '127.0.0.1', 'port': 6379, 'retention_time': None, 'socket': None, 'start_flush': True}, 'storage': ['parquet'], 'storage_interval': 90, 'storage_retries': 5, 'storage_retry_wait': 30}}
+2021-05-16 14:43:39,729 : INFO : message: {"op": "start", "exchange": "COINBASE", "collector": {"l2_book": {"book_delta": true, "max_depth": 100, "symbols": ["MATIC-USD", "MIR-USD", "NMR-USD", "BAT-USD"]}, "l3_book": {"book_delta": true, "symbols": ["MATIC-USD", "MIR-USD", "NMR-USD", "BAT-USD"]}, "retries": -1, "ticker": ["MATIC-USD", "MIR-USD", "NMR-USD", "BAT-USD"], "trades": ["MATIC-USD", "MIR-USD", "NMR-USD", "BAT-USD"]}, "config": {"cache": "redis", "kafka": {"ip": "127.0.0.1", "port": 9092, "start_flush": true}, "parquet": {"S3": {"bucket": "svoe.test.1", "key_id": "AKIAJXSXXFCA3HN3T7GQ", "prefix": "parquet", "secret": "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"}, "append_counter": 0, "compression": {"codec": "BROTLI", "level": 6}, "del_file": true, "file_format": ["exchange", "symbol", "data_type", "timestamp"], "prefix_date": true}, "redis": {"del_after_read": true, "ip": "127.0.0.1", "port": 6379, "retention_time": null, "socket": null, "start_flush": true}, "storage": ["parquet"], "storage_interval": 90, "storage_retries": 5, "storage_retry_wait": 30}}
+2021-05-16 14:43:39,730 : INFO : Starting {'op': 'start', 'exchange': 'COINBASE', 'collector': {'l2_book': {'book_delta': True, 'max_depth': 100, 'symbols': ['MATIC-USD', 'MIR-USD', 'NMR-USD', 'BAT-USD']}, 'l3_book': {'book_delta': True, 'symbols': ['MATIC-USD', 'MIR-USD', 'NMR-USD', 'BAT-USD']}, 'retries': -1, 'ticker': ['MATIC-USD', 'MIR-USD', 'NMR-USD', 'BAT-USD'], 'trades': ['MATIC-USD', 'MIR-USD', 'NMR-USD', 'BAT-USD']}, 'config': {'cache': 'redis', 'kafka': {'ip': '127.0.0.1', 'port': 9092, 'start_flush': True}, 'parquet': {'S3': {'bucket': 'svoe.test.1', 'key_id': 'AKIAJXSXXFCA3HN3T7GQ', 'prefix': 'parquet', 'secret': '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'}, 'append_counter': 0, 'compression': {'codec': 'BROTLI', 'level': 6}, 'del_file': True, 'file_format': ['exchange', 'symbol', 'data_type', 'timestamp'], 'prefix_date': True}, 'redis': {'del_after_read': True, 'ip': '127.0.0.1', 'port': 6379, 'retention_time': None, 'socket': None, 'start_flush': True}, 'storage': ['parquet'], 'storage_interval': 90, 'storage_retries': 5, 'storage_retry_wait': 30}}
+2021-05-16 14:43:39,736 : INFO : message: {"op": "start", "exchange": "BINANCE", "collector": {"l2_book": {"book_delta": true, "max_depth": 100, "symbols": ["BTC-USDT", "ETH-USDT", "BNB-USDT", "NEO-USDT"]}, "retries": -1, "ticker": ["BTC-USDT", "ETH-USDT", "BNB-USDT", "NEO-USDT"], "trades": ["BTC-USDT", "ETH-USDT", "BNB-USDT", "NEO-USDT"]}, "config": {"cache": "redis", "kafka": {"ip": "127.0.0.1", "port": 9092, "start_flush": true}, "parquet": {"S3": {"bucket": "svoe.test.1", "key_id": "AKIAJXSXXFCA3HN3T7GQ", "prefix": "parquet", "secret": "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"}, "append_counter": 0, "compression": {"codec": "BROTLI", "level": 6}, "del_file": true, "file_format": ["exchange", "symbol", "data_type", "timestamp"], "prefix_date": true}, "redis": {"del_after_read": true, "ip": "127.0.0.1", "port": 6379, "retention_time": null, "socket": null, "start_flush": true}, "storage": ["parquet"], "storage_interval": 90, "storage_retries": 5, "storage_retry_wait": 30}}
+2021-05-16 14:43:39,738 : INFO : applying local config file: /Users/anov/IdeaProjects/svoe/configs/data_feed/cryptostore_debug_config.yaml at 2021-05-16 11:43:39.738334
+2021-05-16 14:43:39,738 : INFO : Starting {'op': 'start', 'exchange': 'BINANCE', 'collector': {'l2_book': {'book_delta': True, 'max_depth': 100, 'symbols': ['BTC-USDT', 'ETH-USDT', 'BNB-USDT', 'NEO-USDT']}, 'retries': -1, 'ticker': ['BTC-USDT', 'ETH-USDT', 'BNB-USDT', 'NEO-USDT'], 'trades': ['BTC-USDT', 'ETH-USDT', 'BNB-USDT', 'NEO-USDT']}, 'config': {'cache': 'redis', 'kafka': {'ip': '127.0.0.1', 'port': 9092, 'start_flush': True}, 'parquet': {'S3': {'bucket': 'svoe.test.1', 'key_id': 'AKIAJXSXXFCA3HN3T7GQ', 'prefix': 'parquet', 'secret': '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'}, 'append_counter': 0, 'compression': {'codec': 'BROTLI', 'level': 6}, 'del_file': True, 'file_format': ['exchange', 'symbol', 'data_type', 'timestamp'], 'prefix_date': True}, 'redis': {'del_after_read': True, 'ip': '127.0.0.1', 'port': 6379, 'retention_time': None, 'socket': None, 'start_flush': True}, 'storage': ['parquet'], 'storage_interval': 90, 'storage_retries': 5, 'storage_retry_wait': 30}}
+2021-05-16 14:43:39,762 : INFO : Flushing cache
+2021-05-16 14:43:39,781 : INFO : Reading BINANCE-l2_book-BTC-USDT
+2021-05-16 14:43:39,785 : INFO : No data for BINANCE-l2_book-BTC-USDT
+2021-05-16 14:43:39,785 : INFO : Reading BINANCE-l2_book-ETH-USDT
+2021-05-16 14:43:39,797 : INFO : No data for BINANCE-l2_book-ETH-USDT
+2021-05-16 14:43:39,797 : INFO : Reading BINANCE-l2_book-BNB-USDT
+2021-05-16 14:43:39,803 : INFO : No data for BINANCE-l2_book-BNB-USDT
+2021-05-16 14:43:39,804 : INFO : Reading BINANCE-l2_book-NEO-USDT
+2021-05-16 14:43:39,811 : INFO : No data for BINANCE-l2_book-NEO-USDT
+2021-05-16 14:43:39,822 : INFO : Reading BINANCE-ticker-BTC-USDT
+2021-05-16 14:43:39,827 : INFO : No data for BINANCE-ticker-BTC-USDT
+2021-05-16 14:43:39,827 : INFO : Reading BINANCE-ticker-ETH-USDT
+2021-05-16 14:43:39,845 : INFO : No data for BINANCE-ticker-ETH-USDT
+2021-05-16 14:43:39,845 : INFO : Reading BINANCE-ticker-BNB-USDT
+2021-05-16 14:43:39,846 : INFO : No data for BINANCE-ticker-BNB-USDT
+2021-05-16 14:43:39,846 : INFO : Reading BINANCE-ticker-NEO-USDT
+2021-05-16 14:43:39,846 : INFO : No data for BINANCE-ticker-NEO-USDT
+2021-05-16 14:43:39,847 : INFO : Reading BINANCE-trades-BTC-USDT
+2021-05-16 14:43:39,851 : INFO : No data for BINANCE-trades-BTC-USDT
+2021-05-16 14:43:39,851 : INFO : Reading BINANCE-trades-ETH-USDT
+2021-05-16 14:43:39,852 : INFO : No data for BINANCE-trades-ETH-USDT
+2021-05-16 14:43:39,852 : INFO : Reading BINANCE-trades-BNB-USDT
+2021-05-16 14:43:39,853 : INFO : No data for BINANCE-trades-BNB-USDT
+2021-05-16 14:43:39,853 : INFO : Reading BINANCE-trades-NEO-USDT
+2021-05-16 14:43:39,854 : INFO : No data for BINANCE-trades-NEO-USDT
+2021-05-16 14:43:39,854 : INFO : Reading COINBASE-l2_book-MATIC-USD
+2021-05-16 14:43:39,854 : INFO : No data for COINBASE-l2_book-MATIC-USD
+2021-05-16 14:43:39,855 : INFO : Reading COINBASE-l2_book-MIR-USD
+2021-05-16 14:43:39,858 : INFO : No data for COINBASE-l2_book-MIR-USD
+2021-05-16 14:43:39,859 : INFO : Reading COINBASE-l2_book-NMR-USD
+2021-05-16 14:43:39,860 : INFO : No data for COINBASE-l2_book-NMR-USD
+2021-05-16 14:43:39,860 : INFO : Reading COINBASE-l2_book-BAT-USD
+2021-05-16 14:43:39,862 : INFO : No data for COINBASE-l2_book-BAT-USD
+2021-05-16 14:43:39,862 : INFO : Reading COINBASE-l3_book-MATIC-USD
+2021-05-16 14:43:39,863 : INFO : No data for COINBASE-l3_book-MATIC-USD
+2021-05-16 14:43:39,863 : INFO : Reading COINBASE-l3_book-MIR-USD
+2021-05-16 14:43:39,867 : INFO : No data for COINBASE-l3_book-MIR-USD
+2021-05-16 14:43:39,868 : INFO : Reading COINBASE-l3_book-NMR-USD
+2021-05-16 14:43:39,869 : INFO : No data for COINBASE-l3_book-NMR-USD
+2021-05-16 14:43:39,869 : INFO : Reading COINBASE-l3_book-BAT-USD
+2021-05-16 14:43:39,875 : INFO : No data for COINBASE-l3_book-BAT-USD
+2021-05-16 14:43:39,875 : INFO : Reading COINBASE-ticker-MATIC-USD
+2021-05-16 14:43:39,876 : INFO : No data for COINBASE-ticker-MATIC-USD
+2021-05-16 14:43:39,876 : INFO : Reading COINBASE-ticker-MIR-USD
+2021-05-16 14:43:39,877 : INFO : No data for COINBASE-ticker-MIR-USD
+2021-05-16 14:43:39,877 : INFO : Reading COINBASE-ticker-NMR-USD
+2021-05-16 14:43:39,878 : INFO : No data for COINBASE-ticker-NMR-USD
+2021-05-16 14:43:39,879 : INFO : Reading COINBASE-ticker-BAT-USD
+2021-05-16 14:43:39,879 : INFO : No data for COINBASE-ticker-BAT-USD
+2021-05-16 14:43:39,883 : INFO : Reading COINBASE-trades-MATIC-USD
+2021-05-16 14:43:39,887 : INFO : No data for COINBASE-trades-MATIC-USD
+2021-05-16 14:43:39,888 : INFO : Reading COINBASE-trades-MIR-USD
+2021-05-16 14:43:39,890 : INFO : No data for COINBASE-trades-MIR-USD
+2021-05-16 14:43:39,890 : INFO : Reading COINBASE-trades-NMR-USD
+2021-05-16 14:43:39,891 : INFO : No data for COINBASE-trades-NMR-USD
+2021-05-16 14:43:39,892 : INFO : Reading COINBASE-trades-BAT-USD
+2021-05-16 14:43:39,892 : INFO : No data for COINBASE-trades-BAT-USD
+2021-05-16 14:43:39,893 : INFO : Reading HUOBI-l2_book-INJ-USDT
+2021-05-16 14:43:39,893 : INFO : No data for HUOBI-l2_book-INJ-USDT
+2021-05-16 14:43:39,894 : INFO : Reading HUOBI-l2_book-AE-USDT
+2021-05-16 14:43:39,894 : INFO : No data for HUOBI-l2_book-AE-USDT
+2021-05-16 14:43:39,895 : INFO : Reading HUOBI-l2_book-ALGO-USDT
+2021-05-16 14:43:39,896 : INFO : No data for HUOBI-l2_book-ALGO-USDT
+2021-05-16 14:43:39,897 : INFO : Reading HUOBI-l2_book-OGN-USDT
+2021-05-16 14:43:39,898 : INFO : No data for HUOBI-l2_book-OGN-USDT
+2021-05-16 14:43:39,898 : INFO : Reading HUOBI-trades-INJ-USDT
+2021-05-16 14:43:39,899 : INFO : No data for HUOBI-trades-INJ-USDT
+2021-05-16 14:43:39,899 : INFO : Reading HUOBI-trades-AE-USDT
+2021-05-16 14:43:39,900 : INFO : No data for HUOBI-trades-AE-USDT
+2021-05-16 14:43:39,901 : INFO : Reading HUOBI-trades-ALGO-USDT
+2021-05-16 14:43:39,902 : INFO : No data for HUOBI-trades-ALGO-USDT
+2021-05-16 14:43:39,902 : INFO : Reading HUOBI-trades-OGN-USDT
+2021-05-16 14:43:39,911 : INFO : No data for HUOBI-trades-OGN-USDT
+2021-05-16 14:43:39,911 : INFO : Reading KRAKEN-l2_book-AAVE-USD
+2021-05-16 14:43:39,912 : INFO : No data for KRAKEN-l2_book-AAVE-USD
+2021-05-16 14:43:39,912 : INFO : Reading KRAKEN-l2_book-ADA-USD
+2021-05-16 14:43:39,913 : INFO : No data for KRAKEN-l2_book-ADA-USD
+2021-05-16 14:43:39,913 : INFO : Reading KRAKEN-l2_book-ALGO-USD
+2021-05-16 14:43:39,914 : INFO : No data for KRAKEN-l2_book-ALGO-USD
+2021-05-16 14:43:39,914 : INFO : Reading KRAKEN-l2_book-ANT-USD
+2021-05-16 14:43:39,914 : INFO : No data for KRAKEN-l2_book-ANT-USD
+2021-05-16 14:43:39,914 : INFO : Reading KRAKEN-ticker-AAVE-USD
+2021-05-16 14:43:39,915 : INFO : No data for KRAKEN-ticker-AAVE-USD
+2021-05-16 14:43:39,915 : INFO : Reading KRAKEN-ticker-ADA-USD
+2021-05-16 14:43:39,916 : INFO : No data for KRAKEN-ticker-ADA-USD
+2021-05-16 14:43:39,916 : INFO : Reading KRAKEN-ticker-ALGO-USD
+2021-05-16 14:43:39,916 : INFO : No data for KRAKEN-ticker-ALGO-USD
+2021-05-16 14:43:39,917 : INFO : Reading KRAKEN-ticker-ANT-USD
+2021-05-16 14:43:39,917 : INFO : No data for KRAKEN-ticker-ANT-USD
+2021-05-16 14:43:39,917 : INFO : Reading KRAKEN-trades-AAVE-USD
+2021-05-16 14:43:39,918 : INFO : No data for KRAKEN-trades-AAVE-USD
+2021-05-16 14:43:39,918 : INFO : Reading KRAKEN-trades-ADA-USD
+2021-05-16 14:43:39,918 : INFO : No data for KRAKEN-trades-ADA-USD
+2021-05-16 14:43:39,919 : INFO : Reading KRAKEN-trades-ALGO-USD
+2021-05-16 14:43:39,919 : INFO : No data for KRAKEN-trades-ALGO-USD
+2021-05-16 14:43:39,919 : INFO : Reading KRAKEN-trades-ANT-USD
+2021-05-16 14:43:39,920 : INFO : No data for KRAKEN-trades-ANT-USD
+2021-05-16 14:43:41,337 : INFO : Collector for HUOBI running on PID 17093
+2021-05-16 14:43:41,344 : INFO : Collector for BINANCE running on PID 17095
+2021-05-16 14:43:41,346 : INFO : Collector for COINBASE running on PID 17094
+2021-05-16 14:43:41,371 : INFO : Collector for KRAKEN running on PID 17092
+2021-05-16 14:45:09,784 : INFO : Reading BINANCE-l2_book-BTC-USDT
+2021-05-16 14:45:09,811 : INFO : l2_book-BINANCE-BTC-USDT: Read 821 messages from Redis
+2021-05-16 14:45:15,751 : INFO : l2_book-BINANCE-BTC-USDT: Removed 821 entries through id 1621165509734-0
+2021-05-16 14:45:15,752 : INFO : Write Complete BINANCE-l2_book-BTC-USDT
+2021-05-16 14:45:15,752 : INFO : Reading BINANCE-l2_book-ETH-USDT
+2021-05-16 14:45:15,779 : INFO : l2_book-BINANCE-ETH-USDT: Read 886 messages from Redis
+2021-05-16 14:45:18,418 : INFO : l2_book-BINANCE-ETH-USDT: Removed 886 entries through id 1621165515641-0
+2021-05-16 14:45:18,418 : INFO : Write Complete BINANCE-l2_book-ETH-USDT
+2021-05-16 14:45:18,419 : INFO : Reading BINANCE-l2_book-BNB-USDT
+2021-05-16 14:45:18,428 : INFO : l2_book-BINANCE-BNB-USDT: Read 922 messages from Redis
+2021-05-16 14:45:23,257 : INFO : l2_book-BINANCE-BNB-USDT: Removed 922 entries through id 1621165518412-0
+2021-05-16 14:45:23,257 : INFO : Write Complete BINANCE-l2_book-BNB-USDT
+2021-05-16 14:45:23,257 : INFO : Reading BINANCE-l2_book-NEO-USDT
+2021-05-16 14:45:23,298 : INFO : l2_book-BINANCE-NEO-USDT: Read 783 messages from Redis
+2021-05-16 14:45:26,178 : INFO : l2_book-BINANCE-NEO-USDT: Removed 783 entries through id 1621165523236-0
+2021-05-16 14:45:26,178 : INFO : Write Complete BINANCE-l2_book-NEO-USDT
+2021-05-16 14:45:26,178 : INFO : Reading BINANCE-ticker-BTC-USDT
+2021-05-16 14:45:26,285 : INFO : ticker-BINANCE-BTC-USDT: Read 5195 messages from Redis
+2021-05-16 14:45:30,327 : INFO : ticker-BINANCE-BTC-USDT: Removed 5195 entries through id 1621165525907-6
+2021-05-16 14:45:30,327 : INFO : Write Complete BINANCE-ticker-BTC-USDT
+2021-05-16 14:45:30,327 : INFO : Reading BINANCE-ticker-ETH-USDT
+2021-05-16 14:45:30,372 : INFO : ticker-BINANCE-ETH-USDT: Read 5454 messages from Redis
+2021-05-16 14:45:33,279 : INFO : ticker-BINANCE-ETH-USDT: Removed 5454 entries through id 1621165529829-3
+2021-05-16 14:45:33,279 : INFO : Write Complete BINANCE-ticker-ETH-USDT
+2021-05-16 14:45:33,280 : INFO : Reading BINANCE-ticker-BNB-USDT
+2021-05-16 14:45:33,315 : INFO : ticker-BINANCE-BNB-USDT: Read 4319 messages from Redis
+2021-05-16 14:45:35,538 : INFO : ticker-BINANCE-BNB-USDT: Removed 4319 entries through id 1621165532941-2
+2021-05-16 14:45:35,538 : INFO : Write Complete BINANCE-ticker-BNB-USDT
+2021-05-16 14:45:35,538 : INFO : Reading BINANCE-ticker-NEO-USDT
+2021-05-16 14:45:35,546 : INFO : ticker-BINANCE-NEO-USDT: Read 868 messages from Redis
+2021-05-16 15:00:55,126 : INFO : Starting cryptostore
+2021-05-16 15:00:55,127 : INFO : Cryptostore running on PID 17311
+2021-05-16 15:00:55,133 : INFO : Spawner started
+2021-05-16 15:00:55,138 : INFO : Aggregator started
+2021-05-16 15:00:55,141 : INFO : Cryptostore started
+2021-05-16 15:00:55,141 : INFO : loading config file locally: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-05-16 12:00:55.141765
+2021-05-16 15:00:55,160 : INFO : applying local config file: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-05-16 12:00:55.160405
+2021-05-16 15:00:55,160 : INFO : start: ['HUOBI', 'KRAKEN', 'BINANCE', 'COINBASE'] stop: []
+2021-05-16 15:00:55,979 : INFO : Aggregator running on PID 17314
+2021-05-16 15:00:55,980 : INFO : loading config file locally: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-05-16 12:00:55.980086
+2021-05-16 15:00:55,982 : INFO : Spawner running on PID 17313
+2021-05-16 15:00:55,982 : INFO : message: {"op": "start", "exchange": "HUOBI", "collector": {"l2_book": {"book_delta": true, "max_depth": 100, "symbols": ["LINA-USDT", "UNI2L-USDT", "HT-USDT", "MANA-USDT"]}, "retries": -1, "trades": ["LINA-USDT", "UNI2L-USDT", "HT-USDT", "MANA-USDT"]}, "config": {"cache": "redis", "kafka": {"ip": "127.0.0.1", "port": 9092, "start_flush": true}, "parquet": {"S3": {"bucket": "svoe.test.1", "key_id": "AKIAJXSXXFCA3HN3T7GQ", "prefix": "parquet", "secret": "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"}, "append_counter": 0, "compression": {"codec": "BROTLI", "level": 6}, "del_file": true, "file_format": ["exchange", "symbol", "data_type", "timestamp"], "prefix_date": true}, "redis": {"del_after_read": true, "ip": "127.0.0.1", "port": 6379, "retention_time": null, "socket": null, "start_flush": true}, "storage": ["parquet"], "storage_interval": 90, "storage_retries": 5, "storage_retry_wait": 30}}
+2021-05-16 15:00:55,984 : INFO : Starting {'op': 'start', 'exchange': 'HUOBI', 'collector': {'l2_book': {'book_delta': True, 'max_depth': 100, 'symbols': ['LINA-USDT', 'UNI2L-USDT', 'HT-USDT', 'MANA-USDT']}, 'retries': -1, 'trades': ['LINA-USDT', 'UNI2L-USDT', 'HT-USDT', 'MANA-USDT']}, 'config': {'cache': 'redis', 'kafka': {'ip': '127.0.0.1', 'port': 9092, 'start_flush': True}, 'parquet': {'S3': {'bucket': 'svoe.test.1', 'key_id': 'AKIAJXSXXFCA3HN3T7GQ', 'prefix': 'parquet', 'secret': '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'}, 'append_counter': 0, 'compression': {'codec': 'BROTLI', 'level': 6}, 'del_file': True, 'file_format': ['exchange', 'symbol', 'data_type', 'timestamp'], 'prefix_date': True}, 'redis': {'del_after_read': True, 'ip': '127.0.0.1', 'port': 6379, 'retention_time': None, 'socket': None, 'start_flush': True}, 'storage': ['parquet'], 'storage_interval': 90, 'storage_retries': 5, 'storage_retry_wait': 30}}
+2021-05-16 15:00:55,987 : INFO : message: {"op": "start", "exchange": "KRAKEN", "collector": {"l2_book": {"book_delta": true, "max_depth": 100, "symbols": ["AAVE-USD", "ADA-USD", "ALGO-USD", "ANT-USD"]}, "retries": -1, "ticker": ["AAVE-USD", "ADA-USD", "ALGO-USD", "ANT-USD"], "trades": ["AAVE-USD", "ADA-USD", "ALGO-USD", "ANT-USD"]}, "config": {"cache": "redis", "kafka": {"ip": "127.0.0.1", "port": 9092, "start_flush": true}, "parquet": {"S3": {"bucket": "svoe.test.1", "key_id": "AKIAJXSXXFCA3HN3T7GQ", "prefix": "parquet", "secret": "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"}, "append_counter": 0, "compression": {"codec": "BROTLI", "level": 6}, "del_file": true, "file_format": ["exchange", "symbol", "data_type", "timestamp"], "prefix_date": true}, "redis": {"del_after_read": true, "ip": "127.0.0.1", "port": 6379, "retention_time": null, "socket": null, "start_flush": true}, "storage": ["parquet"], "storage_interval": 90, "storage_retries": 5, "storage_retry_wait": 30}}
+2021-05-16 15:00:55,988 : INFO : Starting {'op': 'start', 'exchange': 'KRAKEN', 'collector': {'l2_book': {'book_delta': True, 'max_depth': 100, 'symbols': ['AAVE-USD', 'ADA-USD', 'ALGO-USD', 'ANT-USD']}, 'retries': -1, 'ticker': ['AAVE-USD', 'ADA-USD', 'ALGO-USD', 'ANT-USD'], 'trades': ['AAVE-USD', 'ADA-USD', 'ALGO-USD', 'ANT-USD']}, 'config': {'cache': 'redis', 'kafka': {'ip': '127.0.0.1', 'port': 9092, 'start_flush': True}, 'parquet': {'S3': {'bucket': 'svoe.test.1', 'key_id': 'AKIAJXSXXFCA3HN3T7GQ', 'prefix': 'parquet', 'secret': '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'}, 'append_counter': 0, 'compression': {'codec': 'BROTLI', 'level': 6}, 'del_file': True, 'file_format': ['exchange', 'symbol', 'data_type', 'timestamp'], 'prefix_date': True}, 'redis': {'del_after_read': True, 'ip': '127.0.0.1', 'port': 6379, 'retention_time': None, 'socket': None, 'start_flush': True}, 'storage': ['parquet'], 'storage_interval': 90, 'storage_retries': 5, 'storage_retry_wait': 30}}
+2021-05-16 15:00:55,992 : INFO : message: {"op": "start", "exchange": "BINANCE", "collector": {"l2_book": {"book_delta": true, "max_depth": 100, "symbols": ["BTC-USDT", "ETH-USDT", "BNB-USDT", "NEO-USDT"]}, "retries": -1, "ticker": ["BTC-USDT", "ETH-USDT", "BNB-USDT", "NEO-USDT"], "trades": ["BTC-USDT", "ETH-USDT", "BNB-USDT", "NEO-USDT"]}, "config": {"cache": "redis", "kafka": {"ip": "127.0.0.1", "port": 9092, "start_flush": true}, "parquet": {"S3": {"bucket": "svoe.test.1", "key_id": "AKIAJXSXXFCA3HN3T7GQ", "prefix": "parquet", "secret": "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"}, "append_counter": 0, "compression": {"codec": "BROTLI", "level": 6}, "del_file": true, "file_format": ["exchange", "symbol", "data_type", "timestamp"], "prefix_date": true}, "redis": {"del_after_read": true, "ip": "127.0.0.1", "port": 6379, "retention_time": null, "socket": null, "start_flush": true}, "storage": ["parquet"], "storage_interval": 90, "storage_retries": 5, "storage_retry_wait": 30}}
+2021-05-16 15:00:55,993 : INFO : Starting {'op': 'start', 'exchange': 'BINANCE', 'collector': {'l2_book': {'book_delta': True, 'max_depth': 100, 'symbols': ['BTC-USDT', 'ETH-USDT', 'BNB-USDT', 'NEO-USDT']}, 'retries': -1, 'ticker': ['BTC-USDT', 'ETH-USDT', 'BNB-USDT', 'NEO-USDT'], 'trades': ['BTC-USDT', 'ETH-USDT', 'BNB-USDT', 'NEO-USDT']}, 'config': {'cache': 'redis', 'kafka': {'ip': '127.0.0.1', 'port': 9092, 'start_flush': True}, 'parquet': {'S3': {'bucket': 'svoe.test.1', 'key_id': 'AKIAJXSXXFCA3HN3T7GQ', 'prefix': 'parquet', 'secret': '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'}, 'append_counter': 0, 'compression': {'codec': 'BROTLI', 'level': 6}, 'del_file': True, 'file_format': ['exchange', 'symbol', 'data_type', 'timestamp'], 'prefix_date': True}, 'redis': {'del_after_read': True, 'ip': '127.0.0.1', 'port': 6379, 'retention_time': None, 'socket': None, 'start_flush': True}, 'storage': ['parquet'], 'storage_interval': 90, 'storage_retries': 5, 'storage_retry_wait': 30}}
+2021-05-16 15:00:55,994 : INFO : applying local config file: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-05-16 12:00:55.994658
+2021-05-16 15:00:55,996 : INFO : message: {"op": "start", "exchange": "COINBASE", "collector": {"l2_book": {"book_delta": true, "max_depth": 100, "symbols": ["COMP-USD", "XLM-USD", "NKN-USD", "USDT-USD"]}, "l3_book": {"book_delta": true, "symbols": ["COMP-USD", "XLM-USD", "NKN-USD", "USDT-USD"]}, "retries": -1, "ticker": ["COMP-USD", "XLM-USD", "NKN-USD", "USDT-USD"], "trades": ["COMP-USD", "XLM-USD", "NKN-USD", "USDT-USD"]}, "config": {"cache": "redis", "kafka": {"ip": "127.0.0.1", "port": 9092, "start_flush": true}, "parquet": {"S3": {"bucket": "svoe.test.1", "key_id": "AKIAJXSXXFCA3HN3T7GQ", "prefix": "parquet", "secret": "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"}, "append_counter": 0, "compression": {"codec": "BROTLI", "level": 6}, "del_file": true, "file_format": ["exchange", "symbol", "data_type", "timestamp"], "prefix_date": true}, "redis": {"del_after_read": true, "ip": "127.0.0.1", "port": 6379, "retention_time": null, "socket": null, "start_flush": true}, "storage": ["parquet"], "storage_interval": 90, "storage_retries": 5, "storage_retry_wait": 30}}
+2021-05-16 15:00:55,999 : INFO : Starting {'op': 'start', 'exchange': 'COINBASE', 'collector': {'l2_book': {'book_delta': True, 'max_depth': 100, 'symbols': ['COMP-USD', 'XLM-USD', 'NKN-USD', 'USDT-USD']}, 'l3_book': {'book_delta': True, 'symbols': ['COMP-USD', 'XLM-USD', 'NKN-USD', 'USDT-USD']}, 'retries': -1, 'ticker': ['COMP-USD', 'XLM-USD', 'NKN-USD', 'USDT-USD'], 'trades': ['COMP-USD', 'XLM-USD', 'NKN-USD', 'USDT-USD']}, 'config': {'cache': 'redis', 'kafka': {'ip': '127.0.0.1', 'port': 9092, 'start_flush': True}, 'parquet': {'S3': {'bucket': 'svoe.test.1', 'key_id': 'AKIAJXSXXFCA3HN3T7GQ', 'prefix': 'parquet', 'secret': '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'}, 'append_counter': 0, 'compression': {'codec': 'BROTLI', 'level': 6}, 'del_file': True, 'file_format': ['exchange', 'symbol', 'data_type', 'timestamp'], 'prefix_date': True}, 'redis': {'del_after_read': True, 'ip': '127.0.0.1', 'port': 6379, 'retention_time': None, 'socket': None, 'start_flush': True}, 'storage': ['parquet'], 'storage_interval': 90, 'storage_retries': 5, 'storage_retry_wait': 30}}
+2021-05-16 15:00:56,017 : INFO : Flushing cache
+2021-05-16 15:00:56,034 : INFO : Reading BINANCE-l2_book-BTC-USDT
+2021-05-16 15:00:56,041 : INFO : No data for BINANCE-l2_book-BTC-USDT
+2021-05-16 15:00:56,041 : INFO : Reading BINANCE-l2_book-ETH-USDT
+2021-05-16 15:00:56,045 : INFO : No data for BINANCE-l2_book-ETH-USDT
+2021-05-16 15:00:56,046 : INFO : Reading BINANCE-l2_book-BNB-USDT
+2021-05-16 15:00:56,054 : INFO : No data for BINANCE-l2_book-BNB-USDT
+2021-05-16 15:00:56,054 : INFO : Reading BINANCE-l2_book-NEO-USDT
+2021-05-16 15:00:56,057 : INFO : No data for BINANCE-l2_book-NEO-USDT
+2021-05-16 15:00:56,057 : INFO : Reading BINANCE-ticker-BTC-USDT
+2021-05-16 15:00:56,063 : INFO : No data for BINANCE-ticker-BTC-USDT
+2021-05-16 15:00:56,064 : INFO : Reading BINANCE-ticker-ETH-USDT
+2021-05-16 15:00:56,065 : INFO : No data for BINANCE-ticker-ETH-USDT
+2021-05-16 15:00:56,065 : INFO : Reading BINANCE-ticker-BNB-USDT
+2021-05-16 15:00:56,068 : INFO : No data for BINANCE-ticker-BNB-USDT
+2021-05-16 15:00:56,068 : INFO : Reading BINANCE-ticker-NEO-USDT
+2021-05-16 15:00:56,074 : INFO : No data for BINANCE-ticker-NEO-USDT
+2021-05-16 15:00:56,074 : INFO : Reading BINANCE-trades-BTC-USDT
+2021-05-16 15:00:56,078 : INFO : No data for BINANCE-trades-BTC-USDT
+2021-05-16 15:00:56,079 : INFO : Reading BINANCE-trades-ETH-USDT
+2021-05-16 15:00:56,082 : INFO : No data for BINANCE-trades-ETH-USDT
+2021-05-16 15:00:56,082 : INFO : Reading BINANCE-trades-BNB-USDT
+2021-05-16 15:00:56,084 : INFO : No data for BINANCE-trades-BNB-USDT
+2021-05-16 15:00:56,084 : INFO : Reading BINANCE-trades-NEO-USDT
+2021-05-16 15:00:56,089 : INFO : No data for BINANCE-trades-NEO-USDT
+2021-05-16 15:00:56,089 : INFO : Reading COINBASE-l2_book-COMP-USD
+2021-05-16 15:00:56,090 : INFO : No data for COINBASE-l2_book-COMP-USD
+2021-05-16 15:00:56,090 : INFO : Reading COINBASE-l2_book-XLM-USD
+2021-05-16 15:00:56,090 : INFO : No data for COINBASE-l2_book-XLM-USD
+2021-05-16 15:00:56,091 : INFO : Reading COINBASE-l2_book-NKN-USD
+2021-05-16 15:00:56,091 : INFO : No data for COINBASE-l2_book-NKN-USD
+2021-05-16 15:00:56,091 : INFO : Reading COINBASE-l2_book-USDT-USD
+2021-05-16 15:00:56,092 : INFO : No data for COINBASE-l2_book-USDT-USD
+2021-05-16 15:00:56,092 : INFO : Reading COINBASE-l3_book-COMP-USD
+2021-05-16 15:00:56,092 : INFO : No data for COINBASE-l3_book-COMP-USD
+2021-05-16 15:00:56,092 : INFO : Reading COINBASE-l3_book-XLM-USD
+2021-05-16 15:00:56,093 : INFO : No data for COINBASE-l3_book-XLM-USD
+2021-05-16 15:00:56,093 : INFO : Reading COINBASE-l3_book-NKN-USD
+2021-05-16 15:00:56,094 : INFO : No data for COINBASE-l3_book-NKN-USD
+2021-05-16 15:00:56,094 : INFO : Reading COINBASE-l3_book-USDT-USD
+2021-05-16 15:00:56,094 : INFO : No data for COINBASE-l3_book-USDT-USD
+2021-05-16 15:00:56,094 : INFO : Reading COINBASE-ticker-COMP-USD
+2021-05-16 15:00:56,095 : INFO : No data for COINBASE-ticker-COMP-USD
+2021-05-16 15:00:56,095 : INFO : Reading COINBASE-ticker-XLM-USD
+2021-05-16 15:00:56,095 : INFO : No data for COINBASE-ticker-XLM-USD
+2021-05-16 15:00:56,096 : INFO : Reading COINBASE-ticker-NKN-USD
+2021-05-16 15:00:56,096 : INFO : No data for COINBASE-ticker-NKN-USD
+2021-05-16 15:00:56,096 : INFO : Reading COINBASE-ticker-USDT-USD
+2021-05-16 15:00:56,097 : INFO : No data for COINBASE-ticker-USDT-USD
+2021-05-16 15:00:56,097 : INFO : Reading COINBASE-trades-COMP-USD
+2021-05-16 15:00:56,098 : INFO : No data for COINBASE-trades-COMP-USD
+2021-05-16 15:00:56,098 : INFO : Reading COINBASE-trades-XLM-USD
+2021-05-16 15:00:56,098 : INFO : No data for COINBASE-trades-XLM-USD
+2021-05-16 15:00:56,098 : INFO : Reading COINBASE-trades-NKN-USD
+2021-05-16 15:00:56,099 : INFO : No data for COINBASE-trades-NKN-USD
+2021-05-16 15:00:56,099 : INFO : Reading COINBASE-trades-USDT-USD
+2021-05-16 15:00:56,100 : INFO : No data for COINBASE-trades-USDT-USD
+2021-05-16 15:00:56,100 : INFO : Reading HUOBI-l2_book-LINA-USDT
+2021-05-16 15:00:56,100 : INFO : No data for HUOBI-l2_book-LINA-USDT
+2021-05-16 15:00:56,100 : INFO : Reading HUOBI-l2_book-UNI2L-USDT
+2021-05-16 15:00:56,101 : INFO : No data for HUOBI-l2_book-UNI2L-USDT
+2021-05-16 15:00:56,101 : INFO : Reading HUOBI-l2_book-HT-USDT
+2021-05-16 15:00:56,101 : INFO : No data for HUOBI-l2_book-HT-USDT
+2021-05-16 15:00:56,102 : INFO : Reading HUOBI-l2_book-MANA-USDT
+2021-05-16 15:00:56,102 : INFO : No data for HUOBI-l2_book-MANA-USDT
+2021-05-16 15:00:56,102 : INFO : Reading HUOBI-trades-LINA-USDT
+2021-05-16 15:00:56,103 : INFO : No data for HUOBI-trades-LINA-USDT
+2021-05-16 15:00:56,103 : INFO : Reading HUOBI-trades-UNI2L-USDT
+2021-05-16 15:00:56,103 : INFO : No data for HUOBI-trades-UNI2L-USDT
+2021-05-16 15:00:56,104 : INFO : Reading HUOBI-trades-HT-USDT
+2021-05-16 15:00:56,104 : INFO : No data for HUOBI-trades-HT-USDT
+2021-05-16 15:00:56,104 : INFO : Reading HUOBI-trades-MANA-USDT
+2021-05-16 15:00:56,105 : INFO : No data for HUOBI-trades-MANA-USDT
+2021-05-16 15:00:56,105 : INFO : Reading KRAKEN-l2_book-AAVE-USD
+2021-05-16 15:00:56,105 : INFO : No data for KRAKEN-l2_book-AAVE-USD
+2021-05-16 15:00:56,105 : INFO : Reading KRAKEN-l2_book-ADA-USD
+2021-05-16 15:00:56,106 : INFO : No data for KRAKEN-l2_book-ADA-USD
+2021-05-16 15:00:56,106 : INFO : Reading KRAKEN-l2_book-ALGO-USD
+2021-05-16 15:00:56,107 : INFO : No data for KRAKEN-l2_book-ALGO-USD
+2021-05-16 15:00:56,107 : INFO : Reading KRAKEN-l2_book-ANT-USD
+2021-05-16 15:00:56,107 : INFO : No data for KRAKEN-l2_book-ANT-USD
+2021-05-16 15:00:56,108 : INFO : Reading KRAKEN-ticker-AAVE-USD
+2021-05-16 15:00:56,108 : INFO : No data for KRAKEN-ticker-AAVE-USD
+2021-05-16 15:00:56,108 : INFO : Reading KRAKEN-ticker-ADA-USD
+2021-05-16 15:00:56,109 : INFO : No data for KRAKEN-ticker-ADA-USD
+2021-05-16 15:00:56,109 : INFO : Reading KRAKEN-ticker-ALGO-USD
+2021-05-16 15:00:56,109 : INFO : No data for KRAKEN-ticker-ALGO-USD
+2021-05-16 15:00:56,110 : INFO : Reading KRAKEN-ticker-ANT-USD
+2021-05-16 15:00:56,110 : INFO : No data for KRAKEN-ticker-ANT-USD
+2021-05-16 15:00:56,110 : INFO : Reading KRAKEN-trades-AAVE-USD
+2021-05-16 15:00:56,111 : INFO : No data for KRAKEN-trades-AAVE-USD
+2021-05-16 15:00:56,111 : INFO : Reading KRAKEN-trades-ADA-USD
+2021-05-16 15:00:56,111 : INFO : No data for KRAKEN-trades-ADA-USD
+2021-05-16 15:00:56,112 : INFO : Reading KRAKEN-trades-ALGO-USD
+2021-05-16 15:00:56,112 : INFO : No data for KRAKEN-trades-ALGO-USD
+2021-05-16 15:00:56,112 : INFO : Reading KRAKEN-trades-ANT-USD
+2021-05-16 15:00:56,113 : INFO : No data for KRAKEN-trades-ANT-USD
+2021-05-16 15:00:57,629 : INFO : Collector for COINBASE running on PID 17318
+2021-05-16 15:00:57,630 : INFO : Collector for HUOBI running on PID 17315
+2021-05-16 15:00:57,630 : INFO : Collector for BINANCE running on PID 17317
+2021-05-16 15:00:57,630 : INFO : Collector for KRAKEN running on PID 17316
+2021-05-17 14:33:42,717 : INFO : Starting cryptostore
+2021-05-17 14:33:42,719 : INFO : Cryptostore running on PID 20959
+2021-05-17 14:33:42,728 : INFO : Spawner started
+2021-05-17 14:33:42,735 : INFO : Aggregator started
+2021-05-17 14:33:42,740 : INFO : Cryptostore started
+2021-05-17 14:33:42,745 : INFO : loading config file locally: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-05-17 11:33:42.744783
+2021-05-17 14:33:42,801 : INFO : applying local config file: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-05-17 11:33:42.801718
+2021-05-17 14:33:42,802 : INFO : start: ['HUOBI', 'KRAKEN', 'COINBASE', 'BINANCE'] stop: []
+2021-05-17 14:33:44,681 : INFO : Spawner running on PID 20964
+2021-05-17 14:33:44,681 : INFO : message: {"op": "start", "exchange": "HUOBI", "collector": {"l2_book": {"book_delta": true, "max_depth": 20, "symbols": ["POND-USDT", "SKL-USDT", "ICX-USDT", "GXC-USDT"]}, "retries": -1, "trades": ["POND-USDT", "SKL-USDT", "ICX-USDT", "GXC-USDT"]}, "config": {"cache": "redis", "kafka": {"ip": "127.0.0.1", "port": 9092, "start_flush": true}, "parquet": {"S3": {"bucket": "svoe.test.1", "key_id": "AKIAJXSXXFCA3HN3T7GQ", "prefix": "parquet", "secret": "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"}, "append_counter": 0, "compression": {"codec": "BROTLI", "level": 6}, "del_file": true, "file_format": ["exchange", "symbol", "data_type", "timestamp"], "prefix_date": true}, "redis": {"del_after_read": true, "ip": "127.0.0.1", "port": 6379, "retention_time": null, "socket": null, "start_flush": true}, "storage": ["parquet"], "storage_interval": 30, "storage_retries": 5, "storage_retry_wait": 30}}
+2021-05-17 14:33:44,684 : INFO : Starting {'op': 'start', 'exchange': 'HUOBI', 'collector': {'l2_book': {'book_delta': True, 'max_depth': 20, 'symbols': ['POND-USDT', 'SKL-USDT', 'ICX-USDT', 'GXC-USDT']}, 'retries': -1, 'trades': ['POND-USDT', 'SKL-USDT', 'ICX-USDT', 'GXC-USDT']}, 'config': {'cache': 'redis', 'kafka': {'ip': '127.0.0.1', 'port': 9092, 'start_flush': True}, 'parquet': {'S3': {'bucket': 'svoe.test.1', 'key_id': 'AKIAJXSXXFCA3HN3T7GQ', 'prefix': 'parquet', 'secret': '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'}, 'append_counter': 0, 'compression': {'codec': 'BROTLI', 'level': 6}, 'del_file': True, 'file_format': ['exchange', 'symbol', 'data_type', 'timestamp'], 'prefix_date': True}, 'redis': {'del_after_read': True, 'ip': '127.0.0.1', 'port': 6379, 'retention_time': None, 'socket': None, 'start_flush': True}, 'storage': ['parquet'], 'storage_interval': 30, 'storage_retries': 5, 'storage_retry_wait': 30}}
+2021-05-17 14:33:44,693 : INFO : message: {"op": "start", "exchange": "KRAKEN", "collector": {"l2_book": {"book_delta": true, "max_depth": 20, "symbols": ["AAVE-USD", "ADA-USD", "ALGO-USD", "ANT-USD"]}, "retries": -1, "ticker": ["AAVE-USD", "ADA-USD", "ALGO-USD", "ANT-USD"], "trades": ["AAVE-USD", "ADA-USD", "ALGO-USD", "ANT-USD"]}, "config": {"cache": "redis", "kafka": {"ip": "127.0.0.1", "port": 9092, "start_flush": true}, "parquet": {"S3": {"bucket": "svoe.test.1", "key_id": "AKIAJXSXXFCA3HN3T7GQ", "prefix": "parquet", "secret": "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"}, "append_counter": 0, "compression": {"codec": "BROTLI", "level": 6}, "del_file": true, "file_format": ["exchange", "symbol", "data_type", "timestamp"], "prefix_date": true}, "redis": {"del_after_read": true, "ip": "127.0.0.1", "port": 6379, "retention_time": null, "socket": null, "start_flush": true}, "storage": ["parquet"], "storage_interval": 30, "storage_retries": 5, "storage_retry_wait": 30}}
+2021-05-17 14:33:44,700 : INFO : Starting {'op': 'start', 'exchange': 'KRAKEN', 'collector': {'l2_book': {'book_delta': True, 'max_depth': 20, 'symbols': ['AAVE-USD', 'ADA-USD', 'ALGO-USD', 'ANT-USD']}, 'retries': -1, 'ticker': ['AAVE-USD', 'ADA-USD', 'ALGO-USD', 'ANT-USD'], 'trades': ['AAVE-USD', 'ADA-USD', 'ALGO-USD', 'ANT-USD']}, 'config': {'cache': 'redis', 'kafka': {'ip': '127.0.0.1', 'port': 9092, 'start_flush': True}, 'parquet': {'S3': {'bucket': 'svoe.test.1', 'key_id': 'AKIAJXSXXFCA3HN3T7GQ', 'prefix': 'parquet', 'secret': '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'}, 'append_counter': 0, 'compression': {'codec': 'BROTLI', 'level': 6}, 'del_file': True, 'file_format': ['exchange', 'symbol', 'data_type', 'timestamp'], 'prefix_date': True}, 'redis': {'del_after_read': True, 'ip': '127.0.0.1', 'port': 6379, 'retention_time': None, 'socket': None, 'start_flush': True}, 'storage': ['parquet'], 'storage_interval': 30, 'storage_retries': 5, 'storage_retry_wait': 30}}
+2021-05-17 14:33:44,708 : INFO : Aggregator running on PID 20965
+2021-05-17 14:33:44,709 : INFO : message: {"op": "start", "exchange": "COINBASE", "collector": {"l2_book": {"book_delta": true, "max_depth": 20, "symbols": ["CTSI-USD", "NU-USD", "YFI-USD", "BNT-USD"]}, "l3_book": {"book_delta": true, "symbols": ["CTSI-USD", "NU-USD", "YFI-USD", "BNT-USD"]}, "retries": -1, "ticker": ["CTSI-USD", "NU-USD", "YFI-USD", "BNT-USD"], "trades": ["CTSI-USD", "NU-USD", "YFI-USD", "BNT-USD"]}, "config": {"cache": "redis", "kafka": {"ip": "127.0.0.1", "port": 9092, "start_flush": true}, "parquet": {"S3": {"bucket": "svoe.test.1", "key_id": "AKIAJXSXXFCA3HN3T7GQ", "prefix": "parquet", "secret": "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"}, "append_counter": 0, "compression": {"codec": "BROTLI", "level": 6}, "del_file": true, "file_format": ["exchange", "symbol", "data_type", "timestamp"], "prefix_date": true}, "redis": {"del_after_read": true, "ip": "127.0.0.1", "port": 6379, "retention_time": null, "socket": null, "start_flush": true}, "storage": ["parquet"], "storage_interval": 30, "storage_retries": 5, "storage_retry_wait": 30}}
+2021-05-17 14:33:44,710 : INFO : Starting {'op': 'start', 'exchange': 'COINBASE', 'collector': {'l2_book': {'book_delta': True, 'max_depth': 20, 'symbols': ['CTSI-USD', 'NU-USD', 'YFI-USD', 'BNT-USD']}, 'l3_book': {'book_delta': True, 'symbols': ['CTSI-USD', 'NU-USD', 'YFI-USD', 'BNT-USD']}, 'retries': -1, 'ticker': ['CTSI-USD', 'NU-USD', 'YFI-USD', 'BNT-USD'], 'trades': ['CTSI-USD', 'NU-USD', 'YFI-USD', 'BNT-USD']}, 'config': {'cache': 'redis', 'kafka': {'ip': '127.0.0.1', 'port': 9092, 'start_flush': True}, 'parquet': {'S3': {'bucket': 'svoe.test.1', 'key_id': 'AKIAJXSXXFCA3HN3T7GQ', 'prefix': 'parquet', 'secret': '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'}, 'append_counter': 0, 'compression': {'codec': 'BROTLI', 'level': 6}, 'del_file': True, 'file_format': ['exchange', 'symbol', 'data_type', 'timestamp'], 'prefix_date': True}, 'redis': {'del_after_read': True, 'ip': '127.0.0.1', 'port': 6379, 'retention_time': None, 'socket': None, 'start_flush': True}, 'storage': ['parquet'], 'storage_interval': 30, 'storage_retries': 5, 'storage_retry_wait': 30}}
+2021-05-17 14:33:44,729 : INFO : message: {"op": "start", "exchange": "BINANCE", "collector": {"l2_book": {"book_delta": true, "max_depth": 20, "symbols": ["BTC-USDT", "ETH-USDT", "BNB-USDT", "NEO-USDT"]}, "retries": -1, "ticker": ["BTC-USDT", "ETH-USDT", "BNB-USDT", "NEO-USDT"], "trades": ["BTC-USDT", "ETH-USDT", "BNB-USDT", "NEO-USDT"]}, "config": {"cache": "redis", "kafka": {"ip": "127.0.0.1", "port": 9092, "start_flush": true}, "parquet": {"S3": {"bucket": "svoe.test.1", "key_id": "AKIAJXSXXFCA3HN3T7GQ", "prefix": "parquet", "secret": "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"}, "append_counter": 0, "compression": {"codec": "BROTLI", "level": 6}, "del_file": true, "file_format": ["exchange", "symbol", "data_type", "timestamp"], "prefix_date": true}, "redis": {"del_after_read": true, "ip": "127.0.0.1", "port": 6379, "retention_time": null, "socket": null, "start_flush": true}, "storage": ["parquet"], "storage_interval": 30, "storage_retries": 5, "storage_retry_wait": 30}}
+2021-05-17 14:33:44,737 : INFO : Starting {'op': 'start', 'exchange': 'BINANCE', 'collector': {'l2_book': {'book_delta': True, 'max_depth': 20, 'symbols': ['BTC-USDT', 'ETH-USDT', 'BNB-USDT', 'NEO-USDT']}, 'retries': -1, 'ticker': ['BTC-USDT', 'ETH-USDT', 'BNB-USDT', 'NEO-USDT'], 'trades': ['BTC-USDT', 'ETH-USDT', 'BNB-USDT', 'NEO-USDT']}, 'config': {'cache': 'redis', 'kafka': {'ip': '127.0.0.1', 'port': 9092, 'start_flush': True}, 'parquet': {'S3': {'bucket': 'svoe.test.1', 'key_id': 'AKIAJXSXXFCA3HN3T7GQ', 'prefix': 'parquet', 'secret': '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'}, 'append_counter': 0, 'compression': {'codec': 'BROTLI', 'level': 6}, 'del_file': True, 'file_format': ['exchange', 'symbol', 'data_type', 'timestamp'], 'prefix_date': True}, 'redis': {'del_after_read': True, 'ip': '127.0.0.1', 'port': 6379, 'retention_time': None, 'socket': None, 'start_flush': True}, 'storage': ['parquet'], 'storage_interval': 30, 'storage_retries': 5, 'storage_retry_wait': 30}}
+2021-05-17 14:33:44,940 : INFO : loading config file locally: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-05-17 11:33:44.940834
+2021-05-17 14:33:45,062 : INFO : applying local config file: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-05-17 11:33:45.061964
+2021-05-17 14:33:45,136 : INFO : Flushing cache
+2021-05-17 14:33:45,168 : INFO : Reading BINANCE-l2_book-BTC-USDT
+2021-05-17 14:33:45,169 : INFO : No data for BINANCE-l2_book-BTC-USDT
+2021-05-17 14:33:45,169 : INFO : Reading BINANCE-l2_book-ETH-USDT
+2021-05-17 14:33:45,170 : INFO : No data for BINANCE-l2_book-ETH-USDT
+2021-05-17 14:33:45,170 : INFO : Reading BINANCE-l2_book-BNB-USDT
+2021-05-17 14:33:45,170 : INFO : No data for BINANCE-l2_book-BNB-USDT
+2021-05-17 14:33:45,170 : INFO : Reading BINANCE-l2_book-NEO-USDT
+2021-05-17 14:33:45,171 : INFO : No data for BINANCE-l2_book-NEO-USDT
+2021-05-17 14:33:45,171 : INFO : Reading BINANCE-ticker-BTC-USDT
+2021-05-17 14:33:45,172 : INFO : No data for BINANCE-ticker-BTC-USDT
+2021-05-17 14:33:45,172 : INFO : Reading BINANCE-ticker-ETH-USDT
+2021-05-17 14:33:45,172 : INFO : No data for BINANCE-ticker-ETH-USDT
+2021-05-17 14:33:45,172 : INFO : Reading BINANCE-ticker-BNB-USDT
+2021-05-17 14:33:45,173 : INFO : No data for BINANCE-ticker-BNB-USDT
+2021-05-17 14:33:45,173 : INFO : Reading BINANCE-ticker-NEO-USDT
+2021-05-17 14:33:45,173 : INFO : No data for BINANCE-ticker-NEO-USDT
+2021-05-17 14:33:45,174 : INFO : Reading BINANCE-trades-BTC-USDT
+2021-05-17 14:33:45,175 : INFO : No data for BINANCE-trades-BTC-USDT
+2021-05-17 14:33:45,175 : INFO : Reading BINANCE-trades-ETH-USDT
+2021-05-17 14:33:45,176 : INFO : No data for BINANCE-trades-ETH-USDT
+2021-05-17 14:33:45,176 : INFO : Reading BINANCE-trades-BNB-USDT
+2021-05-17 14:33:45,176 : INFO : No data for BINANCE-trades-BNB-USDT
+2021-05-17 14:33:45,176 : INFO : Reading BINANCE-trades-NEO-USDT
+2021-05-17 14:33:45,177 : INFO : No data for BINANCE-trades-NEO-USDT
+2021-05-17 14:33:45,177 : INFO : Reading COINBASE-l2_book-CTSI-USD
+2021-05-17 14:33:45,178 : INFO : No data for COINBASE-l2_book-CTSI-USD
+2021-05-17 14:33:45,178 : INFO : Reading COINBASE-l2_book-NU-USD
+2021-05-17 14:33:45,178 : INFO : No data for COINBASE-l2_book-NU-USD
+2021-05-17 14:33:45,178 : INFO : Reading COINBASE-l2_book-YFI-USD
+2021-05-17 14:33:45,179 : INFO : No data for COINBASE-l2_book-YFI-USD
+2021-05-17 14:33:45,179 : INFO : Reading COINBASE-l2_book-BNT-USD
+2021-05-17 14:33:45,180 : INFO : No data for COINBASE-l2_book-BNT-USD
+2021-05-17 14:33:45,180 : INFO : Reading COINBASE-l3_book-CTSI-USD
+2021-05-17 14:33:45,180 : INFO : No data for COINBASE-l3_book-CTSI-USD
+2021-05-17 14:33:45,181 : INFO : Reading COINBASE-l3_book-NU-USD
+2021-05-17 14:33:45,181 : INFO : No data for COINBASE-l3_book-NU-USD
+2021-05-17 14:33:45,181 : INFO : Reading COINBASE-l3_book-YFI-USD
+2021-05-17 14:33:45,182 : INFO : No data for COINBASE-l3_book-YFI-USD
+2021-05-17 14:33:45,182 : INFO : Reading COINBASE-l3_book-BNT-USD
+2021-05-17 14:33:45,182 : INFO : No data for COINBASE-l3_book-BNT-USD
+2021-05-17 14:33:45,182 : INFO : Reading COINBASE-ticker-CTSI-USD
+2021-05-17 14:33:45,183 : INFO : No data for COINBASE-ticker-CTSI-USD
+2021-05-17 14:33:45,183 : INFO : Reading COINBASE-ticker-NU-USD
+2021-05-17 14:33:45,184 : INFO : No data for COINBASE-ticker-NU-USD
+2021-05-17 14:33:45,185 : INFO : Reading COINBASE-ticker-YFI-USD
+2021-05-17 14:33:45,186 : INFO : No data for COINBASE-ticker-YFI-USD
+2021-05-17 14:33:45,187 : INFO : Reading COINBASE-ticker-BNT-USD
+2021-05-17 14:33:45,187 : INFO : No data for COINBASE-ticker-BNT-USD
+2021-05-17 14:33:45,188 : INFO : Reading COINBASE-trades-CTSI-USD
+2021-05-17 14:33:45,188 : INFO : No data for COINBASE-trades-CTSI-USD
+2021-05-17 14:33:45,189 : INFO : Reading COINBASE-trades-NU-USD
+2021-05-17 14:33:45,189 : INFO : No data for COINBASE-trades-NU-USD
+2021-05-17 14:33:45,189 : INFO : Reading COINBASE-trades-YFI-USD
+2021-05-17 14:33:45,190 : INFO : No data for COINBASE-trades-YFI-USD
+2021-05-17 14:33:45,190 : INFO : Reading COINBASE-trades-BNT-USD
+2021-05-17 14:33:45,192 : INFO : No data for COINBASE-trades-BNT-USD
+2021-05-17 14:33:45,192 : INFO : Reading HUOBI-l2_book-POND-USDT
+2021-05-17 14:33:45,193 : INFO : No data for HUOBI-l2_book-POND-USDT
+2021-05-17 14:33:45,193 : INFO : Reading HUOBI-l2_book-SKL-USDT
+2021-05-17 14:33:45,194 : INFO : No data for HUOBI-l2_book-SKL-USDT
+2021-05-17 14:33:45,194 : INFO : Reading HUOBI-l2_book-ICX-USDT
+2021-05-17 14:33:45,194 : INFO : No data for HUOBI-l2_book-ICX-USDT
+2021-05-17 14:33:45,194 : INFO : Reading HUOBI-l2_book-GXC-USDT
+2021-05-17 14:33:45,195 : INFO : No data for HUOBI-l2_book-GXC-USDT
+2021-05-17 14:33:45,195 : INFO : Reading HUOBI-trades-POND-USDT
+2021-05-17 14:33:45,196 : INFO : No data for HUOBI-trades-POND-USDT
+2021-05-17 14:33:45,196 : INFO : Reading HUOBI-trades-SKL-USDT
+2021-05-17 14:33:45,196 : INFO : No data for HUOBI-trades-SKL-USDT
+2021-05-17 14:33:45,197 : INFO : Reading HUOBI-trades-ICX-USDT
+2021-05-17 14:33:45,197 : INFO : No data for HUOBI-trades-ICX-USDT
+2021-05-17 14:33:45,197 : INFO : Reading HUOBI-trades-GXC-USDT
+2021-05-17 14:33:45,198 : INFO : No data for HUOBI-trades-GXC-USDT
+2021-05-17 14:33:45,198 : INFO : Reading KRAKEN-l2_book-AAVE-USD
+2021-05-17 14:33:45,199 : INFO : No data for KRAKEN-l2_book-AAVE-USD
+2021-05-17 14:33:45,199 : INFO : Reading KRAKEN-l2_book-ADA-USD
+2021-05-17 14:33:45,199 : INFO : No data for KRAKEN-l2_book-ADA-USD
+2021-05-17 14:33:45,200 : INFO : Reading KRAKEN-l2_book-ALGO-USD
+2021-05-17 14:33:45,200 : INFO : No data for KRAKEN-l2_book-ALGO-USD
+2021-05-17 14:33:45,200 : INFO : Reading KRAKEN-l2_book-ANT-USD
+2021-05-17 14:33:45,201 : INFO : No data for KRAKEN-l2_book-ANT-USD
+2021-05-17 14:33:45,201 : INFO : Reading KRAKEN-ticker-AAVE-USD
+2021-05-17 14:33:45,202 : INFO : No data for KRAKEN-ticker-AAVE-USD
+2021-05-17 14:33:45,202 : INFO : Reading KRAKEN-ticker-ADA-USD
+2021-05-17 14:33:45,202 : INFO : No data for KRAKEN-ticker-ADA-USD
+2021-05-17 14:33:45,203 : INFO : Reading KRAKEN-ticker-ALGO-USD
+2021-05-17 14:33:45,203 : INFO : No data for KRAKEN-ticker-ALGO-USD
+2021-05-17 14:33:45,203 : INFO : Reading KRAKEN-ticker-ANT-USD
+2021-05-17 14:33:45,204 : INFO : No data for KRAKEN-ticker-ANT-USD
+2021-05-17 14:33:45,204 : INFO : Reading KRAKEN-trades-AAVE-USD
+2021-05-17 14:33:45,204 : INFO : No data for KRAKEN-trades-AAVE-USD
+2021-05-17 14:33:45,204 : INFO : Reading KRAKEN-trades-ADA-USD
+2021-05-17 14:33:45,205 : INFO : No data for KRAKEN-trades-ADA-USD
+2021-05-17 14:33:45,205 : INFO : Reading KRAKEN-trades-ALGO-USD
+2021-05-17 14:33:45,205 : INFO : No data for KRAKEN-trades-ALGO-USD
+2021-05-17 14:33:45,205 : INFO : Reading KRAKEN-trades-ANT-USD
+2021-05-17 14:33:45,206 : INFO : No data for KRAKEN-trades-ANT-USD
+2021-05-17 14:33:49,702 : INFO : Collector for KRAKEN running on PID 20967
+2021-05-17 14:33:49,781 : INFO : Collector for COINBASE running on PID 20968
+2021-05-17 14:33:49,808 : INFO : Collector for HUOBI running on PID 20966
+2021-05-17 14:33:49,928 : INFO : Collector for BINANCE running on PID 20969
+2021-05-17 14:34:15,169 : INFO : Reading BINANCE-l2_book-BTC-USDT
+2021-05-17 14:34:15,198 : INFO : l2_book-BINANCE-BTC-USDT: Read 225 messages from Redis
+2021-05-17 14:34:19,804 : INFO : l2_book-BINANCE-BTC-USDT: Removed 225 entries through id 1621251255114-0
+2021-05-17 14:34:19,804 : INFO : Write Complete BINANCE-l2_book-BTC-USDT
+2021-05-17 14:34:19,804 : INFO : Reading BINANCE-l2_book-ETH-USDT
+2021-05-17 14:34:19,816 : INFO : l2_book-BINANCE-ETH-USDT: Read 268 messages from Redis
+2021-05-17 14:34:22,885 : INFO : l2_book-BINANCE-ETH-USDT: Removed 268 entries through id 1621251259707-0
+2021-05-17 14:34:22,885 : INFO : Write Complete BINANCE-l2_book-ETH-USDT
+2021-05-17 14:34:22,885 : INFO : Reading BINANCE-l2_book-BNB-USDT
+2021-05-17 14:34:22,895 : INFO : l2_book-BINANCE-BNB-USDT: Read 303 messages from Redis
+2021-05-17 14:34:25,541 : INFO : l2_book-BINANCE-BNB-USDT: Removed 303 entries through id 1621251262807-0
+2021-05-17 14:34:25,542 : INFO : Write Complete BINANCE-l2_book-BNB-USDT
+2021-05-17 14:34:25,542 : INFO : Reading BINANCE-l2_book-NEO-USDT
+2021-05-17 14:34:25,549 : INFO : l2_book-BINANCE-NEO-USDT: Read 295 messages from Redis
+2021-05-17 14:34:27,974 : INFO : l2_book-BINANCE-NEO-USDT: Removed 295 entries through id 1621251265506-0
+2021-05-17 14:34:27,975 : INFO : Write Complete BINANCE-l2_book-NEO-USDT
+2021-05-17 14:34:27,975 : INFO : Reading BINANCE-ticker-BTC-USDT
+2021-05-17 14:34:28,121 : INFO : ticker-BINANCE-BTC-USDT: Read 3847 messages from Redis
+2021-05-17 14:34:31,427 : INFO : ticker-BINANCE-BTC-USDT: Removed 3847 entries through id 1621251267951-0
+2021-05-17 14:34:31,428 : INFO : Write Complete BINANCE-ticker-BTC-USDT
+2021-05-17 14:34:31,428 : INFO : Reading BINANCE-ticker-ETH-USDT
+2021-05-17 14:34:31,489 : INFO : ticker-BINANCE-ETH-USDT: Read 4151 messages from Redis
+2021-05-17 14:34:35,068 : INFO : ticker-BINANCE-ETH-USDT: Removed 4151 entries through id 1621251271190-2
+2021-05-17 14:34:35,069 : INFO : Write Complete BINANCE-ticker-ETH-USDT
+2021-05-17 14:34:35,070 : INFO : Reading BINANCE-ticker-BNB-USDT
+2021-05-17 14:34:35,097 : INFO : ticker-BINANCE-BNB-USDT: Read 2096 messages from Redis
+2021-05-17 14:34:37,804 : INFO : ticker-BINANCE-BNB-USDT: Removed 2096 entries through id 1621251274899-0
+2021-05-17 14:34:37,805 : INFO : Write Complete BINANCE-ticker-BNB-USDT
+2021-05-17 14:34:37,805 : INFO : Reading BINANCE-ticker-NEO-USDT
+2021-05-17 14:34:37,816 : INFO : ticker-BINANCE-NEO-USDT: Read 855 messages from Redis
+2021-05-17 14:34:40,124 : INFO : ticker-BINANCE-NEO-USDT: Removed 855 entries through id 1621251277805-0
+2021-05-17 14:34:40,125 : INFO : Write Complete BINANCE-ticker-NEO-USDT
+2021-05-17 14:34:40,125 : INFO : Reading BINANCE-trades-BTC-USDT
+2021-05-17 14:34:40,154 : INFO : trades-BINANCE-BTC-USDT: Read 2048 messages from Redis
+2021-05-17 14:34:43,771 : INFO : trades-BINANCE-BTC-USDT: Removed 2048 entries through id 1621251280026-0
+2021-05-17 14:34:43,773 : INFO : Write Complete BINANCE-trades-BTC-USDT
+2021-05-17 14:34:43,773 : INFO : Reading BINANCE-trades-ETH-USDT
+2021-05-17 14:34:43,796 : INFO : trades-BINANCE-ETH-USDT: Read 1456 messages from Redis
+2021-05-17 14:34:46,760 : INFO : trades-BINANCE-ETH-USDT: Removed 1456 entries through id 1621251283726-0
+2021-05-17 14:34:46,761 : INFO : Write Complete BINANCE-trades-ETH-USDT
+2021-05-17 14:34:46,761 : INFO : Reading BINANCE-trades-BNB-USDT
+2021-05-17 14:34:46,778 : INFO : trades-BINANCE-BNB-USDT: Read 1020 messages from Redis
+2021-05-17 14:34:49,594 : INFO : trades-BINANCE-BNB-USDT: Removed 1020 entries through id 1621251286349-0
+2021-05-17 14:34:49,598 : INFO : Write Complete BINANCE-trades-BNB-USDT
+2021-05-17 14:34:49,598 : INFO : Reading BINANCE-trades-NEO-USDT
+2021-05-17 14:34:49,602 : INFO : trades-BINANCE-NEO-USDT: Read 64 messages from Redis
+2021-05-17 14:34:51,293 : INFO : trades-BINANCE-NEO-USDT: Removed 64 entries through id 1621251289395-0
+2021-05-17 14:34:51,295 : INFO : Write Complete BINANCE-trades-NEO-USDT
+2021-05-17 14:34:51,295 : INFO : Reading COINBASE-l2_book-CTSI-USD
+2021-05-17 14:34:51,338 : INFO : l2_book-COINBASE-CTSI-USD: Read 2676 messages from Redis
+2021-05-17 14:34:54,963 : INFO : l2_book-COINBASE-CTSI-USD: Removed 2676 entries through id 1621251291243-15
+2021-05-17 14:34:54,964 : INFO : Write Complete COINBASE-l2_book-CTSI-USD
+2021-05-17 14:34:54,964 : INFO : Reading COINBASE-l2_book-NU-USD
+2021-05-17 14:34:54,981 : INFO : l2_book-COINBASE-NU-USD: Read 1344 messages from Redis
+2021-05-17 14:34:57,937 : INFO : l2_book-COINBASE-NU-USD: Removed 1344 entries through id 1621251294540-0
+2021-05-17 14:34:57,937 : INFO : Write Complete COINBASE-l2_book-NU-USD
+2021-05-17 14:34:57,938 : INFO : Reading COINBASE-l2_book-YFI-USD
+2021-05-17 14:34:58,141 : INFO : l2_book-COINBASE-YFI-USD: Read 5264 messages from Redis
+2021-05-17 14:35:02,890 : INFO : l2_book-COINBASE-YFI-USD: Removed 5264 entries through id 1621251297937-0
+2021-05-17 14:35:02,891 : INFO : Write Complete COINBASE-l2_book-YFI-USD
+2021-05-17 14:35:02,891 : INFO : Reading COINBASE-l2_book-BNT-USD
+2021-05-17 14:35:03,047 : INFO : l2_book-COINBASE-BNT-USD: Read 3997 messages from Redis
+2021-05-17 14:35:07,401 : INFO : l2_book-COINBASE-BNT-USD: Removed 3997 entries through id 1621251302644-0
+2021-05-17 14:35:07,403 : INFO : Write Complete COINBASE-l2_book-BNT-USD
+2021-05-17 14:35:07,403 : INFO : Reading COINBASE-l3_book-CTSI-USD
+2021-05-17 14:35:07,572 : INFO : l3_book-COINBASE-CTSI-USD: Read 7494 messages from Redis
+2021-05-17 14:35:15,085 : INFO : l3_book-COINBASE-CTSI-USD: Removed 7494 entries through id 1621251307250-1
+2021-05-17 14:35:15,086 : INFO : Write Complete COINBASE-l3_book-CTSI-USD
+2021-05-17 14:35:15,087 : INFO : Reading COINBASE-l3_book-NU-USD
+2021-05-17 14:35:15,476 : INFO : l3_book-COINBASE-NU-USD: Read 3180 messages from Redis
+2021-05-17 14:35:23,641 : INFO : l3_book-COINBASE-NU-USD: Removed 3180 entries through id 1621251314847-6
+2021-05-17 14:35:23,643 : INFO : Write Complete COINBASE-l3_book-NU-USD
+2021-05-17 14:35:23,643 : INFO : Reading COINBASE-l3_book-YFI-USD
+2021-05-17 14:35:24,268 : INFO : l3_book-COINBASE-YFI-USD: Read 11100 messages from Redis
+2021-05-17 14:35:33,733 : INFO : l3_book-COINBASE-YFI-USD: Removed 11100 entries through id 1621251323541-3
+2021-05-17 14:35:33,735 : INFO : Write Complete COINBASE-l3_book-YFI-USD
+2021-05-17 14:35:33,735 : INFO : Reading COINBASE-l3_book-BNT-USD
+2021-05-17 14:35:34,017 : INFO : l3_book-COINBASE-BNT-USD: Read 8146 messages from Redis
+2021-05-17 14:35:41,796 : INFO : l3_book-COINBASE-BNT-USD: Removed 8146 entries through id 1621251333677-0
+2021-05-17 14:35:41,797 : INFO : Write Complete COINBASE-l3_book-BNT-USD
+2021-05-17 14:35:41,797 : INFO : Reading COINBASE-ticker-CTSI-USD
+2021-05-17 14:35:41,800 : INFO : ticker-COINBASE-CTSI-USD: Read 403 messages from Redis
+2021-05-17 14:35:43,859 : INFO : ticker-COINBASE-CTSI-USD: Removed 403 entries through id 1621251341719-0
+2021-05-17 14:35:43,859 : INFO : Write Complete COINBASE-ticker-CTSI-USD
+2021-05-17 14:35:43,860 : INFO : Reading COINBASE-ticker-NU-USD
+2021-05-17 14:35:43,860 : INFO : ticker-COINBASE-NU-USD: Read 54 messages from Redis
+2021-05-17 14:35:45,634 : INFO : ticker-COINBASE-NU-USD: Removed 54 entries through id 1621251343093-0
+2021-05-17 14:35:45,634 : INFO : Write Complete COINBASE-ticker-NU-USD
+2021-05-17 14:35:45,635 : INFO : Reading COINBASE-ticker-YFI-USD
+2021-05-17 14:35:45,635 : INFO : ticker-COINBASE-YFI-USD: Read 76 messages from Redis
+2021-05-17 14:35:47,425 : INFO : ticker-COINBASE-YFI-USD: Removed 76 entries through id 1621251335409-0
+2021-05-17 14:35:47,425 : INFO : Write Complete COINBASE-ticker-YFI-USD
+2021-05-17 14:35:47,426 : INFO : Reading COINBASE-ticker-BNT-USD
+2021-05-17 14:35:47,426 : INFO : ticker-COINBASE-BNT-USD: Read 41 messages from Redis
+2021-05-17 14:35:49,186 : INFO : ticker-COINBASE-BNT-USD: Removed 41 entries through id 1621251328467-1
+2021-05-17 14:35:49,186 : INFO : Write Complete COINBASE-ticker-BNT-USD
+2021-05-17 14:35:49,186 : INFO : Reading COINBASE-trades-CTSI-USD
+2021-05-17 14:35:49,189 : INFO : trades-COINBASE-CTSI-USD: Read 412 messages from Redis
+2021-05-17 14:35:51,225 : INFO : trades-COINBASE-CTSI-USD: Removed 412 entries through id 1621251347560-0
+2021-05-17 14:35:51,225 : INFO : Write Complete COINBASE-trades-CTSI-USD
+2021-05-17 14:35:51,225 : INFO : Reading COINBASE-trades-NU-USD
+2021-05-17 14:35:51,226 : INFO : trades-COINBASE-NU-USD: Read 58 messages from Redis
+2021-05-17 14:35:53,486 : INFO : trades-COINBASE-NU-USD: Removed 58 entries through id 1621251345128-0
+2021-05-17 14:35:53,487 : INFO : Write Complete COINBASE-trades-NU-USD
+2021-05-17 14:35:53,487 : INFO : Reading COINBASE-trades-YFI-USD
+2021-05-17 14:35:53,488 : INFO : trades-COINBASE-YFI-USD: Read 77 messages from Redis
+2021-05-17 14:35:55,205 : INFO : trades-COINBASE-YFI-USD: Removed 77 entries through id 1621251348290-0
+2021-05-17 14:35:55,205 : INFO : Write Complete COINBASE-trades-YFI-USD
+2021-05-17 14:35:55,205 : INFO : Reading COINBASE-trades-BNT-USD
+2021-05-17 14:35:55,207 : INFO : trades-COINBASE-BNT-USD: Read 41 messages from Redis
+2021-05-17 14:35:56,910 : INFO : trades-COINBASE-BNT-USD: Removed 41 entries through id 1621251328438-1
+2021-05-17 14:35:56,910 : INFO : Write Complete COINBASE-trades-BNT-USD
+2021-05-17 14:35:56,910 : INFO : Reading HUOBI-l2_book-POND-USDT
+2021-05-17 14:35:56,933 : INFO : l2_book-HUOBI-POND-USDT: Read 125 messages from Redis
+2021-05-17 14:35:59,994 : INFO : l2_book-HUOBI-POND-USDT: Removed 125 entries through id 1621251356218-0
+2021-05-17 14:35:59,995 : INFO : Write Complete HUOBI-l2_book-POND-USDT
+2021-05-17 14:35:59,995 : INFO : Reading HUOBI-l2_book-SKL-USDT
+2021-05-17 14:36:00,019 : INFO : l2_book-HUOBI-SKL-USDT: Read 129 messages from Redis
+2021-05-17 14:36:03,500 : INFO : l2_book-HUOBI-SKL-USDT: Removed 129 entries through id 1621251359662-0
+2021-05-17 14:36:03,500 : INFO : Write Complete HUOBI-l2_book-SKL-USDT
+2021-05-17 14:36:03,500 : INFO : Reading HUOBI-l2_book-ICX-USDT
+2021-05-17 14:36:03,510 : INFO : l2_book-HUOBI-ICX-USDT: Read 131 messages from Redis
+2021-05-17 14:36:06,406 : INFO : l2_book-HUOBI-ICX-USDT: Removed 131 entries through id 1621251362748-0
+2021-05-17 14:36:06,406 : INFO : Write Complete HUOBI-l2_book-ICX-USDT
+2021-05-17 14:36:06,406 : INFO : Reading HUOBI-l2_book-GXC-USDT
+2021-05-17 14:36:06,409 : INFO : l2_book-HUOBI-GXC-USDT: Read 135 messages from Redis
+2021-05-17 14:36:09,317 : ERROR : Aggregator running on PID 20965 died due to exception
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.9/site-packages/cryptostore/aggregator/aggregator.py", line 125, in loop
+    cache.delete(exchange, dtype, pair)
+  File "/usr/local/lib/python3.9/site-packages/cryptostore/aggregator/redis.py", line 91, in delete
+    self.conn.xdel(key, *self.ids[key])
+  File "/usr/local/lib/python3.9/site-packages/redis/client.py", line 2421, in xdel
+    return self.execute_command('XDEL', name, *ids)
+  File "/usr/local/lib/python3.9/site-packages/redis/client.py", line 901, in execute_command
+    return self.parse_response(conn, command_name, **options)
+  File "/usr/local/lib/python3.9/site-packages/redis/client.py", line 915, in parse_response
+    response = connection.read_response()
+  File "/usr/local/lib/python3.9/site-packages/redis/connection.py", line 756, in read_response
+    raise response
+redis.exceptions.ResponseError: MISCONF Redis is configured to save RDB snapshots, but it is currently not able to persist on disk. Commands that may modify the data set are disabled, because this instance is configured to report errors during writes if RDB snapshotting fails (stop-writes-on-bgsave-error option). Please check the Redis logs for details about the RDB error.
+2021-05-17 14:38:43,075 : INFO : Starting cryptostore
+2021-05-17 14:38:43,076 : INFO : Cryptostore running on PID 21038
+2021-05-17 14:38:43,871 : INFO : Spawner started
+2021-05-17 14:38:44,283 : INFO : Aggregator started
+2021-05-17 14:38:44,288 : INFO : Cryptostore started
+2021-05-17 14:38:44,289 : INFO : loading config file locally: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-05-17 11:38:44.289296
+2021-05-17 14:38:44,328 : INFO : applying local config file: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-05-17 11:38:44.328383
+2021-05-17 14:38:44,328 : INFO : start: ['KRAKEN', 'COINBASE', 'BINANCE', 'HUOBI'] stop: []
+2021-05-17 14:38:47,465 : INFO : Aggregator running on PID 21042
+2021-05-17 14:38:47,469 : INFO : loading config file locally: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-05-17 11:38:47.469312
+2021-05-17 14:38:47,472 : INFO : Spawner running on PID 21041
+2021-05-17 14:38:47,472 : INFO : message: {"op": "start", "exchange": "KRAKEN", "collector": {"l2_book": {"book_delta": true, "max_depth": 20, "symbols": ["AAVE-USD", "ADA-USD", "ALGO-USD", "ANT-USD"]}, "retries": -1, "ticker": ["AAVE-USD", "ADA-USD", "ALGO-USD", "ANT-USD"], "trades": ["AAVE-USD", "ADA-USD", "ALGO-USD", "ANT-USD"]}, "config": {"cache": "redis", "kafka": {"ip": "127.0.0.1", "port": 9092, "start_flush": true}, "parquet": {"S3": {"bucket": "svoe.test.1", "key_id": "AKIAJXSXXFCA3HN3T7GQ", "prefix": "parquet", "secret": "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"}, "append_counter": 0, "compression": {"codec": "BROTLI", "level": 6}, "del_file": true, "file_format": ["exchange", "symbol", "data_type", "timestamp"], "prefix_date": true}, "redis": {"del_after_read": true, "ip": "127.0.0.1", "port": 6379, "retention_time": null, "socket": null, "start_flush": true}, "storage": ["parquet"], "storage_interval": 30, "storage_retries": 5, "storage_retry_wait": 30}}
+2021-05-17 14:38:47,473 : INFO : Starting {'op': 'start', 'exchange': 'KRAKEN', 'collector': {'l2_book': {'book_delta': True, 'max_depth': 20, 'symbols': ['AAVE-USD', 'ADA-USD', 'ALGO-USD', 'ANT-USD']}, 'retries': -1, 'ticker': ['AAVE-USD', 'ADA-USD', 'ALGO-USD', 'ANT-USD'], 'trades': ['AAVE-USD', 'ADA-USD', 'ALGO-USD', 'ANT-USD']}, 'config': {'cache': 'redis', 'kafka': {'ip': '127.0.0.1', 'port': 9092, 'start_flush': True}, 'parquet': {'S3': {'bucket': 'svoe.test.1', 'key_id': 'AKIAJXSXXFCA3HN3T7GQ', 'prefix': 'parquet', 'secret': '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'}, 'append_counter': 0, 'compression': {'codec': 'BROTLI', 'level': 6}, 'del_file': True, 'file_format': ['exchange', 'symbol', 'data_type', 'timestamp'], 'prefix_date': True}, 'redis': {'del_after_read': True, 'ip': '127.0.0.1', 'port': 6379, 'retention_time': None, 'socket': None, 'start_flush': True}, 'storage': ['parquet'], 'storage_interval': 30, 'storage_retries': 5, 'storage_retry_wait': 30}}
+2021-05-17 14:38:47,481 : INFO : message: {"op": "start", "exchange": "COINBASE", "collector": {"l2_book": {"book_delta": true, "max_depth": 20, "symbols": ["LRC-USD", "ANKR-USD", "ETH-USD", "USDT-USD"]}, "l3_book": {"book_delta": true, "symbols": ["LRC-USD", "ANKR-USD", "ETH-USD", "USDT-USD"]}, "retries": -1, "ticker": ["LRC-USD", "ANKR-USD", "ETH-USD", "USDT-USD"], "trades": ["LRC-USD", "ANKR-USD", "ETH-USD", "USDT-USD"]}, "config": {"cache": "redis", "kafka": {"ip": "127.0.0.1", "port": 9092, "start_flush": true}, "parquet": {"S3": {"bucket": "svoe.test.1", "key_id": "AKIAJXSXXFCA3HN3T7GQ", "prefix": "parquet", "secret": "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"}, "append_counter": 0, "compression": {"codec": "BROTLI", "level": 6}, "del_file": true, "file_format": ["exchange", "symbol", "data_type", "timestamp"], "prefix_date": true}, "redis": {"del_after_read": true, "ip": "127.0.0.1", "port": 6379, "retention_time": null, "socket": null, "start_flush": true}, "storage": ["parquet"], "storage_interval": 30, "storage_retries": 5, "storage_retry_wait": 30}}
+2021-05-17 14:38:47,485 : INFO : Starting {'op': 'start', 'exchange': 'COINBASE', 'collector': {'l2_book': {'book_delta': True, 'max_depth': 20, 'symbols': ['LRC-USD', 'ANKR-USD', 'ETH-USD', 'USDT-USD']}, 'l3_book': {'book_delta': True, 'symbols': ['LRC-USD', 'ANKR-USD', 'ETH-USD', 'USDT-USD']}, 'retries': -1, 'ticker': ['LRC-USD', 'ANKR-USD', 'ETH-USD', 'USDT-USD'], 'trades': ['LRC-USD', 'ANKR-USD', 'ETH-USD', 'USDT-USD']}, 'config': {'cache': 'redis', 'kafka': {'ip': '127.0.0.1', 'port': 9092, 'start_flush': True}, 'parquet': {'S3': {'bucket': 'svoe.test.1', 'key_id': 'AKIAJXSXXFCA3HN3T7GQ', 'prefix': 'parquet', 'secret': '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'}, 'append_counter': 0, 'compression': {'codec': 'BROTLI', 'level': 6}, 'del_file': True, 'file_format': ['exchange', 'symbol', 'data_type', 'timestamp'], 'prefix_date': True}, 'redis': {'del_after_read': True, 'ip': '127.0.0.1', 'port': 6379, 'retention_time': None, 'socket': None, 'start_flush': True}, 'storage': ['parquet'], 'storage_interval': 30, 'storage_retries': 5, 'storage_retry_wait': 30}}
+2021-05-17 14:38:47,514 : INFO : applying local config file: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-05-17 11:38:47.514327
+2021-05-17 14:38:47,545 : INFO : Flushing cache
+2021-05-17 14:38:48,044 : INFO : message: {"op": "start", "exchange": "BINANCE", "collector": {"l2_book": {"book_delta": true, "max_depth": 20, "symbols": ["BTC-USDT", "ETH-USDT", "BNB-USDT", "NEO-USDT"]}, "retries": -1, "ticker": ["BTC-USDT", "ETH-USDT", "BNB-USDT", "NEO-USDT"], "trades": ["BTC-USDT", "ETH-USDT", "BNB-USDT", "NEO-USDT"]}, "config": {"cache": "redis", "kafka": {"ip": "127.0.0.1", "port": 9092, "start_flush": true}, "parquet": {"S3": {"bucket": "svoe.test.1", "key_id": "AKIAJXSXXFCA3HN3T7GQ", "prefix": "parquet", "secret": "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"}, "append_counter": 0, "compression": {"codec": "BROTLI", "level": 6}, "del_file": true, "file_format": ["exchange", "symbol", "data_type", "timestamp"], "prefix_date": true}, "redis": {"del_after_read": true, "ip": "127.0.0.1", "port": 6379, "retention_time": null, "socket": null, "start_flush": true}, "storage": ["parquet"], "storage_interval": 30, "storage_retries": 5, "storage_retry_wait": 30}}
+2021-05-17 14:38:48,046 : INFO : Starting {'op': 'start', 'exchange': 'BINANCE', 'collector': {'l2_book': {'book_delta': True, 'max_depth': 20, 'symbols': ['BTC-USDT', 'ETH-USDT', 'BNB-USDT', 'NEO-USDT']}, 'retries': -1, 'ticker': ['BTC-USDT', 'ETH-USDT', 'BNB-USDT', 'NEO-USDT'], 'trades': ['BTC-USDT', 'ETH-USDT', 'BNB-USDT', 'NEO-USDT']}, 'config': {'cache': 'redis', 'kafka': {'ip': '127.0.0.1', 'port': 9092, 'start_flush': True}, 'parquet': {'S3': {'bucket': 'svoe.test.1', 'key_id': 'AKIAJXSXXFCA3HN3T7GQ', 'prefix': 'parquet', 'secret': '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'}, 'append_counter': 0, 'compression': {'codec': 'BROTLI', 'level': 6}, 'del_file': True, 'file_format': ['exchange', 'symbol', 'data_type', 'timestamp'], 'prefix_date': True}, 'redis': {'del_after_read': True, 'ip': '127.0.0.1', 'port': 6379, 'retention_time': None, 'socket': None, 'start_flush': True}, 'storage': ['parquet'], 'storage_interval': 30, 'storage_retries': 5, 'storage_retry_wait': 30}}
+2021-05-17 14:38:48,748 : INFO : message: {"op": "start", "exchange": "HUOBI", "collector": {"l2_book": {"book_delta": true, "max_depth": 20, "symbols": ["BCH-USDT", "LXT-USDT", "WICC-USDT", "SHIB-USDT"]}, "retries": -1, "trades": ["BCH-USDT", "LXT-USDT", "WICC-USDT", "SHIB-USDT"]}, "config": {"cache": "redis", "kafka": {"ip": "127.0.0.1", "port": 9092, "start_flush": true}, "parquet": {"S3": {"bucket": "svoe.test.1", "key_id": "AKIAJXSXXFCA3HN3T7GQ", "prefix": "parquet", "secret": "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"}, "append_counter": 0, "compression": {"codec": "BROTLI", "level": 6}, "del_file": true, "file_format": ["exchange", "symbol", "data_type", "timestamp"], "prefix_date": true}, "redis": {"del_after_read": true, "ip": "127.0.0.1", "port": 6379, "retention_time": null, "socket": null, "start_flush": true}, "storage": ["parquet"], "storage_interval": 30, "storage_retries": 5, "storage_retry_wait": 30}}
+2021-05-17 14:38:48,749 : INFO : Starting {'op': 'start', 'exchange': 'HUOBI', 'collector': {'l2_book': {'book_delta': True, 'max_depth': 20, 'symbols': ['BCH-USDT', 'LXT-USDT', 'WICC-USDT', 'SHIB-USDT']}, 'retries': -1, 'trades': ['BCH-USDT', 'LXT-USDT', 'WICC-USDT', 'SHIB-USDT']}, 'config': {'cache': 'redis', 'kafka': {'ip': '127.0.0.1', 'port': 9092, 'start_flush': True}, 'parquet': {'S3': {'bucket': 'svoe.test.1', 'key_id': 'AKIAJXSXXFCA3HN3T7GQ', 'prefix': 'parquet', 'secret': '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'}, 'append_counter': 0, 'compression': {'codec': 'BROTLI', 'level': 6}, 'del_file': True, 'file_format': ['exchange', 'symbol', 'data_type', 'timestamp'], 'prefix_date': True}, 'redis': {'del_after_read': True, 'ip': '127.0.0.1', 'port': 6379, 'retention_time': None, 'socket': None, 'start_flush': True}, 'storage': ['parquet'], 'storage_interval': 30, 'storage_retries': 5, 'storage_retry_wait': 30}}
+2021-05-17 14:38:51,419 : INFO : Collector for KRAKEN running on PID 21044
+2021-05-17 14:38:52,654 : INFO : Collector for COINBASE running on PID 21045
+2021-05-17 14:38:53,493 : INFO : Collector for BINANCE running on PID 21046
+2021-05-17 14:38:53,893 : INFO : Collector for HUOBI running on PID 21047
+2021-05-17 14:42:50,544 : INFO : Starting cryptostore
+2021-05-17 14:42:50,546 : INFO : Cryptostore running on PID 21077
+2021-05-17 14:42:50,551 : INFO : Spawner started
+2021-05-17 14:42:50,556 : INFO : Aggregator started
+2021-05-17 14:42:50,560 : INFO : Cryptostore started
+2021-05-17 14:42:50,561 : INFO : loading config file locally: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-05-17 11:42:50.561259
+2021-05-17 14:42:50,588 : INFO : applying local config file: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-05-17 11:42:50.588086
+2021-05-17 14:42:50,588 : INFO : start: ['BINANCE', 'COINBASE', 'KRAKEN', 'HUOBI'] stop: []
+2021-05-17 14:42:52,008 : INFO : Aggregator running on PID 21080
+2021-05-17 14:42:52,009 : INFO : loading config file locally: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-05-17 11:42:52.009606
+2021-05-17 14:42:52,014 : INFO : Spawner running on PID 21079
+2021-05-17 14:42:52,015 : INFO : message: {"op": "start", "exchange": "BINANCE", "collector": {"l2_book": {"book_delta": true, "max_depth": 20, "symbols": ["BTC-USDT", "ETH-USDT", "BNB-USDT", "NEO-USDT"]}, "retries": -1, "ticker": ["BTC-USDT", "ETH-USDT", "BNB-USDT", "NEO-USDT"], "trades": ["BTC-USDT", "ETH-USDT", "BNB-USDT", "NEO-USDT"]}, "config": {"cache": "redis", "kafka": {"ip": "127.0.0.1", "port": 9092, "start_flush": true}, "parquet": {"S3": {"bucket": "svoe.test.1", "key_id": "AKIAJXSXXFCA3HN3T7GQ", "prefix": "parquet", "secret": "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"}, "append_counter": 0, "compression": {"codec": "BROTLI", "level": 6}, "del_file": true, "file_format": ["exchange", "symbol", "data_type", "timestamp"], "prefix_date": true}, "redis": {"del_after_read": true, "ip": "127.0.0.1", "port": 6379, "retention_time": null, "socket": null, "start_flush": true}, "storage": ["parquet"], "storage_interval": 30, "storage_retries": 5, "storage_retry_wait": 30}}
+2021-05-17 14:42:52,017 : INFO : Starting {'op': 'start', 'exchange': 'BINANCE', 'collector': {'l2_book': {'book_delta': True, 'max_depth': 20, 'symbols': ['BTC-USDT', 'ETH-USDT', 'BNB-USDT', 'NEO-USDT']}, 'retries': -1, 'ticker': ['BTC-USDT', 'ETH-USDT', 'BNB-USDT', 'NEO-USDT'], 'trades': ['BTC-USDT', 'ETH-USDT', 'BNB-USDT', 'NEO-USDT']}, 'config': {'cache': 'redis', 'kafka': {'ip': '127.0.0.1', 'port': 9092, 'start_flush': True}, 'parquet': {'S3': {'bucket': 'svoe.test.1', 'key_id': 'AKIAJXSXXFCA3HN3T7GQ', 'prefix': 'parquet', 'secret': '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'}, 'append_counter': 0, 'compression': {'codec': 'BROTLI', 'level': 6}, 'del_file': True, 'file_format': ['exchange', 'symbol', 'data_type', 'timestamp'], 'prefix_date': True}, 'redis': {'del_after_read': True, 'ip': '127.0.0.1', 'port': 6379, 'retention_time': None, 'socket': None, 'start_flush': True}, 'storage': ['parquet'], 'storage_interval': 30, 'storage_retries': 5, 'storage_retry_wait': 30}}
+2021-05-17 14:42:52,020 : INFO : message: {"op": "start", "exchange": "COINBASE", "collector": {"l2_book": {"book_delta": true, "max_depth": 20, "symbols": ["ANKR-USD", "AAVE-USD", "BCH-USD", "ENJ-USD"]}, "l3_book": {"book_delta": true, "symbols": ["ANKR-USD", "AAVE-USD", "BCH-USD", "ENJ-USD"]}, "retries": -1, "ticker": ["ANKR-USD", "AAVE-USD", "BCH-USD", "ENJ-USD"], "trades": ["ANKR-USD", "AAVE-USD", "BCH-USD", "ENJ-USD"]}, "config": {"cache": "redis", "kafka": {"ip": "127.0.0.1", "port": 9092, "start_flush": true}, "parquet": {"S3": {"bucket": "svoe.test.1", "key_id": "AKIAJXSXXFCA3HN3T7GQ", "prefix": "parquet", "secret": "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"}, "append_counter": 0, "compression": {"codec": "BROTLI", "level": 6}, "del_file": true, "file_format": ["exchange", "symbol", "data_type", "timestamp"], "prefix_date": true}, "redis": {"del_after_read": true, "ip": "127.0.0.1", "port": 6379, "retention_time": null, "socket": null, "start_flush": true}, "storage": ["parquet"], "storage_interval": 30, "storage_retries": 5, "storage_retry_wait": 30}}
+2021-05-17 14:42:52,022 : INFO : applying local config file: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-05-17 11:42:52.022162
+2021-05-17 14:42:52,022 : INFO : Starting {'op': 'start', 'exchange': 'COINBASE', 'collector': {'l2_book': {'book_delta': True, 'max_depth': 20, 'symbols': ['ANKR-USD', 'AAVE-USD', 'BCH-USD', 'ENJ-USD']}, 'l3_book': {'book_delta': True, 'symbols': ['ANKR-USD', 'AAVE-USD', 'BCH-USD', 'ENJ-USD']}, 'retries': -1, 'ticker': ['ANKR-USD', 'AAVE-USD', 'BCH-USD', 'ENJ-USD'], 'trades': ['ANKR-USD', 'AAVE-USD', 'BCH-USD', 'ENJ-USD']}, 'config': {'cache': 'redis', 'kafka': {'ip': '127.0.0.1', 'port': 9092, 'start_flush': True}, 'parquet': {'S3': {'bucket': 'svoe.test.1', 'key_id': 'AKIAJXSXXFCA3HN3T7GQ', 'prefix': 'parquet', 'secret': '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'}, 'append_counter': 0, 'compression': {'codec': 'BROTLI', 'level': 6}, 'del_file': True, 'file_format': ['exchange', 'symbol', 'data_type', 'timestamp'], 'prefix_date': True}, 'redis': {'del_after_read': True, 'ip': '127.0.0.1', 'port': 6379, 'retention_time': None, 'socket': None, 'start_flush': True}, 'storage': ['parquet'], 'storage_interval': 30, 'storage_retries': 5, 'storage_retry_wait': 30}}
+2021-05-17 14:42:52,026 : INFO : message: {"op": "start", "exchange": "KRAKEN", "collector": {"l2_book": {"book_delta": true, "max_depth": 20, "symbols": ["AAVE-USD", "ADA-USD", "ALGO-USD", "ANT-USD"]}, "retries": -1, "ticker": ["AAVE-USD", "ADA-USD", "ALGO-USD", "ANT-USD"], "trades": ["AAVE-USD", "ADA-USD", "ALGO-USD", "ANT-USD"]}, "config": {"cache": "redis", "kafka": {"ip": "127.0.0.1", "port": 9092, "start_flush": true}, "parquet": {"S3": {"bucket": "svoe.test.1", "key_id": "AKIAJXSXXFCA3HN3T7GQ", "prefix": "parquet", "secret": "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"}, "append_counter": 0, "compression": {"codec": "BROTLI", "level": 6}, "del_file": true, "file_format": ["exchange", "symbol", "data_type", "timestamp"], "prefix_date": true}, "redis": {"del_after_read": true, "ip": "127.0.0.1", "port": 6379, "retention_time": null, "socket": null, "start_flush": true}, "storage": ["parquet"], "storage_interval": 30, "storage_retries": 5, "storage_retry_wait": 30}}
+2021-05-17 14:42:52,027 : INFO : Starting {'op': 'start', 'exchange': 'KRAKEN', 'collector': {'l2_book': {'book_delta': True, 'max_depth': 20, 'symbols': ['AAVE-USD', 'ADA-USD', 'ALGO-USD', 'ANT-USD']}, 'retries': -1, 'ticker': ['AAVE-USD', 'ADA-USD', 'ALGO-USD', 'ANT-USD'], 'trades': ['AAVE-USD', 'ADA-USD', 'ALGO-USD', 'ANT-USD']}, 'config': {'cache': 'redis', 'kafka': {'ip': '127.0.0.1', 'port': 9092, 'start_flush': True}, 'parquet': {'S3': {'bucket': 'svoe.test.1', 'key_id': 'AKIAJXSXXFCA3HN3T7GQ', 'prefix': 'parquet', 'secret': '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'}, 'append_counter': 0, 'compression': {'codec': 'BROTLI', 'level': 6}, 'del_file': True, 'file_format': ['exchange', 'symbol', 'data_type', 'timestamp'], 'prefix_date': True}, 'redis': {'del_after_read': True, 'ip': '127.0.0.1', 'port': 6379, 'retention_time': None, 'socket': None, 'start_flush': True}, 'storage': ['parquet'], 'storage_interval': 30, 'storage_retries': 5, 'storage_retry_wait': 30}}
+2021-05-17 14:42:52,032 : INFO : message: {"op": "start", "exchange": "HUOBI", "collector": {"l2_book": {"book_delta": true, "max_depth": 20, "symbols": ["AUCTION-USDT", "ATOM-USDT", "POND-USDT", "OCN-USDT"]}, "retries": -1, "trades": ["AUCTION-USDT", "ATOM-USDT", "POND-USDT", "OCN-USDT"]}, "config": {"cache": "redis", "kafka": {"ip": "127.0.0.1", "port": 9092, "start_flush": true}, "parquet": {"S3": {"bucket": "svoe.test.1", "key_id": "AKIAJXSXXFCA3HN3T7GQ", "prefix": "parquet", "secret": "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"}, "append_counter": 0, "compression": {"codec": "BROTLI", "level": 6}, "del_file": true, "file_format": ["exchange", "symbol", "data_type", "timestamp"], "prefix_date": true}, "redis": {"del_after_read": true, "ip": "127.0.0.1", "port": 6379, "retention_time": null, "socket": null, "start_flush": true}, "storage": ["parquet"], "storage_interval": 30, "storage_retries": 5, "storage_retry_wait": 30}}
+2021-05-17 14:42:52,034 : INFO : Starting {'op': 'start', 'exchange': 'HUOBI', 'collector': {'l2_book': {'book_delta': True, 'max_depth': 20, 'symbols': ['AUCTION-USDT', 'ATOM-USDT', 'POND-USDT', 'OCN-USDT']}, 'retries': -1, 'trades': ['AUCTION-USDT', 'ATOM-USDT', 'POND-USDT', 'OCN-USDT']}, 'config': {'cache': 'redis', 'kafka': {'ip': '127.0.0.1', 'port': 9092, 'start_flush': True}, 'parquet': {'S3': {'bucket': 'svoe.test.1', 'key_id': 'AKIAJXSXXFCA3HN3T7GQ', 'prefix': 'parquet', 'secret': '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'}, 'append_counter': 0, 'compression': {'codec': 'BROTLI', 'level': 6}, 'del_file': True, 'file_format': ['exchange', 'symbol', 'data_type', 'timestamp'], 'prefix_date': True}, 'redis': {'del_after_read': True, 'ip': '127.0.0.1', 'port': 6379, 'retention_time': None, 'socket': None, 'start_flush': True}, 'storage': ['parquet'], 'storage_interval': 30, 'storage_retries': 5, 'storage_retry_wait': 30}}
+2021-05-17 14:42:52,053 : INFO : Flushing cache
+2021-05-17 14:42:52,077 : INFO : Reading BINANCE-l2_book-BTC-USDT
+2021-05-17 14:42:52,088 : INFO : No data for BINANCE-l2_book-BTC-USDT
+2021-05-17 14:42:52,088 : INFO : Reading BINANCE-l2_book-ETH-USDT
+2021-05-17 14:42:52,090 : INFO : No data for BINANCE-l2_book-ETH-USDT
+2021-05-17 14:42:52,091 : INFO : Reading BINANCE-l2_book-BNB-USDT
+2021-05-17 14:42:52,094 : INFO : No data for BINANCE-l2_book-BNB-USDT
+2021-05-17 14:42:52,095 : INFO : Reading BINANCE-l2_book-NEO-USDT
+2021-05-17 14:42:52,105 : INFO : No data for BINANCE-l2_book-NEO-USDT
+2021-05-17 14:42:52,106 : INFO : Reading BINANCE-ticker-BTC-USDT
+2021-05-17 14:42:52,111 : INFO : No data for BINANCE-ticker-BTC-USDT
+2021-05-17 14:42:52,112 : INFO : Reading BINANCE-ticker-ETH-USDT
+2021-05-17 14:42:52,117 : INFO : No data for BINANCE-ticker-ETH-USDT
+2021-05-17 14:42:52,118 : INFO : Reading BINANCE-ticker-BNB-USDT
+2021-05-17 14:42:52,120 : INFO : No data for BINANCE-ticker-BNB-USDT
+2021-05-17 14:42:52,121 : INFO : Reading BINANCE-ticker-NEO-USDT
+2021-05-17 14:42:52,121 : INFO : No data for BINANCE-ticker-NEO-USDT
+2021-05-17 14:42:52,121 : INFO : Reading BINANCE-trades-BTC-USDT
+2021-05-17 14:42:52,126 : INFO : No data for BINANCE-trades-BTC-USDT
+2021-05-17 14:42:52,126 : INFO : Reading BINANCE-trades-ETH-USDT
+2021-05-17 14:42:52,128 : INFO : No data for BINANCE-trades-ETH-USDT
+2021-05-17 14:42:52,128 : INFO : Reading BINANCE-trades-BNB-USDT
+2021-05-17 14:42:52,135 : INFO : No data for BINANCE-trades-BNB-USDT
+2021-05-17 14:42:52,135 : INFO : Reading BINANCE-trades-NEO-USDT
+2021-05-17 14:42:52,141 : INFO : No data for BINANCE-trades-NEO-USDT
+2021-05-17 14:42:52,141 : INFO : Reading COINBASE-l2_book-ANKR-USD
+2021-05-17 14:42:52,141 : INFO : No data for COINBASE-l2_book-ANKR-USD
+2021-05-17 14:42:52,142 : INFO : Reading COINBASE-l2_book-AAVE-USD
+2021-05-17 14:42:52,143 : INFO : No data for COINBASE-l2_book-AAVE-USD
+2021-05-17 14:42:52,143 : INFO : Reading COINBASE-l2_book-BCH-USD
+2021-05-17 14:42:52,144 : INFO : No data for COINBASE-l2_book-BCH-USD
+2021-05-17 14:42:52,144 : INFO : Reading COINBASE-l2_book-ENJ-USD
+2021-05-17 14:42:52,146 : INFO : No data for COINBASE-l2_book-ENJ-USD
+2021-05-17 14:42:52,147 : INFO : Reading COINBASE-l3_book-ANKR-USD
+2021-05-17 14:42:52,147 : INFO : No data for COINBASE-l3_book-ANKR-USD
+2021-05-17 14:42:52,148 : INFO : Reading COINBASE-l3_book-AAVE-USD
+2021-05-17 14:42:52,150 : INFO : No data for COINBASE-l3_book-AAVE-USD
+2021-05-17 14:42:52,151 : INFO : Reading COINBASE-l3_book-BCH-USD
+2021-05-17 14:42:52,156 : INFO : No data for COINBASE-l3_book-BCH-USD
+2021-05-17 14:42:52,194 : INFO : Reading COINBASE-l3_book-ENJ-USD
+2021-05-17 14:42:52,195 : INFO : No data for COINBASE-l3_book-ENJ-USD
+2021-05-17 14:42:52,195 : INFO : Reading COINBASE-ticker-ANKR-USD
+2021-05-17 14:42:52,200 : INFO : No data for COINBASE-ticker-ANKR-USD
+2021-05-17 14:42:52,200 : INFO : Reading COINBASE-ticker-AAVE-USD
+2021-05-17 14:42:52,200 : INFO : No data for COINBASE-ticker-AAVE-USD
+2021-05-17 14:42:52,213 : INFO : Reading COINBASE-ticker-BCH-USD
+2021-05-17 14:42:52,214 : INFO : No data for COINBASE-ticker-BCH-USD
+2021-05-17 14:42:52,214 : INFO : Reading COINBASE-ticker-ENJ-USD
+2021-05-17 14:42:52,215 : INFO : No data for COINBASE-ticker-ENJ-USD
+2021-05-17 14:42:52,215 : INFO : Reading COINBASE-trades-ANKR-USD
+2021-05-17 14:42:52,215 : INFO : No data for COINBASE-trades-ANKR-USD
+2021-05-17 14:42:52,216 : INFO : Reading COINBASE-trades-AAVE-USD
+2021-05-17 14:42:52,218 : INFO : No data for COINBASE-trades-AAVE-USD
+2021-05-17 14:42:52,218 : INFO : Reading COINBASE-trades-BCH-USD
+2021-05-17 14:42:52,218 : INFO : No data for COINBASE-trades-BCH-USD
+2021-05-17 14:42:52,219 : INFO : Reading COINBASE-trades-ENJ-USD
+2021-05-17 14:42:52,222 : INFO : No data for COINBASE-trades-ENJ-USD
+2021-05-17 14:42:52,222 : INFO : Reading HUOBI-l2_book-AUCTION-USDT
+2021-05-17 14:42:52,224 : INFO : No data for HUOBI-l2_book-AUCTION-USDT
+2021-05-17 14:42:52,224 : INFO : Reading HUOBI-l2_book-ATOM-USDT
+2021-05-17 14:42:52,227 : INFO : No data for HUOBI-l2_book-ATOM-USDT
+2021-05-17 14:42:52,227 : INFO : Reading HUOBI-l2_book-POND-USDT
+2021-05-17 14:42:52,228 : INFO : No data for HUOBI-l2_book-POND-USDT
+2021-05-17 14:42:52,228 : INFO : Reading HUOBI-l2_book-OCN-USDT
+2021-05-17 14:42:52,228 : INFO : No data for HUOBI-l2_book-OCN-USDT
+2021-05-17 14:42:52,229 : INFO : Reading HUOBI-trades-AUCTION-USDT
+2021-05-17 14:42:52,234 : INFO : No data for HUOBI-trades-AUCTION-USDT
+2021-05-17 14:42:52,238 : INFO : Reading HUOBI-trades-ATOM-USDT
+2021-05-17 14:42:52,241 : INFO : No data for HUOBI-trades-ATOM-USDT
+2021-05-17 14:42:52,241 : INFO : Reading HUOBI-trades-POND-USDT
+2021-05-17 14:42:52,244 : INFO : No data for HUOBI-trades-POND-USDT
+2021-05-17 14:42:52,245 : INFO : Reading HUOBI-trades-OCN-USDT
+2021-05-17 14:42:52,249 : INFO : No data for HUOBI-trades-OCN-USDT
+2021-05-17 14:42:52,250 : INFO : Reading KRAKEN-l2_book-AAVE-USD
+2021-05-17 14:42:52,253 : INFO : No data for KRAKEN-l2_book-AAVE-USD
+2021-05-17 14:42:52,253 : INFO : Reading KRAKEN-l2_book-ADA-USD
+2021-05-17 14:42:52,254 : INFO : No data for KRAKEN-l2_book-ADA-USD
+2021-05-17 14:42:52,254 : INFO : Reading KRAKEN-l2_book-ALGO-USD
+2021-05-17 14:42:52,255 : INFO : No data for KRAKEN-l2_book-ALGO-USD
+2021-05-17 14:42:52,255 : INFO : Reading KRAKEN-l2_book-ANT-USD
+2021-05-17 14:42:52,256 : INFO : No data for KRAKEN-l2_book-ANT-USD
+2021-05-17 14:42:52,256 : INFO : Reading KRAKEN-ticker-AAVE-USD
+2021-05-17 14:42:52,257 : INFO : No data for KRAKEN-ticker-AAVE-USD
+2021-05-17 14:42:52,257 : INFO : Reading KRAKEN-ticker-ADA-USD
+2021-05-17 14:42:52,260 : INFO : No data for KRAKEN-ticker-ADA-USD
+2021-05-17 14:42:52,263 : INFO : Reading KRAKEN-ticker-ALGO-USD
+2021-05-17 14:42:52,265 : INFO : No data for KRAKEN-ticker-ALGO-USD
+2021-05-17 14:42:52,267 : INFO : Reading KRAKEN-ticker-ANT-USD
+2021-05-17 14:42:52,268 : INFO : No data for KRAKEN-ticker-ANT-USD
+2021-05-17 14:42:52,268 : INFO : Reading KRAKEN-trades-AAVE-USD
+2021-05-17 14:42:52,269 : INFO : No data for KRAKEN-trades-AAVE-USD
+2021-05-17 14:42:52,269 : INFO : Reading KRAKEN-trades-ADA-USD
+2021-05-17 14:42:52,270 : INFO : No data for KRAKEN-trades-ADA-USD
+2021-05-17 14:42:52,270 : INFO : Reading KRAKEN-trades-ALGO-USD
+2021-05-17 14:42:52,271 : INFO : No data for KRAKEN-trades-ALGO-USD
+2021-05-17 14:42:52,273 : INFO : Reading KRAKEN-trades-ANT-USD
+2021-05-17 14:42:52,275 : INFO : No data for KRAKEN-trades-ANT-USD
+2021-05-17 14:42:53,716 : INFO : Collector for COINBASE running on PID 21082
+2021-05-17 14:42:53,734 : INFO : Collector for BINANCE running on PID 21081
+2021-05-17 14:42:53,790 : INFO : Collector for KRAKEN running on PID 21083
+2021-05-17 14:42:53,843 : INFO : Collector for HUOBI running on PID 21084
+2021-05-17 14:43:22,080 : INFO : Reading BINANCE-l2_book-BTC-USDT
+2021-05-17 14:43:22,082 : INFO : l2_book-BINANCE-BTC-USDT: Read 103 messages from Redis
+2021-05-17 14:43:25,114 : ERROR : Aggregator running on PID 21080 died due to exception
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.9/site-packages/cryptostore/aggregator/aggregator.py", line 125, in loop
+    cache.delete(exchange, dtype, pair)
+  File "/usr/local/lib/python3.9/site-packages/cryptostore/aggregator/redis.py", line 91, in delete
+    self.conn.xdel(key, *self.ids[key])
+  File "/usr/local/lib/python3.9/site-packages/redis/client.py", line 2421, in xdel
+    return self.execute_command('XDEL', name, *ids)
+  File "/usr/local/lib/python3.9/site-packages/redis/client.py", line 901, in execute_command
+    return self.parse_response(conn, command_name, **options)
+  File "/usr/local/lib/python3.9/site-packages/redis/client.py", line 915, in parse_response
+    response = connection.read_response()
+  File "/usr/local/lib/python3.9/site-packages/redis/connection.py", line 756, in read_response
+    raise response
+redis.exceptions.ResponseError: MISCONF Redis is configured to save RDB snapshots, but it is currently not able to persist on disk. Commands that may modify the data set are disabled, because this instance is configured to report errors during writes if RDB snapshotting fails (stop-writes-on-bgsave-error option). Please check the Redis logs for details about the RDB error.

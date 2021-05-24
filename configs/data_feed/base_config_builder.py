@@ -1,5 +1,5 @@
 from cryptofeed.symbols import gen_symbols
-from cryptofeed.defines import BINANCE, COINBASE, KRAKEN, HUOBI, DERIBIT, BITMEX
+from cryptofeed.defines import BINANCE, COINBASE, KRAKEN, HUOBI, DERIBIT, BITMEX, OKEX, FTX, BINANCE_FUTURES
 
 
 # Core logic for pair generation
@@ -7,11 +7,17 @@ class BaseConfigBuilder(object):
 
     def __init__(self):
         self.exchanges_config = {
-            # pair_gen, max_depth_l2, include_ticker, include l3
-            # BINANCE : [self._get_binance_pairs()[:100], 100, True, False], #max_depth 5000 # https://github.com/bmoscon/cryptostore/issues/156 set limit to num pairs to avoid rate limit?
-            # COINBASE: [self._get_coinbase_pairs()[:2], 100, True, True],
-            KRAKEN: [self._get_kraken_pairs()[:100], 100, True, False], #max_depth 1000
-            # HUOBI: [self._get_huobi_pairs()[:100], 100, False, False],
+            # pair_gen, max_depth_l2, include_ticker, include l3, include futures data
+            BINANCE : [self._get_binance_pairs()[:2], 100, True, False, False], #max_depth 5000 # https://github.com/bmoscon/cryptostore/issues/156 set limit to num pairs to avoid rate limit?
+            COINBASE: [self._get_coinbase_pairs()[:1], 100, True, True, False],
+            OKEX: [self.get_okex_pairs()[:2], 100, True, False, False],
+            FTX: [self.get_ftx_pairs()[:1], 100, True, False, False],
+
+            # TODO add funding, open_interest and liquidations
+            BITMEX: [self.get_bitmex_pairs()[:1], 100, True, False, True],
+            BINANCE_FUTURES: [self.get_binance_futures_pairs()[:1], 100, True, False, True]
+            # KRAKEN: [self._get_kraken_pairs()[:40], 100, True, False], #max_depth 1000
+            # HUOBI: [self._get_huobi_pairs()[:40], 100, False, False],
             # 'BITMEX' : BITMEX,
             # 'DERIBIT' : DERIBIT
         }
@@ -54,11 +60,30 @@ class BaseConfigBuilder(object):
         return [*filter(lambda item: item.split('-')[1] == 'USDT', list(symbols.keys()))]
 
     @staticmethod
+    def get_okex_pairs():
+        symbols = gen_symbols(OKEX)
+        return [*filter(lambda item: item.split('-')[1] == 'USDT', list(symbols.keys()))]
+
+
+    @staticmethod
+    def get_ftx_pairs():
+        symbols = gen_symbols(FTX)
+        return [*filter(lambda item: len(item.split('-')) == 2 and item.split('-')[1] == 'USDT', list(symbols.keys()))]
+
+
+    @staticmethod
+    def get_bitmex_pairs():
+        # symbols = gen_symbols(BITMEX)
+        return ['BTC-USD', 'ETH-USD', 'XRP-USD', 'DOGE-USDT', 'BNB-USDT']
+
+    @staticmethod
+    def get_binance_futures_pairs():
+        symbols = gen_symbols(BINANCE_FUTURES)
+        return [*filter(lambda item: item.split('-')[1] == 'USDT', list(symbols.keys()))]
+
+    @staticmethod
     def get_deribit_pairs():
         symbols = gen_symbols(DERIBIT)
         print(symbols)
 
-    @staticmethod
-    def get_bitmex_pairs():
-        symbols = gen_symbols(BITMEX)
-        print(symbols)
+

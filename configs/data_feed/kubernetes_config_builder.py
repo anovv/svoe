@@ -22,8 +22,12 @@ DATA_FEED_HEADLESS_SERVICE_NAME = 'svoe-data-feed-stateful-set-service'
 
 # Container
 DATA_FEED_CONTAINER_NAME = 'svoe-data-feed-container'
-DATA_FEED_IMAGE = '050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v1'
+DATA_FEED_IMAGE = '050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v6'
+
+# TODO this should be in sync with data feed service
 DATA_FEED_CONFIG_DIR = '/etc/svoe/data_feed/configs'
+# TODO use this instead of hardcoding
+DATA_FEED_CONFIG_FILE_NAME = 'data-feed-config.yaml'
 
 # Init Container
 DATA_FEED_INIT_CONTAINER_NAME = 'svoe-data-feed-init-container'
@@ -34,7 +38,8 @@ DATA_FEED_SCRIPTS_VOLUME_NAME = 'svoe-data-feed-scripts-vol'
 DATA_FEED_CONFIGS_VOLUME_NAME = 'svoe-data-feed-conf-vol'
 
 # Pods
-NUM_PODS = 4
+# TODO add namespace
+NUM_PODS = 6
 
 
 # Kubernetes specific configs
@@ -92,17 +97,46 @@ class KubernetesConfigBuilder(CryptostoreConfigBuilder):
                     'spec': {
                         'containers': [
                             {
+                                'name': 'redis',
+                                'image': 'redis:alpine',
+                                'ports': [
+                                    {
+                                        'containerPort': 6379, # TODO use const
+                                    }
+                                ],
+                                # 'resources': {
+                                #     'requests': {
+                                #         'cpu': '20m',
+                                #         'memory': '30Mi',
+                                #     }
+                                # },
+                            },
+                            {
                                 'name': DATA_FEED_CONTAINER_NAME,
                                 'image': DATA_FEED_IMAGE,
                                 'imagePullPolicy': 'IfNotPresent',
-                                # 'command': ['/bin/sh', '-c'],
-                                # 'args': ['echo "Starting statefulset pod"; cat /etc/svoe/data_feed/configs/data-feed-config.yaml; while true; do sleep 600; done'],
                                 'volumeMounts': [
                                     {
                                         'name': DATA_FEED_CONFIGS_VOLUME_NAME,
                                         'mountPath': DATA_FEED_CONFIG_DIR,
                                     },
-                                ]
+                                ],
+                                'livenessProbe': {
+                                    'exec': {
+                                        'command': [
+                                            'python',
+                                            'health_check/health_check.py',
+                                        ],
+                                    },
+                                    'initialDelaySeconds': 60,
+                                    'periodSeconds': 5,
+                                },
+                                # 'resources': {
+                                #     'requests': {
+                                #         'cpu': '450m',
+                                #         'memory': '250Mi',
+                                #     }
+                                # },
                             },
                         ],
                         'initContainers': [
@@ -165,6 +199,7 @@ class KubernetesConfigBuilder(CryptostoreConfigBuilder):
 
         cs_conf = self._build_kuber_cryptostore_config()
 
+        # TODO move 'data-feed-config' to const in cryptofeed_config_builder
         launch_script = \
             textwrap.dedent(
                 """

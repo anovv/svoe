@@ -18,7 +18,9 @@ START_FLUSH = True
 # TODO figure out production paths
 AWS_CREDENTIALS_PATH = str(Path(__file__).parent / 'aws_credentials.yaml')
 
-CRYPTOSTORE_DEBUG_CONFIG_PATH = str(Path(__file__).parent / 'cryptostore_debug_config.yaml')
+# TODO this should be in sync with data feed service
+DATA_FEED_CONFIG_DIR = '/etc/svoe/data_feed/configs'
+DATA_FEED_CONFIG_FILE_NAME = 'data-feed-config.yaml'
 
 # Cryptostore specific configs
 class CryptostoreConfigBuilder(BaseConfigBuilder):
@@ -29,7 +31,7 @@ class CryptostoreConfigBuilder(BaseConfigBuilder):
         for exchange in self.exchanges_config.keys():
             ex_to_pairs[exchange] = self.exchanges_config[exchange][0]
         config = self._build_cryptostore_config(ex_to_pairs)
-        return self._dump_yaml_config(config, CRYPTOSTORE_DEBUG_CONFIG_PATH)
+        return self._dump_yaml_config(config, DATA_FEED_CONFIG_DIR + '/' + DATA_FEED_CONFIG_FILE_NAME)
 
     def _build_cryptostore_config(self, ex_to_pairs: dict[str, list[str]]) -> dict:
         aws_credentials = self._read_aws_credentials()
@@ -68,7 +70,7 @@ class CryptostoreConfigBuilder(BaseConfigBuilder):
                 },
                 # path=TEMP_FILES_PATH,
             },
-            'storage_interval': 90,
+            'storage_interval': 30,
             'exchanges': self._build_exchanges_config(ex_to_pairs)
         }
 
@@ -111,6 +113,13 @@ class CryptostoreConfigBuilder(BaseConfigBuilder):
             include_ticker = self.exchanges_config[exchange][2]
             if include_ticker:
                 config[exchange]['ticker'] = pairs
+
+            # futures data: open interest, funding, liquidations
+            include_futures_data = self.exchanges_config[exchange][4]
+            if include_futures_data:
+                config[exchange]['liquidations'] = pairs
+                config[exchange]['open_interest'] = pairs
+                config[exchange]['funding'] = pairs
 
         return config
 
