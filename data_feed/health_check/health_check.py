@@ -14,7 +14,7 @@ FEEDHANDLER_LOG_PATH = 'feedhandler.log'
 SUCCESS = 0
 FAILURE = 1
 
-def tail(filename, n=20):
+def tail(filename, n=10):
     from collections import deque
     return ''.join(deque(open(filename), n))
 
