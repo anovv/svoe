@@ -1,89 +1,138 @@
-from cryptofeed.symbols import gen_symbols
-from cryptofeed.defines import BINANCE, COINBASE, KRAKEN, HUOBI, DERIBIT, BITMEX, OKEX, FTX, BINANCE_FUTURES
+from cryptofeed.defines import BINANCE, COINBASE, BITMEX, OKEX, FTX, BINANCE_FUTURES
+from cryptofeed.exchanges import EXCHANGE_MAP
+from cryptofeed.defines import TICKER, TRADES, L2_BOOK, L3_BOOK, LIQUIDATIONS, OPEN_INTEREST, FUNDING
 
-
-# Core logic for pair generation
+SPOT = 'S'
+FUTURES = 'F'
+# B692998Y 3 weeks
 class BaseConfigBuilder(object):
+
+    TOP_20 = ['BTC', 'ETH', 'BNB', 'ADA', 'XRP', 'DOGE', 'DOT', 'BCH', 'UNI', 'LTC', 'LINK', 'MATIC', 'XLM', 'ETC', 'VET', 'TRX', 'EOS', 'FIL', 'SHIB', 'BSV']
+    STABLE = ['USDT', 'BUSD', 'USDC']
+    FIAT = ['USD', 'GBP', 'RUB', 'CHF']
 
     def __init__(self):
         self.exchanges_config = {
-            # pair_gen, max_depth_l2, include_ticker, include l3, include futures data
-            BINANCE : [self._get_binance_pairs()[:2], 100, True, False, False], #max_depth 5000 # https://github.com/bmoscon/cryptostore/issues/156 set limit to num pairs to avoid rate limit?
-            COINBASE: [self._get_coinbase_pairs()[:1], 100, True, True, False],
-            OKEX: [self.get_okex_pairs()[:2], 100, True, False, False],
-            FTX: [self.get_ftx_pairs()[:1], 100, True, False, False],
-
-            # TODO add funding, open_interest and liquidations
-            BITMEX: [self.get_bitmex_pairs()[:1], 100, True, False, True],
-            BINANCE_FUTURES: [self.get_binance_futures_pairs()[:1], 100, True, False, True]
-            # KRAKEN: [self._get_kraken_pairs()[:40], 100, True, False], #max_depth 1000
-            # HUOBI: [self._get_huobi_pairs()[:40], 100, False, False],
-            # 'BITMEX' : BITMEX,
-            # 'DERIBIT' : DERIBIT
+            # symbol_gen, max_depth_l2, channels (ticker, trades, l2, l3, liquidations, open_interest, funding), pairs per pod
+            BINANCE: {
+                SPOT: [self.symbols(BINANCE, SPOT), 100, [TICKER, TRADES, L2_BOOK], 1],
+            },
+            COINBASE: {
+                SPOT: [self.symbols(COINBASE, SPOT), 100, [TICKER, TRADES, L2_BOOK, L3_BOOK], 1],
+            },
+            OKEX: {
+                SPOT: [self.symbols(OKEX, SPOT), 100, [TICKER, TRADES, L2_BOOK], 1],
+                FUTURES: [self.symbols(OKEX, FUTURES), 100, [TICKER, TRADES, L2_BOOK, LIQUIDATIONS, OPEN_INTEREST, FUNDING], 1],
+            },
+            FTX: {
+                SPOT: [self.symbols(FTX, SPOT), 100, [TICKER, TRADES, L2_BOOK], 1],
+                FUTURES: [self.symbols(FTX, FUTURES), 100, [TICKER, TRADES, L2_BOOK, LIQUIDATIONS, OPEN_INTEREST, FUNDING], 1],
+            },
+            BITMEX: {
+                FUTURES: [self.symbols(BITMEX, FUTURES), 100, [TICKER, TRADES, L2_BOOK, LIQUIDATIONS, OPEN_INTEREST, FUNDING], 1],
+            },
+            BINANCE_FUTURES: {
+                FUTURES: [self.symbols(BINANCE_FUTURES, FUTURES), 100, [TICKER, TRADES, L2_BOOK, LIQUIDATIONS, OPEN_INTEREST, FUNDING], 1]
+            },
         }
 
-    # TODO refactor below to remove dependency on exchnage specific logic, move to separate class
-    @staticmethod
-    def _get_kraken_pairs() -> list[str]:
-        symbols = gen_symbols(KRAKEN)
+    # TODO add logic to select base currency
+    def symbols(self, exchange: str, instrument: str) -> list[str]:
+        symbols = EXCHANGE_MAP[exchange].symbols()
 
-        # USD quote only
-        return [*filter(lambda item: item.split('-')[1] == 'USD', list(symbols.keys()))]
+        if exchange is BINANCE:
+            if instrument is not SPOT:
+                raise ValueError('[Symbols gen] Wrong args: ' + exchange + ' ' + instrument)
 
-    @staticmethod
-    def _get_coinbase_pairs() -> list[str]:
-        symbols = gen_symbols(COINBASE)
+            usdt = [*filter(lambda item: len(item.split('-')) == 2 and item.split('-')[1] == 'USDT', symbols)]
+            res = []
+            for coin in self.TOP_20:
+                symbol = coin + '-USDT'
+                if symbol in usdt:
+                    res.append(symbol)
+            return res
 
-        # USD quote only
-        return [*filter(lambda item: item.split('-')[1] == 'USD', list(symbols.keys()))]
+        elif exchange is COINBASE:
+            if instrument is not SPOT:
+                raise ValueError('[Symbols gen] Wrong args: ' + exchange + ' ' + instrument)
 
-        # from ccxt
-        # c = coinbase()
-        # markets = c.fetch_markets()
-        # usd_only = list(filter(lambda item: item['symbol'].split('/')[1] == 'USD', markets))
-        # usd_only_symbols = list(map(lambda item: item['symbol'], usd_only))
+            usd = [*filter(lambda item: len(item.split('-')) == 2 and item.split('-')[1] == 'USD', symbols)]
+            res = []
+            for coin in self.TOP_20:
+                symbol = coin + '-USD'
+                if symbol in usd:
+                    res.append(symbol)
+            return res
 
-        # return usd_only_symbols
+        elif exchange is OKEX:
+            if instrument not in [SPOT, FUTURES]:
+                raise ValueError('[Symbols gen] Wrong args: ' + exchange + ' ' + instrument)
 
-    @staticmethod
-    def _get_binance_pairs() -> list[str]:
-        symbols = gen_symbols(BINANCE)
+            if instrument is SPOT:
+                usdt = [*filter(lambda item: len(item.split('-')) == 2 and item.split('-')[1] == 'USDT', symbols)]
+                res = []
+                for coin in self.TOP_20:
+                    symbol = coin + '-USDT'
+                    if symbol in usdt:
+                        res.append(symbol)
+                return res
 
-        # USD quote only
-        return [*filter(lambda item: item.split('-')[1] == 'USDT', list(symbols.keys()))]
+            if instrument is FUTURES:
+                usdt_swap = [*filter(lambda item: len(item.split('-')) == 3 and item.split('-')[1] == 'USDT' and item.split('-')[2] == 'SWAP', symbols)]
+                res = []
+                for coin in self.TOP_20:
+                    symbol = coin + '-USDT-SWAP'
+                    if symbol in usdt_swap:
+                        res.append(symbol)
+                return res
 
-    @staticmethod
-    def _get_huobi_pairs() -> list[str]:
-        symbols = gen_symbols(HUOBI)
+        elif exchange is FTX:
+            if instrument not in [SPOT, FUTURES]:
+                raise ValueError('[Symbols gen] Wrong args: ' + exchange + ' ' + instrument)
 
-        # USD quote only
-        return [*filter(lambda item: item.split('-')[1] == 'USDT', list(symbols.keys()))]
+            if instrument is SPOT:
+                usd = [*filter(lambda item: len(item.split('-')) == 2 and item.split('-')[1] == 'USD', symbols)]
+                res = []
+                for coin in self.TOP_20:
+                    symbol = coin + '-USD'
+                    if symbol in usd:
+                        res.append(symbol)
+                return res
 
-    @staticmethod
-    def get_okex_pairs():
-        symbols = gen_symbols(OKEX)
-        return [*filter(lambda item: item.split('-')[1] == 'USDT', list(symbols.keys()))]
+            if instrument is FUTURES:
+                perp = [*filter(lambda item: len(item.split('-')) == 2 and item.split('-')[1] == 'PERP', symbols)]
+                res = []
+                for coin in self.TOP_20:
+                    symbol = coin + '-PERP'
+                    if symbol in perp:
+                        res.append(symbol)
+                return res
 
+        elif exchange is BITMEX:
+            if instrument is not FUTURES:
+                raise ValueError('[Symbols gen] Wrong args: ' + exchange + ' ' + instrument)
 
-    @staticmethod
-    def get_ftx_pairs():
-        symbols = gen_symbols(FTX)
-        return [*filter(lambda item: len(item.split('-')) == 2 and item.split('-')[1] == 'USDT', list(symbols.keys()))]
+            usd_and_usdt = [*filter(lambda item: len(item.split('-')) == 2 and (item.split('-')[1] == 'USDT' or item.split('-')[1] == 'USD'), symbols)]
+            res = []
+            for coin in self.TOP_20:
+                symbol_usd = coin + '-USD'
+                symbol_usdt = coin + '-USDT'
+                if symbol_usd in usd_and_usdt:
+                    res.append(symbol_usd)
+                elif symbol_usdt in usd_and_usdt:
+                    res.append(symbol_usdt)
+            return res
 
+        elif exchange is BINANCE_FUTURES:
+            if instrument is not FUTURES:
+                raise ValueError('[Symbols gen] Wrong args: ' + exchange + ' ' + instrument)
 
-    @staticmethod
-    def get_bitmex_pairs():
-        # symbols = gen_symbols(BITMEX)
-        return ['BTC-USD', 'ETH-USD', 'XRP-USD', 'DOGE-USDT', 'BNB-USDT']
-
-    @staticmethod
-    def get_binance_futures_pairs():
-        symbols = gen_symbols(BINANCE_FUTURES)
-        return [*filter(lambda item: item.split('-')[1] == 'USDT', list(symbols.keys()))]
-
-    @staticmethod
-    def get_deribit_pairs():
-        symbols = gen_symbols(DERIBIT)
-        print(symbols)
-
-
+            usdt = [*filter(lambda item: len(item.split('-')) == 2 and item.split('-')[1] == 'USDT', symbols)]
+            res = []
+            for coin in self.TOP_20:
+                symbol = coin + '-USDT'
+                if symbol in usdt:
+                    res.append(symbol)
+            return res
+        else:
+            raise ValueError('[Symbols gen] Unsupported exchange ' + exchange)

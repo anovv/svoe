@@ -1,4 +1,5 @@
 from configs.data_feed.base_config_builder import BaseConfigBuilder
+from cryptofeed.defines import TICKER, TRADES, L2_BOOK, L3_BOOK, LIQUIDATIONS, OPEN_INTEREST, FUNDING
 
 from pathlib import Path
 from typing import Any
@@ -26,16 +27,13 @@ DATA_FEED_CONFIG_FILE_NAME = 'data-feed-config.yaml'
 class CryptostoreConfigBuilder(BaseConfigBuilder):
 
     # DEBUG ONLY
-    def cryptostore_single_config_DEBUG(self) -> str:
-        ex_to_pairs = {}
-        for exchange in self.exchanges_config.keys():
-            ex_to_pairs[exchange] = self.exchanges_config[exchange][0]
-        config = self._build_cryptostore_config(ex_to_pairs)
+    def gen_DEBUG(self) -> str:
+        config = self._cryptostore_config_FULL_DEBUG()
         return self._dump_yaml_config(config, DATA_FEED_CONFIG_DIR + '/' + DATA_FEED_CONFIG_FILE_NAME)
 
-    def _build_cryptostore_config(self, ex_to_pairs: dict[str, list[str]]) -> dict:
+    def _cryptostore_template(self):
         aws_credentials = self._read_aws_credentials()
-        config = {
+        return {
             'cache': MEDIUM,
             'kafka': {
                 'ip': KAFKA_IP,
@@ -71,57 +69,130 @@ class CryptostoreConfigBuilder(BaseConfigBuilder):
                 # path=TEMP_FILES_PATH,
             },
             'storage_interval': 30,
-            'exchanges': self._build_exchanges_config(ex_to_pairs)
         }
 
+    def _cryptostore_config(
+        self,
+        exchange: str,
+        instrument: str,
+        symbols: list[str],
+    ) -> dict:
+        config = self._cryptostore_template()
+        config['exchanges'] = self._exchange_config(exchange, instrument, symbols)
         return config
 
-    def _build_exchanges_config(self, ex_to_pairs: dict[str, list[str]]) -> dict[str, Any]:
+    def _exchange_config(
+        self,
+        exchange: str,
+        instrument: str,
+        symbols: list[str],
+    ) -> dict:
+        config = {exchange: {}}
+        config[exchange]['retries'] = -1
+        self._populate_channels(
+            config,
+            exchange,
+            instrument,
+            symbols,
+        )
+
+        return config
+
+    def _cryptostore_config_FULL_DEBUG(self) -> dict:
+        config = self._cryptostore_template()
+        config['exchanges'] = self._exchanges_config_FULL_DEBUG()
+        return config
+
+    def _exchanges_config_FULL_DEBUG(self) -> dict:
         config = {}
-        for exchange in ex_to_pairs.keys():
-            if exchange not in self.exchanges_config:
-                raise Exception('Exchange {} is not supported'.format(exchange))
+        for exchange in self.exchanges_config.keys():
+            config[exchange] = {}
+            # per exchange retries?
+            config[exchange]['retries'] = -1
 
-            # pairs
-            pairs = ex_to_pairs[exchange]
+            for instrument in self.exchanges_config[exchange].keys():
+                symbols = self.exchanges_config[exchange][instrument][0]
+                self._populate_channels(
+                    config,
+                    exchange,
+                    instrument,
+                    symbols,
+                )
 
-            # l2 book
-            l2_book = {
-                'symbols': pairs,
-                'book_delta': True,
-            }
-            max_depth_l2 = self.exchanges_config[exchange][1]
-            if max_depth_l2 > 0:
-                l2_book['max_depth'] = max_depth_l2
+        return config
 
-            config[exchange] = {
-                'retries': -1,
-                'l2_book': l2_book,
-                'trades': pairs,
-            }
+    def _populate_channels(
+        self,
+        config: dict,
+        exchange: str,
+        instrument: str,
+        symbols: list[str],
+    ) -> None:
+        channels = self.exchanges_config[exchange][instrument][2]
 
-            # l3 book
-            include_l3 = self.exchanges_config[exchange][3]
-            if include_l3:
-                l3_book = {
-                    'symbols': pairs,
+        # ticker
+        if TICKER in channels:
+            if TICKER in config[exchange]:
+                config[exchange][TICKER].append(symbols)
+            else:
+                config[exchange][TICKER] = symbols
+
+        # l2 book
+        max_depth_l2 = self.exchanges_config[exchange][instrument][1]
+        if L2_BOOK in channels:
+            if L2_BOOK in config[exchange]:
+                config[exchange][L2_BOOK]['symbols'].append(symbols)
+            else:
+                l2_book = {
+                    'symbols': symbols,
                     'book_delta': True,
                 }
-                config[exchange]['l3_book'] = l3_book
+                if max_depth_l2 > 0:
+                    l2_book['max_depth'] = max_depth_l2
+                config[exchange] = {
+                    L2_BOOK: l2_book,
+                }
 
-            # ticker
-            include_ticker = self.exchanges_config[exchange][2]
-            if include_ticker:
-                config[exchange]['ticker'] = pairs
+        # l3 book
+        if L3_BOOK in channels:
+            if L3_BOOK in config[exchange]:
+                config[exchange][L3_BOOK]['symbols'].append(symbols)
+            else:
+                l3_book = {
+                    'symbols': symbols,
+                    'book_delta': True,
+                }
+                config[exchange] = {
+                    L3_BOOK: l3_book,
+                }
 
-            # futures data: open interest, funding, liquidations
-            include_futures_data = self.exchanges_config[exchange][4]
-            if include_futures_data:
-                config[exchange]['liquidations'] = pairs
-                config[exchange]['open_interest'] = pairs
-                config[exchange]['funding'] = pairs
+        # trades
+        if TRADES in channels:
+            if TRADES in config[exchange]:
+                config[exchange][TRADES].append(symbols)
+            else:
+                config[exchange][TRADES] = symbols
 
-        return config
+        # open interest
+        if OPEN_INTEREST in channels:
+            if OPEN_INTEREST in config[exchange]:
+                config[exchange][OPEN_INTEREST].append(symbols)
+            else:
+                config[exchange][OPEN_INTEREST] = symbols
+
+        # funding
+        if FUNDING in channels:
+            if FUNDING in config[exchange]:
+                config[exchange][FUNDING].append(symbols)
+            else:
+                config[exchange][FUNDING] = symbols
+
+        # liquidations
+        if LIQUIDATIONS in channels:
+            if LIQUIDATIONS in config[exchange]:
+                config[exchange][LIQUIDATIONS].append(symbols)
+            else:
+                config[exchange][LIQUIDATIONS] = symbols
 
     @staticmethod
     def _read_aws_credentials() -> list[str]:

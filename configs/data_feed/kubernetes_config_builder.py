@@ -12,48 +12,99 @@ import yaml
 
 # TODO figure out prod paths
 # ConfigMap
-DATA_FEED_CONFIG_MAP_PATH = str(Path(__file__).parent / 'svoe_data_feed_config_map.yaml')
-DATA_FEED_CONFIG_MAP_NAME = 'svoe-data-feed-config-map'
+CONFIG_MAP_GEN_PATH = str(Path(__file__).parent / 'svoe_data_feed_config_map.yaml')
+CONFIG_MAP_NAME_PREFIX = 'svoe-data-feed-cm'
 
 # Stateful Set
-DATA_FEED_STATEFUL_SET_CONFIG_PATH = str(Path(__file__).parent / 'svoe_data_feed_stateful_set.yaml')
-DATA_FEED_STATEFUL_SET_NAME = 'svoe-data-feed-stateful-set'
-DATA_FEED_HEADLESS_SERVICE_NAME = 'svoe-data-feed-stateful-set-service'
+STATEFUL_SET_GEN_PATH = str(Path(__file__).parent / 'svoe_data_feed_stateful_set.yaml')
+STATEFUL_SET_NAME_REFIX = 'svoe-data-feed-ss'
+SERVICE_NAME_REFIX = 'svoe-data-feed-ss-svc'
 
 # Container
-DATA_FEED_CONTAINER_NAME = 'svoe-data-feed-container'
-DATA_FEED_IMAGE = '050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v6'
+CONTAINER_NAME = 'svoe-data-feed-container'
+IMAGE = '050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7'
 
 # TODO this should be in sync with data feed service
-DATA_FEED_CONFIG_DIR = '/etc/svoe/data_feed/configs'
+CONFIG_DIR = '/etc/svoe/data_feed/configs'
 # TODO use this instead of hardcoding
-DATA_FEED_CONFIG_FILE_NAME = 'data-feed-config.yaml'
+CONFIG_FILE_NAME = 'data-feed-config.yaml'
 
 # Init Container
-DATA_FEED_INIT_CONTAINER_NAME = 'svoe-data-feed-init-container'
-DATA_FEED_INIT_IMAGE = 'busybox'
+INIT_CONTAINER_NAME = 'svoe-data-feed-init-container'
+INIT_IMAGE = 'busybox'
 
 # Volumes
-DATA_FEED_SCRIPTS_VOLUME_NAME = 'svoe-data-feed-scripts-vol'
-DATA_FEED_CONFIGS_VOLUME_NAME = 'svoe-data-feed-conf-vol'
+SCRIPTS_VOLUME_NAME_PREFIX = 'svoe-data-feed-scripts-vol'
+CONFIGS_VOLUME_NAME_PREFIX = 'svoe-data-feed-conf-vol'
 
-# Pods
 # TODO add namespace
-NUM_PODS = 6
-
 
 # Kubernetes specific configs
 # https://faun.pub/unique-configuration-per-pod-in-a-statefulset-1415e0c80258
 class KubernetesConfigBuilder(CryptostoreConfigBuilder):
 
-    def data_feed_stateful_set(self) -> str:
-        headless_service_config = {
+    def gen(self) -> tuple[str, str]:
+        config_map_specs = []
+        service_set_specs = [] # [headless_service_config, stateful_set_config]
+
+        for exchange in self.exchanges_config.keys():
+            for instrument in self.exchanges_config[exchange].keys():
+
+                config_map_name = (exchange + '-' + instrument + '-' + CONFIG_MAP_NAME_PREFIX).replace('_', '-').lower()
+                stateful_set_name = (exchange + '-' + instrument + '-' + STATEFUL_SET_NAME_REFIX).replace('_', '-').lower()
+                service_name = (exchange + '-' + instrument + '-' + SERVICE_NAME_REFIX).replace('_', '-').lower()
+                configs_volume_name = (exchange + '-' + instrument + '-' + CONFIGS_VOLUME_NAME_PREFIX).replace('_', '-').lower()
+                scripts_volume_name = (exchange + '-' + instrument + '-' + SCRIPTS_VOLUME_NAME_PREFIX).replace('_', '-').lower()
+
+                config_map_spec = self._config_map(
+                    config_map_name,
+                    exchange,
+                    instrument,
+                )
+                config_map_specs.append(config_map_spec)
+
+                service_and_stateful_set_specs = self._service_and_stateful_set(
+                    service_name,
+                    stateful_set_name,
+                    configs_volume_name,
+                    scripts_volume_name,
+                    config_map_name,
+                )
+
+                service_set_specs.extend(list(service_and_stateful_set_specs))
+
+        with open(CONFIG_MAP_GEN_PATH, 'w+') as outfile:
+            yaml.dump_all(
+                config_map_specs,
+                outfile,
+                default_flow_style=False,
+            )
+
+        with open(STATEFUL_SET_GEN_PATH, 'w+') as outfile:
+            yaml.dump_all(
+                service_set_specs,
+                outfile,
+                default_flow_style=False,
+            )
+
+        # TODO put all in one file?
+        return CONFIG_MAP_GEN_PATH, STATEFUL_SET_GEN_PATH
+
+    def _service_and_stateful_set(
+        self,
+        service_name: str,
+        stateful_set_name: str,
+        configs_volume_name: str,
+        scripts_volume_name: str,
+        config_map_name: str,
+    ) -> tuple[dict, dict]:
+        service_spec = {
             'apiVersion': 'v1',
             'kind': 'Service',
             'metadata': {
-                'name': DATA_FEED_HEADLESS_SERVICE_NAME,
+                'name': service_name,
                 'labels': {
-                    'name': DATA_FEED_HEADLESS_SERVICE_NAME,
+                    'name': service_name,
                 },
             },
             'spec': {
@@ -65,33 +116,32 @@ class KubernetesConfigBuilder(CryptostoreConfigBuilder):
                     },
                 ],
                 'selector': {
-                    'name': DATA_FEED_STATEFUL_SET_NAME,
+                    'name': stateful_set_name,
                 },
             },
         }
 
-        stateful_set_config = {
+        stateful_set_spec = {
             'apiVersion': 'apps/v1',
             'kind': 'StatefulSet',
             'metadata': {
-                'name': DATA_FEED_STATEFUL_SET_NAME,
+                'name': stateful_set_name,
                 'labels': {
-                    'name': DATA_FEED_STATEFUL_SET_NAME,
+                    'name': stateful_set_name,
                 },
             },
             'spec': {
-                'serviceName': DATA_FEED_HEADLESS_SERVICE_NAME,
-                'replicas': NUM_PODS,
-                'podManagementPolicy': 'Parallel',
+                'serviceName': service_name,
+                'replicas': 0,
                 'selector': {
                     'matchLabels': {
-                        'name': DATA_FEED_STATEFUL_SET_NAME,
+                        'name': stateful_set_name,
                     }
                 },
                 'template': {
                     'metadata': {
                         'labels': {
-                            'name': DATA_FEED_STATEFUL_SET_NAME
+                            'name': stateful_set_name
                         },
                     },
                     'spec': {
@@ -112,25 +162,33 @@ class KubernetesConfigBuilder(CryptostoreConfigBuilder):
                                 # },
                             },
                             {
-                                'name': DATA_FEED_CONTAINER_NAME,
-                                'image': DATA_FEED_IMAGE,
+                                'name': CONTAINER_NAME,
+                                'image': IMAGE,
                                 'imagePullPolicy': 'IfNotPresent',
                                 'volumeMounts': [
                                     {
-                                        'name': DATA_FEED_CONFIGS_VOLUME_NAME,
-                                        'mountPath': DATA_FEED_CONFIG_DIR,
+                                        'name': configs_volume_name,
+                                        'mountPath': CONFIG_DIR,
                                     },
+
                                 ],
-                                'livenessProbe': {
-                                    'exec': {
-                                        'command': [
-                                            'python',
-                                            'health_check/health_check.py',
-                                        ],
-                                    },
-                                    'initialDelaySeconds': 60,
-                                    'periodSeconds': 5,
-                                },
+                                # 'resources': {
+                                #     'requests': {
+                                #         'cpu': '200m',
+                                #         'memory': '200Mi',
+                                #     }
+                                # },
+                                # TODO fix livenessProbe
+                                # 'livenessProbe': {
+                                #     'exec': {
+                                #         'command': [
+                                #             'python',
+                                #             'health_check/health_check.py',
+                                #         ],
+                                #     },
+                                #     'initialDelaySeconds': 60,
+                                #     'periodSeconds': 5,
+                                # },
                                 # 'resources': {
                                 #     'requests': {
                                 #         'cpu': '450m',
@@ -141,16 +199,16 @@ class KubernetesConfigBuilder(CryptostoreConfigBuilder):
                         ],
                         'initContainers': [
                             {
-                                'name': DATA_FEED_INIT_CONTAINER_NAME,
-                                'image': DATA_FEED_INIT_IMAGE,
+                                'name': INIT_CONTAINER_NAME,
+                                'image': INIT_IMAGE,
                                 'command': ['/mnt/scripts/run.sh'],
                                 'volumeMounts': [
                                     {
-                                        'name': DATA_FEED_SCRIPTS_VOLUME_NAME,
+                                        'name': scripts_volume_name,
                                         'mountPath': '/mnt/scripts',
                                     },
                                     {
-                                        'name': DATA_FEED_CONFIGS_VOLUME_NAME,
+                                        'name': configs_volume_name,
                                         'mountPath': '/mnt/data',
                                     },
                                 ],
@@ -158,14 +216,14 @@ class KubernetesConfigBuilder(CryptostoreConfigBuilder):
                         ],
                         'volumes': [
                             {
-                                'name': DATA_FEED_SCRIPTS_VOLUME_NAME,
+                                'name': scripts_volume_name,
                                 'configMap': {
-                                    'name': DATA_FEED_CONFIG_MAP_NAME,
+                                    'name': config_map_name,
                                     'defaultMode': 0o555,
                                 },
                             },
                             {
-                                'name': DATA_FEED_CONFIGS_VOLUME_NAME,
+                                'name': configs_volume_name,
                                 'emptyDir': {},
                             },
                         ],
@@ -174,18 +232,16 @@ class KubernetesConfigBuilder(CryptostoreConfigBuilder):
             },
         }
 
-        with open(DATA_FEED_STATEFUL_SET_CONFIG_PATH, 'w+') as outfile:
-            yaml.dump_all(
-                [headless_service_config, stateful_set_config],
-                outfile,
-                default_flow_style=False,
-            )
-
-        return DATA_FEED_STATEFUL_SET_CONFIG_PATH
+        return service_spec, stateful_set_spec
 
     # ConfigMap containing Cryptostore configs for each pod
     # Assigned to pods using initContainer
-    def data_feed_config_map(self) -> str:
+    def _config_map(
+        self,
+        name: str,
+        exchange: str,
+        instrument: str,
+    ) -> dict:
         # yaml woodoo, move to separate class later
         # https://stackoverflow.com/questions/67080308/how-do-i-add-a-pipe-the-vertical-bar-into-a-yaml-file-from-python
 
@@ -197,7 +253,7 @@ class KubernetesConfigBuilder(CryptostoreConfigBuilder):
                                            data, style="|")
         yaml.add_representer(AsLiteral, represent_literal)
 
-        cs_conf = self._build_kuber_cryptostore_config()
+        pod_config_mapping = self._kuber_cryptostore_mapping(exchange, instrument)
 
         # TODO move 'data-feed-config' to const in cryptofeed_config_builder
         launch_script = \
@@ -210,9 +266,7 @@ class KubernetesConfigBuilder(CryptostoreConfigBuilder):
                     cp /mnt/scripts/data-feed-config-0.yaml /mnt/data/data-feed-config.yaml"""
             )
 
-        # TODO move config name to const
-
-        for pod in cs_conf.keys():
+        for pod in pod_config_mapping.keys():
             if pod == 0:
                 continue
             s = \
@@ -236,29 +290,38 @@ class KubernetesConfigBuilder(CryptostoreConfigBuilder):
             'apiVersion': 'v1',
             'kind': 'ConfigMap',
             'metadata': {
-                'name': DATA_FEED_CONFIG_MAP_NAME
+                'name': name,
             },
             'data': {
                 'run.sh': AsLiteral(launch_script.strip())
             }
         }
 
-        for pod in cs_conf.keys():
+        for pod in pod_config_mapping.keys():
             key = 'data-feed-config-' + str(pod) + '.yaml'
-            config['data'][key] = AsLiteral(yaml.dump(cs_conf[pod]))
+            config['data'][key] = AsLiteral(yaml.dump(pod_config_mapping[pod]))
 
-        return self._dump_yaml_config(config, DATA_FEED_CONFIG_MAP_PATH)
-
-    # Maps pods to their cryptostore configs
-    def _build_kuber_cryptostore_config(self) -> dict[int, dict]:
-        config = {}
-        pods_to_pairs = self._kuber_pods_to_pairs()
-        for pod in pods_to_pairs.keys():
-            ex_to_pairs = pods_to_pairs[pod]
-            config[pod] = self._build_cryptostore_config(ex_to_pairs)
         return config
 
-    def _kuber_pods_to_pairs(self) -> dict[int, dict[str, list[str]]]:
+    # Maps pods to their cryptostore configs
+    def _kuber_cryptostore_mapping(
+        self,
+        exchange: str,
+        instrument: str,
+    ) -> dict[int, dict]:
+        symbols = self.exchanges_config[exchange][instrument][0]
+        symbols_per_pod = self.exchanges_config[exchange][instrument][3]
+        pods_count = math.ceil(len(symbols)/symbols_per_pod)
+
+        config = {}
+        for pod in range(pods_count):
+            symbols_for_pod = symbols[symbols_per_pod*pod:min(len(symbols), symbols_per_pod*(pod + 1))]
+            config[pod] = self._cryptostore_config(exchange, instrument, symbols_for_pod)
+        return config
+
+### --------------------------------------------
+
+    def _kuber_pods_to_pairs_DEPRECATED(self) -> dict[int, dict[str, list[str]]]:
 
         # e1: p1 p2 p3 p4 p5 p6  | pairs: 6 cost: 3.6 round: 3
         #
@@ -270,7 +333,7 @@ class KubernetesConfigBuilder(CryptostoreConfigBuilder):
         #
         # num_pods = 6
 
-        num_pods = NUM_PODS
+        num_pods = 10
         pods = [*range(0, num_pods)]
         num_exchanges = len(self.exchanges_config)
         num_pairs = sum(len(val[0]) for val in self.exchanges_config.values())

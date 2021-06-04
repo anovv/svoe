@@ -55,8 +55,9 @@ def check():
 
 
         r = redis.Redis(redis_ip, redis_port)
-        if num_redis_keys != len(r.keys()):
-            print('[HEALTH CHECK][FAILED][Redis]: Keys expected ' + str(num_redis_keys) + ' Keys read ' + str(len(r.keys())))
+        keys = r.keys()
+        if num_redis_keys != len(keys):
+            print('[HEALTH CHECK][FAILED][Redis]: Keys expected ' + str(num_redis_keys) + ' Keys read ' + str(len(keys)))
             print('[HEALTH CHECK][feedhandler.log tail]:\n' + tail(FEEDHANDLER_LOG_PATH))
             print('[HEALTH CHECK][cryptostore.log tail]:\n' + tail(CRYPTOSTORE_LOG_PATH))
             sys.exit(FAILURE)

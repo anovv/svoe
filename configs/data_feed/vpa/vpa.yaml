@@ -1,0 +1,23 @@
+apiVersion: autoscaling.k8s.io/v1beta2
+kind: VerticalPodAutoscaler
+metadata:
+  name: ftx-s-svoe-data-feed-ss-recommender
+spec:
+  targetRef:
+    apiVersion: "apps/v1"
+    kind:       StatefulSet
+    name:       ftx-s-svoe-data-feed-ss
+  updatePolicy:
+    updateMode: "Auto"
+---
+apiVersion: autoscaling.k8s.io/v1beta2
+kind: VerticalPodAutoscaler
+metadata:
+  name: coinbase-s-svoe-data-feed-ss-recommender
+spec:
+  targetRef:
+    apiVersion: "apps/v1"
+    kind:       StatefulSet
+    name:       coinbase-s-svoe-data-feed-ss
+  updatePolicy:
+    updateMode: "Auto"
