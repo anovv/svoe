@@ -105,15 +105,29 @@ class KubernetesConfigBuilder(CryptostoreConfigBuilder):
                 'name': service_name,
                 'labels': {
                     'name': service_name,
+                    'monitored': 'all',
                 },
             },
             'spec': {
                 'clusterIP': 'None',
                 'ports': [
                     {
+                        # is this needed ?
                         'name': 'http',
                         'port': 80,
                     },
+                    {
+                        'name': 'redis',
+                        'port': 6379,
+                        'targetPort': 6379,
+                        'protocol': 'TCP',
+                    },
+                    {
+                        'name': 'redis-metrics',
+                        'port': 9121,
+                        'targetPort': 9121,
+                        'protocol': 'TCP',
+                    }
                 ],
                 'selector': {
                     'name': stateful_set_name,
@@ -160,6 +174,16 @@ class KubernetesConfigBuilder(CryptostoreConfigBuilder):
                                 #         'memory': '30Mi',
                                 #     }
                                 # },
+                            },
+                            {
+                                'name': 'redis-exporter',
+                                'image': 'oliver006/redis_exporter:latest',
+                                'ports': [
+                                    {
+                                        'containerPort': 9121, # TODO use const
+                                        'name': 'redis-metrics'
+                                    }
+                                ],
                             },
                             {
                                 'name': CONTAINER_NAME,

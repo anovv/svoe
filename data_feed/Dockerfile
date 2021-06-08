@@ -8,7 +8,7 @@ COPY . .
 
 RUN apt install gcc git
 
-RUN pip install --no-cache-dir git+https://github.com/bmoscon/cryptostore.git
+RUN pip install --no-cache-dir git+https://github.com/dirtyValera/cryptostore.git
 RUN pip install --no-cache-dir redis
 RUN pip install --no-cache-dir git+https://github.com/aio-libs/aioredis-py@4dfdc05
 RUN pip install --no-cache-dir boto3

@@ -10,7 +10,7 @@ setup(
     url="https://github.com/dirtyValera/svoe",
     packages=find_packages(),
     install_requires=[
-        "cryptostore",
+        "cryptostore @ git+https://github.com/dirtyValera/cryptostore.git",
     ],
     entry_points={
         'console_scripts': ['svoe_data_feed_launch=data_feed.bin.launcher:main'],

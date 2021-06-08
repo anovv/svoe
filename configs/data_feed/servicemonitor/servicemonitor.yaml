@@ -1,0 +1,16 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: svoe-data-feed-all-svcmonitor
+  labels:
+    name: svoe-data-feed-all-svcmonitor
+spec:
+  selector:
+    matchLabels:
+      monitored: all
+  namespaceSelector:
+    matchNames:
+      - default
+  endpoints:
+    - port: redis-metrics
+      interval: 5s
