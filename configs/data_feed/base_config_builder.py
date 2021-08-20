@@ -7,19 +7,20 @@ FUTURES = 'F'
 # B692998Y 3 weeks
 class BaseConfigBuilder(object):
 
-    TOP_20 = ['BTC', 'ETH', 'BNB', 'ADA', 'XRP', 'DOGE', 'DOT', 'BCH', 'UNI', 'LTC', 'LINK', 'MATIC', 'XLM', 'ETC', 'VET', 'TRX', 'EOS', 'FIL', 'SHIB', 'BSV']
+    # TOP_20 = ['BTC', 'ETH', 'BNB', 'ADA', 'XRP', 'DOGE', 'DOT', 'BCH', 'UNI', 'LTC', 'LINK', 'MATIC', 'XLM', 'ETC', 'VET', 'TRX', 'EOS', 'FIL', 'SHIB', 'BSV']
+    TOP_20 = ['BTC']
     STABLE = ['USDT', 'BUSD', 'USDC']
     FIAT = ['USD', 'GBP', 'RUB', 'CHF']
 
     def __init__(self):
         self.exchanges_config = {
             # symbol_gen, max_depth_l2, channels (ticker, trades, l2, l3, liquidations, open_interest, funding), pairs per pod
-            BINANCE: {
-                SPOT: [self.symbols(BINANCE, SPOT), 100, [TICKER, TRADES, L2_BOOK], 1],
-            },
-            COINBASE: {
-                SPOT: [self.symbols(COINBASE, SPOT), 100, [TICKER, TRADES, L2_BOOK, L3_BOOK], 1],
-            },
+            # BINANCE: {
+            #     SPOT: [self.symbols(BINANCE, SPOT), 100, [TICKER, TRADES, L2_BOOK], 1],
+            # },
+            # COINBASE: {
+            #     SPOT: [self.symbols(COINBASE, SPOT), 100, [TICKER, TRADES, L2_BOOK, L3_BOOK], 1],
+            # },
             OKEX: {
                 SPOT: [self.symbols(OKEX, SPOT), 100, [TICKER, TRADES, L2_BOOK], 1],
                 FUTURES: [self.symbols(OKEX, FUTURES), 100, [TICKER, TRADES, L2_BOOK, LIQUIDATIONS, OPEN_INTEREST, FUNDING], 1],
@@ -28,12 +29,12 @@ class BaseConfigBuilder(object):
                 SPOT: [self.symbols(FTX, SPOT), 100, [TICKER, TRADES, L2_BOOK], 1],
                 FUTURES: [self.symbols(FTX, FUTURES), 100, [TICKER, TRADES, L2_BOOK, LIQUIDATIONS, OPEN_INTEREST, FUNDING], 1],
             },
-            BITMEX: {
-                FUTURES: [self.symbols(BITMEX, FUTURES), 100, [TICKER, TRADES, L2_BOOK, LIQUIDATIONS, OPEN_INTEREST, FUNDING], 1],
-            },
-            BINANCE_FUTURES: {
-                FUTURES: [self.symbols(BINANCE_FUTURES, FUTURES), 100, [TICKER, TRADES, L2_BOOK, LIQUIDATIONS, OPEN_INTEREST, FUNDING], 1]
-            },
+            # BITMEX: {
+            #     FUTURES: [self.symbols(BITMEX, FUTURES), 100, [TICKER, TRADES, L2_BOOK, LIQUIDATIONS, OPEN_INTEREST, FUNDING], 1],
+            # },
+            # BINANCE_FUTURES: {
+            #     FUTURES: [self.symbols(BINANCE_FUTURES, FUTURES), 100, [TICKER, TRADES, L2_BOOK, LIQUIDATIONS, OPEN_INTEREST, FUNDING], 1]
+            # },
         }
 
     # TODO add logic to select base currency

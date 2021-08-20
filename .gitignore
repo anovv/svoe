@@ -9,3 +9,5 @@ utils/parquet/parquet_sample_files/
 configs/data_feed/aws_credentials.yaml
 **/*.egg-info
 cryptostore.log
+kubeflow/kfapp/
+prometheus_multiproc_dir/

@@ -133,7 +133,7 @@ class CryptostoreConfigBuilder(BaseConfigBuilder):
         # ticker
         if TICKER in channels:
             if TICKER in config[exchange]:
-                config[exchange][TICKER].append(symbols)
+                config[exchange][TICKER].extend(symbols)
             else:
                 config[exchange][TICKER] = symbols
 
@@ -141,7 +141,7 @@ class CryptostoreConfigBuilder(BaseConfigBuilder):
         max_depth_l2 = self.exchanges_config[exchange][instrument][1]
         if L2_BOOK in channels:
             if L2_BOOK in config[exchange]:
-                config[exchange][L2_BOOK]['symbols'].append(symbols)
+                config[exchange][L2_BOOK]['symbols'].extend(symbols)
             else:
                 l2_book = {
                     'symbols': symbols,
@@ -156,7 +156,7 @@ class CryptostoreConfigBuilder(BaseConfigBuilder):
         # l3 book
         if L3_BOOK in channels:
             if L3_BOOK in config[exchange]:
-                config[exchange][L3_BOOK]['symbols'].append(symbols)
+                config[exchange][L3_BOOK]['symbols'].extend(symbols)
             else:
                 l3_book = {
                     'symbols': symbols,
@@ -169,28 +169,28 @@ class CryptostoreConfigBuilder(BaseConfigBuilder):
         # trades
         if TRADES in channels:
             if TRADES in config[exchange]:
-                config[exchange][TRADES].append(symbols)
+                config[exchange][TRADES].extend(symbols)
             else:
                 config[exchange][TRADES] = symbols
 
         # open interest
         if OPEN_INTEREST in channels:
             if OPEN_INTEREST in config[exchange]:
-                config[exchange][OPEN_INTEREST].append(symbols)
+                config[exchange][OPEN_INTEREST].extend(symbols)
             else:
                 config[exchange][OPEN_INTEREST] = symbols
 
         # funding
         if FUNDING in channels:
             if FUNDING in config[exchange]:
-                config[exchange][FUNDING].append(symbols)
+                config[exchange][FUNDING].extend(symbols)
             else:
                 config[exchange][FUNDING] = symbols
 
         # liquidations
         if LIQUIDATIONS in channels:
             if LIQUIDATIONS in config[exchange]:
-                config[exchange][LIQUIDATIONS].append(symbols)
+                config[exchange][LIQUIDATIONS].extend(symbols)
             else:
                 config[exchange][LIQUIDATIONS] = symbols
 
