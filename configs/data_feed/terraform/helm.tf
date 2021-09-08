@@ -7,8 +7,66 @@ provider "helm" {
 }
 
 locals {
+  // Prometheus // TODO make similar to metrics values
   finalizers = ["kubernetes.io/pvc-protection"]
   accessModes = ["ReadWriteOnce"]
+
+  // Metrics server
+  metrics-server-values = {
+    // make sure it runs on master
+    tolerations = [
+      {
+        effect = "NoSchedule",
+        key = "node-role.kubernetes.io/master",
+      }
+    ]
+    nodeSelector = {
+      "node-role.kubernetes.io/master" = ""
+    }
+  }
+
+  // Dask
+  dask-values = {
+    "scheduler.tolerations" = [
+      {
+        effect = "NoSchedule",
+        key = "dedicated",
+        operator = "Equal",
+        value = "dask",
+      }
+    ]
+    "worker.tolerations" = [
+      {
+        effect = "NoSchedule",
+        key = "dedicated",
+        operator = "Equal",
+        value = "dask",
+      }
+    ]
+
+    "scheduler.nodeSelector" = {
+      dedicated = "dask"
+    }
+    "worker.nodeSelector" = {
+      dedicated = "dask"
+    }
+
+    "jupyter.enabled" = false
+
+    "scheduler.serviceType" = "LoadBalancer"
+  }
+}
+
+resource "helm_release" "metrics-server" {
+  name       = "metrics-server"
+  namespace  = "kube-system"
+  create_namespace = false
+  repository = "https://charts.bitnami.com/bitnami"
+  chart      = "metrics-server"
+
+  values = [
+    yamlencode(local.metrics-server-values)
+  ]
 }
 
 resource "helm_release" "dask" {
@@ -17,6 +75,10 @@ resource "helm_release" "dask" {
   create_namespace = true
   repository = "https://helm.dask.org/"
   chart      = "dask"
+
+  values = [
+    yamlencode(local.dask-values)
+  ]
 }
 
 // TODO uncomment when installing prometheus from scratch
