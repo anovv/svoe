@@ -11,3 +11,5 @@ configs/data_feed/aws_credentials.yaml
 cryptostore.log
 kubeflow/kfapp/
 prometheus_multiproc_dir/
+config/data_feed/terraform/.terraform/
+config/data_feed/terraform/aws/glue/.terraform/
