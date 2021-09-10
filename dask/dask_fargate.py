@@ -53,6 +53,7 @@ def install_package():
 
 client.run(install_package)
 
-storage_options={'key': 'AKIAJXSXXFCA3HN3T7GQ', 'secret': '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'}
+# TODO update and use secret
+storage_options={}
 d = dask.delayed(dd.read_parquet)('s3://svoe.test.1/parquet/FTX/l2_book/BTC-USD', storage_options=storage_options)
 df = dask.compute(d)[0]
