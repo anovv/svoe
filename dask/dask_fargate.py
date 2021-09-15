@@ -53,7 +53,12 @@ def install_package():
 
 client.run(install_package)
 
-# TODO update and use secret
-storage_options={}
-d = dask.delayed(dd.read_parquet)('s3://svoe.test.1/parquet/FTX/l2_book/BTC-USD', storage_options=storage_options)
+d = dask.delayed(dd.read_parquet)('s3://svoe.test.1/parquet/FTX/l2_book/BTC-USD')
 df = dask.compute(d)[0]
+
+# https://github.com/dask/s3fs/issues/272
+# https://github.com/apache/arrow/issues/2192#issuecomment-569125326
+from fastparquet import ParquetFile
+
+from s3fs import S3FileSystem, S3File
+
