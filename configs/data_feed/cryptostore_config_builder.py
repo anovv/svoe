@@ -2,14 +2,13 @@ from configs.data_feed.base_config_builder import BaseConfigBuilder
 from cryptofeed.defines import TICKER, TRADES, L2_BOOK, L3_BOOK, LIQUIDATIONS, OPEN_INTEREST, FUNDING
 
 from pathlib import Path
-from typing import Any
 import yaml
 
 MEDIUM = 'redis'
 
 # https://stackoverflow.com/questions/52996028/accessing-local-kafka-from-within-services-deployed-in-local-docker-for-mac-inc
 KAFKA_IP = '127.0.0.1'# ip='host.docker.internal', # for Docker on Mac use host.docker.internal:19092
-KAFKA_PORT = 9092# port=19092
+KAFKA_PORT = 9092 # port=19092
 
 REDIS_IP = '127.0.0.1'
 REDIS_PORT = 6379
@@ -22,6 +21,7 @@ AWS_CREDENTIALS_PATH = str(Path(__file__).parent / 'aws_credentials.yaml')
 # TODO this should be in sync with data feed service
 DATA_FEED_CONFIG_DIR = '/etc/svoe/data_feed/configs'
 DATA_FEED_CONFIG_FILE_NAME = 'data-feed-config.yaml'
+
 
 # Cryptostore specific configs
 class CryptostoreConfigBuilder(BaseConfigBuilder):
@@ -56,16 +56,24 @@ class CryptostoreConfigBuilder(BaseConfigBuilder):
                 'append_counter': 0,
                 'file_format': ['exchange', 'symbol', 'data_type', 'timestamp'],
                 'compression': {
-                    'codec': 'BROTLI',
-                    'level': 6,
+                    'codec': 'gzip',
+                    'level': 5,
                 },
                 'prefix_date': True,
-                'S3': {
-                    'key_id': aws_credentials[0],
-                    'secret': aws_credentials[1],
-                    'bucket': aws_credentials[2],
-                    'prefix': 'parquet',
-                },
+                # 'S3': {
+                #     'key_id': aws_credentials[0],
+                #     'secret': aws_credentials[1],
+                #     'bucket': aws_credentials[2],
+                #     'prefix': 'parquet',
+                # },
+                'SVOE': {
+                    's3_key_id': aws_credentials[0],
+                    's3_secret': aws_credentials[1],
+                    's3_bucket': aws_credentials[2],
+                    's3_prefix': 'data_lake',
+                    'glue_database': 'svoe_glue_db', # TODO sync with Terraform
+                    'version': 'local' # TODO add version logging
+                }
                 # path=TEMP_FILES_PATH,
             },
             'storage_interval': 30,
@@ -130,7 +138,7 @@ class CryptostoreConfigBuilder(BaseConfigBuilder):
     ) -> None:
         channels = self.exchanges_config[exchange][instrument][2]
 
-        # ticker
+        # ticker # TODO ticker is not populated^ why?
         if TICKER in channels:
             if TICKER in config[exchange]:
                 config[exchange][TICKER].extend(symbols)

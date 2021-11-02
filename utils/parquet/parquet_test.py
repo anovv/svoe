@@ -17,3 +17,6 @@ def read_s3() -> None:
     bucket = 's3://svoe.test.1/parquet/FTX/l2_book/BTC-USD'
     df = pq.ParquetDataset(bucket, filesystem=s3).read_pandas().to_pandas()
     print(df.timestamp)
+    import awswrangler as wr
+    wr.s3.store_parquet_metadata()
+

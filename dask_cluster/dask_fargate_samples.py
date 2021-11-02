@@ -49,9 +49,10 @@ def boto_bucket_exists():
 
 def install_package():
     import os
-    os.system("pip install pyarrow")
+    os.system("pip install pyarrow prefect[aws] s3fs fastparquet")
 
 client.run(install_package)
+# client.run_on_scheduler(install_package)
 
 d = dask.delayed(dd.read_parquet)('s3://svoe.test.1/parquet/FTX/l2_book/BTC-USD')
 df = dask.compute(d)[0]

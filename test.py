@@ -1,6 +1,9 @@
 import sys
-sys.path.append('/Users/anov/IdeaProjects/cryptofeed')
-sys.path.append('/Users/anov/IdeaProjects/cryptostore')
+
+# TODO move to PYTHONPATH
+# sys.path.append('/Users/anov/IdeaProjects/cryptofeed')
+# sys.path.append('/Users/anov/IdeaProjects/cryptostore')
+# sys.path.append('/dask_cluster/')
 
 from configs.data_feed.kubernetes_config_builder import KubernetesConfigBuilder
 from configs.data_feed.cryptostore_config_builder import CryptostoreConfigBuilder
@@ -12,7 +15,7 @@ from cryptofeed.exchanges import Coinbase
 from cryptofeed.callback import TickerCallback
 from prometheus_client import start_http_server, multiprocess
 
-def test():
+def test_datafeed():
     #
     # kcb = KubernetesConfigBuilder()
     # print(kcb.gen())
@@ -26,6 +29,5 @@ def test():
     # fh.add_feed(Coinbase(symbols=['BTC-USD'], channels=[TICKER], callbacks=ticker_cb))
     # fh.run()
 
-
 if __name__ == '__main__':
-    test()
+    test_datafeed()

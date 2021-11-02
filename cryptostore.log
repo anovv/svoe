@@ -9447,3 +9447,1181 @@ redis.exceptions.ResponseError: MISCONF Redis is configured to save RDB snapshot
 2021-06-15 12:37:13,255 : INFO : Flushing cache
 2021-06-15 12:37:14,250 : INFO : Collector for FTX running on PID 587
 2021-06-15 12:37:14,250 : INFO : Collector for OKEX running on PID 588
+2021-10-28 12:44:15,774 : INFO : Starting cryptostore
+2021-10-28 12:44:15,776 : INFO : Cryptostore running on PID 77566
+2021-10-28 12:44:15,812 : INFO : Prometheus started on port 8000
+2021-10-28 12:44:15,829 : INFO : Spawner started
+2021-10-28 12:44:15,839 : INFO : Aggregator started
+2021-10-28 12:44:15,847 : INFO : Cryptostore started
+2021-10-28 12:44:15,849 : INFO : loading config file locally: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-10-28 09:44:15.849559
+2021-10-28 12:44:15,898 : INFO : applying local config file: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-10-28 09:44:15.898077
+2021-10-28 12:44:15,898 : INFO : start: ['OKEX', 'FTX'] stop: []
+2021-10-28 12:44:19,718 : INFO : Aggregator running on PID 77589
+2021-10-28 12:44:19,726 : INFO : loading config file locally: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-10-28 09:44:19.726609
+2021-10-28 12:44:19,729 : INFO : Spawner running on PID 77588
+2021-10-28 12:44:19,733 : INFO : message: {"op": "start", "exchange": "OKEX", "collector": {"funding": [], "l2_book": {"book_delta": true, "max_depth": 100, "symbols": ["BTC-USDT"]}, "liquidations": [], "open_interest": [], "ticker": [], "trades": ["BTC-USDT"]}, "config": {"cache": "redis", "kafka": {"ip": "127.0.0.1", "port": 9092, "start_flush": true}, "parquet": {"S3": {"bucket": "svoe.test.1", "key_id": "AKIAJXSXXFCA3HN3T7GQ", "prefix": "parquet", "secret": "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"}, "append_counter": 0, "compression": {"codec": "BROTLI", "level": 5}, "del_file": true, "file_format": ["exchange", "symbol", "data_type", "timestamp"], "prefix_date": true}, "redis": {"del_after_read": true, "ip": "127.0.0.1", "port": 6379, "retention_time": null, "socket": null, "start_flush": true}, "storage": ["parquet"], "storage_interval": 30, "storage_retries": 5, "storage_retry_wait": 30}}
+2021-10-28 12:44:19,734 : INFO : Starting {'op': 'start', 'exchange': 'OKEX', 'collector': {'funding': [], 'l2_book': {'book_delta': True, 'max_depth': 100, 'symbols': ['BTC-USDT']}, 'liquidations': [], 'open_interest': [], 'ticker': [], 'trades': ['BTC-USDT']}, 'config': {'cache': 'redis', 'kafka': {'ip': '127.0.0.1', 'port': 9092, 'start_flush': True}, 'parquet': {'S3': {'bucket': 'svoe.test.1', 'key_id': 'AKIAJXSXXFCA3HN3T7GQ', 'prefix': 'parquet', 'secret': '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'}, 'append_counter': 0, 'compression': {'codec': 'BROTLI', 'level': 5}, 'del_file': True, 'file_format': ['exchange', 'symbol', 'data_type', 'timestamp'], 'prefix_date': True}, 'redis': {'del_after_read': True, 'ip': '127.0.0.1', 'port': 6379, 'retention_time': None, 'socket': None, 'start_flush': True}, 'storage': ['parquet'], 'storage_interval': 30, 'storage_retries': 5, 'storage_retry_wait': 30}}
+2021-10-28 12:44:19,766 : INFO : message: {"op": "start", "exchange": "FTX", "collector": {"funding": [], "l2_book": {"book_delta": true, "max_depth": 100, "symbols": ["BTC-USD"]}, "liquidations": [], "open_interest": [], "ticker": [], "trades": ["BTC-USD"]}, "config": {"cache": "redis", "kafka": {"ip": "127.0.0.1", "port": 9092, "start_flush": true}, "parquet": {"S3": {"bucket": "svoe.test.1", "key_id": "AKIAJXSXXFCA3HN3T7GQ", "prefix": "parquet", "secret": "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"}, "append_counter": 0, "compression": {"codec": "BROTLI", "level": 5}, "del_file": true, "file_format": ["exchange", "symbol", "data_type", "timestamp"], "prefix_date": true}, "redis": {"del_after_read": true, "ip": "127.0.0.1", "port": 6379, "retention_time": null, "socket": null, "start_flush": true}, "storage": ["parquet"], "storage_interval": 30, "storage_retries": 5, "storage_retry_wait": 30}}
+2021-10-28 12:44:19,769 : INFO : Starting {'op': 'start', 'exchange': 'FTX', 'collector': {'funding': [], 'l2_book': {'book_delta': True, 'max_depth': 100, 'symbols': ['BTC-USD']}, 'liquidations': [], 'open_interest': [], 'ticker': [], 'trades': ['BTC-USD']}, 'config': {'cache': 'redis', 'kafka': {'ip': '127.0.0.1', 'port': 9092, 'start_flush': True}, 'parquet': {'S3': {'bucket': 'svoe.test.1', 'key_id': 'AKIAJXSXXFCA3HN3T7GQ', 'prefix': 'parquet', 'secret': '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'}, 'append_counter': 0, 'compression': {'codec': 'BROTLI', 'level': 5}, 'del_file': True, 'file_format': ['exchange', 'symbol', 'data_type', 'timestamp'], 'prefix_date': True}, 'redis': {'del_after_read': True, 'ip': '127.0.0.1', 'port': 6379, 'retention_time': None, 'socket': None, 'start_flush': True}, 'storage': ['parquet'], 'storage_interval': 30, 'storage_retries': 5, 'storage_retry_wait': 30}}
+2021-10-28 12:44:19,895 : INFO : applying local config file: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-10-28 09:44:19.895630
+2021-10-28 12:44:19,958 : INFO : Flushing cache
+2021-10-28 12:44:22,320 : INFO : Collector for OKEX running on PID 77592
+2021-10-28 12:44:22,354 : INFO : Collector for FTX running on PID 77593
+2021-10-28 12:44:22,619 : INFO : Collector added feed handler - FTX(FUNDING, {'retries': 30, 'timeout': 120})
+2021-10-28 12:44:22,621 : INFO : Collector added feed handler - FTX(L2_BOOK, {'retries': 30, 'timeout': 120, 'max_depth': 100})
+2021-10-28 12:44:22,627 : INFO : Collector added feed handler - FTX(LIQUIDATIONS, {'retries': 30, 'timeout': 120})
+2021-10-28 12:44:22,629 : INFO : Collector added feed handler - FTX(OPEN_INTEREST, {'retries': 30, 'timeout': 120})
+2021-10-28 12:44:22,631 : INFO : Collector added feed handler - FTX(TICKER, {'retries': 30, 'timeout': 120})
+2021-10-28 12:44:22,635 : INFO : Collector added feed handler - FTX(TRADES, {'retries': 30, 'timeout': 120})
+2021-10-28 12:44:24,251 : INFO : Collector added feed handler - OKEX(FUNDING, {'retries': 30, 'timeout': 120})
+2021-10-28 12:44:24,255 : INFO : Collector added feed handler - OKEX(L2_BOOK, {'retries': 30, 'timeout': 120, 'max_depth': 100})
+2021-10-28 12:44:24,260 : INFO : Collector added feed handler - OKEX(LIQUIDATIONS, {'retries': 30, 'timeout': 120})
+2021-10-28 12:44:24,263 : INFO : Collector added feed handler - OKEX(OPEN_INTEREST, {'retries': 30, 'timeout': 120})
+2021-10-28 12:44:24,267 : INFO : Collector added feed handler - OKEX(TICKER, {'retries': 30, 'timeout': 120})
+2021-10-28 12:44:24,271 : INFO : Collector added feed handler - OKEX(TRADES, {'retries': 30, 'timeout': 120})
+2021-10-28 13:21:20,103 : INFO : Starting cryptostore
+2021-10-28 13:21:20,105 : INFO : Cryptostore running on PID 78157
+2021-10-28 13:21:20,192 : INFO : Prometheus started on port 8000
+2021-10-28 13:21:20,206 : INFO : Spawner started
+2021-10-28 13:21:20,214 : INFO : Aggregator started
+2021-10-28 13:21:20,219 : INFO : Cryptostore started
+2021-10-28 13:21:20,220 : INFO : loading config file locally: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-10-28 10:21:20.220476
+2021-10-28 13:21:20,234 : INFO : applying local config file: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-10-28 10:21:20.234843
+2021-10-28 13:21:20,235 : INFO : start: ['FTX', 'OKEX'] stop: []
+2021-10-28 13:21:23,767 : INFO : Aggregator running on PID 78173
+2021-10-28 13:21:23,770 : INFO : loading config file locally: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-10-28 10:21:23.770405
+2021-10-28 13:21:23,779 : INFO : Spawner running on PID 78172
+2021-10-28 13:21:23,784 : INFO : message: {"op": "start", "exchange": "FTX", "collector": {"funding": [], "l2_book": {"book_delta": true, "max_depth": 100, "symbols": ["BTC-USD"]}, "liquidations": [], "open_interest": [], "ticker": [], "trades": ["BTC-USD"]}, "config": {"cache": "redis", "kafka": {"ip": "127.0.0.1", "port": 9092, "start_flush": true}, "parquet": {"S3": {"bucket": "svoe.test.1", "key_id": "AKIAJXSXXFCA3HN3T7GQ", "prefix": "parquet", "secret": "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"}, "append_counter": 0, "compression": {"codec": "BROTLI", "level": 5}, "del_file": true, "file_format": ["exchange", "symbol", "data_type", "timestamp"], "prefix_date": true}, "redis": {"del_after_read": true, "ip": "127.0.0.1", "port": 6379, "retention_time": null, "socket": null, "start_flush": true}, "storage": ["parquet"], "storage_interval": 30, "storage_retries": 5, "storage_retry_wait": 30}}
+2021-10-28 13:21:23,785 : INFO : Starting {'op': 'start', 'exchange': 'FTX', 'collector': {'funding': [], 'l2_book': {'book_delta': True, 'max_depth': 100, 'symbols': ['BTC-USD']}, 'liquidations': [], 'open_interest': [], 'ticker': [], 'trades': ['BTC-USD']}, 'config': {'cache': 'redis', 'kafka': {'ip': '127.0.0.1', 'port': 9092, 'start_flush': True}, 'parquet': {'S3': {'bucket': 'svoe.test.1', 'key_id': 'AKIAJXSXXFCA3HN3T7GQ', 'prefix': 'parquet', 'secret': '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'}, 'append_counter': 0, 'compression': {'codec': 'BROTLI', 'level': 5}, 'del_file': True, 'file_format': ['exchange', 'symbol', 'data_type', 'timestamp'], 'prefix_date': True}, 'redis': {'del_after_read': True, 'ip': '127.0.0.1', 'port': 6379, 'retention_time': None, 'socket': None, 'start_flush': True}, 'storage': ['parquet'], 'storage_interval': 30, 'storage_retries': 5, 'storage_retry_wait': 30}}
+2021-10-28 13:21:23,807 : INFO : message: {"op": "start", "exchange": "OKEX", "collector": {"funding": [], "l2_book": {"book_delta": true, "max_depth": 100, "symbols": ["BTC-USDT"]}, "liquidations": [], "open_interest": [], "ticker": [], "trades": ["BTC-USDT"]}, "config": {"cache": "redis", "kafka": {"ip": "127.0.0.1", "port": 9092, "start_flush": true}, "parquet": {"S3": {"bucket": "svoe.test.1", "key_id": "AKIAJXSXXFCA3HN3T7GQ", "prefix": "parquet", "secret": "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"}, "append_counter": 0, "compression": {"codec": "BROTLI", "level": 5}, "del_file": true, "file_format": ["exchange", "symbol", "data_type", "timestamp"], "prefix_date": true}, "redis": {"del_after_read": true, "ip": "127.0.0.1", "port": 6379, "retention_time": null, "socket": null, "start_flush": true}, "storage": ["parquet"], "storage_interval": 30, "storage_retries": 5, "storage_retry_wait": 30}}
+2021-10-28 13:21:23,809 : INFO : Starting {'op': 'start', 'exchange': 'OKEX', 'collector': {'funding': [], 'l2_book': {'book_delta': True, 'max_depth': 100, 'symbols': ['BTC-USDT']}, 'liquidations': [], 'open_interest': [], 'ticker': [], 'trades': ['BTC-USDT']}, 'config': {'cache': 'redis', 'kafka': {'ip': '127.0.0.1', 'port': 9092, 'start_flush': True}, 'parquet': {'S3': {'bucket': 'svoe.test.1', 'key_id': 'AKIAJXSXXFCA3HN3T7GQ', 'prefix': 'parquet', 'secret': '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'}, 'append_counter': 0, 'compression': {'codec': 'BROTLI', 'level': 5}, 'del_file': True, 'file_format': ['exchange', 'symbol', 'data_type', 'timestamp'], 'prefix_date': True}, 'redis': {'del_after_read': True, 'ip': '127.0.0.1', 'port': 6379, 'retention_time': None, 'socket': None, 'start_flush': True}, 'storage': ['parquet'], 'storage_interval': 30, 'storage_retries': 5, 'storage_retry_wait': 30}}
+2021-10-28 13:21:23,850 : INFO : applying local config file: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-10-28 10:21:23.850483
+2021-10-28 13:21:23,894 : INFO : Flushing cache
+2021-10-28 17:34:14,815 : INFO : Starting cryptostore
+2021-10-28 17:34:14,817 : INFO : Cryptostore running on PID 80200
+2021-10-28 17:34:14,844 : INFO : Prometehus started on port 8000
+2021-10-28 17:34:14,854 : INFO : Spawner started
+2021-10-28 17:34:14,861 : INFO : Aggregator started
+2021-10-28 17:34:14,865 : INFO : Cryptostore started
+2021-10-28 17:34:14,866 : INFO : loading config file locally: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-10-28 14:34:14.866475
+2021-10-28 17:34:14,883 : INFO : applying local config file: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-10-28 14:34:14.883417
+2021-10-28 17:34:14,883 : INFO : start: ['FTX', 'OKEX'] stop: []
+2021-10-28 17:34:38,780 : INFO : Starting cryptostore
+2021-10-28 17:34:38,781 : INFO : Cryptostore running on PID 80213
+2021-10-28 17:34:38,809 : INFO : Prometehus started on port 8000
+2021-10-28 17:34:38,816 : INFO : Spawner started
+2021-10-28 17:34:38,825 : INFO : Aggregator started
+2021-10-28 17:34:38,833 : INFO : Cryptostore started
+2021-10-28 17:34:38,834 : INFO : loading config file locally: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-10-28 14:34:38.834308
+2021-10-28 17:34:38,854 : INFO : applying local config file: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-10-28 14:34:38.854531
+2021-10-28 17:34:38,855 : INFO : start: ['OKEX', 'FTX'] stop: []
+2021-10-28 17:34:40,789 : INFO : Aggregator running on PID 80229
+2021-10-28 17:34:40,789 : INFO : loading config file locally: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-10-28 14:34:40.789839
+2021-10-28 17:34:40,793 : INFO : Spawner running on PID 80228
+2021-10-28 17:34:40,794 : INFO : message: {"op": "start", "exchange": "OKEX", "collector": {"funding": [], "l2_book": {"book_delta": true, "max_depth": 100, "symbols": ["BTC-USDT"]}, "liquidations": [], "open_interest": [], "ticker": [], "trades": ["BTC-USDT"]}, "config": {"cache": "redis", "kafka": {"ip": "127.0.0.1", "port": 9092, "start_flush": true}, "parquet": {"S3": {"bucket": "svoe.test.1", "key_id": "AKIAJXSXXFCA3HN3T7GQ", "prefix": "parquet", "secret": "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"}, "append_counter": 0, "compression": {"codec": "BROTLI", "level": 5}, "del_file": true, "file_format": ["exchange", "symbol", "data_type", "timestamp"], "prefix_date": true}, "redis": {"del_after_read": true, "ip": "127.0.0.1", "port": 6379, "retention_time": null, "socket": null, "start_flush": true}, "storage": ["parquet"], "storage_interval": 30, "storage_retries": 5, "storage_retry_wait": 30}}
+2021-10-28 17:34:40,795 : INFO : Starting {'op': 'start', 'exchange': 'OKEX', 'collector': {'funding': [], 'l2_book': {'book_delta': True, 'max_depth': 100, 'symbols': ['BTC-USDT']}, 'liquidations': [], 'open_interest': [], 'ticker': [], 'trades': ['BTC-USDT']}, 'config': {'cache': 'redis', 'kafka': {'ip': '127.0.0.1', 'port': 9092, 'start_flush': True}, 'parquet': {'S3': {'bucket': 'svoe.test.1', 'key_id': 'AKIAJXSXXFCA3HN3T7GQ', 'prefix': 'parquet', 'secret': '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'}, 'append_counter': 0, 'compression': {'codec': 'BROTLI', 'level': 5}, 'del_file': True, 'file_format': ['exchange', 'symbol', 'data_type', 'timestamp'], 'prefix_date': True}, 'redis': {'del_after_read': True, 'ip': '127.0.0.1', 'port': 6379, 'retention_time': None, 'socket': None, 'start_flush': True}, 'storage': ['parquet'], 'storage_interval': 30, 'storage_retries': 5, 'storage_retry_wait': 30}}
+2021-10-28 17:34:40,806 : INFO : message: {"op": "start", "exchange": "FTX", "collector": {"funding": [], "l2_book": {"book_delta": true, "max_depth": 100, "symbols": ["BTC-USD"]}, "liquidations": [], "open_interest": [], "ticker": [], "trades": ["BTC-USD"]}, "config": {"cache": "redis", "kafka": {"ip": "127.0.0.1", "port": 9092, "start_flush": true}, "parquet": {"S3": {"bucket": "svoe.test.1", "key_id": "AKIAJXSXXFCA3HN3T7GQ", "prefix": "parquet", "secret": "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"}, "append_counter": 0, "compression": {"codec": "BROTLI", "level": 5}, "del_file": true, "file_format": ["exchange", "symbol", "data_type", "timestamp"], "prefix_date": true}, "redis": {"del_after_read": true, "ip": "127.0.0.1", "port": 6379, "retention_time": null, "socket": null, "start_flush": true}, "storage": ["parquet"], "storage_interval": 30, "storage_retries": 5, "storage_retry_wait": 30}}
+2021-10-28 17:34:40,808 : INFO : Starting {'op': 'start', 'exchange': 'FTX', 'collector': {'funding': [], 'l2_book': {'book_delta': True, 'max_depth': 100, 'symbols': ['BTC-USD']}, 'liquidations': [], 'open_interest': [], 'ticker': [], 'trades': ['BTC-USD']}, 'config': {'cache': 'redis', 'kafka': {'ip': '127.0.0.1', 'port': 9092, 'start_flush': True}, 'parquet': {'S3': {'bucket': 'svoe.test.1', 'key_id': 'AKIAJXSXXFCA3HN3T7GQ', 'prefix': 'parquet', 'secret': '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'}, 'append_counter': 0, 'compression': {'codec': 'BROTLI', 'level': 5}, 'del_file': True, 'file_format': ['exchange', 'symbol', 'data_type', 'timestamp'], 'prefix_date': True}, 'redis': {'del_after_read': True, 'ip': '127.0.0.1', 'port': 6379, 'retention_time': None, 'socket': None, 'start_flush': True}, 'storage': ['parquet'], 'storage_interval': 30, 'storage_retries': 5, 'storage_retry_wait': 30}}
+2021-10-28 17:34:40,808 : INFO : applying local config file: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-10-28 14:34:40.808860
+2021-10-28 17:34:40,851 : INFO : Flushing cache
+2021-10-28 17:34:42,819 : INFO : Collector for OKEX running on PID 80230
+2021-10-28 17:34:42,819 : INFO : Collector for FTX running on PID 80231
+2021-10-28 17:34:43,159 : INFO : Collector added feed handler - FTX(FUNDING, {'retries': 30, 'timeout': 120})
+2021-10-28 17:34:43,161 : INFO : Collector added feed handler - FTX(L2_BOOK, {'retries': 30, 'timeout': 120, 'max_depth': 100})
+2021-10-28 17:34:43,165 : INFO : Collector added feed handler - FTX(LIQUIDATIONS, {'retries': 30, 'timeout': 120})
+2021-10-28 17:34:43,166 : INFO : Collector added feed handler - FTX(OPEN_INTEREST, {'retries': 30, 'timeout': 120})
+2021-10-28 17:34:43,167 : INFO : Collector added feed handler - FTX(TICKER, {'retries': 30, 'timeout': 120})
+2021-10-28 17:34:43,168 : INFO : Collector added feed handler - FTX(TRADES, {'retries': 30, 'timeout': 120})
+2021-10-28 17:34:44,801 : INFO : Collector added feed handler - OKEX(FUNDING, {'retries': 30, 'timeout': 120})
+2021-10-28 17:34:44,802 : INFO : Collector added feed handler - OKEX(L2_BOOK, {'retries': 30, 'timeout': 120, 'max_depth': 100})
+2021-10-28 17:34:44,805 : INFO : Collector added feed handler - OKEX(LIQUIDATIONS, {'retries': 30, 'timeout': 120})
+2021-10-28 17:34:44,806 : INFO : Collector added feed handler - OKEX(OPEN_INTEREST, {'retries': 30, 'timeout': 120})
+2021-10-28 17:34:44,807 : INFO : Collector added feed handler - OKEX(TICKER, {'retries': 30, 'timeout': 120})
+2021-10-28 17:34:44,808 : INFO : Collector added feed handler - OKEX(TRADES, {'retries': 30, 'timeout': 120})
+2021-10-28 17:45:15,839 : INFO : Starting cryptostore
+2021-10-28 17:45:15,840 : INFO : Cryptostore running on PID 80330
+2021-10-28 17:45:15,859 : INFO : Prometehus started on port 8000
+2021-10-28 17:45:15,871 : INFO : Spawner started
+2021-10-28 17:45:15,880 : INFO : Aggregator started
+2021-10-28 17:45:15,895 : INFO : Cryptostore started
+2021-10-28 17:45:15,900 : INFO : loading config file locally: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-10-28 14:45:15.900708
+2021-10-28 17:45:15,967 : INFO : applying local config file: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-10-28 14:45:15.967018
+2021-10-28 17:45:15,967 : INFO : start: ['OKEX', 'FTX'] stop: []
+2021-10-28 17:45:19,107 : INFO : Spawner running on PID 80332
+2021-10-28 17:45:19,109 : INFO : message: {"op": "start", "exchange": "OKEX", "collector": {"funding": [], "l2_book": {"book_delta": true, "max_depth": 100, "symbols": ["BTC-USDT"]}, "liquidations": [], "open_interest": [], "ticker": [], "trades": ["BTC-USDT"]}, "config": {"cache": "redis", "kafka": {"ip": "127.0.0.1", "port": 9092, "start_flush": true}, "parquet": {"SVOE": {"glue_database": "svoe_glue_db", "s3_bucket": "svoe.test.1", "s3_key_id": "AKIAJXSXXFCA3HN3T7GQ", "s3_prefix": "parquet", "s3_secret": "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", "version": "local"}, "append_counter": 0, "compression": {"codec": "snappy", "level": 5}, "del_file": true, "file_format": ["exchange", "symbol", "data_type", "timestamp"], "prefix_date": true}, "redis": {"del_after_read": true, "ip": "127.0.0.1", "port": 6379, "retention_time": null, "socket": null, "start_flush": true}, "storage": ["parquet"], "storage_interval": 30, "storage_retries": 5, "storage_retry_wait": 30}}
+2021-10-28 17:45:19,109 : INFO : Starting {'op': 'start', 'exchange': 'OKEX', 'collector': {'funding': [], 'l2_book': {'book_delta': True, 'max_depth': 100, 'symbols': ['BTC-USDT']}, 'liquidations': [], 'open_interest': [], 'ticker': [], 'trades': ['BTC-USDT']}, 'config': {'cache': 'redis', 'kafka': {'ip': '127.0.0.1', 'port': 9092, 'start_flush': True}, 'parquet': {'SVOE': {'glue_database': 'svoe_glue_db', 's3_bucket': 'svoe.test.1', 's3_key_id': 'AKIAJXSXXFCA3HN3T7GQ', 's3_prefix': 'parquet', 's3_secret': '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', 'version': 'local'}, 'append_counter': 0, 'compression': {'codec': 'snappy', 'level': 5}, 'del_file': True, 'file_format': ['exchange', 'symbol', 'data_type', 'timestamp'], 'prefix_date': True}, 'redis': {'del_after_read': True, 'ip': '127.0.0.1', 'port': 6379, 'retention_time': None, 'socket': None, 'start_flush': True}, 'storage': ['parquet'], 'storage_interval': 30, 'storage_retries': 5, 'storage_retry_wait': 30}}
+2021-10-28 17:45:19,124 : INFO : message: {"op": "start", "exchange": "FTX", "collector": {"funding": [], "l2_book": {"book_delta": true, "max_depth": 100, "symbols": ["BTC-USD"]}, "liquidations": [], "open_interest": [], "ticker": [], "trades": ["BTC-USD"]}, "config": {"cache": "redis", "kafka": {"ip": "127.0.0.1", "port": 9092, "start_flush": true}, "parquet": {"SVOE": {"glue_database": "svoe_glue_db", "s3_bucket": "svoe.test.1", "s3_key_id": "AKIAJXSXXFCA3HN3T7GQ", "s3_prefix": "parquet", "s3_secret": "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", "version": "local"}, "append_counter": 0, "compression": {"codec": "snappy", "level": 5}, "del_file": true, "file_format": ["exchange", "symbol", "data_type", "timestamp"], "prefix_date": true}, "redis": {"del_after_read": true, "ip": "127.0.0.1", "port": 6379, "retention_time": null, "socket": null, "start_flush": true}, "storage": ["parquet"], "storage_interval": 30, "storage_retries": 5, "storage_retry_wait": 30}}
+2021-10-28 17:45:19,128 : INFO : Starting {'op': 'start', 'exchange': 'FTX', 'collector': {'funding': [], 'l2_book': {'book_delta': True, 'max_depth': 100, 'symbols': ['BTC-USD']}, 'liquidations': [], 'open_interest': [], 'ticker': [], 'trades': ['BTC-USD']}, 'config': {'cache': 'redis', 'kafka': {'ip': '127.0.0.1', 'port': 9092, 'start_flush': True}, 'parquet': {'SVOE': {'glue_database': 'svoe_glue_db', 's3_bucket': 'svoe.test.1', 's3_key_id': 'AKIAJXSXXFCA3HN3T7GQ', 's3_prefix': 'parquet', 's3_secret': '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', 'version': 'local'}, 'append_counter': 0, 'compression': {'codec': 'snappy', 'level': 5}, 'del_file': True, 'file_format': ['exchange', 'symbol', 'data_type', 'timestamp'], 'prefix_date': True}, 'redis': {'del_after_read': True, 'ip': '127.0.0.1', 'port': 6379, 'retention_time': None, 'socket': None, 'start_flush': True}, 'storage': ['parquet'], 'storage_interval': 30, 'storage_retries': 5, 'storage_retry_wait': 30}}
+2021-10-28 17:45:19,153 : INFO : Aggregator running on PID 80333
+2021-10-28 17:45:19,157 : INFO : loading config file locally: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-10-28 14:45:19.156999
+2021-10-28 17:45:19,199 : INFO : applying local config file: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-10-28 14:45:19.198941
+2021-10-28 17:45:19,245 : INFO : Flushing cache
+2021-10-28 17:45:19,289 : INFO : Reading FTX-l2_book-BTC-USD
+2021-10-28 17:45:19,290 : INFO : No data for FTX-l2_book-BTC-USD
+2021-10-28 17:45:19,290 : INFO : Reading FTX-trades-BTC-USD
+2021-10-28 17:45:19,291 : INFO : No data for FTX-trades-BTC-USD
+2021-10-28 17:45:19,291 : INFO : Reading OKEX-l2_book-BTC-USDT
+2021-10-28 17:45:19,292 : INFO : No data for OKEX-l2_book-BTC-USDT
+2021-10-28 17:45:19,292 : INFO : Reading OKEX-trades-BTC-USDT
+2021-10-28 17:45:19,293 : INFO : No data for OKEX-trades-BTC-USDT
+2021-10-28 17:45:22,514 : INFO : Collector for FTX running on PID 80335
+2021-10-28 17:45:22,534 : INFO : Collector for OKEX running on PID 80334
+2021-10-28 17:45:22,935 : INFO : Collector added feed handler - FTX(FUNDING, {'retries': 30, 'timeout': 120})
+2021-10-28 17:45:22,936 : INFO : Collector added feed handler - FTX(L2_BOOK, {'retries': 30, 'timeout': 120, 'max_depth': 100})
+2021-10-28 17:45:22,943 : INFO : Collector added feed handler - FTX(LIQUIDATIONS, {'retries': 30, 'timeout': 120})
+2021-10-28 17:45:22,946 : INFO : Collector added feed handler - FTX(OPEN_INTEREST, {'retries': 30, 'timeout': 120})
+2021-10-28 17:45:22,950 : INFO : Collector added feed handler - FTX(TICKER, {'retries': 30, 'timeout': 120})
+2021-10-28 17:45:22,952 : INFO : Collector added feed handler - FTX(TRADES, {'retries': 30, 'timeout': 120})
+2021-10-28 17:45:24,736 : INFO : Collector added feed handler - OKEX(FUNDING, {'retries': 30, 'timeout': 120})
+2021-10-28 17:45:24,737 : INFO : Collector added feed handler - OKEX(L2_BOOK, {'retries': 30, 'timeout': 120, 'max_depth': 100})
+2021-10-28 17:45:24,738 : INFO : Collector added feed handler - OKEX(LIQUIDATIONS, {'retries': 30, 'timeout': 120})
+2021-10-28 17:45:24,748 : INFO : Collector added feed handler - OKEX(OPEN_INTEREST, {'retries': 30, 'timeout': 120})
+2021-10-28 17:45:24,752 : INFO : Collector added feed handler - OKEX(TICKER, {'retries': 30, 'timeout': 120})
+2021-10-28 17:45:24,755 : INFO : Collector added feed handler - OKEX(TRADES, {'retries': 30, 'timeout': 120})
+2021-10-28 17:59:04,905 : INFO : Starting cryptostore
+2021-10-28 17:59:04,907 : INFO : Cryptostore running on PID 80491
+2021-10-28 17:59:04,918 : INFO : Prometehus started on port 8000
+2021-10-28 17:59:04,931 : INFO : Spawner started
+2021-10-28 17:59:04,947 : INFO : Aggregator started
+2021-10-28 17:59:04,952 : INFO : Cryptostore started
+2021-10-28 17:59:04,952 : INFO : loading config file locally: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-10-28 14:59:04.952495
+2021-10-28 17:59:04,980 : INFO : applying local config file: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-10-28 14:59:04.980270
+2021-10-28 17:59:04,980 : INFO : start: ['FTX', 'OKEX'] stop: []
+2021-10-28 17:59:09,266 : INFO : Aggregator running on PID 80498
+2021-10-28 17:59:09,268 : INFO : loading config file locally: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-10-28 14:59:09.268401
+2021-10-28 17:59:09,268 : INFO : Spawner running on PID 80497
+2021-10-28 17:59:09,268 : INFO : message: {"op": "start", "exchange": "FTX", "collector": {"funding": [], "l2_book": {"book_delta": true, "max_depth": 100, "symbols": ["BTC-USD"]}, "liquidations": [], "open_interest": [], "ticker": [], "trades": ["BTC-USD"]}, "config": {"cache": "redis", "kafka": {"ip": "127.0.0.1", "port": 9092, "start_flush": true}, "parquet": {"SVOE": {"glue_database": "svoe_glue_db", "s3_bucket": "svoe.test.1", "s3_key_id": "AKIAJXSXXFCA3HN3T7GQ", "s3_prefix": "parquet", "s3_secret": "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", "version": "local"}, "append_counter": 0, "compression": {"codec": "snappy", "level": 5}, "del_file": true, "file_format": ["exchange", "symbol", "data_type", "timestamp"], "prefix_date": true}, "redis": {"del_after_read": true, "ip": "127.0.0.1", "port": 6379, "retention_time": null, "socket": null, "start_flush": true}, "storage": ["parquet"], "storage_interval": 30, "storage_retries": 5, "storage_retry_wait": 30}}
+2021-10-28 17:59:09,269 : INFO : Starting {'op': 'start', 'exchange': 'FTX', 'collector': {'funding': [], 'l2_book': {'book_delta': True, 'max_depth': 100, 'symbols': ['BTC-USD']}, 'liquidations': [], 'open_interest': [], 'ticker': [], 'trades': ['BTC-USD']}, 'config': {'cache': 'redis', 'kafka': {'ip': '127.0.0.1', 'port': 9092, 'start_flush': True}, 'parquet': {'SVOE': {'glue_database': 'svoe_glue_db', 's3_bucket': 'svoe.test.1', 's3_key_id': 'AKIAJXSXXFCA3HN3T7GQ', 's3_prefix': 'parquet', 's3_secret': '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', 'version': 'local'}, 'append_counter': 0, 'compression': {'codec': 'snappy', 'level': 5}, 'del_file': True, 'file_format': ['exchange', 'symbol', 'data_type', 'timestamp'], 'prefix_date': True}, 'redis': {'del_after_read': True, 'ip': '127.0.0.1', 'port': 6379, 'retention_time': None, 'socket': None, 'start_flush': True}, 'storage': ['parquet'], 'storage_interval': 30, 'storage_retries': 5, 'storage_retry_wait': 30}}
+2021-10-28 17:59:09,274 : INFO : message: {"op": "start", "exchange": "OKEX", "collector": {"funding": [], "l2_book": {"book_delta": true, "max_depth": 100, "symbols": ["BTC-USDT"]}, "liquidations": [], "open_interest": [], "ticker": [], "trades": ["BTC-USDT"]}, "config": {"cache": "redis", "kafka": {"ip": "127.0.0.1", "port": 9092, "start_flush": true}, "parquet": {"SVOE": {"glue_database": "svoe_glue_db", "s3_bucket": "svoe.test.1", "s3_key_id": "AKIAJXSXXFCA3HN3T7GQ", "s3_prefix": "parquet", "s3_secret": "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", "version": "local"}, "append_counter": 0, "compression": {"codec": "snappy", "level": 5}, "del_file": true, "file_format": ["exchange", "symbol", "data_type", "timestamp"], "prefix_date": true}, "redis": {"del_after_read": true, "ip": "127.0.0.1", "port": 6379, "retention_time": null, "socket": null, "start_flush": true}, "storage": ["parquet"], "storage_interval": 30, "storage_retries": 5, "storage_retry_wait": 30}}
+2021-10-28 17:59:09,284 : INFO : Starting {'op': 'start', 'exchange': 'OKEX', 'collector': {'funding': [], 'l2_book': {'book_delta': True, 'max_depth': 100, 'symbols': ['BTC-USDT']}, 'liquidations': [], 'open_interest': [], 'ticker': [], 'trades': ['BTC-USDT']}, 'config': {'cache': 'redis', 'kafka': {'ip': '127.0.0.1', 'port': 9092, 'start_flush': True}, 'parquet': {'SVOE': {'glue_database': 'svoe_glue_db', 's3_bucket': 'svoe.test.1', 's3_key_id': 'AKIAJXSXXFCA3HN3T7GQ', 's3_prefix': 'parquet', 's3_secret': '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', 'version': 'local'}, 'append_counter': 0, 'compression': {'codec': 'snappy', 'level': 5}, 'del_file': True, 'file_format': ['exchange', 'symbol', 'data_type', 'timestamp'], 'prefix_date': True}, 'redis': {'del_after_read': True, 'ip': '127.0.0.1', 'port': 6379, 'retention_time': None, 'socket': None, 'start_flush': True}, 'storage': ['parquet'], 'storage_interval': 30, 'storage_retries': 5, 'storage_retry_wait': 30}}
+2021-10-28 17:59:09,293 : INFO : applying local config file: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-10-28 14:59:09.293657
+2021-10-28 17:59:09,329 : INFO : Flushing cache
+2021-10-28 17:59:09,366 : INFO : Reading FTX-l2_book-BTC-USD
+2021-10-28 17:59:09,367 : INFO : No data for FTX-l2_book-BTC-USD
+2021-10-28 17:59:09,367 : INFO : Reading FTX-trades-BTC-USD
+2021-10-28 17:59:09,368 : INFO : No data for FTX-trades-BTC-USD
+2021-10-28 17:59:09,368 : INFO : Reading OKEX-l2_book-BTC-USDT
+2021-10-28 17:59:09,369 : INFO : No data for OKEX-l2_book-BTC-USDT
+2021-10-28 17:59:09,369 : INFO : Reading OKEX-trades-BTC-USDT
+2021-10-28 17:59:09,369 : INFO : No data for OKEX-trades-BTC-USDT
+2021-10-28 17:59:11,995 : INFO : Collector for OKEX running on PID 80500
+2021-10-28 17:59:12,003 : INFO : Collector for FTX running on PID 80499
+2021-10-28 17:59:12,312 : INFO : Collector added feed handler - FTX(FUNDING, {'retries': 30, 'timeout': 120})
+2021-10-28 17:59:12,317 : INFO : Collector added feed handler - FTX(L2_BOOK, {'retries': 30, 'timeout': 120, 'max_depth': 100})
+2021-10-28 17:59:12,321 : INFO : Collector added feed handler - FTX(LIQUIDATIONS, {'retries': 30, 'timeout': 120})
+2021-10-28 17:59:12,324 : INFO : Collector added feed handler - FTX(OPEN_INTEREST, {'retries': 30, 'timeout': 120})
+2021-10-28 17:59:12,326 : INFO : Collector added feed handler - FTX(TICKER, {'retries': 30, 'timeout': 120})
+2021-10-28 17:59:12,327 : INFO : Collector added feed handler - FTX(TRADES, {'retries': 30, 'timeout': 120})
+2021-10-28 17:59:14,396 : INFO : Collector added feed handler - OKEX(FUNDING, {'retries': 30, 'timeout': 120})
+2021-10-28 17:59:14,397 : INFO : Collector added feed handler - OKEX(L2_BOOK, {'retries': 30, 'timeout': 120, 'max_depth': 100})
+2021-10-28 17:59:14,398 : INFO : Collector added feed handler - OKEX(LIQUIDATIONS, {'retries': 30, 'timeout': 120})
+2021-10-28 17:59:14,400 : INFO : Collector added feed handler - OKEX(OPEN_INTEREST, {'retries': 30, 'timeout': 120})
+2021-10-28 17:59:14,401 : INFO : Collector added feed handler - OKEX(TICKER, {'retries': 30, 'timeout': 120})
+2021-10-28 17:59:14,402 : INFO : Collector added feed handler - OKEX(TRADES, {'retries': 30, 'timeout': 120})
+2021-10-28 18:00:33,826 : INFO : Starting cryptostore
+2021-10-28 18:00:33,829 : INFO : Cryptostore running on PID 80547
+2021-10-28 18:00:33,855 : INFO : Prometehus started on port 8000
+2021-10-28 18:00:33,864 : INFO : Spawner started
+2021-10-28 18:00:33,882 : INFO : Aggregator started
+2021-10-28 18:00:33,885 : INFO : Cryptostore started
+2021-10-28 18:00:33,887 : INFO : loading config file locally: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-10-28 15:00:33.887270
+2021-10-28 18:00:33,959 : INFO : applying local config file: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-10-28 15:00:33.958998
+2021-10-28 18:00:33,959 : INFO : start: ['FTX', 'OKEX'] stop: []
+2021-10-28 18:00:38,411 : INFO : Aggregator running on PID 80550
+2021-10-28 18:00:38,413 : INFO : loading config file locally: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-10-28 15:00:38.413743
+2021-10-28 18:00:38,416 : INFO : Spawner running on PID 80549
+2021-10-28 18:00:38,417 : INFO : message: {"op": "start", "exchange": "FTX", "collector": {"funding": [], "l2_book": {"book_delta": true, "max_depth": 100, "symbols": ["BTC-USD"]}, "liquidations": [], "open_interest": [], "ticker": [], "trades": ["BTC-USD"]}, "config": {"cache": "redis", "kafka": {"ip": "127.0.0.1", "port": 9092, "start_flush": true}, "parquet": {"SVOE": {"glue_database": "svoe_glue_db", "s3_bucket": "svoe.test.1", "s3_key_id": "AKIAJXSXXFCA3HN3T7GQ", "s3_prefix": "parquet", "s3_secret": "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", "version": "local"}, "append_counter": 0, "compression": {"codec": "snappy", "level": 5}, "del_file": true, "file_format": ["exchange", "symbol", "data_type", "timestamp"], "prefix_date": true}, "redis": {"del_after_read": true, "ip": "127.0.0.1", "port": 6379, "retention_time": null, "socket": null, "start_flush": true}, "storage": ["parquet"], "storage_interval": 30, "storage_retries": 5, "storage_retry_wait": 30}}
+2021-10-28 18:00:38,417 : INFO : Starting {'op': 'start', 'exchange': 'FTX', 'collector': {'funding': [], 'l2_book': {'book_delta': True, 'max_depth': 100, 'symbols': ['BTC-USD']}, 'liquidations': [], 'open_interest': [], 'ticker': [], 'trades': ['BTC-USD']}, 'config': {'cache': 'redis', 'kafka': {'ip': '127.0.0.1', 'port': 9092, 'start_flush': True}, 'parquet': {'SVOE': {'glue_database': 'svoe_glue_db', 's3_bucket': 'svoe.test.1', 's3_key_id': 'AKIAJXSXXFCA3HN3T7GQ', 's3_prefix': 'parquet', 's3_secret': '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', 'version': 'local'}, 'append_counter': 0, 'compression': {'codec': 'snappy', 'level': 5}, 'del_file': True, 'file_format': ['exchange', 'symbol', 'data_type', 'timestamp'], 'prefix_date': True}, 'redis': {'del_after_read': True, 'ip': '127.0.0.1', 'port': 6379, 'retention_time': None, 'socket': None, 'start_flush': True}, 'storage': ['parquet'], 'storage_interval': 30, 'storage_retries': 5, 'storage_retry_wait': 30}}
+2021-10-28 18:00:38,423 : INFO : message: {"op": "start", "exchange": "OKEX", "collector": {"funding": [], "l2_book": {"book_delta": true, "max_depth": 100, "symbols": ["BTC-USDT"]}, "liquidations": [], "open_interest": [], "ticker": [], "trades": ["BTC-USDT"]}, "config": {"cache": "redis", "kafka": {"ip": "127.0.0.1", "port": 9092, "start_flush": true}, "parquet": {"SVOE": {"glue_database": "svoe_glue_db", "s3_bucket": "svoe.test.1", "s3_key_id": "AKIAJXSXXFCA3HN3T7GQ", "s3_prefix": "parquet", "s3_secret": "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", "version": "local"}, "append_counter": 0, "compression": {"codec": "snappy", "level": 5}, "del_file": true, "file_format": ["exchange", "symbol", "data_type", "timestamp"], "prefix_date": true}, "redis": {"del_after_read": true, "ip": "127.0.0.1", "port": 6379, "retention_time": null, "socket": null, "start_flush": true}, "storage": ["parquet"], "storage_interval": 30, "storage_retries": 5, "storage_retry_wait": 30}}
+2021-10-28 18:00:38,427 : INFO : Starting {'op': 'start', 'exchange': 'OKEX', 'collector': {'funding': [], 'l2_book': {'book_delta': True, 'max_depth': 100, 'symbols': ['BTC-USDT']}, 'liquidations': [], 'open_interest': [], 'ticker': [], 'trades': ['BTC-USDT']}, 'config': {'cache': 'redis', 'kafka': {'ip': '127.0.0.1', 'port': 9092, 'start_flush': True}, 'parquet': {'SVOE': {'glue_database': 'svoe_glue_db', 's3_bucket': 'svoe.test.1', 's3_key_id': 'AKIAJXSXXFCA3HN3T7GQ', 's3_prefix': 'parquet', 's3_secret': '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', 'version': 'local'}, 'append_counter': 0, 'compression': {'codec': 'snappy', 'level': 5}, 'del_file': True, 'file_format': ['exchange', 'symbol', 'data_type', 'timestamp'], 'prefix_date': True}, 'redis': {'del_after_read': True, 'ip': '127.0.0.1', 'port': 6379, 'retention_time': None, 'socket': None, 'start_flush': True}, 'storage': ['parquet'], 'storage_interval': 30, 'storage_retries': 5, 'storage_retry_wait': 30}}
+2021-10-28 18:00:38,428 : INFO : applying local config file: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-10-28 15:00:38.428554
+2021-10-28 18:00:38,463 : INFO : Flushing cache
+2021-10-28 18:00:38,519 : INFO : Reading FTX-l2_book-BTC-USD
+2021-10-28 18:00:38,520 : INFO : No data for FTX-l2_book-BTC-USD
+2021-10-28 18:00:38,521 : INFO : Reading FTX-trades-BTC-USD
+2021-10-28 18:00:38,521 : INFO : No data for FTX-trades-BTC-USD
+2021-10-28 18:00:38,522 : INFO : Reading OKEX-l2_book-BTC-USDT
+2021-10-28 18:00:38,522 : INFO : No data for OKEX-l2_book-BTC-USDT
+2021-10-28 18:00:38,523 : INFO : Reading OKEX-trades-BTC-USDT
+2021-10-28 18:00:38,523 : INFO : No data for OKEX-trades-BTC-USDT
+2021-10-28 18:00:41,824 : INFO : Collector for OKEX running on PID 80552
+2021-10-28 18:00:41,864 : INFO : Collector for FTX running on PID 80551
+2021-10-28 18:00:42,313 : INFO : Collector added feed handler - FTX(FUNDING, {'retries': 30, 'timeout': 120})
+2021-10-28 18:00:42,314 : INFO : Collector added feed handler - FTX(L2_BOOK, {'retries': 30, 'timeout': 120, 'max_depth': 100})
+2021-10-28 18:00:42,315 : INFO : Collector added feed handler - FTX(LIQUIDATIONS, {'retries': 30, 'timeout': 120})
+2021-10-28 18:00:42,318 : INFO : Collector added feed handler - FTX(OPEN_INTEREST, {'retries': 30, 'timeout': 120})
+2021-10-28 18:00:42,325 : INFO : Collector added feed handler - FTX(TICKER, {'retries': 30, 'timeout': 120})
+2021-10-28 18:00:42,328 : INFO : Collector added feed handler - FTX(TRADES, {'retries': 30, 'timeout': 120})
+2021-10-28 18:00:44,799 : INFO : Collector added feed handler - OKEX(FUNDING, {'retries': 30, 'timeout': 120})
+2021-10-28 18:00:44,802 : INFO : Collector added feed handler - OKEX(L2_BOOK, {'retries': 30, 'timeout': 120, 'max_depth': 100})
+2021-10-28 18:00:44,807 : INFO : Collector added feed handler - OKEX(LIQUIDATIONS, {'retries': 30, 'timeout': 120})
+2021-10-28 18:00:44,808 : INFO : Collector added feed handler - OKEX(OPEN_INTEREST, {'retries': 30, 'timeout': 120})
+2021-10-28 18:00:44,810 : INFO : Collector added feed handler - OKEX(TICKER, {'retries': 30, 'timeout': 120})
+2021-10-28 18:00:44,811 : INFO : Collector added feed handler - OKEX(TRADES, {'retries': 30, 'timeout': 120})
+2021-10-28 18:03:10,004 : INFO : Starting cryptostore
+2021-10-28 18:03:10,004 : INFO : Cryptostore running on PID 80584
+2021-10-28 18:03:10,015 : INFO : Prometehus started on port 8000
+2021-10-28 18:03:10,023 : INFO : Spawner started
+2021-10-28 18:03:10,029 : INFO : Aggregator started
+2021-10-28 18:03:10,034 : INFO : Cryptostore started
+2021-10-28 18:03:10,034 : INFO : loading config file locally: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-10-28 15:03:10.034939
+2021-10-28 18:03:10,051 : INFO : applying local config file: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-10-28 15:03:10.051114
+2021-10-28 18:03:10,051 : INFO : start: ['OKEX', 'FTX'] stop: []
+2021-10-28 18:03:11,956 : INFO : Aggregator running on PID 80589
+2021-10-28 18:03:11,957 : INFO : loading config file locally: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-10-28 15:03:11.957090
+2021-10-28 18:03:11,961 : INFO : Spawner running on PID 80588
+2021-10-28 18:03:11,961 : INFO : message: {"op": "start", "exchange": "OKEX", "collector": {"funding": [], "l2_book": {"book_delta": true, "max_depth": 100, "symbols": ["BTC-USDT"]}, "liquidations": [], "open_interest": [], "ticker": [], "trades": ["BTC-USDT"]}, "config": {"cache": "redis", "kafka": {"ip": "127.0.0.1", "port": 9092, "start_flush": true}, "parquet": {"SVOE": {"glue_database": "svoe_glue_db", "s3_bucket": "svoe.test.1", "s3_key_id": "AKIAJXSXXFCA3HN3T7GQ", "s3_prefix": "parquet", "s3_secret": "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", "version": "local"}, "append_counter": 0, "compression": {"codec": "snappy", "level": 5}, "del_file": true, "file_format": ["exchange", "symbol", "data_type", "timestamp"], "prefix_date": true}, "redis": {"del_after_read": true, "ip": "127.0.0.1", "port": 6379, "retention_time": null, "socket": null, "start_flush": true}, "storage": ["parquet"], "storage_interval": 30, "storage_retries": 5, "storage_retry_wait": 30}}
+2021-10-28 18:03:11,961 : INFO : Starting {'op': 'start', 'exchange': 'OKEX', 'collector': {'funding': [], 'l2_book': {'book_delta': True, 'max_depth': 100, 'symbols': ['BTC-USDT']}, 'liquidations': [], 'open_interest': [], 'ticker': [], 'trades': ['BTC-USDT']}, 'config': {'cache': 'redis', 'kafka': {'ip': '127.0.0.1', 'port': 9092, 'start_flush': True}, 'parquet': {'SVOE': {'glue_database': 'svoe_glue_db', 's3_bucket': 'svoe.test.1', 's3_key_id': 'AKIAJXSXXFCA3HN3T7GQ', 's3_prefix': 'parquet', 's3_secret': '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', 'version': 'local'}, 'append_counter': 0, 'compression': {'codec': 'snappy', 'level': 5}, 'del_file': True, 'file_format': ['exchange', 'symbol', 'data_type', 'timestamp'], 'prefix_date': True}, 'redis': {'del_after_read': True, 'ip': '127.0.0.1', 'port': 6379, 'retention_time': None, 'socket': None, 'start_flush': True}, 'storage': ['parquet'], 'storage_interval': 30, 'storage_retries': 5, 'storage_retry_wait': 30}}
+2021-10-28 18:03:11,966 : INFO : applying local config file: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-10-28 15:03:11.966083
+2021-10-28 18:03:11,965 : INFO : message: {"op": "start", "exchange": "FTX", "collector": {"funding": [], "l2_book": {"book_delta": true, "max_depth": 100, "symbols": ["BTC-USD"]}, "liquidations": [], "open_interest": [], "ticker": [], "trades": ["BTC-USD"]}, "config": {"cache": "redis", "kafka": {"ip": "127.0.0.1", "port": 9092, "start_flush": true}, "parquet": {"SVOE": {"glue_database": "svoe_glue_db", "s3_bucket": "svoe.test.1", "s3_key_id": "AKIAJXSXXFCA3HN3T7GQ", "s3_prefix": "parquet", "s3_secret": "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", "version": "local"}, "append_counter": 0, "compression": {"codec": "snappy", "level": 5}, "del_file": true, "file_format": ["exchange", "symbol", "data_type", "timestamp"], "prefix_date": true}, "redis": {"del_after_read": true, "ip": "127.0.0.1", "port": 6379, "retention_time": null, "socket": null, "start_flush": true}, "storage": ["parquet"], "storage_interval": 30, "storage_retries": 5, "storage_retry_wait": 30}}
+2021-10-28 18:03:11,967 : INFO : Starting {'op': 'start', 'exchange': 'FTX', 'collector': {'funding': [], 'l2_book': {'book_delta': True, 'max_depth': 100, 'symbols': ['BTC-USD']}, 'liquidations': [], 'open_interest': [], 'ticker': [], 'trades': ['BTC-USD']}, 'config': {'cache': 'redis', 'kafka': {'ip': '127.0.0.1', 'port': 9092, 'start_flush': True}, 'parquet': {'SVOE': {'glue_database': 'svoe_glue_db', 's3_bucket': 'svoe.test.1', 's3_key_id': 'AKIAJXSXXFCA3HN3T7GQ', 's3_prefix': 'parquet', 's3_secret': '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', 'version': 'local'}, 'append_counter': 0, 'compression': {'codec': 'snappy', 'level': 5}, 'del_file': True, 'file_format': ['exchange', 'symbol', 'data_type', 'timestamp'], 'prefix_date': True}, 'redis': {'del_after_read': True, 'ip': '127.0.0.1', 'port': 6379, 'retention_time': None, 'socket': None, 'start_flush': True}, 'storage': ['parquet'], 'storage_interval': 30, 'storage_retries': 5, 'storage_retry_wait': 30}}
+2021-10-28 18:03:11,992 : INFO : Flushing cache
+2021-10-28 18:03:12,033 : INFO : Reading FTX-l2_book-BTC-USD
+2021-10-28 18:03:12,033 : INFO : No data for FTX-l2_book-BTC-USD
+2021-10-28 18:03:12,034 : INFO : Reading FTX-trades-BTC-USD
+2021-10-28 18:03:12,034 : INFO : No data for FTX-trades-BTC-USD
+2021-10-28 18:03:12,034 : INFO : Reading OKEX-l2_book-BTC-USDT
+2021-10-28 18:03:12,035 : INFO : No data for OKEX-l2_book-BTC-USDT
+2021-10-28 18:03:12,035 : INFO : Reading OKEX-trades-BTC-USDT
+2021-10-28 18:03:12,037 : INFO : No data for OKEX-trades-BTC-USDT
+2021-10-28 18:03:14,162 : INFO : Collector for OKEX running on PID 80590
+2021-10-28 18:03:14,165 : INFO : Collector for FTX running on PID 80591
+2021-10-28 18:03:14,405 : INFO : Collector added feed handler - FTX(FUNDING, {'retries': 30, 'timeout': 120})
+2021-10-28 18:03:14,406 : INFO : Collector added feed handler - FTX(L2_BOOK, {'retries': 30, 'timeout': 120, 'max_depth': 100})
+2021-10-28 18:03:14,409 : INFO : Collector added feed handler - FTX(LIQUIDATIONS, {'retries': 30, 'timeout': 120})
+2021-10-28 18:03:14,410 : INFO : Collector added feed handler - FTX(OPEN_INTEREST, {'retries': 30, 'timeout': 120})
+2021-10-28 18:03:14,410 : INFO : Collector added feed handler - FTX(TICKER, {'retries': 30, 'timeout': 120})
+2021-10-28 18:03:14,411 : INFO : Collector added feed handler - FTX(TRADES, {'retries': 30, 'timeout': 120})
+2021-10-28 18:03:15,892 : INFO : Collector added feed handler - OKEX(FUNDING, {'retries': 30, 'timeout': 120})
+2021-10-28 18:03:15,893 : INFO : Collector added feed handler - OKEX(L2_BOOK, {'retries': 30, 'timeout': 120, 'max_depth': 100})
+2021-10-28 18:03:15,895 : INFO : Collector added feed handler - OKEX(LIQUIDATIONS, {'retries': 30, 'timeout': 120})
+2021-10-28 18:03:15,895 : INFO : Collector added feed handler - OKEX(OPEN_INTEREST, {'retries': 30, 'timeout': 120})
+2021-10-28 18:03:15,896 : INFO : Collector added feed handler - OKEX(TICKER, {'retries': 30, 'timeout': 120})
+2021-10-28 18:03:15,897 : INFO : Collector added feed handler - OKEX(TRADES, {'retries': 30, 'timeout': 120})
+2021-10-28 18:03:42,056 : INFO : Reading FTX-l2_book-BTC-USD
+2021-10-28 18:03:42,061 : INFO : l2_book-FTX-BTC-USD: Read 464 messages from Redis
+2021-10-28 18:03:42,078 : ERROR : Aggregator running on PID 80589 died due to exception
+Traceback (most recent call last):
+  File "/Users/anov/IdeaProjects/cryptostore/cryptostore/aggregator/aggregator.py", line 108, in loop
+    store.write(exchange, dtype, pair, time.time())
+  File "/Users/anov/IdeaProjects/cryptostore/cryptostore/data/storage.py", line 37, in write
+    s.write(exchange, data_type, pair, timestamp)
+  File "/Users/anov/IdeaProjects/cryptostore/cryptostore/data/parquet.py", line 150, in write
+    writer.write_table(table=self.data)
+  File "/usr/local/lib/python3.9/site-packages/pyarrow/parquet.py", line 651, in write_table
+    self.writer.write_table(table, row_group_size=row_group_size)
+  File "pyarrow/_parquet.pyx", line 1409, in pyarrow._parquet.ParquetWriter.write_table
+  File "pyarrow/error.pxi", line 84, in pyarrow.lib.check_status
+pyarrow.lib.ArrowInvalid: Codec 'snappy' doesn't support setting a compression level.
+2021-10-28 18:09:04,836 : INFO : Starting cryptostore
+2021-10-28 18:09:04,838 : INFO : Cryptostore running on PID 80642
+2021-10-28 18:09:04,860 : INFO : Prometehus started on port 8000
+2021-10-28 18:09:04,869 : INFO : Spawner started
+2021-10-28 18:09:04,880 : INFO : Aggregator started
+2021-10-28 18:09:04,892 : INFO : Cryptostore started
+2021-10-28 18:09:04,893 : INFO : loading config file locally: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-10-28 15:09:04.893802
+2021-10-28 18:09:04,920 : INFO : applying local config file: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-10-28 15:09:04.920295
+2021-10-28 18:09:04,920 : INFO : start: ['FTX', 'OKEX'] stop: []
+2021-10-28 18:09:08,323 : INFO : Aggregator running on PID 80649
+2021-10-28 18:09:08,324 : INFO : loading config file locally: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-10-28 15:09:08.324772
+2021-10-28 18:09:08,325 : INFO : Spawner running on PID 80648
+2021-10-28 18:09:08,326 : INFO : message: {"op": "start", "exchange": "FTX", "collector": {"funding": [], "l2_book": {"book_delta": true, "max_depth": 100, "symbols": ["BTC-USD"]}, "liquidations": [], "open_interest": [], "ticker": [], "trades": ["BTC-USD"]}, "config": {"cache": "redis", "kafka": {"ip": "127.0.0.1", "port": 9092, "start_flush": true}, "parquet": {"SVOE": {"glue_database": "svoe_glue_db", "s3_bucket": "svoe.test.1", "s3_key_id": "AKIAJXSXXFCA3HN3T7GQ", "s3_prefix": "parquet", "s3_secret": "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", "version": "local"}, "append_counter": 0, "compression": {"codec": "gzip", "level": 5}, "del_file": true, "file_format": ["exchange", "symbol", "data_type", "timestamp"], "prefix_date": true}, "redis": {"del_after_read": true, "ip": "127.0.0.1", "port": 6379, "retention_time": null, "socket": null, "start_flush": true}, "storage": ["parquet"], "storage_interval": 30, "storage_retries": 5, "storage_retry_wait": 30}}
+2021-10-28 18:09:08,326 : INFO : Starting {'op': 'start', 'exchange': 'FTX', 'collector': {'funding': [], 'l2_book': {'book_delta': True, 'max_depth': 100, 'symbols': ['BTC-USD']}, 'liquidations': [], 'open_interest': [], 'ticker': [], 'trades': ['BTC-USD']}, 'config': {'cache': 'redis', 'kafka': {'ip': '127.0.0.1', 'port': 9092, 'start_flush': True}, 'parquet': {'SVOE': {'glue_database': 'svoe_glue_db', 's3_bucket': 'svoe.test.1', 's3_key_id': 'AKIAJXSXXFCA3HN3T7GQ', 's3_prefix': 'parquet', 's3_secret': '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', 'version': 'local'}, 'append_counter': 0, 'compression': {'codec': 'gzip', 'level': 5}, 'del_file': True, 'file_format': ['exchange', 'symbol', 'data_type', 'timestamp'], 'prefix_date': True}, 'redis': {'del_after_read': True, 'ip': '127.0.0.1', 'port': 6379, 'retention_time': None, 'socket': None, 'start_flush': True}, 'storage': ['parquet'], 'storage_interval': 30, 'storage_retries': 5, 'storage_retry_wait': 30}}
+2021-10-28 18:09:08,331 : INFO : message: {"op": "start", "exchange": "OKEX", "collector": {"funding": [], "l2_book": {"book_delta": true, "max_depth": 100, "symbols": ["BTC-USDT"]}, "liquidations": [], "open_interest": [], "ticker": [], "trades": ["BTC-USDT"]}, "config": {"cache": "redis", "kafka": {"ip": "127.0.0.1", "port": 9092, "start_flush": true}, "parquet": {"SVOE": {"glue_database": "svoe_glue_db", "s3_bucket": "svoe.test.1", "s3_key_id": "AKIAJXSXXFCA3HN3T7GQ", "s3_prefix": "parquet", "s3_secret": "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", "version": "local"}, "append_counter": 0, "compression": {"codec": "gzip", "level": 5}, "del_file": true, "file_format": ["exchange", "symbol", "data_type", "timestamp"], "prefix_date": true}, "redis": {"del_after_read": true, "ip": "127.0.0.1", "port": 6379, "retention_time": null, "socket": null, "start_flush": true}, "storage": ["parquet"], "storage_interval": 30, "storage_retries": 5, "storage_retry_wait": 30}}
+2021-10-28 18:09:08,336 : INFO : Starting {'op': 'start', 'exchange': 'OKEX', 'collector': {'funding': [], 'l2_book': {'book_delta': True, 'max_depth': 100, 'symbols': ['BTC-USDT']}, 'liquidations': [], 'open_interest': [], 'ticker': [], 'trades': ['BTC-USDT']}, 'config': {'cache': 'redis', 'kafka': {'ip': '127.0.0.1', 'port': 9092, 'start_flush': True}, 'parquet': {'SVOE': {'glue_database': 'svoe_glue_db', 's3_bucket': 'svoe.test.1', 's3_key_id': 'AKIAJXSXXFCA3HN3T7GQ', 's3_prefix': 'parquet', 's3_secret': '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', 'version': 'local'}, 'append_counter': 0, 'compression': {'codec': 'gzip', 'level': 5}, 'del_file': True, 'file_format': ['exchange', 'symbol', 'data_type', 'timestamp'], 'prefix_date': True}, 'redis': {'del_after_read': True, 'ip': '127.0.0.1', 'port': 6379, 'retention_time': None, 'socket': None, 'start_flush': True}, 'storage': ['parquet'], 'storage_interval': 30, 'storage_retries': 5, 'storage_retry_wait': 30}}
+2021-10-28 18:09:08,342 : INFO : applying local config file: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-10-28 15:09:08.342372
+2021-10-28 18:09:08,415 : INFO : Flushing cache
+2021-10-28 18:09:08,460 : INFO : Reading FTX-l2_book-BTC-USD
+2021-10-28 18:09:08,460 : INFO : No data for FTX-l2_book-BTC-USD
+2021-10-28 18:09:08,461 : INFO : Reading FTX-trades-BTC-USD
+2021-10-28 18:09:08,462 : INFO : No data for FTX-trades-BTC-USD
+2021-10-28 18:09:08,462 : INFO : Reading OKEX-l2_book-BTC-USDT
+2021-10-28 18:09:08,463 : INFO : No data for OKEX-l2_book-BTC-USDT
+2021-10-28 18:09:08,463 : INFO : Reading OKEX-trades-BTC-USDT
+2021-10-28 18:09:08,463 : INFO : No data for OKEX-trades-BTC-USDT
+2021-10-28 18:09:10,290 : INFO : Collector for OKEX running on PID 80651
+2021-10-28 18:09:10,291 : INFO : Collector for FTX running on PID 80650
+2021-10-28 18:09:10,632 : INFO : Collector added feed handler - FTX(FUNDING, {'retries': 30, 'timeout': 120})
+2021-10-28 18:09:10,634 : INFO : Collector added feed handler - FTX(L2_BOOK, {'retries': 30, 'timeout': 120, 'max_depth': 100})
+2021-10-28 18:09:10,676 : INFO : Collector added feed handler - FTX(LIQUIDATIONS, {'retries': 30, 'timeout': 120})
+2021-10-28 18:09:10,678 : INFO : Collector added feed handler - FTX(OPEN_INTEREST, {'retries': 30, 'timeout': 120})
+2021-10-28 18:09:10,679 : INFO : Collector added feed handler - FTX(TICKER, {'retries': 30, 'timeout': 120})
+2021-10-28 18:09:10,679 : INFO : Collector added feed handler - FTX(TRADES, {'retries': 30, 'timeout': 120})
+2021-10-28 18:09:12,386 : INFO : Collector added feed handler - OKEX(FUNDING, {'retries': 30, 'timeout': 120})
+2021-10-28 18:09:12,391 : INFO : Collector added feed handler - OKEX(L2_BOOK, {'retries': 30, 'timeout': 120, 'max_depth': 100})
+2021-10-28 18:09:12,395 : INFO : Collector added feed handler - OKEX(LIQUIDATIONS, {'retries': 30, 'timeout': 120})
+2021-10-28 18:09:12,396 : INFO : Collector added feed handler - OKEX(OPEN_INTEREST, {'retries': 30, 'timeout': 120})
+2021-10-28 18:09:12,402 : INFO : Collector added feed handler - OKEX(TICKER, {'retries': 30, 'timeout': 120})
+2021-10-28 18:09:12,405 : INFO : Collector added feed handler - OKEX(TRADES, {'retries': 30, 'timeout': 120})
+2021-10-28 18:09:38,486 : INFO : Reading FTX-l2_book-BTC-USD
+2021-10-28 18:09:38,492 : INFO : l2_book-FTX-BTC-USD: Read 492 messages from Redis
+2021-10-28 18:09:38,526 : INFO : l2_book-FTX-BTC-USD: Removed 492 entries through id 1635433778462-0
+2021-10-28 18:09:38,526 : INFO : Write Complete FTX-l2_book-BTC-USD
+2021-10-28 18:09:38,527 : INFO : Reading FTX-trades-BTC-USD
+2021-10-28 18:09:38,528 : INFO : trades-FTX-BTC-USD: Read 14 messages from Redis
+2021-10-28 18:09:38,541 : INFO : trades-FTX-BTC-USD: Removed 14 entries through id 1635433776471-0
+2021-10-28 18:09:38,541 : INFO : Write Complete FTX-trades-BTC-USD
+2021-10-28 18:09:38,541 : INFO : Reading OKEX-l2_book-BTC-USDT
+2021-10-28 18:09:38,580 : INFO : l2_book-OKEX-BTC-USDT: Read 2214 messages from Redis
+2021-10-28 18:09:38,885 : INFO : l2_book-OKEX-BTC-USDT: Removed 2214 entries through id 1635433778541-0
+2021-10-28 18:09:38,887 : INFO : Write Complete OKEX-l2_book-BTC-USDT
+2021-10-28 18:09:38,888 : INFO : Reading OKEX-trades-BTC-USDT
+2021-10-28 18:09:38,904 : INFO : trades-OKEX-BTC-USDT: Read 116 messages from Redis
+2021-10-28 18:09:38,940 : INFO : trades-OKEX-BTC-USDT: Removed 116 entries through id 1635433776856-3
+2021-10-28 18:09:38,940 : INFO : Write Complete OKEX-trades-BTC-USDT
+2021-10-28 18:10:08,456 : INFO : Reading FTX-l2_book-BTC-USD
+2021-10-28 18:10:08,463 : INFO : l2_book-FTX-BTC-USD: Read 538 messages from Redis
+2021-10-28 18:10:08,485 : INFO : l2_book-FTX-BTC-USD: Removed 538 entries through id 1635433808414-0
+2021-10-28 18:10:08,486 : INFO : Write Complete FTX-l2_book-BTC-USD
+2021-10-28 18:10:08,486 : INFO : Reading FTX-trades-BTC-USD
+2021-10-28 18:10:08,487 : INFO : trades-FTX-BTC-USD: Read 20 messages from Redis
+2021-10-28 18:10:08,493 : INFO : trades-FTX-BTC-USD: Removed 20 entries through id 1635433808259-0
+2021-10-28 18:10:08,493 : INFO : Write Complete FTX-trades-BTC-USD
+2021-10-28 18:10:08,494 : INFO : Reading OKEX-l2_book-BTC-USDT
+2021-10-28 18:10:08,510 : INFO : l2_book-OKEX-BTC-USDT: Read 2536 messages from Redis
+2021-10-28 18:10:08,602 : INFO : l2_book-OKEX-BTC-USDT: Removed 2536 entries through id 1635433808478-1
+2021-10-28 18:10:08,603 : INFO : Write Complete OKEX-l2_book-BTC-USDT
+2021-10-28 18:10:08,603 : INFO : Reading OKEX-trades-BTC-USDT
+2021-10-28 18:10:08,604 : INFO : trades-OKEX-BTC-USDT: Read 69 messages from Redis
+2021-10-28 18:10:08,610 : INFO : trades-OKEX-BTC-USDT: Removed 69 entries through id 1635433806566-0
+2021-10-28 18:10:08,610 : INFO : Write Complete OKEX-trades-BTC-USDT
+2021-10-28 18:10:38,450 : INFO : Reading FTX-l2_book-BTC-USD
+2021-10-28 18:10:38,454 : INFO : l2_book-FTX-BTC-USD: Read 553 messages from Redis
+2021-10-28 18:10:38,470 : INFO : l2_book-FTX-BTC-USD: Removed 553 entries through id 1635433838424-0
+2021-10-28 18:10:38,470 : INFO : Write Complete FTX-l2_book-BTC-USD
+2021-10-28 18:10:38,470 : INFO : Reading FTX-trades-BTC-USD
+2021-10-28 18:10:38,470 : INFO : trades-FTX-BTC-USD: Read 12 messages from Redis
+2021-10-28 18:10:38,474 : INFO : trades-FTX-BTC-USD: Removed 12 entries through id 1635433835329-0
+2021-10-28 18:10:38,474 : INFO : Write Complete FTX-trades-BTC-USD
+2021-10-28 18:10:38,474 : INFO : Reading OKEX-l2_book-BTC-USDT
+2021-10-28 18:10:38,495 : INFO : l2_book-OKEX-BTC-USDT: Read 2462 messages from Redis
+2021-10-28 18:10:38,569 : INFO : l2_book-OKEX-BTC-USDT: Removed 2462 entries through id 1635433838474-0
+2021-10-28 18:10:38,569 : INFO : Write Complete OKEX-l2_book-BTC-USDT
+2021-10-28 18:10:38,569 : INFO : Reading OKEX-trades-BTC-USDT
+2021-10-28 18:10:38,570 : INFO : trades-OKEX-BTC-USDT: Read 40 messages from Redis
+2021-10-28 18:10:38,574 : INFO : trades-OKEX-BTC-USDT: Removed 40 entries through id 1635433837539-0
+2021-10-28 18:10:38,574 : INFO : Write Complete OKEX-trades-BTC-USDT
+2021-10-28 18:11:08,464 : INFO : Reading FTX-l2_book-BTC-USD
+2021-10-28 18:11:08,471 : INFO : l2_book-FTX-BTC-USD: Read 546 messages from Redis
+2021-10-28 18:11:08,490 : INFO : l2_book-FTX-BTC-USD: Removed 546 entries through id 1635433868439-0
+2021-10-28 18:11:08,490 : INFO : Write Complete FTX-l2_book-BTC-USD
+2021-10-28 18:11:08,490 : INFO : Reading FTX-trades-BTC-USD
+2021-10-28 18:11:08,491 : INFO : trades-FTX-BTC-USD: Read 10 messages from Redis
+2021-10-28 18:11:08,495 : INFO : trades-FTX-BTC-USD: Removed 10 entries through id 1635433865667-0
+2021-10-28 18:11:08,495 : INFO : Write Complete FTX-trades-BTC-USD
+2021-10-28 18:11:08,495 : INFO : Reading OKEX-l2_book-BTC-USDT
+2021-10-28 18:11:08,512 : INFO : l2_book-OKEX-BTC-USDT: Read 2452 messages from Redis
+2021-10-28 18:11:08,590 : INFO : l2_book-OKEX-BTC-USDT: Removed 2452 entries through id 1635433868490-0
+2021-10-28 18:11:08,590 : INFO : Write Complete OKEX-l2_book-BTC-USDT
+2021-10-28 18:11:08,591 : INFO : Reading OKEX-trades-BTC-USDT
+2021-10-28 18:11:08,592 : INFO : trades-OKEX-BTC-USDT: Read 91 messages from Redis
+2021-10-28 18:11:08,600 : INFO : trades-OKEX-BTC-USDT: Removed 91 entries through id 1635433868544-10
+2021-10-28 18:11:08,600 : INFO : Write Complete OKEX-trades-BTC-USDT
+2021-10-28 18:11:38,460 : INFO : Reading FTX-l2_book-BTC-USD
+2021-10-28 18:11:38,464 : INFO : l2_book-FTX-BTC-USD: Read 510 messages from Redis
+2021-10-28 18:11:38,483 : INFO : l2_book-FTX-BTC-USD: Removed 510 entries through id 1635433898452-0
+2021-10-28 18:11:38,484 : INFO : Write Complete FTX-l2_book-BTC-USD
+2021-10-28 18:11:38,484 : INFO : Reading FTX-trades-BTC-USD
+2021-10-28 18:11:38,484 : INFO : trades-FTX-BTC-USD: Read 25 messages from Redis
+2021-10-28 18:11:38,489 : INFO : trades-FTX-BTC-USD: Removed 25 entries through id 1635433883943-7
+2021-10-28 18:11:38,489 : INFO : Write Complete FTX-trades-BTC-USD
+2021-10-28 18:11:38,489 : INFO : Reading OKEX-l2_book-BTC-USDT
+2021-10-28 18:11:38,503 : INFO : l2_book-OKEX-BTC-USDT: Read 2369 messages from Redis
+2021-10-28 18:11:38,575 : INFO : l2_book-OKEX-BTC-USDT: Removed 2369 entries through id 1635433898468-0
+2021-10-28 18:11:38,576 : INFO : Write Complete OKEX-l2_book-BTC-USDT
+2021-10-28 18:11:38,576 : INFO : Reading OKEX-trades-BTC-USDT
+2021-10-28 18:11:38,576 : INFO : trades-OKEX-BTC-USDT: Read 40 messages from Redis
+2021-10-28 18:11:38,582 : INFO : trades-OKEX-BTC-USDT: Removed 40 entries through id 1635433897351-0
+2021-10-28 18:11:38,582 : INFO : Write Complete OKEX-trades-BTC-USDT
+2021-10-28 18:13:03,775 : INFO : Starting cryptostore
+2021-10-28 18:13:03,776 : INFO : Cryptostore running on PID 80702
+2021-10-28 18:13:03,802 : INFO : Prometehus started on port 8000
+2021-10-28 18:13:03,809 : INFO : Spawner started
+2021-10-28 18:13:03,832 : INFO : Aggregator started
+2021-10-28 18:13:03,884 : INFO : Cryptostore started
+2021-10-28 18:13:03,889 : INFO : loading config file locally: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-10-28 15:13:03.889301
+2021-10-28 18:13:03,913 : INFO : applying local config file: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-10-28 15:13:03.913567
+2021-10-28 18:13:03,913 : INFO : start: ['FTX', 'OKEX'] stop: []
+2021-10-28 18:13:11,483 : INFO : Aggregator running on PID 80706
+2021-10-28 18:13:11,486 : INFO : loading config file locally: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-10-28 15:13:11.486039
+2021-10-28 18:13:11,492 : INFO : Spawner running on PID 80705
+2021-10-28 18:13:11,493 : INFO : message: {"op": "start", "exchange": "FTX", "collector": {"funding": [], "l2_book": {"book_delta": true, "max_depth": 100, "symbols": ["BTC-USD"]}, "liquidations": [], "open_interest": [], "ticker": [], "trades": ["BTC-USD"]}, "config": {"cache": "redis", "kafka": {"ip": "127.0.0.1", "port": 9092, "start_flush": true}, "parquet": {"SVOE": {"glue_database": "svoe_glue_db", "s3_bucket": "svoe.test.1", "s3_key_id": "AKIAJXSXXFCA3HN3T7GQ", "s3_prefix": "data_lake", "s3_secret": "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", "version": "local"}, "append_counter": 0, "compression": {"codec": "gzip", "level": 5}, "del_file": true, "file_format": ["exchange", "symbol", "data_type", "timestamp"], "prefix_date": true}, "redis": {"del_after_read": true, "ip": "127.0.0.1", "port": 6379, "retention_time": null, "socket": null, "start_flush": true}, "storage": ["parquet"], "storage_interval": 30, "storage_retries": 5, "storage_retry_wait": 30}}
+2021-10-28 18:13:11,494 : INFO : Starting {'op': 'start', 'exchange': 'FTX', 'collector': {'funding': [], 'l2_book': {'book_delta': True, 'max_depth': 100, 'symbols': ['BTC-USD']}, 'liquidations': [], 'open_interest': [], 'ticker': [], 'trades': ['BTC-USD']}, 'config': {'cache': 'redis', 'kafka': {'ip': '127.0.0.1', 'port': 9092, 'start_flush': True}, 'parquet': {'SVOE': {'glue_database': 'svoe_glue_db', 's3_bucket': 'svoe.test.1', 's3_key_id': 'AKIAJXSXXFCA3HN3T7GQ', 's3_prefix': 'data_lake', 's3_secret': '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', 'version': 'local'}, 'append_counter': 0, 'compression': {'codec': 'gzip', 'level': 5}, 'del_file': True, 'file_format': ['exchange', 'symbol', 'data_type', 'timestamp'], 'prefix_date': True}, 'redis': {'del_after_read': True, 'ip': '127.0.0.1', 'port': 6379, 'retention_time': None, 'socket': None, 'start_flush': True}, 'storage': ['parquet'], 'storage_interval': 30, 'storage_retries': 5, 'storage_retry_wait': 30}}
+2021-10-28 18:13:11,508 : INFO : applying local config file: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-10-28 15:13:11.508960
+2021-10-28 18:13:11,503 : INFO : message: {"op": "start", "exchange": "OKEX", "collector": {"funding": [], "l2_book": {"book_delta": true, "max_depth": 100, "symbols": ["BTC-USDT"]}, "liquidations": [], "open_interest": [], "ticker": [], "trades": ["BTC-USDT"]}, "config": {"cache": "redis", "kafka": {"ip": "127.0.0.1", "port": 9092, "start_flush": true}, "parquet": {"SVOE": {"glue_database": "svoe_glue_db", "s3_bucket": "svoe.test.1", "s3_key_id": "AKIAJXSXXFCA3HN3T7GQ", "s3_prefix": "data_lake", "s3_secret": "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", "version": "local"}, "append_counter": 0, "compression": {"codec": "gzip", "level": 5}, "del_file": true, "file_format": ["exchange", "symbol", "data_type", "timestamp"], "prefix_date": true}, "redis": {"del_after_read": true, "ip": "127.0.0.1", "port": 6379, "retention_time": null, "socket": null, "start_flush": true}, "storage": ["parquet"], "storage_interval": 30, "storage_retries": 5, "storage_retry_wait": 30}}
+2021-10-28 18:13:11,518 : INFO : Starting {'op': 'start', 'exchange': 'OKEX', 'collector': {'funding': [], 'l2_book': {'book_delta': True, 'max_depth': 100, 'symbols': ['BTC-USDT']}, 'liquidations': [], 'open_interest': [], 'ticker': [], 'trades': ['BTC-USDT']}, 'config': {'cache': 'redis', 'kafka': {'ip': '127.0.0.1', 'port': 9092, 'start_flush': True}, 'parquet': {'SVOE': {'glue_database': 'svoe_glue_db', 's3_bucket': 'svoe.test.1', 's3_key_id': 'AKIAJXSXXFCA3HN3T7GQ', 's3_prefix': 'data_lake', 's3_secret': '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', 'version': 'local'}, 'append_counter': 0, 'compression': {'codec': 'gzip', 'level': 5}, 'del_file': True, 'file_format': ['exchange', 'symbol', 'data_type', 'timestamp'], 'prefix_date': True}, 'redis': {'del_after_read': True, 'ip': '127.0.0.1', 'port': 6379, 'retention_time': None, 'socket': None, 'start_flush': True}, 'storage': ['parquet'], 'storage_interval': 30, 'storage_retries': 5, 'storage_retry_wait': 30}}
+2021-10-28 18:13:11,562 : INFO : Flushing cache
+2021-10-28 18:13:11,683 : INFO : Reading FTX-l2_book-BTC-USD
+2021-10-28 18:13:11,684 : INFO : No data for FTX-l2_book-BTC-USD
+2021-10-28 18:13:11,684 : INFO : Reading FTX-trades-BTC-USD
+2021-10-28 18:13:11,685 : INFO : No data for FTX-trades-BTC-USD
+2021-10-28 18:13:11,685 : INFO : Reading OKEX-l2_book-BTC-USDT
+2021-10-28 18:13:11,686 : INFO : No data for OKEX-l2_book-BTC-USDT
+2021-10-28 18:13:11,686 : INFO : Reading OKEX-trades-BTC-USDT
+2021-10-28 18:13:11,687 : INFO : No data for OKEX-trades-BTC-USDT
+2021-10-28 18:13:14,286 : INFO : Collector for OKEX running on PID 80710
+2021-10-28 18:13:14,312 : INFO : Collector for FTX running on PID 80709
+2021-10-28 18:13:14,576 : INFO : Collector added feed handler - FTX(FUNDING, {'retries': 30, 'timeout': 120})
+2021-10-28 18:13:14,578 : INFO : Collector added feed handler - FTX(L2_BOOK, {'retries': 30, 'timeout': 120, 'max_depth': 100})
+2021-10-28 18:13:14,579 : INFO : Collector added feed handler - FTX(LIQUIDATIONS, {'retries': 30, 'timeout': 120})
+2021-10-28 18:13:14,584 : INFO : Collector added feed handler - FTX(OPEN_INTEREST, {'retries': 30, 'timeout': 120})
+2021-10-28 18:13:14,585 : INFO : Collector added feed handler - FTX(TICKER, {'retries': 30, 'timeout': 120})
+2021-10-28 18:13:14,585 : INFO : Collector added feed handler - FTX(TRADES, {'retries': 30, 'timeout': 120})
+2021-10-28 18:13:16,117 : INFO : Collector added feed handler - OKEX(FUNDING, {'retries': 30, 'timeout': 120})
+2021-10-28 18:13:16,118 : INFO : Collector added feed handler - OKEX(L2_BOOK, {'retries': 30, 'timeout': 120, 'max_depth': 100})
+2021-10-28 18:13:16,121 : INFO : Collector added feed handler - OKEX(LIQUIDATIONS, {'retries': 30, 'timeout': 120})
+2021-10-28 18:13:16,122 : INFO : Collector added feed handler - OKEX(OPEN_INTEREST, {'retries': 30, 'timeout': 120})
+2021-10-28 18:13:16,123 : INFO : Collector added feed handler - OKEX(TICKER, {'retries': 30, 'timeout': 120})
+2021-10-28 18:13:16,125 : INFO : Collector added feed handler - OKEX(TRADES, {'retries': 30, 'timeout': 120})
+2021-10-28 18:13:41,670 : INFO : Reading FTX-l2_book-BTC-USD
+2021-10-28 18:13:41,674 : INFO : l2_book-FTX-BTC-USD: Read 413 messages from Redis
+2021-10-28 18:13:41,718 : INFO : l2_book-FTX-BTC-USD: Removed 413 entries through id 1635434021456-0
+2021-10-28 18:13:41,718 : INFO : Write Complete FTX-l2_book-BTC-USD
+2021-10-28 18:13:41,719 : INFO : Reading FTX-trades-BTC-USD
+2021-10-28 18:13:41,722 : INFO : trades-FTX-BTC-USD: Read 15 messages from Redis
+2021-10-28 18:13:41,739 : INFO : trades-FTX-BTC-USD: Removed 15 entries through id 1635434020770-0
+2021-10-28 18:13:41,740 : INFO : Write Complete FTX-trades-BTC-USD
+2021-10-28 18:13:41,740 : INFO : Reading OKEX-l2_book-BTC-USDT
+2021-10-28 18:13:41,777 : INFO : l2_book-OKEX-BTC-USDT: Read 2010 messages from Redis
+2021-10-28 18:13:41,889 : INFO : l2_book-OKEX-BTC-USDT: Removed 2010 entries through id 1635434021715-0
+2021-10-28 18:13:41,890 : INFO : Write Complete OKEX-l2_book-BTC-USDT
+2021-10-28 18:13:41,890 : INFO : Reading OKEX-trades-BTC-USDT
+2021-10-28 18:13:41,891 : INFO : trades-OKEX-BTC-USDT: Read 32 messages from Redis
+2021-10-28 18:13:41,897 : INFO : trades-OKEX-BTC-USDT: Removed 32 entries through id 1635434020293-0
+2021-10-28 18:13:41,898 : INFO : Write Complete OKEX-trades-BTC-USDT
+2021-10-28 18:14:11,601 : INFO : Reading FTX-l2_book-BTC-USD
+2021-10-28 18:14:11,605 : INFO : l2_book-FTX-BTC-USD: Read 529 messages from Redis
+2021-10-28 18:14:11,621 : INFO : l2_book-FTX-BTC-USD: Removed 529 entries through id 1635434051495-0
+2021-10-28 18:14:11,621 : INFO : Write Complete FTX-l2_book-BTC-USD
+2021-10-28 18:14:11,621 : INFO : Reading FTX-trades-BTC-USD
+2021-10-28 18:14:11,622 : INFO : trades-FTX-BTC-USD: Read 72 messages from Redis
+2021-10-28 18:14:11,626 : INFO : trades-FTX-BTC-USD: Removed 72 entries through id 1635434048000-0
+2021-10-28 18:14:11,626 : INFO : Write Complete FTX-trades-BTC-USD
+2021-10-28 18:14:11,627 : INFO : Reading OKEX-l2_book-BTC-USDT
+2021-10-28 18:14:11,644 : INFO : l2_book-OKEX-BTC-USDT: Read 2486 messages from Redis
+2021-10-28 18:14:11,722 : INFO : l2_book-OKEX-BTC-USDT: Removed 2486 entries through id 1635434051621-0
+2021-10-28 18:14:11,722 : INFO : Write Complete OKEX-l2_book-BTC-USDT
+2021-10-28 18:14:11,723 : INFO : Reading OKEX-trades-BTC-USDT
+2021-10-28 18:14:11,724 : INFO : trades-OKEX-BTC-USDT: Read 97 messages from Redis
+2021-10-28 18:14:11,731 : INFO : trades-OKEX-BTC-USDT: Removed 97 entries through id 1635434051522-0
+2021-10-28 18:14:11,731 : INFO : Write Complete OKEX-trades-BTC-USDT
+2021-10-28 18:14:41,604 : INFO : Reading FTX-l2_book-BTC-USD
+2021-10-28 18:14:41,609 : INFO : l2_book-FTX-BTC-USD: Read 548 messages from Redis
+2021-10-28 18:14:41,627 : INFO : l2_book-FTX-BTC-USD: Removed 548 entries through id 1635434081580-0
+2021-10-28 18:14:41,627 : INFO : Write Complete FTX-l2_book-BTC-USD
+2021-10-28 18:14:41,628 : INFO : Reading FTX-trades-BTC-USD
+2021-10-28 18:14:41,630 : INFO : trades-FTX-BTC-USD: Read 41 messages from Redis
+2021-10-28 18:14:41,635 : INFO : trades-FTX-BTC-USD: Removed 41 entries through id 1635434079856-2
+2021-10-28 18:14:41,635 : INFO : Write Complete FTX-trades-BTC-USD
+2021-10-28 18:14:41,635 : INFO : Reading OKEX-l2_book-BTC-USDT
+2021-10-28 18:14:41,658 : INFO : l2_book-OKEX-BTC-USDT: Read 2553 messages from Redis
+2021-10-28 18:14:41,795 : INFO : l2_book-OKEX-BTC-USDT: Removed 2553 entries through id 1635434081634-0
+2021-10-28 18:14:41,796 : INFO : Write Complete OKEX-l2_book-BTC-USDT
+2021-10-28 18:14:41,796 : INFO : Reading OKEX-trades-BTC-USDT
+2021-10-28 18:14:41,799 : INFO : trades-OKEX-BTC-USDT: Read 54 messages from Redis
+2021-10-28 18:14:41,808 : INFO : trades-OKEX-BTC-USDT: Removed 54 entries through id 1635434080708-0
+2021-10-28 18:14:41,808 : INFO : Write Complete OKEX-trades-BTC-USDT
+2021-10-29 09:36:17,786 : INFO : Starting cryptostore
+2021-10-29 09:36:17,787 : INFO : Cryptostore running on PID 81284
+2021-10-29 09:36:22,793 : INFO : Prometehus started on port 8000
+2021-10-29 09:36:22,800 : INFO : Spawner started
+2021-10-29 09:36:22,805 : INFO : Aggregator started
+2021-10-29 09:36:22,809 : INFO : Cryptostore started
+2021-10-29 09:36:22,810 : INFO : loading config file locally: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-10-29 06:36:22.810133
+2021-10-29 09:36:22,823 : INFO : applying local config file: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-10-29 06:36:22.823567
+2021-10-29 09:36:22,823 : INFO : start: ['FTX', 'OKEX'] stop: []
+2021-10-29 09:36:23,898 : INFO : Aggregator running on PID 81289
+2021-10-29 09:36:23,898 : INFO : loading config file locally: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-10-29 06:36:23.898859
+2021-10-29 09:36:23,899 : INFO : Spawner running on PID 81288
+2021-10-29 09:36:23,900 : INFO : message: {"op": "start", "exchange": "FTX", "collector": {"funding": [], "l2_book": {"book_delta": true, "max_depth": 100, "symbols": ["BTC-USD"]}, "liquidations": [], "open_interest": [], "ticker": [], "trades": ["BTC-USD"]}, "config": {"cache": "redis", "kafka": {"ip": "127.0.0.1", "port": 9092, "start_flush": true}, "parquet": {"SVOE": {"glue_database": "svoe_glue_db", "s3_bucket": "svoe.test.1", "s3_key_id": "AKIAQXJHI7MZZ35ZPS4C", "s3_prefix": "data_lake", "s3_secret": "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", "version": "local"}, "append_counter": 0, "compression": {"codec": "gzip", "level": 5}, "del_file": true, "file_format": ["exchange", "symbol", "data_type", "timestamp"], "prefix_date": true}, "redis": {"del_after_read": true, "ip": "127.0.0.1", "port": 6379, "retention_time": null, "socket": null, "start_flush": true}, "storage": ["parquet"], "storage_interval": 30, "storage_retries": 5, "storage_retry_wait": 30}}
+2021-10-29 09:36:23,900 : INFO : Starting {'op': 'start', 'exchange': 'FTX', 'collector': {'funding': [], 'l2_book': {'book_delta': True, 'max_depth': 100, 'symbols': ['BTC-USD']}, 'liquidations': [], 'open_interest': [], 'ticker': [], 'trades': ['BTC-USD']}, 'config': {'cache': 'redis', 'kafka': {'ip': '127.0.0.1', 'port': 9092, 'start_flush': True}, 'parquet': {'SVOE': {'glue_database': 'svoe_glue_db', 's3_bucket': 'svoe.test.1', 's3_key_id': 'AKIAQXJHI7MZZ35ZPS4C', 's3_prefix': 'data_lake', 's3_secret': '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', 'version': 'local'}, 'append_counter': 0, 'compression': {'codec': 'gzip', 'level': 5}, 'del_file': True, 'file_format': ['exchange', 'symbol', 'data_type', 'timestamp'], 'prefix_date': True}, 'redis': {'del_after_read': True, 'ip': '127.0.0.1', 'port': 6379, 'retention_time': None, 'socket': None, 'start_flush': True}, 'storage': ['parquet'], 'storage_interval': 30, 'storage_retries': 5, 'storage_retry_wait': 30}}
+2021-10-29 09:36:23,904 : INFO : message: {"op": "start", "exchange": "OKEX", "collector": {"funding": [], "l2_book": {"book_delta": true, "max_depth": 100, "symbols": ["BTC-USDT"]}, "liquidations": [], "open_interest": [], "ticker": [], "trades": ["BTC-USDT"]}, "config": {"cache": "redis", "kafka": {"ip": "127.0.0.1", "port": 9092, "start_flush": true}, "parquet": {"SVOE": {"glue_database": "svoe_glue_db", "s3_bucket": "svoe.test.1", "s3_key_id": "AKIAQXJHI7MZZ35ZPS4C", "s3_prefix": "data_lake", "s3_secret": "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", "version": "local"}, "append_counter": 0, "compression": {"codec": "gzip", "level": 5}, "del_file": true, "file_format": ["exchange", "symbol", "data_type", "timestamp"], "prefix_date": true}, "redis": {"del_after_read": true, "ip": "127.0.0.1", "port": 6379, "retention_time": null, "socket": null, "start_flush": true}, "storage": ["parquet"], "storage_interval": 30, "storage_retries": 5, "storage_retry_wait": 30}}
+2021-10-29 09:36:23,905 : INFO : Starting {'op': 'start', 'exchange': 'OKEX', 'collector': {'funding': [], 'l2_book': {'book_delta': True, 'max_depth': 100, 'symbols': ['BTC-USDT']}, 'liquidations': [], 'open_interest': [], 'ticker': [], 'trades': ['BTC-USDT']}, 'config': {'cache': 'redis', 'kafka': {'ip': '127.0.0.1', 'port': 9092, 'start_flush': True}, 'parquet': {'SVOE': {'glue_database': 'svoe_glue_db', 's3_bucket': 'svoe.test.1', 's3_key_id': 'AKIAQXJHI7MZZ35ZPS4C', 's3_prefix': 'data_lake', 's3_secret': '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', 'version': 'local'}, 'append_counter': 0, 'compression': {'codec': 'gzip', 'level': 5}, 'del_file': True, 'file_format': ['exchange', 'symbol', 'data_type', 'timestamp'], 'prefix_date': True}, 'redis': {'del_after_read': True, 'ip': '127.0.0.1', 'port': 6379, 'retention_time': None, 'socket': None, 'start_flush': True}, 'storage': ['parquet'], 'storage_interval': 30, 'storage_retries': 5, 'storage_retry_wait': 30}}
+2021-10-29 09:36:23,906 : INFO : applying local config file: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-10-29 06:36:23.906472
+2021-10-29 09:36:23,924 : INFO : Flushing cache
+2021-10-29 09:36:23,949 : INFO : Reading FTX-l2_book-BTC-USD
+2021-10-29 09:36:23,950 : INFO : No data for FTX-l2_book-BTC-USD
+2021-10-29 09:36:23,950 : INFO : Reading FTX-trades-BTC-USD
+2021-10-29 09:36:23,950 : INFO : No data for FTX-trades-BTC-USD
+2021-10-29 09:36:23,951 : INFO : Reading OKEX-l2_book-BTC-USDT
+2021-10-29 09:36:23,951 : INFO : No data for OKEX-l2_book-BTC-USDT
+2021-10-29 09:36:23,951 : INFO : Reading OKEX-trades-BTC-USDT
+2021-10-29 09:36:23,952 : INFO : No data for OKEX-trades-BTC-USDT
+2021-10-29 09:36:25,465 : INFO : Collector for OKEX running on PID 81291
+2021-10-29 09:36:25,472 : INFO : Collector for FTX running on PID 81290
+2021-10-29 09:36:26,570 : INFO : Collector added feed handler - FTX(FUNDING, {'retries': 30, 'timeout': 120})
+2021-10-29 09:36:26,571 : INFO : Collector added feed handler - FTX(L2_BOOK, {'retries': 30, 'timeout': 120, 'max_depth': 100})
+2021-10-29 09:36:26,575 : INFO : Collector added feed handler - FTX(LIQUIDATIONS, {'retries': 30, 'timeout': 120})
+2021-10-29 09:36:26,576 : INFO : Collector added feed handler - FTX(OPEN_INTEREST, {'retries': 30, 'timeout': 120})
+2021-10-29 09:36:26,576 : INFO : Collector added feed handler - FTX(TICKER, {'retries': 30, 'timeout': 120})
+2021-10-29 09:36:26,577 : INFO : Collector added feed handler - FTX(TRADES, {'retries': 30, 'timeout': 120})
+2021-10-29 09:36:31,753 : INFO : Collector added feed handler - OKEX(FUNDING, {'retries': 30, 'timeout': 120})
+2021-10-29 09:36:31,755 : INFO : Collector added feed handler - OKEX(L2_BOOK, {'retries': 30, 'timeout': 120, 'max_depth': 100})
+2021-10-29 09:36:31,756 : INFO : Collector added feed handler - OKEX(LIQUIDATIONS, {'retries': 30, 'timeout': 120})
+2021-10-29 09:36:31,757 : INFO : Collector added feed handler - OKEX(OPEN_INTEREST, {'retries': 30, 'timeout': 120})
+2021-10-29 09:36:31,758 : INFO : Collector added feed handler - OKEX(TICKER, {'retries': 30, 'timeout': 120})
+2021-10-29 09:36:31,759 : INFO : Collector added feed handler - OKEX(TRADES, {'retries': 30, 'timeout': 120})
+2021-10-29 09:36:54,008 : INFO : Reading FTX-l2_book-BTC-USD
+2021-10-29 09:36:54,010 : INFO : l2_book-FTX-BTC-USD: Read 140 messages from Redis
+2021-10-29 09:36:54,027 : INFO : l2_book-FTX-BTC-USD: Removed 140 entries through id 1635489395883-0
+2021-10-29 09:36:54,027 : INFO : Write Complete FTX-l2_book-BTC-USD
+2021-10-29 09:36:54,027 : INFO : Reading FTX-trades-BTC-USD
+2021-10-29 09:36:54,028 : INFO : trades-FTX-BTC-USD: Read 9 messages from Redis
+2021-10-29 09:36:54,032 : INFO : trades-FTX-BTC-USD: Removed 9 entries through id 1635489395324-3
+2021-10-29 09:36:54,032 : INFO : Write Complete FTX-trades-BTC-USD
+2021-10-29 09:36:54,032 : INFO : Reading OKEX-l2_book-BTC-USDT
+2021-10-29 09:36:54,033 : INFO : l2_book-OKEX-BTC-USDT: Read 98 messages from Redis
+2021-10-29 09:36:54,039 : INFO : l2_book-OKEX-BTC-USDT: Removed 98 entries through id 1635489395891-1
+2021-10-29 09:36:54,040 : INFO : Write Complete OKEX-l2_book-BTC-USDT
+2021-10-29 09:36:54,040 : INFO : Reading OKEX-trades-BTC-USDT
+2021-10-29 09:36:54,040 : INFO : trades-OKEX-BTC-USDT: Read 7 messages from Redis
+2021-10-29 09:36:54,044 : INFO : trades-OKEX-BTC-USDT: Removed 7 entries through id 1635489395836-0
+2021-10-29 09:36:54,044 : INFO : Write Complete OKEX-trades-BTC-USDT
+2021-10-29 09:37:23,948 : INFO : Reading FTX-l2_book-BTC-USD
+2021-10-29 09:37:23,948 : INFO : No data for FTX-l2_book-BTC-USD
+2021-10-29 09:37:23,949 : INFO : Reading FTX-trades-BTC-USD
+2021-10-29 09:37:23,949 : INFO : No data for FTX-trades-BTC-USD
+2021-10-29 09:37:23,949 : INFO : Reading OKEX-l2_book-BTC-USDT
+2021-10-29 09:37:23,950 : INFO : No data for OKEX-l2_book-BTC-USDT
+2021-10-29 09:37:23,950 : INFO : Reading OKEX-trades-BTC-USDT
+2021-10-29 09:37:23,953 : INFO : No data for OKEX-trades-BTC-USDT
+2021-10-29 09:37:53,944 : INFO : Reading FTX-l2_book-BTC-USD
+2021-10-29 09:37:53,944 : INFO : No data for FTX-l2_book-BTC-USD
+2021-10-29 09:37:53,944 : INFO : Reading FTX-trades-BTC-USD
+2021-10-29 09:37:53,945 : INFO : No data for FTX-trades-BTC-USD
+2021-10-29 09:37:53,945 : INFO : Reading OKEX-l2_book-BTC-USDT
+2021-10-29 09:37:53,945 : INFO : No data for OKEX-l2_book-BTC-USDT
+2021-10-29 09:37:53,945 : INFO : Reading OKEX-trades-BTC-USDT
+2021-10-29 09:37:53,945 : INFO : No data for OKEX-trades-BTC-USDT
+2021-10-29 09:44:35,344 : INFO : Starting cryptostore
+2021-10-29 09:44:35,346 : INFO : Cryptostore running on PID 81386
+2021-10-29 09:44:40,361 : INFO : Prometehus started on port 8000
+2021-10-29 09:44:40,368 : INFO : Spawner started
+2021-10-29 09:44:40,374 : INFO : Aggregator started
+2021-10-29 09:44:40,377 : INFO : Cryptostore started
+2021-10-29 09:44:40,378 : INFO : loading config file locally: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-10-29 06:44:40.378247
+2021-10-29 09:44:40,392 : INFO : applying local config file: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-10-29 06:44:40.392871
+2021-10-29 09:44:40,393 : INFO : start: ['FTX', 'OKEX'] stop: []
+2021-10-29 09:44:43,488 : INFO : Aggregator running on PID 81408
+2021-10-29 09:44:43,489 : INFO : loading config file locally: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-10-29 06:44:43.489938
+2021-10-29 09:44:43,492 : INFO : Spawner running on PID 81407
+2021-10-29 09:44:43,492 : INFO : message: {"op": "start", "exchange": "FTX", "collector": {"funding": [], "l2_book": {"book_delta": true, "max_depth": 100, "symbols": ["BTC-USD"]}, "liquidations": [], "open_interest": [], "ticker": [], "trades": ["BTC-USD"]}, "config": {"cache": "redis", "kafka": {"ip": "127.0.0.1", "port": 9092, "start_flush": true}, "parquet": {"SVOE": {"glue_database": "svoe_glue_db", "s3_bucket": "svoe.test.1", "s3_key_id": "AKIAQXJHI7MZZ35ZPS4C", "s3_prefix": "data_lake", "s3_secret": "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", "version": "local"}, "append_counter": 0, "compression": {"codec": "gzip", "level": 5}, "del_file": true, "file_format": ["exchange", "symbol", "data_type", "timestamp"], "prefix_date": true}, "redis": {"del_after_read": true, "ip": "127.0.0.1", "port": 6379, "retention_time": null, "socket": null, "start_flush": true}, "storage": ["parquet"], "storage_interval": 30, "storage_retries": 5, "storage_retry_wait": 30}}
+2021-10-29 09:44:43,492 : INFO : Starting {'op': 'start', 'exchange': 'FTX', 'collector': {'funding': [], 'l2_book': {'book_delta': True, 'max_depth': 100, 'symbols': ['BTC-USD']}, 'liquidations': [], 'open_interest': [], 'ticker': [], 'trades': ['BTC-USD']}, 'config': {'cache': 'redis', 'kafka': {'ip': '127.0.0.1', 'port': 9092, 'start_flush': True}, 'parquet': {'SVOE': {'glue_database': 'svoe_glue_db', 's3_bucket': 'svoe.test.1', 's3_key_id': 'AKIAQXJHI7MZZ35ZPS4C', 's3_prefix': 'data_lake', 's3_secret': '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', 'version': 'local'}, 'append_counter': 0, 'compression': {'codec': 'gzip', 'level': 5}, 'del_file': True, 'file_format': ['exchange', 'symbol', 'data_type', 'timestamp'], 'prefix_date': True}, 'redis': {'del_after_read': True, 'ip': '127.0.0.1', 'port': 6379, 'retention_time': None, 'socket': None, 'start_flush': True}, 'storage': ['parquet'], 'storage_interval': 30, 'storage_retries': 5, 'storage_retry_wait': 30}}
+2021-10-29 09:44:43,496 : INFO : message: {"op": "start", "exchange": "OKEX", "collector": {"funding": [], "l2_book": {"book_delta": true, "max_depth": 100, "symbols": ["BTC-USDT"]}, "liquidations": [], "open_interest": [], "ticker": [], "trades": ["BTC-USDT"]}, "config": {"cache": "redis", "kafka": {"ip": "127.0.0.1", "port": 9092, "start_flush": true}, "parquet": {"SVOE": {"glue_database": "svoe_glue_db", "s3_bucket": "svoe.test.1", "s3_key_id": "AKIAQXJHI7MZZ35ZPS4C", "s3_prefix": "data_lake", "s3_secret": "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", "version": "local"}, "append_counter": 0, "compression": {"codec": "gzip", "level": 5}, "del_file": true, "file_format": ["exchange", "symbol", "data_type", "timestamp"], "prefix_date": true}, "redis": {"del_after_read": true, "ip": "127.0.0.1", "port": 6379, "retention_time": null, "socket": null, "start_flush": true}, "storage": ["parquet"], "storage_interval": 30, "storage_retries": 5, "storage_retry_wait": 30}}
+2021-10-29 09:44:43,503 : INFO : Starting {'op': 'start', 'exchange': 'OKEX', 'collector': {'funding': [], 'l2_book': {'book_delta': True, 'max_depth': 100, 'symbols': ['BTC-USDT']}, 'liquidations': [], 'open_interest': [], 'ticker': [], 'trades': ['BTC-USDT']}, 'config': {'cache': 'redis', 'kafka': {'ip': '127.0.0.1', 'port': 9092, 'start_flush': True}, 'parquet': {'SVOE': {'glue_database': 'svoe_glue_db', 's3_bucket': 'svoe.test.1', 's3_key_id': 'AKIAQXJHI7MZZ35ZPS4C', 's3_prefix': 'data_lake', 's3_secret': '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', 'version': 'local'}, 'append_counter': 0, 'compression': {'codec': 'gzip', 'level': 5}, 'del_file': True, 'file_format': ['exchange', 'symbol', 'data_type', 'timestamp'], 'prefix_date': True}, 'redis': {'del_after_read': True, 'ip': '127.0.0.1', 'port': 6379, 'retention_time': None, 'socket': None, 'start_flush': True}, 'storage': ['parquet'], 'storage_interval': 30, 'storage_retries': 5, 'storage_retry_wait': 30}}
+2021-10-29 09:44:43,504 : INFO : applying local config file: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-10-29 06:44:43.504583
+2021-10-29 09:44:43,536 : INFO : Flushing cache
+2021-10-29 09:44:43,579 : INFO : Reading FTX-l2_book-BTC-USD
+2021-10-29 09:44:43,580 : INFO : No data for FTX-l2_book-BTC-USD
+2021-10-29 09:44:43,580 : INFO : Reading FTX-trades-BTC-USD
+2021-10-29 09:44:43,581 : INFO : No data for FTX-trades-BTC-USD
+2021-10-29 09:44:43,581 : INFO : Reading OKEX-l2_book-BTC-USDT
+2021-10-29 09:44:43,581 : INFO : No data for OKEX-l2_book-BTC-USDT
+2021-10-29 09:44:43,582 : INFO : Reading OKEX-trades-BTC-USDT
+2021-10-29 09:44:43,583 : INFO : No data for OKEX-trades-BTC-USDT
+2021-10-29 09:44:45,812 : INFO : Collector for OKEX running on PID 81410
+2021-10-29 09:44:45,829 : INFO : Collector for FTX running on PID 81409
+2021-10-29 09:45:42,226 : INFO : Starting cryptostore
+2021-10-29 09:45:42,226 : INFO : Cryptostore running on PID 81430
+2021-10-29 09:45:47,234 : INFO : Prometehus started on port 8000
+2021-10-29 09:45:47,239 : INFO : Spawner started
+2021-10-29 09:45:47,244 : INFO : Aggregator started
+2021-10-29 09:45:47,248 : INFO : Cryptostore started
+2021-10-29 09:45:47,248 : INFO : loading config file locally: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-10-29 06:45:47.248696
+2021-10-29 09:45:47,259 : INFO : applying local config file: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-10-29 06:45:47.259465
+2021-10-29 09:45:47,259 : INFO : start: ['FTX', 'OKEX'] stop: []
+2021-10-29 09:45:48,390 : INFO : Spawner running on PID 81433
+2021-10-29 09:45:48,390 : INFO : message: {"op": "start", "exchange": "FTX", "collector": {"funding": [], "l2_book": {"book_delta": true, "max_depth": 100, "symbols": ["BTC-USD"]}, "liquidations": [], "open_interest": [], "ticker": [], "trades": ["BTC-USD"]}, "config": {"cache": "redis", "kafka": {"ip": "127.0.0.1", "port": 9092, "start_flush": true}, "parquet": {"SVOE": {"glue_database": "svoe_glue_db", "s3_bucket": "svoe.test.1", "s3_key_id": "AKIAQXJHI7MZZ35ZPS4C", "s3_prefix": "data_lake", "s3_secret": "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", "version": "local"}, "append_counter": 0, "compression": {"codec": "gzip", "level": 5}, "del_file": true, "file_format": ["exchange", "symbol", "data_type", "timestamp"], "prefix_date": true}, "redis": {"del_after_read": true, "ip": "127.0.0.1", "port": 6379, "retention_time": null, "socket": null, "start_flush": true}, "storage": ["parquet"], "storage_interval": 30, "storage_retries": 5, "storage_retry_wait": 30}}
+2021-10-29 09:45:48,391 : INFO : Starting {'op': 'start', 'exchange': 'FTX', 'collector': {'funding': [], 'l2_book': {'book_delta': True, 'max_depth': 100, 'symbols': ['BTC-USD']}, 'liquidations': [], 'open_interest': [], 'ticker': [], 'trades': ['BTC-USD']}, 'config': {'cache': 'redis', 'kafka': {'ip': '127.0.0.1', 'port': 9092, 'start_flush': True}, 'parquet': {'SVOE': {'glue_database': 'svoe_glue_db', 's3_bucket': 'svoe.test.1', 's3_key_id': 'AKIAQXJHI7MZZ35ZPS4C', 's3_prefix': 'data_lake', 's3_secret': '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', 'version': 'local'}, 'append_counter': 0, 'compression': {'codec': 'gzip', 'level': 5}, 'del_file': True, 'file_format': ['exchange', 'symbol', 'data_type', 'timestamp'], 'prefix_date': True}, 'redis': {'del_after_read': True, 'ip': '127.0.0.1', 'port': 6379, 'retention_time': None, 'socket': None, 'start_flush': True}, 'storage': ['parquet'], 'storage_interval': 30, 'storage_retries': 5, 'storage_retry_wait': 30}}
+2021-10-29 09:45:48,395 : INFO : message: {"op": "start", "exchange": "OKEX", "collector": {"funding": [], "l2_book": {"book_delta": true, "max_depth": 100, "symbols": ["BTC-USDT"]}, "liquidations": [], "open_interest": [], "ticker": [], "trades": ["BTC-USDT"]}, "config": {"cache": "redis", "kafka": {"ip": "127.0.0.1", "port": 9092, "start_flush": true}, "parquet": {"SVOE": {"glue_database": "svoe_glue_db", "s3_bucket": "svoe.test.1", "s3_key_id": "AKIAQXJHI7MZZ35ZPS4C", "s3_prefix": "data_lake", "s3_secret": "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", "version": "local"}, "append_counter": 0, "compression": {"codec": "gzip", "level": 5}, "del_file": true, "file_format": ["exchange", "symbol", "data_type", "timestamp"], "prefix_date": true}, "redis": {"del_after_read": true, "ip": "127.0.0.1", "port": 6379, "retention_time": null, "socket": null, "start_flush": true}, "storage": ["parquet"], "storage_interval": 30, "storage_retries": 5, "storage_retry_wait": 30}}
+2021-10-29 09:45:48,396 : INFO : Starting {'op': 'start', 'exchange': 'OKEX', 'collector': {'funding': [], 'l2_book': {'book_delta': True, 'max_depth': 100, 'symbols': ['BTC-USDT']}, 'liquidations': [], 'open_interest': [], 'ticker': [], 'trades': ['BTC-USDT']}, 'config': {'cache': 'redis', 'kafka': {'ip': '127.0.0.1', 'port': 9092, 'start_flush': True}, 'parquet': {'SVOE': {'glue_database': 'svoe_glue_db', 's3_bucket': 'svoe.test.1', 's3_key_id': 'AKIAQXJHI7MZZ35ZPS4C', 's3_prefix': 'data_lake', 's3_secret': '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', 'version': 'local'}, 'append_counter': 0, 'compression': {'codec': 'gzip', 'level': 5}, 'del_file': True, 'file_format': ['exchange', 'symbol', 'data_type', 'timestamp'], 'prefix_date': True}, 'redis': {'del_after_read': True, 'ip': '127.0.0.1', 'port': 6379, 'retention_time': None, 'socket': None, 'start_flush': True}, 'storage': ['parquet'], 'storage_interval': 30, 'storage_retries': 5, 'storage_retry_wait': 30}}
+2021-10-29 09:45:48,399 : INFO : Aggregator running on PID 81434
+2021-10-29 09:45:48,400 : INFO : loading config file locally: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-10-29 06:45:48.400577
+2021-10-29 09:45:48,410 : INFO : applying local config file: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-10-29 06:45:48.410599
+2021-10-29 09:45:48,417 : INFO : Flushing cache
+2021-10-29 09:45:48,448 : INFO : Reading FTX-l2_book-BTC-USD
+2021-10-29 09:45:48,449 : INFO : No data for FTX-l2_book-BTC-USD
+2021-10-29 09:45:48,450 : INFO : Reading FTX-trades-BTC-USD
+2021-10-29 09:45:48,450 : INFO : No data for FTX-trades-BTC-USD
+2021-10-29 09:45:48,451 : INFO : Reading OKEX-l2_book-BTC-USDT
+2021-10-29 09:45:48,451 : INFO : No data for OKEX-l2_book-BTC-USDT
+2021-10-29 09:45:48,451 : INFO : Reading OKEX-trades-BTC-USDT
+2021-10-29 09:45:48,452 : INFO : No data for OKEX-trades-BTC-USDT
+2021-10-29 09:45:49,809 : INFO : Collector for FTX running on PID 81435
+2021-10-29 09:45:49,820 : INFO : Collector for OKEX running on PID 81436
+2021-10-29 09:45:51,141 : INFO : Collector added feed handler - FTX(FUNDING, {'retries': 30, 'timeout': 120})
+2021-10-29 09:45:51,142 : INFO : Collector added feed handler - FTX(L2_BOOK, {'retries': 30, 'timeout': 120, 'max_depth': 100})
+2021-10-29 09:45:51,143 : INFO : Collector added feed handler - FTX(LIQUIDATIONS, {'retries': 30, 'timeout': 120})
+2021-10-29 09:45:51,144 : INFO : Collector added feed handler - FTX(OPEN_INTEREST, {'retries': 30, 'timeout': 120})
+2021-10-29 09:45:51,145 : INFO : Collector added feed handler - FTX(TICKER, {'retries': 30, 'timeout': 120})
+2021-10-29 09:45:51,145 : INFO : Collector added feed handler - FTX(TRADES, {'retries': 30, 'timeout': 120})
+2021-10-29 09:45:52,381 : INFO : Collector added feed handler - OKEX(FUNDING, {'retries': 30, 'timeout': 120})
+2021-10-29 09:45:52,382 : INFO : Collector added feed handler - OKEX(L2_BOOK, {'retries': 30, 'timeout': 120, 'max_depth': 100})
+2021-10-29 09:45:52,385 : INFO : Collector added feed handler - OKEX(LIQUIDATIONS, {'retries': 30, 'timeout': 120})
+2021-10-29 09:45:52,386 : INFO : Collector added feed handler - OKEX(OPEN_INTEREST, {'retries': 30, 'timeout': 120})
+2021-10-29 09:45:52,386 : INFO : Collector added feed handler - OKEX(TICKER, {'retries': 30, 'timeout': 120})
+2021-10-29 09:45:52,387 : INFO : Collector added feed handler - OKEX(TRADES, {'retries': 30, 'timeout': 120})
+2021-10-29 09:46:18,470 : INFO : Reading FTX-l2_book-BTC-USD
+2021-10-29 09:46:18,477 : INFO : l2_book-FTX-BTC-USD: Read 469 messages from Redis
+2021-10-29 09:46:18,496 : INFO : l2_book-FTX-BTC-USD: Removed 469 entries through id 1635489978467-0
+2021-10-29 09:46:18,496 : INFO : Write Complete FTX-l2_book-BTC-USD
+2021-10-29 09:46:18,496 : INFO : Reading FTX-trades-BTC-USD
+2021-10-29 09:46:18,497 : INFO : trades-FTX-BTC-USD: Read 52 messages from Redis
+2021-10-29 09:46:18,504 : INFO : trades-FTX-BTC-USD: Removed 52 entries through id 1635489976317-0
+2021-10-29 09:46:18,504 : INFO : Write Complete FTX-trades-BTC-USD
+2021-10-29 09:46:18,504 : INFO : Reading OKEX-l2_book-BTC-USDT
+2021-10-29 09:46:18,528 : INFO : l2_book-OKEX-BTC-USDT: Read 2343 messages from Redis
+2021-10-29 09:46:18,607 : INFO : l2_book-OKEX-BTC-USDT: Removed 2343 entries through id 1635489978496-0
+2021-10-29 09:46:18,608 : INFO : Write Complete OKEX-l2_book-BTC-USDT
+2021-10-29 09:46:18,608 : INFO : Reading OKEX-trades-BTC-USDT
+2021-10-29 09:46:18,609 : INFO : trades-OKEX-BTC-USDT: Read 159 messages from Redis
+2021-10-29 09:46:18,615 : INFO : trades-OKEX-BTC-USDT: Removed 159 entries through id 1635489978179-0
+2021-10-29 09:46:18,615 : INFO : Write Complete OKEX-trades-BTC-USDT
+2021-10-29 09:50:20,518 : INFO : Starting cryptostore
+2021-10-29 09:50:20,518 : INFO : Cryptostore running on PID 81489
+2021-10-29 09:50:25,524 : INFO : Prometehus started on port 8000
+2021-10-29 09:50:25,532 : INFO : Spawner started
+2021-10-29 09:50:25,536 : INFO : Aggregator started
+2021-10-29 09:50:25,541 : INFO : Cryptostore started
+2021-10-29 09:50:25,541 : INFO : loading config file locally: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-10-29 06:50:25.541793
+2021-10-29 09:50:25,553 : INFO : applying local config file: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-10-29 06:50:25.553102
+2021-10-29 09:50:25,553 : INFO : start: ['FTX', 'OKEX'] stop: []
+2021-10-29 09:50:26,672 : INFO : Spawner running on PID 81491
+2021-10-29 09:50:26,672 : INFO : message: {"op": "start", "exchange": "FTX", "collector": {"funding": [], "l2_book": {"book_delta": true, "max_depth": 100, "symbols": ["BTC-USD"]}, "liquidations": [], "open_interest": [], "ticker": [], "trades": ["BTC-USD"]}, "config": {"cache": "redis", "kafka": {"ip": "127.0.0.1", "port": 9092, "start_flush": true}, "parquet": {"SVOE": {"glue_database": "svoe_glue_db", "s3_bucket": "svoe.test.1", "s3_key_id": "AKIAQXJHI7MZZ35ZPS4C", "s3_prefix": "data_lake", "s3_secret": "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", "version": "local"}, "append_counter": 0, "compression": {"codec": "gzip", "level": 5}, "del_file": true, "file_format": ["exchange", "symbol", "data_type", "timestamp"], "prefix_date": true}, "redis": {"del_after_read": true, "ip": "127.0.0.1", "port": 6379, "retention_time": null, "socket": null, "start_flush": true}, "storage": ["parquet"], "storage_interval": 30, "storage_retries": 5, "storage_retry_wait": 30}}
+2021-10-29 09:50:26,672 : INFO : Starting {'op': 'start', 'exchange': 'FTX', 'collector': {'funding': [], 'l2_book': {'book_delta': True, 'max_depth': 100, 'symbols': ['BTC-USD']}, 'liquidations': [], 'open_interest': [], 'ticker': [], 'trades': ['BTC-USD']}, 'config': {'cache': 'redis', 'kafka': {'ip': '127.0.0.1', 'port': 9092, 'start_flush': True}, 'parquet': {'SVOE': {'glue_database': 'svoe_glue_db', 's3_bucket': 'svoe.test.1', 's3_key_id': 'AKIAQXJHI7MZZ35ZPS4C', 's3_prefix': 'data_lake', 's3_secret': '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', 'version': 'local'}, 'append_counter': 0, 'compression': {'codec': 'gzip', 'level': 5}, 'del_file': True, 'file_format': ['exchange', 'symbol', 'data_type', 'timestamp'], 'prefix_date': True}, 'redis': {'del_after_read': True, 'ip': '127.0.0.1', 'port': 6379, 'retention_time': None, 'socket': None, 'start_flush': True}, 'storage': ['parquet'], 'storage_interval': 30, 'storage_retries': 5, 'storage_retry_wait': 30}}
+2021-10-29 09:50:26,676 : INFO : Aggregator running on PID 81492
+2021-10-29 09:50:26,677 : INFO : loading config file locally: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-10-29 06:50:26.677652
+2021-10-29 09:50:26,676 : INFO : message: {"op": "start", "exchange": "OKEX", "collector": {"funding": [], "l2_book": {"book_delta": true, "max_depth": 100, "symbols": ["BTC-USDT"]}, "liquidations": [], "open_interest": [], "ticker": [], "trades": ["BTC-USDT"]}, "config": {"cache": "redis", "kafka": {"ip": "127.0.0.1", "port": 9092, "start_flush": true}, "parquet": {"SVOE": {"glue_database": "svoe_glue_db", "s3_bucket": "svoe.test.1", "s3_key_id": "AKIAQXJHI7MZZ35ZPS4C", "s3_prefix": "data_lake", "s3_secret": "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", "version": "local"}, "append_counter": 0, "compression": {"codec": "gzip", "level": 5}, "del_file": true, "file_format": ["exchange", "symbol", "data_type", "timestamp"], "prefix_date": true}, "redis": {"del_after_read": true, "ip": "127.0.0.1", "port": 6379, "retention_time": null, "socket": null, "start_flush": true}, "storage": ["parquet"], "storage_interval": 30, "storage_retries": 5, "storage_retry_wait": 30}}
+2021-10-29 09:50:26,679 : INFO : Starting {'op': 'start', 'exchange': 'OKEX', 'collector': {'funding': [], 'l2_book': {'book_delta': True, 'max_depth': 100, 'symbols': ['BTC-USDT']}, 'liquidations': [], 'open_interest': [], 'ticker': [], 'trades': ['BTC-USDT']}, 'config': {'cache': 'redis', 'kafka': {'ip': '127.0.0.1', 'port': 9092, 'start_flush': True}, 'parquet': {'SVOE': {'glue_database': 'svoe_glue_db', 's3_bucket': 'svoe.test.1', 's3_key_id': 'AKIAQXJHI7MZZ35ZPS4C', 's3_prefix': 'data_lake', 's3_secret': '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', 'version': 'local'}, 'append_counter': 0, 'compression': {'codec': 'gzip', 'level': 5}, 'del_file': True, 'file_format': ['exchange', 'symbol', 'data_type', 'timestamp'], 'prefix_date': True}, 'redis': {'del_after_read': True, 'ip': '127.0.0.1', 'port': 6379, 'retention_time': None, 'socket': None, 'start_flush': True}, 'storage': ['parquet'], 'storage_interval': 30, 'storage_retries': 5, 'storage_retry_wait': 30}}
+2021-10-29 09:50:26,688 : INFO : applying local config file: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-10-29 06:50:26.688474
+2021-10-29 09:50:26,717 : INFO : Flushing cache
+2021-10-29 09:50:26,746 : INFO : Reading FTX-l2_book-BTC-USD
+2021-10-29 09:50:26,747 : INFO : No data for FTX-l2_book-BTC-USD
+2021-10-29 09:50:26,748 : INFO : Reading FTX-trades-BTC-USD
+2021-10-29 09:50:26,749 : INFO : No data for FTX-trades-BTC-USD
+2021-10-29 09:50:26,750 : INFO : Reading OKEX-l2_book-BTC-USDT
+2021-10-29 09:50:26,751 : INFO : No data for OKEX-l2_book-BTC-USDT
+2021-10-29 09:50:26,751 : INFO : Reading OKEX-trades-BTC-USDT
+2021-10-29 09:50:26,752 : INFO : No data for OKEX-trades-BTC-USDT
+2021-10-29 09:50:28,086 : INFO : Collector for FTX running on PID 81493
+2021-10-29 09:50:28,087 : INFO : Collector for OKEX running on PID 81494
+2021-10-29 09:50:29,417 : INFO : Collector added feed handler - FTX(FUNDING, {'retries': 30, 'timeout': 120})
+2021-10-29 09:50:29,418 : INFO : Collector added feed handler - FTX(L2_BOOK, {'retries': 30, 'timeout': 120, 'max_depth': 100})
+2021-10-29 09:50:29,419 : INFO : Collector added feed handler - FTX(LIQUIDATIONS, {'retries': 30, 'timeout': 120})
+2021-10-29 09:50:29,421 : INFO : Collector added feed handler - FTX(OPEN_INTEREST, {'retries': 30, 'timeout': 120})
+2021-10-29 09:50:29,424 : INFO : Collector added feed handler - FTX(TICKER, {'retries': 30, 'timeout': 120})
+2021-10-29 09:50:29,427 : INFO : Collector added feed handler - FTX(TRADES, {'retries': 30, 'timeout': 120})
+2021-10-29 09:50:30,666 : INFO : Collector added feed handler - OKEX(FUNDING, {'retries': 30, 'timeout': 120})
+2021-10-29 09:50:30,668 : INFO : Collector added feed handler - OKEX(L2_BOOK, {'retries': 30, 'timeout': 120, 'max_depth': 100})
+2021-10-29 09:50:30,670 : INFO : Collector added feed handler - OKEX(LIQUIDATIONS, {'retries': 30, 'timeout': 120})
+2021-10-29 09:50:30,671 : INFO : Collector added feed handler - OKEX(OPEN_INTEREST, {'retries': 30, 'timeout': 120})
+2021-10-29 09:50:30,672 : INFO : Collector added feed handler - OKEX(TICKER, {'retries': 30, 'timeout': 120})
+2021-10-29 09:50:30,673 : INFO : Collector added feed handler - OKEX(TRADES, {'retries': 30, 'timeout': 120})
+2021-10-29 09:50:56,776 : INFO : Reading FTX-l2_book-BTC-USD
+2021-10-29 09:50:56,780 : INFO : l2_book-FTX-BTC-USD: Read 445 messages from Redis
+2021-10-29 09:50:56,801 : INFO : l2_book-FTX-BTC-USD: Removed 445 entries through id 1635490256719-0
+2021-10-29 09:50:56,801 : INFO : Write Complete FTX-l2_book-BTC-USD
+2021-10-29 09:50:56,801 : INFO : Reading FTX-trades-BTC-USD
+2021-10-29 09:50:56,802 : INFO : trades-FTX-BTC-USD: Read 30 messages from Redis
+2021-10-29 09:50:56,806 : INFO : trades-FTX-BTC-USD: Removed 30 entries through id 1635490256385-2
+2021-10-29 09:50:56,806 : INFO : Write Complete FTX-trades-BTC-USD
+2021-10-29 09:50:56,807 : INFO : Reading OKEX-l2_book-BTC-USDT
+2021-10-29 09:50:56,826 : INFO : l2_book-OKEX-BTC-USDT: Read 2080 messages from Redis
+2021-10-29 09:50:56,898 : INFO : l2_book-OKEX-BTC-USDT: Removed 2080 entries through id 1635490256801-0
+2021-10-29 09:50:56,901 : INFO : Write Complete OKEX-l2_book-BTC-USDT
+2021-10-29 09:50:56,901 : INFO : Reading OKEX-trades-BTC-USDT
+2021-10-29 09:50:56,903 : INFO : trades-OKEX-BTC-USDT: Read 104 messages from Redis
+2021-10-29 09:50:56,923 : INFO : trades-OKEX-BTC-USDT: Removed 104 entries through id 1635490256413-0
+2021-10-29 09:50:56,923 : INFO : Write Complete OKEX-trades-BTC-USDT
+2021-10-29 09:51:26,753 : INFO : Reading FTX-l2_book-BTC-USD
+2021-10-29 09:51:26,763 : INFO : l2_book-FTX-BTC-USD: Read 572 messages from Redis
+2021-10-29 09:51:26,789 : INFO : l2_book-FTX-BTC-USD: Removed 572 entries through id 1635490286730-0
+2021-10-29 09:51:26,789 : INFO : Write Complete FTX-l2_book-BTC-USD
+2021-10-29 09:51:26,790 : INFO : Reading FTX-trades-BTC-USD
+2021-10-29 09:51:26,790 : INFO : trades-FTX-BTC-USD: Read 48 messages from Redis
+2021-10-29 09:51:26,805 : INFO : trades-FTX-BTC-USD: Removed 48 entries through id 1635490286692-0
+2021-10-29 09:51:26,806 : INFO : Write Complete FTX-trades-BTC-USD
+2021-10-29 09:51:26,806 : INFO : Reading OKEX-l2_book-BTC-USDT
+2021-10-29 09:51:26,835 : INFO : l2_book-OKEX-BTC-USDT: Read 2441 messages from Redis
+2021-10-29 09:51:26,904 : INFO : l2_book-OKEX-BTC-USDT: Removed 2441 entries through id 1635490286784-2
+2021-10-29 09:51:26,904 : INFO : Write Complete OKEX-l2_book-BTC-USDT
+2021-10-29 09:51:26,904 : INFO : Reading OKEX-trades-BTC-USDT
+2021-10-29 09:51:26,911 : INFO : trades-OKEX-BTC-USDT: Read 850 messages from Redis
+2021-10-29 09:51:26,924 : INFO : trades-OKEX-BTC-USDT: Removed 850 entries through id 1635490286658-1
+2021-10-29 09:51:26,924 : INFO : Write Complete OKEX-trades-BTC-USDT
+2021-10-29 09:53:01,819 : INFO : Starting cryptostore
+2021-10-29 09:53:01,820 : INFO : Cryptostore running on PID 81513
+2021-10-29 09:53:06,825 : INFO : Prometehus started on port 8000
+2021-10-29 09:53:06,832 : INFO : Spawner started
+2021-10-29 09:53:06,837 : INFO : Aggregator started
+2021-10-29 09:53:06,841 : INFO : Cryptostore started
+2021-10-29 09:53:06,841 : INFO : loading config file locally: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-10-29 06:53:06.841508
+2021-10-29 09:53:06,855 : INFO : applying local config file: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-10-29 06:53:06.855262
+2021-10-29 09:53:06,855 : INFO : start: ['OKEX', 'FTX'] stop: []
+2021-10-29 09:53:07,948 : INFO : Aggregator running on PID 81516
+2021-10-29 09:53:07,948 : INFO : loading config file locally: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-10-29 06:53:07.948783
+2021-10-29 09:53:07,950 : INFO : Spawner running on PID 81515
+2021-10-29 09:53:07,951 : INFO : message: {"op": "start", "exchange": "OKEX", "collector": {"funding": [], "l2_book": {"book_delta": true, "max_depth": 100, "symbols": ["BTC-USDT"]}, "liquidations": [], "open_interest": [], "ticker": [], "trades": ["BTC-USDT"]}, "config": {"cache": "redis", "kafka": {"ip": "127.0.0.1", "port": 9092, "start_flush": true}, "parquet": {"SVOE": {"glue_database": "svoe_glue_db", "s3_bucket": "svoe.test.1", "s3_key_id": "AKIAQXJHI7MZZ35ZPS4C", "s3_prefix": "data_lake", "s3_secret": "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", "version": "local"}, "append_counter": 0, "compression": {"codec": "gzip", "level": 5}, "del_file": true, "file_format": ["exchange", "symbol", "data_type", "timestamp"], "prefix_date": true}, "redis": {"del_after_read": true, "ip": "127.0.0.1", "port": 6379, "retention_time": null, "socket": null, "start_flush": true}, "storage": ["parquet"], "storage_interval": 30, "storage_retries": 5, "storage_retry_wait": 30}}
+2021-10-29 09:53:07,951 : INFO : Starting {'op': 'start', 'exchange': 'OKEX', 'collector': {'funding': [], 'l2_book': {'book_delta': True, 'max_depth': 100, 'symbols': ['BTC-USDT']}, 'liquidations': [], 'open_interest': [], 'ticker': [], 'trades': ['BTC-USDT']}, 'config': {'cache': 'redis', 'kafka': {'ip': '127.0.0.1', 'port': 9092, 'start_flush': True}, 'parquet': {'SVOE': {'glue_database': 'svoe_glue_db', 's3_bucket': 'svoe.test.1', 's3_key_id': 'AKIAQXJHI7MZZ35ZPS4C', 's3_prefix': 'data_lake', 's3_secret': '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', 'version': 'local'}, 'append_counter': 0, 'compression': {'codec': 'gzip', 'level': 5}, 'del_file': True, 'file_format': ['exchange', 'symbol', 'data_type', 'timestamp'], 'prefix_date': True}, 'redis': {'del_after_read': True, 'ip': '127.0.0.1', 'port': 6379, 'retention_time': None, 'socket': None, 'start_flush': True}, 'storage': ['parquet'], 'storage_interval': 30, 'storage_retries': 5, 'storage_retry_wait': 30}}
+2021-10-29 09:53:07,954 : INFO : message: {"op": "start", "exchange": "FTX", "collector": {"funding": [], "l2_book": {"book_delta": true, "max_depth": 100, "symbols": ["BTC-USD"]}, "liquidations": [], "open_interest": [], "ticker": [], "trades": ["BTC-USD"]}, "config": {"cache": "redis", "kafka": {"ip": "127.0.0.1", "port": 9092, "start_flush": true}, "parquet": {"SVOE": {"glue_database": "svoe_glue_db", "s3_bucket": "svoe.test.1", "s3_key_id": "AKIAQXJHI7MZZ35ZPS4C", "s3_prefix": "data_lake", "s3_secret": "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", "version": "local"}, "append_counter": 0, "compression": {"codec": "gzip", "level": 5}, "del_file": true, "file_format": ["exchange", "symbol", "data_type", "timestamp"], "prefix_date": true}, "redis": {"del_after_read": true, "ip": "127.0.0.1", "port": 6379, "retention_time": null, "socket": null, "start_flush": true}, "storage": ["parquet"], "storage_interval": 30, "storage_retries": 5, "storage_retry_wait": 30}}
+2021-10-29 09:53:07,956 : INFO : Starting {'op': 'start', 'exchange': 'FTX', 'collector': {'funding': [], 'l2_book': {'book_delta': True, 'max_depth': 100, 'symbols': ['BTC-USD']}, 'liquidations': [], 'open_interest': [], 'ticker': [], 'trades': ['BTC-USD']}, 'config': {'cache': 'redis', 'kafka': {'ip': '127.0.0.1', 'port': 9092, 'start_flush': True}, 'parquet': {'SVOE': {'glue_database': 'svoe_glue_db', 's3_bucket': 'svoe.test.1', 's3_key_id': 'AKIAQXJHI7MZZ35ZPS4C', 's3_prefix': 'data_lake', 's3_secret': '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', 'version': 'local'}, 'append_counter': 0, 'compression': {'codec': 'gzip', 'level': 5}, 'del_file': True, 'file_format': ['exchange', 'symbol', 'data_type', 'timestamp'], 'prefix_date': True}, 'redis': {'del_after_read': True, 'ip': '127.0.0.1', 'port': 6379, 'retention_time': None, 'socket': None, 'start_flush': True}, 'storage': ['parquet'], 'storage_interval': 30, 'storage_retries': 5, 'storage_retry_wait': 30}}
+2021-10-29 09:53:07,957 : INFO : applying local config file: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-10-29 06:53:07.956995
+2021-10-29 09:53:07,977 : INFO : Flushing cache
+2021-10-29 09:53:08,007 : INFO : Reading FTX-l2_book-BTC-USD
+2021-10-29 09:53:08,008 : INFO : No data for FTX-l2_book-BTC-USD
+2021-10-29 09:53:08,008 : INFO : Reading FTX-trades-BTC-USD
+2021-10-29 09:53:08,009 : INFO : No data for FTX-trades-BTC-USD
+2021-10-29 09:53:08,009 : INFO : Reading OKEX-l2_book-BTC-USDT
+2021-10-29 09:53:08,009 : INFO : No data for OKEX-l2_book-BTC-USDT
+2021-10-29 09:53:08,010 : INFO : Reading OKEX-trades-BTC-USDT
+2021-10-29 09:53:08,010 : INFO : No data for OKEX-trades-BTC-USDT
+2021-10-29 09:53:09,299 : INFO : Collector for OKEX running on PID 81517
+2021-10-29 09:53:09,310 : INFO : Collector for FTX running on PID 81518
+2021-10-29 10:03:31,124 : INFO : Starting cryptostore
+2021-10-29 10:03:31,126 : INFO : Cryptostore running on PID 81579
+2021-10-29 10:03:36,130 : INFO : Prometehus started on port 8000
+2021-10-29 10:03:36,139 : INFO : Spawner started
+2021-10-29 10:03:36,144 : INFO : Aggregator started
+2021-10-29 10:03:36,147 : INFO : Cryptostore started
+2021-10-29 10:03:36,147 : INFO : loading config file locally: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-10-29 07:03:36.147803
+2021-10-29 10:03:36,160 : INFO : applying local config file: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-10-29 07:03:36.160690
+2021-10-29 10:03:36,161 : INFO : start: ['OKEX', 'FTX'] stop: []
+2021-10-29 10:03:39,041 : INFO : Aggregator running on PID 81582
+2021-10-29 10:03:39,043 : INFO : loading config file locally: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-10-29 07:03:39.043085
+2021-10-29 10:03:39,045 : INFO : Spawner running on PID 81581
+2021-10-29 10:03:39,046 : INFO : message: {"op": "start", "exchange": "OKEX", "collector": {"funding": [], "l2_book": {"book_delta": true, "max_depth": 100, "symbols": ["BTC-USDT"]}, "liquidations": [], "open_interest": [], "ticker": [], "trades": ["BTC-USDT"]}, "config": {"cache": "redis", "kafka": {"ip": "127.0.0.1", "port": 9092, "start_flush": true}, "parquet": {"SVOE": {"glue_database": "svoe_glue_db", "s3_bucket": "svoe.test.1", "s3_key_id": "AKIAQXJHI7MZZ35ZPS4C", "s3_prefix": "data_lake", "s3_secret": "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", "version": "local"}, "append_counter": 0, "compression": {"codec": "gzip", "level": 5}, "del_file": true, "file_format": ["exchange", "symbol", "data_type", "timestamp"], "prefix_date": true}, "redis": {"del_after_read": true, "ip": "127.0.0.1", "port": 6379, "retention_time": null, "socket": null, "start_flush": true}, "storage": ["parquet"], "storage_interval": 30, "storage_retries": 5, "storage_retry_wait": 30}}
+2021-10-29 10:03:39,046 : INFO : Starting {'op': 'start', 'exchange': 'OKEX', 'collector': {'funding': [], 'l2_book': {'book_delta': True, 'max_depth': 100, 'symbols': ['BTC-USDT']}, 'liquidations': [], 'open_interest': [], 'ticker': [], 'trades': ['BTC-USDT']}, 'config': {'cache': 'redis', 'kafka': {'ip': '127.0.0.1', 'port': 9092, 'start_flush': True}, 'parquet': {'SVOE': {'glue_database': 'svoe_glue_db', 's3_bucket': 'svoe.test.1', 's3_key_id': 'AKIAQXJHI7MZZ35ZPS4C', 's3_prefix': 'data_lake', 's3_secret': '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', 'version': 'local'}, 'append_counter': 0, 'compression': {'codec': 'gzip', 'level': 5}, 'del_file': True, 'file_format': ['exchange', 'symbol', 'data_type', 'timestamp'], 'prefix_date': True}, 'redis': {'del_after_read': True, 'ip': '127.0.0.1', 'port': 6379, 'retention_time': None, 'socket': None, 'start_flush': True}, 'storage': ['parquet'], 'storage_interval': 30, 'storage_retries': 5, 'storage_retry_wait': 30}}
+2021-10-29 10:03:39,050 : INFO : message: {"op": "start", "exchange": "FTX", "collector": {"funding": [], "l2_book": {"book_delta": true, "max_depth": 100, "symbols": ["BTC-USD"]}, "liquidations": [], "open_interest": [], "ticker": [], "trades": ["BTC-USD"]}, "config": {"cache": "redis", "kafka": {"ip": "127.0.0.1", "port": 9092, "start_flush": true}, "parquet": {"SVOE": {"glue_database": "svoe_glue_db", "s3_bucket": "svoe.test.1", "s3_key_id": "AKIAQXJHI7MZZ35ZPS4C", "s3_prefix": "data_lake", "s3_secret": "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", "version": "local"}, "append_counter": 0, "compression": {"codec": "gzip", "level": 5}, "del_file": true, "file_format": ["exchange", "symbol", "data_type", "timestamp"], "prefix_date": true}, "redis": {"del_after_read": true, "ip": "127.0.0.1", "port": 6379, "retention_time": null, "socket": null, "start_flush": true}, "storage": ["parquet"], "storage_interval": 30, "storage_retries": 5, "storage_retry_wait": 30}}
+2021-10-29 10:03:39,051 : INFO : Starting {'op': 'start', 'exchange': 'FTX', 'collector': {'funding': [], 'l2_book': {'book_delta': True, 'max_depth': 100, 'symbols': ['BTC-USD']}, 'liquidations': [], 'open_interest': [], 'ticker': [], 'trades': ['BTC-USD']}, 'config': {'cache': 'redis', 'kafka': {'ip': '127.0.0.1', 'port': 9092, 'start_flush': True}, 'parquet': {'SVOE': {'glue_database': 'svoe_glue_db', 's3_bucket': 'svoe.test.1', 's3_key_id': 'AKIAQXJHI7MZZ35ZPS4C', 's3_prefix': 'data_lake', 's3_secret': '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', 'version': 'local'}, 'append_counter': 0, 'compression': {'codec': 'gzip', 'level': 5}, 'del_file': True, 'file_format': ['exchange', 'symbol', 'data_type', 'timestamp'], 'prefix_date': True}, 'redis': {'del_after_read': True, 'ip': '127.0.0.1', 'port': 6379, 'retention_time': None, 'socket': None, 'start_flush': True}, 'storage': ['parquet'], 'storage_interval': 30, 'storage_retries': 5, 'storage_retry_wait': 30}}
+2021-10-29 10:03:39,052 : INFO : applying local config file: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-10-29 07:03:39.052911
+2021-10-29 10:03:39,076 : INFO : Flushing cache
+2021-10-29 10:03:39,104 : INFO : Reading FTX-l2_book-BTC-USD
+2021-10-29 10:03:39,105 : INFO : No data for FTX-l2_book-BTC-USD
+2021-10-29 10:03:39,105 : INFO : Reading FTX-trades-BTC-USD
+2021-10-29 10:03:39,106 : INFO : No data for FTX-trades-BTC-USD
+2021-10-29 10:03:39,106 : INFO : Reading OKEX-l2_book-BTC-USDT
+2021-10-29 10:03:39,107 : INFO : No data for OKEX-l2_book-BTC-USDT
+2021-10-29 10:03:39,107 : INFO : Reading OKEX-trades-BTC-USDT
+2021-10-29 10:03:39,108 : INFO : No data for OKEX-trades-BTC-USDT
+2021-10-29 10:03:40,650 : INFO : Collector for OKEX running on PID 81583
+2021-10-29 10:03:40,653 : INFO : Collector for FTX running on PID 81584
+2021-10-29 10:03:41,962 : INFO : Collector added feed handler - FTX(FUNDING, {'retries': 30, 'timeout': 120})
+2021-10-29 10:03:41,965 : INFO : Collector added feed handler - FTX(L2_BOOK, {'retries': 30, 'timeout': 120, 'max_depth': 100})
+2021-10-29 10:03:41,968 : INFO : Collector added feed handler - FTX(LIQUIDATIONS, {'retries': 30, 'timeout': 120})
+2021-10-29 10:03:41,969 : INFO : Collector added feed handler - FTX(OPEN_INTEREST, {'retries': 30, 'timeout': 120})
+2021-10-29 10:03:41,969 : INFO : Collector added feed handler - FTX(TICKER, {'retries': 30, 'timeout': 120})
+2021-10-29 10:03:41,970 : INFO : Collector added feed handler - FTX(TRADES, {'retries': 30, 'timeout': 120})
+2021-10-29 10:03:43,241 : INFO : Collector added feed handler - OKEX(FUNDING, {'retries': 30, 'timeout': 120})
+2021-10-29 10:03:43,243 : INFO : Collector added feed handler - OKEX(L2_BOOK, {'retries': 30, 'timeout': 120, 'max_depth': 100})
+2021-10-29 10:03:43,244 : INFO : Collector added feed handler - OKEX(LIQUIDATIONS, {'retries': 30, 'timeout': 120})
+2021-10-29 10:03:43,245 : INFO : Collector added feed handler - OKEX(OPEN_INTEREST, {'retries': 30, 'timeout': 120})
+2021-10-29 10:03:43,246 : INFO : Collector added feed handler - OKEX(TICKER, {'retries': 30, 'timeout': 120})
+2021-10-29 10:03:43,246 : INFO : Collector added feed handler - OKEX(TRADES, {'retries': 30, 'timeout': 120})
+2021-10-29 10:04:09,129 : INFO : Reading FTX-l2_book-BTC-USD
+2021-10-29 10:04:09,131 : INFO : l2_book-FTX-BTC-USD: Read 425 messages from Redis
+2021-10-29 10:04:09,147 : INFO : l2_book-FTX-BTC-USD: Removed 425 entries through id 1635491049119-0
+2021-10-29 10:04:09,147 : INFO : Write Complete FTX-l2_book-BTC-USD
+2021-10-29 10:04:09,148 : INFO : Reading FTX-trades-BTC-USD
+2021-10-29 10:04:09,148 : INFO : trades-FTX-BTC-USD: Read 109 messages from Redis
+2021-10-29 10:04:09,154 : INFO : trades-FTX-BTC-USD: Removed 109 entries through id 1635491049061-0
+2021-10-29 10:04:09,154 : INFO : Write Complete FTX-trades-BTC-USD
+2021-10-29 10:04:09,154 : INFO : Reading OKEX-l2_book-BTC-USDT
+2021-10-29 10:04:09,168 : INFO : l2_book-OKEX-BTC-USDT: Read 2250 messages from Redis
+2021-10-29 10:04:09,240 : INFO : l2_book-OKEX-BTC-USDT: Removed 2250 entries through id 1635491049146-1
+2021-10-29 10:04:09,240 : INFO : Write Complete OKEX-l2_book-BTC-USDT
+2021-10-29 10:04:09,241 : INFO : Reading OKEX-trades-BTC-USDT
+2021-10-29 10:04:09,242 : INFO : trades-OKEX-BTC-USDT: Read 141 messages from Redis
+2021-10-29 10:04:09,247 : INFO : trades-OKEX-BTC-USDT: Removed 141 entries through id 1635491048755-0
+2021-10-29 10:04:09,248 : INFO : Write Complete OKEX-trades-BTC-USDT
+2021-10-29 10:28:14,040 : INFO : Starting cryptostore
+2021-10-29 10:28:14,041 : INFO : Cryptostore running on PID 82000
+2021-10-29 10:28:19,049 : INFO : Prometehus started on port 8000
+2021-10-29 10:28:19,057 : INFO : Spawner started
+2021-10-29 10:28:19,062 : INFO : Aggregator started
+2021-10-29 10:28:19,065 : INFO : Cryptostore started
+2021-10-29 10:28:19,065 : INFO : loading config file locally: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-10-29 07:28:19.065445
+2021-10-29 10:28:19,076 : INFO : applying local config file: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-10-29 07:28:19.076501
+2021-10-29 10:28:19,076 : INFO : start: ['FTX', 'OKEX'] stop: []
+2021-10-29 10:28:20,172 : INFO : Aggregator running on PID 82003
+2021-10-29 10:28:20,172 : INFO : loading config file locally: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-10-29 07:28:20.172941
+2021-10-29 10:28:20,174 : INFO : Spawner running on PID 82002
+2021-10-29 10:28:20,174 : INFO : message: {"op": "start", "exchange": "FTX", "collector": {"funding": [], "l2_book": {"book_delta": true, "max_depth": 100, "symbols": ["BTC-USD"]}, "liquidations": [], "open_interest": [], "ticker": [], "trades": ["BTC-USD"]}, "config": {"cache": "redis", "kafka": {"ip": "127.0.0.1", "port": 9092, "start_flush": true}, "parquet": {"SVOE": {"glue_database": "svoe_glue_db", "s3_bucket": "svoe.test.1", "s3_key_id": "AKIAQXJHI7MZZ35ZPS4C", "s3_prefix": "data_lake", "s3_secret": "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", "version": "local"}, "append_counter": 0, "compression": {"codec": "gzip", "level": 5}, "del_file": true, "file_format": ["exchange", "symbol", "data_type", "timestamp"], "prefix_date": true}, "redis": {"del_after_read": true, "ip": "127.0.0.1", "port": 6379, "retention_time": null, "socket": null, "start_flush": true}, "storage": ["parquet"], "storage_interval": 30, "storage_retries": 5, "storage_retry_wait": 30}}
+2021-10-29 10:28:20,175 : INFO : Starting {'op': 'start', 'exchange': 'FTX', 'collector': {'funding': [], 'l2_book': {'book_delta': True, 'max_depth': 100, 'symbols': ['BTC-USD']}, 'liquidations': [], 'open_interest': [], 'ticker': [], 'trades': ['BTC-USD']}, 'config': {'cache': 'redis', 'kafka': {'ip': '127.0.0.1', 'port': 9092, 'start_flush': True}, 'parquet': {'SVOE': {'glue_database': 'svoe_glue_db', 's3_bucket': 'svoe.test.1', 's3_key_id': 'AKIAQXJHI7MZZ35ZPS4C', 's3_prefix': 'data_lake', 's3_secret': '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', 'version': 'local'}, 'append_counter': 0, 'compression': {'codec': 'gzip', 'level': 5}, 'del_file': True, 'file_format': ['exchange', 'symbol', 'data_type', 'timestamp'], 'prefix_date': True}, 'redis': {'del_after_read': True, 'ip': '127.0.0.1', 'port': 6379, 'retention_time': None, 'socket': None, 'start_flush': True}, 'storage': ['parquet'], 'storage_interval': 30, 'storage_retries': 5, 'storage_retry_wait': 30}}
+2021-10-29 10:28:20,178 : INFO : message: {"op": "start", "exchange": "OKEX", "collector": {"funding": [], "l2_book": {"book_delta": true, "max_depth": 100, "symbols": ["BTC-USDT"]}, "liquidations": [], "open_interest": [], "ticker": [], "trades": ["BTC-USDT"]}, "config": {"cache": "redis", "kafka": {"ip": "127.0.0.1", "port": 9092, "start_flush": true}, "parquet": {"SVOE": {"glue_database": "svoe_glue_db", "s3_bucket": "svoe.test.1", "s3_key_id": "AKIAQXJHI7MZZ35ZPS4C", "s3_prefix": "data_lake", "s3_secret": "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", "version": "local"}, "append_counter": 0, "compression": {"codec": "gzip", "level": 5}, "del_file": true, "file_format": ["exchange", "symbol", "data_type", "timestamp"], "prefix_date": true}, "redis": {"del_after_read": true, "ip": "127.0.0.1", "port": 6379, "retention_time": null, "socket": null, "start_flush": true}, "storage": ["parquet"], "storage_interval": 30, "storage_retries": 5, "storage_retry_wait": 30}}
+2021-10-29 10:28:20,180 : INFO : Starting {'op': 'start', 'exchange': 'OKEX', 'collector': {'funding': [], 'l2_book': {'book_delta': True, 'max_depth': 100, 'symbols': ['BTC-USDT']}, 'liquidations': [], 'open_interest': [], 'ticker': [], 'trades': ['BTC-USDT']}, 'config': {'cache': 'redis', 'kafka': {'ip': '127.0.0.1', 'port': 9092, 'start_flush': True}, 'parquet': {'SVOE': {'glue_database': 'svoe_glue_db', 's3_bucket': 'svoe.test.1', 's3_key_id': 'AKIAQXJHI7MZZ35ZPS4C', 's3_prefix': 'data_lake', 's3_secret': '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', 'version': 'local'}, 'append_counter': 0, 'compression': {'codec': 'gzip', 'level': 5}, 'del_file': True, 'file_format': ['exchange', 'symbol', 'data_type', 'timestamp'], 'prefix_date': True}, 'redis': {'del_after_read': True, 'ip': '127.0.0.1', 'port': 6379, 'retention_time': None, 'socket': None, 'start_flush': True}, 'storage': ['parquet'], 'storage_interval': 30, 'storage_retries': 5, 'storage_retry_wait': 30}}
+2021-10-29 10:28:20,181 : INFO : applying local config file: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-10-29 07:28:20.181208
+2021-10-29 10:28:20,203 : INFO : Flushing cache
+2021-10-29 10:28:20,233 : ERROR : Aggregator running on PID 82003 died due to exception
+Traceback (most recent call last):
+  File "/Users/anov/IdeaProjects/cryptostore/cryptostore/aggregator/aggregator.py", line 84, in loop
+    store = Storage(self.config, parquet_buffer=parquet_buffer)
+  File "/Users/anov/IdeaProjects/cryptostore/cryptostore/data/storage.py", line 18, in __init__
+    self.s = [Storage.__init_helper(s, config, **kwargs) for s in config.storage]
+  File "/Users/anov/IdeaProjects/cryptostore/cryptostore/data/storage.py", line 18, in <listcomp>
+    self.s = [Storage.__init_helper(s, config, **kwargs) for s in config.storage]
+  File "/Users/anov/IdeaProjects/cryptostore/cryptostore/data/storage.py", line 25, in __init_helper
+    return Parquet(config.exchanges, config.parquet if 'parquet' in config else None, **kwargs)
+  File "/Users/anov/IdeaProjects/cryptostore/cryptostore/data/parquet.py", line 81, in __init__
+    print(self._write + '3')
+TypeError: can only concatenate list (not "str") to list
+2021-10-29 10:28:21,543 : INFO : Collector for FTX running on PID 82004
+2021-10-29 10:28:21,543 : INFO : Collector for OKEX running on PID 82005
+2021-10-29 10:28:24,885 : INFO : Collector added feed handler - FTX(FUNDING, {'retries': 30, 'timeout': 120})
+2021-10-29 10:28:24,886 : INFO : Collector added feed handler - FTX(L2_BOOK, {'retries': 30, 'timeout': 120, 'max_depth': 100})
+2021-10-29 10:28:24,887 : INFO : Collector added feed handler - FTX(LIQUIDATIONS, {'retries': 30, 'timeout': 120})
+2021-10-29 10:28:24,890 : INFO : Collector added feed handler - FTX(OPEN_INTEREST, {'retries': 30, 'timeout': 120})
+2021-10-29 10:28:24,891 : INFO : Collector added feed handler - FTX(TICKER, {'retries': 30, 'timeout': 120})
+2021-10-29 10:28:24,892 : INFO : Collector added feed handler - FTX(TRADES, {'retries': 30, 'timeout': 120})
+2021-10-29 10:28:26,312 : INFO : Collector added feed handler - OKEX(FUNDING, {'retries': 30, 'timeout': 120})
+2021-10-29 10:28:26,313 : INFO : Collector added feed handler - OKEX(L2_BOOK, {'retries': 30, 'timeout': 120, 'max_depth': 100})
+2021-10-29 10:28:26,314 : INFO : Collector added feed handler - OKEX(LIQUIDATIONS, {'retries': 30, 'timeout': 120})
+2021-10-29 10:28:26,317 : INFO : Collector added feed handler - OKEX(OPEN_INTEREST, {'retries': 30, 'timeout': 120})
+2021-10-29 10:28:26,322 : INFO : Collector added feed handler - OKEX(TICKER, {'retries': 30, 'timeout': 120})
+2021-10-29 10:28:26,323 : INFO : Collector added feed handler - OKEX(TRADES, {'retries': 30, 'timeout': 120})
+2021-10-29 10:29:45,138 : INFO : Starting cryptostore
+2021-10-29 10:29:45,138 : INFO : Cryptostore running on PID 82020
+2021-10-29 10:29:50,143 : INFO : Prometehus started on port 8000
+2021-10-29 10:29:50,150 : INFO : Spawner started
+2021-10-29 10:29:50,154 : INFO : Aggregator started
+2021-10-29 10:29:50,158 : INFO : Cryptostore started
+2021-10-29 10:29:50,159 : INFO : loading config file locally: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-10-29 07:29:50.159146
+2021-10-29 10:29:50,171 : INFO : applying local config file: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-10-29 07:29:50.171745
+2021-10-29 10:29:50,172 : INFO : start: ['OKEX', 'FTX'] stop: []
+2021-10-29 10:29:51,453 : INFO : Aggregator running on PID 82023
+2021-10-29 10:29:51,454 : INFO : loading config file locally: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-10-29 07:29:51.454715
+2021-10-29 10:29:51,468 : INFO : applying local config file: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-10-29 07:29:51.468866
+2021-10-29 10:29:51,471 : INFO : Spawner running on PID 82022
+2021-10-29 10:29:51,473 : INFO : message: {"op": "start", "exchange": "OKEX", "collector": {"funding": [], "l2_book": {"book_delta": true, "max_depth": 100, "symbols": ["BTC-USDT"]}, "liquidations": [], "open_interest": [], "ticker": [], "trades": ["BTC-USDT"]}, "config": {"cache": "redis", "kafka": {"ip": "127.0.0.1", "port": 9092, "start_flush": true}, "parquet": {"SVOE": {"glue_database": "svoe_glue_db", "s3_bucket": "svoe.test.1", "s3_key_id": "AKIAQXJHI7MZZ35ZPS4C", "s3_prefix": "data_lake", "s3_secret": "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", "version": "local"}, "append_counter": 0, "compression": {"codec": "gzip", "level": 5}, "del_file": true, "file_format": ["exchange", "symbol", "data_type", "timestamp"], "prefix_date": true}, "redis": {"del_after_read": true, "ip": "127.0.0.1", "port": 6379, "retention_time": null, "socket": null, "start_flush": true}, "storage": ["parquet"], "storage_interval": 30, "storage_retries": 5, "storage_retry_wait": 30}}
+2021-10-29 10:29:51,474 : INFO : Starting {'op': 'start', 'exchange': 'OKEX', 'collector': {'funding': [], 'l2_book': {'book_delta': True, 'max_depth': 100, 'symbols': ['BTC-USDT']}, 'liquidations': [], 'open_interest': [], 'ticker': [], 'trades': ['BTC-USDT']}, 'config': {'cache': 'redis', 'kafka': {'ip': '127.0.0.1', 'port': 9092, 'start_flush': True}, 'parquet': {'SVOE': {'glue_database': 'svoe_glue_db', 's3_bucket': 'svoe.test.1', 's3_key_id': 'AKIAQXJHI7MZZ35ZPS4C', 's3_prefix': 'data_lake', 's3_secret': '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', 'version': 'local'}, 'append_counter': 0, 'compression': {'codec': 'gzip', 'level': 5}, 'del_file': True, 'file_format': ['exchange', 'symbol', 'data_type', 'timestamp'], 'prefix_date': True}, 'redis': {'del_after_read': True, 'ip': '127.0.0.1', 'port': 6379, 'retention_time': None, 'socket': None, 'start_flush': True}, 'storage': ['parquet'], 'storage_interval': 30, 'storage_retries': 5, 'storage_retry_wait': 30}}
+2021-10-29 10:29:51,481 : INFO : message: {"op": "start", "exchange": "FTX", "collector": {"funding": [], "l2_book": {"book_delta": true, "max_depth": 100, "symbols": ["BTC-USD"]}, "liquidations": [], "open_interest": [], "ticker": [], "trades": ["BTC-USD"]}, "config": {"cache": "redis", "kafka": {"ip": "127.0.0.1", "port": 9092, "start_flush": true}, "parquet": {"SVOE": {"glue_database": "svoe_glue_db", "s3_bucket": "svoe.test.1", "s3_key_id": "AKIAQXJHI7MZZ35ZPS4C", "s3_prefix": "data_lake", "s3_secret": "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", "version": "local"}, "append_counter": 0, "compression": {"codec": "gzip", "level": 5}, "del_file": true, "file_format": ["exchange", "symbol", "data_type", "timestamp"], "prefix_date": true}, "redis": {"del_after_read": true, "ip": "127.0.0.1", "port": 6379, "retention_time": null, "socket": null, "start_flush": true}, "storage": ["parquet"], "storage_interval": 30, "storage_retries": 5, "storage_retry_wait": 30}}
+2021-10-29 10:29:51,483 : INFO : Starting {'op': 'start', 'exchange': 'FTX', 'collector': {'funding': [], 'l2_book': {'book_delta': True, 'max_depth': 100, 'symbols': ['BTC-USD']}, 'liquidations': [], 'open_interest': [], 'ticker': [], 'trades': ['BTC-USD']}, 'config': {'cache': 'redis', 'kafka': {'ip': '127.0.0.1', 'port': 9092, 'start_flush': True}, 'parquet': {'SVOE': {'glue_database': 'svoe_glue_db', 's3_bucket': 'svoe.test.1', 's3_key_id': 'AKIAQXJHI7MZZ35ZPS4C', 's3_prefix': 'data_lake', 's3_secret': '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', 'version': 'local'}, 'append_counter': 0, 'compression': {'codec': 'gzip', 'level': 5}, 'del_file': True, 'file_format': ['exchange', 'symbol', 'data_type', 'timestamp'], 'prefix_date': True}, 'redis': {'del_after_read': True, 'ip': '127.0.0.1', 'port': 6379, 'retention_time': None, 'socket': None, 'start_flush': True}, 'storage': ['parquet'], 'storage_interval': 30, 'storage_retries': 5, 'storage_retry_wait': 30}}
+2021-10-29 10:29:51,493 : INFO : Flushing cache
+2021-10-29 10:29:51,520 : INFO : Reading FTX-l2_book-BTC-USD
+2021-10-29 10:29:51,520 : INFO : No data for FTX-l2_book-BTC-USD
+2021-10-29 10:29:51,521 : INFO : Reading FTX-trades-BTC-USD
+2021-10-29 10:29:51,521 : INFO : No data for FTX-trades-BTC-USD
+2021-10-29 10:29:51,522 : INFO : Reading OKEX-l2_book-BTC-USDT
+2021-10-29 10:29:51,522 : INFO : No data for OKEX-l2_book-BTC-USDT
+2021-10-29 10:29:51,523 : INFO : Reading OKEX-trades-BTC-USDT
+2021-10-29 10:29:51,523 : INFO : No data for OKEX-trades-BTC-USDT
+2021-10-29 10:29:53,075 : INFO : Collector for FTX running on PID 82025
+2021-10-29 10:29:53,083 : INFO : Collector for OKEX running on PID 82024
+2021-10-29 10:29:56,062 : INFO : Collector added feed handler - FTX(FUNDING, {'retries': 30, 'timeout': 120})
+2021-10-29 10:29:56,063 : INFO : Collector added feed handler - FTX(L2_BOOK, {'retries': 30, 'timeout': 120, 'max_depth': 100})
+2021-10-29 10:29:56,065 : INFO : Collector added feed handler - FTX(LIQUIDATIONS, {'retries': 30, 'timeout': 120})
+2021-10-29 10:29:56,066 : INFO : Collector added feed handler - FTX(OPEN_INTEREST, {'retries': 30, 'timeout': 120})
+2021-10-29 10:29:56,067 : INFO : Collector added feed handler - FTX(TICKER, {'retries': 30, 'timeout': 120})
+2021-10-29 10:29:56,067 : INFO : Collector added feed handler - FTX(TRADES, {'retries': 30, 'timeout': 120})
+2021-10-29 10:29:57,541 : INFO : Collector added feed handler - OKEX(FUNDING, {'retries': 30, 'timeout': 120})
+2021-10-29 10:29:57,543 : INFO : Collector added feed handler - OKEX(L2_BOOK, {'retries': 30, 'timeout': 120, 'max_depth': 100})
+2021-10-29 10:29:57,545 : INFO : Collector added feed handler - OKEX(LIQUIDATIONS, {'retries': 30, 'timeout': 120})
+2021-10-29 10:29:57,546 : INFO : Collector added feed handler - OKEX(OPEN_INTEREST, {'retries': 30, 'timeout': 120})
+2021-10-29 10:29:57,547 : INFO : Collector added feed handler - OKEX(TICKER, {'retries': 30, 'timeout': 120})
+2021-10-29 10:29:57,548 : INFO : Collector added feed handler - OKEX(TRADES, {'retries': 30, 'timeout': 120})
+2021-10-29 10:30:21,545 : INFO : Reading FTX-l2_book-BTC-USD
+2021-10-29 10:30:21,550 : INFO : l2_book-FTX-BTC-USD: Read 475 messages from Redis
+2021-10-29 10:30:21,569 : INFO : l2_book-FTX-BTC-USD: Removed 475 entries through id 1635492621434-1
+2021-10-29 10:30:21,569 : INFO : Write Complete FTX-l2_book-BTC-USD
+2021-10-29 10:30:21,569 : INFO : Reading FTX-trades-BTC-USD
+2021-10-29 10:30:21,570 : INFO : trades-FTX-BTC-USD: Read 96 messages from Redis
+2021-10-29 10:30:21,576 : INFO : trades-FTX-BTC-USD: Removed 96 entries through id 1635492621379-0
+2021-10-29 10:30:21,576 : INFO : Write Complete FTX-trades-BTC-USD
+2021-10-29 10:30:21,576 : INFO : Reading OKEX-l2_book-BTC-USDT
+2021-10-29 10:30:21,583 : INFO : l2_book-OKEX-BTC-USDT: Read 1215 messages from Redis
+2021-10-29 10:30:21,622 : INFO : l2_book-OKEX-BTC-USDT: Removed 1215 entries through id 1635492618719-90
+2021-10-29 10:30:21,623 : INFO : Write Complete OKEX-l2_book-BTC-USDT
+2021-10-29 10:30:21,623 : INFO : Reading OKEX-trades-BTC-USDT
+2021-10-29 10:30:21,624 : INFO : trades-OKEX-BTC-USDT: Read 112 messages from Redis
+2021-10-29 10:30:21,629 : INFO : trades-OKEX-BTC-USDT: Removed 112 entries through id 1635492621504-1
+2021-10-29 10:30:21,629 : INFO : Write Complete OKEX-trades-BTC-USDT
+2021-10-29 10:34:32,118 : INFO : Starting cryptostore
+2021-10-29 10:34:32,118 : INFO : Cryptostore running on PID 82054
+2021-10-29 10:34:37,125 : INFO : Prometehus started on port 8000
+2021-10-29 10:34:37,133 : INFO : Spawner started
+2021-10-29 10:34:37,137 : INFO : Aggregator started
+2021-10-29 10:34:37,140 : INFO : Cryptostore started
+2021-10-29 10:34:37,141 : INFO : loading config file locally: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-10-29 07:34:37.141196
+2021-10-29 10:34:37,154 : INFO : applying local config file: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-10-29 07:34:37.154556
+2021-10-29 10:34:37,154 : INFO : start: ['FTX', 'OKEX'] stop: []
+2021-10-29 10:34:38,260 : INFO : Aggregator running on PID 82058
+2021-10-29 10:34:38,261 : INFO : loading config file locally: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-10-29 07:34:38.261243
+2021-10-29 10:34:38,262 : INFO : Spawner running on PID 82057
+2021-10-29 10:34:38,262 : INFO : message: {"op": "start", "exchange": "FTX", "collector": {"funding": [], "l2_book": {"book_delta": true, "max_depth": 100, "symbols": ["BTC-USD"]}, "liquidations": [], "open_interest": [], "ticker": [], "trades": ["BTC-USD"]}, "config": {"cache": "redis", "kafka": {"ip": "127.0.0.1", "port": 9092, "start_flush": true}, "parquet": {"SVOE": {"glue_database": "svoe_glue_db", "s3_bucket": "svoe.test.1", "s3_key_id": "AKIAQXJHI7MZZ35ZPS4C", "s3_prefix": "data_lake", "s3_secret": "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", "version": "local"}, "append_counter": 0, "compression": {"codec": "gzip", "level": 5}, "del_file": true, "file_format": ["exchange", "symbol", "data_type", "timestamp"], "prefix_date": true}, "redis": {"del_after_read": true, "ip": "127.0.0.1", "port": 6379, "retention_time": null, "socket": null, "start_flush": true}, "storage": ["parquet"], "storage_interval": 30, "storage_retries": 5, "storage_retry_wait": 30}}
+2021-10-29 10:34:38,262 : INFO : Starting {'op': 'start', 'exchange': 'FTX', 'collector': {'funding': [], 'l2_book': {'book_delta': True, 'max_depth': 100, 'symbols': ['BTC-USD']}, 'liquidations': [], 'open_interest': [], 'ticker': [], 'trades': ['BTC-USD']}, 'config': {'cache': 'redis', 'kafka': {'ip': '127.0.0.1', 'port': 9092, 'start_flush': True}, 'parquet': {'SVOE': {'glue_database': 'svoe_glue_db', 's3_bucket': 'svoe.test.1', 's3_key_id': 'AKIAQXJHI7MZZ35ZPS4C', 's3_prefix': 'data_lake', 's3_secret': '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', 'version': 'local'}, 'append_counter': 0, 'compression': {'codec': 'gzip', 'level': 5}, 'del_file': True, 'file_format': ['exchange', 'symbol', 'data_type', 'timestamp'], 'prefix_date': True}, 'redis': {'del_after_read': True, 'ip': '127.0.0.1', 'port': 6379, 'retention_time': None, 'socket': None, 'start_flush': True}, 'storage': ['parquet'], 'storage_interval': 30, 'storage_retries': 5, 'storage_retry_wait': 30}}
+2021-10-29 10:34:38,266 : INFO : message: {"op": "start", "exchange": "OKEX", "collector": {"funding": [], "l2_book": {"book_delta": true, "max_depth": 100, "symbols": ["BTC-USDT"]}, "liquidations": [], "open_interest": [], "ticker": [], "trades": ["BTC-USDT"]}, "config": {"cache": "redis", "kafka": {"ip": "127.0.0.1", "port": 9092, "start_flush": true}, "parquet": {"SVOE": {"glue_database": "svoe_glue_db", "s3_bucket": "svoe.test.1", "s3_key_id": "AKIAQXJHI7MZZ35ZPS4C", "s3_prefix": "data_lake", "s3_secret": "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", "version": "local"}, "append_counter": 0, "compression": {"codec": "gzip", "level": 5}, "del_file": true, "file_format": ["exchange", "symbol", "data_type", "timestamp"], "prefix_date": true}, "redis": {"del_after_read": true, "ip": "127.0.0.1", "port": 6379, "retention_time": null, "socket": null, "start_flush": true}, "storage": ["parquet"], "storage_interval": 30, "storage_retries": 5, "storage_retry_wait": 30}}
+2021-10-29 10:34:38,267 : INFO : Starting {'op': 'start', 'exchange': 'OKEX', 'collector': {'funding': [], 'l2_book': {'book_delta': True, 'max_depth': 100, 'symbols': ['BTC-USDT']}, 'liquidations': [], 'open_interest': [], 'ticker': [], 'trades': ['BTC-USDT']}, 'config': {'cache': 'redis', 'kafka': {'ip': '127.0.0.1', 'port': 9092, 'start_flush': True}, 'parquet': {'SVOE': {'glue_database': 'svoe_glue_db', 's3_bucket': 'svoe.test.1', 's3_key_id': 'AKIAQXJHI7MZZ35ZPS4C', 's3_prefix': 'data_lake', 's3_secret': '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', 'version': 'local'}, 'append_counter': 0, 'compression': {'codec': 'gzip', 'level': 5}, 'del_file': True, 'file_format': ['exchange', 'symbol', 'data_type', 'timestamp'], 'prefix_date': True}, 'redis': {'del_after_read': True, 'ip': '127.0.0.1', 'port': 6379, 'retention_time': None, 'socket': None, 'start_flush': True}, 'storage': ['parquet'], 'storage_interval': 30, 'storage_retries': 5, 'storage_retry_wait': 30}}
+2021-10-29 10:34:38,270 : INFO : applying local config file: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-10-29 07:34:38.270547
+2021-10-29 10:34:38,288 : INFO : Flushing cache
+2021-10-29 10:34:38,315 : INFO : Reading FTX-l2_book-BTC-USD
+2021-10-29 10:34:38,316 : INFO : No data for FTX-l2_book-BTC-USD
+2021-10-29 10:34:38,316 : INFO : Reading FTX-trades-BTC-USD
+2021-10-29 10:34:38,317 : INFO : No data for FTX-trades-BTC-USD
+2021-10-29 10:34:38,317 : INFO : Reading OKEX-l2_book-BTC-USDT
+2021-10-29 10:34:38,317 : INFO : No data for OKEX-l2_book-BTC-USDT
+2021-10-29 10:34:38,318 : INFO : Reading OKEX-trades-BTC-USDT
+2021-10-29 10:34:38,318 : INFO : No data for OKEX-trades-BTC-USDT
+2021-10-29 10:34:39,545 : INFO : Collector for OKEX running on PID 82060
+2021-10-29 10:34:39,553 : INFO : Collector for FTX running on PID 82059
+2021-10-29 10:34:45,971 : INFO : Collector added feed handler - FTX(FUNDING, {'retries': 30, 'timeout': 120})
+2021-10-29 10:34:45,972 : INFO : Collector added feed handler - FTX(L2_BOOK, {'retries': 30, 'timeout': 120, 'max_depth': 100})
+2021-10-29 10:34:45,976 : INFO : Collector added feed handler - FTX(LIQUIDATIONS, {'retries': 30, 'timeout': 120})
+2021-10-29 10:34:45,977 : INFO : Collector added feed handler - FTX(OPEN_INTEREST, {'retries': 30, 'timeout': 120})
+2021-10-29 10:34:45,977 : INFO : Collector added feed handler - FTX(TICKER, {'retries': 30, 'timeout': 120})
+2021-10-29 10:34:45,978 : INFO : Collector added feed handler - FTX(TRADES, {'retries': 30, 'timeout': 120})
+2021-10-29 10:34:46,021 : INFO : Collector added feed handler - OKEX(FUNDING, {'retries': 30, 'timeout': 120})
+2021-10-29 10:34:46,023 : INFO : Collector added feed handler - OKEX(L2_BOOK, {'retries': 30, 'timeout': 120, 'max_depth': 100})
+2021-10-29 10:34:46,025 : INFO : Collector added feed handler - OKEX(LIQUIDATIONS, {'retries': 30, 'timeout': 120})
+2021-10-29 10:34:46,027 : INFO : Collector added feed handler - OKEX(OPEN_INTEREST, {'retries': 30, 'timeout': 120})
+2021-10-29 10:34:46,029 : INFO : Collector added feed handler - OKEX(TICKER, {'retries': 30, 'timeout': 120})
+2021-10-29 10:34:46,030 : INFO : Collector added feed handler - OKEX(TRADES, {'retries': 30, 'timeout': 120})
+2021-10-29 10:35:08,336 : INFO : Reading FTX-l2_book-BTC-USD
+2021-10-29 10:35:08,339 : INFO : l2_book-FTX-BTC-USD: Read 339 messages from Redis
+2021-10-29 10:35:08,358 : INFO : l2_book-FTX-BTC-USD: Removed 339 entries through id 1635492907802-15
+2021-10-29 10:35:08,358 : INFO : Write Complete FTX-l2_book-BTC-USD
+2021-10-29 10:35:08,358 : INFO : Reading FTX-trades-BTC-USD
+2021-10-29 10:35:08,359 : INFO : trades-FTX-BTC-USD: Read 45 messages from Redis
+2021-10-29 10:35:08,364 : INFO : trades-FTX-BTC-USD: Removed 45 entries through id 1635492906192-0
+2021-10-29 10:35:08,364 : INFO : Write Complete FTX-trades-BTC-USD
+2021-10-29 10:35:08,364 : INFO : Reading OKEX-l2_book-BTC-USDT
+2021-10-29 10:35:08,367 : INFO : l2_book-OKEX-BTC-USDT: Read 504 messages from Redis
+2021-10-29 10:35:08,387 : INFO : l2_book-OKEX-BTC-USDT: Removed 504 entries through id 1635492906745-20
+2021-10-29 10:35:08,387 : INFO : Write Complete OKEX-l2_book-BTC-USDT
+2021-10-29 10:35:08,387 : INFO : Reading OKEX-trades-BTC-USDT
+2021-10-29 10:35:08,389 : INFO : trades-OKEX-BTC-USDT: Read 175 messages from Redis
+2021-10-29 10:35:08,395 : INFO : trades-OKEX-BTC-USDT: Removed 175 entries through id 1635492906228-16
+2021-10-29 10:35:08,395 : INFO : Write Complete OKEX-trades-BTC-USDT
+2021-10-29 10:36:29,012 : INFO : Starting cryptostore
+2021-10-29 10:36:29,012 : INFO : Cryptostore running on PID 82076
+2021-10-29 10:36:34,019 : INFO : Prometehus started on port 8000
+2021-10-29 10:36:34,028 : INFO : Spawner started
+2021-10-29 10:36:34,033 : INFO : Aggregator started
+2021-10-29 10:36:34,036 : INFO : Cryptostore started
+2021-10-29 10:36:34,036 : INFO : loading config file locally: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-10-29 07:36:34.036648
+2021-10-29 10:36:34,045 : INFO : applying local config file: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-10-29 07:36:34.045361
+2021-10-29 10:36:34,045 : INFO : start: ['OKEX', 'FTX'] stop: []
+2021-10-29 10:36:35,122 : INFO : Spawner running on PID 82078
+2021-10-29 10:36:35,122 : INFO : message: {"op": "start", "exchange": "OKEX", "collector": {"funding": [], "l2_book": {"book_delta": true, "max_depth": 100, "symbols": ["BTC-USDT"]}, "liquidations": [], "open_interest": [], "ticker": [], "trades": ["BTC-USDT"]}, "config": {"cache": "redis", "kafka": {"ip": "127.0.0.1", "port": 9092, "start_flush": true}, "parquet": {"SVOE": {"glue_database": "svoe_glue_db", "s3_bucket": "svoe.test.1", "s3_key_id": "AKIAQXJHI7MZZ35ZPS4C", "s3_prefix": "data_lake", "s3_secret": "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", "version": "local"}, "append_counter": 0, "compression": {"codec": "gzip", "level": 5}, "del_file": true, "file_format": ["exchange", "symbol", "data_type", "timestamp"], "prefix_date": true}, "redis": {"del_after_read": true, "ip": "127.0.0.1", "port": 6379, "retention_time": null, "socket": null, "start_flush": true}, "storage": ["parquet"], "storage_interval": 30, "storage_retries": 5, "storage_retry_wait": 30}}
+2021-10-29 10:36:35,122 : INFO : Starting {'op': 'start', 'exchange': 'OKEX', 'collector': {'funding': [], 'l2_book': {'book_delta': True, 'max_depth': 100, 'symbols': ['BTC-USDT']}, 'liquidations': [], 'open_interest': [], 'ticker': [], 'trades': ['BTC-USDT']}, 'config': {'cache': 'redis', 'kafka': {'ip': '127.0.0.1', 'port': 9092, 'start_flush': True}, 'parquet': {'SVOE': {'glue_database': 'svoe_glue_db', 's3_bucket': 'svoe.test.1', 's3_key_id': 'AKIAQXJHI7MZZ35ZPS4C', 's3_prefix': 'data_lake', 's3_secret': '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', 'version': 'local'}, 'append_counter': 0, 'compression': {'codec': 'gzip', 'level': 5}, 'del_file': True, 'file_format': ['exchange', 'symbol', 'data_type', 'timestamp'], 'prefix_date': True}, 'redis': {'del_after_read': True, 'ip': '127.0.0.1', 'port': 6379, 'retention_time': None, 'socket': None, 'start_flush': True}, 'storage': ['parquet'], 'storage_interval': 30, 'storage_retries': 5, 'storage_retry_wait': 30}}
+2021-10-29 10:36:35,124 : INFO : Aggregator running on PID 82079
+2021-10-29 10:36:35,125 : INFO : loading config file locally: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-10-29 07:36:35.125012
+2021-10-29 10:36:35,126 : INFO : message: {"op": "start", "exchange": "FTX", "collector": {"funding": [], "l2_book": {"book_delta": true, "max_depth": 100, "symbols": ["BTC-USD"]}, "liquidations": [], "open_interest": [], "ticker": [], "trades": ["BTC-USD"]}, "config": {"cache": "redis", "kafka": {"ip": "127.0.0.1", "port": 9092, "start_flush": true}, "parquet": {"SVOE": {"glue_database": "svoe_glue_db", "s3_bucket": "svoe.test.1", "s3_key_id": "AKIAQXJHI7MZZ35ZPS4C", "s3_prefix": "data_lake", "s3_secret": "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", "version": "local"}, "append_counter": 0, "compression": {"codec": "gzip", "level": 5}, "del_file": true, "file_format": ["exchange", "symbol", "data_type", "timestamp"], "prefix_date": true}, "redis": {"del_after_read": true, "ip": "127.0.0.1", "port": 6379, "retention_time": null, "socket": null, "start_flush": true}, "storage": ["parquet"], "storage_interval": 30, "storage_retries": 5, "storage_retry_wait": 30}}
+2021-10-29 10:36:35,128 : INFO : Starting {'op': 'start', 'exchange': 'FTX', 'collector': {'funding': [], 'l2_book': {'book_delta': True, 'max_depth': 100, 'symbols': ['BTC-USD']}, 'liquidations': [], 'open_interest': [], 'ticker': [], 'trades': ['BTC-USD']}, 'config': {'cache': 'redis', 'kafka': {'ip': '127.0.0.1', 'port': 9092, 'start_flush': True}, 'parquet': {'SVOE': {'glue_database': 'svoe_glue_db', 's3_bucket': 'svoe.test.1', 's3_key_id': 'AKIAQXJHI7MZZ35ZPS4C', 's3_prefix': 'data_lake', 's3_secret': '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', 'version': 'local'}, 'append_counter': 0, 'compression': {'codec': 'gzip', 'level': 5}, 'del_file': True, 'file_format': ['exchange', 'symbol', 'data_type', 'timestamp'], 'prefix_date': True}, 'redis': {'del_after_read': True, 'ip': '127.0.0.1', 'port': 6379, 'retention_time': None, 'socket': None, 'start_flush': True}, 'storage': ['parquet'], 'storage_interval': 30, 'storage_retries': 5, 'storage_retry_wait': 30}}
+2021-10-29 10:36:35,134 : INFO : applying local config file: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-10-29 07:36:35.134607
+2021-10-29 10:36:35,144 : INFO : Flushing cache
+2021-10-29 10:36:35,172 : INFO : Reading FTX-l2_book-BTC-USD
+2021-10-29 10:36:35,173 : INFO : No data for FTX-l2_book-BTC-USD
+2021-10-29 10:36:35,173 : INFO : Reading FTX-trades-BTC-USD
+2021-10-29 10:36:35,174 : INFO : No data for FTX-trades-BTC-USD
+2021-10-29 10:36:35,174 : INFO : Reading OKEX-l2_book-BTC-USDT
+2021-10-29 10:36:35,175 : INFO : No data for OKEX-l2_book-BTC-USDT
+2021-10-29 10:36:35,175 : INFO : Reading OKEX-trades-BTC-USDT
+2021-10-29 10:36:35,175 : INFO : No data for OKEX-trades-BTC-USDT
+2021-10-29 10:36:36,383 : INFO : Collector for OKEX running on PID 82080
+2021-10-29 10:36:36,392 : INFO : Collector for FTX running on PID 82081
+2021-10-29 10:36:38,590 : INFO : Collector added feed handler - FTX(FUNDING, {'retries': 30, 'timeout': 120})
+2021-10-29 10:36:38,591 : INFO : Collector added feed handler - FTX(L2_BOOK, {'retries': 30, 'timeout': 120, 'max_depth': 100})
+2021-10-29 10:36:38,592 : INFO : Collector added feed handler - FTX(LIQUIDATIONS, {'retries': 30, 'timeout': 120})
+2021-10-29 10:36:38,594 : INFO : Collector added feed handler - FTX(OPEN_INTEREST, {'retries': 30, 'timeout': 120})
+2021-10-29 10:36:38,594 : INFO : Collector added feed handler - FTX(TICKER, {'retries': 30, 'timeout': 120})
+2021-10-29 10:36:38,595 : INFO : Collector added feed handler - FTX(TRADES, {'retries': 30, 'timeout': 120})
+2021-10-29 10:36:39,830 : INFO : Collector added feed handler - OKEX(FUNDING, {'retries': 30, 'timeout': 120})
+2021-10-29 10:36:39,832 : INFO : Collector added feed handler - OKEX(L2_BOOK, {'retries': 30, 'timeout': 120, 'max_depth': 100})
+2021-10-29 10:36:39,835 : INFO : Collector added feed handler - OKEX(LIQUIDATIONS, {'retries': 30, 'timeout': 120})
+2021-10-29 10:36:39,837 : INFO : Collector added feed handler - OKEX(OPEN_INTEREST, {'retries': 30, 'timeout': 120})
+2021-10-29 10:36:39,838 : INFO : Collector added feed handler - OKEX(TICKER, {'retries': 30, 'timeout': 120})
+2021-10-29 10:36:39,838 : INFO : Collector added feed handler - OKEX(TRADES, {'retries': 30, 'timeout': 120})
+2021-10-29 10:37:05,163 : INFO : Reading FTX-l2_book-BTC-USD
+2021-10-29 10:37:05,201 : INFO : l2_book-FTX-BTC-USD: Read 477 messages from Redis
+2021-10-29 10:37:05,218 : INFO : l2_book-FTX-BTC-USD: Removed 477 entries through id 1635493025040-0
+2021-10-29 10:37:05,218 : INFO : Write Complete FTX-l2_book-BTC-USD
+2021-10-29 10:37:05,219 : INFO : Reading FTX-trades-BTC-USD
+2021-10-29 10:37:05,219 : INFO : trades-FTX-BTC-USD: Read 94 messages from Redis
+2021-10-29 10:37:05,225 : INFO : trades-FTX-BTC-USD: Removed 94 entries through id 1635493024806-0
+2021-10-29 10:37:05,225 : INFO : Write Complete FTX-trades-BTC-USD
+2021-10-29 10:37:05,225 : INFO : Reading OKEX-l2_book-BTC-USDT
+2021-10-29 10:37:05,238 : INFO : l2_book-OKEX-BTC-USDT: Read 1815 messages from Redis
+2021-10-29 10:37:05,293 : INFO : l2_book-OKEX-BTC-USDT: Removed 1815 entries through id 1635493025044-78
+2021-10-29 10:37:05,294 : INFO : Write Complete OKEX-l2_book-BTC-USDT
+2021-10-29 10:37:05,294 : INFO : Reading OKEX-trades-BTC-USDT
+2021-10-29 10:37:05,295 : INFO : trades-OKEX-BTC-USDT: Read 240 messages from Redis
+2021-10-29 10:37:05,302 : INFO : trades-OKEX-BTC-USDT: Removed 240 entries through id 1635493025132-3
+2021-10-29 10:37:05,302 : INFO : Write Complete OKEX-trades-BTC-USDT
+2021-10-29 10:39:45,097 : INFO : Starting cryptostore
+2021-10-29 10:39:45,098 : INFO : Cryptostore running on PID 82107
+2021-10-29 10:39:50,103 : INFO : Prometehus started on port 8000
+2021-10-29 10:39:50,111 : INFO : Spawner started
+2021-10-29 10:39:50,116 : INFO : Aggregator started
+2021-10-29 10:39:50,120 : INFO : Cryptostore started
+2021-10-29 10:39:50,120 : INFO : loading config file locally: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-10-29 07:39:50.120785
+2021-10-29 10:39:50,132 : INFO : applying local config file: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-10-29 07:39:50.132894
+2021-10-29 10:39:50,133 : INFO : start: ['OKEX', 'FTX'] stop: []
+2021-10-29 10:39:51,331 : INFO : Aggregator running on PID 82110
+2021-10-29 10:39:51,332 : INFO : loading config file locally: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-10-29 07:39:51.332192
+2021-10-29 10:39:51,332 : INFO : Spawner running on PID 82109
+2021-10-29 10:39:51,332 : INFO : message: {"op": "start", "exchange": "OKEX", "collector": {"funding": [], "l2_book": {"book_delta": true, "max_depth": 100, "symbols": ["BTC-USDT"]}, "liquidations": [], "open_interest": [], "ticker": [], "trades": ["BTC-USDT"]}, "config": {"cache": "redis", "kafka": {"ip": "127.0.0.1", "port": 9092, "start_flush": true}, "parquet": {"SVOE": {"glue_database": "svoe_glue_db", "s3_bucket": "svoe.test.1", "s3_key_id": "AKIAQXJHI7MZZ35ZPS4C", "s3_prefix": "data_lake", "s3_secret": "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", "version": "local"}, "append_counter": 0, "compression": {"codec": "gzip", "level": 5}, "del_file": true, "file_format": ["exchange", "symbol", "data_type", "timestamp"], "prefix_date": true}, "redis": {"del_after_read": true, "ip": "127.0.0.1", "port": 6379, "retention_time": null, "socket": null, "start_flush": true}, "storage": ["parquet"], "storage_interval": 30, "storage_retries": 5, "storage_retry_wait": 30}}
+2021-10-29 10:39:51,332 : INFO : Starting {'op': 'start', 'exchange': 'OKEX', 'collector': {'funding': [], 'l2_book': {'book_delta': True, 'max_depth': 100, 'symbols': ['BTC-USDT']}, 'liquidations': [], 'open_interest': [], 'ticker': [], 'trades': ['BTC-USDT']}, 'config': {'cache': 'redis', 'kafka': {'ip': '127.0.0.1', 'port': 9092, 'start_flush': True}, 'parquet': {'SVOE': {'glue_database': 'svoe_glue_db', 's3_bucket': 'svoe.test.1', 's3_key_id': 'AKIAQXJHI7MZZ35ZPS4C', 's3_prefix': 'data_lake', 's3_secret': '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', 'version': 'local'}, 'append_counter': 0, 'compression': {'codec': 'gzip', 'level': 5}, 'del_file': True, 'file_format': ['exchange', 'symbol', 'data_type', 'timestamp'], 'prefix_date': True}, 'redis': {'del_after_read': True, 'ip': '127.0.0.1', 'port': 6379, 'retention_time': None, 'socket': None, 'start_flush': True}, 'storage': ['parquet'], 'storage_interval': 30, 'storage_retries': 5, 'storage_retry_wait': 30}}
+2021-10-29 10:39:51,336 : INFO : message: {"op": "start", "exchange": "FTX", "collector": {"funding": [], "l2_book": {"book_delta": true, "max_depth": 100, "symbols": ["BTC-USD"]}, "liquidations": [], "open_interest": [], "ticker": [], "trades": ["BTC-USD"]}, "config": {"cache": "redis", "kafka": {"ip": "127.0.0.1", "port": 9092, "start_flush": true}, "parquet": {"SVOE": {"glue_database": "svoe_glue_db", "s3_bucket": "svoe.test.1", "s3_key_id": "AKIAQXJHI7MZZ35ZPS4C", "s3_prefix": "data_lake", "s3_secret": "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", "version": "local"}, "append_counter": 0, "compression": {"codec": "gzip", "level": 5}, "del_file": true, "file_format": ["exchange", "symbol", "data_type", "timestamp"], "prefix_date": true}, "redis": {"del_after_read": true, "ip": "127.0.0.1", "port": 6379, "retention_time": null, "socket": null, "start_flush": true}, "storage": ["parquet"], "storage_interval": 30, "storage_retries": 5, "storage_retry_wait": 30}}
+2021-10-29 10:39:51,337 : INFO : Starting {'op': 'start', 'exchange': 'FTX', 'collector': {'funding': [], 'l2_book': {'book_delta': True, 'max_depth': 100, 'symbols': ['BTC-USD']}, 'liquidations': [], 'open_interest': [], 'ticker': [], 'trades': ['BTC-USD']}, 'config': {'cache': 'redis', 'kafka': {'ip': '127.0.0.1', 'port': 9092, 'start_flush': True}, 'parquet': {'SVOE': {'glue_database': 'svoe_glue_db', 's3_bucket': 'svoe.test.1', 's3_key_id': 'AKIAQXJHI7MZZ35ZPS4C', 's3_prefix': 'data_lake', 's3_secret': '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', 'version': 'local'}, 'append_counter': 0, 'compression': {'codec': 'gzip', 'level': 5}, 'del_file': True, 'file_format': ['exchange', 'symbol', 'data_type', 'timestamp'], 'prefix_date': True}, 'redis': {'del_after_read': True, 'ip': '127.0.0.1', 'port': 6379, 'retention_time': None, 'socket': None, 'start_flush': True}, 'storage': ['parquet'], 'storage_interval': 30, 'storage_retries': 5, 'storage_retry_wait': 30}}
+2021-10-29 10:39:51,342 : INFO : applying local config file: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-10-29 07:39:51.342137
+2021-10-29 10:39:51,362 : INFO : Flushing cache
+2021-10-29 10:39:51,388 : INFO : Reading FTX-l2_book-BTC-USD
+2021-10-29 10:39:51,389 : INFO : No data for FTX-l2_book-BTC-USD
+2021-10-29 10:39:51,389 : INFO : Reading FTX-trades-BTC-USD
+2021-10-29 10:39:51,390 : INFO : No data for FTX-trades-BTC-USD
+2021-10-29 10:39:51,390 : INFO : Reading OKEX-l2_book-BTC-USDT
+2021-10-29 10:39:51,391 : INFO : No data for OKEX-l2_book-BTC-USDT
+2021-10-29 10:39:51,391 : INFO : Reading OKEX-trades-BTC-USDT
+2021-10-29 10:39:51,392 : INFO : No data for OKEX-trades-BTC-USDT
+2021-10-29 10:39:52,848 : INFO : Collector for OKEX running on PID 82111
+2021-10-29 10:39:52,852 : INFO : Collector for FTX running on PID 82112
+2021-10-29 10:39:54,517 : INFO : Collector added feed handler - FTX(FUNDING, {'retries': 30, 'timeout': 120})
+2021-10-29 10:39:54,518 : INFO : Collector added feed handler - FTX(L2_BOOK, {'retries': 30, 'timeout': 120, 'max_depth': 100})
+2021-10-29 10:39:54,522 : INFO : Collector added feed handler - FTX(LIQUIDATIONS, {'retries': 30, 'timeout': 120})
+2021-10-29 10:39:54,523 : INFO : Collector added feed handler - FTX(OPEN_INTEREST, {'retries': 30, 'timeout': 120})
+2021-10-29 10:39:54,523 : INFO : Collector added feed handler - FTX(TICKER, {'retries': 30, 'timeout': 120})
+2021-10-29 10:39:54,524 : INFO : Collector added feed handler - FTX(TRADES, {'retries': 30, 'timeout': 120})
+2021-10-29 10:39:56,166 : INFO : Collector added feed handler - OKEX(FUNDING, {'retries': 30, 'timeout': 120})
+2021-10-29 10:39:56,167 : INFO : Collector added feed handler - OKEX(L2_BOOK, {'retries': 30, 'timeout': 120, 'max_depth': 100})
+2021-10-29 10:39:56,169 : INFO : Collector added feed handler - OKEX(LIQUIDATIONS, {'retries': 30, 'timeout': 120})
+2021-10-29 10:39:56,170 : INFO : Collector added feed handler - OKEX(OPEN_INTEREST, {'retries': 30, 'timeout': 120})
+2021-10-29 10:39:56,170 : INFO : Collector added feed handler - OKEX(TICKER, {'retries': 30, 'timeout': 120})
+2021-10-29 10:39:56,171 : INFO : Collector added feed handler - OKEX(TRADES, {'retries': 30, 'timeout': 120})
+2021-10-29 10:40:21,414 : INFO : Reading FTX-l2_book-BTC-USD
+2021-10-29 10:40:21,418 : INFO : l2_book-FTX-BTC-USD: Read 503 messages from Redis
+2021-10-29 10:40:21,514 : ERROR : Aggregator running on PID 82110 died due to exception
+Traceback (most recent call last):
+  File "/Users/anov/IdeaProjects/cryptostore/cryptostore/aggregator/aggregator.py", line 108, in loop
+    store.write(exchange, dtype, pair, time.time())
+  File "/Users/anov/IdeaProjects/cryptostore/cryptostore/data/storage.py", line 37, in write
+    s.write(exchange, data_type, pair, timestamp)
+  File "/Users/anov/IdeaProjects/cryptostore/cryptostore/data/parquet.py", line 186, in write
+    func(bucket, path, final_path, **kwargs)
+  File "/Users/anov/IdeaProjects/cryptostore/cryptostore/data/svoe.py", line 25, in write
+    wr.s3.to_parquet(
+  File "/usr/local/lib/python3.9/site-packages/awswrangler/_config.py", line 400, in wrapper
+    args: Dict[str, Any] = signature.bind_partial(*args_raw, **kwargs).arguments
+  File "/usr/local/Cellar/python@3.9/3.9.6/Frameworks/Python.framework/Versions/3.9/lib/python3.9/inspect.py", line 3069, in bind_partial
+    return self._bind(args, kwargs, partial=True)
+  File "/usr/local/Cellar/python@3.9/3.9.6/Frameworks/Python.framework/Versions/3.9/lib/python3.9/inspect.py", line 3051, in _bind
+    raise TypeError(
+TypeError: got an unexpected keyword argument 'bucket'
+2021-10-29 10:44:18,757 : INFO : Starting cryptostore
+2021-10-29 10:44:18,757 : INFO : Cryptostore running on PID 82159
+2021-10-29 10:44:23,763 : INFO : Prometehus started on port 8000
+2021-10-29 10:44:23,769 : INFO : Spawner started
+2021-10-29 10:44:23,774 : INFO : Aggregator started
+2021-10-29 10:44:23,778 : INFO : Cryptostore started
+2021-10-29 10:44:23,778 : INFO : loading config file locally: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-10-29 07:44:23.778657
+2021-10-29 10:44:23,787 : INFO : applying local config file: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-10-29 07:44:23.787750
+2021-10-29 10:44:23,788 : INFO : start: ['OKEX', 'FTX'] stop: []
+2021-10-29 10:44:24,910 : INFO : Aggregator running on PID 82163
+2021-10-29 10:44:24,911 : INFO : loading config file locally: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-10-29 07:44:24.911192
+2021-10-29 10:44:24,912 : INFO : Spawner running on PID 82162
+2021-10-29 10:44:24,912 : INFO : message: {"op": "start", "exchange": "OKEX", "collector": {"funding": [], "l2_book": {"book_delta": true, "max_depth": 100, "symbols": ["BTC-USDT"]}, "liquidations": [], "open_interest": [], "ticker": [], "trades": ["BTC-USDT"]}, "config": {"cache": "redis", "kafka": {"ip": "127.0.0.1", "port": 9092, "start_flush": true}, "parquet": {"SVOE": {"glue_database": "svoe_glue_db", "s3_bucket": "svoe.test.1", "s3_key_id": "AKIAQXJHI7MZZ35ZPS4C", "s3_prefix": "data_lake", "s3_secret": "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", "version": "local"}, "append_counter": 0, "compression": {"codec": "gzip", "level": 5}, "del_file": true, "file_format": ["exchange", "symbol", "data_type", "timestamp"], "prefix_date": true}, "redis": {"del_after_read": true, "ip": "127.0.0.1", "port": 6379, "retention_time": null, "socket": null, "start_flush": true}, "storage": ["parquet"], "storage_interval": 30, "storage_retries": 5, "storage_retry_wait": 30}}
+2021-10-29 10:44:24,912 : INFO : Starting {'op': 'start', 'exchange': 'OKEX', 'collector': {'funding': [], 'l2_book': {'book_delta': True, 'max_depth': 100, 'symbols': ['BTC-USDT']}, 'liquidations': [], 'open_interest': [], 'ticker': [], 'trades': ['BTC-USDT']}, 'config': {'cache': 'redis', 'kafka': {'ip': '127.0.0.1', 'port': 9092, 'start_flush': True}, 'parquet': {'SVOE': {'glue_database': 'svoe_glue_db', 's3_bucket': 'svoe.test.1', 's3_key_id': 'AKIAQXJHI7MZZ35ZPS4C', 's3_prefix': 'data_lake', 's3_secret': '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', 'version': 'local'}, 'append_counter': 0, 'compression': {'codec': 'gzip', 'level': 5}, 'del_file': True, 'file_format': ['exchange', 'symbol', 'data_type', 'timestamp'], 'prefix_date': True}, 'redis': {'del_after_read': True, 'ip': '127.0.0.1', 'port': 6379, 'retention_time': None, 'socket': None, 'start_flush': True}, 'storage': ['parquet'], 'storage_interval': 30, 'storage_retries': 5, 'storage_retry_wait': 30}}
+2021-10-29 10:44:24,917 : INFO : message: {"op": "start", "exchange": "FTX", "collector": {"funding": [], "l2_book": {"book_delta": true, "max_depth": 100, "symbols": ["BTC-USD"]}, "liquidations": [], "open_interest": [], "ticker": [], "trades": ["BTC-USD"]}, "config": {"cache": "redis", "kafka": {"ip": "127.0.0.1", "port": 9092, "start_flush": true}, "parquet": {"SVOE": {"glue_database": "svoe_glue_db", "s3_bucket": "svoe.test.1", "s3_key_id": "AKIAQXJHI7MZZ35ZPS4C", "s3_prefix": "data_lake", "s3_secret": "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", "version": "local"}, "append_counter": 0, "compression": {"codec": "gzip", "level": 5}, "del_file": true, "file_format": ["exchange", "symbol", "data_type", "timestamp"], "prefix_date": true}, "redis": {"del_after_read": true, "ip": "127.0.0.1", "port": 6379, "retention_time": null, "socket": null, "start_flush": true}, "storage": ["parquet"], "storage_interval": 30, "storage_retries": 5, "storage_retry_wait": 30}}
+2021-10-29 10:44:24,917 : INFO : Starting {'op': 'start', 'exchange': 'FTX', 'collector': {'funding': [], 'l2_book': {'book_delta': True, 'max_depth': 100, 'symbols': ['BTC-USD']}, 'liquidations': [], 'open_interest': [], 'ticker': [], 'trades': ['BTC-USD']}, 'config': {'cache': 'redis', 'kafka': {'ip': '127.0.0.1', 'port': 9092, 'start_flush': True}, 'parquet': {'SVOE': {'glue_database': 'svoe_glue_db', 's3_bucket': 'svoe.test.1', 's3_key_id': 'AKIAQXJHI7MZZ35ZPS4C', 's3_prefix': 'data_lake', 's3_secret': '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', 'version': 'local'}, 'append_counter': 0, 'compression': {'codec': 'gzip', 'level': 5}, 'del_file': True, 'file_format': ['exchange', 'symbol', 'data_type', 'timestamp'], 'prefix_date': True}, 'redis': {'del_after_read': True, 'ip': '127.0.0.1', 'port': 6379, 'retention_time': None, 'socket': None, 'start_flush': True}, 'storage': ['parquet'], 'storage_interval': 30, 'storage_retries': 5, 'storage_retry_wait': 30}}
+2021-10-29 10:44:24,919 : INFO : applying local config file: /etc/svoe/data_feed/configs/data-feed-config.yaml at 2021-10-29 07:44:24.919776
+2021-10-29 10:44:24,937 : INFO : Flushing cache
+2021-10-29 10:44:24,963 : INFO : Reading FTX-l2_book-BTC-USD
+2021-10-29 10:44:24,964 : INFO : No data for FTX-l2_book-BTC-USD
+2021-10-29 10:44:24,964 : INFO : Reading FTX-trades-BTC-USD
+2021-10-29 10:44:24,965 : INFO : No data for FTX-trades-BTC-USD
+2021-10-29 10:44:24,965 : INFO : Reading OKEX-l2_book-BTC-USDT
+2021-10-29 10:44:24,966 : INFO : No data for OKEX-l2_book-BTC-USDT
+2021-10-29 10:44:24,966 : INFO : Reading OKEX-trades-BTC-USDT
+2021-10-29 10:44:24,966 : INFO : No data for OKEX-trades-BTC-USDT
+2021-10-29 10:44:26,305 : INFO : Collector for FTX running on PID 82165
+2021-10-29 10:44:26,307 : INFO : Collector for OKEX running on PID 82164
+2021-10-29 10:44:27,239 : INFO : Collector added feed handler - FTX(FUNDING, {'retries': 30, 'timeout': 120})
+2021-10-29 10:44:27,241 : INFO : Collector added feed handler - FTX(L2_BOOK, {'retries': 30, 'timeout': 120, 'max_depth': 100})
+2021-10-29 10:44:27,242 : INFO : Collector added feed handler - FTX(LIQUIDATIONS, {'retries': 30, 'timeout': 120})
+2021-10-29 10:44:27,243 : INFO : Collector added feed handler - FTX(OPEN_INTEREST, {'retries': 30, 'timeout': 120})
+2021-10-29 10:44:27,243 : INFO : Collector added feed handler - FTX(TICKER, {'retries': 30, 'timeout': 120})
+2021-10-29 10:44:27,244 : INFO : Collector added feed handler - FTX(TRADES, {'retries': 30, 'timeout': 120})
+2021-10-29 10:44:28,609 : INFO : Collector added feed handler - OKEX(FUNDING, {'retries': 30, 'timeout': 120})
+2021-10-29 10:44:28,610 : INFO : Collector added feed handler - OKEX(L2_BOOK, {'retries': 30, 'timeout': 120, 'max_depth': 100})
+2021-10-29 10:44:28,611 : INFO : Collector added feed handler - OKEX(LIQUIDATIONS, {'retries': 30, 'timeout': 120})
+2021-10-29 10:44:28,611 : INFO : Collector added feed handler - OKEX(OPEN_INTEREST, {'retries': 30, 'timeout': 120})
+2021-10-29 10:44:28,613 : INFO : Collector added feed handler - OKEX(TICKER, {'retries': 30, 'timeout': 120})
+2021-10-29 10:44:28,613 : INFO : Collector added feed handler - OKEX(TRADES, {'retries': 30, 'timeout': 120})
+2021-10-29 10:44:54,990 : INFO : Reading FTX-l2_book-BTC-USD
+2021-10-29 10:44:54,994 : INFO : l2_book-FTX-BTC-USD: Read 474 messages from Redis
+2021-10-29 10:45:02,684 : INFO : l2_book-FTX-BTC-USD: Removed 474 entries through id 1635493494984-0
+2021-10-29 10:45:02,685 : INFO : Write Complete FTX-l2_book-BTC-USD
+2021-10-29 10:45:02,685 : INFO : Reading FTX-trades-BTC-USD
+2021-10-29 10:45:02,686 : INFO : trades-FTX-BTC-USD: Read 103 messages from Redis
+2021-10-29 10:45:08,331 : INFO : trades-FTX-BTC-USD: Removed 103 entries through id 1635493502587-0
+2021-10-29 10:45:08,331 : INFO : Write Complete FTX-trades-BTC-USD
+2021-10-29 10:45:08,331 : INFO : Reading OKEX-l2_book-BTC-USDT
+2021-10-29 10:45:08,356 : INFO : l2_book-OKEX-BTC-USDT: Read 3559 messages from Redis
+2021-10-29 10:45:18,639 : INFO : l2_book-OKEX-BTC-USDT: Removed 3559 entries through id 1635493508326-1
+2021-10-29 10:45:18,639 : INFO : Write Complete OKEX-l2_book-BTC-USDT
+2021-10-29 10:45:18,639 : INFO : Reading OKEX-trades-BTC-USDT
+2021-10-29 10:45:18,642 : INFO : trades-OKEX-BTC-USDT: Read 387 messages from Redis
+2021-10-29 10:45:25,226 : INFO : trades-OKEX-BTC-USDT: Removed 387 entries through id 1635493517938-2
+2021-10-29 10:45:25,226 : INFO : Write Complete OKEX-trades-BTC-USDT
+2021-10-29 10:45:25,226 : WARNING : Storage operations currently take 30.3 seconds, longer than the interval of 30
+2021-10-29 10:45:25,740 : INFO : Reading FTX-l2_book-BTC-USD
+2021-10-29 10:45:25,744 : INFO : l2_book-FTX-BTC-USD: Read 585 messages from Redis
+2021-10-29 10:45:32,454 : INFO : l2_book-FTX-BTC-USD: Removed 585 entries through id 1635493525709-0
+2021-10-29 10:45:32,455 : INFO : Write Complete FTX-l2_book-BTC-USD
+2021-10-29 10:45:32,455 : INFO : Reading FTX-trades-BTC-USD
+2021-10-29 10:45:32,455 : INFO : trades-FTX-BTC-USD: Read 37 messages from Redis
+2021-10-29 10:45:38,547 : INFO : trades-FTX-BTC-USD: Removed 37 entries through id 1635493532096-0
+2021-10-29 10:45:38,548 : INFO : Write Complete FTX-trades-BTC-USD
+2021-10-29 10:45:38,548 : INFO : Reading OKEX-l2_book-BTC-USDT
+2021-10-29 10:45:38,603 : INFO : l2_book-OKEX-BTC-USDT: Read 2720 messages from Redis
+2021-10-29 10:45:48,798 : INFO : l2_book-OKEX-BTC-USDT: Removed 2720 entries through id 1635493538547-1
+2021-10-29 10:45:48,799 : INFO : Write Complete OKEX-l2_book-BTC-USDT
+2021-10-29 10:45:48,800 : INFO : Reading OKEX-trades-BTC-USDT
+2021-10-29 10:45:48,802 : INFO : trades-OKEX-BTC-USDT: Read 346 messages from Redis
+2021-10-29 10:45:55,240 : INFO : trades-OKEX-BTC-USDT: Removed 346 entries through id 1635493548785-4
+2021-10-29 10:45:55,240 : INFO : Write Complete OKEX-trades-BTC-USDT
+2021-10-29 10:45:55,748 : INFO : Reading FTX-l2_book-BTC-USD
+2021-10-29 10:45:55,751 : INFO : l2_book-FTX-BTC-USD: Read 526 messages from Redis
+2021-10-29 10:46:01,666 : INFO : l2_book-FTX-BTC-USD: Removed 526 entries through id 1635493555703-0
+2021-10-29 10:46:01,667 : INFO : Write Complete FTX-l2_book-BTC-USD
+2021-10-29 10:46:01,668 : INFO : Reading FTX-trades-BTC-USD
+2021-10-29 10:46:01,669 : INFO : trades-FTX-BTC-USD: Read 87 messages from Redis
+2021-10-29 10:46:07,048 : INFO : trades-FTX-BTC-USD: Removed 87 entries through id 1635493561552-0
+2021-10-29 10:46:07,048 : INFO : Write Complete FTX-trades-BTC-USD
+2021-10-29 10:46:07,048 : INFO : Reading OKEX-l2_book-BTC-USDT
+2021-10-29 10:46:07,070 : INFO : l2_book-OKEX-BTC-USDT: Read 2686 messages from Redis
+2021-10-29 10:46:21,994 : INFO : l2_book-OKEX-BTC-USDT: Removed 2686 entries through id 1635493567035-0
+2021-10-29 10:46:21,995 : INFO : Write Complete OKEX-l2_book-BTC-USDT
+2021-10-29 10:46:21,995 : INFO : Reading OKEX-trades-BTC-USDT
+2021-10-29 10:46:21,999 : INFO : trades-OKEX-BTC-USDT: Read 535 messages from Redis
+2021-10-29 10:46:29,686 : INFO : trades-OKEX-BTC-USDT: Removed 535 entries through id 1635493581993-0
+2021-10-29 10:46:29,687 : INFO : Write Complete OKEX-trades-BTC-USDT
+2021-10-29 10:46:29,688 : WARNING : Storage operations currently take 34.0 seconds, longer than the interval of 30
+2021-10-29 10:46:30,209 : INFO : Reading FTX-l2_book-BTC-USD
+2021-10-29 10:46:30,214 : INFO : l2_book-FTX-BTC-USD: Read 632 messages from Redis
+2021-10-29 10:46:37,196 : INFO : l2_book-FTX-BTC-USD: Removed 632 entries through id 1635493590157-0
+2021-10-29 10:46:37,197 : INFO : Write Complete FTX-l2_book-BTC-USD
+2021-10-29 10:46:37,197 : INFO : Reading FTX-trades-BTC-USD
+2021-10-29 10:46:37,199 : INFO : trades-FTX-BTC-USD: Read 148 messages from Redis
+2021-10-29 10:46:43,603 : INFO : trades-FTX-BTC-USD: Removed 148 entries through id 1635493596464-0
+2021-10-29 10:46:43,604 : INFO : Write Complete FTX-trades-BTC-USD
+2021-10-29 10:46:43,604 : INFO : Reading OKEX-l2_book-BTC-USDT
+2021-10-29 10:46:43,639 : INFO : l2_book-OKEX-BTC-USDT: Read 3453 messages from Redis
+2021-10-29 10:46:53,570 : INFO : l2_book-OKEX-BTC-USDT: Removed 3453 entries through id 1635493603603-1
+2021-10-29 10:46:53,570 : INFO : Write Complete OKEX-l2_book-BTC-USDT
+2021-10-29 10:46:53,571 : INFO : Reading OKEX-trades-BTC-USDT
+2021-10-29 10:46:53,573 : INFO : trades-OKEX-BTC-USDT: Read 270 messages from Redis
+2021-10-29 10:46:59,413 : INFO : trades-OKEX-BTC-USDT: Removed 270 entries through id 1635493613476-0
+2021-10-29 10:46:59,413 : INFO : Write Complete OKEX-trades-BTC-USDT
+2021-10-29 10:47:00,215 : INFO : Reading FTX-l2_book-BTC-USD
+2021-10-29 10:47:00,218 : INFO : l2_book-FTX-BTC-USD: Read 567 messages from Redis
+2021-10-29 10:47:06,944 : INFO : l2_book-FTX-BTC-USD: Removed 567 entries through id 1635493620205-0
+2021-10-29 10:47:06,945 : INFO : Write Complete FTX-l2_book-BTC-USD
+2021-10-29 10:47:06,945 : INFO : Reading FTX-trades-BTC-USD
+2021-10-29 10:47:06,948 : INFO : trades-FTX-BTC-USD: Read 90 messages from Redis
+2021-10-29 10:47:13,689 : INFO : trades-FTX-BTC-USD: Removed 90 entries through id 1635493626248-2
+2021-10-29 10:47:13,690 : INFO : Write Complete FTX-trades-BTC-USD
+2021-10-29 10:47:13,690 : INFO : Reading OKEX-l2_book-BTC-USDT
+2021-10-29 10:47:13,706 : INFO : l2_book-OKEX-BTC-USDT: Read 2783 messages from Redis
+2021-10-29 10:47:22,167 : INFO : l2_book-OKEX-BTC-USDT: Removed 2783 entries through id 1635493633686-3
+2021-10-29 10:47:22,167 : INFO : Write Complete OKEX-l2_book-BTC-USDT
+2021-10-29 10:47:22,168 : INFO : Reading OKEX-trades-BTC-USDT
+2021-10-29 10:47:22,170 : INFO : trades-OKEX-BTC-USDT: Read 328 messages from Redis
