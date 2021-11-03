@@ -7,9 +7,10 @@ import zmq.asyncio
 
 from featurizer.featurizer.log import get_logger
 from featurizer.featurizer.util import get_queue_key
+from featurizer.featurizer.calculator import Calculator
 from faster_fifo import Queue
 
-LOG = get_logger('cryptostore', 'cryptostore.log', logging.INFO, size=50000000, num_files=10)
+LOG = get_logger('featurizer', 'featurizer.log', logging.INFO, size=50000000, num_files=10)
 
 
 # https://github.com/alex-petrenko/faster-fifo high perf multiproc queue
@@ -18,6 +19,7 @@ class Featurizer:
     def __init__(self, config_path: str):
         self.config = self._read_config(config_path)
         self.queues = self._init_queues()
+        self.calculator = Calculator()
         ctx = zmq.asyncio.Context.instance()
         # self.in_sockets = []
         self.poller = zmq.asyncio.Poller()
@@ -29,6 +31,7 @@ class Featurizer:
 
     def run(self):
         LOG.info("Featurizer running on PID %d", os.getpid())
+        self.calculator.start()
         loop = asyncio.get_event_loop()
         loop.create_task(self.loop())
         try:
@@ -37,8 +40,6 @@ class Featurizer:
             pass
         except Exception:
             LOG.error("Featurizer running on PID %d died due to exception", os.getpid(), exc_info=True)
-
-        return
 
     async def loop(self):
         while True:
