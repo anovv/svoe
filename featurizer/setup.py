@@ -11,6 +11,7 @@ setup(
     packages=find_packages(),
     install_requires=[
         "pyzmq",
+        "faster-fifo"
     ],
     entry_points={
         'console_scripts': ['svoe_featurizer_launch=featurizer.bin.launcher:main'],
