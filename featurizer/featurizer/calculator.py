@@ -8,6 +8,7 @@ LOG = get_logger('featurizer', 'featurizer.log', logging.INFO, size=50000000, nu
 
 class Calculator(Process):
 
+    # TODO use pool of processes instead of a single process?
     def __init__(self, config: dict, queues: dict):
         self.config = config
         self.queues = queues

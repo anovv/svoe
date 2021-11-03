@@ -19,7 +19,7 @@ class Featurizer:
     def __init__(self, config_path: str):
         self.config = self._read_config(config_path)
         self.queues = self._init_queues()
-        self.calculator = Calculator()
+        self.calculator = Calculator(self.config, self.queues)
         ctx = zmq.asyncio.Context.instance()
         # self.in_sockets = []
         self.poller = zmq.asyncio.Poller()
