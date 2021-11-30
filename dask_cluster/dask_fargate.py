@@ -55,12 +55,14 @@ class SvoeTestDaskCluster(FargateCluster):
             scheduler_cpu=512,
             scheduler_mem=1024,
             scheduler_timeout="30 minutes",
-            find_address_timeout=90, # TODO fix https://github.com/dask/dask-cloudprovider/issues/313 to speed up boot time
+            find_address_timeout=120, # TODO fix https://github.com/dask/dask-cloudprovider/issues/313 to speed up boot time
             worker_task_kwargs=HackyDict(capacity_provider_fargate_spot_config),
             scheduler_task_kwargs=HackyDict(capacity_provider_fargate_config),
             environment=
             {
-                'EXTRA_PIP_PACKAGES': 'pyarrow s3fs prefect[aws] fastparquet numpy', # TODO use prebuild docker image to speed up boot time
+                'EXTRA_PIP_PACKAGES': 'pyarrow s3fs prefect[aws] fastparquet numpy order_book',
+                # TODO use prebuild docker image to speed up boot time
+                # TODO set AWS credentials env vars
             },
             **kwargs
         )
