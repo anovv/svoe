@@ -1,2 +1,2 @@
 include:
-  - ./terraform/.gitlab-ci-terraform.yml
+  - terraform/.gitlab-ci-terraform.yml
