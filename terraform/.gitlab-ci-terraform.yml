@@ -27,6 +27,5 @@ validate:
     - terraform validate
   only:
     - branches
-  rules:
     - changes:
         - ./terraform
