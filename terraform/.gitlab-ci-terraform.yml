@@ -27,6 +27,6 @@ validate:
     - terraform validate
   only:
     refs:
-      - branches
+      - master
     changes:
       - ./terraform
