@@ -14,3 +14,4 @@ prometheus_multiproc_dir/
 terraform/.terraform/
 terraform/aws/glue/.terraform/
 
+notebooks/dask-worker-space/
