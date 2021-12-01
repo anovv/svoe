@@ -26,6 +26,7 @@ validate:
   script:
     - terraform validate
   only:
-    - branches
-    - changes:
-        - ./terraform
+    refs:
+      - branches
+    changes:
+      - ./terraform
