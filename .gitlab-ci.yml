@@ -1,2 +1,37 @@
-include:
-  - terraform/.gitlab-ci-terraform.yml
+# TODO if file grows to large, split into smaller chunks and use includes
+# NOTE: if using local gitlab-runner exec command, includes are not supported
+#include:
+#  - terraform/.gitlab-ci-terraform.yml
+
+image:
+  name: hashicorp/terraform:light
+  entrypoint:
+    - '/usr/bin/env'
+    - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
+    - 'AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}'
+    - 'AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}'
+    - 'AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}'
+
+variables:
+  PLAN: plan.tfplan
+
+cache:
+  paths:
+    - .terraform
+
+before_script:
+  - terraform --version
+  - terraform init
+
+stages:
+  - validate
+
+validate:
+  stage: validate
+  script:
+    - terraform validate
+  only:
+    refs:
+      - main
+    changes:
+      - terraform/*
