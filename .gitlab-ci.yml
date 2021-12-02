@@ -33,5 +33,5 @@ validate:
   only:
     refs:
       - main
-    changes:
+#    changes:
 #      - terraform/*
