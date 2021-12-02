@@ -28,5 +28,5 @@ validate:
   only:
     refs:
       - main
-#    changes:
-#      - ./terraform
+    changes:
+      - terraform
