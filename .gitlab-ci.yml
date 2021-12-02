@@ -34,4 +34,4 @@ validate:
     refs:
       - main
     changes:
-      - terraform/*
+#      - terraform/*
