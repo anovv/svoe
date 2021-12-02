@@ -30,5 +30,3 @@ validate:
       - main
     changes:
       - ./terraform
-
-### TEST
