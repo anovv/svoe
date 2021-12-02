@@ -29,7 +29,7 @@ stages:
 validate:
   stage: validate
   script:
-    - terraform validate
+    - terraform validatedsds
   only:
     refs:
       - main
