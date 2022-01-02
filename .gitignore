@@ -19,3 +19,5 @@ notebooks/dask-worker-space/
 builds/
 cache/
 
+feedhandler.log*
+cryptostore.log*

@@ -29,5 +29,8 @@ def test_datafeed():
     # fh.add_feed(Coinbase(symbols=['BTC-USD'], channels=[TICKER], callbacks=ticker_cb))
     # fh.run()
 
+# To rebuild Cython https://stackoverflow.com/questions/34928001/distutils-ignores-changes-to-setup-py-when-building-an-extension
+# python setup.py clean --all
+# python setup.py develop
 if __name__ == '__main__':
     test_datafeed()

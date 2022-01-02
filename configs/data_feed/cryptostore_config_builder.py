@@ -4,12 +4,6 @@ from cryptofeed.defines import TICKER, TRADES, L2_BOOK, L3_BOOK, LIQUIDATIONS, O
 from pathlib import Path
 import yaml
 
-MEDIUM = 'redis'
-
-# https://stackoverflow.com/questions/52996028/accessing-local-kafka-from-within-services-deployed-in-local-docker-for-mac-inc
-KAFKA_IP = '127.0.0.1'# ip='host.docker.internal', # for Docker on Mac use host.docker.internal:19092
-KAFKA_PORT = 9092 # port=19092
-
 REDIS_IP = '127.0.0.1'
 REDIS_PORT = 6379
 
@@ -34,12 +28,7 @@ class CryptostoreConfigBuilder(BaseConfigBuilder):
     def _cryptostore_template(self):
         aws_credentials = self._read_aws_credentials()
         return {
-            'cache': MEDIUM,
-            'kafka': {
-                'ip': KAFKA_IP,
-                'port': KAFKA_PORT,
-                'start_flush': START_FLUSH,
-            },
+            'cache': 'redis',
             'redis': {
                 'ip': REDIS_IP,
                 'port': REDIS_PORT,
@@ -48,35 +37,29 @@ class CryptostoreConfigBuilder(BaseConfigBuilder):
                 'retention_time': None,
                 'start_flush': START_FLUSH,
             },
-            'storage': ['parquet'],
-            'storage_retries': 5,
-            'storage_retry_wait': 30,
-            'parquet': {
-                'del_file': True,
-                'append_counter': 0,
-                'file_format': ['exchange', 'symbol', 'data_type', 'timestamp'],
-                'compression': {
-                    'codec': 'gzip',
-                    'level': 5,
-                },
-                'prefix_date': True,
-                # 'S3': {
-                #     'key_id': aws_credentials[0],
-                #     'secret': aws_credentials[1],
-                #     'bucket': aws_credentials[2],
-                #     'prefix': 'parquet',
-                # },
-                'SVOE': {
-                    's3_key_id': aws_credentials[0],
-                    's3_secret': aws_credentials[1],
-                    's3_bucket': aws_credentials[2],
-                    's3_prefix': 'data_lake',
-                    'glue_database': 'svoe_glue_db', # TODO sync with Terraform
-                    'version': 'local' # TODO add version logging
-                }
-                # path=TEMP_FILES_PATH,
+            'storage': ['svoe'],
+            'storage_retries': 3,
+            'storage_retry_wait': 10,
+            'write_on_stop': True,
+            'num_write_threads': 100,
+            'svoe': {
+                's3_key_id': aws_credentials[0],
+                's3_secret': aws_credentials[1],
+                's3_bucket': aws_credentials[2],
+                's3_prefix': 'data_lake',
+                'glue_database': 'svoe_glue_db',  # TODO sync with Terraform
+                'compression': 'gzip',
+                'version': 'local',  # TODO add version logging
             },
             'storage_interval': 30,
+            'health_check': {
+                'port': 1234,
+                'path': '/health'
+            },
+            'prometheus': {
+                'port': 8000,
+                'multiproc_dir': '/Users/anov/IdeaProjects/svoe/prometheus_multiproc_dir' # TODO this should be unique per config
+            }
         }
 
     def _cryptostore_config(
@@ -96,6 +79,7 @@ class CryptostoreConfigBuilder(BaseConfigBuilder):
         symbols: list[str],
     ) -> dict:
         config = {exchange: {}}
+        # TODO per exchange per channel retry support e.g.
         config[exchange]['retries'] = -1
         self._populate_channels(
             config,
@@ -114,9 +98,14 @@ class CryptostoreConfigBuilder(BaseConfigBuilder):
     def _exchanges_config_FULL_DEBUG(self) -> dict:
         config = {}
         for exchange in self.exchanges_config.keys():
-            config[exchange] = {}
-            # per exchange retries?
-            config[exchange]['retries'] = -1
+            if exchange not in config:
+                # TODO per exchange per channel retry support e.g.
+                # channel_timeouts:
+                #   l2_book: 30
+                #   trades: 120
+                #   ticker: 120
+                #   funding: -1
+                config[exchange] = {'retries': -1}
 
             for instrument in self.exchanges_config[exchange].keys():
                 symbols = self.exchanges_config[exchange][instrument][0]
@@ -126,7 +115,6 @@ class CryptostoreConfigBuilder(BaseConfigBuilder):
                     instrument,
                     symbols,
                 )
-
         return config
 
     def _populate_channels(
@@ -136,12 +124,21 @@ class CryptostoreConfigBuilder(BaseConfigBuilder):
         instrument: str,
         symbols: list[str],
     ) -> None:
+
+        # TODO some exchanges don't have all channels supported,
+        # e.g.
+        # OKEX implementation has no liquidations channel support https://github.com/bmoscon/cryptofeed/issues/612
+        # PHEMEX has no funding channel
+        # BYBIT has not ticker
+
         channels = self.exchanges_config[exchange][instrument][2]
 
-        # ticker # TODO ticker is not populated^ why?
+        # ticker
         if TICKER in channels:
             if TICKER in config[exchange]:
-                config[exchange][TICKER].extend(symbols)
+                l = config[exchange][TICKER].copy()
+                l.extend(symbols)
+                config[exchange][TICKER] = l
             else:
                 config[exchange][TICKER] = symbols
 
@@ -149,7 +146,9 @@ class CryptostoreConfigBuilder(BaseConfigBuilder):
         max_depth_l2 = self.exchanges_config[exchange][instrument][1]
         if L2_BOOK in channels:
             if L2_BOOK in config[exchange]:
-                config[exchange][L2_BOOK]['symbols'].extend(symbols)
+                l = config[exchange][L2_BOOK]['symbols'].copy()
+                l.extend(symbols)
+                config[exchange][L2_BOOK]['symbols'] = l
             else:
                 l2_book = {
                     'symbols': symbols,
@@ -157,48 +156,55 @@ class CryptostoreConfigBuilder(BaseConfigBuilder):
                 }
                 if max_depth_l2 > 0:
                     l2_book['max_depth'] = max_depth_l2
-                config[exchange] = {
-                    L2_BOOK: l2_book,
-                }
+
+                config[exchange][L2_BOOK] = l2_book
 
         # l3 book
         if L3_BOOK in channels:
             if L3_BOOK in config[exchange]:
-                config[exchange][L3_BOOK]['symbols'].extend(symbols)
+                l = config[exchange][L3_BOOK]['symbols'].copy()
+                l.extend(symbols)
+                config[exchange][L3_BOOK]['symbols'] = l
             else:
                 l3_book = {
                     'symbols': symbols,
                     'book_delta': True,
                 }
-                config[exchange] = {
-                    L3_BOOK: l3_book,
-                }
+                config[exchange][L3_BOOK] = l3_book
 
         # trades
         if TRADES in channels:
             if TRADES in config[exchange]:
-                config[exchange][TRADES].extend(symbols)
+                l = config[exchange][TRADES].copy()
+                l.extend(symbols)
+                config[exchange][TRADES] = l
             else:
                 config[exchange][TRADES] = symbols
 
         # open interest
         if OPEN_INTEREST in channels:
             if OPEN_INTEREST in config[exchange]:
-                config[exchange][OPEN_INTEREST].extend(symbols)
+                l = config[exchange][OPEN_INTEREST].copy()
+                l.extend(symbols)
+                config[exchange][OPEN_INTEREST] = l
             else:
                 config[exchange][OPEN_INTEREST] = symbols
 
         # funding
         if FUNDING in channels:
             if FUNDING in config[exchange]:
-                config[exchange][FUNDING].extend(symbols)
+                l = config[exchange][FUNDING].copy()
+                l.extend(symbols)
+                config[exchange][FUNDING] = l
             else:
                 config[exchange][FUNDING] = symbols
 
         # liquidations
         if LIQUIDATIONS in channels:
             if LIQUIDATIONS in config[exchange]:
-                config[exchange][LIQUIDATIONS].extend(symbols)
+                l = config[exchange][LIQUIDATIONS].copy()
+                l.extend(symbols)
+                config[exchange][LIQUIDATIONS] = l
             else:
                 config[exchange][LIQUIDATIONS] = symbols
 

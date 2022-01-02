@@ -17,7 +17,7 @@ LOG = get_logger('featurizer', 'featurizer.log', logging.INFO, size=50000000, nu
 class Featurizer:
 
     def __init__(self, config_path: str):
-        self.config = self._read_config(config_path)
+        self.config = self._read_config(config_path) # TODO use DynamicConfig?
         self.queues = self._init_queues()
         self.calculator = Calculator(self.config, self.queues)
         ctx = zmq.asyncio.Context.instance()
@@ -42,7 +42,7 @@ class Featurizer:
             LOG.error("Featurizer running on PID %d died due to exception", os.getpid(), exc_info=True)
 
     async def loop(self):
-        while True:
+        while True: # TODO add interrupt handlers
             try:
                 events = await self.poller.poll()
                 for socket in dict(events):
