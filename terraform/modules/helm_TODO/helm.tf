@@ -1,5 +1,8 @@
-// TODO move terraform related stuff to a separate package
+# TODO move terraform related stuff to a separate package
 
+# TODO set vpcs, etc.
+# https://medium.com/bench-engineering/deploying-kubernetes-clusters-with-kops-and-terraform-832b89250e8e
+# https://aymen-segni.com/index.php/2020/04/19/deploy-kubernetes-aws-k8s-cluster-with-terraform-and-kops/
 provider "helm" {
   kubernetes {
     config_path = "~/.kube/config"

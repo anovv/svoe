@@ -11,8 +11,8 @@ configs/data_feed/aws_credentials.yaml
 cryptostore.log
 kubeflow/kfapp/
 prometheus_multiproc_dir/
-terraform/.terraform/
-terraform/aws/glue/.terraform/
+terraform/modules/helm_TODO/.terraform/
+terraform/modules/aws/glue/.terraform/
 
 notebooks/dask-worker-space/
 
@@ -21,3 +21,6 @@ cache/
 
 feedhandler.log*
 cryptostore.log*
+
+*.terraform/*
+*.terraform.*
