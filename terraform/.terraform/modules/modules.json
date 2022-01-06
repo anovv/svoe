@@ -1,1 +1,1 @@
-{"Modules":[{"Key":"","Source":"","Dir":"."},{"Key":"glue","Source":"./modules/aws/glue","Dir":"modules/aws/glue"}]}
+{"Modules":[{"Key":"apn1_vpc","Source":"./modules/aws/vpc","Dir":"modules/aws/vpc"},{"Key":"apn1_kops_resources","Source":"./modules/aws/kops_resources","Dir":"modules/aws/kops_resources"},{"Key":"apn1_vpc.vpc","Source":"terraform-aws-modules/vpc/aws","Version":"3.11.0","Dir":".terraform/modules/apn1_vpc.vpc"},{"Key":"","Source":"","Dir":"."},{"Key":"glue","Source":"./modules/aws/glue","Dir":"modules/aws/glue"}]}
