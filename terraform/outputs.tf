@@ -47,6 +47,10 @@ output "k8s_security_group_id" {
   value = module.apn1_kops_resources.k8s_security_group_id
 }
 
+output "k8s_non_masquerade_cidr" {
+  value = var.k8s_non_masquerade_cidr
+}
+
 output "cluster_name" {
   value = var.cluster_name
 }

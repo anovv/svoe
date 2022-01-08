@@ -1,8 +1,9 @@
 cluster_name    = "apn1.k8s.local" # should contain .local for Gossip DNS
 environment     = "dev"
 region          = "ap-northeast-1"
-cidr            = "10.0.0.0/16"
+cidr            = "172.20.0.0/16"
 azs             = ["ap-northeast-1a"]
 private_subnets = []
-public_subnets  = ["10.0.101.0/24"]
-ingress_ips     = ["10.0.0.0/16"]
+public_subnets  = ["172.20.32.0/19"]
+ingress_ips     = ["172.20.0.0/16"] # TODO ??
+k8s_non_masquerade_cidr = "100.64.0.0/10"

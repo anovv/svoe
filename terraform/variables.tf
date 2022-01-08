@@ -33,6 +33,11 @@ variable "ingress_ips" {
   description = "List of Ingress IPs for security group"
 }
 
+variable "k8s_non_masquerade_cidr" {
+  type        = string
+  description = "nonMasqueradeCIDR for cluster"
+}
+
 variable "cluster_name" {
   type        = string
   description = "FQDN cluster name"

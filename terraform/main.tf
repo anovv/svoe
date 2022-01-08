@@ -17,18 +17,18 @@ module "apn1_vpc" {
   cidr                   = var.cidr
   azs                    = var.azs
   private_subnets        = var.private_subnets
-  public_subnets         = var.public_subnets # ["10.0.101.0/24"]
+  public_subnets         = var.public_subnets
   environment            = var.environment
   enable_nat_gateway     = false
   single_nat_gateway     = false
   one_nat_gateway_per_az = false
-  cluster_name           = var.cluster_name #"apn1.k8s.local"
+  cluster_name           = var.cluster_name
 }
 
 module "apn1_kops_resources" {
 
   source      = "./modules/aws/kops_resources"
-  environment = var.environment # "dev"
-  ingress_ips = var.ingress_ips # ["10.0.0.0/16"]
+  environment = var.environment
+  ingress_ips = var.ingress_ips
   vpc_id      = module.apn1_vpc.vpc_id
 }
