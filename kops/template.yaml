@@ -1,3 +1,4 @@
+
 apiVersion: kops.k8s.io/v1alpha2
 kind: Cluster
 metadata:
@@ -15,47 +16,53 @@ spec:
   configBase: s3://{{.kops_s3_bucket_name.value}}/{{.cluster_name.value}}
   # Create one etcd member per AZ
   etcdClusters:
-  – etcdMembers:
+  - etcdMembers:
   {{range $i, $az := .availability_zones.value}}
-    – instanceGroup: master-{{.}}
+    - instanceGroup: master-{{.}}
       name: {{. | replace $.region.value "" }}
+      encryptedVolume: true
   {{end}}
     name: main
-  – etcdMembers:
+    cpuRequest: 200m
+    memoryRequest: 100Mi
+  - etcdMembers:
   {{range $i, $az := .availability_zones.value}}
-    – instanceGroup: master-{{.}}
+    - instanceGroup: master-{{.}}
       name: {{. | replace $.region.value "" }}
+      encryptedVolume: true
   {{end}}
     name: events
+    cpuRequest: 100m
+    memoryRequest: 100Mi
   iam:
     allowContainerRegistry: true
     legacy: false
   kubernetesVersion: 1.23.1
   masterPublicName: api.{{.cluster_name.value}}
   networkCIDR: {{.vpc_cidr_block.value}}
-  kubeControllerManager:
-    clusterCIDR: {{.vpc_cidr_block.value}}
-  kubeProxy:
-    clusterCIDR: {{.vpc_cidr_block.value}}
+#  kubeControllerManager:
+#    clusterCIDR: {{.vpc_cidr_block.value}}
+#  kubeProxy:
+#    clusterCIDR: {{.vpc_cidr_block.value}}
   networkID: {{.vpc_id.value}}
   kubelet:
     anonymousAuth: false
   networking:
     cilium: {}
-  nonMasqueradeCIDR: {{.vpc_cidr_block.value}}
+  nonMasqueradeCIDR: {{.k8s_non_masquerade_cidr.value}}
   sshAccess:
-  – 0.0.0.0/0
+  - 0.0.0.0/0
   subnets:
-  # Public (utility) subnets, one per AZ
+  # Public subnets, one per AZ
   {{range $i, $id := .public_subnet_ids.value}}
-  – id: {{.}}
-    name: utility-{{index $.availability_zones.value $i}}
-    type: Utility
+  - id: {{.}}
+    name: {{index $.availability_zones.value $i}}
+    type: Public
     zone: {{index $.availability_zones.value $i}}
   {{end}}
   # Private subnets, one per AZ
   {{range $i, $id := .private_subnet_ids.value}}
-  – id: {{.}}
+  - id: {{.}}
     name: {{index $.availability_zones.value $i}}
     type: Private
     zone: {{index $.availability_zones.value $i}}
@@ -66,7 +73,7 @@ spec:
       type: Public
     masters: public
     nodes: public
-—
+---
 
 # TODO optimize rootVolumeSize
 # Create one master per AZ
@@ -87,8 +94,8 @@ spec:
   nodeLabels:
     kops.k8s.io/instancegroup: master-{{.}}
   subnets:
-  – {{.}}
-—
+  - {{.}}
+---
   {{end}}
 
 apiVersion: kops/v1alpha2
@@ -108,9 +115,9 @@ spec:
     kops.k8s.io/instancegroup: nodes-on-demand
   subnets:
   {{range .availability_zones.value}}
-  – {{.}}
+  - {{.}}
   {{end}}
-—
+---
 
 # TODO set mixedInstancesPolicy
 # TODO set warmPool
@@ -133,5 +140,5 @@ spec:
   rootVolumeType: gp2
   subnets:
   {{range .availability_zones.value}}
-  – utility-{{.}}
+  - {{.}}
   {{end}}

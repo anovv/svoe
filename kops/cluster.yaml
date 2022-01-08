@@ -1,0 +1,108 @@
+apiVersion: kops.k8s.io/v1alpha2
+kind: Cluster
+metadata:
+  name: apn1.k8s.local
+spec:
+  api:
+    loadBalancer:
+      class: Classic
+      type: Public
+  authorization:
+    rbac: {}
+  channel: stable
+  cloudProvider: aws
+  configBase: s3://dev-kops-s3/apn1.k8s.local
+  etcdClusters:
+  - cpuRequest: 200m
+    etcdMembers:
+    - encryptedVolume: true
+      instanceGroup: master-ap-northeast-1a
+      name: a
+    memoryRequest: 100Mi
+    name: main
+  - cpuRequest: 100m
+    etcdMembers:
+    - encryptedVolume: true
+      instanceGroup: master-ap-northeast-1a
+      name: a
+    memoryRequest: 100Mi
+    name: events
+  iam:
+    allowContainerRegistry: true
+    legacy: false
+  kubelet:
+    anonymousAuth: false
+  kubernetesVersion: 1.23.1
+  masterPublicName: api.apn1.k8s.local
+  networkCIDR: 172.20.0.0/16
+  networkID: vpc-03822c2081fa070b0
+  networking:
+    cilium: {}
+  nonMasqueradeCIDR: 100.64.0.0/10
+  sshAccess:
+  - 0.0.0.0/0
+  subnets:
+  - id: subnet-08da82d6214c82c18
+    name: ap-northeast-1a
+    type: Public
+    zone: ap-northeast-1a
+  topology:
+    dns:
+      type: Public
+    masters: public
+    nodes: public
+---
+apiVersion: kops.k8s.io/v1alpha2
+kind: InstanceGroup
+metadata:
+  labels:
+    kops.k8s.io/cluster: apn1.k8s.local
+  name: master-ap-northeast-1a
+spec:
+  machineType: t3.medium
+  maxSize: 1
+  minSize: 1
+  nodeLabels:
+    kops.k8s.io/instancegroup: master-ap-northeast-1a
+  role: Master
+  rootVolumeSize: 20
+  rootVolumeType: gp2
+  subnets:
+  - ap-northeast-1a
+---
+apiVersion: kops/v1alpha2
+kind: InstanceGroup
+metadata:
+  labels:
+    kops.k8s.io/cluster: apn1.k8s.local
+  name: nodes-on-demand
+spec:
+  machineType: t3.small
+  maxSize: 2
+  minSize: 1
+  nodeLabels:
+    kops.k8s.io/instancegroup: nodes-on-demand
+  role: Node
+  rootVolumeSize: 20
+  rootVolumeType: gp2
+  subnets:
+  - ap-northeast-1a
+---
+apiVersion: kops/v1alpha2
+kind: InstanceGroup
+metadata:
+  labels:
+    kops.k8s.io/cluster: apn1.k8s.local
+  name: nodes-spot
+spec:
+  machineType: t3.small
+  maxPrice: "0.0273"
+  maxSize: 2
+  minSize: 1
+  nodeLabels:
+    kops.k8s.io/instancegroup: nodes-spot
+  role: Node
+  rootVolumeSize: 20
+  rootVolumeType: gp2
+  subnets:
+  - ap-northeast-1a
