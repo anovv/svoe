@@ -34,6 +34,7 @@ CAs:
     cSMRi3Sf7586mmkMRUv3Mkt9ARLujsLeTZIgiTAPQXNmxFNZS1XGcSCggJs=
     -----END CERTIFICATE-----
 ClusterName: apn1.k8s.local
+DefaultMachineType: t3.small
 Hooks:
 - null
 - null

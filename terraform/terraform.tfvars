@@ -5,5 +5,5 @@ cidr            = "172.20.0.0/16"
 azs             = ["ap-northeast-1a"]
 private_subnets = []
 public_subnets  = ["172.20.32.0/19"]
-ingress_ips     = ["172.20.0.0/16"] # TODO ??
+ingress_ips     = ["0.0.0.0/0"] # TODO ?? security group ingress
 k8s_non_masquerade_cidr = "100.64.0.0/10"

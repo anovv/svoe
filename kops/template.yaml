@@ -6,9 +6,9 @@ metadata:
 spec:
   api:
     loadBalancer:
-      class: Classic
+#      class: Classic
       type: Public
-#      additionalSecurityGroups: ["{{.k8s_security_group_id.value}}"]
+      additionalSecurityGroups: ["{{.k8s_security_group_id.value}}"]
   authorization:
     rbac: {}
   channel: stable
@@ -21,6 +21,7 @@ spec:
     - instanceGroup: master-{{.}}
       name: {{. | replace $.region.value "" }}
       encryptedVolume: true
+#      volumeSize # TODO
   {{end}}
     name: main
     cpuRequest: 200m
@@ -30,6 +31,7 @@ spec:
     - instanceGroup: master-{{.}}
       name: {{. | replace $.region.value "" }}
       encryptedVolume: true
+      # volumeSize # TODO
   {{end}}
     name: events
     cpuRequest: 100m
@@ -42,15 +44,21 @@ spec:
   networkCIDR: {{.vpc_cidr_block.value}}
 #  kubeControllerManager:
 #    clusterCIDR: {{.vpc_cidr_block.value}}
-#  kubeProxy:
-#    clusterCIDR: {{.vpc_cidr_block.value}}
+  kubeProxy:
+##    clusterCIDR: {{.vpc_cidr_block.value}}
+    enabled: false # for cilium BPF
   networkID: {{.vpc_id.value}}
   kubelet:
-    anonymousAuth: false
+    anonymousAuth: false # TODO
   networking:
-    cilium: {}
+    cilium:
+      enableNodePort: true # BPF support
+#  networking:
+#    kubenet: {}
   nonMasqueradeCIDR: {{.k8s_non_masquerade_cidr.value}}
   sshAccess:
+  - 0.0.0.0/0
+  kubernetesApiAccess: # TODO should be set to ingress?
   - 0.0.0.0/0
   subnets:
   # Public subnets, one per AZ
@@ -122,23 +130,23 @@ spec:
 # TODO set mixedInstancesPolicy
 # TODO set warmPool
 # TODO set maxPrice by instance type/dynamically
-apiVersion: kops/v1alpha2
-kind: InstanceGroup
-metadata:
-  labels:
-    kops.k8s.io/cluster: {{.cluster_name.value}}
-  name: nodes-spot
-spec:
-  machineType: t3.small
-  maxPrice: "0.0273" # on-demand price
-  maxSize: 2
-  minSize: 1
-  nodeLabels:
-    kops.k8s.io/instancegroup: nodes-spot
-  role: Node
-  rootVolumeSize: 20
-  rootVolumeType: gp2
-  subnets:
-  {{range .availability_zones.value}}
-  - {{.}}
-  {{end}}
+#apiVersion: kops/v1alpha2
+#kind: InstanceGroup
+#metadata:
+#  labels:
+#    kops.k8s.io/cluster: {{.cluster_name.value}}
+#  name: nodes-spot
+#spec:
+#  machineType: t3.small
+#  maxPrice: "0.0273" # on-demand price
+#  maxSize: 2
+#  minSize: 1
+#  nodeLabels:
+#    kops.k8s.io/instancegroup: nodes-spot
+#  role: Node
+#  rootVolumeSize: 20
+#  rootVolumeType: gp2
+#  subnets:
+#  {{range .availability_zones.value}}
+#  - {{.}}
+#  {{end}}

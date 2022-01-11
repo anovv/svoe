@@ -36,3 +36,19 @@ Suggestions:
  * list nodes: kubectl get nodes --show-labels
  * ssh to the master: ssh -i ~/.ssh/id_rsa ubuntu@api.apn1.k8s.local
  * the ubuntu user is specific to Ubuntu. If not using Ubuntu please use the appropriate user based on your OS.
+
+for certs:
+
+https://stackoverflow.com/questions/46234295/kubectl-unable-to-connect-to-server-x509-certificate-signed-by-unknown-authori
+
+openssl.exe s_client -showcerts -connect elb.address:443
+Copy paste stuff starting from -----BEGIN CERTIFICATE----- to -----END CERTIFICATE----- (these lines included) into a new text file, say... myCert.crt If there are multiple entries, copy all of them.
+put in certificate-authority: myCert.crt
+
+or
+cluster:
+    remove cert and add
+    insecure-skip-tls-verify: true
+
+# Another example
+# https://managedkube.com/draft-posts/2018-07-07-how-i-use-kops.html

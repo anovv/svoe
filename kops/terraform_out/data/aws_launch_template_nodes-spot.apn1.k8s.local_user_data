@@ -135,7 +135,6 @@ containerd:
 docker:
   skipInstall: true
 kubeProxy:
-  clusterCIDR: 100.96.0.0/11
   cpuRequest: 100m
   hostnameOverride: '@aws'
   image: k8s.gcr.io/kube-proxy:v1.23.1
@@ -167,7 +166,7 @@ CloudProvider: aws
 ConfigBase: s3://dev-kops-s3/apn1.k8s.local
 InstanceGroupName: nodes-spot
 InstanceGroupRole: Node
-NodeupConfigHash: uBy+jd5rfokW9Q8nS9lyyOLEwEmA7g1FBZ3xxvuJV/s=
+NodeupConfigHash: Ci8zeBR6uRV8raune/nRBepS9geXQt+3LkawgDPbtj4=
 
 __EOF_KUBE_ENV
 

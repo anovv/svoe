@@ -203,6 +203,7 @@ kubeControllerManager:
 kubeProxy:
   clusterCIDR: 100.96.0.0/11
   cpuRequest: 100m
+  enabled: false
   hostnameOverride: '@aws'
   image: k8s.gcr.io/kube-proxy:v1.23.1
   logLevel: 2
@@ -258,7 +259,7 @@ CloudProvider: aws
 ConfigBase: s3://dev-kops-s3/apn1.k8s.local
 InstanceGroupName: master-ap-northeast-1a
 InstanceGroupRole: Master
-NodeupConfigHash: G2PexZ7rZwQCfdFOSq1xeeCY9hstCwqA4sCCuf8qW/k=
+NodeupConfigHash: 0Q77ACE6lmqig1932jx+A4umAB6sXd/AgCgiuTzMQKU=
 
 __EOF_KUBE_ENV
 

@@ -4,7 +4,7 @@ locals {
   master_security_group_ids    = [aws_security_group.masters-apn1-k8s-local.id]
   masters_role_arn             = aws_iam_role.masters-apn1-k8s-local.arn
   masters_role_name            = aws_iam_role.masters-apn1-k8s-local.name
-  node_autoscaling_group_ids   = [aws_autoscaling_group.nodes-on-demand-apn1-k8s-local.id, aws_autoscaling_group.nodes-spot-apn1-k8s-local.id]
+  node_autoscaling_group_ids   = [aws_autoscaling_group.nodes-on-demand-apn1-k8s-local.id]
   node_security_group_ids      = [aws_security_group.nodes-apn1-k8s-local.id]
   node_subnet_ids              = ["subnet-08da82d6214c82c18"]
   nodes_role_arn               = aws_iam_role.nodes-apn1-k8s-local.arn
@@ -36,7 +36,7 @@ output "masters_role_name" {
 }
 
 output "node_autoscaling_group_ids" {
-  value = [aws_autoscaling_group.nodes-on-demand-apn1-k8s-local.id, aws_autoscaling_group.nodes-spot-apn1-k8s-local.id]
+  value = [aws_autoscaling_group.nodes-on-demand-apn1-k8s-local.id]
 }
 
 output "node_security_group_ids" {
@@ -204,60 +204,6 @@ resource "aws_autoscaling_group" "nodes-on-demand-apn1-k8s-local" {
   vpc_zone_identifier = ["subnet-08da82d6214c82c18"]
 }
 
-resource "aws_autoscaling_group" "nodes-spot-apn1-k8s-local" {
-  enabled_metrics = ["GroupDesiredCapacity", "GroupInServiceInstances", "GroupMaxSize", "GroupMinSize", "GroupPendingInstances", "GroupStandbyInstances", "GroupTerminatingInstances", "GroupTotalInstances"]
-  launch_template {
-    id      = aws_launch_template.nodes-spot-apn1-k8s-local.id
-    version = aws_launch_template.nodes-spot-apn1-k8s-local.latest_version
-  }
-  max_size              = 2
-  metrics_granularity   = "1Minute"
-  min_size              = 1
-  name                  = "nodes-spot.apn1.k8s.local"
-  protect_from_scale_in = false
-  tag {
-    key                 = "KubernetesCluster"
-    propagate_at_launch = true
-    value               = "apn1.k8s.local"
-  }
-  tag {
-    key                 = "Name"
-    propagate_at_launch = true
-    value               = "nodes-spot.apn1.k8s.local"
-  }
-  tag {
-    key                 = "k8s.io/cluster-autoscaler/node-template/label/kops.k8s.io/instancegroup"
-    propagate_at_launch = true
-    value               = "nodes-spot"
-  }
-  tag {
-    key                 = "k8s.io/cluster-autoscaler/node-template/label/kubernetes.io/role"
-    propagate_at_launch = true
-    value               = "node"
-  }
-  tag {
-    key                 = "k8s.io/cluster-autoscaler/node-template/label/node-role.kubernetes.io/node"
-    propagate_at_launch = true
-    value               = ""
-  }
-  tag {
-    key                 = "k8s.io/role/node"
-    propagate_at_launch = true
-    value               = "1"
-  }
-  tag {
-    key                 = "kops.k8s.io/instancegroup"
-    propagate_at_launch = true
-    value               = "nodes-spot"
-  }
-  tag {
-    key                 = "kubernetes.io/cluster/apn1.k8s.local"
-    propagate_at_launch = true
-    value               = "owned"
-  }
-  vpc_zone_identifier = ["subnet-08da82d6214c82c18"]
-}
-
 resource "aws_ebs_volume" "a-etcd-events-apn1-k8s-local" {
   availability_zone = "ap-northeast-1a"
   encrypted         = true
@@ -307,7 +253,7 @@ resource "aws_elb" "api-apn1-k8s-local" {
     lb_protocol       = "TCP"
   }
   name            = "api-apn1-k8s-local-q7d8vm"
-  security_groups = [aws_security_group.api-elb-apn1-k8s-local.id]
+  security_groups = [aws_security_group.api-elb-apn1-k8s-local.id, "sg-00b835e40b921dde8"]
   subnets         = ["subnet-08da82d6214c82c18"]
   tags = {
     "KubernetesCluster"                    = "apn1.k8s.local"
@@ -535,86 +481,6 @@ resource "aws_launch_template" "nodes-on-demand-apn1-k8s-local" {
   user_data = filebase64("${path.module}/data/aws_launch_template_nodes-on-demand.apn1.k8s.local_user_data")
 }
 
-resource "aws_launch_template" "nodes-spot-apn1-k8s-local" {
-  block_device_mappings {
-    device_name = "/dev/sda1"
-    ebs {
-      delete_on_termination = true
-      encrypted             = true
-      volume_size           = 20
-      volume_type           = "gp2"
-    }
-  }
-  iam_instance_profile {
-    name = aws_iam_instance_profile.nodes-apn1-k8s-local.id
-  }
-  image_id = "ami-08455f1340543554c"
-  instance_market_options {
-    market_type = "spot"
-    spot_options {
-      max_price = "0.0273"
-    }
-  }
-  instance_type = "t3.small"
-  key_name      = aws_key_pair.kubernetes-apn1-k8s-local-aac13af0a95e65bc0e6a0cad89851058.id
-  lifecycle {
-    create_before_destroy = true
-  }
-  metadata_options {
-    http_endpoint               = "enabled"
-    http_protocol_ipv6          = "disabled"
-    http_put_response_hop_limit = 1
-    http_tokens                 = "optional"
-  }
-  monitoring {
-    enabled = false
-  }
-  name = "nodes-spot.apn1.k8s.local"
-  network_interfaces {
-    associate_public_ip_address = true
-    delete_on_termination       = true
-    ipv6_address_count          = 0
-    security_groups             = [aws_security_group.nodes-apn1-k8s-local.id]
-  }
-  tag_specifications {
-    resource_type = "instance"
-    tags = {
-      "KubernetesCluster"                                                          = "apn1.k8s.local"
-      "Name"                                                                       = "nodes-spot.apn1.k8s.local"
-      "k8s.io/cluster-autoscaler/node-template/label/kops.k8s.io/instancegroup"    = "nodes-spot"
-      "k8s.io/cluster-autoscaler/node-template/label/kubernetes.io/role"           = "node"
-      "k8s.io/cluster-autoscaler/node-template/label/node-role.kubernetes.io/node" = ""
-      "k8s.io/role/node"                                                           = "1"
-      "kops.k8s.io/instancegroup"                                                  = "nodes-spot"
-      "kubernetes.io/cluster/apn1.k8s.local"                                       = "owned"
-    }
-  }
-  tag_specifications {
-    resource_type = "volume"
-    tags = {
-      "KubernetesCluster"                                                          = "apn1.k8s.local"
-      "Name"                                                                       = "nodes-spot.apn1.k8s.local"
-      "k8s.io/cluster-autoscaler/node-template/label/kops.k8s.io/instancegroup"    = "nodes-spot"
-      "k8s.io/cluster-autoscaler/node-template/label/kubernetes.io/role"           = "node"
-      "k8s.io/cluster-autoscaler/node-template/label/node-role.kubernetes.io/node" = ""
-      "k8s.io/role/node"                                                           = "1"
-      "kops.k8s.io/instancegroup"                                                  = "nodes-spot"
-      "kubernetes.io/cluster/apn1.k8s.local"                                       = "owned"
-    }
-  }
-  tags = {
-    "KubernetesCluster"                                                          = "apn1.k8s.local"
-    "Name"                                                                       = "nodes-spot.apn1.k8s.local"
-    "k8s.io/cluster-autoscaler/node-template/label/kops.k8s.io/instancegroup"    = "nodes-spot"
-    "k8s.io/cluster-autoscaler/node-template/label/kubernetes.io/role"           = "node"
-    "k8s.io/cluster-autoscaler/node-template/label/node-role.kubernetes.io/node" = ""
-    "k8s.io/role/node"                                                           = "1"
-    "kops.k8s.io/instancegroup"                                                  = "nodes-spot"
-    "kubernetes.io/cluster/apn1.k8s.local"                                       = "owned"
-  }
-  user_data = filebase64("${path.module}/data/aws_launch_template_nodes-spot.apn1.k8s.local_user_data")
-}
-
 resource "aws_s3_bucket_object" "apn1-k8s-local-addons-aws-ebs-csi-driver-addons-k8s-io-k8s-1-17" {
   bucket                 = "dev-kops-s3"
   content                = file("${path.module}/data/aws_s3_bucket_object_apn1.k8s.local-addons-aws-ebs-csi-driver.addons.k8s.io-k8s-1.17_content")
@@ -767,14 +633,6 @@ resource "aws_s3_bucket_object" "nodeupconfig-nodes-on-demand" {
   server_side_encryption = "AES256"
 }
 
-resource "aws_s3_bucket_object" "nodeupconfig-nodes-spot" {
-  bucket                 = "dev-kops-s3"
-  content                = file("${path.module}/data/aws_s3_bucket_object_nodeupconfig-nodes-spot_content")
-  key                    = "apn1.k8s.local/igconfig/node/nodes-spot/nodeupconfig.yaml"
-  provider               = aws.files
-  server_side_encryption = "AES256"
-}
-
 resource "aws_security_group" "api-elb-apn1-k8s-local" {
   description = "Security group for api ELB"
   name        = "api-elb.apn1.k8s.local"
@@ -823,6 +681,15 @@ resource "aws_security_group_rule" "from-0-0-0-0--0-ingress-tcp-22to22-nodes-apn
   protocol          = "tcp"
   security_group_id = aws_security_group.nodes-apn1-k8s-local.id
   to_port           = 22
+  type              = "ingress"
+}
+
+resource "aws_security_group_rule" "from-0-0-0-0--0-ingress-tcp-443to443-api-elb-apn1-k8s-local" {
+  cidr_blocks       = ["0.0.0.0/0"]
+  from_port         = 443
+  protocol          = "tcp"
+  security_group_id = aws_security_group.api-elb-apn1-k8s-local.id
+  to_port           = 443
   type              = "ingress"
 }
 
@@ -950,6 +817,15 @@ resource "aws_security_group_rule" "https-elb-to-master" {
   source_security_group_id = aws_security_group.api-elb-apn1-k8s-local.id
   to_port                  = 443
   type                     = "ingress"
+}
+
+resource "aws_security_group_rule" "icmp-pmtu-api-elb-0-0-0-0--0" {
+  cidr_blocks       = ["0.0.0.0/0"]
+  from_port         = 3
+  protocol          = "icmp"
+  security_group_id = aws_security_group.api-elb-apn1-k8s-local.id
+  to_port           = 4
+  type              = "ingress"
 }
 
 terraform {

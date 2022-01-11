@@ -1,12 +1,13 @@
 apiVersion: kops.k8s.io/v1alpha2
 kind: Cluster
 metadata:
-  creationTimestamp: null
-  generation: 1
+  creationTimestamp: "2022-01-11T07:35:09Z"
   name: apn1.k8s.local
 spec:
   api:
     loadBalancer:
+      additionalSecurityGroups:
+      - sg-00b835e40b921dde8
       class: Classic
       type: Public
   authorization:
@@ -134,6 +135,7 @@ spec:
   kubeProxy:
     clusterCIDR: 100.96.0.0/11
     cpuRequest: 100m
+    enabled: false
     hostnameOverride: '@aws'
     image: k8s.gcr.io/kube-proxy:v1.23.1
     logLevel: 2
@@ -161,6 +163,8 @@ spec:
     nonMasqueradeCIDR: 100.64.0.0/10
     podManifestPath: /etc/kubernetes/manifests
     protectKernelDefaults: true
+  kubernetesApiAccess:
+  - 0.0.0.0/0
   kubernetesVersion: 1.23.1
   masterInternalName: api.internal.apn1.k8s.local
   masterKubelet:
@@ -205,6 +209,7 @@ spec:
       enableBPFMasquerade: false
       enableEndpointHealthChecking: true
       enableL7Proxy: true
+      enableNodePort: true
       enableRemoteNodeIdentity: true
       hubble:
         enabled: false

@@ -5,6 +5,8 @@ metadata:
 spec:
   api:
     loadBalancer:
+      additionalSecurityGroups:
+      - sg-00b835e40b921dde8
       class: Classic
       type: Public
   authorization:
@@ -30,14 +32,19 @@ spec:
   iam:
     allowContainerRegistry: true
     legacy: false
+  kubeProxy:
+    enabled: false
   kubelet:
     anonymousAuth: false
+  kubernetesApiAccess:
+  - 0.0.0.0/0
   kubernetesVersion: 1.23.1
   masterPublicName: api.apn1.k8s.local
   networkCIDR: 172.20.0.0/16
   networkID: vpc-03822c2081fa070b0
   networking:
-    cilium: {}
+    cilium:
+      enableNodePort: true
   nonMasqueradeCIDR: 100.64.0.0/10
   sshAccess:
   - 0.0.0.0/0
@@ -82,25 +89,6 @@ spec:
   minSize: 1
   nodeLabels:
     kops.k8s.io/instancegroup: nodes-on-demand
-  role: Node
-  rootVolumeSize: 20
-  rootVolumeType: gp2
-  subnets:
-  - ap-northeast-1a
----
-apiVersion: kops/v1alpha2
-kind: InstanceGroup
-metadata:
-  labels:
-    kops.k8s.io/cluster: apn1.k8s.local
-  name: nodes-spot
-spec:
-  machineType: t3.small
-  maxPrice: "0.0273"
-  maxSize: 2
-  minSize: 1
-  nodeLabels:
-    kops.k8s.io/instancegroup: nodes-spot
   role: Node
   rootVolumeSize: 20
   rootVolumeType: gp2

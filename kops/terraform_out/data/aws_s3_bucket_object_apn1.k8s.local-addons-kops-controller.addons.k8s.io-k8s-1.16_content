@@ -1,7 +1,7 @@
 apiVersion: v1
 data:
   config.yaml: |
-    {"cloud":"aws","configBase":"s3://dev-kops-s3/apn1.k8s.local","server":{"Listen":":3988","provider":{"aws":{"nodesRoles":["nodes.apn1.k8s.local"],"Region":"ap-northeast-1"}},"serverKeyPath":"/etc/kubernetes/kops-controller/pki/kops-controller.key","serverCertificatePath":"/etc/kubernetes/kops-controller/pki/kops-controller.crt","caBasePath":"/etc/kubernetes/kops-controller/pki","signingCAs":["kubernetes-ca"],"certNames":["kubelet","kubelet-server","kube-proxy"]}}
+    {"cloud":"aws","configBase":"s3://dev-kops-s3/apn1.k8s.local","server":{"Listen":":3988","provider":{"aws":{"nodesRoles":["nodes.apn1.k8s.local"],"Region":"ap-northeast-1"}},"serverKeyPath":"/etc/kubernetes/kops-controller/pki/kops-controller.key","serverCertificatePath":"/etc/kubernetes/kops-controller/pki/kops-controller.crt","caBasePath":"/etc/kubernetes/kops-controller/pki","signingCAs":["kubernetes-ca"],"certNames":["kubelet","kubelet-server"]}}
 kind: ConfigMap
 metadata:
   creationTimestamp: null

@@ -47,13 +47,13 @@ data:
   enable-ipv6: "false"
   enable-ipv6-masquerade: "true"
   enable-l7-proxy: "true"
-  enable-node-port: "false"
+  enable-node-port: "true"
   enable-remote-node-identity: "true"
   identity-allocation-mode: crd
   identity-change-grace-period: 5s
   install-iptables-rules: "true"
   ipam: kubernetes
-  kube-proxy-replacement: partial
+  kube-proxy-replacement: strict
   masquerade: "true"
   monitor-aggregation: medium
   preallocate-bpf-maps: "false"
