@@ -5,10 +5,10 @@ metadata:
   name: {{.cluster_name.value}}
 spec:
   api:
-    loadBalancer:
+    dns: {}
+#    loadBalancer:
 #      class: Classic
-      type: Public
-      additionalSecurityGroups: ["{{.k8s_security_group_id.value}}"]
+#      type: Public
   authorization:
     rbac: {}
   channel: stable

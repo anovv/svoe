@@ -40,17 +40,21 @@ output "availability_zones" {
 }
 
 output "kops_s3_bucket_name" {
-  value = module.apn1_kops_resources.kops_s3_bucket_name
+  value = module.kops_resources.kops_s3_bucket_name
 }
 
-output "k8s_security_group_id" {
-  value = module.apn1_kops_resources.k8s_security_group_id
+output "kops_hosted_zone_name_severs" {
+  value = module.kops_resources.kops_hosted_zone_name_severs
 }
+
+#output "k8s_security_group_id" {
+#  value = module.apn1_kops_resources.k8s_security_group_id
+#}
 
 output "k8s_non_masquerade_cidr" {
   value = var.k8s_non_masquerade_cidr
 }
 
 output "cluster_name" {
-  value = var.cluster_name
+  value = local.cluster_name
 }

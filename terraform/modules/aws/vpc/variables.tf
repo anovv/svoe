@@ -14,17 +14,17 @@ variable "cidr" {
 }
 
 variable "azs" {
-  type        = list
+  type        = list(any)
   description = "Availability zones list"
 }
 
 variable "private_subnets" {
-  type        = list
+  type        = list(any)
   description = "List of private subnets in the vpc"
 }
 
 variable "public_subnets" {
-  type        = list
+  type        = list(any)
   description = "Public subnets list"
 }
 

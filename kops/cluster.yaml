@@ -1,19 +1,15 @@
 apiVersion: kops.k8s.io/v1alpha2
 kind: Cluster
 metadata:
-  name: apn1.k8s.local
+  name: apn1.k8s.dev.svoe.link
 spec:
   api:
-    loadBalancer:
-      additionalSecurityGroups:
-      - sg-00b835e40b921dde8
-      class: Classic
-      type: Public
+    dns: {}
   authorization:
     rbac: {}
   channel: stable
   cloudProvider: aws
-  configBase: s3://dev-kops-s3/apn1.k8s.local
+  configBase: s3://dev-kops-s3/apn1.k8s.dev.svoe.link
   etcdClusters:
   - cpuRequest: 200m
     etcdMembers:
@@ -39,7 +35,7 @@ spec:
   kubernetesApiAccess:
   - 0.0.0.0/0
   kubernetesVersion: 1.23.1
-  masterPublicName: api.apn1.k8s.local
+  masterPublicName: api.apn1.k8s.dev.svoe.link
   networkCIDR: 172.20.0.0/16
   networkID: vpc-03822c2081fa070b0
   networking:
@@ -63,7 +59,7 @@ apiVersion: kops.k8s.io/v1alpha2
 kind: InstanceGroup
 metadata:
   labels:
-    kops.k8s.io/cluster: apn1.k8s.local
+    kops.k8s.io/cluster: apn1.k8s.dev.svoe.link
   name: master-ap-northeast-1a
 spec:
   machineType: t3.medium
@@ -81,7 +77,7 @@ apiVersion: kops/v1alpha2
 kind: InstanceGroup
 metadata:
   labels:
-    kops.k8s.io/cluster: apn1.k8s.local
+    kops.k8s.io/cluster: apn1.k8s.dev.svoe.link
   name: nodes-on-demand
 spec:
   machineType: t3.small

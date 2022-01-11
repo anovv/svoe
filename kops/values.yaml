@@ -8,7 +8,7 @@ availability_zones:
 cluster_name:
   sensitive: false
   type: string
-  value: apn1.k8s.local
+  value: apn1.k8s.dev.svoe.link
 default_security_group_id:
   sensitive: false
   type: string
@@ -17,10 +17,16 @@ k8s_non_masquerade_cidr:
   sensitive: false
   type: string
   value: 100.64.0.0/10
-k8s_security_group_id:
+kops_hosted_zone_name_severs:
   sensitive: false
-  type: string
-  value: sg-00b835e40b921dde8
+  type:
+    - list
+    - string
+  value:
+    - ns-1243.awsdns-27.org
+    - ns-1567.awsdns-03.co.uk
+    - ns-481.awsdns-60.com
+    - ns-906.awsdns-49.net
 kops_s3_bucket_name:
   sensitive: false
   type: string

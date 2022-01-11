@@ -1,15 +1,11 @@
 apiVersion: kops.k8s.io/v1alpha2
 kind: Cluster
 metadata:
-  creationTimestamp: "2022-01-11T07:35:09Z"
-  name: apn1.k8s.local
+  creationTimestamp: "2022-01-11T14:33:30Z"
+  name: apn1.k8s.dev.svoe.link
 spec:
   api:
-    loadBalancer:
-      additionalSecurityGroups:
-      - sg-00b835e40b921dde8
-      class: Classic
-      type: Public
+    dns: {}
   authorization:
     rbac: {}
   channel: stable
@@ -20,17 +16,18 @@ spec:
     manageStorageClasses: true
   cloudProvider: aws
   clusterDNSDomain: cluster.local
-  configBase: s3://dev-kops-s3/apn1.k8s.local
-  configStore: s3://dev-kops-s3/apn1.k8s.local
+  configBase: s3://dev-kops-s3/apn1.k8s.dev.svoe.link
+  configStore: s3://dev-kops-s3/apn1.k8s.dev.svoe.link
   containerRuntime: containerd
   containerd:
     logLevel: info
     version: 1.4.12
+  dnsZone: Z0884235AI0F6QJ3XB7D
   docker:
     skipInstall: true
   etcdClusters:
   - backups:
-      backupStore: s3://dev-kops-s3/apn1.k8s.local/backups/etcd/main
+      backupStore: s3://dev-kops-s3/apn1.k8s.dev.svoe.link/backups/etcd/main
     cpuRequest: 200m
     enableEtcdTLS: true
     enableTLSAuth: true
@@ -43,7 +40,7 @@ spec:
     provider: Manager
     version: 3.5.0
   - backups:
-      backupStore: s3://dev-kops-s3/apn1.k8s.local/backups/etcd/events
+      backupStore: s3://dev-kops-s3/apn1.k8s.dev.svoe.link/backups/etcd/events
     cpuRequest: 100m
     enableEtcdTLS: true
     enableTLSAuth: true
@@ -60,7 +57,7 @@ spec:
   iam:
     allowContainerRegistry: true
     legacy: false
-  keyStore: s3://dev-kops-s3/apn1.k8s.local/pki
+  keyStore: s3://dev-kops-s3/apn1.k8s.dev.svoe.link/pki
   kubeAPIServer:
     allowPrivileged: true
     anonymousAuth: false
@@ -99,8 +96,8 @@ spec:
     requestheaderUsernameHeaders:
     - X-Remote-User
     securePort: 443
-    serviceAccountIssuer: https://api.internal.apn1.k8s.local
-    serviceAccountJWKSURI: https://api.internal.apn1.k8s.local/openid/v1/jwks
+    serviceAccountIssuer: https://api.internal.apn1.k8s.dev.svoe.link
+    serviceAccountJWKSURI: https://api.internal.apn1.k8s.dev.svoe.link/openid/v1/jwks
     serviceClusterIPRange: 100.64.0.0/13
     storageBackend: etcd3
   kubeControllerManager:
@@ -108,7 +105,7 @@ spec:
     attachDetachReconcileSyncPeriod: 1m0s
     cloudProvider: aws
     clusterCIDR: 100.96.0.0/11
-    clusterName: apn1.k8s.local
+    clusterName: apn1.k8s.dev.svoe.link
     configureCloudRoutes: false
     featureGates:
       CSIMigrationAWS: "true"
@@ -166,7 +163,7 @@ spec:
   kubernetesApiAccess:
   - 0.0.0.0/0
   kubernetesVersion: 1.23.1
-  masterInternalName: api.internal.apn1.k8s.local
+  masterInternalName: api.internal.apn1.k8s.dev.svoe.link
   masterKubelet:
     anonymousAuth: false
     cgroupDriver: systemd
@@ -187,7 +184,7 @@ spec:
     podManifestPath: /etc/kubernetes/manifests
     protectKernelDefaults: true
     registerSchedulable: false
-  masterPublicName: api.apn1.k8s.local
+  masterPublicName: api.apn1.k8s.dev.svoe.link
   networkCIDR: 172.20.0.0/16
   networkID: vpc-03822c2081fa070b0
   networking:
@@ -224,7 +221,7 @@ spec:
       version: v1.10.3
   nonMasqueradeCIDR: 100.64.0.0/10
   podCIDR: 100.96.0.0/11
-  secretStore: s3://dev-kops-s3/apn1.k8s.local/secrets
+  secretStore: s3://dev-kops-s3/apn1.k8s.dev.svoe.link/secrets
   serviceClusterIPRange: 100.64.0.0/13
   sshAccess:
   - 0.0.0.0/0

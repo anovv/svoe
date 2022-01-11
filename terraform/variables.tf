@@ -3,6 +3,11 @@ variable "region" {
   description = "AWS region"
 }
 
+variable "vpc_name" {
+  type        = string
+  description = "VPC name"
+}
+
 variable "environment" {
   type        = string
   description = "Env"
@@ -28,17 +33,22 @@ variable "public_subnets" {
   description = "Public subnets list"
 }
 
-variable "ingress_ips" {
-  type        = list(any)
-  description = "List of Ingress IPs for security group"
-}
+#variable "ingress_ips" {
+#  type        = list(any)
+#  description = "List of Ingress IPs for security group"
+#}
 
 variable "k8s_non_masquerade_cidr" {
   type        = string
   description = "nonMasqueradeCIDR for cluster"
 }
 
-variable "cluster_name" {
+variable "cluster_name_prefix" {
   type        = string
-  description = "FQDN cluster name"
+  description = "Name prefix. Full name is {prefix}.{environment}.{domain}"
+}
+
+variable "domain" {
+  type        = string
+  description = "Domain to host cluster"
 }
