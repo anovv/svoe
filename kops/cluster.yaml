@@ -34,7 +34,7 @@ spec:
     anonymousAuth: false
   kubernetesApiAccess:
   - 0.0.0.0/0
-  kubernetesVersion: 1.23.1
+  kubernetesVersion: 1.22.5
   masterPublicName: api.apn1.k8s.dev.svoe.link
   networkCIDR: 172.20.0.0/16
   networkID: vpc-03822c2081fa070b0

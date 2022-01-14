@@ -6,9 +6,6 @@ metadata:
 spec:
   api:
     dns: {}
-#    loadBalancer:
-#      class: Classic
-#      type: Public
   authorization:
     rbac: {}
   channel: stable
@@ -39,26 +36,21 @@ spec:
   iam:
     allowContainerRegistry: true
     legacy: false
-  kubernetesVersion: 1.23.1
+  kubernetesVersion: 1.22.5
   masterPublicName: api.{{.cluster_name.value}}
   networkCIDR: {{.vpc_cidr_block.value}}
-#  kubeControllerManager:
-#    clusterCIDR: {{.vpc_cidr_block.value}}
   kubeProxy:
-##    clusterCIDR: {{.vpc_cidr_block.value}}
     enabled: false # for cilium BPF
   networkID: {{.vpc_id.value}}
   kubelet:
-    anonymousAuth: false # TODO
+    anonymousAuth: false
   networking:
     cilium:
       enableNodePort: true # BPF support
-#  networking:
-#    kubenet: {}
   nonMasqueradeCIDR: {{.k8s_non_masquerade_cidr.value}}
   sshAccess:
   - 0.0.0.0/0
-  kubernetesApiAccess: # TODO should be set to ingress?
+  kubernetesApiAccess:
   - 0.0.0.0/0
   subnets:
   # Public subnets, one per AZ

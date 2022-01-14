@@ -8,11 +8,11 @@ STATE="s3://$(echo $TF_OUTPUT_JSON | jq -r .kops_s3_bucket_name.value)"
 echo "Cluster "$CLUSTER_NAME
 echo "Terraform input values in values.yaml"
 
-kops toolbox template --name ${CLUSTER_NAME} --values values.yaml --template template.yaml --format-yaml > cluster.yaml
-echo "Cluster config in cluster.yaml"
-
 kops delete cluster --state $STATE --name $CLUSTER_NAME --yes
 echo "Cleared old state at "$STATE
+
+kops toolbox template --name ${CLUSTER_NAME} --values values.yaml --template template.yaml --format-yaml > cluster.yaml
+echo "Cluster config in cluster.yaml"
 
 kops replace -f cluster.yaml --state $STATE --name $CLUSTER_NAME --force
 echo "Kops state moved to "$STATE

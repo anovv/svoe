@@ -1,7 +1,7 @@
 apiVersion: kops.k8s.io/v1alpha2
 kind: Cluster
 metadata:
-  creationTimestamp: "2022-01-11T14:33:30Z"
+  creationTimestamp: "2022-01-12T14:44:08Z"
   name: apn1.k8s.dev.svoe.link
 spec:
   api:
@@ -81,7 +81,7 @@ spec:
     - https://127.0.0.1:4001
     etcdServersOverrides:
     - /events#https://127.0.0.1:4002
-    image: k8s.gcr.io/kube-apiserver:v1.23.1
+    image: k8s.gcr.io/kube-apiserver:v1.22.5
     kubeletPreferredAddressTypes:
     - InternalIP
     - Hostname
@@ -109,7 +109,7 @@ spec:
     configureCloudRoutes: false
     featureGates:
       CSIMigrationAWS: "true"
-    image: k8s.gcr.io/kube-controller-manager:v1.23.1
+    image: k8s.gcr.io/kube-controller-manager:v1.22.5
     leaderElection:
       leaderElect: true
     logLevel: 2
@@ -134,10 +134,10 @@ spec:
     cpuRequest: 100m
     enabled: false
     hostnameOverride: '@aws'
-    image: k8s.gcr.io/kube-proxy:v1.23.1
+    image: k8s.gcr.io/kube-proxy:v1.22.5
     logLevel: 2
   kubeScheduler:
-    image: k8s.gcr.io/kube-scheduler:v1.23.1
+    image: k8s.gcr.io/kube-scheduler:v1.22.5
     leaderElection:
       leaderElect: true
     logLevel: 2
@@ -162,7 +162,7 @@ spec:
     protectKernelDefaults: true
   kubernetesApiAccess:
   - 0.0.0.0/0
-  kubernetesVersion: 1.23.1
+  kubernetesVersion: 1.22.5
   masterInternalName: api.internal.apn1.k8s.dev.svoe.link
   masterKubelet:
     anonymousAuth: false

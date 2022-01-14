@@ -24,3 +24,4 @@ cryptostore.log*
 
 *.terraform/*
 *.terraform.*
+kops/terraform_out/

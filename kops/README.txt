@@ -52,3 +52,13 @@ cluster:
 
 # Another example
 # https://managedkube.com/draft-posts/2018-07-07-how-i-use-kops.html
+
+# TODO fix health check for kube-scheduler
+# TODO use port: 10259 and scheme: HTTPS
+# TODO or use k8s 1.22.* version
+# https://github.com/kubernetes-sigs/kubespray/issues/6506
+# https://github.com/kubernetes/kubernetes/pull/93208/files
+
+# TODO for cilium:
+# DNS records show up after some time, cilium-controller fails and waits long to restart
+# need to ssh and restart cilium-controller pod

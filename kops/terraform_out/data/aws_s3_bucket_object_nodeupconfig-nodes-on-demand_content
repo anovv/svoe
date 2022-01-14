@@ -1,40 +1,40 @@
 Assets:
   amd64:
-  - 7ff47abf62096a41005d18c6d482cf73f26b613854173327fa9f2b98720804d4@https://storage.googleapis.com/kubernetes-release/release/v1.23.1/bin/linux/amd64/kubelet
-  - 156fd5e7ebbedf3c482fd274089ad75a448b04cf42bc53f370e4e4ea628f705e@https://storage.googleapis.com/kubernetes-release/release/v1.23.1/bin/linux/amd64/kubectl
+  - 2be340f236a25881969eaa7d58b2279a4e31dc393cab289a74c78c0c37ba2154@https://storage.googleapis.com/kubernetes-release/release/v1.22.5/bin/linux/amd64/kubelet
+  - fcb54488199c5340ff1bc0e8641d0adacb27bb18d87d0899a45ddbcc45468611@https://storage.googleapis.com/kubernetes-release/release/v1.22.5/bin/linux/amd64/kubectl
   - 962100bbc4baeaaa5748cdbfce941f756b1531c2eadb290129401498bfac21e7@https://storage.googleapis.com/k8s-artifacts-cni/release/v0.9.1/cni-plugins-linux-amd64-v0.9.1.tgz
   - f6120552408175ca332fd3b5d31c5edd115d8426d6731664e4ea3951c5eee3b4@https://github.com/containerd/containerd/releases/download/v1.4.12/cri-containerd-cni-1.4.12-linux-amd64.tar.gz
   arm64:
-  - c24e4ab211507a39141d227595610383f7c5686cae3795b7d75eebbce8606f3d@https://storage.googleapis.com/kubernetes-release/release/v1.23.1/bin/linux/arm64/kubelet
-  - c0c24c7f6a974390e15148a575c84878e925f32328ff96ae173ec762678e4524@https://storage.googleapis.com/kubernetes-release/release/v1.23.1/bin/linux/arm64/kubectl
+  - e68536cff9172d1562edddd7194d20302472a064009bf7c0ed8d79d030cb61aa@https://storage.googleapis.com/kubernetes-release/release/v1.22.5/bin/linux/arm64/kubelet
+  - a122ef299d75c0bec1dc1e28670d358e13743144e68223c8178462ba5c436e1d@https://storage.googleapis.com/kubernetes-release/release/v1.22.5/bin/linux/arm64/kubectl
   - ef17764ffd6cdcb16d76401bac1db6acc050c9b088f1be5efa0e094ea3b01df0@https://storage.googleapis.com/k8s-artifacts-cni/release/v0.9.1/cni-plugins-linux-arm64-v0.9.1.tgz
   - 87a4219c54552797ffd38790b72832372a90eceb7c8e451c36a682093d57dae6@https://download.docker.com/linux/static/stable/aarch64/docker-20.10.11.tgz
 CAs:
   kubernetes-ca: |
     -----BEGIN CERTIFICATE-----
-    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
+    MIIC+DCCAeCgAwIBAgIMFsmNGC0PDMhnlfvXMA0GCSqGSIb3DQEBCwUAMBgxFjAU
+    BgNVBAMTDWt1YmVybmV0ZXMtY2EwHhcNMjIwMTEwMTQ0NDM0WhcNMzIwMTEwMTQ0
+    NDM0WjAYMRYwFAYDVQQDEw1rdWJlcm5ldGVzLWNhMIIBIjANBgkqhkiG9w0BAQEF
+    AAOCAQ8AMIIBCgKCAQEAy033fKf3H6WKbstPLS3cz12XSHJRgbJ1P7Tyn+0MGheT
+    pfv4YZBRvFWEGLX6M9tB4/ubWDoHGKYtl5QRdvGa7GVxxJyyiE0BFRBjMMaex88J
+    QuGaVPqMHUFN/qHaBlA+KlOsLAmTDCIiAZ26K6I7Kf7VkGIvwHCBp89hlG/j0s+6
+    0GhcrAI0CxNLL0WwqzMNkcpAhXp+GA7/SxX9h7XXq4M0wszX63JpxqdmniP+1mE/
+    7F6KXHgB0lcyrcx0MKjrVjgcVUO8Lk9PKtPQ1woNLZ938hxodXbvpXZRm2mhz+n1
+    EARJjcwToOaQT+i8kMguJ8RgdZAwS6KMAOrs4RoBkwIDAQABo0IwQDAOBgNVHQ8B
+    Af8EBAMCAQYwDwYDVR0TAQH/BAUwAwEB/zAdBgNVHQ4EFgQUa90+bhvlw8BTnnNE
+    VFpwvD+TMvcwDQYJKoZIhvcNAQELBQADggEBAL+YujRY2KHtVI9Tn1+Wl+OvsXQh
+    pwOZplCVQIrsYLrzvnbQ7pDfz7IcWktVkR/RxWpJEu/wSjy8vQQUI7CtzEOFzGgO
+    Ew7EUxAJSXgXbdPCxhKoo6UBu4oLfrzJlBroucFnlrkftt8Vq8xtgMpggB67HHcJ
+    IHIT2FXf7jZurVJuZBOGDf8ubnTlAkuPID2xGa8fKxBrlADV0lbow+pfZLpqA7mU
+    FMsX4j41YFyc0XmKxUUjWgzWsHxqIf5JrFOkObmFwD7Pjs7/SGW1XDS9mWVo4i9j
+    12kZxgwa5dAMjUZIWXLyXV5zQnCxNaBqiBcqw7EGwx+oaWs3UN/gjADG1WI=
     -----END CERTIFICATE-----
 ClusterName: apn1.k8s.dev.svoe.link
 Hooks:
 - null
 - null
 KeypairIDs:
-  kubernetes-ca: "7051956752252411449811734893"
+  kubernetes-ca: "7052330605454902276293786583"
 KubeletConfig:
   anonymousAuth: false
   cgroupDriver: systemd
