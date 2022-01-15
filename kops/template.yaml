@@ -33,6 +33,22 @@ spec:
     name: events
     cpuRequest: 100m
     memoryRequest: 100Mi
+  - etcdMembers:
+    {{range $i, $az := .availability_zones.value}}
+    - instanceGroup: master-{{.}}
+      name: {{. | replace $.region.value "" }}
+      encryptedVolume: true
+      # volumeSize # TODO
+    {{end}}
+    name: cilium
+    cpuRequest: 100m
+    memoryRequest: 100Mi
+    manager:
+      env:
+        - name: ETCD_AUTO_COMPACTION_MODE
+          value: revision
+        - name: ETCD_AUTO_COMPACTION_RETENTION
+          value: "2500"
   iam:
     allowContainerRegistry: true
     legacy: false
@@ -46,7 +62,11 @@ spec:
     anonymousAuth: false
   networking:
     cilium:
-      enableNodePort: true # BPF support
+      etcdManaged: true
+      enableNodePort: true
+      enableEncryption: false # BPF support
+#      cpuRequest: "25m"
+#      memoryRequest: "128Mi" TODO
   nonMasqueradeCIDR: {{.k8s_non_masquerade_cidr.value}}
   sshAccess:
   - 0.0.0.0/0

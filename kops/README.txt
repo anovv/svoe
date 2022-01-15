@@ -60,5 +60,9 @@ cluster:
 # https://github.com/kubernetes/kubernetes/pull/93208/files
 
 # TODO for cilium:
-# DNS records show up after some time, cilium-controller fails and waits long to restart
-# need to ssh and restart cilium-controller pod
+# DNS records show up after some time, cilium-operator fails and waits long to restart
+# need to ssh and restart cilium-operator pod
+
+# cilium pods labels: k8s-app=cilium
+# cilium-operator: io.cilium/app
+# etcd-manager-cilium: k8s-app=etcd-manager-cilium

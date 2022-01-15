@@ -25,6 +25,19 @@ spec:
       name: a
     memoryRequest: 100Mi
     name: events
+  - cpuRequest: 100m
+    etcdMembers:
+    - encryptedVolume: true
+      instanceGroup: master-ap-northeast-1a
+      name: a
+    manager:
+      env:
+      - name: ETCD_AUTO_COMPACTION_MODE
+        value: revision
+      - name: ETCD_AUTO_COMPACTION_RETENTION
+        value: "2500"
+    memoryRequest: 100Mi
+    name: cilium
   iam:
     allowContainerRegistry: true
     legacy: false
@@ -40,7 +53,9 @@ spec:
   networkID: vpc-03822c2081fa070b0
   networking:
     cilium:
+      enableEncryption: false
       enableNodePort: true
+      etcdManaged: true
   nonMasqueradeCIDR: 100.64.0.0/10
   sshAccess:
   - 0.0.0.0/0
