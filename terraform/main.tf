@@ -1,38 +1,38 @@
 # TODO move tfstate to S3 bucket
-# TODO move shared variables to .tfvars
 
 provider "aws" {
-  region                  = var.region
-  shared_credentials_file = "~/.aws/credentials"
-  profile                 = "default"
-}
-
-locals {
-  cluster_name = "${var.cluster_name_prefix}.${var.environment}.${var.domain}"
+  # This is a dummy provider needed for terraform to compile
+  region = "ap-northeast-1"
 }
 
 module "glue" {
   source = "./modules/aws/glue"
 }
 
-module "apn1_vpc" {
-  source                 = "./modules/aws/vpc"
-  name                   = var.vpc_name
-  cidr                   = var.cidr
-  azs                    = var.azs
-  private_subnets        = var.private_subnets
-  public_subnets         = var.public_subnets
-  environment            = var.environment
-  enable_nat_gateway     = false
-  single_nat_gateway     = false
-  one_nat_gateway_per_az = false
-  cluster_name           = local.cluster_name
+module "vpc_mesh" {
+  source = "./modules/aws/vpc_mesh"
 }
 
-module "kops_resources" {
+module "apn1_kops_resources" {
+  source              = "./modules/aws/kops_resources"
+  kops_s3_bucket_name = var.kops_s3_bucket_name
+  domain              = var.domain
+}
 
-  source      = "./modules/aws/kops_resources"
-  environment = var.environment
-  domain = var.domain
-#  ingress_ips = var.ingress_ips
+locals {
+  # TODO move this to a module
+  multicluster_config_ouput = {
+    for cluster in var.multicluster_config:
+      cluster["cluster_id"] => merge({
+        # TODO add cluster_id to name?
+          cluster_name: join(".", [cluster["name_prefix"], cluster["vpc_name"], cluster["environment"], var.domain])
+          kops_s3_bucket_name: var.kops_s3_bucket_name
+        },{
+          for k, v in cluster:
+            k => v
+        },{
+          for k, v in module.vpc_mesh.vpc_mesh_output[cluster["vpc_name"]]:
+            k => v
+        })
+  }
 }

@@ -3,11 +3,6 @@ variable "name" {
   description = "VPC name"
 }
 
-variable "environment" {
-  type        = string
-  description = "Name prefix"
-}
-
 variable "cidr" {
   type        = string
   description = "vpc cidr"
@@ -26,11 +21,6 @@ variable "private_subnets" {
 variable "public_subnets" {
   type        = list(any)
   description = "Public subnets list"
-}
-
-variable "cluster_name" {
-  type        = string
-  description = "FQDN cluster name"
 }
 
 variable "enable_nat_gateway" {

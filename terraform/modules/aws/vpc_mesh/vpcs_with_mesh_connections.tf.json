@@ -1,0 +1,164 @@
+[
+  {
+    "provider": {
+      "aws": {
+        "region": "ap-northeast-1",
+        "shared_credentials_file": "~/.aws/credentials",
+        "alias": "ap-northeast-1"
+      }
+    }
+  },
+  {
+    "provider": {
+      "aws": {
+        "region": "ap-southeast-1",
+        "shared_credentials_file": "~/.aws/credentials",
+        "alias": "ap-southeast-1"
+      }
+    }
+  },
+  {
+    "module": {
+      "vpcs": {
+        "source": "./vpcs"
+      }
+    }
+  },
+  {
+    "data": {
+      "aws_route_tables": {
+        "rts-vpc-apne1": {
+          "vpc_id": "${module.vpcs.vpcs_output[\"vpc-apne1\"][\"vpc_id\"]}",
+          "provider": "aws.ap-northeast-1"
+        }
+      }
+    }
+  },
+  {
+    "data": {
+      "aws_route_tables": {
+        "rts-vpc-apse1": {
+          "vpc_id": "${module.vpcs.vpcs_output[\"vpc-apse1\"][\"vpc_id\"]}",
+          "provider": "aws.ap-southeast-1"
+        }
+      }
+    }
+  },
+  {
+    "resource": {
+      "aws_vpc_peering_connection": {
+        "r-vpc-apne1-to-vpc-apse1": {
+          "provider": "aws.ap-northeast-1",
+          "vpc_id": "${module.vpcs.vpcs_output[\"vpc-apne1\"][\"vpc_id\"]}",
+          "peer_vpc_id": "${module.vpcs.vpcs_output[\"vpc-apse1\"][\"vpc_id\"]}",
+          "peer_region": "ap-southeast-1",
+          "tags": {
+            "Side": "Requester"
+          },
+          "timeouts": {
+            "create": "10m",
+            "delete": "10m"
+          }
+        }
+      }
+    }
+  },
+  {
+    "resource": {
+      "aws_vpc_peering_connection_accepter": {
+        "a-vpc-apse1": {
+          "provider": "aws.ap-southeast-1",
+          "vpc_peering_connection_id": "${aws_vpc_peering_connection.r-vpc-apne1-to-vpc-apse1.id}",
+          "auto_accept": true,
+          "tags": {
+            "Side": "Accepter"
+          }
+        }
+      }
+    }
+  },
+  {
+    "resource": {
+      "aws_vpc_peering_connection_options": {
+        "r-vpc-apne1-to-vpc-apse1": {
+          "provider": "aws.ap-northeast-1",
+          "vpc_peering_connection_id": "${aws_vpc_peering_connection_accepter.a-vpc-apse1.id}",
+          "requester": {
+            "allow_remote_vpc_dns_resolution": true,
+            "allow_classic_link_to_remote_vpc": true,
+            "allow_vpc_to_remote_classic_link": true
+          }
+        }
+      }
+    }
+  },
+  {
+    "resource": {
+      "aws_vpc_peering_connection_options": {
+        "a-vpc-apse1": {
+          "provider": "aws.ap-southeast-1",
+          "vpc_peering_connection_id": "${aws_vpc_peering_connection_accepter.a-vpc-apse1.id}",
+          "accepter": {
+            "allow_remote_vpc_dns_resolution": true,
+            "allow_classic_link_to_remote_vpc": true,
+            "allow_vpc_to_remote_classic_link": true
+          }
+        }
+      }
+    }
+  },
+  {
+    "resource": {
+      "aws_route": {
+        "routes-vpc-apne1-to-vpc-apse1": {
+          "count": "${length(data.aws_route_tables.rts-vpc-apne1.ids)}",
+          "route_table_id": "${tolist(data.aws_route_tables.rts-vpc-apne1.ids)[count.index]}",
+          "provider": "aws.ap-northeast-1",
+          "destination_cidr_block": "${module.vpcs.vpcs_output[\"vpc-apse1\"][\"vpc_cidr_block\"]}",
+          "vpc_peering_connection_id": "${aws_vpc_peering_connection.r-vpc-apne1-to-vpc-apse1.id}"
+        }
+      }
+    }
+  },
+  {
+    "resource": {
+      "aws_route": {
+        "routes-vpc-apse1-to-vpc-apne1": {
+          "count": "${length(data.aws_route_tables.rts-vpc-apse1.ids)}",
+          "route_table_id": "${tolist(data.aws_route_tables.rts-vpc-apse1.ids)[count.index]}",
+          "provider": "aws.ap-southeast-1",
+          "destination_cidr_block": "${module.vpcs.vpcs_output[\"vpc-apne1\"][\"vpc_cidr_block\"]}",
+          "vpc_peering_connection_id": "${aws_vpc_peering_connection.r-vpc-apne1-to-vpc-apse1.id}"
+        }
+      }
+    }
+  },
+  {
+    "output": {
+      "vpc_mesh_output": {
+        "value": {
+          "vpc-apne1": {
+            "vpc_id": "${module.vpcs.vpcs_output[\"vpc-apne1\"][\"vpc_id\"]}",
+            "vpc_cidr_block": "${module.vpcs.vpcs_output[\"vpc-apne1\"][\"vpc_cidr_block\"]}",
+            "public_subnets": "${module.vpcs.vpcs_output[\"vpc-apne1\"][\"public_subnets\"]}",
+            "private_subnets": "${module.vpcs.vpcs_output[\"vpc-apne1\"][\"private_subnets\"]}",
+            "azs": "${module.vpcs.vpcs_output[\"vpc-apne1\"][\"azs\"]}",
+            "default_security_group_id": "${module.vpcs.vpcs_output[\"vpc-apne1\"][\"default_security_group_id\"]}",
+            "natgw_ids": "${module.vpcs.vpcs_output[\"vpc-apne1\"][\"natgw_ids\"]}",
+            "region": "ap-northeast-1"
+          },
+          "vpc-apse1": {
+            "vpc_id": "${module.vpcs.vpcs_output[\"vpc-apse1\"][\"vpc_id\"]}",
+            "vpc_cidr_block": "${module.vpcs.vpcs_output[\"vpc-apse1\"][\"vpc_cidr_block\"]}",
+            "public_subnets": "${module.vpcs.vpcs_output[\"vpc-apse1\"][\"public_subnets\"]}",
+            "private_subnets": "${module.vpcs.vpcs_output[\"vpc-apse1\"][\"private_subnets\"]}",
+            "azs": "${module.vpcs.vpcs_output[\"vpc-apse1\"][\"azs\"]}",
+            "default_security_group_id": "${module.vpcs.vpcs_output[\"vpc-apse1\"][\"default_security_group_id\"]}",
+            "natgw_ids": "${module.vpcs.vpcs_output[\"vpc-apse1\"][\"natgw_ids\"]}",
+            "region": "ap-southeast-1"
+          }
+        }
+      }
+    }
+  }
+]
