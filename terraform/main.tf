@@ -21,7 +21,7 @@ module "apn1_kops_resources" {
 
 locals {
   # TODO move this to a module
-  multicluster_config_ouput = {
+  multicluster_config_output = {
     for cluster in var.multicluster_config:
       cluster["cluster_id"] => merge({
         # TODO add cluster_id to name?
