@@ -1,8 +1,8 @@
 apiVersion: kops.k8s.io/v1alpha2
 kind: Cluster
 metadata:
-  creationTimestamp: "2022-01-23T14:15:15Z"
-  name: k8s.vpc-apne1.dev.svoe.link
+  creationTimestamp: "2022-01-23T14:15:37Z"
+  name: k8s.vpc-apse1.dev.svoe.link
 spec:
   api:
     dns: {}
@@ -16,8 +16,8 @@ spec:
     manageStorageClasses: true
   cloudProvider: aws
   clusterDNSDomain: cluster.local
-  configBase: s3://dev-kops-s3/k8s.vpc-apne1.dev.svoe.link
-  configStore: s3://dev-kops-s3/k8s.vpc-apne1.dev.svoe.link
+  configBase: s3://dev-kops-s3/k8s.vpc-apse1.dev.svoe.link
+  configStore: s3://dev-kops-s3/k8s.vpc-apse1.dev.svoe.link
   containerRuntime: containerd
   containerd:
     logLevel: info
@@ -27,39 +27,39 @@ spec:
     skipInstall: true
   etcdClusters:
   - backups:
-      backupStore: s3://dev-kops-s3/k8s.vpc-apne1.dev.svoe.link/backups/etcd/main
+      backupStore: s3://dev-kops-s3/k8s.vpc-apse1.dev.svoe.link/backups/etcd/main
     cpuRequest: 200m
     enableEtcdTLS: true
     enableTLSAuth: true
     etcdMembers:
     - encryptedVolume: true
-      instanceGroup: master-ap-northeast-1a
+      instanceGroup: master-ap-southeast-1a
       name: a
     memoryRequest: 100Mi
     name: main
     provider: Manager
     version: 3.5.0
   - backups:
-      backupStore: s3://dev-kops-s3/k8s.vpc-apne1.dev.svoe.link/backups/etcd/events
+      backupStore: s3://dev-kops-s3/k8s.vpc-apse1.dev.svoe.link/backups/etcd/events
     cpuRequest: 100m
     enableEtcdTLS: true
     enableTLSAuth: true
     etcdMembers:
     - encryptedVolume: true
-      instanceGroup: master-ap-northeast-1a
+      instanceGroup: master-ap-southeast-1a
       name: a
     memoryRequest: 100Mi
     name: events
     provider: Manager
     version: 3.5.0
   - backups:
-      backupStore: s3://dev-kops-s3/k8s.vpc-apne1.dev.svoe.link/backups/etcd/cilium
+      backupStore: s3://dev-kops-s3/k8s.vpc-apse1.dev.svoe.link/backups/etcd/cilium
     cpuRequest: 100m
     enableEtcdTLS: true
     enableTLSAuth: true
     etcdMembers:
     - encryptedVolume: true
-      instanceGroup: master-ap-northeast-1a
+      instanceGroup: master-ap-southeast-1a
       name: a
     manager:
       env:
@@ -76,7 +76,7 @@ spec:
   iam:
     allowContainerRegistry: true
     legacy: false
-  keyStore: s3://dev-kops-s3/k8s.vpc-apne1.dev.svoe.link/pki
+  keyStore: s3://dev-kops-s3/k8s.vpc-apse1.dev.svoe.link/pki
   kubeAPIServer:
     allowPrivileged: true
     anonymousAuth: false
@@ -115,8 +115,8 @@ spec:
     requestheaderUsernameHeaders:
     - X-Remote-User
     securePort: 443
-    serviceAccountIssuer: https://api.internal.k8s.vpc-apne1.dev.svoe.link
-    serviceAccountJWKSURI: https://api.internal.k8s.vpc-apne1.dev.svoe.link/openid/v1/jwks
+    serviceAccountIssuer: https://api.internal.k8s.vpc-apse1.dev.svoe.link
+    serviceAccountJWKSURI: https://api.internal.k8s.vpc-apse1.dev.svoe.link/openid/v1/jwks
     serviceClusterIPRange: 100.64.0.0/13
     storageBackend: etcd3
   kubeControllerManager:
@@ -124,7 +124,7 @@ spec:
     attachDetachReconcileSyncPeriod: 1m0s
     cloudProvider: aws
     clusterCIDR: 100.96.0.0/11
-    clusterName: k8s.vpc-apne1.dev.svoe.link
+    clusterName: k8s.vpc-apse1.dev.svoe.link
     configureCloudRoutes: false
     featureGates:
       CSIMigrationAWS: "true"
@@ -182,7 +182,7 @@ spec:
   kubernetesApiAccess:
   - 0.0.0.0/0
   kubernetesVersion: 1.22.5
-  masterInternalName: api.internal.k8s.vpc-apne1.dev.svoe.link
+  masterInternalName: api.internal.k8s.vpc-apse1.dev.svoe.link
   masterKubelet:
     anonymousAuth: false
     cgroupDriver: systemd
@@ -203,9 +203,9 @@ spec:
     podManifestPath: /etc/kubernetes/manifests
     protectKernelDefaults: true
     registerSchedulable: false
-  masterPublicName: api.k8s.vpc-apne1.dev.svoe.link
-  networkCIDR: 10.100.0.0/16
-  networkID: vpc-02eba23ddbbf5c077
+  masterPublicName: api.k8s.vpc-apse1.dev.svoe.link
+  networkCIDR: 10.200.0.0/16
+  networkID: vpc-068f1f538267269b2
   networking:
     cilium:
       agentPrometheusPort: 9090
@@ -241,16 +241,16 @@ spec:
       version: v1.10.3
   nonMasqueradeCIDR: 100.64.0.0/10
   podCIDR: 100.96.0.0/11
-  secretStore: s3://dev-kops-s3/k8s.vpc-apne1.dev.svoe.link/secrets
+  secretStore: s3://dev-kops-s3/k8s.vpc-apse1.dev.svoe.link/secrets
   serviceClusterIPRange: 100.64.0.0/13
   sshAccess:
   - 0.0.0.0/0
   subnets:
-  - cidr: 10.100.0.0/24
-    id: subnet-0af26ff6b484dd1e8
-    name: ap-northeast-1a
+  - cidr: 10.200.0.0/24
+    id: subnet-0f00257a3d86dd480
+    name: ap-southeast-1a
     type: Public
-    zone: ap-northeast-1a
+    zone: ap-southeast-1a
   topology:
     dns:
       type: Public

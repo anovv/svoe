@@ -1,11 +1,11 @@
 locals {
   cluster_name                 = "k8s.vpc-apne1.dev.svoe.link"
   master_autoscaling_group_ids = [aws_autoscaling_group.master-ap-northeast-1a-masters-k8s-vpc-apne1-dev-svoe-link.id]
-  master_security_group_ids    = [aws_security_group.masters-k8s-vpc-apne1-dev-svoe-link.id]
+  master_security_group_ids    = ["sg-09b8fbe061be615a9"]
   masters_role_arn             = aws_iam_role.masters-k8s-vpc-apne1-dev-svoe-link.arn
   masters_role_name            = aws_iam_role.masters-k8s-vpc-apne1-dev-svoe-link.name
   node_autoscaling_group_ids   = [aws_autoscaling_group.nodes-on-demand-k8s-vpc-apne1-dev-svoe-link.id]
-  node_security_group_ids      = [aws_security_group.nodes-k8s-vpc-apne1-dev-svoe-link.id]
+  node_security_group_ids      = ["sg-09b8fbe061be615a9"]
   node_subnet_ids              = ["subnet-0af26ff6b484dd1e8"]
   nodes_role_arn               = aws_iam_role.nodes-k8s-vpc-apne1-dev-svoe-link.arn
   nodes_role_name              = aws_iam_role.nodes-k8s-vpc-apne1-dev-svoe-link.name
@@ -24,7 +24,7 @@ output "master_autoscaling_group_ids" {
 }
 
 output "master_security_group_ids" {
-  value = [aws_security_group.masters-k8s-vpc-apne1-dev-svoe-link.id]
+  value = ["sg-09b8fbe061be615a9"]
 }
 
 output "masters_role_arn" {
@@ -40,7 +40,7 @@ output "node_autoscaling_group_ids" {
 }
 
 output "node_security_group_ids" {
-  value = [aws_security_group.nodes-k8s-vpc-apne1-dev-svoe-link.id]
+  value = ["sg-09b8fbe061be615a9"]
 }
 
 output "node_subnet_ids" {
@@ -346,7 +346,7 @@ resource "aws_launch_template" "master-ap-northeast-1a-masters-k8s-vpc-apne1-dev
     associate_public_ip_address = true
     delete_on_termination       = true
     ipv6_address_count          = 0
-    security_groups             = [aws_security_group.masters-k8s-vpc-apne1-dev-svoe-link.id]
+    security_groups             = ["sg-09b8fbe061be615a9"]
   }
   tag_specifications {
     resource_type = "instance"
@@ -429,7 +429,7 @@ resource "aws_launch_template" "nodes-on-demand-k8s-vpc-apne1-dev-svoe-link" {
     associate_public_ip_address = true
     delete_on_termination       = true
     ipv6_address_count          = 0
-    security_groups             = [aws_security_group.nodes-k8s-vpc-apne1-dev-svoe-link.id]
+    security_groups             = ["sg-09b8fbe061be615a9"]
   }
   tag_specifications {
     resource_type = "instance"
@@ -638,150 +638,128 @@ resource "aws_s3_bucket_object" "nodeupconfig-nodes-on-demand" {
   server_side_encryption = "AES256"
 }
 
-resource "aws_security_group" "masters-k8s-vpc-apne1-dev-svoe-link" {
-  description = "Security group for masters"
-  name        = "masters.k8s.vpc-apne1.dev.svoe.link"
-  tags = {
-    "KubernetesCluster"                                 = "k8s.vpc-apne1.dev.svoe.link"
-    "Name"                                              = "masters.k8s.vpc-apne1.dev.svoe.link"
-    "kubernetes.io/cluster/k8s.vpc-apne1.dev.svoe.link" = "owned"
-  }
-  vpc_id = "vpc-02eba23ddbbf5c077"
-}
-
-resource "aws_security_group" "nodes-k8s-vpc-apne1-dev-svoe-link" {
-  description = "Security group for nodes"
-  name        = "nodes.k8s.vpc-apne1.dev.svoe.link"
-  tags = {
-    "KubernetesCluster"                                 = "k8s.vpc-apne1.dev.svoe.link"
-    "Name"                                              = "nodes.k8s.vpc-apne1.dev.svoe.link"
-    "kubernetes.io/cluster/k8s.vpc-apne1.dev.svoe.link" = "owned"
-  }
-  vpc_id = "vpc-02eba23ddbbf5c077"
-}
-
-resource "aws_security_group_rule" "from-0-0-0-0--0-ingress-tcp-22to22-masters-k8s-vpc-apne1-dev-svoe-link" {
+resource "aws_security_group_rule" "from-0-0-0-0--0-ingress-tcp-22to22-sg-09b8fbe061be615a9-Master" {
   cidr_blocks       = ["0.0.0.0/0"]
   from_port         = 22
   protocol          = "tcp"
-  security_group_id = aws_security_group.masters-k8s-vpc-apne1-dev-svoe-link.id
+  security_group_id = "sg-09b8fbe061be615a9"
   to_port           = 22
   type              = "ingress"
 }
 
-resource "aws_security_group_rule" "from-0-0-0-0--0-ingress-tcp-22to22-nodes-k8s-vpc-apne1-dev-svoe-link" {
+resource "aws_security_group_rule" "from-0-0-0-0--0-ingress-tcp-22to22-sg-09b8fbe061be615a9-Node" {
   cidr_blocks       = ["0.0.0.0/0"]
   from_port         = 22
   protocol          = "tcp"
-  security_group_id = aws_security_group.nodes-k8s-vpc-apne1-dev-svoe-link.id
+  security_group_id = "sg-09b8fbe061be615a9"
   to_port           = 22
   type              = "ingress"
 }
 
-resource "aws_security_group_rule" "from-0-0-0-0--0-ingress-tcp-443to443-masters-k8s-vpc-apne1-dev-svoe-link" {
+resource "aws_security_group_rule" "from-0-0-0-0--0-ingress-tcp-443to443-sg-09b8fbe061be615a9-Master" {
   cidr_blocks       = ["0.0.0.0/0"]
   from_port         = 443
   protocol          = "tcp"
-  security_group_id = aws_security_group.masters-k8s-vpc-apne1-dev-svoe-link.id
+  security_group_id = "sg-09b8fbe061be615a9"
   to_port           = 443
   type              = "ingress"
 }
 
-resource "aws_security_group_rule" "from-masters-k8s-vpc-apne1-dev-svoe-link-egress-all-0to0-0-0-0-0--0" {
+resource "aws_security_group_rule" "from-sg-09b8fbe061be615a9-Master-egress-all-0to0-0-0-0-0--0" {
   cidr_blocks       = ["0.0.0.0/0"]
   from_port         = 0
   protocol          = "-1"
-  security_group_id = aws_security_group.masters-k8s-vpc-apne1-dev-svoe-link.id
+  security_group_id = "sg-09b8fbe061be615a9"
   to_port           = 0
   type              = "egress"
 }
 
-resource "aws_security_group_rule" "from-masters-k8s-vpc-apne1-dev-svoe-link-egress-all-0to0-__--0" {
+resource "aws_security_group_rule" "from-sg-09b8fbe061be615a9-Master-egress-all-0to0-__--0" {
   from_port         = 0
   ipv6_cidr_blocks  = ["::/0"]
   protocol          = "-1"
-  security_group_id = aws_security_group.masters-k8s-vpc-apne1-dev-svoe-link.id
+  security_group_id = "sg-09b8fbe061be615a9"
   to_port           = 0
   type              = "egress"
 }
 
-resource "aws_security_group_rule" "from-masters-k8s-vpc-apne1-dev-svoe-link-ingress-all-0to0-masters-k8s-vpc-apne1-dev-svoe-link" {
+resource "aws_security_group_rule" "from-sg-09b8fbe061be615a9-Master-ingress-all-0to0-sg-09b8fbe061be615a9-Master" {
   from_port                = 0
   protocol                 = "-1"
-  security_group_id        = aws_security_group.masters-k8s-vpc-apne1-dev-svoe-link.id
-  source_security_group_id = aws_security_group.masters-k8s-vpc-apne1-dev-svoe-link.id
+  security_group_id        = "sg-09b8fbe061be615a9"
+  source_security_group_id = "sg-09b8fbe061be615a9"
   to_port                  = 0
   type                     = "ingress"
 }
 
-resource "aws_security_group_rule" "from-masters-k8s-vpc-apne1-dev-svoe-link-ingress-all-0to0-nodes-k8s-vpc-apne1-dev-svoe-link" {
+resource "aws_security_group_rule" "from-sg-09b8fbe061be615a9-Master-ingress-all-0to0-sg-09b8fbe061be615a9-Node" {
   from_port                = 0
   protocol                 = "-1"
-  security_group_id        = aws_security_group.nodes-k8s-vpc-apne1-dev-svoe-link.id
-  source_security_group_id = aws_security_group.masters-k8s-vpc-apne1-dev-svoe-link.id
+  security_group_id        = "sg-09b8fbe061be615a9"
+  source_security_group_id = "sg-09b8fbe061be615a9"
   to_port                  = 0
   type                     = "ingress"
 }
 
-resource "aws_security_group_rule" "from-nodes-k8s-vpc-apne1-dev-svoe-link-egress-all-0to0-0-0-0-0--0" {
+resource "aws_security_group_rule" "from-sg-09b8fbe061be615a9-Node-egress-all-0to0-0-0-0-0--0" {
   cidr_blocks       = ["0.0.0.0/0"]
   from_port         = 0
   protocol          = "-1"
-  security_group_id = aws_security_group.nodes-k8s-vpc-apne1-dev-svoe-link.id
+  security_group_id = "sg-09b8fbe061be615a9"
   to_port           = 0
   type              = "egress"
 }
 
-resource "aws_security_group_rule" "from-nodes-k8s-vpc-apne1-dev-svoe-link-egress-all-0to0-__--0" {
+resource "aws_security_group_rule" "from-sg-09b8fbe061be615a9-Node-egress-all-0to0-__--0" {
   from_port         = 0
   ipv6_cidr_blocks  = ["::/0"]
   protocol          = "-1"
-  security_group_id = aws_security_group.nodes-k8s-vpc-apne1-dev-svoe-link.id
+  security_group_id = "sg-09b8fbe061be615a9"
   to_port           = 0
   type              = "egress"
 }
 
-resource "aws_security_group_rule" "from-nodes-k8s-vpc-apne1-dev-svoe-link-ingress-all-0to0-nodes-k8s-vpc-apne1-dev-svoe-link" {
+resource "aws_security_group_rule" "from-sg-09b8fbe061be615a9-Node-ingress-all-0to0-sg-09b8fbe061be615a9-Node" {
   from_port                = 0
   protocol                 = "-1"
-  security_group_id        = aws_security_group.nodes-k8s-vpc-apne1-dev-svoe-link.id
-  source_security_group_id = aws_security_group.nodes-k8s-vpc-apne1-dev-svoe-link.id
+  security_group_id        = "sg-09b8fbe061be615a9"
+  source_security_group_id = "sg-09b8fbe061be615a9"
   to_port                  = 0
   type                     = "ingress"
 }
 
-resource "aws_security_group_rule" "from-nodes-k8s-vpc-apne1-dev-svoe-link-ingress-tcp-1to2379-masters-k8s-vpc-apne1-dev-svoe-link" {
+resource "aws_security_group_rule" "from-sg-09b8fbe061be615a9-Node-ingress-tcp-1to2379-sg-09b8fbe061be615a9-Master" {
   from_port                = 1
   protocol                 = "tcp"
-  security_group_id        = aws_security_group.masters-k8s-vpc-apne1-dev-svoe-link.id
-  source_security_group_id = aws_security_group.nodes-k8s-vpc-apne1-dev-svoe-link.id
+  security_group_id        = "sg-09b8fbe061be615a9"
+  source_security_group_id = "sg-09b8fbe061be615a9"
   to_port                  = 2379
   type                     = "ingress"
 }
 
-resource "aws_security_group_rule" "from-nodes-k8s-vpc-apne1-dev-svoe-link-ingress-tcp-2383to4000-masters-k8s-vpc-apne1-dev-svoe-link" {
+resource "aws_security_group_rule" "from-sg-09b8fbe061be615a9-Node-ingress-tcp-2383to4000-sg-09b8fbe061be615a9-Master" {
   from_port                = 2383
   protocol                 = "tcp"
-  security_group_id        = aws_security_group.masters-k8s-vpc-apne1-dev-svoe-link.id
-  source_security_group_id = aws_security_group.nodes-k8s-vpc-apne1-dev-svoe-link.id
+  security_group_id        = "sg-09b8fbe061be615a9"
+  source_security_group_id = "sg-09b8fbe061be615a9"
   to_port                  = 4000
   type                     = "ingress"
 }
 
-resource "aws_security_group_rule" "from-nodes-k8s-vpc-apne1-dev-svoe-link-ingress-tcp-4003to65535-masters-k8s-vpc-apne1-dev-svoe-link" {
+resource "aws_security_group_rule" "from-sg-09b8fbe061be615a9-Node-ingress-tcp-4003to65535-sg-09b8fbe061be615a9-Master" {
   from_port                = 4003
   protocol                 = "tcp"
-  security_group_id        = aws_security_group.masters-k8s-vpc-apne1-dev-svoe-link.id
-  source_security_group_id = aws_security_group.nodes-k8s-vpc-apne1-dev-svoe-link.id
+  security_group_id        = "sg-09b8fbe061be615a9"
+  source_security_group_id = "sg-09b8fbe061be615a9"
   to_port                  = 65535
   type                     = "ingress"
 }
 
-resource "aws_security_group_rule" "from-nodes-k8s-vpc-apne1-dev-svoe-link-ingress-udp-1to65535-masters-k8s-vpc-apne1-dev-svoe-link" {
+resource "aws_security_group_rule" "from-sg-09b8fbe061be615a9-Node-ingress-udp-1to65535-sg-09b8fbe061be615a9-Master" {
   from_port                = 1
   protocol                 = "udp"
-  security_group_id        = aws_security_group.masters-k8s-vpc-apne1-dev-svoe-link.id
-  source_security_group_id = aws_security_group.nodes-k8s-vpc-apne1-dev-svoe-link.id
+  security_group_id        = "sg-09b8fbe061be615a9"
+  source_security_group_id = "sg-09b8fbe061be615a9"
   to_port                  = 65535
   type                     = "ingress"
 }

@@ -1,0 +1,18 @@
+azs:
+  - ap-southeast-1a
+cluster_id: "2"
+cluster_name: k8s.vpc-apse1.dev.svoe.link
+default_security_group_id: sg-094da6acc991bfe1b
+environment: dev
+k8s_non_masquerade_cidr: 100.64.0.0/10
+kops_s3_bucket_name: dev-kops-s3
+name_prefix: k8s
+natgw_ids: []
+private_subnets: []
+public_subnets:
+  - subnet-0f00257a3d86dd480
+region: ap-southeast-1
+security_group_override: sg-07edc502487de6d8a
+vpc_cidr_block: 10.200.0.0/16
+vpc_id: vpc-068f1f538267269b2
+vpc_name: vpc-apse1

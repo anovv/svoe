@@ -8,7 +8,7 @@ NODEUP_HASH_AMD64=3f7f06d7be1bf787239eaefafb5fdf5a24870c5b9eba8abe7f0fc84e5c46b0
 NODEUP_URL_ARM64=https://artifacts.k8s.io/binaries/kops/1.22.2/linux/arm64/nodeup,https://github.com/kubernetes/kops/releases/download/v1.22.2/nodeup-linux-arm64
 NODEUP_HASH_ARM64=f5baa40268a5cc4da2116a4c0a8de036700e4f753caefdc094471cdbecf407c7
 
-export AWS_REGION=ap-northeast-1
+export AWS_REGION=ap-southeast-1
 
 
 
@@ -165,10 +165,10 @@ __EOF_CLUSTER_SPEC
 
 cat > conf/kube_env.yaml << '__EOF_KUBE_ENV'
 CloudProvider: aws
-ConfigBase: s3://dev-kops-s3/k8s.vpc-apne1.dev.svoe.link
+ConfigBase: s3://dev-kops-s3/k8s.vpc-apse1.dev.svoe.link
 InstanceGroupName: nodes-on-demand
 InstanceGroupRole: Node
-NodeupConfigHash: XEUVSjJuItatbXjZcqNqo1B+d7v4jU+tatP0l63Gw1E=
+NodeupConfigHash: nAvB41ia2eB8rUyHzyVmQ/qSbn0dE0k7XE4ToKLjGhk=
 
 __EOF_KUBE_ENV
 

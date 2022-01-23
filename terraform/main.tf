@@ -19,12 +19,11 @@ module "apn1_kops_resources" {
   domain              = var.domain
 }
 
+# TODO move everything below to a multicluster module
 locals {
-  # TODO move this to a module
   multicluster_config_output = {
     for cluster in var.multicluster_config:
       cluster["cluster_id"] => merge({
-        # TODO add cluster_id to name?
           cluster_name: join(".", [cluster["name_prefix"], cluster["vpc_name"], cluster["environment"], var.domain])
           kops_s3_bucket_name: var.kops_s3_bucket_name
         },{

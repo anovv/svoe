@@ -29,3 +29,6 @@ cluster:
 # cilium pods labels: k8s-app=cilium
 # cilium-operator: io.cilium/app
 # etcd-manager-cilium: k8s-app=etcd-manager-cilium
+
+# python server
+# python -m http.server 8000

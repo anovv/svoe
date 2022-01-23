@@ -46,6 +46,84 @@
   },
   {
     "resource": {
+      "aws_security_group": {
+        "common-vpc-apne1": {
+          "name": "common-vpc-apne1",
+          "vpc_id": "${module.vpcs.vpcs_output[\"vpc-apne1\"][\"vpc_id\"]}",
+          "ingress": [
+            {
+              "description": "Connectivity test",
+              "from_port": 8000,
+              "protocol": "tcp",
+              "to_port": 8000,
+              "cidr_blocks": [
+                "0.0.0.0/0"
+              ],
+              "ipv6_cidr_blocks": [],
+              "prefix_list_ids": [],
+              "security_groups": [],
+              "self": false
+            },
+            {
+              "description": "Cilium etcd",
+              "from_port": 2379,
+              "protocol": "tcp",
+              "to_port": 2379,
+              "cidr_blocks": [
+                "0.0.0.0/0"
+              ],
+              "ipv6_cidr_blocks": [],
+              "prefix_list_ids": [],
+              "security_groups": [],
+              "self": false
+            }
+          ],
+          "provider": "aws.ap-northeast-1"
+        }
+      }
+    }
+  },
+  {
+    "resource": {
+      "aws_security_group": {
+        "common-vpc-apse1": {
+          "name": "common-vpc-apse1",
+          "vpc_id": "${module.vpcs.vpcs_output[\"vpc-apse1\"][\"vpc_id\"]}",
+          "ingress": [
+            {
+              "description": "Connectivity test",
+              "from_port": 8000,
+              "protocol": "tcp",
+              "to_port": 8000,
+              "cidr_blocks": [
+                "0.0.0.0/0"
+              ],
+              "ipv6_cidr_blocks": [],
+              "prefix_list_ids": [],
+              "security_groups": [],
+              "self": false
+            },
+            {
+              "description": "Cilium etcd",
+              "from_port": 2379,
+              "protocol": "tcp",
+              "to_port": 2379,
+              "cidr_blocks": [
+                "0.0.0.0/0"
+              ],
+              "ipv6_cidr_blocks": [],
+              "prefix_list_ids": [],
+              "security_groups": [],
+              "self": false
+            }
+          ],
+          "provider": "aws.ap-southeast-1"
+        }
+      }
+    }
+  },
+  {
+    "resource": {
       "aws_vpc_peering_connection": {
         "r-vpc-apne1-to-vpc-apse1": {
           "provider": "aws.ap-northeast-1",
@@ -145,7 +223,8 @@
             "azs": "${module.vpcs.vpcs_output[\"vpc-apne1\"][\"azs\"]}",
             "default_security_group_id": "${module.vpcs.vpcs_output[\"vpc-apne1\"][\"default_security_group_id\"]}",
             "natgw_ids": "${module.vpcs.vpcs_output[\"vpc-apne1\"][\"natgw_ids\"]}",
-            "region": "ap-northeast-1"
+            "region": "ap-northeast-1",
+            "security_group_override": "${aws_security_group.common-vpc-apne1.id}"
           },
           "vpc-apse1": {
             "vpc_id": "${module.vpcs.vpcs_output[\"vpc-apse1\"][\"vpc_id\"]}",
@@ -155,7 +234,8 @@
             "azs": "${module.vpcs.vpcs_output[\"vpc-apse1\"][\"azs\"]}",
             "default_security_group_id": "${module.vpcs.vpcs_output[\"vpc-apse1\"][\"default_security_group_id\"]}",
             "natgw_ids": "${module.vpcs.vpcs_output[\"vpc-apse1\"][\"natgw_ids\"]}",
-            "region": "ap-southeast-1"
+            "region": "ap-southeast-1",
+            "security_group_override": "${aws_security_group.common-vpc-apse1.id}"
           }
         }
       }

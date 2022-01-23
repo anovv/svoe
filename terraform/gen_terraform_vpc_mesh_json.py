@@ -34,6 +34,8 @@ peering_options = []
 # Routes to peer cidr
 routes = []
 vpc_mesh_output = {}
+# Security groups
+security_groups = {}
 
 
 def get_vpcs_module_output(vpc_name, output_name):
@@ -59,6 +61,8 @@ def get_region(vpc_name):
 def get_route_tables(vpc_name):
     return 'rts-' + vpc_name
 
+def get_common_sg(vpc_name):
+    return 'common-' + vpc_name
 
 def get_routes(vpc_name_requester, vpc_name_accepter):
     return 'routes-' + vpc_name_requester + '-to-' + vpc_name_accepter
@@ -112,6 +116,46 @@ with open(PATH_TO_INPUT) as json_file:
                     get_route_tables(vpc_name): {
                         'vpc_id': get_vpcs_module_output(vpc_name, vpc_output_values.VPC_ID),
                         'provider': get_provider(vpc_name),
+                    }
+                }
+            }
+        }
+
+        security_groups[vpc_name] = {
+            'resource': {
+                'aws_security_group': {
+                    get_common_sg(vpc_name): {
+                        'name': get_common_sg(vpc_name),
+                        'vpc_id': get_vpcs_module_output(vpc_name, vpc_output_values.VPC_ID),
+                        'ingress': [
+                            {
+                                'description': 'Connectivity test',
+                                'from_port': 8000,
+                                'protocol': 'tcp',
+                                'to_port': 8000,
+                                'cidr_blocks': ["0.0.0.0/0"], # TODO use vpc_cidrs
+
+                                # Below fields are only needed for compile
+                                'ipv6_cidr_blocks': [],
+                                'prefix_list_ids': [],
+                                'security_groups': [],
+                                'self': False
+                            },
+                            {
+                                'description': 'Cilium etcd',
+                                'from_port': 2379, # TODO this is duplicate??
+                                'protocol': 'tcp',
+                                'to_port': 2379,
+                                'cidr_blocks': ["0.0.0.0/0"],  # TODO use vpc_cidrs
+
+                                # Below fields are only needed for compile
+                                'ipv6_cidr_blocks': [],
+                                'prefix_list_ids': [],
+                                'security_groups': [],
+                                'self': False
+                            },
+                        ],
+                        'provider': get_provider(vpc_name)
                     }
                 }
             }
@@ -234,6 +278,7 @@ with open(PATH_TO_INPUT) as json_file:
             for output_value in vpc_output_values
         ])
         vpc_mesh_output['output']['vpc_mesh_output']['value'][vpc_name]['region'] = get_region(vpc_name)
+        vpc_mesh_output['output']['vpc_mesh_output']['value'][vpc_name]['security_group_override'] = '${aws_security_group.' + get_common_sg(vpc_name) + '.id}'
 
 # VPCs module
 config_vpcs = []
@@ -264,6 +309,9 @@ config_vpc_mesh.append({
 
 for k in route_tables_data:
     config_vpc_mesh.append(route_tables_data[k])
+
+for k in security_groups:
+    config_vpc_mesh.append(security_groups[k])
 
 for v in peerings:
     config_vpc_mesh.append(v)
