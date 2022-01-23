@@ -1,7 +1,7 @@
 apiVersion: kops.k8s.io/v1alpha2
 kind: Cluster
 metadata:
-  name: apn1.k8s.dev.svoe.link
+  name: k8s.vpc-apne1.dev.svoe.link
 spec:
   api:
     dns: {}
@@ -9,7 +9,7 @@ spec:
     rbac: {}
   channel: stable
   cloudProvider: aws
-  configBase: s3://dev-kops-s3/apn1.k8s.dev.svoe.link
+  configBase: s3://dev-kops-s3/k8s.vpc-apne1.dev.svoe.link
   etcdClusters:
   - cpuRequest: 200m
     etcdMembers:
@@ -48,9 +48,9 @@ spec:
   kubernetesApiAccess:
   - 0.0.0.0/0
   kubernetesVersion: 1.22.5
-  masterPublicName: api.apn1.k8s.dev.svoe.link
-  networkCIDR: 172.20.0.0/16
-  networkID: vpc-03822c2081fa070b0
+  masterPublicName: api.k8s.vpc-apne1.dev.svoe.link
+  networkCIDR: 10.100.0.0/16
+  networkID: vpc-02eba23ddbbf5c077
   networking:
     cilium:
       enableEncryption: false
@@ -60,7 +60,7 @@ spec:
   sshAccess:
   - 0.0.0.0/0
   subnets:
-  - id: subnet-08da82d6214c82c18
+  - id: subnet-0af26ff6b484dd1e8
     name: ap-northeast-1a
     type: Public
     zone: ap-northeast-1a
@@ -74,7 +74,7 @@ apiVersion: kops.k8s.io/v1alpha2
 kind: InstanceGroup
 metadata:
   labels:
-    kops.k8s.io/cluster: apn1.k8s.dev.svoe.link
+    kops.k8s.io/cluster: k8s.vpc-apne1.dev.svoe.link
   name: master-ap-northeast-1a
 spec:
   machineType: t3.medium
@@ -92,7 +92,7 @@ apiVersion: kops/v1alpha2
 kind: InstanceGroup
 metadata:
   labels:
-    kops.k8s.io/cluster: apn1.k8s.dev.svoe.link
+    kops.k8s.io/cluster: k8s.vpc-apne1.dev.svoe.link
   name: nodes-on-demand
 spec:
   machineType: t3.small

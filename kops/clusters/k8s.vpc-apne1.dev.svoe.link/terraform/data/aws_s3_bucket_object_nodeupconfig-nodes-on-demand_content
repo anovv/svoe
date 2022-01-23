@@ -1,0 +1,87 @@
+Assets:
+  amd64:
+  - 2be340f236a25881969eaa7d58b2279a4e31dc393cab289a74c78c0c37ba2154@https://storage.googleapis.com/kubernetes-release/release/v1.22.5/bin/linux/amd64/kubelet
+  - fcb54488199c5340ff1bc0e8641d0adacb27bb18d87d0899a45ddbcc45468611@https://storage.googleapis.com/kubernetes-release/release/v1.22.5/bin/linux/amd64/kubectl
+  - 962100bbc4baeaaa5748cdbfce941f756b1531c2eadb290129401498bfac21e7@https://storage.googleapis.com/k8s-artifacts-cni/release/v0.9.1/cni-plugins-linux-amd64-v0.9.1.tgz
+  - f6120552408175ca332fd3b5d31c5edd115d8426d6731664e4ea3951c5eee3b4@https://github.com/containerd/containerd/releases/download/v1.4.12/cri-containerd-cni-1.4.12-linux-amd64.tar.gz
+  arm64:
+  - e68536cff9172d1562edddd7194d20302472a064009bf7c0ed8d79d030cb61aa@https://storage.googleapis.com/kubernetes-release/release/v1.22.5/bin/linux/arm64/kubelet
+  - a122ef299d75c0bec1dc1e28670d358e13743144e68223c8178462ba5c436e1d@https://storage.googleapis.com/kubernetes-release/release/v1.22.5/bin/linux/arm64/kubectl
+  - ef17764ffd6cdcb16d76401bac1db6acc050c9b088f1be5efa0e094ea3b01df0@https://storage.googleapis.com/k8s-artifacts-cni/release/v0.9.1/cni-plugins-linux-arm64-v0.9.1.tgz
+  - 87a4219c54552797ffd38790b72832372a90eceb7c8e451c36a682093d57dae6@https://download.docker.com/linux/static/stable/aarch64/docker-20.10.11.tgz
+CAs:
+  etcd-clients-ca-cilium: |
+    -----BEGIN CERTIFICATE-----
+    MIIDCjCCAfKgAwIBAgIMFszdzNKqM6hwvJs1MA0GCSqGSIb3DQEBCwUAMCExHzAd
+    BgNVBAMTFmV0Y2QtY2xpZW50cy1jYS1jaWxpdW0wHhcNMjIwMTIxMDk1NzE1WhcN
+    MzIwMTIxMDk1NzE1WjAhMR8wHQYDVQQDExZldGNkLWNsaWVudHMtY2EtY2lsaXVt
+    MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAys2e7KhQ1qBsapOufUDx
+    ZJvDoW6bZoKRakxg26z/dj5ZSOVtgXZ9ArSO6GJ9mrw4EbE9TBqzH7HEnqoHzLOV
+    2p4zjRUFA4CN072cA/resyeiZGNh6cedFSncfVUB9RdZsrHw4JNRgJHEOwLwI7u7
+    y2PkWGNaBoJ0SeD6JVEHaxK1P7VGsrgbv/DuzXtEYtzDJ538D5XeEIsNQf7f9ZB+
+    ZQpwFnt5l0fdhLMi8KDHiydlgiRPkh+fJRrZytzNqubg6reAOwX4kaSRq7jyly7R
+    oLaNg2SV7KGBXs59psYkk6M/+CQ+3jP/lU31cuRPuF+F/2/CZPTzwep3u6PWeHAQ
+    EQIDAQABo0IwQDAOBgNVHQ8BAf8EBAMCAQYwDwYDVR0TAQH/BAUwAwEB/zAdBgNV
+    HQ4EFgQUQvIDdbFHWUpdVmk6YkoFD2MpDiswDQYJKoZIhvcNAQELBQADggEBAIqo
+    k07i2vhqTiyTKRqH+O0BW3R91CHevy4H4Sn+mg5kF4CYm3fiZBTVqTBrDbTAobZc
+    dwF4b79euAFQKdNVpw03So1/IcdnmmgvmwSaC5vOqrW1U1VsoTp4ndDV5/6bMS52
+    f4y2tN1S7RGhxXjpKkbUWxatzrIM9cqcbLuYFAg/hbFFHnIwD61wZagmo96dv4bu
+    A1eeL8tcmBTw593JInWsxk+zTKp+nB8ix4PZ7ituBWAO39M8dahapcfObImXU/aR
+    egC86mTowQ/4/eI1I6XGX6Wmvyq8Y1x6nasroYxVC5yXaIF47iwjK6cUHhQa20Zh
+    80QsMXle5CBe433Bw1A=
+    -----END CERTIFICATE-----
+  kubernetes-ca: |
+    -----BEGIN CERTIFICATE-----
+    MIIC+DCCAeCgAwIBAgIMFszdzQ0fE3hbWDAXMA0GCSqGSIb3DQEBCwUAMBgxFjAU
+    BgNVBAMTDWt1YmVybmV0ZXMtY2EwHhcNMjIwMTIxMDk1NzE3WhcNMzIwMTIxMDk1
+    NzE3WjAYMRYwFAYDVQQDEw1rdWJlcm5ldGVzLWNhMIIBIjANBgkqhkiG9w0BAQEF
+    AAOCAQ8AMIIBCgKCAQEAwe2znFeXEnFHl3vbvQDTggr6CQ9b6GYjL5Bs1tst4yEm
+    4OHNVLOPNKZYJKdsJiF0n5nZMYV1sl68/26UzHbQ6dPHC+flPdqY+yFcjvQVx2ee
+    r3NqwJ1c2mETosMY3eqJvHX5a7g9mpnxlJaF2xhYSCHg3sH+3FNTVLK2WcQCfzi3
+    +FtC+gpjJwkRfqOrTbOX6pyfblp5xjTHk/4TvqrLd8oy8J3JI/lbx6ahULo3+v1U
+    Dzd/143XNBEV+GoGBH453RLdL1RHi6aRqJi0subRMZla2zp0C4fR0n84NrYxEQjn
+    NDN9xrSS1L65zNMOu7lQ3rzNMvDD6NO+jabaicldwwIDAQABo0IwQDAOBgNVHQ8B
+    Af8EBAMCAQYwDwYDVR0TAQH/BAUwAwEB/zAdBgNVHQ4EFgQUKJp2QQVwJKiVbIBs
+    vQMDXZw6uBYwDQYJKoZIhvcNAQELBQADggEBABXDzObvnChl7whs9ZEhEmrCqZX6
+    EDxLhIsTz7U6T56QBSo/9aQ6n3kQD0FpcQe+Ud3/lya0pSpMAZZObuyO9yJuOzcp
+    0HXBOZ4VwmK7vQhwskGAs/kou8YA/i4Rn29ilNlynAoKnppfbmzT0FoAJ94Hwc72
+    xcppyJqp7xU7nI+VHrB0r7YuyfOmlC0WPrsW2vuP9uswFQ1CbDZuhJWHw529lbju
+    dbMt0eSrDtYB0LtuSXYw7yoGjrRbGHoj/6psrqfuKZq5pditK7L/Rxf7LcLQpkNm
+    hGrOGRfnkiWKaJFdepT8hylbLQ42AoGwm2izmsibffFIIrR7PDPgBEd+g5M=
+    -----END CERTIFICATE-----
+ClusterName: k8s.vpc-apne1.dev.svoe.link
+Hooks:
+- null
+- null
+KeypairIDs:
+  etcd-clients-ca-cilium: "7056338504579483384470608693"
+  kubernetes-ca: "7056338508791721020056154135"
+KubeletConfig:
+  anonymousAuth: false
+  cgroupDriver: systemd
+  cgroupRoot: /
+  cloudProvider: aws
+  clusterDNS: 100.64.0.10
+  clusterDomain: cluster.local
+  enableDebuggingHandlers: true
+  evictionHard: memory.available<100Mi,nodefs.available<10%,nodefs.inodesFree<5%,imagefs.available<10%,imagefs.inodesFree<5%
+  featureGates:
+    CSIMigrationAWS: "true"
+    InTreePluginAWSUnregister: "true"
+  hostnameOverride: '@aws'
+  kubeconfigPath: /var/lib/kubelet/kubeconfig
+  logLevel: 2
+  networkPluginName: cni
+  nodeLabels:
+    kops.k8s.io/instancegroup: nodes-on-demand
+    kubernetes.io/role: node
+    node-role.kubernetes.io/node: ""
+  nonMasqueradeCIDR: 100.64.0.0/10
+  podManifestPath: /etc/kubernetes/manifests
+  protectKernelDefaults: true
+UpdatePolicy: automatic
+channels:
+- s3://dev-kops-s3/k8s.vpc-apne1.dev.svoe.link/addons/bootstrap-channel.yaml
+containerdConfig:
+  logLevel: info
+  version: 1.4.12
