@@ -130,9 +130,9 @@ with open(PATH_TO_INPUT) as json_file:
                         'ingress': [
                             {
                                 'description': 'Connectivity test',
-                                'from_port': 8000,
-                                'protocol': 'tcp',
-                                'to_port': 8000,
+                                'from_port': 0,
+                                'protocol': -1, # TODO figure out security group rules and ports to open
+                                'to_port': 0,
                                 'cidr_blocks': ["0.0.0.0/0"], # TODO use vpc_cidrs
 
                                 # Below fields are only needed for compile
@@ -141,19 +141,19 @@ with open(PATH_TO_INPUT) as json_file:
                                 'security_groups': [],
                                 'self': False
                             },
-                            {
-                                'description': 'Cilium etcd',
-                                'from_port': 2379, # TODO this is duplicate??
-                                'protocol': 'tcp',
-                                'to_port': 2379,
-                                'cidr_blocks': ["0.0.0.0/0"],  # TODO use vpc_cidrs
-
-                                # Below fields are only needed for compile
-                                'ipv6_cidr_blocks': [],
-                                'prefix_list_ids': [],
-                                'security_groups': [],
-                                'self': False
-                            },
+                            # {
+                            #     'description': 'Cilium etcd',
+                            #     'from_port': 2379, # TODO this is duplicate??
+                            #     'protocol': 'tcp',
+                            #     'to_port': 2379,
+                            #     'cidr_blocks': ["0.0.0.0/0"],  # TODO use vpc_cidrs
+                            #
+                            #     # Below fields are only needed for compile
+                            #     'ipv6_cidr_blocks': [],
+                            #     'prefix_list_ids': [],
+                            #     'security_groups': [],
+                            #     'self': False
+                            # },
                         ],
                         'provider': get_provider(vpc_name)
                     }
