@@ -27,5 +27,6 @@ cryptostore.log*
 terraform/.terraform
 kops/clusters/*
 kops/cilium/*
-terraform/terraform.state
-terraform/terraform.state.backup
+
+terraform/terraform.tfstate
+terraform/terraform.tfstate.backup
