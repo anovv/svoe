@@ -26,9 +26,10 @@ cluster:
 # DNS records show up after some time, cilium-operator fails and waits long to restart
 # need to ssh and restart cilium-operator pod
 
-# cilium pods labels: k8s-app=cilium
-# cilium-operator: io.cilium/app
-# etcd-manager-cilium: k8s-app=etcd-manager-cilium
+# cilium pods labels: k8s-app=cilium 4
+# cilium-operator: io.cilium/app 3
+# etcd-manager-cilium: k8s-app=etcd-manager-cilium 1
+# clustermesh-apiserver: k8s-app=clustermesh-apiserver 2
 
 # python server
 # python -m http.server 8000

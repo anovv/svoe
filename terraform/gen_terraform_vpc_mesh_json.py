@@ -97,6 +97,7 @@ with open(PATH_TO_INPUT) as json_file:
             }
         }
 
+        # TODO add subnet tags!!! (https://kops.sigs.k8s.io/run_in_existing_vpc/)
         # populate VPCs modules vars
         inputs_to_skip = ['region'] # TODO
         for k in input_config[vpc_name]:

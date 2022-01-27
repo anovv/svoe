@@ -37,4 +37,4 @@ echo "Created secret sshpublickey"
 
 kops update cluster --out=$TERRAFORM_OUTPUT_PATH --target=terraform --state $STATE --name $CLUSTER_NAME
 echo "Terraform output in ${TERRAFORM_OUTPUT_PATH}"
-echo "Done."
+echo "Config gen done"
