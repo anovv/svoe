@@ -11,8 +11,9 @@ CLUSTER_NAME=$(echo $CLUSTER_CONFIG | jq -r .cluster_name)
 OUTPUT_PATH="clusters/${CLUSTER_NAME}"
 TERRAFORM_OUTPUT_PATH="${OUTPUT_PATH}/terraform/"
 
-./gen_cluster_config.sh $1
+./_gen_cluster_config.sh $1
 
 cd $TERRAFORM_OUTPUT_PATH
 terraform init
+terraform apply --auto-approve
 echo "Cluster creation done"
