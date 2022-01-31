@@ -61,7 +61,6 @@ spec:
   kubelet:
     anonymousAuth: false
   networking:
-#    kubenet: {}
     cilium:
       etcdManaged: true
       enableNodePort: true # BPF support

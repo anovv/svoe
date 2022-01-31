@@ -16,4 +16,5 @@ TERRAFORM_OUTPUT_PATH="${OUTPUT_PATH}/terraform/"
 cd $TERRAFORM_OUTPUT_PATH
 terraform init
 terraform apply --auto-approve
+# TODO kops export config
 echo "Cluster creation done"
