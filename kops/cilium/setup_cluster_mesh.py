@@ -16,8 +16,6 @@ def get_cilium_cluster_name(cluster_id, vpc_name):
 p = subprocess.getoutput('cd ../../terraform && terraform output -json')
 obj = json.loads(p)
 
-res = []
-
 for cluster_id in obj['multicluster_config_output']['value']:
     # cilium_multicluster_config[cluster_id] = {'cluster_name': cluster_config['cluster_name'] }
     cluster_config = obj['multicluster_config_output']['value'][cluster_id]
@@ -47,4 +45,6 @@ for pair in pairs:
     exe = f'cilium clustermesh connect --context {cluster_name1} --destination-context {cluster_name2}'
     out = subprocess.getoutput(exe)
     print(out)
+
+# call ./restart_cilium_pods.sh for each cluster
 

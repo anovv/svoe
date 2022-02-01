@@ -1,0 +1,11 @@
+helmDefaults:
+  kubeContext: k8s.vpc-apse1.dev.svoe.link
+releases:
+- chart: bitnami/metrics-server
+  name: metrics-server
+  namespace: kube-system
+  values:
+  - ../../release_sets_values/common/bitnami/metrics-server/values.yaml
+repositories:
+- name: bitnami
+  url: https://charts.bitnami.com/bitnami
