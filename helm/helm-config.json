@@ -2,24 +2,21 @@
   "config": {
     "1": [
       "common"
-    ],
-    "2": [
-      "common"
     ]
   },
   "release_sets": {
     "common": {
       "repositories": [
         {
-          "name": "bitnami",
-          "url": "https://charts.bitnami.com/bitnami"
+          "name": "metrics-server",
+          "url": "https://kubernetes-sigs.github.io/metrics-server/"
         }
       ],
       "releases": [
         {
           "name": "metrics-server",
           "namespace": "kube-system",
-          "chart": "bitnami/metrics-server"
+          "chart": "metrics-server/metrics-server"
         }
       ]
     }

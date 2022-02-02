@@ -22,6 +22,8 @@ with open('helm-config.json') as json_file:
     helm_config = json.load(json_file)
 
 for cluster_id in tf_config['multicluster_config_output']['value']:
+    if str(cluster_id) not in helm_config['config']:
+        continue
     cluster_config = tf_config['multicluster_config_output']['value'][cluster_id]
     cluster_name = cluster_config['cluster_name']
     helmfile = {'helmDefaults': {'kubeContext': cluster_name}}
