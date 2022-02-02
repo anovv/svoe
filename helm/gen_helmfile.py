@@ -4,13 +4,23 @@ import subprocess
 import json
 import yaml
 import os
+import os.path
 
 GLOBAL_HELMFILE_PATH = './helmfile.yaml'
 global_helmfile = {'helmfiles': []}
 
-def get_values_path(release_set_name, chart):
+def read_values(release_set_name, chart):
     # chart example: bitnami/metrics-server, contains /
-    return '../../release_sets_values/' + release_set_name + '/' + chart + '/values.yaml'
+    path = 'release_sets_values/' + release_set_name + '/' + chart + '/values.yaml'
+
+    if not os.path.exists(path):
+        print(f'No values file for {chart}')
+        return {}
+
+    v = yaml.safe_load(open(path))
+    if v is None:
+        return {}
+    return v
 
 def get_helmfile_path(cluster_name):
     return 'helmfiles_gen/' + cluster_name + '/helmfile.yaml'
@@ -26,17 +36,34 @@ for cluster_id in tf_config['multicluster_config_output']['value']:
         continue
     cluster_config = tf_config['multicluster_config_output']['value'][cluster_id]
     cluster_name = cluster_config['cluster_name']
-    helmfile = {'helmDefaults': {'kubeContext': cluster_name}}
-    helmfile['repositories'] = []
-    helmfile['releases'] = []
+    helmfile = {'helmDefaults': {
+        'kubeContext': cluster_name,
+        'recreatePods': True
+    }, 'repositories': [], 'releases': []}
     for release_set_name in helm_config['config'][str(cluster_id)]:
         release_set = helm_config['release_sets'][release_set_name]
         for repository in release_set['repositories']:
             helmfile['repositories'].append(repository)
         for release in release_set['releases']:
-            values_path = get_values_path(release_set_name, release['chart'])
             r = release.copy()
-            r['values'] = [values_path]
+            r['set'] = []
+            values = read_values(release_set_name, release['chart'])
+            for k in values:
+                # TODO figure out typing for list of values
+                r['set'].append({
+                    'name': k,
+                    'value': values[k]
+                })
+
+            # from terraform
+            if 'tf_values' in release:
+                del r['tf_values']
+                for k in release['tf_values']:
+                    r['set'].append({
+                        'name': k,
+                        'value': cluster_config[release['tf_values'][k]]
+                    })
+
             helmfile['releases'].append(r)
 
     helmfile_path = get_helmfile_path(cluster_name)

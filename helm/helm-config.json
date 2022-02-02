@@ -10,6 +10,10 @@
         {
           "name": "metrics-server",
           "url": "https://kubernetes-sigs.github.io/metrics-server/"
+        },
+        {
+          "name": "autoscaler",
+          "url": "https://kubernetes.github.io/autoscaler"
         }
       ],
       "releases": [
@@ -17,6 +21,14 @@
           "name": "metrics-server",
           "namespace": "kube-system",
           "chart": "metrics-server/metrics-server"
+        },
+        {
+          "name": "autoscaler",
+          "namespace": "kube-system",
+          "chart": "autoscaler/cluster-autoscaler",
+          "tf_values": {
+            "autoDiscovery.clusterName": "cluster_name"
+          }
         }
       ]
     }

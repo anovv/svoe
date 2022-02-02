@@ -1,11 +1,23 @@
 helmDefaults:
   kubeContext: k8s.vpc-apne1.dev.svoe.link
+  recreatePods: true
 releases:
 - chart: metrics-server/metrics-server
   name: metrics-server
   namespace: kube-system
-  values:
-  - ../../release_sets_values/common/metrics-server/metrics-server/values.yaml
+  set:
+  - name: service.type
+    value: ClusterIP
+  - name: apiService.create
+    value: true
+- chart: autoscaler/cluster-autoscaler
+  name: autoscaler
+  namespace: kube-system
+  set:
+  - name: autoDiscovery.clusterName
+    value: k8s.vpc-apne1.dev.svoe.link
 repositories:
 - name: metrics-server
   url: https://kubernetes-sigs.github.io/metrics-server/
+- name: autoscaler
+  url: https://kubernetes.github.io/autoscaler
