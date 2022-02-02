@@ -1,0 +1,5 @@
+enableSqsTerminationDraining: False
+enableSpotInterruptionDraining: True
+enableScheduledEventDraining: False
+enableRebalanceMonitoring: True
+managedAsgTag: aws-node-termination-handler/managed

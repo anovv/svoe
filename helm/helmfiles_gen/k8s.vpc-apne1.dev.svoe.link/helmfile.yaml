@@ -16,8 +16,24 @@ releases:
   set:
   - name: autoDiscovery.clusterName
     value: k8s.vpc-apne1.dev.svoe.link
+- chart: eks/aws-node-termination-handler
+  name: aws-node-termination-handler
+  namespace: kube-system
+  set:
+  - name: enableSqsTerminationDraining
+    value: false
+  - name: enableSpotInterruptionDraining
+    value: true
+  - name: enableScheduledEventDraining
+    value: false
+  - name: enableRebalanceMonitoring
+    value: true
+  - name: managedAsgTag
+    value: aws-node-termination-handler/managed
 repositories:
 - name: metrics-server
   url: https://kubernetes-sigs.github.io/metrics-server/
 - name: autoscaler
   url: https://kubernetes.github.io/autoscaler
+- name: eks
+  url: https://aws.github.io/eks-charts/

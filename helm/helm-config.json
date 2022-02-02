@@ -14,6 +14,10 @@
         {
           "name": "autoscaler",
           "url": "https://kubernetes.github.io/autoscaler"
+        },
+        {
+          "name": "eks",
+          "url": "https://aws.github.io/eks-charts/"
         }
       ],
       "releases": [
@@ -29,6 +33,11 @@
           "tf_values": {
             "autoDiscovery.clusterName": "cluster_name"
           }
+        },
+        {
+          "name": "aws-node-termination-handler",
+          "namespace": "kube-system",
+          "chart": "eks/aws-node-termination-handler"
         }
       ]
     }
