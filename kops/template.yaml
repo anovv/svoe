@@ -1,9 +1,14 @@
-
 apiVersion: kops.k8s.io/v1alpha2
 kind: Cluster
 metadata:
   name: {{.cluster_name}}
 spec:
+  # Needed for cluster autoscaler
+  additionalPolicies:
+    node: |
+      [
+        {"Effect":"Allow","Action":["autoscaling:DescribeAutoScalingGroups","autoscaling:DescribeAutoScalingInstances","autoscaling:DescribeLaunchConfigurations","autoscaling:DescribeTags","autoscaling:SetDesiredCapacity","autoscaling:TerminateInstanceInAutoScalingGroup","ec2:DescribeInstanceTypes","ec2:DescribeLaunchTemplateVersions"],"Resource":"*"}
+      ]
   api:
     dns: {}
   authorization:
@@ -107,8 +112,11 @@ metadata:
     kops.k8s.io/cluster: {{$.cluster_name}}
   name: master-{{.}}
 spec:
+  cloudLabels:
+    k8s.io/cluster-autoscaler/enabled: ""
+    k8s.io/cluster-autoscaler/{{$.cluster_name}}: ""
   machineType: t3.medium
-  maxSize: 1
+  maxSize: 2
   minSize: 1
   role: Master
   rootVolumeSize: 20
@@ -128,8 +136,11 @@ metadata:
     kops.k8s.io/cluster: {{.cluster_name}}
   name: nodes-on-demand
 spec:
+  cloudLabels:
+    k8s.io/cluster-autoscaler/enabled: ""
+    k8s.io/cluster-autoscaler/{{.cluster_name}}: ""
   machineType: t3.small
-  maxSize: 2
+  maxSize: 5
   minSize: 1
   role: Node
   rootVolumeSize: 20
@@ -153,6 +164,9 @@ spec:
 #    kops.k8s.io/cluster: {{.cluster_name}}
 #  name: nodes-spot
 #spec:
+#  cloudLabels:
+#    k8s.io/cluster-autoscaler/enabled: ""
+#    k8s.io/cluster-autoscaler/{{.cluster_name}}: ""
 #  machineType: t3.small
 #  maxPrice: "0.0273" # on-demand price
 #  maxSize: 2
