@@ -1,8 +1,8 @@
 environments:
   default:
     values:
+    - clusterName: k8s.vpc-apne1.dev.svoe.link
     - clusterId: '1'
-      clusterName: k8s.vpc-apne1.dev.svoe.link
 helmDefaults:
   kubeContext: k8s.vpc-apne1.dev.svoe.link
 releases:

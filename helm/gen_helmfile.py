@@ -29,10 +29,10 @@ for cluster_id in tf_config['multicluster_config_output']['value']:
 
     # set tf values as default env values
     cluster_name = cluster_config['cluster_name']
-    env_vals = [{
-        'clusterName': cluster_name,
-        'clusterId': cluster_id
-    }]
+    env_vals = [
+        {'clusterName': cluster_name},
+        {'clusterId': cluster_id}
+    ]
 
     helmfile = {'helmDefaults': {
         'kubeContext': cluster_name,
