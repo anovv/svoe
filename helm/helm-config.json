@@ -1,10 +1,45 @@
 {
   "config": {
     "1": [
-      "common"
+      "common",
+      "monitoring_observer"
+    ],
+    "2": [
+      "common",
+      "monitoring_observee"
     ]
   },
   "release_sets": {
+    "monitoring_observee": {
+      "repositories": [
+        {
+          "name": "prometheus-community",
+          "url": "https://prometheus-community.github.io/helm-charts"
+        }
+      ],
+      "releases": [
+        {
+          "name": "kube-prometheus-stack",
+          "namespace": "monitoring_observee_{{ .Values | get \"clusterId\"}}",
+          "chart": "prometheus-community/kube-prometheus-stack"
+        }
+      ]
+    },
+    "monitoring_observer": {
+      "repositories": [
+        {
+          "name": "prometheus-community",
+          "url": "https://prometheus-community.github.io/helm-charts"
+        }
+      ],
+      "releases": [
+        {
+          "name": "kube-prometheus-stack",
+          "namespace": "monitoring_observer",
+          "chart": "prometheus-community/kube-prometheus-stack"
+        }
+      ]
+    },
     "common": {
       "repositories": [
         {
@@ -29,10 +64,7 @@
         {
           "name": "autoscaler",
           "namespace": "kube-system",
-          "chart": "autoscaler/cluster-autoscaler",
-          "tf_values": {
-            "autoDiscovery.clusterName": "cluster_name"
-          }
+          "chart": "autoscaler/cluster-autoscaler"
         },
         {
           "name": "aws-node-termination-handler",

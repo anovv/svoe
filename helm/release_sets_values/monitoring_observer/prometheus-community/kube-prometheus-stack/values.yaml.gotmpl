@@ -1,0 +1,46 @@
+grafana:
+  service:
+    type: NodePort
+    annotations:
+      dns.alpha.kubernetes.io/external: grafana.{{ .Values | get "clusterName" }}
+  persistence:
+    enabled: true
+    type: pvc
+    storageClassName: default
+    accessModes:
+    - ReadWriteOnce
+    size: 2Gi
+    finalizers:
+    - kubernetes.io/pvc-protection
+  sidecar:
+    dashboards:
+      multicluster:
+        global:
+          enabled: true
+        etcd:
+          enabled: true
+
+prometheus:
+  thanosService:
+    enabled: true
+    annotations:
+      io.cilium/global-service: "true"
+  prometheusSpec:
+    serviceMonitorSelectorNilUsesHelmValues: false
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          accessModes:
+          - ReadWriteOnce
+          resources:
+            requests:
+              storage: 2Gi
+    externalLabels:
+      cluster_name: {{ .Values | get "clusterName" }}
+  server:
+    persistentVolume:
+      enabled: true
+
+kubelet:
+  serviceMonitor:
+    https: true

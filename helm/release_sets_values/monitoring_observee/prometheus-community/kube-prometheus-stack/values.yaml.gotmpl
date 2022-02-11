@@ -1,0 +1,32 @@
+grafana:
+  enabled: false
+
+prometheus:
+  thanosService:
+    enabled: true
+    annotations:
+      io.cilium/global-service: "true"
+  prometheusSpec:
+    serviceMonitorSelectorNilUsesHelmValues: false
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          accessModes:
+          - ReadWriteOnce
+          resources:
+            requests:
+              storage: 2Gi
+    externalLabels:
+      cluster_name: {{ .Values | get "clusterName" }}
+  server:
+    persistentVolume:
+      enabled: true
+
+alertmanager:
+  service:
+    annotations:
+      io.cilium/global-service: "true"
+
+kubelet:
+  serviceMonitor:
+    https: true

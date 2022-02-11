@@ -1,0 +1,16 @@
+helmDefaults:
+  kubeContext: k8s.vpc-apne1.dev.svoe.link
+  recreatePods: true
+environments:
+  default:
+    values:
+      - tf_params.yaml
+repositories:
+- name: metrics-server
+  url: https://kubernetes-sigs.github.io/metrics-server/
+releases:
+- chart: metrics-server/metrics-server
+  name: metrics-server
+  namespace: kube-system
+  values:
+    - values/values-templ.yaml.gotmpl

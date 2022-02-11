@@ -1,35 +1,31 @@
+environments:
+  default:
+    values:
+    - clusterId: '1'
+      clusterName: k8s.vpc-apne1.dev.svoe.link
 helmDefaults:
   kubeContext: k8s.vpc-apne1.dev.svoe.link
-  recreatePods: true
 releases:
 - chart: metrics-server/metrics-server
   name: metrics-server
   namespace: kube-system
-  set:
-  - name: service.type
-    value: ClusterIP
-  - name: apiService.create
-    value: true
+  values:
+  - ../../release_sets_values/common/metrics-server/metrics-server/values.yaml.gotmpl
 - chart: autoscaler/cluster-autoscaler
   name: autoscaler
   namespace: kube-system
-  set:
-  - name: autoDiscovery.clusterName
-    value: k8s.vpc-apne1.dev.svoe.link
+  values:
+  - ../../release_sets_values/common/autoscaler/cluster-autoscaler/values.yaml.gotmpl
 - chart: eks/aws-node-termination-handler
   name: aws-node-termination-handler
   namespace: kube-system
-  set:
-  - name: enableSqsTerminationDraining
-    value: false
-  - name: enableSpotInterruptionDraining
-    value: true
-  - name: enableScheduledEventDraining
-    value: false
-  - name: enableRebalanceMonitoring
-    value: true
-  - name: managedAsgTag
-    value: aws-node-termination-handler/managed
+  values:
+  - ../../release_sets_values/common/eks/aws-node-termination-handler/values.yaml.gotmpl
+- chart: prometheus-community/kube-prometheus-stack
+  name: kube-prometheus-stack
+  namespace: monitoring_observer
+  values:
+  - ../../release_sets_values/monitoring_observer/prometheus-community/kube-prometheus-stack/values.yaml.gotmpl
 repositories:
 - name: metrics-server
   url: https://kubernetes-sigs.github.io/metrics-server/
@@ -37,3 +33,5 @@ repositories:
   url: https://kubernetes.github.io/autoscaler
 - name: eks
   url: https://aws.github.io/eks-charts/
+- name: prometheus-community
+  url: https://prometheus-community.github.io/helm-charts
