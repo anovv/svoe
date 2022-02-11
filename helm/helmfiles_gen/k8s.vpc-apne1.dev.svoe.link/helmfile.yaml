@@ -26,6 +26,11 @@ releases:
   namespace: monitoring_observer
   values:
   - ../../release_sets_values/monitoring_observer/prometheus-community/kube-prometheus-stack/values.yaml.gotmpl
+- chart: bitnami/thanos
+  name: thanos
+  namespace: monitoring_observer
+  values:
+  - ../../release_sets_values/monitoring_observer/bitnami/thanos/values.yaml.gotmpl
 repositories:
 - name: metrics-server
   url: https://kubernetes-sigs.github.io/metrics-server/
@@ -35,3 +40,5 @@ repositories:
   url: https://aws.github.io/eks-charts/
 - name: prometheus-community
   url: https://prometheus-community.github.io/helm-charts
+- name: bitnami
+  url: https://charts.bitnami.com/bitnami
