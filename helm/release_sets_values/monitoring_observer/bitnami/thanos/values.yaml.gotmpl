@@ -7,9 +7,9 @@ objstoreConfig: |-
     secret_key: KEY
     insecure: true
 querier:
-  stores:
-    - SIDECAR-SERVICE-IP-ADDRESS-1:10901
-    - SIDECAR-SERVICE-IP-ADDRESS-2:10901
+  stores: {{range $cluster-id := .Values | get "clusterIds"}} {{$cluster-id service name here:10901}} {{end}}
+#    - SIDECAR-SERVICE-IP-ADDRESS-1:10901
+#    - SIDECAR-SERVICE-IP-ADDRESS-2:10901
 bucketweb:
   enabled: true
 compactor:

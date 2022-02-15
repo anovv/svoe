@@ -25,7 +25,22 @@ prometheus:
     enabled: true
     annotations:
       io.cilium/global-service: "true"
+  thanosServiceExternal:
+    enabled: true
+    annotations:
+      io.cilium/global-service: "true"
+      io.cilium/shared-service: "false"
+    type: ClusterIP
+
   prometheusSpec:
+    # retention: 1d ??
+    # externalUrl: "" ??
+    thanos:
+      image: quay.io/thanos/thanos:v0.24.0
+      version: v0.24.0
+      objectStorageConfig:
+        name: thanos-objstore-config
+        key: thanos-objstore-config.yaml
     serviceMonitorSelectorNilUsesHelmValues: false
     storageSpec:
       volumeClaimTemplate:
@@ -40,6 +55,11 @@ prometheus:
   server:
     persistentVolume:
       enabled: true
+
+alertmanager:
+  service:
+    annotations:
+      io.cilium/global-service: "true"
 
 kubelet:
   serviceMonitor:

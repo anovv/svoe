@@ -20,8 +20,16 @@
       "releases": [
         {
           "name": "kube-prometheus-stack",
-          "namespace": "monitoring_observee_{{ .Values | get \"clusterId\"}}",
-          "chart": "prometheus-community/kube-prometheus-stack"
+          "namespace": "monitoring",
+          "chart": "prometheus-community/kube-prometheus-stack",
+          "hooks": [
+            {
+              "events": ["presync"],
+              "showlogs": true,
+              "command": "../../scripts/thanos/setup_thanos.sh",
+              "args": ["{{`{{.Values | get \"clusterName\"}}`}}", "{{`{{.Release.Namespace}}`}}"]
+            }
+          ]
         }
       ]
     },
@@ -39,13 +47,16 @@
       "releases": [
         {
           "name": "kube-prometheus-stack",
-          "namespace": "monitoring_observer",
-          "chart": "prometheus-community/kube-prometheus-stack"
-        },
-        {
-          "name": "thanos",
-          "namespace": "monitoring_observer",
-          "chart": "bitnami/thanos"
+          "namespace": "monitoring",
+          "chart": "prometheus-community/kube-prometheus-stack",
+          "hooks": [
+            {
+              "events": ["presync"],
+              "showlogs": true,
+              "command": "../../scripts/thanos/setup_thanos.sh",
+              "args": ["{{`{{.Values | get \"clusterName\"}}`}}", "{{`{{.Release.Namespace}}`}}"]
+            }
+          ]
         }
       ]
     },

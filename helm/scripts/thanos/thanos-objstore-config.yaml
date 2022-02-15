@@ -1,0 +1,7 @@
+type: s3
+config:
+  bucket: svoe-prometheus-thanos
+  endpoint: s3.ap-northeast-1.amazonaws.com
+  access_key: ${KEY}
+  secret_key: ${SECRET}
+  insecure: true

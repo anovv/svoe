@@ -22,8 +22,16 @@ releases:
   values:
   - ../../release_sets_values/common/eks/aws-node-termination-handler/values.yaml.gotmpl
 - chart: prometheus-community/kube-prometheus-stack
+  hooks:
+  - args:
+    - '{{`{{.Values | get "clusterName"}}`}}'
+    - '{{`{{.Release.Namespace}}`}}'
+    command: ../../scripts/thanos/setup_thanos.sh
+    events:
+    - presync
+    showlogs: true
   name: kube-prometheus-stack
-  namespace: monitoring_observee_{{ .Values | get "clusterId"}}
+  namespace: monitoring
   values:
   - ../../release_sets_values/monitoring_observee/prometheus-community/kube-prometheus-stack/values.yaml.gotmpl
 repositories:
