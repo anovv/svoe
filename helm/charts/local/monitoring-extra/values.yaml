@@ -1,2 +1,8 @@
-awsKey: TEST
-awsSecret: TEST
+awsKey: test
+awsSecret: test
+isObserver: true
+clusterId: 1
+clusterIds:
+  first: 1
+  second: 2
+  third: 3

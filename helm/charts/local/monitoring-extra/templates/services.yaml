@@ -1,0 +1,11 @@
+{{- $localClusterId := .Values.clusterId}}
+{{ if .Values.isObserver }}
+{{- range .Values.clusterIds }}
+{{ if not (eq . $localClusterId) }}
+{{- template "monitoring-extra.thanos-global-service" . }}
+---
+{{ end }}
+{{ end }}
+{{ else }}
+{{- template "monitoring-extra.thanos-global-service" .Values.clusterId }}
+{{ end }}

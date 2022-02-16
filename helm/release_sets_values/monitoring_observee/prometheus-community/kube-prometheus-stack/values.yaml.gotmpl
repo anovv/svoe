@@ -1,3 +1,7 @@
+commonLabels:
+  cluster-name: {{ .Values | get "clusterName" }}
+  cluster-id: {{ .Values | get "clusterId" | quote }}
+
 grafana:
   enabled: false
 

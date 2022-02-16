@@ -2,7 +2,10 @@ environments:
   default:
     values:
     - clusterName: k8s.vpc-apse1.dev.svoe.link
-    - clusterId: '2'
+    - clusterId: 2
+    - clusterIds:
+      - 1
+      - 2
     - awsKey: testawskey
     - awsSecret: testawssecret
 helmDefaults:

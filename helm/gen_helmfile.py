@@ -27,6 +27,8 @@ tf_config = json.loads(tf)
 with open('helm-config.json') as json_file:
     helm_config = json.load(json_file)
 
+cluster_ids = [int(cluster_id) for cluster_id in tf_config['multicluster_config_output']['value']]
+
 for cluster_id in tf_config['multicluster_config_output']['value']:
     if str(cluster_id) not in helm_config['config']:
         continue
@@ -36,7 +38,8 @@ for cluster_id in tf_config['multicluster_config_output']['value']:
     cluster_name = cluster_config['cluster_name']
     env_vals = [
         {'clusterName': cluster_name},
-        {'clusterId': cluster_id},
+        {'clusterId': int(cluster_id)},
+        {'clusterIds': cluster_ids},
         # TODO gen secrets
         {'awsKey': 'testawskey'},
         {'awsSecret': 'testawssecret'},
