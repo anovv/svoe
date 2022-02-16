@@ -21,15 +21,12 @@
         {
           "name": "kube-prometheus-stack",
           "namespace": "monitoring",
-          "chart": "prometheus-community/kube-prometheus-stack",
-          "hooks": [
-            {
-              "events": ["presync"],
-              "showlogs": true,
-              "command": "../../scripts/thanos/setup_thanos.sh",
-              "args": ["{{`{{.Values | get \"clusterName\"}}`}}", "{{`{{.Release.Namespace}}`}}"]
-            }
-          ]
+          "chart": "prometheus-community/kube-prometheus-stack"
+        },
+        {
+          "name": "monitoring-extra",
+          "namespace": "monitoring",
+          "chart": "../../charts/local/monitoring-extra"
         }
       ]
     },
@@ -48,15 +45,12 @@
         {
           "name": "kube-prometheus-stack",
           "namespace": "monitoring",
-          "chart": "prometheus-community/kube-prometheus-stack",
-          "hooks": [
-            {
-              "events": ["presync"],
-              "showlogs": true,
-              "command": "../../scripts/thanos/setup_thanos.sh",
-              "args": ["{{`{{.Values | get \"clusterName\"}}`}}", "{{`{{.Release.Namespace}}`}}"]
-            }
-          ]
+          "chart": "prometheus-community/kube-prometheus-stack"
+        },
+        {
+          "name": "monitoring-extra",
+          "namespace": "monitoring",
+          "chart": "../../charts/local/monitoring-extra"
         }
       ]
     },

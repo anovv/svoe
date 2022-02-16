@@ -1,0 +1,6 @@
+apiVersion: v2
+name: monitoring-extra
+description: Extra stuff for monitoring, Thanos secrets and Cilium global services
+type: application
+version: 0.1.0
+appVersion: "0.1.0"

@@ -11,6 +11,11 @@ global_helmfile = {'helmfiles': []}
 
 def get_values_path(release_set_name, chart):
     # chart example: bitnami/metrics-server, contains /
+    # TODO template value files instead
+    # special case: local
+    if '/local/' in chart:
+        split = chart.split('/')
+        chart = split[-2] + '/' + split[-1]
     return '../../release_sets_values/' + release_set_name + '/' + chart + '/values.yaml.gotmpl'
 
 def get_helmfile_path(cluster_name):
@@ -31,7 +36,10 @@ for cluster_id in tf_config['multicluster_config_output']['value']:
     cluster_name = cluster_config['cluster_name']
     env_vals = [
         {'clusterName': cluster_name},
-        {'clusterId': cluster_id}
+        {'clusterId': cluster_id},
+        # TODO gen secrets
+        {'awsKey': 'testawskey'},
+        {'awsSecret': 'testawssecret'},
     ]
 
     helmfile = {'helmDefaults': {

@@ -3,6 +3,8 @@ environments:
     values:
     - clusterName: k8s.vpc-apse1.dev.svoe.link
     - clusterId: '2'
+    - awsKey: testawskey
+    - awsSecret: testawssecret
 helmDefaults:
   kubeContext: k8s.vpc-apse1.dev.svoe.link
 releases:
@@ -22,18 +24,15 @@ releases:
   values:
   - ../../release_sets_values/common/eks/aws-node-termination-handler/values.yaml.gotmpl
 - chart: prometheus-community/kube-prometheus-stack
-  hooks:
-  - args:
-    - '{{`{{.Values | get "clusterName"}}`}}'
-    - '{{`{{.Release.Namespace}}`}}'
-    command: ../../scripts/thanos/setup_thanos.sh
-    events:
-    - presync
-    showlogs: true
   name: kube-prometheus-stack
   namespace: monitoring
   values:
   - ../../release_sets_values/monitoring_observee/prometheus-community/kube-prometheus-stack/values.yaml.gotmpl
+- chart: ../../charts/local/monitoring-extra
+  name: monitoring-extra
+  namespace: monitoring
+  values:
+  - ../../release_sets_values/monitoring_observee/local/monitoring-extra/values.yaml.gotmpl
 repositories:
 - name: metrics-server
   url: https://kubernetes-sigs.github.io/metrics-server/
