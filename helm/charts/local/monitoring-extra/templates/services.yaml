@@ -1,11 +1,18 @@
-{{- $localClusterId := .Values.clusterId}}
-{{ if .Values.isObserver }}
-{{- range .Values.clusterIds }}
-{{ if not (eq . $localClusterId) }}
-{{- template "monitoring-extra.thanos-global-service" . }}
+{{- $localClusterId := .Values.clusterId }}
+{{- $isObserver := .Values.isObserver }}
+{{ if $isObserver }}
+{{- range $clusterId := .Values.clusterIds }}
+{{ if not (eq $localClusterId $clusterId) }}
+{{ $data := dict "clusterId" $clusterId "isObserver" $isObserver}}
+{{- include "monitoring-extra.thanos-global-service" $data }}
+---
+{{- include "monitoring-extra.alertmanager-global-service" $data }}
 ---
 {{ end }}
-{{ end }}
+{{- end }}
 {{ else }}
-{{- template "monitoring-extra.thanos-global-service" .Values.clusterId }}
-{{ end }}
+{{ $data := dict "clusterId" $localClusterId "isObserver" $isObserver}}
+{{- include "monitoring-extra.thanos-global-service" $data }}
+---
+{{- include "monitoring-extra.alertmanager-global-service" $data }}
+{{ end}}

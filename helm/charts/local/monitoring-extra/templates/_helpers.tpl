@@ -1,9 +1,8 @@
 {{- define "monitoring-extra.thanos-global-service" }}
-{{- $clusterId := . }}
 apiVersion: v1
 kind: Service
 metadata:
-  name: thanos-global-cluster-{{ $clusterId }}
+  name: thanos-global-cluster-{{ .clusterId }}
   annotations:
     io.cilium/global-service: "true"
 spec:
@@ -17,8 +16,29 @@ spec:
       protocol: TCP
       port: 10902
       targetPort: http
+  {{ if not .isObserver }}
   selector:
     app.kubernetes.io/name: prometheus
     prometheus: kube-prometheus-stack-prometheus
-    cluster-id: {{ $clusterId | quote }}
+  {{ end }}
+{{- end }}
+{{- define "monitoring-extra.alertmanager-global-service" }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: alertmanager-global-cluster-{{ .clusterId }}
+  annotations:
+    io.cilium/global-service: "true"
+spec:
+  type: ClusterIP
+  ports:
+    - name: http-web
+      protocol: TCP
+      port: 9093
+      targetPort: 9093
+  {{ if not .isObserver }}
+  selector:
+    alertmanager: kube-prometheus-stack-alertmanager
+    app.kubernetes.io/name: alertmanager
+  {{ end }}
 {{- end }}

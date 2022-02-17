@@ -8,14 +8,9 @@ grafana:
 prometheus:
   thanosService:
     enabled: true
-    annotations:
-      io.cilium/global-service: "true"
 
   thanosServiceExternal:
     enabled: true
-    annotations:
-      io.cilium/global-service: "true"
-      io.cilium/shared-service: "false"
     type: ClusterIP
 
   prometheusSpec:
@@ -41,11 +36,6 @@ prometheus:
   server:
     persistentVolume:
       enabled: true
-
-alertmanager:
-  service:
-    annotations:
-      io.cilium/global-service: "true"
 
 kubelet:
   serviceMonitor:
