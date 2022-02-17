@@ -1,13 +1,13 @@
 environments:
   default:
+    secrets:
+    - ../../secrets/shared_secrets.yaml
     values:
     - clusterName: k8s.vpc-apne1.dev.svoe.link
     - clusterId: 1
     - clusterIds:
       - 1
       - 2
-    - awsKey: testawskey
-    - awsSecret: testawssecret
 helmDefaults:
   kubeContext: k8s.vpc-apne1.dev.svoe.link
 releases:

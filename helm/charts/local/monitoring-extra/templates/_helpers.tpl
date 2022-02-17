@@ -1,5 +1,5 @@
 {{- define "monitoring-extra.thanos-global-service" }}
-{{- $clusterId := .}}
+{{- $clusterId := . }}
 apiVersion: v1
 kind: Service
 metadata:

@@ -29,3 +29,6 @@ kops/clusters/*
 
 terraform/terraform.tfstate
 terraform/terraform.tfstate.backup
+
+# helm secret age keys
+helm/secrets/key.txt

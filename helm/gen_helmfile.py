@@ -40,14 +40,14 @@ for cluster_id in tf_config['multicluster_config_output']['value']:
         {'clusterName': cluster_name},
         {'clusterId': int(cluster_id)},
         {'clusterIds': cluster_ids},
-        # TODO gen secrets
-        {'awsKey': 'testawskey'},
-        {'awsSecret': 'testawssecret'},
     ]
 
     helmfile = {'helmDefaults': {
         'kubeContext': cluster_name,
     }, 'repositories': [], 'releases': [], 'environments': {'default': {'values': env_vals}}}
+
+    # Shared secrets file
+    helmfile['environments']['default']['secrets'] = ['../../secrets/shared_secrets.yaml']
 
     # TODO add labels
     for release_set_name in helm_config['config'][str(cluster_id)]:
