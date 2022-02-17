@@ -30,9 +30,6 @@ prometheus:
     enabled: true
 
   # TODO add thanos service monitor?? here or monitoring-extra?
-  thanosServiceExternal:
-    enabled: true
-    type: ClusterIP
 
   prometheusSpec:
     # retention: 1d ??
@@ -54,6 +51,7 @@ prometheus:
               storage: 2Gi
     externalLabels:
       cluster_name: {{ .Values | get "clusterName" }}
+      cluster_id: {{ .Values | get "clusterName" | quote}}
   server:
     persistentVolume:
       enabled: true
