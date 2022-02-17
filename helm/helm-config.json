@@ -51,6 +51,11 @@
           "name": "monitoring-extra",
           "namespace": "monitoring",
           "chart": "../../charts/local/monitoring-extra"
+        },
+        {
+          "name": "thanos",
+          "namespace": "monitoring",
+          "chart": "bitnami/thanos"
         }
       ]
     },

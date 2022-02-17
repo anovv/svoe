@@ -1,35 +1,56 @@
-objstoreConfig: |-
-  type: s3
-  config:
-    bucket: thanos
-    endpoint: {{ include "thanos.minio.fullname" . }}.monitoring.svc.cluster.local:9000
-    access_key: minio
-    secret_key: KEY
-    insecure: true
-querier:
-  stores: {{range $cluster-id := .Values | get "clusterIds"}} {{$cluster-id service name here:10901}} {{end}}
-#    - SIDECAR-SERVICE-IP-ADDRESS-1:10901
-#    - SIDECAR-SERVICE-IP-ADDRESS-2:10901
+existingObjstoreSecret: thanos-objstore-config-secret
+
+query:
+  enabled: true
+  dnsDiscovery:
+    stores:
+      - dnssrv+_grpc._tcp.change-this-to-local-thanos-sidecar-service.monitoring.svc.cluster.local
+      {{ range $clusterId := .Values | get "clusterIds" }}
+      - thanos-global-cluster-{{ $clusterId }}.monitoring.svc.cluster.local:10901
+      {{ end }}
+
+queryFrontend:
+  enabled: true
+
 bucketweb:
   enabled: true
+  refresh: 5m
+
 compactor:
   enabled: true
+  persistence:
+    size: 2Gi
+    existingClaim: ""
+
 storegateway:
   enabled: true
+  persistence:
+    size: 2Gi
+    existingClaim: ""
+
 ruler:
   enabled: true
   alertmanagers:
     - http://prometheus-operator-alertmanager.monitoring.svc.cluster.local:9093
+    {{ range $clusterId := .Values | get "clusterIds" }}
+    - http://alertmanager-global-cluster-{{ $clusterId }}.monitoring.svc.cluster.local:9093
+    {{ end }}
   config: |-
     groups:
       - name: "metamonitoring"
         rules:
           - alert: "PrometheusDown"
             expr: absent(up{prometheus="monitoring/prometheus-operator"})
+
+receive:
+  enabled: false
+
 minio:
   enabled: true
-  accessKey:
-    password: "minio"
-  secretKey:
-    password: "KEY"
-  defaultBuckets: "thanos"
+  #TODO set rootUser and rootPassword via secrets
+  defaultBuckets: svoe-prometheus-thanos #TODO sync this with monitoring-extra secret via env vars?
+
+metrics:
+  enabled: true
+  serviceMonitor:
+    enabled: true

@@ -2,6 +2,7 @@ commonLabels:
   cluster-name: {{ .Values | get "clusterName" }}
   cluster-id: {{ .Values | get "clusterId" | quote }}
 
+#TODO set passwords for grafana/alertmanager/prometheus via secrets
 grafana:
   service:
     type: NodePort
@@ -27,6 +28,8 @@ grafana:
 prometheus:
   thanosService:
     enabled: true
+
+  # TODO add thanos service monitor?? here or monitoring-extra?
   thanosServiceExternal:
     enabled: true
     type: ClusterIP

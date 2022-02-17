@@ -36,6 +36,11 @@ releases:
   namespace: monitoring
   values:
   - ../../release_sets_values/monitoring_observer/local/monitoring-extra/values.yaml.gotmpl
+- chart: bitnami/thanos
+  name: thanos
+  namespace: monitoring
+  values:
+  - ../../release_sets_values/monitoring_observer/bitnami/thanos/values.yaml.gotmpl
 repositories:
 - name: metrics-server
   url: https://kubernetes-sigs.github.io/metrics-server/
