@@ -2,8 +2,9 @@ commonLabels:
   cluster-name: {{ .Values | get "clusterName" }}
   cluster-id: {{ .Values | get "clusterId" | quote }}
 
-#TODO set passwords for grafana/alertmanager/prometheus via secrets
+#TODO set passwords for alertmanager/prometheus via secrets
 grafana:
+  adminPassword: {{ .Values | get "grafanaAdminPassword" }}
   service:
     type: NodePort
     annotations:
@@ -51,7 +52,7 @@ prometheus:
             requests:
               storage: 2Gi
     externalLabels:
-      cluster_name: {{ .Values | get "clusterName" }}
+      cluster: {{ .Values | get "clusterName" }}
       cluster_id: {{ .Values | get "clusterName" | quote}}
   server:
     persistentVolume:

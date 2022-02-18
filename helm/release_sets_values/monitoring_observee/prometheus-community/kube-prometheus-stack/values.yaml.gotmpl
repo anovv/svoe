@@ -32,7 +32,7 @@ prometheus:
             requests:
               storage: 2Gi
     externalLabels:
-      cluster_name: {{ .Values | get "clusterName" }}
+      cluster: {{ .Values | get "clusterName" }}
       cluster_id: {{ .Values | get "clusterName" | quote}}
   server:
     persistentVolume:
