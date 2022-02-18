@@ -27,15 +27,15 @@ grafana:
           enabled: true
     datasources:
       defaultDatasourceEnabled: false
-    additionalDataSources:
-      - name: prometheus
-        access: proxy
-        editable: false
-        orgId: 1
-        type: prometheus
-        url: http://thanos-query-frontend:9090
-        version: 1
-        isDefault: true
+  additionalDataSources:
+    - name: prometheus
+      access: proxy
+      editable: false
+      orgId: 1
+      type: prometheus
+      url: http://thanos-query-frontend:9090
+      version: 1
+      isDefault: true
     # TODO set datasources ??
   # TODO additionalDataSources - Thanos, Athena, MySQL, Redis, etc
 
