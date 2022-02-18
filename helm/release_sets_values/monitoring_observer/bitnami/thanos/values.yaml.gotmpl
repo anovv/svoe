@@ -7,7 +7,7 @@ query:
     sidecarsService: "" # TODO needed?
     sidecarsNamespace: "" # TODO needed?
   stores:
-    - dnssrv+_grpc._tcp.kube-prometheus-stack-thanos-discovery.monitoring.svc.cluster.local
+    - kube-prometheus-stack-thanos-discovery.monitoring.svc.cluster.local:10901
     {{ range $clusterId := .Values | get "clusterIds" }}
     {{ if not (eq $clusterId 1)}} # TODO set env var indicating if cluster is an observer
     - thanos-global-cluster-{{ $clusterId }}.monitoring.svc.cluster.local:10901
@@ -34,6 +34,7 @@ storegateway:
     existingClaim: ""
 
 ruler:
+  # TODO lower volumeClaims (takes 8Gi now, uses 30Mi)
   enabled: true
   alertmanagers:
     - http://prometheus-operator-alertmanager.monitoring.svc.cluster.local:9093
@@ -53,6 +54,7 @@ receive:
   enabled: false
 
 minio:
+  # TODO lower volumeClaims (takes 8Gi now, uses 30Mi)
   enabled: true
   auth:
     rootUser: {{ .Values | get "minioRootUser" }}

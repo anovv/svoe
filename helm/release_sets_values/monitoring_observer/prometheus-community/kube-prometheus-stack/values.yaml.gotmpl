@@ -25,19 +25,49 @@ grafana:
           enabled: true
         etcd:
           enabled: true
+    # TODO set datasources ??
     datasources:
       defaultDatasourceEnabled: false
+  # TODO additionalDataSources - Thanos, Athena, MySQL, Redis, etc
   additionalDataSources:
     - name: prometheus
       access: proxy
       editable: false
       orgId: 1
       type: prometheus
-      url: http://thanos-query-frontend:9090
+      url: http://thanos-query-frontend.monitoring.svc.cluster.local:9090
       version: 1
       isDefault: true
-    # TODO set datasources ??
-  # TODO additionalDataSources - Thanos, Athena, MySQL, Redis, etc
+  dashboardProviders:
+    dashboardproviders.yaml:
+      apiVersion: 1
+      providers:
+        - name: 'default'
+          orgId: 1
+          folder: ''
+          type: file
+          disableDeletion: false
+          editable: true
+          options:
+            path: /var/lib/grafana/dashboards/default
+  dashboards:
+    default:
+      thanos-overview:
+        url: https://raw.githubusercontent.com/thanos-io/thanos/master/examples/dashboards/overview.json
+      thanos-compact:
+        url: https://raw.githubusercontent.com/thanos-io/thanos/master/examples/dashboards/compact.json
+      thanos-query:
+        url: https://raw.githubusercontent.com/thanos-io/thanos/master/examples/dashboards/query.json
+      thanos-store:
+        url: https://raw.githubusercontent.com/thanos-io/thanos/master/examples/dashboards/store.json
+      thanos-receiver:
+        url: https://raw.githubusercontent.com/thanos-io/thanos/master/examples/dashboards/receive.json
+      thanos-sidecar:
+        url: https://raw.githubusercontent.com/thanos-io/thanos/master/examples/dashboards/sidecar.json
+      thanos-rule:
+        url: https://raw.githubusercontent.com/thanos-io/thanos/master/examples/dashboards/rule.json
+      thanos-replicate:
+        url: https://raw.githubusercontent.com/thanos-io/thanos/master/examples/dashboards/bucket-replicate.json
 
 prometheus:
   thanosService:
@@ -66,7 +96,7 @@ prometheus:
               storage: 2Gi
     externalLabels:
       cluster: {{ .Values | get "clusterName" }}
-      cluster_id: {{ .Values | get "clusterName" | quote}}
+      cluster_id: {{ .Values | get "clusterId" | quote}}
   server:
     persistentVolume:
       enabled: true

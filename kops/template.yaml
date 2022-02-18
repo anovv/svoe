@@ -139,6 +139,7 @@ spec:
   cloudLabels:
     k8s.io/cluster-autoscaler/enabled: ""
     k8s.io/cluster-autoscaler/{{.cluster_name}}: ""
+  # TODO use t3.medium for observer cluster
   machineType: t3.small
   maxSize: 5
   minSize: 1

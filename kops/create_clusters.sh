@@ -10,3 +10,4 @@ while read cluster_id; do
 done <<< "$(echo $MULTICLUSTER_CONFIG | jq 'to_entries[] | .key')"
 wait
 echo "All clusters are created."
+# TODO add validation step (kops validate cluster)

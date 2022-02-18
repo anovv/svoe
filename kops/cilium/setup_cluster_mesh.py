@@ -2,6 +2,7 @@
 
 import subprocess
 import json
+import time
 from itertools import combinations
 
 
@@ -45,6 +46,8 @@ for pair in pairs:
     exe = f'cilium clustermesh connect --context {cluster_name1} --destination-context {cluster_name2}'
     out = subprocess.getoutput(exe)
     print(out)
+
+time.sleep(4) # just in case
 
 print('Restarting cilium pods...')
 for cluster_id in obj['multicluster_config_output']['value']:
