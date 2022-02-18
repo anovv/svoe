@@ -2,7 +2,7 @@ commonLabels:
   cluster-name: {{ .Values | get "clusterName" }}
   cluster-id: {{ .Values | get "clusterId" | quote }}
 
-#TODO set passwords for alertmanager/prometheus via secrets
+#https://github.com/particuleio/terraform-kubernetes-addons/blob/main/modules/aws/kube-prometheus.tf
 grafana:
   adminPassword: {{ .Values | get "grafanaAdminPassword" }}
   service:
@@ -25,6 +25,19 @@ grafana:
           enabled: true
         etcd:
           enabled: true
+    datasources:
+      defaultDatasourceEnabled: false
+    additionalDataSources:
+      - name: prometheus
+        access: proxy
+        editable: false
+        orgId: 1
+        type: prometheus
+        url: http://thanos-query-frontend:9090
+        version: 1
+        isDefault: true
+    # TODO set datasources ??
+  # TODO additionalDataSources - Thanos, Athena, MySQL, Redis, etc
 
 prometheus:
   thanosService:
