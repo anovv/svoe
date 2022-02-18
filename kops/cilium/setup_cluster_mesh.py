@@ -46,5 +46,11 @@ for pair in pairs:
     out = subprocess.getoutput(exe)
     print(out)
 
-# call ./restart_cilium_pods.sh for each cluster
+print('Restarting cilium pods...')
+for cluster_id in obj['multicluster_config_output']['value']:
+    exe = f'./restart_cilium_pods.sh {cluster_id}'
+    out = subprocess.getoutput(exe)
+    print(out)
+
+print('Done.')
 
