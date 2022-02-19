@@ -2,6 +2,7 @@ commonLabels:
   cluster-name: {{ .Values | get "clusterName" }}
   cluster-id: {{ .Values | get "clusterId" | quote }}
 
+# TODO set pod requests/limits
 #https://github.com/particuleio/terraform-kubernetes-addons/blob/main/modules/aws/kube-prometheus.tf
 grafana:
   adminPassword: {{ .Values | get "grafanaAdminPassword" }}
@@ -68,6 +69,10 @@ grafana:
         url: https://raw.githubusercontent.com/thanos-io/thanos/master/examples/dashboards/rule.json
       thanos-replicate:
         url: https://raw.githubusercontent.com/thanos-io/thanos/master/examples/dashboards/bucket-replicate.json
+      cluster-autoscaler:
+        gnetId: 3831
+        revision: 1
+        datasource: prometheus
 
 prometheus:
   thanosService:
