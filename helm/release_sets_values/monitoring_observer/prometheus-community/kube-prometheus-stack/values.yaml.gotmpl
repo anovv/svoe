@@ -82,7 +82,7 @@ prometheus:
     enabled: true
 
   prometheusSpec:
-    # retention: 1d ??
+    retention: 3h # Thanos uploads every 2 hours
     # externalUrl: "" ??
     thanos:
       image: quay.io/thanos/thanos:v0.24.0
