@@ -3,7 +3,7 @@ from cryptofeed.exchanges import EXCHANGE_MAP
 from cryptofeed.defines import TICKER, TRADES, L2_BOOK, L3_BOOK, LIQUIDATIONS, OPEN_INTEREST, FUNDING
 
 SPOT = 'S'
-FUTURES = 'F'
+FUTURES = 'F' # this should be PERP
 # B692998Y 3 weeks
 class BaseConfigBuilder(object):
 

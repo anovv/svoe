@@ -14,8 +14,11 @@ prometheus:
     enabled: true
 
   prometheusSpec:
-    retention: 3h # Thanos uploads every 2 hours
-    # externalUrl: "" ??
+    retention: 3h
+    # Thanos uploads every 2 hours
+    # set --storage.tsdb.min-block-duration and --storage.tsdb.max-block-duration
+    # to same value (default 2h) to disable local Prom compactor
+    # This value also defines how often Thanos uploads Prom blocks
     thanos:
       image: quay.io/thanos/thanos:v0.24.0
       version: v0.24.0

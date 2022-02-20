@@ -22,9 +22,13 @@ bucketweb:
   enabled: true
   refresh: 5m
 
-# TODO disable compactor ?
 compactor:
   enabled: true
+  retentionResolutionRaw: 7d
+  retentionResolution5m: 10h # > 40h (2d??) to enable 5m downsampling
+  retentionResolution1h: 1d # > 10d (2w??) to enable 1h downsampling
+  consistencyDelay: 30m # 30m default when to start compacting new blocks
+
   persistence:
     size: 2Gi
     existingClaim: ""
@@ -54,14 +58,6 @@ ruler:
 
 receive:
   enabled: false
-
-minio:
-  # TODO lower volumeClaims (takes 8Gi now, uses 30Mi)
-  enabled: true
-  auth:
-    rootUser: {{ .Values | get "minioRootUser" }}
-    rootPassword: {{ .Values | get "minioRootPassword" }}
-  defaultBuckets: svoe-prometheus-thanos #TODO sync this with monitoring-extra secret via env vars?
 
 metrics:
   enabled: true
