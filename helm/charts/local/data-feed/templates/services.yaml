@@ -1,0 +1,18 @@
+{{- $localClusterId := .Values.clusterId }}
+{{- $isObserver := .Values.isObserver }}
+{{ if $isObserver }}
+{{- range $clusterId := .Values.clusterIds }}
+{{ if not (eq $localClusterId $clusterId) }}
+{{ $data := dict "clusterId" $clusterId "isObserver" $isObserver}}
+{{- include "monitoring-extra.thanos-global-service" $data }}
+---
+{{- include "monitoring-extra.alertmanager-global-service" $data }}
+---
+{{ end }}
+{{- end }}
+{{ else }}
+{{ $data := dict "clusterId" $localClusterId "isObserver" $isObserver}}
+{{- include "monitoring-extra.thanos-global-service" $data }}
+---
+{{- include "monitoring-extra.alertmanager-global-service" $data }}
+{{ end}}
