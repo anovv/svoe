@@ -2,6 +2,27 @@
 {{- lower (regexReplaceAll "_" .exchange "-") }}-{{ lower .instrumentType }}-base-{{ lower .base }}-data-feed
 {{- end }}
 {{- define "data-feed.data-feed-service" }}
+{{- $prefix := include "data-feed.data-feed-name-prefix" . }}
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    monitored: all
+    name: {{ $prefix }}-svc
+  name: {{ $prefix }}-svc
+spec:
+  clusterIP: None
+  ports:
+  - name: redis
+    port: {{ .redis.port }}
+    protocol: TCP
+    targetPort: {{ .redis.port }}
+  - name: redis-metrics
+    port: {{ .redis.exporterPort }}
+    protocol: TCP
+    targetPort: {{ .redis.exporterPort }}
+  selector:
+    name: {{ $prefix }}-ss
 {{- end }}
 {{- define "data-feed.data-feed-stateful-set" }}
 {{- $prefix := include "data-feed.data-feed-name-prefix" . }}
@@ -55,8 +76,6 @@ spec:
         name: {{ $prefix }}-scripts-vol
       - emptyDir: {}
         name: {{ $prefix }}-conf-vol
-{{- end }}
-{{- define "data-feed.data-feed-servicemonitor" }}
 {{- end }}
 {{- define "data-feed.data-feed-config-map" }}
 {{- $prefix := include "data-feed.data-feed-name-prefix" . }}
