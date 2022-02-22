@@ -89,6 +89,11 @@
           "name": "aws-node-termination-handler",
           "namespace": "kube-system",
           "chart": "eks/aws-node-termination-handler"
+        },
+        {
+          "name": "data-feed",
+          "namespace": "data-feed",
+          "chart": "../../charts/local/data-feed"
         }
       ]
     }

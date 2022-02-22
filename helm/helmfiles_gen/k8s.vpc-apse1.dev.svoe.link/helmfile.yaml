@@ -26,6 +26,11 @@ releases:
   namespace: kube-system
   values:
   - ../../release_sets_values/common/eks/aws-node-termination-handler/values.yaml.gotmpl
+- chart: ../../charts/local/data-feed
+  name: data-feed
+  namespace: data-feed
+  values:
+  - ../../release_sets_values/common/local/data-feed/values.yaml.gotmpl
 - chart: prometheus-community/kube-prometheus-stack
   name: kube-prometheus-stack
   namespace: monitoring

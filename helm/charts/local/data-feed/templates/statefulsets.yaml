@@ -1,0 +1,4 @@
+{{- range $config := .Values.exchangesConfig }}
+{{- include "data-feed.data-feed-stateful-set" $config }}
+---
+{{- end }}
