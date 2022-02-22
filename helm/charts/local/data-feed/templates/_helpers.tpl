@@ -59,4 +59,16 @@ spec:
 {{- define "data-feed.data-feed-servicemonitor" }}
 {{- end }}
 {{- define "data-feed.data-feed-config-map" }}
+{{- $prefix := include "data-feed.data-feed-name-prefix" . }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ $prefix }}-cm
+data:
+  {{ range $podConfig := .dataFeed.podConfigs }}
+  {{- $podConfig.name }}: |
+  {{- $podConfig.config | nindent 4 }}
+  {{- end }}
+  {{ .initScript.name }}: |-
+  {{- .initScript.script | nindent 4}}
 {{- end }}

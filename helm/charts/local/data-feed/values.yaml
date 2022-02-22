@@ -1,4 +1,7 @@
-# TODO nodeSelectors, clusterId, clusterName, version/config hash/commit hash per pod, az/region/instance config hash/info
+# TODO nodeSelectors, clusterId, clusterName labels
+# version/config hash/commit hash per pod labels
+# az/region/instance config hash/info in labels
+# instrumentType/instrumentExtra/base/quotes/symbols labels
 exchangesConfig:
   - exchange: BINANCE
     instrumentType: SPOT
@@ -33,7 +36,8 @@ exchangesConfig:
                   max_depth: 100
                   symbols:
                     - BTC-USDT
-                trades: *id001
+                trades:
+                  - BTC-USDT
             storage:
               - parquet
             storage_interval: 120
