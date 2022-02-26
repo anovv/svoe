@@ -1,5 +1,5 @@
 {{- define "data-feed.data-feed-name-prefix" }}
-{{- lower (regexReplaceAll "_" .exchange "-") }}-{{ lower .instrumentType }}-base-{{ lower .base }}-data-feed
+{{- lower (regexReplaceAll "_" .exchange "-") }}-{{ lower .instrumentType }}-quote-{{ lower .quote }}-data-feed
 {{- end }}
 {{- define "data-feed.data-feed-service" }}
 {{- $prefix := include "data-feed.data-feed-name-prefix" . }}

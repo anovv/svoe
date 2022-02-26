@@ -1,4 +1,4 @@
-{{- range $config := .Values.exchangesConfig }}
+{{- range $config := .Values.feedConfigs }}
 {{- include "data-feed.data-feed-service" $config }}
 ---
 {{- end }}

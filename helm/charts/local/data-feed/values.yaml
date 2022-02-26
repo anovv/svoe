@@ -1,17 +1,19 @@
 # TODO nodeSelectors, clusterId, clusterName labels
+# TODO add versioning, versions to ss,svc,cm names
+# TODO add prometheus metrics config
 # version/config hash/commit hash per pod labels
 # az/region/instance config hash/info in labels
 # instrumentType/instrumentExtra/base/quotes/symbols labels
-exchangesConfig:
+feedConfigs:
   - exchange: BINANCE
     instrumentType: SPOT
     instrumentExtra:
       strikePrice: 1
       expirationDate: TODO
-    base: USDT
-    quotes:
+    quote: USDT
+    bases:
       - symbol: BTC-USDT
-      - quote: BTC
+        base: BTC
     redis:
       port: 6379
       exporterPort: 9121
@@ -74,5 +76,3 @@ exchangesConfig:
             echo "Invalid stateful set index"
             exit 1
         fi
-
-
