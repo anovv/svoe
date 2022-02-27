@@ -1,3 +1,5 @@
+{% for cluster_id, feed_configs in cluster_feed_configs_mapping.items() %}
+{%- raw %}{{ if eq .Values.clusterId {% endraw %}{{cluster_id}}{% raw %} }}{% endraw %}
 feedConfigs:
   {%- for feed_config in feed_configs %}
   - exchange: {{ feed_config['exchange'] }}
@@ -23,7 +25,7 @@ feedConfigs:
       {%- for pod_config in feed_config['pod_configs'] %}
         - name: data-feed-config-{{ pod_config[0] }}.yaml
           config: |
-            {{ pod_config[1] }}
+            {{ pod_config[1] | indent(width=12) }}
       {%- endfor %}
     initScript:
       name: run.sh
@@ -42,3 +44,5 @@ feedConfigs:
             exit 1
         fi
   {%- endfor %}
+{% raw %}{{ end }}{% endraw %}
+{% endfor %}

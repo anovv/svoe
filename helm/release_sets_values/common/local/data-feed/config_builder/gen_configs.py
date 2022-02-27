@@ -12,7 +12,19 @@ def gen_helm_values():
         for exchange_config in MASTER_CONFIG['exchangeConfigSets'][exchange]:
             feed_configs.extend(build_feed_configs(exchange, exchange_config))
 
-    return Template(open('feed-configs-template.yaml', 'r').read()).render(feed_configs=feed_configs)
+    cluster_feed_configs_mapping = {}
+    for feed_config in feed_configs:
+        cluster_id = feed_config['cluster_id']
+        if cluster_id in cluster_feed_configs_mapping:
+            cluster_feed_configs_mapping[cluster_id].append(feed_config)
+        else:
+            cluster_feed_configs_mapping[cluster_id] = [feed_config]
+
+    values = Template(open('feed-configs-template.yaml', 'r').read()).render(
+        cluster_feed_configs_mapping=cluster_feed_configs_mapping
+    )
+    with open('../values.yaml.gotmpl', 'w+') as outfile:
+        outfile.write(values)
 
 def build_feed_configs(exchange, exchange_config):
     feed_configs = []
@@ -34,7 +46,7 @@ def build_feed_configs(exchange, exchange_config):
         base_tuples = []
         for base in bases:
             if base in exclude_bases:
-                print(f'Skipping {base} in exclude...')
+                print(f'Skipping {base} for {exchange} {instrument_type} in exclude...')
                 continue
             # TODO handle options/futures
             symbol = Symbol(base, quote, instrument_type)
@@ -56,7 +68,8 @@ def build_feed_configs(exchange, exchange_config):
             'quote': quote,
             'base_tuples': base_tuples,
             'data_feed_image': exchange_config['dataFeedImage'],
-            'pod_configs': pod_configs
+            'pod_configs': pod_configs,
+            'cluster_id': exchange_config['clusterId']
         })
     return feed_configs
 
@@ -78,6 +91,9 @@ def _build_cryptostore_config(exchange, exchange_config, symbols, channels):
         config['exchanges'][exchange][k] = exchangeConfigOverrides[k]
 
     # TODO set prometheus.multiProcDir per config
+    # TODO hashes
+    # TODO cluster distribution
+    # TODO az distribution
 
     return yaml.dump(config, default_flow_style=False)
 
@@ -116,4 +132,5 @@ def _readSymbolSet(exchange_config, field):
     else:
         return MASTER_CONFIG['symbolSets'][exchange_config[field]]
 
-print(gen_helm_values())
+gen_helm_values()
+print('Done')

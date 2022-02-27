@@ -20,3 +20,22 @@ exchangeConfigSets:
       symbolPodDistributionStrategy: ONE_TO_ONE
       description: |
         Common configuration for Binance spot top 20
+  BYBIT:
+    - instrumentType: perpetual
+      quotes: [USDT]
+      bases: TOP_20
+      excludeBases: [SHIB]
+      channels: [l2_book, trades, liquidations, open_interest, funding]
+      dataFeedImage: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+      channelsConfigOverrides:
+        l2_book:
+          max_depth: 100
+          book_delta: true
+      exchangeConfigOverrides:
+        retries: -1
+      cryptostoreConfigOverrides: {}
+      clusterId: 2
+      region: a
+      symbolPodDistributionStrategy: ONE_TO_ONE
+      description: |
+        Common configuration for Bybit perpetual futures top 20

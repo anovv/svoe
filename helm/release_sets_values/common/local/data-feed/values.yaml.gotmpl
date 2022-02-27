@@ -1,0 +1,1838 @@
+{{ if eq .Values.clusterId 1 }}
+feedConfigs:
+  - exchange: BINANCE
+    instrumentType: spot
+    quote: USDT
+    bases:
+      - symbol: BTC-USDT
+        base: BTC
+      - symbol: ETH-USDT
+        base: ETH
+      - symbol: BNB-USDT
+        base: BNB
+      - symbol: ADA-USDT
+        base: ADA
+      - symbol: XRP-USDT
+        base: XRP
+      - symbol: DOGE-USDT
+        base: DOGE
+      - symbol: DOT-USDT
+        base: DOT
+      - symbol: BCH-USDT
+        base: BCH
+      - symbol: UNI-USDT
+        base: UNI
+      - symbol: LTC-USDT
+        base: LTC
+      - symbol: LINK-USDT
+        base: LINK
+      - symbol: MATIC-USDT
+        base: MATIC
+      - symbol: XLM-USDT
+        base: XLM
+      - symbol: ETC-USDT
+        base: ETC
+      - symbol: VET-USDT
+        base: VET
+      - symbol: TRX-USDT
+        base: TRX
+      - symbol: EOS-USDT
+        base: EOS
+      - symbol: FIL-USDT
+        base: FIL
+      - symbol: SHIB-USDT
+        base: SHIB
+    redis:
+      port: 6379
+      exporterPort: 9121
+    dataFeed:
+      image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+      podConfigsVolumeMountPath: /etc/svoe/data_feed/configs
+      podConfigs:
+        - name: data-feed-config-0.yaml
+          config: |
+            cache: redis
+            exchanges:
+              BINANCE:
+                l2_book:
+                  book_delta: true
+                  max_depth: 100
+                  symbols: &id001
+                  - BTC-USDT
+                retries: -1
+                ticker: *id001
+                trades: *id001
+            health_check:
+              path: /health
+              port: 1234
+            num_write_threads: 100
+            prometheus:
+              multiproc_dir: test
+              port: 8000
+            redis:
+              del_after_read: true
+              ip: 127.0.0.1
+              port: 6379
+              retention_time: null
+              socket: null
+              start_flush: true
+            storage:
+            - svoe
+            storage_interval: 30
+            storage_retries: 3
+            storage_retry_wait: 10
+            svoe:
+              compression: gzip
+              glue_database: svoe_glue_db
+              s3_bucket: svoe.test.1
+              s3_key_id: '{{ .Values.awsKey }}'
+              s3_prefix: data_lake
+              s3_secret: '{{ .Values.awsSecret }}'
+              version: local
+            write_on_stop: true
+
+        - name: data-feed-config-1.yaml
+          config: |
+            cache: redis
+            exchanges:
+              BINANCE:
+                l2_book:
+                  book_delta: true
+                  max_depth: 100
+                  symbols: &id001
+                  - ETH-USDT
+                retries: -1
+                ticker: *id001
+                trades: *id001
+            health_check:
+              path: /health
+              port: 1234
+            num_write_threads: 100
+            prometheus:
+              multiproc_dir: test
+              port: 8000
+            redis:
+              del_after_read: true
+              ip: 127.0.0.1
+              port: 6379
+              retention_time: null
+              socket: null
+              start_flush: true
+            storage:
+            - svoe
+            storage_interval: 30
+            storage_retries: 3
+            storage_retry_wait: 10
+            svoe:
+              compression: gzip
+              glue_database: svoe_glue_db
+              s3_bucket: svoe.test.1
+              s3_key_id: '{{ .Values.awsKey }}'
+              s3_prefix: data_lake
+              s3_secret: '{{ .Values.awsSecret }}'
+              version: local
+            write_on_stop: true
+
+        - name: data-feed-config-2.yaml
+          config: |
+            cache: redis
+            exchanges:
+              BINANCE:
+                l2_book:
+                  book_delta: true
+                  max_depth: 100
+                  symbols: &id001
+                  - BNB-USDT
+                retries: -1
+                ticker: *id001
+                trades: *id001
+            health_check:
+              path: /health
+              port: 1234
+            num_write_threads: 100
+            prometheus:
+              multiproc_dir: test
+              port: 8000
+            redis:
+              del_after_read: true
+              ip: 127.0.0.1
+              port: 6379
+              retention_time: null
+              socket: null
+              start_flush: true
+            storage:
+            - svoe
+            storage_interval: 30
+            storage_retries: 3
+            storage_retry_wait: 10
+            svoe:
+              compression: gzip
+              glue_database: svoe_glue_db
+              s3_bucket: svoe.test.1
+              s3_key_id: '{{ .Values.awsKey }}'
+              s3_prefix: data_lake
+              s3_secret: '{{ .Values.awsSecret }}'
+              version: local
+            write_on_stop: true
+
+        - name: data-feed-config-3.yaml
+          config: |
+            cache: redis
+            exchanges:
+              BINANCE:
+                l2_book:
+                  book_delta: true
+                  max_depth: 100
+                  symbols: &id001
+                  - ADA-USDT
+                retries: -1
+                ticker: *id001
+                trades: *id001
+            health_check:
+              path: /health
+              port: 1234
+            num_write_threads: 100
+            prometheus:
+              multiproc_dir: test
+              port: 8000
+            redis:
+              del_after_read: true
+              ip: 127.0.0.1
+              port: 6379
+              retention_time: null
+              socket: null
+              start_flush: true
+            storage:
+            - svoe
+            storage_interval: 30
+            storage_retries: 3
+            storage_retry_wait: 10
+            svoe:
+              compression: gzip
+              glue_database: svoe_glue_db
+              s3_bucket: svoe.test.1
+              s3_key_id: '{{ .Values.awsKey }}'
+              s3_prefix: data_lake
+              s3_secret: '{{ .Values.awsSecret }}'
+              version: local
+            write_on_stop: true
+
+        - name: data-feed-config-4.yaml
+          config: |
+            cache: redis
+            exchanges:
+              BINANCE:
+                l2_book:
+                  book_delta: true
+                  max_depth: 100
+                  symbols: &id001
+                  - XRP-USDT
+                retries: -1
+                ticker: *id001
+                trades: *id001
+            health_check:
+              path: /health
+              port: 1234
+            num_write_threads: 100
+            prometheus:
+              multiproc_dir: test
+              port: 8000
+            redis:
+              del_after_read: true
+              ip: 127.0.0.1
+              port: 6379
+              retention_time: null
+              socket: null
+              start_flush: true
+            storage:
+            - svoe
+            storage_interval: 30
+            storage_retries: 3
+            storage_retry_wait: 10
+            svoe:
+              compression: gzip
+              glue_database: svoe_glue_db
+              s3_bucket: svoe.test.1
+              s3_key_id: '{{ .Values.awsKey }}'
+              s3_prefix: data_lake
+              s3_secret: '{{ .Values.awsSecret }}'
+              version: local
+            write_on_stop: true
+
+        - name: data-feed-config-5.yaml
+          config: |
+            cache: redis
+            exchanges:
+              BINANCE:
+                l2_book:
+                  book_delta: true
+                  max_depth: 100
+                  symbols: &id001
+                  - DOGE-USDT
+                retries: -1
+                ticker: *id001
+                trades: *id001
+            health_check:
+              path: /health
+              port: 1234
+            num_write_threads: 100
+            prometheus:
+              multiproc_dir: test
+              port: 8000
+            redis:
+              del_after_read: true
+              ip: 127.0.0.1
+              port: 6379
+              retention_time: null
+              socket: null
+              start_flush: true
+            storage:
+            - svoe
+            storage_interval: 30
+            storage_retries: 3
+            storage_retry_wait: 10
+            svoe:
+              compression: gzip
+              glue_database: svoe_glue_db
+              s3_bucket: svoe.test.1
+              s3_key_id: '{{ .Values.awsKey }}'
+              s3_prefix: data_lake
+              s3_secret: '{{ .Values.awsSecret }}'
+              version: local
+            write_on_stop: true
+
+        - name: data-feed-config-6.yaml
+          config: |
+            cache: redis
+            exchanges:
+              BINANCE:
+                l2_book:
+                  book_delta: true
+                  max_depth: 100
+                  symbols: &id001
+                  - DOT-USDT
+                retries: -1
+                ticker: *id001
+                trades: *id001
+            health_check:
+              path: /health
+              port: 1234
+            num_write_threads: 100
+            prometheus:
+              multiproc_dir: test
+              port: 8000
+            redis:
+              del_after_read: true
+              ip: 127.0.0.1
+              port: 6379
+              retention_time: null
+              socket: null
+              start_flush: true
+            storage:
+            - svoe
+            storage_interval: 30
+            storage_retries: 3
+            storage_retry_wait: 10
+            svoe:
+              compression: gzip
+              glue_database: svoe_glue_db
+              s3_bucket: svoe.test.1
+              s3_key_id: '{{ .Values.awsKey }}'
+              s3_prefix: data_lake
+              s3_secret: '{{ .Values.awsSecret }}'
+              version: local
+            write_on_stop: true
+
+        - name: data-feed-config-7.yaml
+          config: |
+            cache: redis
+            exchanges:
+              BINANCE:
+                l2_book:
+                  book_delta: true
+                  max_depth: 100
+                  symbols: &id001
+                  - BCH-USDT
+                retries: -1
+                ticker: *id001
+                trades: *id001
+            health_check:
+              path: /health
+              port: 1234
+            num_write_threads: 100
+            prometheus:
+              multiproc_dir: test
+              port: 8000
+            redis:
+              del_after_read: true
+              ip: 127.0.0.1
+              port: 6379
+              retention_time: null
+              socket: null
+              start_flush: true
+            storage:
+            - svoe
+            storage_interval: 30
+            storage_retries: 3
+            storage_retry_wait: 10
+            svoe:
+              compression: gzip
+              glue_database: svoe_glue_db
+              s3_bucket: svoe.test.1
+              s3_key_id: '{{ .Values.awsKey }}'
+              s3_prefix: data_lake
+              s3_secret: '{{ .Values.awsSecret }}'
+              version: local
+            write_on_stop: true
+
+        - name: data-feed-config-8.yaml
+          config: |
+            cache: redis
+            exchanges:
+              BINANCE:
+                l2_book:
+                  book_delta: true
+                  max_depth: 100
+                  symbols: &id001
+                  - UNI-USDT
+                retries: -1
+                ticker: *id001
+                trades: *id001
+            health_check:
+              path: /health
+              port: 1234
+            num_write_threads: 100
+            prometheus:
+              multiproc_dir: test
+              port: 8000
+            redis:
+              del_after_read: true
+              ip: 127.0.0.1
+              port: 6379
+              retention_time: null
+              socket: null
+              start_flush: true
+            storage:
+            - svoe
+            storage_interval: 30
+            storage_retries: 3
+            storage_retry_wait: 10
+            svoe:
+              compression: gzip
+              glue_database: svoe_glue_db
+              s3_bucket: svoe.test.1
+              s3_key_id: '{{ .Values.awsKey }}'
+              s3_prefix: data_lake
+              s3_secret: '{{ .Values.awsSecret }}'
+              version: local
+            write_on_stop: true
+
+        - name: data-feed-config-9.yaml
+          config: |
+            cache: redis
+            exchanges:
+              BINANCE:
+                l2_book:
+                  book_delta: true
+                  max_depth: 100
+                  symbols: &id001
+                  - LTC-USDT
+                retries: -1
+                ticker: *id001
+                trades: *id001
+            health_check:
+              path: /health
+              port: 1234
+            num_write_threads: 100
+            prometheus:
+              multiproc_dir: test
+              port: 8000
+            redis:
+              del_after_read: true
+              ip: 127.0.0.1
+              port: 6379
+              retention_time: null
+              socket: null
+              start_flush: true
+            storage:
+            - svoe
+            storage_interval: 30
+            storage_retries: 3
+            storage_retry_wait: 10
+            svoe:
+              compression: gzip
+              glue_database: svoe_glue_db
+              s3_bucket: svoe.test.1
+              s3_key_id: '{{ .Values.awsKey }}'
+              s3_prefix: data_lake
+              s3_secret: '{{ .Values.awsSecret }}'
+              version: local
+            write_on_stop: true
+
+        - name: data-feed-config-10.yaml
+          config: |
+            cache: redis
+            exchanges:
+              BINANCE:
+                l2_book:
+                  book_delta: true
+                  max_depth: 100
+                  symbols: &id001
+                  - LINK-USDT
+                retries: -1
+                ticker: *id001
+                trades: *id001
+            health_check:
+              path: /health
+              port: 1234
+            num_write_threads: 100
+            prometheus:
+              multiproc_dir: test
+              port: 8000
+            redis:
+              del_after_read: true
+              ip: 127.0.0.1
+              port: 6379
+              retention_time: null
+              socket: null
+              start_flush: true
+            storage:
+            - svoe
+            storage_interval: 30
+            storage_retries: 3
+            storage_retry_wait: 10
+            svoe:
+              compression: gzip
+              glue_database: svoe_glue_db
+              s3_bucket: svoe.test.1
+              s3_key_id: '{{ .Values.awsKey }}'
+              s3_prefix: data_lake
+              s3_secret: '{{ .Values.awsSecret }}'
+              version: local
+            write_on_stop: true
+
+        - name: data-feed-config-11.yaml
+          config: |
+            cache: redis
+            exchanges:
+              BINANCE:
+                l2_book:
+                  book_delta: true
+                  max_depth: 100
+                  symbols: &id001
+                  - MATIC-USDT
+                retries: -1
+                ticker: *id001
+                trades: *id001
+            health_check:
+              path: /health
+              port: 1234
+            num_write_threads: 100
+            prometheus:
+              multiproc_dir: test
+              port: 8000
+            redis:
+              del_after_read: true
+              ip: 127.0.0.1
+              port: 6379
+              retention_time: null
+              socket: null
+              start_flush: true
+            storage:
+            - svoe
+            storage_interval: 30
+            storage_retries: 3
+            storage_retry_wait: 10
+            svoe:
+              compression: gzip
+              glue_database: svoe_glue_db
+              s3_bucket: svoe.test.1
+              s3_key_id: '{{ .Values.awsKey }}'
+              s3_prefix: data_lake
+              s3_secret: '{{ .Values.awsSecret }}'
+              version: local
+            write_on_stop: true
+
+        - name: data-feed-config-12.yaml
+          config: |
+            cache: redis
+            exchanges:
+              BINANCE:
+                l2_book:
+                  book_delta: true
+                  max_depth: 100
+                  symbols: &id001
+                  - XLM-USDT
+                retries: -1
+                ticker: *id001
+                trades: *id001
+            health_check:
+              path: /health
+              port: 1234
+            num_write_threads: 100
+            prometheus:
+              multiproc_dir: test
+              port: 8000
+            redis:
+              del_after_read: true
+              ip: 127.0.0.1
+              port: 6379
+              retention_time: null
+              socket: null
+              start_flush: true
+            storage:
+            - svoe
+            storage_interval: 30
+            storage_retries: 3
+            storage_retry_wait: 10
+            svoe:
+              compression: gzip
+              glue_database: svoe_glue_db
+              s3_bucket: svoe.test.1
+              s3_key_id: '{{ .Values.awsKey }}'
+              s3_prefix: data_lake
+              s3_secret: '{{ .Values.awsSecret }}'
+              version: local
+            write_on_stop: true
+
+        - name: data-feed-config-13.yaml
+          config: |
+            cache: redis
+            exchanges:
+              BINANCE:
+                l2_book:
+                  book_delta: true
+                  max_depth: 100
+                  symbols: &id001
+                  - ETC-USDT
+                retries: -1
+                ticker: *id001
+                trades: *id001
+            health_check:
+              path: /health
+              port: 1234
+            num_write_threads: 100
+            prometheus:
+              multiproc_dir: test
+              port: 8000
+            redis:
+              del_after_read: true
+              ip: 127.0.0.1
+              port: 6379
+              retention_time: null
+              socket: null
+              start_flush: true
+            storage:
+            - svoe
+            storage_interval: 30
+            storage_retries: 3
+            storage_retry_wait: 10
+            svoe:
+              compression: gzip
+              glue_database: svoe_glue_db
+              s3_bucket: svoe.test.1
+              s3_key_id: '{{ .Values.awsKey }}'
+              s3_prefix: data_lake
+              s3_secret: '{{ .Values.awsSecret }}'
+              version: local
+            write_on_stop: true
+
+        - name: data-feed-config-14.yaml
+          config: |
+            cache: redis
+            exchanges:
+              BINANCE:
+                l2_book:
+                  book_delta: true
+                  max_depth: 100
+                  symbols: &id001
+                  - VET-USDT
+                retries: -1
+                ticker: *id001
+                trades: *id001
+            health_check:
+              path: /health
+              port: 1234
+            num_write_threads: 100
+            prometheus:
+              multiproc_dir: test
+              port: 8000
+            redis:
+              del_after_read: true
+              ip: 127.0.0.1
+              port: 6379
+              retention_time: null
+              socket: null
+              start_flush: true
+            storage:
+            - svoe
+            storage_interval: 30
+            storage_retries: 3
+            storage_retry_wait: 10
+            svoe:
+              compression: gzip
+              glue_database: svoe_glue_db
+              s3_bucket: svoe.test.1
+              s3_key_id: '{{ .Values.awsKey }}'
+              s3_prefix: data_lake
+              s3_secret: '{{ .Values.awsSecret }}'
+              version: local
+            write_on_stop: true
+
+        - name: data-feed-config-15.yaml
+          config: |
+            cache: redis
+            exchanges:
+              BINANCE:
+                l2_book:
+                  book_delta: true
+                  max_depth: 100
+                  symbols: &id001
+                  - TRX-USDT
+                retries: -1
+                ticker: *id001
+                trades: *id001
+            health_check:
+              path: /health
+              port: 1234
+            num_write_threads: 100
+            prometheus:
+              multiproc_dir: test
+              port: 8000
+            redis:
+              del_after_read: true
+              ip: 127.0.0.1
+              port: 6379
+              retention_time: null
+              socket: null
+              start_flush: true
+            storage:
+            - svoe
+            storage_interval: 30
+            storage_retries: 3
+            storage_retry_wait: 10
+            svoe:
+              compression: gzip
+              glue_database: svoe_glue_db
+              s3_bucket: svoe.test.1
+              s3_key_id: '{{ .Values.awsKey }}'
+              s3_prefix: data_lake
+              s3_secret: '{{ .Values.awsSecret }}'
+              version: local
+            write_on_stop: true
+
+        - name: data-feed-config-16.yaml
+          config: |
+            cache: redis
+            exchanges:
+              BINANCE:
+                l2_book:
+                  book_delta: true
+                  max_depth: 100
+                  symbols: &id001
+                  - EOS-USDT
+                retries: -1
+                ticker: *id001
+                trades: *id001
+            health_check:
+              path: /health
+              port: 1234
+            num_write_threads: 100
+            prometheus:
+              multiproc_dir: test
+              port: 8000
+            redis:
+              del_after_read: true
+              ip: 127.0.0.1
+              port: 6379
+              retention_time: null
+              socket: null
+              start_flush: true
+            storage:
+            - svoe
+            storage_interval: 30
+            storage_retries: 3
+            storage_retry_wait: 10
+            svoe:
+              compression: gzip
+              glue_database: svoe_glue_db
+              s3_bucket: svoe.test.1
+              s3_key_id: '{{ .Values.awsKey }}'
+              s3_prefix: data_lake
+              s3_secret: '{{ .Values.awsSecret }}'
+              version: local
+            write_on_stop: true
+
+        - name: data-feed-config-17.yaml
+          config: |
+            cache: redis
+            exchanges:
+              BINANCE:
+                l2_book:
+                  book_delta: true
+                  max_depth: 100
+                  symbols: &id001
+                  - FIL-USDT
+                retries: -1
+                ticker: *id001
+                trades: *id001
+            health_check:
+              path: /health
+              port: 1234
+            num_write_threads: 100
+            prometheus:
+              multiproc_dir: test
+              port: 8000
+            redis:
+              del_after_read: true
+              ip: 127.0.0.1
+              port: 6379
+              retention_time: null
+              socket: null
+              start_flush: true
+            storage:
+            - svoe
+            storage_interval: 30
+            storage_retries: 3
+            storage_retry_wait: 10
+            svoe:
+              compression: gzip
+              glue_database: svoe_glue_db
+              s3_bucket: svoe.test.1
+              s3_key_id: '{{ .Values.awsKey }}'
+              s3_prefix: data_lake
+              s3_secret: '{{ .Values.awsSecret }}'
+              version: local
+            write_on_stop: true
+
+        - name: data-feed-config-18.yaml
+          config: |
+            cache: redis
+            exchanges:
+              BINANCE:
+                l2_book:
+                  book_delta: true
+                  max_depth: 100
+                  symbols: &id001
+                  - SHIB-USDT
+                retries: -1
+                ticker: *id001
+                trades: *id001
+            health_check:
+              path: /health
+              port: 1234
+            num_write_threads: 100
+            prometheus:
+              multiproc_dir: test
+              port: 8000
+            redis:
+              del_after_read: true
+              ip: 127.0.0.1
+              port: 6379
+              retention_time: null
+              socket: null
+              start_flush: true
+            storage:
+            - svoe
+            storage_interval: 30
+            storage_retries: 3
+            storage_retry_wait: 10
+            svoe:
+              compression: gzip
+              glue_database: svoe_glue_db
+              s3_bucket: svoe.test.1
+              s3_key_id: '{{ .Values.awsKey }}'
+              s3_prefix: data_lake
+              s3_secret: '{{ .Values.awsSecret }}'
+              version: local
+            write_on_stop: true
+
+    initScript:
+      name: run.sh
+      configsVolumeMountPath: /mnt/data
+      scriptsVolumeMountPath: /mnt/scripts
+      script: |-
+        #!/bin/sh
+        SET_INDEX=${HOSTNAME##*-}
+        echo "Starting initializing for pod $SET_INDEX"
+        if [ "$SET_INDEX" = "0" ]; then
+            cp /mnt/scripts/data-feed-config-0.yaml /mnt/data/data-feed-config.yaml
+        if [ "$SET_INDEX" = "1" ]; then
+            cp /mnt/scripts/data-feed-config-1.yaml /mnt/data/data-feed-config.yaml
+        if [ "$SET_INDEX" = "2" ]; then
+            cp /mnt/scripts/data-feed-config-2.yaml /mnt/data/data-feed-config.yaml
+        if [ "$SET_INDEX" = "3" ]; then
+            cp /mnt/scripts/data-feed-config-3.yaml /mnt/data/data-feed-config.yaml
+        if [ "$SET_INDEX" = "4" ]; then
+            cp /mnt/scripts/data-feed-config-4.yaml /mnt/data/data-feed-config.yaml
+        if [ "$SET_INDEX" = "5" ]; then
+            cp /mnt/scripts/data-feed-config-5.yaml /mnt/data/data-feed-config.yaml
+        if [ "$SET_INDEX" = "6" ]; then
+            cp /mnt/scripts/data-feed-config-6.yaml /mnt/data/data-feed-config.yaml
+        if [ "$SET_INDEX" = "7" ]; then
+            cp /mnt/scripts/data-feed-config-7.yaml /mnt/data/data-feed-config.yaml
+        if [ "$SET_INDEX" = "8" ]; then
+            cp /mnt/scripts/data-feed-config-8.yaml /mnt/data/data-feed-config.yaml
+        if [ "$SET_INDEX" = "9" ]; then
+            cp /mnt/scripts/data-feed-config-9.yaml /mnt/data/data-feed-config.yaml
+        if [ "$SET_INDEX" = "10" ]; then
+            cp /mnt/scripts/data-feed-config-10.yaml /mnt/data/data-feed-config.yaml
+        if [ "$SET_INDEX" = "11" ]; then
+            cp /mnt/scripts/data-feed-config-11.yaml /mnt/data/data-feed-config.yaml
+        if [ "$SET_INDEX" = "12" ]; then
+            cp /mnt/scripts/data-feed-config-12.yaml /mnt/data/data-feed-config.yaml
+        if [ "$SET_INDEX" = "13" ]; then
+            cp /mnt/scripts/data-feed-config-13.yaml /mnt/data/data-feed-config.yaml
+        if [ "$SET_INDEX" = "14" ]; then
+            cp /mnt/scripts/data-feed-config-14.yaml /mnt/data/data-feed-config.yaml
+        if [ "$SET_INDEX" = "15" ]; then
+            cp /mnt/scripts/data-feed-config-15.yaml /mnt/data/data-feed-config.yaml
+        if [ "$SET_INDEX" = "16" ]; then
+            cp /mnt/scripts/data-feed-config-16.yaml /mnt/data/data-feed-config.yaml
+        if [ "$SET_INDEX" = "17" ]; then
+            cp /mnt/scripts/data-feed-config-17.yaml /mnt/data/data-feed-config.yaml
+        if [ "$SET_INDEX" = "18" ]; then
+            cp /mnt/scripts/data-feed-config-18.yaml /mnt/data/data-feed-config.yaml
+        else
+            echo "Invalid stateful set index"
+            exit 1
+        fi
+{{ end }}
+{{ if eq .Values.clusterId 2 }}
+feedConfigs:
+  - exchange: BYBIT
+    instrumentType: perpetual
+    quote: USDT
+    bases:
+      - symbol: BTC-USDT-PERP
+        base: BTC
+      - symbol: ETH-USDT-PERP
+        base: ETH
+      - symbol: BNB-USDT-PERP
+        base: BNB
+      - symbol: ADA-USDT-PERP
+        base: ADA
+      - symbol: XRP-USDT-PERP
+        base: XRP
+      - symbol: DOGE-USDT-PERP
+        base: DOGE
+      - symbol: DOT-USDT-PERP
+        base: DOT
+      - symbol: BCH-USDT-PERP
+        base: BCH
+      - symbol: UNI-USDT-PERP
+        base: UNI
+      - symbol: LTC-USDT-PERP
+        base: LTC
+      - symbol: LINK-USDT-PERP
+        base: LINK
+      - symbol: MATIC-USDT-PERP
+        base: MATIC
+      - symbol: XLM-USDT-PERP
+        base: XLM
+      - symbol: ETC-USDT-PERP
+        base: ETC
+      - symbol: VET-USDT-PERP
+        base: VET
+      - symbol: TRX-USDT-PERP
+        base: TRX
+      - symbol: EOS-USDT-PERP
+        base: EOS
+      - symbol: FIL-USDT-PERP
+        base: FIL
+      - symbol: BSV-USDT-PERP
+        base: BSV
+    redis:
+      port: 6379
+      exporterPort: 9121
+    dataFeed:
+      image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+      podConfigsVolumeMountPath: /etc/svoe/data_feed/configs
+      podConfigs:
+        - name: data-feed-config-0.yaml
+          config: |
+            cache: redis
+            exchanges:
+              BYBIT:
+                funding: &id001
+                - BTC-USDT-PERP
+                l2_book:
+                  book_delta: true
+                  max_depth: 100
+                  symbols: *id001
+                liquidations: *id001
+                open_interest: *id001
+                retries: -1
+                trades: *id001
+            health_check:
+              path: /health
+              port: 1234
+            num_write_threads: 100
+            prometheus:
+              multiproc_dir: test
+              port: 8000
+            redis:
+              del_after_read: true
+              ip: 127.0.0.1
+              port: 6379
+              retention_time: null
+              socket: null
+              start_flush: true
+            storage:
+            - svoe
+            storage_interval: 30
+            storage_retries: 3
+            storage_retry_wait: 10
+            svoe:
+              compression: gzip
+              glue_database: svoe_glue_db
+              s3_bucket: svoe.test.1
+              s3_key_id: '{{ .Values.awsKey }}'
+              s3_prefix: data_lake
+              s3_secret: '{{ .Values.awsSecret }}'
+              version: local
+            write_on_stop: true
+
+        - name: data-feed-config-1.yaml
+          config: |
+            cache: redis
+            exchanges:
+              BYBIT:
+                funding: &id001
+                - ETH-USDT-PERP
+                l2_book:
+                  book_delta: true
+                  max_depth: 100
+                  symbols: *id001
+                liquidations: *id001
+                open_interest: *id001
+                retries: -1
+                trades: *id001
+            health_check:
+              path: /health
+              port: 1234
+            num_write_threads: 100
+            prometheus:
+              multiproc_dir: test
+              port: 8000
+            redis:
+              del_after_read: true
+              ip: 127.0.0.1
+              port: 6379
+              retention_time: null
+              socket: null
+              start_flush: true
+            storage:
+            - svoe
+            storage_interval: 30
+            storage_retries: 3
+            storage_retry_wait: 10
+            svoe:
+              compression: gzip
+              glue_database: svoe_glue_db
+              s3_bucket: svoe.test.1
+              s3_key_id: '{{ .Values.awsKey }}'
+              s3_prefix: data_lake
+              s3_secret: '{{ .Values.awsSecret }}'
+              version: local
+            write_on_stop: true
+
+        - name: data-feed-config-2.yaml
+          config: |
+            cache: redis
+            exchanges:
+              BYBIT:
+                funding: &id001
+                - BNB-USDT-PERP
+                l2_book:
+                  book_delta: true
+                  max_depth: 100
+                  symbols: *id001
+                liquidations: *id001
+                open_interest: *id001
+                retries: -1
+                trades: *id001
+            health_check:
+              path: /health
+              port: 1234
+            num_write_threads: 100
+            prometheus:
+              multiproc_dir: test
+              port: 8000
+            redis:
+              del_after_read: true
+              ip: 127.0.0.1
+              port: 6379
+              retention_time: null
+              socket: null
+              start_flush: true
+            storage:
+            - svoe
+            storage_interval: 30
+            storage_retries: 3
+            storage_retry_wait: 10
+            svoe:
+              compression: gzip
+              glue_database: svoe_glue_db
+              s3_bucket: svoe.test.1
+              s3_key_id: '{{ .Values.awsKey }}'
+              s3_prefix: data_lake
+              s3_secret: '{{ .Values.awsSecret }}'
+              version: local
+            write_on_stop: true
+
+        - name: data-feed-config-3.yaml
+          config: |
+            cache: redis
+            exchanges:
+              BYBIT:
+                funding: &id001
+                - ADA-USDT-PERP
+                l2_book:
+                  book_delta: true
+                  max_depth: 100
+                  symbols: *id001
+                liquidations: *id001
+                open_interest: *id001
+                retries: -1
+                trades: *id001
+            health_check:
+              path: /health
+              port: 1234
+            num_write_threads: 100
+            prometheus:
+              multiproc_dir: test
+              port: 8000
+            redis:
+              del_after_read: true
+              ip: 127.0.0.1
+              port: 6379
+              retention_time: null
+              socket: null
+              start_flush: true
+            storage:
+            - svoe
+            storage_interval: 30
+            storage_retries: 3
+            storage_retry_wait: 10
+            svoe:
+              compression: gzip
+              glue_database: svoe_glue_db
+              s3_bucket: svoe.test.1
+              s3_key_id: '{{ .Values.awsKey }}'
+              s3_prefix: data_lake
+              s3_secret: '{{ .Values.awsSecret }}'
+              version: local
+            write_on_stop: true
+
+        - name: data-feed-config-4.yaml
+          config: |
+            cache: redis
+            exchanges:
+              BYBIT:
+                funding: &id001
+                - XRP-USDT-PERP
+                l2_book:
+                  book_delta: true
+                  max_depth: 100
+                  symbols: *id001
+                liquidations: *id001
+                open_interest: *id001
+                retries: -1
+                trades: *id001
+            health_check:
+              path: /health
+              port: 1234
+            num_write_threads: 100
+            prometheus:
+              multiproc_dir: test
+              port: 8000
+            redis:
+              del_after_read: true
+              ip: 127.0.0.1
+              port: 6379
+              retention_time: null
+              socket: null
+              start_flush: true
+            storage:
+            - svoe
+            storage_interval: 30
+            storage_retries: 3
+            storage_retry_wait: 10
+            svoe:
+              compression: gzip
+              glue_database: svoe_glue_db
+              s3_bucket: svoe.test.1
+              s3_key_id: '{{ .Values.awsKey }}'
+              s3_prefix: data_lake
+              s3_secret: '{{ .Values.awsSecret }}'
+              version: local
+            write_on_stop: true
+
+        - name: data-feed-config-5.yaml
+          config: |
+            cache: redis
+            exchanges:
+              BYBIT:
+                funding: &id001
+                - DOGE-USDT-PERP
+                l2_book:
+                  book_delta: true
+                  max_depth: 100
+                  symbols: *id001
+                liquidations: *id001
+                open_interest: *id001
+                retries: -1
+                trades: *id001
+            health_check:
+              path: /health
+              port: 1234
+            num_write_threads: 100
+            prometheus:
+              multiproc_dir: test
+              port: 8000
+            redis:
+              del_after_read: true
+              ip: 127.0.0.1
+              port: 6379
+              retention_time: null
+              socket: null
+              start_flush: true
+            storage:
+            - svoe
+            storage_interval: 30
+            storage_retries: 3
+            storage_retry_wait: 10
+            svoe:
+              compression: gzip
+              glue_database: svoe_glue_db
+              s3_bucket: svoe.test.1
+              s3_key_id: '{{ .Values.awsKey }}'
+              s3_prefix: data_lake
+              s3_secret: '{{ .Values.awsSecret }}'
+              version: local
+            write_on_stop: true
+
+        - name: data-feed-config-6.yaml
+          config: |
+            cache: redis
+            exchanges:
+              BYBIT:
+                funding: &id001
+                - DOT-USDT-PERP
+                l2_book:
+                  book_delta: true
+                  max_depth: 100
+                  symbols: *id001
+                liquidations: *id001
+                open_interest: *id001
+                retries: -1
+                trades: *id001
+            health_check:
+              path: /health
+              port: 1234
+            num_write_threads: 100
+            prometheus:
+              multiproc_dir: test
+              port: 8000
+            redis:
+              del_after_read: true
+              ip: 127.0.0.1
+              port: 6379
+              retention_time: null
+              socket: null
+              start_flush: true
+            storage:
+            - svoe
+            storage_interval: 30
+            storage_retries: 3
+            storage_retry_wait: 10
+            svoe:
+              compression: gzip
+              glue_database: svoe_glue_db
+              s3_bucket: svoe.test.1
+              s3_key_id: '{{ .Values.awsKey }}'
+              s3_prefix: data_lake
+              s3_secret: '{{ .Values.awsSecret }}'
+              version: local
+            write_on_stop: true
+
+        - name: data-feed-config-7.yaml
+          config: |
+            cache: redis
+            exchanges:
+              BYBIT:
+                funding: &id001
+                - BCH-USDT-PERP
+                l2_book:
+                  book_delta: true
+                  max_depth: 100
+                  symbols: *id001
+                liquidations: *id001
+                open_interest: *id001
+                retries: -1
+                trades: *id001
+            health_check:
+              path: /health
+              port: 1234
+            num_write_threads: 100
+            prometheus:
+              multiproc_dir: test
+              port: 8000
+            redis:
+              del_after_read: true
+              ip: 127.0.0.1
+              port: 6379
+              retention_time: null
+              socket: null
+              start_flush: true
+            storage:
+            - svoe
+            storage_interval: 30
+            storage_retries: 3
+            storage_retry_wait: 10
+            svoe:
+              compression: gzip
+              glue_database: svoe_glue_db
+              s3_bucket: svoe.test.1
+              s3_key_id: '{{ .Values.awsKey }}'
+              s3_prefix: data_lake
+              s3_secret: '{{ .Values.awsSecret }}'
+              version: local
+            write_on_stop: true
+
+        - name: data-feed-config-8.yaml
+          config: |
+            cache: redis
+            exchanges:
+              BYBIT:
+                funding: &id001
+                - UNI-USDT-PERP
+                l2_book:
+                  book_delta: true
+                  max_depth: 100
+                  symbols: *id001
+                liquidations: *id001
+                open_interest: *id001
+                retries: -1
+                trades: *id001
+            health_check:
+              path: /health
+              port: 1234
+            num_write_threads: 100
+            prometheus:
+              multiproc_dir: test
+              port: 8000
+            redis:
+              del_after_read: true
+              ip: 127.0.0.1
+              port: 6379
+              retention_time: null
+              socket: null
+              start_flush: true
+            storage:
+            - svoe
+            storage_interval: 30
+            storage_retries: 3
+            storage_retry_wait: 10
+            svoe:
+              compression: gzip
+              glue_database: svoe_glue_db
+              s3_bucket: svoe.test.1
+              s3_key_id: '{{ .Values.awsKey }}'
+              s3_prefix: data_lake
+              s3_secret: '{{ .Values.awsSecret }}'
+              version: local
+            write_on_stop: true
+
+        - name: data-feed-config-9.yaml
+          config: |
+            cache: redis
+            exchanges:
+              BYBIT:
+                funding: &id001
+                - LTC-USDT-PERP
+                l2_book:
+                  book_delta: true
+                  max_depth: 100
+                  symbols: *id001
+                liquidations: *id001
+                open_interest: *id001
+                retries: -1
+                trades: *id001
+            health_check:
+              path: /health
+              port: 1234
+            num_write_threads: 100
+            prometheus:
+              multiproc_dir: test
+              port: 8000
+            redis:
+              del_after_read: true
+              ip: 127.0.0.1
+              port: 6379
+              retention_time: null
+              socket: null
+              start_flush: true
+            storage:
+            - svoe
+            storage_interval: 30
+            storage_retries: 3
+            storage_retry_wait: 10
+            svoe:
+              compression: gzip
+              glue_database: svoe_glue_db
+              s3_bucket: svoe.test.1
+              s3_key_id: '{{ .Values.awsKey }}'
+              s3_prefix: data_lake
+              s3_secret: '{{ .Values.awsSecret }}'
+              version: local
+            write_on_stop: true
+
+        - name: data-feed-config-10.yaml
+          config: |
+            cache: redis
+            exchanges:
+              BYBIT:
+                funding: &id001
+                - LINK-USDT-PERP
+                l2_book:
+                  book_delta: true
+                  max_depth: 100
+                  symbols: *id001
+                liquidations: *id001
+                open_interest: *id001
+                retries: -1
+                trades: *id001
+            health_check:
+              path: /health
+              port: 1234
+            num_write_threads: 100
+            prometheus:
+              multiproc_dir: test
+              port: 8000
+            redis:
+              del_after_read: true
+              ip: 127.0.0.1
+              port: 6379
+              retention_time: null
+              socket: null
+              start_flush: true
+            storage:
+            - svoe
+            storage_interval: 30
+            storage_retries: 3
+            storage_retry_wait: 10
+            svoe:
+              compression: gzip
+              glue_database: svoe_glue_db
+              s3_bucket: svoe.test.1
+              s3_key_id: '{{ .Values.awsKey }}'
+              s3_prefix: data_lake
+              s3_secret: '{{ .Values.awsSecret }}'
+              version: local
+            write_on_stop: true
+
+        - name: data-feed-config-11.yaml
+          config: |
+            cache: redis
+            exchanges:
+              BYBIT:
+                funding: &id001
+                - MATIC-USDT-PERP
+                l2_book:
+                  book_delta: true
+                  max_depth: 100
+                  symbols: *id001
+                liquidations: *id001
+                open_interest: *id001
+                retries: -1
+                trades: *id001
+            health_check:
+              path: /health
+              port: 1234
+            num_write_threads: 100
+            prometheus:
+              multiproc_dir: test
+              port: 8000
+            redis:
+              del_after_read: true
+              ip: 127.0.0.1
+              port: 6379
+              retention_time: null
+              socket: null
+              start_flush: true
+            storage:
+            - svoe
+            storage_interval: 30
+            storage_retries: 3
+            storage_retry_wait: 10
+            svoe:
+              compression: gzip
+              glue_database: svoe_glue_db
+              s3_bucket: svoe.test.1
+              s3_key_id: '{{ .Values.awsKey }}'
+              s3_prefix: data_lake
+              s3_secret: '{{ .Values.awsSecret }}'
+              version: local
+            write_on_stop: true
+
+        - name: data-feed-config-12.yaml
+          config: |
+            cache: redis
+            exchanges:
+              BYBIT:
+                funding: &id001
+                - XLM-USDT-PERP
+                l2_book:
+                  book_delta: true
+                  max_depth: 100
+                  symbols: *id001
+                liquidations: *id001
+                open_interest: *id001
+                retries: -1
+                trades: *id001
+            health_check:
+              path: /health
+              port: 1234
+            num_write_threads: 100
+            prometheus:
+              multiproc_dir: test
+              port: 8000
+            redis:
+              del_after_read: true
+              ip: 127.0.0.1
+              port: 6379
+              retention_time: null
+              socket: null
+              start_flush: true
+            storage:
+            - svoe
+            storage_interval: 30
+            storage_retries: 3
+            storage_retry_wait: 10
+            svoe:
+              compression: gzip
+              glue_database: svoe_glue_db
+              s3_bucket: svoe.test.1
+              s3_key_id: '{{ .Values.awsKey }}'
+              s3_prefix: data_lake
+              s3_secret: '{{ .Values.awsSecret }}'
+              version: local
+            write_on_stop: true
+
+        - name: data-feed-config-13.yaml
+          config: |
+            cache: redis
+            exchanges:
+              BYBIT:
+                funding: &id001
+                - ETC-USDT-PERP
+                l2_book:
+                  book_delta: true
+                  max_depth: 100
+                  symbols: *id001
+                liquidations: *id001
+                open_interest: *id001
+                retries: -1
+                trades: *id001
+            health_check:
+              path: /health
+              port: 1234
+            num_write_threads: 100
+            prometheus:
+              multiproc_dir: test
+              port: 8000
+            redis:
+              del_after_read: true
+              ip: 127.0.0.1
+              port: 6379
+              retention_time: null
+              socket: null
+              start_flush: true
+            storage:
+            - svoe
+            storage_interval: 30
+            storage_retries: 3
+            storage_retry_wait: 10
+            svoe:
+              compression: gzip
+              glue_database: svoe_glue_db
+              s3_bucket: svoe.test.1
+              s3_key_id: '{{ .Values.awsKey }}'
+              s3_prefix: data_lake
+              s3_secret: '{{ .Values.awsSecret }}'
+              version: local
+            write_on_stop: true
+
+        - name: data-feed-config-14.yaml
+          config: |
+            cache: redis
+            exchanges:
+              BYBIT:
+                funding: &id001
+                - VET-USDT-PERP
+                l2_book:
+                  book_delta: true
+                  max_depth: 100
+                  symbols: *id001
+                liquidations: *id001
+                open_interest: *id001
+                retries: -1
+                trades: *id001
+            health_check:
+              path: /health
+              port: 1234
+            num_write_threads: 100
+            prometheus:
+              multiproc_dir: test
+              port: 8000
+            redis:
+              del_after_read: true
+              ip: 127.0.0.1
+              port: 6379
+              retention_time: null
+              socket: null
+              start_flush: true
+            storage:
+            - svoe
+            storage_interval: 30
+            storage_retries: 3
+            storage_retry_wait: 10
+            svoe:
+              compression: gzip
+              glue_database: svoe_glue_db
+              s3_bucket: svoe.test.1
+              s3_key_id: '{{ .Values.awsKey }}'
+              s3_prefix: data_lake
+              s3_secret: '{{ .Values.awsSecret }}'
+              version: local
+            write_on_stop: true
+
+        - name: data-feed-config-15.yaml
+          config: |
+            cache: redis
+            exchanges:
+              BYBIT:
+                funding: &id001
+                - TRX-USDT-PERP
+                l2_book:
+                  book_delta: true
+                  max_depth: 100
+                  symbols: *id001
+                liquidations: *id001
+                open_interest: *id001
+                retries: -1
+                trades: *id001
+            health_check:
+              path: /health
+              port: 1234
+            num_write_threads: 100
+            prometheus:
+              multiproc_dir: test
+              port: 8000
+            redis:
+              del_after_read: true
+              ip: 127.0.0.1
+              port: 6379
+              retention_time: null
+              socket: null
+              start_flush: true
+            storage:
+            - svoe
+            storage_interval: 30
+            storage_retries: 3
+            storage_retry_wait: 10
+            svoe:
+              compression: gzip
+              glue_database: svoe_glue_db
+              s3_bucket: svoe.test.1
+              s3_key_id: '{{ .Values.awsKey }}'
+              s3_prefix: data_lake
+              s3_secret: '{{ .Values.awsSecret }}'
+              version: local
+            write_on_stop: true
+
+        - name: data-feed-config-16.yaml
+          config: |
+            cache: redis
+            exchanges:
+              BYBIT:
+                funding: &id001
+                - EOS-USDT-PERP
+                l2_book:
+                  book_delta: true
+                  max_depth: 100
+                  symbols: *id001
+                liquidations: *id001
+                open_interest: *id001
+                retries: -1
+                trades: *id001
+            health_check:
+              path: /health
+              port: 1234
+            num_write_threads: 100
+            prometheus:
+              multiproc_dir: test
+              port: 8000
+            redis:
+              del_after_read: true
+              ip: 127.0.0.1
+              port: 6379
+              retention_time: null
+              socket: null
+              start_flush: true
+            storage:
+            - svoe
+            storage_interval: 30
+            storage_retries: 3
+            storage_retry_wait: 10
+            svoe:
+              compression: gzip
+              glue_database: svoe_glue_db
+              s3_bucket: svoe.test.1
+              s3_key_id: '{{ .Values.awsKey }}'
+              s3_prefix: data_lake
+              s3_secret: '{{ .Values.awsSecret }}'
+              version: local
+            write_on_stop: true
+
+        - name: data-feed-config-17.yaml
+          config: |
+            cache: redis
+            exchanges:
+              BYBIT:
+                funding: &id001
+                - FIL-USDT-PERP
+                l2_book:
+                  book_delta: true
+                  max_depth: 100
+                  symbols: *id001
+                liquidations: *id001
+                open_interest: *id001
+                retries: -1
+                trades: *id001
+            health_check:
+              path: /health
+              port: 1234
+            num_write_threads: 100
+            prometheus:
+              multiproc_dir: test
+              port: 8000
+            redis:
+              del_after_read: true
+              ip: 127.0.0.1
+              port: 6379
+              retention_time: null
+              socket: null
+              start_flush: true
+            storage:
+            - svoe
+            storage_interval: 30
+            storage_retries: 3
+            storage_retry_wait: 10
+            svoe:
+              compression: gzip
+              glue_database: svoe_glue_db
+              s3_bucket: svoe.test.1
+              s3_key_id: '{{ .Values.awsKey }}'
+              s3_prefix: data_lake
+              s3_secret: '{{ .Values.awsSecret }}'
+              version: local
+            write_on_stop: true
+
+        - name: data-feed-config-18.yaml
+          config: |
+            cache: redis
+            exchanges:
+              BYBIT:
+                funding: &id001
+                - BSV-USDT-PERP
+                l2_book:
+                  book_delta: true
+                  max_depth: 100
+                  symbols: *id001
+                liquidations: *id001
+                open_interest: *id001
+                retries: -1
+                trades: *id001
+            health_check:
+              path: /health
+              port: 1234
+            num_write_threads: 100
+            prometheus:
+              multiproc_dir: test
+              port: 8000
+            redis:
+              del_after_read: true
+              ip: 127.0.0.1
+              port: 6379
+              retention_time: null
+              socket: null
+              start_flush: true
+            storage:
+            - svoe
+            storage_interval: 30
+            storage_retries: 3
+            storage_retry_wait: 10
+            svoe:
+              compression: gzip
+              glue_database: svoe_glue_db
+              s3_bucket: svoe.test.1
+              s3_key_id: '{{ .Values.awsKey }}'
+              s3_prefix: data_lake
+              s3_secret: '{{ .Values.awsSecret }}'
+              version: local
+            write_on_stop: true
+
+    initScript:
+      name: run.sh
+      configsVolumeMountPath: /mnt/data
+      scriptsVolumeMountPath: /mnt/scripts
+      script: |-
+        #!/bin/sh
+        SET_INDEX=${HOSTNAME##*-}
+        echo "Starting initializing for pod $SET_INDEX"
+        if [ "$SET_INDEX" = "0" ]; then
+            cp /mnt/scripts/data-feed-config-0.yaml /mnt/data/data-feed-config.yaml
+        if [ "$SET_INDEX" = "1" ]; then
+            cp /mnt/scripts/data-feed-config-1.yaml /mnt/data/data-feed-config.yaml
+        if [ "$SET_INDEX" = "2" ]; then
+            cp /mnt/scripts/data-feed-config-2.yaml /mnt/data/data-feed-config.yaml
+        if [ "$SET_INDEX" = "3" ]; then
+            cp /mnt/scripts/data-feed-config-3.yaml /mnt/data/data-feed-config.yaml
+        if [ "$SET_INDEX" = "4" ]; then
+            cp /mnt/scripts/data-feed-config-4.yaml /mnt/data/data-feed-config.yaml
+        if [ "$SET_INDEX" = "5" ]; then
+            cp /mnt/scripts/data-feed-config-5.yaml /mnt/data/data-feed-config.yaml
+        if [ "$SET_INDEX" = "6" ]; then
+            cp /mnt/scripts/data-feed-config-6.yaml /mnt/data/data-feed-config.yaml
+        if [ "$SET_INDEX" = "7" ]; then
+            cp /mnt/scripts/data-feed-config-7.yaml /mnt/data/data-feed-config.yaml
+        if [ "$SET_INDEX" = "8" ]; then
+            cp /mnt/scripts/data-feed-config-8.yaml /mnt/data/data-feed-config.yaml
+        if [ "$SET_INDEX" = "9" ]; then
+            cp /mnt/scripts/data-feed-config-9.yaml /mnt/data/data-feed-config.yaml
+        if [ "$SET_INDEX" = "10" ]; then
+            cp /mnt/scripts/data-feed-config-10.yaml /mnt/data/data-feed-config.yaml
+        if [ "$SET_INDEX" = "11" ]; then
+            cp /mnt/scripts/data-feed-config-11.yaml /mnt/data/data-feed-config.yaml
+        if [ "$SET_INDEX" = "12" ]; then
+            cp /mnt/scripts/data-feed-config-12.yaml /mnt/data/data-feed-config.yaml
+        if [ "$SET_INDEX" = "13" ]; then
+            cp /mnt/scripts/data-feed-config-13.yaml /mnt/data/data-feed-config.yaml
+        if [ "$SET_INDEX" = "14" ]; then
+            cp /mnt/scripts/data-feed-config-14.yaml /mnt/data/data-feed-config.yaml
+        if [ "$SET_INDEX" = "15" ]; then
+            cp /mnt/scripts/data-feed-config-15.yaml /mnt/data/data-feed-config.yaml
+        if [ "$SET_INDEX" = "16" ]; then
+            cp /mnt/scripts/data-feed-config-16.yaml /mnt/data/data-feed-config.yaml
+        if [ "$SET_INDEX" = "17" ]; then
+            cp /mnt/scripts/data-feed-config-17.yaml /mnt/data/data-feed-config.yaml
+        if [ "$SET_INDEX" = "18" ]; then
+            cp /mnt/scripts/data-feed-config-18.yaml /mnt/data/data-feed-config.yaml
+        else
+            echo "Invalid stateful set index"
+            exit 1
+        fi
+{{ end }}

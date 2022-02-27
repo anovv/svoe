@@ -13,8 +13,8 @@ storage_retry_wait: 10
 write_on_stop: true
 num_write_threads: 100
 svoe:
-  s3_key_id: {% raw %}{{ .Values.awsKey }}{% endraw %}
-  s3_secret: {% raw %}{{ .Values.awsSecret }}{% endraw %}
+  s3_key_id: "{{ .Values.awsKey }}"
+  s3_secret: "{{ .Values.awsSecret }}"
   s3_bucket: svoe.test.1
   s3_prefix: data_lake
   glue_database: svoe_glue_db  # TODO sync with Terraform via helmfile
@@ -26,6 +26,4 @@ health_check:
   path: /health
 prometheus:
   port: 8000
-  multiproc_dir:
-exchanges:
-  {{ exchanges_config }}
+  multiproc_dir: test
