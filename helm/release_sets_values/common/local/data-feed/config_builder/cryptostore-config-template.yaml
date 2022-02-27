@@ -19,11 +19,13 @@ svoe:
   s3_prefix: data_lake
   glue_database: svoe_glue_db  # TODO sync with Terraform via helmfile
   compression: gzip
-  version: local  # TODO add version logging
+  version: unchanged
+  data_feed_image: unchanged
+  cluster_id: unchanged
 storage_interval: 30
 health_check:
   port: 1234
   path: /health
 prometheus:
   port: 8000
-  multiproc_dir: test
+  multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir # multiproc_dir is multiproc_dir_prefix + config hash

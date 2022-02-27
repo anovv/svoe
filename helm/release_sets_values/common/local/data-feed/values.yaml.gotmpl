@@ -67,7 +67,8 @@ feedConfigs:
               port: 1234
             num_write_threads: 100
             prometheus:
-              multiproc_dir: test
+              multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_0a4d9e
+              multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
               port: 8000
             redis:
               del_after_read: true
@@ -82,13 +83,15 @@ feedConfigs:
             storage_retries: 3
             storage_retry_wait: 10
             svoe:
+              cluster_id: 1
               compression: gzip
+              data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
               glue_database: svoe_glue_db
               s3_bucket: svoe.test.1
               s3_key_id: '{{ .Values.awsKey }}'
               s3_prefix: data_lake
               s3_secret: '{{ .Values.awsSecret }}'
-              version: local
+              version: 0a4d9ea6481624074c73a47308e151660253dae2
             write_on_stop: true
 
         - name: data-feed-config-1.yaml
@@ -109,7 +112,8 @@ feedConfigs:
               port: 1234
             num_write_threads: 100
             prometheus:
-              multiproc_dir: test
+              multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_f3c162
+              multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
               port: 8000
             redis:
               del_after_read: true
@@ -124,13 +128,15 @@ feedConfigs:
             storage_retries: 3
             storage_retry_wait: 10
             svoe:
+              cluster_id: 1
               compression: gzip
+              data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
               glue_database: svoe_glue_db
               s3_bucket: svoe.test.1
               s3_key_id: '{{ .Values.awsKey }}'
               s3_prefix: data_lake
               s3_secret: '{{ .Values.awsSecret }}'
-              version: local
+              version: f3c162ca0c5765b12e541bde8aa90c88541a3fe7
             write_on_stop: true
 
         - name: data-feed-config-2.yaml
@@ -151,7 +157,8 @@ feedConfigs:
               port: 1234
             num_write_threads: 100
             prometheus:
-              multiproc_dir: test
+              multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_733449
+              multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
               port: 8000
             redis:
               del_after_read: true
@@ -166,13 +173,15 @@ feedConfigs:
             storage_retries: 3
             storage_retry_wait: 10
             svoe:
+              cluster_id: 1
               compression: gzip
+              data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
               glue_database: svoe_glue_db
               s3_bucket: svoe.test.1
               s3_key_id: '{{ .Values.awsKey }}'
               s3_prefix: data_lake
               s3_secret: '{{ .Values.awsSecret }}'
-              version: local
+              version: 73344956c621649dec878cc4255325c58373cecf
             write_on_stop: true
 
         - name: data-feed-config-3.yaml
@@ -193,7 +202,8 @@ feedConfigs:
               port: 1234
             num_write_threads: 100
             prometheus:
-              multiproc_dir: test
+              multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_0fff47
+              multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
               port: 8000
             redis:
               del_after_read: true
@@ -208,13 +218,15 @@ feedConfigs:
             storage_retries: 3
             storage_retry_wait: 10
             svoe:
+              cluster_id: 1
               compression: gzip
+              data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
               glue_database: svoe_glue_db
               s3_bucket: svoe.test.1
               s3_key_id: '{{ .Values.awsKey }}'
               s3_prefix: data_lake
               s3_secret: '{{ .Values.awsSecret }}'
-              version: local
+              version: 0fff479f59534f445cc744fc428504054a422a58
             write_on_stop: true
 
         - name: data-feed-config-4.yaml
@@ -235,7 +247,8 @@ feedConfigs:
               port: 1234
             num_write_threads: 100
             prometheus:
-              multiproc_dir: test
+              multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_fc3bbe
+              multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
               port: 8000
             redis:
               del_after_read: true
@@ -250,13 +263,15 @@ feedConfigs:
             storage_retries: 3
             storage_retry_wait: 10
             svoe:
+              cluster_id: 1
               compression: gzip
+              data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
               glue_database: svoe_glue_db
               s3_bucket: svoe.test.1
               s3_key_id: '{{ .Values.awsKey }}'
               s3_prefix: data_lake
               s3_secret: '{{ .Values.awsSecret }}'
-              version: local
+              version: fc3bbeb82349828d1a7bc46b31c9e385fb74d854
             write_on_stop: true
 
         - name: data-feed-config-5.yaml
@@ -277,7 +292,8 @@ feedConfigs:
               port: 1234
             num_write_threads: 100
             prometheus:
-              multiproc_dir: test
+              multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_82157f
+              multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
               port: 8000
             redis:
               del_after_read: true
@@ -292,13 +308,15 @@ feedConfigs:
             storage_retries: 3
             storage_retry_wait: 10
             svoe:
+              cluster_id: 1
               compression: gzip
+              data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
               glue_database: svoe_glue_db
               s3_bucket: svoe.test.1
               s3_key_id: '{{ .Values.awsKey }}'
               s3_prefix: data_lake
               s3_secret: '{{ .Values.awsSecret }}'
-              version: local
+              version: 82157f766e481eaa04e56c46840d158d3d7c5707
             write_on_stop: true
 
         - name: data-feed-config-6.yaml
@@ -319,7 +337,8 @@ feedConfigs:
               port: 1234
             num_write_threads: 100
             prometheus:
-              multiproc_dir: test
+              multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_25fc93
+              multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
               port: 8000
             redis:
               del_after_read: true
@@ -334,13 +353,15 @@ feedConfigs:
             storage_retries: 3
             storage_retry_wait: 10
             svoe:
+              cluster_id: 1
               compression: gzip
+              data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
               glue_database: svoe_glue_db
               s3_bucket: svoe.test.1
               s3_key_id: '{{ .Values.awsKey }}'
               s3_prefix: data_lake
               s3_secret: '{{ .Values.awsSecret }}'
-              version: local
+              version: 25fc9314e9a5d1520c4fd348c88cf2e9e97f01de
             write_on_stop: true
 
         - name: data-feed-config-7.yaml
@@ -361,7 +382,8 @@ feedConfigs:
               port: 1234
             num_write_threads: 100
             prometheus:
-              multiproc_dir: test
+              multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_f932cf
+              multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
               port: 8000
             redis:
               del_after_read: true
@@ -376,13 +398,15 @@ feedConfigs:
             storage_retries: 3
             storage_retry_wait: 10
             svoe:
+              cluster_id: 1
               compression: gzip
+              data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
               glue_database: svoe_glue_db
               s3_bucket: svoe.test.1
               s3_key_id: '{{ .Values.awsKey }}'
               s3_prefix: data_lake
               s3_secret: '{{ .Values.awsSecret }}'
-              version: local
+              version: f932cf59993d3f5ea74051a1244a286ec0acb68b
             write_on_stop: true
 
         - name: data-feed-config-8.yaml
@@ -403,7 +427,8 @@ feedConfigs:
               port: 1234
             num_write_threads: 100
             prometheus:
-              multiproc_dir: test
+              multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_e5fada
+              multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
               port: 8000
             redis:
               del_after_read: true
@@ -418,13 +443,15 @@ feedConfigs:
             storage_retries: 3
             storage_retry_wait: 10
             svoe:
+              cluster_id: 1
               compression: gzip
+              data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
               glue_database: svoe_glue_db
               s3_bucket: svoe.test.1
               s3_key_id: '{{ .Values.awsKey }}'
               s3_prefix: data_lake
               s3_secret: '{{ .Values.awsSecret }}'
-              version: local
+              version: e5fada12140240f37a46c82d8a0179011c0fee12
             write_on_stop: true
 
         - name: data-feed-config-9.yaml
@@ -445,7 +472,8 @@ feedConfigs:
               port: 1234
             num_write_threads: 100
             prometheus:
-              multiproc_dir: test
+              multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_e2861a
+              multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
               port: 8000
             redis:
               del_after_read: true
@@ -460,13 +488,15 @@ feedConfigs:
             storage_retries: 3
             storage_retry_wait: 10
             svoe:
+              cluster_id: 1
               compression: gzip
+              data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
               glue_database: svoe_glue_db
               s3_bucket: svoe.test.1
               s3_key_id: '{{ .Values.awsKey }}'
               s3_prefix: data_lake
               s3_secret: '{{ .Values.awsSecret }}'
-              version: local
+              version: e2861a4869700e9b77a3a01849f8823696df66db
             write_on_stop: true
 
         - name: data-feed-config-10.yaml
@@ -487,7 +517,8 @@ feedConfigs:
               port: 1234
             num_write_threads: 100
             prometheus:
-              multiproc_dir: test
+              multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_da9841
+              multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
               port: 8000
             redis:
               del_after_read: true
@@ -502,13 +533,15 @@ feedConfigs:
             storage_retries: 3
             storage_retry_wait: 10
             svoe:
+              cluster_id: 1
               compression: gzip
+              data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
               glue_database: svoe_glue_db
               s3_bucket: svoe.test.1
               s3_key_id: '{{ .Values.awsKey }}'
               s3_prefix: data_lake
               s3_secret: '{{ .Values.awsSecret }}'
-              version: local
+              version: da9841ba59bef77a35d297d29b21529d96ce8485
             write_on_stop: true
 
         - name: data-feed-config-11.yaml
@@ -529,7 +562,8 @@ feedConfigs:
               port: 1234
             num_write_threads: 100
             prometheus:
-              multiproc_dir: test
+              multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_adb478
+              multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
               port: 8000
             redis:
               del_after_read: true
@@ -544,13 +578,15 @@ feedConfigs:
             storage_retries: 3
             storage_retry_wait: 10
             svoe:
+              cluster_id: 1
               compression: gzip
+              data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
               glue_database: svoe_glue_db
               s3_bucket: svoe.test.1
               s3_key_id: '{{ .Values.awsKey }}'
               s3_prefix: data_lake
               s3_secret: '{{ .Values.awsSecret }}'
-              version: local
+              version: adb478cfcf722b1d7487ebfa9b287e656236c914
             write_on_stop: true
 
         - name: data-feed-config-12.yaml
@@ -571,7 +607,8 @@ feedConfigs:
               port: 1234
             num_write_threads: 100
             prometheus:
-              multiproc_dir: test
+              multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_354476
+              multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
               port: 8000
             redis:
               del_after_read: true
@@ -586,13 +623,15 @@ feedConfigs:
             storage_retries: 3
             storage_retry_wait: 10
             svoe:
+              cluster_id: 1
               compression: gzip
+              data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
               glue_database: svoe_glue_db
               s3_bucket: svoe.test.1
               s3_key_id: '{{ .Values.awsKey }}'
               s3_prefix: data_lake
               s3_secret: '{{ .Values.awsSecret }}'
-              version: local
+              version: 3544765dd50cc9835add1988d332d11391fa261a
             write_on_stop: true
 
         - name: data-feed-config-13.yaml
@@ -613,7 +652,8 @@ feedConfigs:
               port: 1234
             num_write_threads: 100
             prometheus:
-              multiproc_dir: test
+              multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_a6608f
+              multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
               port: 8000
             redis:
               del_after_read: true
@@ -628,13 +668,15 @@ feedConfigs:
             storage_retries: 3
             storage_retry_wait: 10
             svoe:
+              cluster_id: 1
               compression: gzip
+              data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
               glue_database: svoe_glue_db
               s3_bucket: svoe.test.1
               s3_key_id: '{{ .Values.awsKey }}'
               s3_prefix: data_lake
               s3_secret: '{{ .Values.awsSecret }}'
-              version: local
+              version: a6608f91b81566787d703be961132705c4d39df7
             write_on_stop: true
 
         - name: data-feed-config-14.yaml
@@ -655,7 +697,8 @@ feedConfigs:
               port: 1234
             num_write_threads: 100
             prometheus:
-              multiproc_dir: test
+              multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_1224d9
+              multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
               port: 8000
             redis:
               del_after_read: true
@@ -670,13 +713,15 @@ feedConfigs:
             storage_retries: 3
             storage_retry_wait: 10
             svoe:
+              cluster_id: 1
               compression: gzip
+              data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
               glue_database: svoe_glue_db
               s3_bucket: svoe.test.1
               s3_key_id: '{{ .Values.awsKey }}'
               s3_prefix: data_lake
               s3_secret: '{{ .Values.awsSecret }}'
-              version: local
+              version: 1224d94c4aad2a1893c173dfb47fcd9629887eb9
             write_on_stop: true
 
         - name: data-feed-config-15.yaml
@@ -697,7 +742,8 @@ feedConfigs:
               port: 1234
             num_write_threads: 100
             prometheus:
-              multiproc_dir: test
+              multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_3850c2
+              multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
               port: 8000
             redis:
               del_after_read: true
@@ -712,13 +758,15 @@ feedConfigs:
             storage_retries: 3
             storage_retry_wait: 10
             svoe:
+              cluster_id: 1
               compression: gzip
+              data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
               glue_database: svoe_glue_db
               s3_bucket: svoe.test.1
               s3_key_id: '{{ .Values.awsKey }}'
               s3_prefix: data_lake
               s3_secret: '{{ .Values.awsSecret }}'
-              version: local
+              version: 3850c28a8850c4183ac50b4d70267b4e37771f2d
             write_on_stop: true
 
         - name: data-feed-config-16.yaml
@@ -739,7 +787,8 @@ feedConfigs:
               port: 1234
             num_write_threads: 100
             prometheus:
-              multiproc_dir: test
+              multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_413194
+              multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
               port: 8000
             redis:
               del_after_read: true
@@ -754,13 +803,15 @@ feedConfigs:
             storage_retries: 3
             storage_retry_wait: 10
             svoe:
+              cluster_id: 1
               compression: gzip
+              data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
               glue_database: svoe_glue_db
               s3_bucket: svoe.test.1
               s3_key_id: '{{ .Values.awsKey }}'
               s3_prefix: data_lake
               s3_secret: '{{ .Values.awsSecret }}'
-              version: local
+              version: 413194dc23a47330e14021d7d5fa494d158f5478
             write_on_stop: true
 
         - name: data-feed-config-17.yaml
@@ -781,7 +832,8 @@ feedConfigs:
               port: 1234
             num_write_threads: 100
             prometheus:
-              multiproc_dir: test
+              multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_d75138
+              multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
               port: 8000
             redis:
               del_after_read: true
@@ -796,13 +848,15 @@ feedConfigs:
             storage_retries: 3
             storage_retry_wait: 10
             svoe:
+              cluster_id: 1
               compression: gzip
+              data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
               glue_database: svoe_glue_db
               s3_bucket: svoe.test.1
               s3_key_id: '{{ .Values.awsKey }}'
               s3_prefix: data_lake
               s3_secret: '{{ .Values.awsSecret }}'
-              version: local
+              version: d75138f8936531dff162a2e7c74e8b477f8a4715
             write_on_stop: true
 
         - name: data-feed-config-18.yaml
@@ -823,7 +877,8 @@ feedConfigs:
               port: 1234
             num_write_threads: 100
             prometheus:
-              multiproc_dir: test
+              multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_3f23f7
+              multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
               port: 8000
             redis:
               del_after_read: true
@@ -838,13 +893,15 @@ feedConfigs:
             storage_retries: 3
             storage_retry_wait: 10
             svoe:
+              cluster_id: 1
               compression: gzip
+              data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
               glue_database: svoe_glue_db
               s3_bucket: svoe.test.1
               s3_key_id: '{{ .Values.awsKey }}'
               s3_prefix: data_lake
               s3_secret: '{{ .Values.awsSecret }}'
-              version: local
+              version: 3f23f7d44b91cfa61d4cf93110c4fcaa2feafcb9
             write_on_stop: true
 
     initScript:
@@ -969,7 +1026,8 @@ feedConfigs:
               port: 1234
             num_write_threads: 100
             prometheus:
-              multiproc_dir: test
+              multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_87494f
+              multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
               port: 8000
             redis:
               del_after_read: true
@@ -984,13 +1042,15 @@ feedConfigs:
             storage_retries: 3
             storage_retry_wait: 10
             svoe:
+              cluster_id: 2
               compression: gzip
+              data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
               glue_database: svoe_glue_db
               s3_bucket: svoe.test.1
               s3_key_id: '{{ .Values.awsKey }}'
               s3_prefix: data_lake
               s3_secret: '{{ .Values.awsSecret }}'
-              version: local
+              version: 87494f68ffdbcfa5276a5e8522527b69324fc059
             write_on_stop: true
 
         - name: data-feed-config-1.yaml
@@ -1013,7 +1073,8 @@ feedConfigs:
               port: 1234
             num_write_threads: 100
             prometheus:
-              multiproc_dir: test
+              multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_ba96b2
+              multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
               port: 8000
             redis:
               del_after_read: true
@@ -1028,13 +1089,15 @@ feedConfigs:
             storage_retries: 3
             storage_retry_wait: 10
             svoe:
+              cluster_id: 2
               compression: gzip
+              data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
               glue_database: svoe_glue_db
               s3_bucket: svoe.test.1
               s3_key_id: '{{ .Values.awsKey }}'
               s3_prefix: data_lake
               s3_secret: '{{ .Values.awsSecret }}'
-              version: local
+              version: ba96b249a4704b1e319bcea6465518d33ff2299e
             write_on_stop: true
 
         - name: data-feed-config-2.yaml
@@ -1057,7 +1120,8 @@ feedConfigs:
               port: 1234
             num_write_threads: 100
             prometheus:
-              multiproc_dir: test
+              multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_e5590f
+              multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
               port: 8000
             redis:
               del_after_read: true
@@ -1072,13 +1136,15 @@ feedConfigs:
             storage_retries: 3
             storage_retry_wait: 10
             svoe:
+              cluster_id: 2
               compression: gzip
+              data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
               glue_database: svoe_glue_db
               s3_bucket: svoe.test.1
               s3_key_id: '{{ .Values.awsKey }}'
               s3_prefix: data_lake
               s3_secret: '{{ .Values.awsSecret }}'
-              version: local
+              version: e5590f525516269cd5e0bec180144a269790cbc0
             write_on_stop: true
 
         - name: data-feed-config-3.yaml
@@ -1101,7 +1167,8 @@ feedConfigs:
               port: 1234
             num_write_threads: 100
             prometheus:
-              multiproc_dir: test
+              multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_2d60d2
+              multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
               port: 8000
             redis:
               del_after_read: true
@@ -1116,13 +1183,15 @@ feedConfigs:
             storage_retries: 3
             storage_retry_wait: 10
             svoe:
+              cluster_id: 2
               compression: gzip
+              data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
               glue_database: svoe_glue_db
               s3_bucket: svoe.test.1
               s3_key_id: '{{ .Values.awsKey }}'
               s3_prefix: data_lake
               s3_secret: '{{ .Values.awsSecret }}'
-              version: local
+              version: 2d60d2c785f35ddceea77b736481b9ccfaa52ba5
             write_on_stop: true
 
         - name: data-feed-config-4.yaml
@@ -1145,7 +1214,8 @@ feedConfigs:
               port: 1234
             num_write_threads: 100
             prometheus:
-              multiproc_dir: test
+              multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_d36214
+              multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
               port: 8000
             redis:
               del_after_read: true
@@ -1160,13 +1230,15 @@ feedConfigs:
             storage_retries: 3
             storage_retry_wait: 10
             svoe:
+              cluster_id: 2
               compression: gzip
+              data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
               glue_database: svoe_glue_db
               s3_bucket: svoe.test.1
               s3_key_id: '{{ .Values.awsKey }}'
               s3_prefix: data_lake
               s3_secret: '{{ .Values.awsSecret }}'
-              version: local
+              version: d362142008230707de0864fefae2050a712fefaf
             write_on_stop: true
 
         - name: data-feed-config-5.yaml
@@ -1189,7 +1261,8 @@ feedConfigs:
               port: 1234
             num_write_threads: 100
             prometheus:
-              multiproc_dir: test
+              multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_afac35
+              multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
               port: 8000
             redis:
               del_after_read: true
@@ -1204,13 +1277,15 @@ feedConfigs:
             storage_retries: 3
             storage_retry_wait: 10
             svoe:
+              cluster_id: 2
               compression: gzip
+              data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
               glue_database: svoe_glue_db
               s3_bucket: svoe.test.1
               s3_key_id: '{{ .Values.awsKey }}'
               s3_prefix: data_lake
               s3_secret: '{{ .Values.awsSecret }}'
-              version: local
+              version: afac3513272dde0a02edea51c2f59519243885c4
             write_on_stop: true
 
         - name: data-feed-config-6.yaml
@@ -1233,7 +1308,8 @@ feedConfigs:
               port: 1234
             num_write_threads: 100
             prometheus:
-              multiproc_dir: test
+              multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_8cc184
+              multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
               port: 8000
             redis:
               del_after_read: true
@@ -1248,13 +1324,15 @@ feedConfigs:
             storage_retries: 3
             storage_retry_wait: 10
             svoe:
+              cluster_id: 2
               compression: gzip
+              data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
               glue_database: svoe_glue_db
               s3_bucket: svoe.test.1
               s3_key_id: '{{ .Values.awsKey }}'
               s3_prefix: data_lake
               s3_secret: '{{ .Values.awsSecret }}'
-              version: local
+              version: 8cc184c9fca73fcffaa444dcf998cac779dcba02
             write_on_stop: true
 
         - name: data-feed-config-7.yaml
@@ -1277,7 +1355,8 @@ feedConfigs:
               port: 1234
             num_write_threads: 100
             prometheus:
-              multiproc_dir: test
+              multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_45e52c
+              multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
               port: 8000
             redis:
               del_after_read: true
@@ -1292,13 +1371,15 @@ feedConfigs:
             storage_retries: 3
             storage_retry_wait: 10
             svoe:
+              cluster_id: 2
               compression: gzip
+              data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
               glue_database: svoe_glue_db
               s3_bucket: svoe.test.1
               s3_key_id: '{{ .Values.awsKey }}'
               s3_prefix: data_lake
               s3_secret: '{{ .Values.awsSecret }}'
-              version: local
+              version: 45e52c6764b8d97e6479f577142ecfd61878356a
             write_on_stop: true
 
         - name: data-feed-config-8.yaml
@@ -1321,7 +1402,8 @@ feedConfigs:
               port: 1234
             num_write_threads: 100
             prometheus:
-              multiproc_dir: test
+              multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_1ee777
+              multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
               port: 8000
             redis:
               del_after_read: true
@@ -1336,13 +1418,15 @@ feedConfigs:
             storage_retries: 3
             storage_retry_wait: 10
             svoe:
+              cluster_id: 2
               compression: gzip
+              data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
               glue_database: svoe_glue_db
               s3_bucket: svoe.test.1
               s3_key_id: '{{ .Values.awsKey }}'
               s3_prefix: data_lake
               s3_secret: '{{ .Values.awsSecret }}'
-              version: local
+              version: 1ee77747a40c9fbae2d33c43ef4fbeb0057a1f64
             write_on_stop: true
 
         - name: data-feed-config-9.yaml
@@ -1365,7 +1449,8 @@ feedConfigs:
               port: 1234
             num_write_threads: 100
             prometheus:
-              multiproc_dir: test
+              multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_7d833c
+              multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
               port: 8000
             redis:
               del_after_read: true
@@ -1380,13 +1465,15 @@ feedConfigs:
             storage_retries: 3
             storage_retry_wait: 10
             svoe:
+              cluster_id: 2
               compression: gzip
+              data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
               glue_database: svoe_glue_db
               s3_bucket: svoe.test.1
               s3_key_id: '{{ .Values.awsKey }}'
               s3_prefix: data_lake
               s3_secret: '{{ .Values.awsSecret }}'
-              version: local
+              version: 7d833c019348fcd3ee9bc5eb2f5ba5d4e1472567
             write_on_stop: true
 
         - name: data-feed-config-10.yaml
@@ -1409,7 +1496,8 @@ feedConfigs:
               port: 1234
             num_write_threads: 100
             prometheus:
-              multiproc_dir: test
+              multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_a1cdc5
+              multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
               port: 8000
             redis:
               del_after_read: true
@@ -1424,13 +1512,15 @@ feedConfigs:
             storage_retries: 3
             storage_retry_wait: 10
             svoe:
+              cluster_id: 2
               compression: gzip
+              data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
               glue_database: svoe_glue_db
               s3_bucket: svoe.test.1
               s3_key_id: '{{ .Values.awsKey }}'
               s3_prefix: data_lake
               s3_secret: '{{ .Values.awsSecret }}'
-              version: local
+              version: a1cdc513688863394b074377750b8dab8190d4ba
             write_on_stop: true
 
         - name: data-feed-config-11.yaml
@@ -1453,7 +1543,8 @@ feedConfigs:
               port: 1234
             num_write_threads: 100
             prometheus:
-              multiproc_dir: test
+              multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_8ace50
+              multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
               port: 8000
             redis:
               del_after_read: true
@@ -1468,13 +1559,15 @@ feedConfigs:
             storage_retries: 3
             storage_retry_wait: 10
             svoe:
+              cluster_id: 2
               compression: gzip
+              data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
               glue_database: svoe_glue_db
               s3_bucket: svoe.test.1
               s3_key_id: '{{ .Values.awsKey }}'
               s3_prefix: data_lake
               s3_secret: '{{ .Values.awsSecret }}'
-              version: local
+              version: 8ace5083e9dbc01e456b40767a0de7b3deaf0093
             write_on_stop: true
 
         - name: data-feed-config-12.yaml
@@ -1497,7 +1590,8 @@ feedConfigs:
               port: 1234
             num_write_threads: 100
             prometheus:
-              multiproc_dir: test
+              multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_ed5a4e
+              multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
               port: 8000
             redis:
               del_after_read: true
@@ -1512,13 +1606,15 @@ feedConfigs:
             storage_retries: 3
             storage_retry_wait: 10
             svoe:
+              cluster_id: 2
               compression: gzip
+              data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
               glue_database: svoe_glue_db
               s3_bucket: svoe.test.1
               s3_key_id: '{{ .Values.awsKey }}'
               s3_prefix: data_lake
               s3_secret: '{{ .Values.awsSecret }}'
-              version: local
+              version: ed5a4ebcfc81337bb2811439e3a0b7c750fb65cf
             write_on_stop: true
 
         - name: data-feed-config-13.yaml
@@ -1541,7 +1637,8 @@ feedConfigs:
               port: 1234
             num_write_threads: 100
             prometheus:
-              multiproc_dir: test
+              multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_94b58a
+              multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
               port: 8000
             redis:
               del_after_read: true
@@ -1556,13 +1653,15 @@ feedConfigs:
             storage_retries: 3
             storage_retry_wait: 10
             svoe:
+              cluster_id: 2
               compression: gzip
+              data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
               glue_database: svoe_glue_db
               s3_bucket: svoe.test.1
               s3_key_id: '{{ .Values.awsKey }}'
               s3_prefix: data_lake
               s3_secret: '{{ .Values.awsSecret }}'
-              version: local
+              version: 94b58adfda8adba05d7fd6167f6633f7c95db65c
             write_on_stop: true
 
         - name: data-feed-config-14.yaml
@@ -1585,7 +1684,8 @@ feedConfigs:
               port: 1234
             num_write_threads: 100
             prometheus:
-              multiproc_dir: test
+              multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_e3bd7c
+              multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
               port: 8000
             redis:
               del_after_read: true
@@ -1600,13 +1700,15 @@ feedConfigs:
             storage_retries: 3
             storage_retry_wait: 10
             svoe:
+              cluster_id: 2
               compression: gzip
+              data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
               glue_database: svoe_glue_db
               s3_bucket: svoe.test.1
               s3_key_id: '{{ .Values.awsKey }}'
               s3_prefix: data_lake
               s3_secret: '{{ .Values.awsSecret }}'
-              version: local
+              version: e3bd7c9476b33901f2370ef5793fdabdc698f234
             write_on_stop: true
 
         - name: data-feed-config-15.yaml
@@ -1629,7 +1731,8 @@ feedConfigs:
               port: 1234
             num_write_threads: 100
             prometheus:
-              multiproc_dir: test
+              multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_7d3114
+              multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
               port: 8000
             redis:
               del_after_read: true
@@ -1644,13 +1747,15 @@ feedConfigs:
             storage_retries: 3
             storage_retry_wait: 10
             svoe:
+              cluster_id: 2
               compression: gzip
+              data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
               glue_database: svoe_glue_db
               s3_bucket: svoe.test.1
               s3_key_id: '{{ .Values.awsKey }}'
               s3_prefix: data_lake
               s3_secret: '{{ .Values.awsSecret }}'
-              version: local
+              version: 7d31144e47f7d54763e3b433fd0cd45563f7fcf9
             write_on_stop: true
 
         - name: data-feed-config-16.yaml
@@ -1673,7 +1778,8 @@ feedConfigs:
               port: 1234
             num_write_threads: 100
             prometheus:
-              multiproc_dir: test
+              multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_89b0fb
+              multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
               port: 8000
             redis:
               del_after_read: true
@@ -1688,13 +1794,15 @@ feedConfigs:
             storage_retries: 3
             storage_retry_wait: 10
             svoe:
+              cluster_id: 2
               compression: gzip
+              data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
               glue_database: svoe_glue_db
               s3_bucket: svoe.test.1
               s3_key_id: '{{ .Values.awsKey }}'
               s3_prefix: data_lake
               s3_secret: '{{ .Values.awsSecret }}'
-              version: local
+              version: 89b0fba1dd732a303b2a7a343d3948c16446d05a
             write_on_stop: true
 
         - name: data-feed-config-17.yaml
@@ -1717,7 +1825,8 @@ feedConfigs:
               port: 1234
             num_write_threads: 100
             prometheus:
-              multiproc_dir: test
+              multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_0eee0a
+              multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
               port: 8000
             redis:
               del_after_read: true
@@ -1732,13 +1841,15 @@ feedConfigs:
             storage_retries: 3
             storage_retry_wait: 10
             svoe:
+              cluster_id: 2
               compression: gzip
+              data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
               glue_database: svoe_glue_db
               s3_bucket: svoe.test.1
               s3_key_id: '{{ .Values.awsKey }}'
               s3_prefix: data_lake
               s3_secret: '{{ .Values.awsSecret }}'
-              version: local
+              version: 0eee0a4688bdaac1d59654a8970dbc3dc4234db9
             write_on_stop: true
 
         - name: data-feed-config-18.yaml
@@ -1761,7 +1872,8 @@ feedConfigs:
               port: 1234
             num_write_threads: 100
             prometheus:
-              multiproc_dir: test
+              multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_632c70
+              multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
               port: 8000
             redis:
               del_after_read: true
@@ -1776,13 +1888,15 @@ feedConfigs:
             storage_retries: 3
             storage_retry_wait: 10
             svoe:
+              cluster_id: 2
               compression: gzip
+              data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
               glue_database: svoe_glue_db
               s3_bucket: svoe.test.1
               s3_key_id: '{{ .Values.awsKey }}'
               s3_prefix: data_lake
               s3_secret: '{{ .Values.awsSecret }}'
-              version: local
+              version: 632c7071daa977fc69ae2646d9fe48f01aa53b38
             write_on_stop: true
 
     initScript:

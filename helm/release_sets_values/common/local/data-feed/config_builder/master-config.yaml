@@ -16,7 +16,7 @@ exchangeConfigSets:
         retries: -1
       cryptostoreConfigOverrides: {}
       clusterId: 1
-      region: a
+      availabilityZone: a
       symbolPodDistributionStrategy: ONE_TO_ONE
       description: |
         Common configuration for Binance spot top 20
@@ -35,7 +35,7 @@ exchangeConfigSets:
         retries: -1
       cryptostoreConfigOverrides: {}
       clusterId: 2
-      region: a
+      availabilityZone: a
       symbolPodDistributionStrategy: ONE_TO_ONE
       description: |
         Common configuration for Bybit perpetual futures top 20

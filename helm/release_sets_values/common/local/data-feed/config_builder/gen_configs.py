@@ -1,11 +1,16 @@
-from cryptofeed.defines import TICKER, TRADES, L2_BOOK, L3_BOOK, LIQUIDATIONS, OPEN_INTEREST, FUNDING, FUTURES, FX, OPTION, PERPETUAL, SPOT, CALL, PUT, CURRENCY
+from cryptofeed.defines import TICKER, TRADES, L2_BOOK, L3_BOOK, LIQUIDATIONS, OPEN_INTEREST, FUNDING, FUTURES, FX, \
+    OPTION, PERPETUAL, SPOT, CALL, PUT, CURRENCY
 from cryptofeed.symbols import Symbols, Symbol
 from cryptofeed.exchanges import EXCHANGE_MAP
 from jinja2 import Template
 import yaml
+import json
+from hashlib import sha1
 
 MASTER_CONFIG = yaml.safe_load(open('master-config.yaml', 'r'))
 
+
+# TODO az distribution + az changes to config/hash
 def gen_helm_values():
     feed_configs = []
     for exchange in MASTER_CONFIG['exchangeConfigSets']:
@@ -25,6 +30,7 @@ def gen_helm_values():
     )
     with open('../values.yaml.gotmpl', 'w+') as outfile:
         outfile.write(values)
+
 
 def build_feed_configs(exchange, exchange_config):
     feed_configs = []
@@ -58,9 +64,21 @@ def build_feed_configs(exchange, exchange_config):
             base_tuples.append((symbol.normalized, base))
 
         symbol_pod_mapping = _distributeSymbols(exchange, symbols_for_quote, symbol_distribution_strategy)
-        pod_configs = []
+        pod_configs_raw = []
         for pod_id in symbol_pod_mapping:
-            pod_configs.append((pod_id, _build_cryptostore_config(exchange, exchange_config, symbol_pod_mapping[pod_id], channels)))
+            pod_configs_raw.append(
+                (pod_id, _build_cryptostore_config(exchange, exchange_config, symbol_pod_mapping[pod_id], channels)))
+
+        pod_configs = []
+        # hashify pod configs:
+        for p in pod_configs_raw:
+            # TODO figure out which fields of config are hash-sensitive
+            hash_pod_config = _hash(p[1])
+            p[1]['svoe']['version'] = hash_pod_config
+            p[1]['prometheus']['multiproc_dir'] = p[1]['prometheus']['multiproc_dir_prefix'] + '_' + _hash_short(hash_pod_config)
+            p[1]['svoe']['data_feed_image'] = exchange_config['dataFeedImage']
+            p[1]['svoe']['cluster_id'] = exchange_config['clusterId']
+            pod_configs.append((p[0], yaml.dump(p[1], default_flow_style=False)))
 
         feed_configs.append({
             'exchange': exchange,
@@ -71,7 +89,9 @@ def build_feed_configs(exchange, exchange_config):
             'pod_configs': pod_configs,
             'cluster_id': exchange_config['clusterId']
         })
+
     return feed_configs
+
 
 def _build_cryptostore_config(exchange, exchange_config, symbols, channels):
     config = yaml.safe_load(open('cryptostore-config-template.yaml', 'r'))
@@ -90,12 +110,8 @@ def _build_cryptostore_config(exchange, exchange_config, symbols, channels):
     for k in exchangeConfigOverrides:
         config['exchanges'][exchange][k] = exchangeConfigOverrides[k]
 
-    # TODO set prometheus.multiProcDir per config
-    # TODO hashes
-    # TODO cluster distribution
-    # TODO az distribution
+    return config
 
-    return yaml.dump(config, default_flow_style=False)
 
 def _build_cryptostore_channels_config(symbols, channels, overrides):
     # TODO validate result against template (make one) for testing purposes?
@@ -115,6 +131,7 @@ def _build_cryptostore_channels_config(symbols, channels, overrides):
 
     return config
 
+
 def _distributeSymbols(exchange, symbols, strategy):
     dist = {}
     if strategy == 'ONE_TO_ONE':
@@ -125,12 +142,22 @@ def _distributeSymbols(exchange, symbols, strategy):
 
     return dist
 
+
 def _readSymbolSet(exchange_config, field):
     # bases and quotes can be either explicit list of symbols or a reference to symbolSet
     if isinstance(exchange_config[field], list):
         return exchange_config[field]
     else:
         return MASTER_CONFIG['symbolSets'][exchange_config[field]]
+
+
+def _hash(config):
+    return sha1(json.dumps(config, sort_keys=True).encode('utf8')).hexdigest()
+
+
+def _hash_short(hash):
+    return hash[:6]
+
 
 gen_helm_values()
 print('Done')
