@@ -10,11 +10,10 @@ setup(
     url="https://github.com/dirtyValera/svoe",
     packages=find_packages(),
     install_requires=[
-        "cryptostore @ git+https://github.com/dirtyValera/cryptostore.git",
-        "boto3",
-        "redis",
-        "aioredis",
     ],
+    extras_require={
+        'prod': ['cryptostore @ git+https://github.com/dirtyValera/cryptostore.git'], # TODO figure out stable commit
+    },
     entry_points={
         'console_scripts': ['svoe_data_feed_launch=data_feed.bin.launcher:main'],
     }

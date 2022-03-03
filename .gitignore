@@ -33,3 +33,7 @@ terraform/terraform.tfstate.backup
 # helm secret age keys
 helm/secrets/key.txt
 helm/secrets/shared_secrets.yaml.dec
+
+cryptostore.log
+data_feed/data-feed-config.yaml
+

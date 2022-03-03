@@ -1,3 +1,6 @@
+import pyximport
+pyximport.install() # TODO should this be dev env only?
+
 from cryptostore import Cryptostore
 
 # TODO this path should be synced with cryptostore_config_builder consts
@@ -7,7 +10,6 @@ class DataFeedService(object):
 
     @staticmethod
     def run() -> None:
-
         cs = Cryptostore(config=DATA_FEED_CONFIG_PATH)
         try:
             cs.run()

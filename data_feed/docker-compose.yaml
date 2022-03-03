@@ -3,7 +3,11 @@ services:
   svoe_data_feed:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Doockerfile # dev
+    volumes:
+      - ./data-feed-config.yaml:/etc/svoe/data_feed/configs/data-feed-config.yaml
+      - ../../cryptofeed:/etc/svoe/local_packages/cryptofeed # mounts local python project to use instead of pip packages
+      - ../../cryptostore:/etc/svoe/local_packages/cryptostore
   redis:
     image: "redis:alpine"
     expose:

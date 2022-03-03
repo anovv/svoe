@@ -1,0 +1,18 @@
+cython
+pandas
+pyyaml
+pyarrow
+aiohttp>=3.7.1, < 4.0.0
+prometheus-client
+awswrangler
+boto3
+uvloop
+requests>=2.18.4
+websockets>=10.0
+aiofile>=2.0.0
+yapic.json>=1.6.3
+aiodns>=1.1
+cchardet
+order_book>=0.4.1
+redis
+aioredis

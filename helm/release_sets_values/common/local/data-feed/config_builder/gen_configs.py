@@ -52,6 +52,7 @@ def build_feed_configs(exchange, exchange_config):
         base_tuples = []
         for base in bases:
             if base in exclude_bases:
+                # TODO make excludes per quote
                 print(f'Skipping {base} for {exchange} {instrument_type} in exclude...')
                 continue
             # TODO handle options/futures
@@ -104,7 +105,8 @@ def _build_cryptostore_config(exchange, exchange_config, symbols, channels):
         config[k] = cryptostoreConfigOverrides[k]
 
     channels_config = _build_cryptostore_channels_config(symbols, channels, channelsConfigOverrides)
-    config['exchanges'] = {}
+    if 'exchanges' not in config:
+        config['exchanges'] = {}
     config['exchanges'][exchange] = channels_config
 
     for k in exchangeConfigOverrides:
@@ -137,6 +139,9 @@ def _distributeSymbols(exchange, symbols, strategy):
     if strategy == 'ONE_TO_ONE':
         for index, symbol in enumerate(symbols):
             dist[index] = [symbol]
+    elif strategy == 'ONE_THREE_FIVE':
+        # TODO
+        raise ValueError('Unsupported pod distribution strategy')
     else:
         raise ValueError('Unsupported pod distribution strategy')
 

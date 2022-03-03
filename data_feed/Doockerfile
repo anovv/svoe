@@ -1,0 +1,16 @@
+# dev docker
+# should be used with docker-compose only (otherwise volumes are not mounted)
+FROM python:3.8.2-slim-buster
+
+WORKDIR /usr/src/svoe/data_feed
+COPY . .
+
+RUN apt-get update && \
+    apt-get -y install gcc
+RUN pip install -r requirements-dev.txt
+RUN pip install -e .
+
+ENV PYTHONPATH "${PYTHONPATH}:/etc/svoe/local_packages/cryptofeed"
+ENV PYTHONPATH "${PYTHONPATH}:/etc/svoe/local_packages/cryptostore"
+
+ENTRYPOINT ["svoe_data_feed_launch"]
