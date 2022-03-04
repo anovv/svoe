@@ -12,7 +12,7 @@ exchangeConfigSets:
         l2_book:
           max_depth: 100
           book_delta: true
-      exchangeConfigOverrides:
+      exchangeConfigOverrides: # TODO snapshot_interval ?
         retries: -1
       cryptostoreConfigOverrides: {}
       clusterId: 1

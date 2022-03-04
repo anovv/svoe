@@ -16,3 +16,6 @@ cchardet
 order_book>=0.4.1
 redis
 aioredis
+sqlalchemy
+cryptography
+pymysql

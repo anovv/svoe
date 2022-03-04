@@ -1,5 +1,24 @@
 version: "3.9"
 services:
+  redis:
+    image: redis:alpine
+    expose:
+      - 6379
+    command: [ "redis-server", "--save", "''", "--appendonly", "no" ]
+  mysql:
+    image: mysql:latest
+    restart: always
+    environment:
+      MYSQL_DATABASE: db
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+      MYSQL_ROOT_PASSWORD: password
+    ports:
+      - 3306:3306
+    expose:
+      - 3306
+    volumes:
+      - mysql-db:/var/lib/mysql
   svoe_data_feed:
     build:
       context: .
@@ -8,8 +27,5 @@ services:
       - ./data-feed-config.yaml:/etc/svoe/data_feed/configs/data-feed-config.yaml
       - ../../cryptofeed:/etc/svoe/local_packages/cryptofeed # mounts local python project to use instead of pip packages
       - ../../cryptostore:/etc/svoe/local_packages/cryptostore
-  redis:
-    image: "redis:alpine"
-    expose:
-      - 6379
-    command: [ "redis-server", "--save", "''", "--appendonly", "no" ]
+volumes:
+  mysql-db:

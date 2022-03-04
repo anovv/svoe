@@ -1,5 +1,5 @@
 import pyximport
-pyximport.install() # TODO should this be dev env only?
+pyximport.install() # TODO should this be dev env only? Move to a script ?
 
 from cryptostore import Cryptostore
 
