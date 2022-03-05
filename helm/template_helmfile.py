@@ -6,14 +6,14 @@ import yaml
 import os
 import os.path
 
-GLOBAL_HELMFILE_PATH = './helmfile_templated.yaml'
+GLOBAL_HELMFILE_PATH = './helmfile.yaml'
 TEMPLATE_HELMFILE_PATH = './template.yaml'
 GLOBAL_HELMFILE = {'helmfiles': []}
 OBSERVER_CLUSTER_ID = 1
 MYSQL_HOST_CLUSTER_ID = 1
 
 def get_helmfile_per_cluster_path(cluster_name):
-    return 'helmfiles_gen/' + cluster_name + '/helmfile_templated.yaml'
+    return 'helmfiles_gen/' + cluster_name + '/helmfile.yaml'
 
 def get_env_values_per_cluster_path(cluster_name):
     return 'helmfiles_gen/' + cluster_name + '/env_values.yaml'

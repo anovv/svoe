@@ -1,6 +1,0 @@
-awsKey: {{ .Values | get "awsKey" }}
-awsSecret: {{ .Values | get "awsSecret" }}
-clusterId: {{ .Values | get "clusterId" }}
-clusterIds:
-{{ .Values | get "clusterIds" | toYaml | indent 2}}
-isObserver: false
