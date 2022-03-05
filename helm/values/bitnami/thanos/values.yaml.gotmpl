@@ -1,0 +1,65 @@
+existingObjstoreSecret: thanos-objstore-config-secret
+# TODO add dependsOn kube-prometheus-stack to helmfile for thanos chart (for ServiceMonitor CRD to be created)
+# TODO set pod requests/limits
+query:
+  enabled: true
+  dnsDiscovery:
+    enabled: true
+    sidecarsService: "" # TODO needed?
+    sidecarsNamespace: "" # TODO needed?
+  stores:
+    - kube-prometheus-stack-thanos-discovery.monitoring.svc.cluster.local:10901
+    {{ range $clusterId := .Values | get "clusterIds" }}
+    {{ if not (eq $clusterId ($.Values | get "observerClusterId")) }}
+    - thanos-global-cluster-{{ $clusterId }}.monitoring.svc.cluster.local:10901
+    {{ end }}
+    {{ end }}
+
+queryFrontend:
+  enabled: true
+
+bucketweb:
+  enabled: true
+  refresh: 5m
+
+compactor:
+  enabled: true
+  retentionResolutionRaw: 7d
+  retentionResolution5m: 10h # > 40h (2d??) to enable 5m downsampling
+  retentionResolution1h: 1d # > 10d (2w??) to enable 1h downsampling
+  consistencyDelay: 30m # 30m default when to start compacting new blocks
+
+  persistence:
+    size: 2Gi
+    existingClaim: ""
+
+storegateway:
+  enabled: true
+  persistence:
+    size: 2Gi
+    existingClaim: ""
+
+ruler:
+  # TODO lower volumeClaims (takes 8Gi now, uses 30Mi)
+  enabled: true
+  alertmanagers:
+    - http://prometheus-operator-alertmanager.monitoring.svc.cluster.local:9093
+    {{ range $clusterId := .Values | get "clusterIds" }}
+    {{ if not (eq $clusterId ($.Values | get "observerClusterId")) }}
+    - http://alertmanager-global-cluster-{{ $clusterId }}.monitoring.svc.cluster.local:9093
+    {{ end }}
+    {{ end }}
+  config: |-
+    groups:
+      - name: "metamonitoring"
+        rules:
+          - alert: "PrometheusDown"
+            expr: absent(up{prometheus="monitoring/prometheus-operator"})
+
+receive:
+  enabled: false
+
+metrics:
+  enabled: true
+  serviceMonitor:
+    enabled: true

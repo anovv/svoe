@@ -1,0 +1,8 @@
+clusterId: 1
+clusterIds:
+- 1
+- 2
+clusterName: k8s.vpc-apne1.dev.svoe.link
+isMysqlHost: true
+isObserver: true
+observerClusterId: 1

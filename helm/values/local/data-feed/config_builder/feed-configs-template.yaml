@@ -1,0 +1,48 @@
+{% for cluster_id, feed_configs in cluster_feed_configs_mapping.items() %}
+{%- raw %}{{ if eq .Values.clusterId {% endraw %}{{cluster_id}}{% raw %} }}{% endraw %}
+feedConfigs:
+  {%- for feed_config in feed_configs %}
+  - exchange: {{ feed_config['exchange'] }}
+    instrumentType: {{ feed_config['instrument_type'] }}
+    {%- if feed_config['instrument_extra'] is defined %}
+    instrumentExtra:
+      strikePrice: {{ feed_config['instrument_extra']['strike_price'] }}
+      expirationDate: {{ feed_config['instrument_extra']['expiration_date'] }}
+    {%- endif %}
+    quote: {{ feed_config['quote'] }}
+    bases:
+      {%- for base_tuple in feed_config['base_tuples'] %}
+      - symbol: {{ base_tuple[0] }}
+        base: {{ base_tuple[1] }}
+      {%- endfor %}
+    redis:
+      port: 6379
+      exporterPort: 9121
+    dataFeed:
+      image: {{ feed_config['data_feed_image'] }}
+      podConfigsVolumeMountPath: /etc/svoe/data_feed/configs
+      podConfigs:
+      {%- for pod_config in feed_config['pod_configs'] %}
+        - name: data-feed-config-{{ pod_config[0] }}.yaml
+          config: |
+            {{ pod_config[1] | indent(width=12) }}
+      {%- endfor %}
+    initScript:
+      name: run.sh
+      configsVolumeMountPath: /mnt/data
+      scriptsVolumeMountPath: /mnt/scripts
+      script: |-
+        #!/bin/sh
+        SET_INDEX=${HOSTNAME##*-}
+        echo "Starting initializing for pod $SET_INDEX"
+        {%- for pod_config in feed_config['pod_configs'] %}
+        if [ "$SET_INDEX" = "{{ pod_config[0] }}" ]; then
+            cp /mnt/scripts/data-feed-config-{{ pod_config[0] }}.yaml /mnt/data/data-feed-config.yaml
+        {%- endfor %}
+        else
+            echo "Invalid stateful set index"
+            exit 1
+        fi
+  {%- endfor %}
+{% raw %}{{ end }}{% endraw %}
+{% endfor %}

@@ -72,6 +72,10 @@
         {
           "name": "eks",
           "url": "https://aws.github.io/eks-charts/"
+        },
+        {
+          "name": "bitnami",
+          "url": "https://charts.bitnami.com/bitnami"
         }
       ],
       "releases": [
@@ -94,6 +98,11 @@
           "name": "data-feed",
           "namespace": "data-feed",
           "chart": "../../charts/local/data-feed"
+        },
+        {
+          "name": "mysql",
+          "namespace": "mysql",
+          "chart": "bitnami/mysql"
         }
       ]
     }
