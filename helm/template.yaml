@@ -50,6 +50,11 @@ releases:
   namespace: mysql
   values:
   - ../../values/bitnami/mysql/values.yaml.gotmpl
+- chart: mysql-backup/mysql-backup
+  name: mysql-backup
+  namespace: mysql
+  values:
+  - ../../values/mysql-backup/mysql-backup/values.yaml.gotmpl
 {{ end }}
 repositories:
 - name: metrics-server
@@ -60,7 +65,11 @@ repositories:
   url: https://aws.github.io/eks-charts/
 - name: prometheus-community
   url: https://prometheus-community.github.io/helm-charts
-{{ if or .Values.isObserver .Values.isMysqlHost}}
+{{ if or .Values.isObserver .Values.isMysqlHost }}
 - name: bitnami
   url: https://charts.bitnami.com/bitnami
+{{ end }}
+{{ if .Values.isMysqlHost }}
+- name: mysql-backup
+  url: hhttps://obukhov.github.io/helm-mysql-backup/
 {{ end }}
