@@ -1,1 +1,55 @@
 # TODO
+auth:
+  rootPassword: ""
+  database: mydatabase
+  username: ""
+  password: ""
+initdbScripts: {}
+## Example:
+## initdbScripts:
+##   my_init_script.sh: |
+##      #!/bin/bash
+## https://serverfault.com/questions/311852/can-you-restore-a-mysql-dump-file-from-an-s3-bucket-to-an-rds-instance
+## or use this https://github.com/databacker/mysql-backup
+##      mysql -u db_user -p password database_name < aws s3 cp s3://mysqldump_bucket_name/mysqldump.sql
+##      echo "Restored db from S3 dumpfile."
+##
+## TODO add preStop hook to mysql container with mysqls3dump script https://github.com/databacker/mysql-backup
+## TODO e.g. initcontainer with mysql-backup dumping db when pod is destroyed, probably won't work, init container is fire once
+## TODO or use sidecar??
+## TODO terminationGracePeriodSeconds
+primary:
+  persistance:
+    enabled: true
+    existingClaim: ""
+    storageClass: ""
+    accessModes:
+      - ReadWriteOnce
+    size: 8Gi
+  service:
+    type: ClusterIP
+    nodePort: ""
+    clusterIP: ""
+    annotations: {}
+# TODO
+#  resources:
+#    limits: {}
+#    requests: {}
+metrics:
+  enabled: false
+  service:
+    type: ClusterIP
+    port: 9104
+    annotations:
+      prometheus.io/scrape: "true"
+      prometheus.io/port: "{{ .Values.metrics.service.port }}"
+# TODO
+#   resources:
+#     limits: {}
+#     requests: {}
+  serviceMonitor:
+    enabled: false
+    namespace: ""
+    interval: 30s
+    scrapeTimeout: ""
+    additionalLabels: {}

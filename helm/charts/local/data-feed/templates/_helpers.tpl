@@ -26,6 +26,7 @@ spec:
 {{- end }}
 {{- define "data-feed.data-feed-stateful-set" }}
 {{- $prefix := include "data-feed.data-feed-name-prefix" . }}
+# TODO set terminationGracePeriodSeconds
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
