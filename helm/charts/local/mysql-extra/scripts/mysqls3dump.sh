@@ -1,5 +1,5 @@
 #!/bin/bash -e
-
+# TODO possible race condition since this script can be called from different pods
 filename=$(mktemp)
 echo "[$(date -Iseconds)] Started mysqldump"
 

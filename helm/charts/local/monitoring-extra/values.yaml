@@ -1,5 +1,6 @@
 awsKey: test
 awsSecret: test
+awsRegion: test
 isObserver: true
 clusterId: 1
 clusterIds:

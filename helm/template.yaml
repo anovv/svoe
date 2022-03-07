@@ -50,12 +50,12 @@ releases:
   namespace: mysql
   values:
   - ../../values/bitnami/mysql/values.yaml.gotmpl
-- chart: mysql-backup/mysql-backup
-  name: mysql-backup
+{{ end }}
+- chart: ../../charts/local/mysql-extra
+  name: mysql-extra
   namespace: mysql
   values:
-  - ../../values/mysql-backup/mysql-backup/values.yaml.gotmpl
-{{ end }}
+  - ../../values/local/mysql-extra/values.yaml.gotmpl
 repositories:
 - name: metrics-server
   url: https://kubernetes-sigs.github.io/metrics-server/
@@ -68,8 +68,4 @@ repositories:
 {{ if or .Values.isObserver .Values.isMysqlHost }}
 - name: bitnami
   url: https://charts.bitnami.com/bitnami
-{{ end }}
-{{ if .Values.isMysqlHost }}
-- name: mysql-backup
-  url: hhttps://obukhov.github.io/helm-mysql-backup/
 {{ end }}

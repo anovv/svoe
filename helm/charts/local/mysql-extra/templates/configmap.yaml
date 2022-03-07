@@ -1,0 +1,12 @@
+{{ if .Values.isMysqlHost }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mysqls3backup-cm
+  namespace: {{ .Release.Namespace }}
+data:
+  mysqls3init.sh: |-
+{{ .Files.Get "scripts/mysqls3init.sh" | indent 4 }}
+  mysqls3dump.sh: |-
+{{ .Files.Get "scripts/mysqls3dump.sh" | indent 4 }}
+{{ end }}

@@ -1,0 +1,34 @@
+{{ if .Values.isMysqlHost }}
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: mysqls3backup-cronjob
+  namespace: {{ .Release.Namespace }}
+spec:
+  schedule: {{ .Values.backupSchedule }}
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app: mysqls3backup
+        spec:
+          containers:
+            - name: dumper
+              image: alpine:latest
+              command:
+                - /scripts/mysqls3init.sh
+                - /scripts/mysqls3dump.sh
+              volumeMounts:
+                - name: mysqls3backup-vol
+                  mountPath: /scripts
+              envFrom:
+                - secretRef:
+                    name: mysqls3backup-secret
+          volumes:
+            - name: mysqls3backup-vol # should be synced with mysql chart
+              configMap:
+                name: mysqls3backup-cm
+                defaultMode: 365
+          restartPolicy: OnFailure
+{{ end }}

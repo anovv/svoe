@@ -1,5 +1,6 @@
 awsKey: {{ .Values | get "awsKey" }}
 awsSecret: {{ .Values | get "awsSecret" }}
+awsRegion: {{ .Values | get "awsDefaultRegion" }}
 clusterId: {{ .Values | get "clusterId" }}
 clusterIds:
 {{ .Values | get "clusterIds" | toYaml | indent 2}}

@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-global-svc
+  annotations:
+    io.cilium/global-service: "true"
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      protocol: TCP
+      port: {{ .Values.mysql.port }}
+      targetPort: {{ .Values.mysql.port }}
+  {{ if .Values.isMysqlHost }}
+  selector:
+    todo: todo # TODO
+  {{ end }}

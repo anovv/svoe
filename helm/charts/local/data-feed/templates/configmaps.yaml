@@ -2,3 +2,4 @@
 {{- include "data-feed.data-feed-config-map" $config }}
 ---
 {{- end }}
+# TODO pass aws keys and other sensitive data via secrets and env vars
