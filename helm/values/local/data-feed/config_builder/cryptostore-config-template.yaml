@@ -14,7 +14,7 @@ write_on_stop: true
 num_write_threads: 100
 svoe:
   s3_key_id: "{{ .Values.awsKey }}"
-  s3_secret: "{{ .Values.awsSecret }}"
+  s3_secret: "{{ .Values.awsSecret }}" # TODO move to env vars via secret
   s3_region: ap-northeast-1 # TODO sync all of it with Terraform via helmfile
   s3_bucket: svoe.test.1
   s3_prefix: data_lake
