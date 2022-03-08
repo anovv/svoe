@@ -51,6 +51,11 @@ releases:
   values:
   - ../../values/bitnami/mysql/values.yaml.gotmpl
 {{ end }}
+- chart: ../../charts/local/mysql-extra
+  name: mysql-extra
+  namespace: mysql
+  values:
+  - ../../values/local/mysql-extra/values.yaml.gotmpl
 repositories:
 - name: metrics-server
   url: https://kubernetes-sigs.github.io/metrics-server/
@@ -60,7 +65,7 @@ repositories:
   url: https://aws.github.io/eks-charts/
 - name: prometheus-community
   url: https://prometheus-community.github.io/helm-charts
-{{ if or .Values.isObserver .Values.isMysqlHost}}
+{{ if or .Values.isObserver .Values.isMysqlHost }}
 - name: bitnami
   url: https://charts.bitnami.com/bitnami
 {{ end }}

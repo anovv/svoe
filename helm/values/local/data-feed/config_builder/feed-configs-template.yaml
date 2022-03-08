@@ -1,5 +1,16 @@
 {% for cluster_id, feed_configs in cluster_feed_configs_mapping.items() %}
 {%- raw %}{{ if eq .Values.clusterId {% endraw %}{{cluster_id}}{% raw %} }}{% endraw %}
+commonSecrets:
+  mysql:
+    host: mysql-global-svc.mysql.svc.local # namespace should be synced with mysql chart
+    port: 3306
+    database: {%- raw %} {{ .Values | get "mysqlDefaultSvoeDb" }}{% endraw %}
+    user: {%- raw %} {{ .Values | get "mysqlUsername" }}{% endraw %}
+    password: {%- raw %} {{ .Values | get "mysqlPassword" }}{% endraw %}
+  s3:
+    accessKeyId: {%- raw %} {{ .Values | get "awsKey" }}{% endraw %}
+    secretAccessKey: {%- raw %} {{ .Values | get "awsSecret" }}{% endraw %}
+    region: {%- raw %} {{ .Values | get "awsDefaultRegion" }}{% endraw %}
 feedConfigs:
   {%- for feed_config in feed_configs %}
   - exchange: {{ feed_config['exchange'] }}

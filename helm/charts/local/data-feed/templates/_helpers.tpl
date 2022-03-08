@@ -61,6 +61,9 @@ spec:
         volumeMounts:
         - mountPath: {{ .dataFeed.podConfigsVolumeMountPath }}
           name: {{ $prefix }}-conf-vol
+        envFrom:
+          - secretRef:
+              name: data-feed-common-secret
       initContainers:
       - command:
         - {{ .initScript.scriptsVolumeMountPath }}/{{ .initScript.name }}

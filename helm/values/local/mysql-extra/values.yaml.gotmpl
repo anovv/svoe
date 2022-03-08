@@ -7,7 +7,7 @@ mysql:
   port: 3306
   host: mysql-global-svc.mysql.svc.local # namespace should be synced with mysql chart
 s3:
-  bucket: mysql-backup
+  bucket: svoe-mysql-backup
   accessKeyId: {{ .Values | get "awsKey" }}
   secretAccessKey: {{ .Values | get "awsSecret" }}
   region: {{ .Values | get "awsDefaultRegion" }}

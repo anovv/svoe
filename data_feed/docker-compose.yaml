@@ -9,10 +9,11 @@ services:
     image: mysql:latest
     restart: always
     environment:
-      MYSQL_DATABASE: db
+      MYSQL_DATABASE: db # TODO read helm secrets
       MYSQL_USER: user
       MYSQL_PASSWORD: password
       MYSQL_ROOT_PASSWORD: password
+      MYSQL_HOST: mysql
     ports:
       - 3306:3306
     expose:
@@ -27,5 +28,9 @@ services:
       - ./data-feed-config.yaml:/etc/svoe/data_feed/configs/data-feed-config.yaml
       - ../../cryptofeed:/etc/svoe/local_packages/cryptofeed # mounts local python project to use instead of pip packages
       - ../../cryptostore:/etc/svoe/local_packages/cryptostore
+    environment:
+      AWS_ACCESS_KEY_ID: TODO # TODO read helm secret
+      AWS_SECRET_ACCESS_KEY: TODO
+      AWS_REGION: TODO
 volumes:
   mysql-db:
