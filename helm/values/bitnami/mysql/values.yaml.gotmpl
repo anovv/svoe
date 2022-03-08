@@ -4,18 +4,23 @@ auth:
   username: {{ .Values | get "mysqlUsername" }}
   password: {{ .Values | get "mysqlPassword" }}
 initdbScripts:
-  mysqls3init.sh: |-
+  # https://iamvickyav.medium.com/mysql-init-script-on-docker-compose-e53677102e48
+  # executed in alphabetical order
+  1.sh: |-
 {{ readFile "../../charts/local/mysql-extra/scripts/mysqls3init.sh" | indent 4 }}
-  mysqls3restore.sh: |-
+  2.sh: |-
 {{ readFile "../../charts/local/mysql-extra/scripts/mysqls3restore.sh" | indent 4 }}
 ## TODO terminationGracePeriodSeconds
 primary:
   extraEnvVarsSecret: mysqls3backup-secret # should be synced with mysql-extra
+  args: ["--default-authentication-plugin=mysql_native_password"]
   sidecars:
     - name: pre-stop-dumper
       image: alpine:latest
-      command:
-        - /scripts/mysqls3init.sh
+      command: ["/bin/sh", "-c"]
+      args:
+        - /scripts/mysqls3init.sh;
+          while true; do sleep 30; done;
       volumeMounts:
         - name: mysqls3backup-vol # should be synced with mysql-extra
           mountPath: /scripts
@@ -32,7 +37,7 @@ primary:
     existingClaim: ""
     accessModes:
       - ReadWriteOnce
-    size: 2Gi
+    size: 4Gi # init script downloads packages 400mb + s3 backup
   service:
     type: ClusterIP
 metrics:

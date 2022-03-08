@@ -7,7 +7,7 @@ mysql:
   port: port
   host: host
 s3:
-  bucket: bucket
+  mysqlBucket: bucket
   accessKeyId: accessKeyId
   secretAccessKey: secretAccessKey
   region: region

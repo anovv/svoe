@@ -7,6 +7,7 @@ services:
     command: [ "redis-server", "--save", "''", "--appendonly", "no" ]
   mysql:
     image: mysql:latest
+    command: --default-authentication-plugin=mysql_native_password
     restart: always
     ports:
       - 3306:3306
@@ -14,22 +15,28 @@ services:
       - 3306
     volumes:
       - mysql-db:/var/lib/mysql
-      - ../helm/charts/local/mysql-extra/scripts/mysqls3init.sh:/scripts/mysqls3init.sh
-      - ../helm/charts/local/mysql-extra/scripts/mysqls3restore.sh:/scripts/mysqls3restore.sh
+      # https://iamvickyav.medium.com/mysql-init-script-on-docker-compose-e53677102e48
+      - ../helm/charts/local/mysql-extra/scripts/mysqls3init.sh:/docker-entrypoint-initdb.d/1.sh
+      - ../helm/charts/local/mysql-extra/scripts/mysqls3restore.sh:/docker-entrypoint-initdb.d/2.sh
     env_file:
       - ./secrets_DO_NOT_COMMIT.env
   svoe_data_feed:
     build:
       context: .
       dockerfile: Doockerfile # dev
+    restart: always
     volumes:
       - ./data-feed-config.yaml:/etc/svoe/data_feed/configs/data-feed-config.yaml
       - ../../cryptofeed:/etc/svoe/local_packages/cryptofeed # mounts local python project to use instead of pip packages
       - ../../cryptostore:/etc/svoe/local_packages/cryptostore
     env_file:
       - ./secrets_DO_NOT_COMMIT.env
+    depends_on:
+      - mysql
+      - redis
   dumper:
-    image: alpine:latest
+    command: sh -c "/scripts/mysqls3init.sh; while true; do echo 'Sleeping 30s...' && sleep 30; done;"
+    image: ubuntu:latest
     restart: always
     volumes:
       - ../helm/charts/local/mysql-extra/scripts/mysqls3init.sh:/scripts/mysqls3init.sh

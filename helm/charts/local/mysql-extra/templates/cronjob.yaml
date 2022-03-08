@@ -15,7 +15,7 @@ spec:
         spec:
           containers:
             - name: dumper
-              image: alpine:latest
+              image: ubuntu:latest
               command:
                 - /scripts/mysqls3init.sh
                 - /scripts/mysqls3dump.sh
