@@ -8,19 +8,16 @@ services:
   mysql:
     image: mysql:latest
     restart: always
-    environment:
-      MYSQL_DATABASE: db # TODO read helm secrets
-      MYSQL_USER: user
-      MYSQL_PASSWORD: password
-      MYSQL_ROOT_PASSWORD: password
-      MYSQL_HOST: mysql
-      MYSQL_PORT: 3306
     ports:
       - 3306:3306
     expose:
       - 3306
     volumes:
       - mysql-db:/var/lib/mysql
+      - ../helm/charts/local/mysql-extra/scripts/mysqls3init.sh:/scripts/mysqls3init.sh
+      - ../helm/charts/local/mysql-extra/scripts/mysqls3restore.sh:/scripts/mysqls3restore.sh
+    env_file:
+      - ./secrets_DO_NOT_COMMIT.env
   svoe_data_feed:
     build:
       context: .
@@ -29,9 +26,15 @@ services:
       - ./data-feed-config.yaml:/etc/svoe/data_feed/configs/data-feed-config.yaml
       - ../../cryptofeed:/etc/svoe/local_packages/cryptofeed # mounts local python project to use instead of pip packages
       - ../../cryptostore:/etc/svoe/local_packages/cryptostore
-    environment:
-      AWS_ACCESS_KEY_ID: TODO # TODO read helm secret
-      AWS_SECRET_ACCESS_KEY: TODO
-      AWS_REGION: TODO
+    env_file:
+      - ./secrets_DO_NOT_COMMIT.env
+  dumper:
+    image: alpine:latest
+    restart: always
+    volumes:
+      - ../helm/charts/local/mysql-extra/scripts/mysqls3init.sh:/scripts/mysqls3init.sh
+      - ../helm/charts/local/mysql-extra/scripts/mysqls3dump.sh:/scripts/mysqls3dump.sh
+    env_file:
+      - ./secrets_DO_NOT_COMMIT.env
 volumes:
   mysql-db:
