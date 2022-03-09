@@ -7,9 +7,9 @@ initdbScripts:
   # https://iamvickyav.medium.com/mysql-init-script-on-docker-compose-e53677102e48
   # executed in alphabetical order
   1.sh: |-
-{{ readFile "../../charts/local/mysql-extra/scripts/mysqls3init.sh" | indent 4 }}
+{{ readFile "../../../charts/local/mysql-extra/scripts/mysqls3init.sh" | indent 4 }}
   2.sh: |-
-{{ readFile "../../charts/local/mysql-extra/scripts/mysqls3restore.sh" | indent 4 }}
+{{ readFile "../../../charts/local/mysql-extra/scripts/mysqls3restore.sh" | indent 4 }}
 ## TODO terminationGracePeriodSeconds
 primary:
   extraEnvVarsSecret: mysqls3backup-secret # should be synced with mysql-extra
@@ -47,7 +47,7 @@ metrics:
     port: 9104
     annotations:
       prometheus.io/scrape: "true"
-      prometheus.io/port: "{{ .Values.metrics.service.port }}"
+      prometheus.io/port: "9104"
   serviceMonitor:
     enabled: true
     namespace: mysql # should be synced with release namespace

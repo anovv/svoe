@@ -1,12 +1,14 @@
 #!/bin/sh -e
-# TODO possible race condition since this script can be called from different pods
+
+# TODO posibility of race since this can be called from different pods
+
 filename=$(mktemp)
 echo "[$(date -Iseconds)] Started mysqldump"
 
 if [ -z "$MYSQL_DATABASE" ]; then
-	MYSQL_DATABASE="--all-databases"
+  MYSQL_DATABASE="--all-databases"
 else
-	MYSQL_DATABASE="--databases ${MYSQL_DATABASE}"
+  MYSQL_DATABASE="--databases ${MYSQL_DATABASE}"
 fi
 
 mysqldump --no-tablespaces -h "${MYSQL_HOST}" -P "${MYSQL_PORT}" -u "${MYSQL_USER}" -p"${MYSQL_PASSWORD}" ${MYSQL_DATABASE} > "${filename}"
