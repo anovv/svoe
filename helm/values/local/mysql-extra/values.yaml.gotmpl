@@ -1,8 +1,8 @@
 isMysqlHost: {{ .Values | get "isMysqlHost" }}
 backupSchedule: "0 * * * *"
 mysql:
-  user: {{ .Values | get "mysqlUsername" }}
-  password: {{ .Values | get "mysqlPassword" }}
+  user: {{ .Values | get "mysqlRootUsername" }}
+  password: {{ .Values | get "mysqlRootPassword" }}
   database: {{ .Values | get "mysqlDefaultSvoeDb" }}
   port: 3306
   host: mysql-global-svc.mysql.svc.local # namespace should be synced with mysql chart

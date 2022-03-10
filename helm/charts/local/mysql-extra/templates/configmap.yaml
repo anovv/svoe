@@ -7,6 +7,8 @@ metadata:
 data:
   mysqls3init.sh: |-
 {{ .Files.Get "scripts/mysqls3init.sh" | indent 4 }}
+  mysqls3restore.sh: |-
+{{ .Files.Get "scripts/mysqls3restore.sh" | indent 4 }}
   mysqls3dump.sh: |-
 {{ .Files.Get "scripts/mysqls3dump.sh" | indent 4 }}
 {{ end }}

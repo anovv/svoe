@@ -1,11 +1,10 @@
 #!/bin/sh -e
 
-# should be used inside ubuntu images (mysql image is ubuntu)
-# https://iamvickyav.medium.com/mysql-init-script-on-docker-compose-e53677102e48
-if [ -z "$MYSQL_S3_INIT" ]; then
+MYSQL_S3_INITED_FLAG_FILE=/tmp/mysql_s3_is.inited
+if ! [ -f "$MYSQL_S3_INITED_FLAG_FILE" ]; then
   echo "[$(date -Iseconds)] Mysqls3 init..."
-  apt-get -y update && apt-get -y dist-upgrade && apt-get -y install mysql-client python3 python3-pip && pip3 install awscli
-  export MYSQL_S3_INIT=true
+  apk --update add mysql-client python3 py3-pip && pip3 install awscli
+  touch $MYSQL_S3_INITED_FLAG_FILE
   echo "[$(date -Iseconds)] Done"
 else
   echo "[$(date -Iseconds)] Mysqls3 already inited"

@@ -16,10 +16,12 @@ services:
     volumes:
       - mysql-db:/var/lib/mysql
       # https://iamvickyav.medium.com/mysql-init-script-on-docker-compose-e53677102e48
-      - ../helm/charts/local/mysql-extra/scripts/mysqls3init.sh:/docker-entrypoint-initdb.d/1.sh
-      - ../helm/charts/local/mysql-extra/scripts/mysqls3restore.sh:/docker-entrypoint-initdb.d/2.sh
+#      - ../helm/charts/local/mysql-extra/scripts/mysqls3init.sh:/docker-entrypoint-initdb.d/1.sh
+#      - ../helm/charts/local/mysql-extra/scripts/mysqls3restore.sh:/docker-entrypoint-initdb.d/2.sh
     env_file:
       - ./secrets_DO_NOT_COMMIT.env
+    environment:
+      - MYSQL_DATABASE=dummy # make sure mysql does not create db by itself
   svoe_data_feed:
     build:
       context: .
@@ -34,12 +36,13 @@ services:
     depends_on:
       - mysql
       - redis
-  dumper:
-    command: sh -c "/scripts/mysqls3init.sh; while true; do echo 'Sleeping 30s...' && sleep 30; done;"
-    image: ubuntu:latest
+  dumper-restorer:
+    command: sh -c "/scripts/mysqls3init.sh; /scripts/mysqls3restore.sh; while true; do echo 'Sleeping 30s...' && sleep 30; done;"
+    image: alpine:latest
     restart: always
     volumes:
       - ../helm/charts/local/mysql-extra/scripts/mysqls3init.sh:/scripts/mysqls3init.sh
+      - ../helm/charts/local/mysql-extra/scripts/mysqls3restore.sh:/scripts/mysqls3restore.sh
       - ../helm/charts/local/mysql-extra/scripts/mysqls3dump.sh:/scripts/mysqls3dump.sh
     env_file:
       - ./secrets_DO_NOT_COMMIT.env
