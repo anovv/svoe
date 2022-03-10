@@ -19,7 +19,7 @@ else
   MYSQL_DATABASE="--databases ${MYSQL_DATABASE}"
 fi
 
-mysqldump --no-tablespaces -h "${MYSQL_HOST}" -P "${MYSQL_PORT}" -u "${MYSQL_ROOT_USER}" -p"${MYSQL_ROOT_PASSWORD}" ${MYSQL_DATABASE} > "${filename}"
+mysqldump --no-tablespaces -h "${MYSQL_HOST}" -P "${MYSQL_PORT}" -u root -p"${MYSQL_ROOT_PASSWORD}" ${MYSQL_DATABASE} > "${filename}"
 echo "[$(date -Iseconds)] mysqldump finished. Started compression"
 gzip "${filename}"
 echo "[$(date -Iseconds)] Compression finished"

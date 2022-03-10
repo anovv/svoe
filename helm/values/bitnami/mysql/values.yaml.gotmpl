@@ -1,11 +1,7 @@
 auth:
   rootPassword: {{ .Values | get "mysqlRootPassword" }}
-  database: {{ .Values | get "mysqlDefaultSvoeDb" }}
-  username: {{ .Values | get "mysqlUsername" }}
-  password: {{ .Values | get "mysqlPassword" }}
 ## TODO terminationGracePeriodSeconds
 primary:
-  extraEnvVarsSecret: mysqls3backup-secret # should be synced with mysql-extra
   args: ["--default-authentication-plugin=mysql_native_password"]
   sidecars:
     - name: dumper-restorer
@@ -21,6 +17,7 @@ primary:
       envFrom:
         - secretRef:
             name: mysqls3backup-secret # should be synced with mysql-extra
+
       lifecycle:
         preStop:
           exec:

@@ -1,8 +1,7 @@
 isMysqlHost: true
 backupSchedule: "0 0 0 0 0"
 mysql:
-  user: user
-  password: password
+  rootPassword: password
   database: database
   port: port
   host: host

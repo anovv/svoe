@@ -1,7 +1,6 @@
 isMysqlHost: {{ .Values | get "isMysqlHost" }}
 backupSchedule: "0 * * * *"
 mysql:
-  rootUser: {{ .Values | get "mysqlRootUsername" }}
   rootPassword: {{ .Values | get "mysqlRootPassword" }}
   database: {{ .Values | get "mysqlDefaultSvoeDb" }}
   port: 3306

@@ -20,7 +20,7 @@ if [ $not_exist ]; then
   while [ "$SUCCESS" = false ]
   do
     echo "[$(date -Iseconds)] Creating db ..."
-    mysql -h "${MYSQL_HOST}" -P "${MYSQL_PORT}" -u "${MYSQL_ROOT_USER}" -p"${MYSQL_ROOT_PASSWORD}" -e "CREATE DATABASE IF NOT EXISTS ${MYSQL_DATABASE};"
+    mysql -h "${MYSQL_HOST}" -P "${MYSQL_PORT}" -u root -p"${MYSQL_ROOT_PASSWORD}" -e "CREATE DATABASE IF NOT EXISTS ${MYSQL_DATABASE};"
     if [ $? -eq 0 ]; then
       SUCCESS=true
     else
@@ -41,7 +41,7 @@ else
   do
     echo "[$(date -Iseconds)] Restoring dump file"
     # https://stackoverflow.com/questions/14011968/user-cant-access-a-database
-    mysql -h "${MYSQL_HOST}" -P "${MYSQL_PORT}" -u "${MYSQL_ROOT_USER}"  -p"${MYSQL_ROOT_PASSWORD}" < "${s3filename_latest_unzip}"
+    mysql -h "${MYSQL_HOST}" -P "${MYSQL_PORT}" -u root  -p"${MYSQL_ROOT_PASSWORD}" < "${s3filename_latest_unzip}"
     if [ $? -eq 0 ]; then
       SUCCESS=true
     else
