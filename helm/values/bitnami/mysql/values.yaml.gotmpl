@@ -17,7 +17,6 @@ primary:
       envFrom:
         - secretRef:
             name: mysqls3backup-secret # should be synced with mysql-extra
-
       lifecycle:
         preStop:
           exec:

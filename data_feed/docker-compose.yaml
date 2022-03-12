@@ -16,10 +16,8 @@ services:
     volumes:
       - mysql-db:/var/lib/mysql
       # https://iamvickyav.medium.com/mysql-init-script-on-docker-compose-e53677102e48
-    env_file:
-      - ./secrets_DO_NOT_COMMIT.env
     environment:
-      - MYSQL_DATABASE=dummy # make sure mysql does not create db by itself
+      - MYSQL_ROOT_PASSWORD=root
   svoe_data_feed:
     build:
       context: .

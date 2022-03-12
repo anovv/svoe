@@ -12,3 +12,8 @@ variable "domain" {
   type        = string
   description = "Domain to host clusters"
 }
+
+variable "ecr_repo_name" {
+  type        = string
+  description = "Repository name in ECR"
+}
