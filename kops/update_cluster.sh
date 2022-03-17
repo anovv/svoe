@@ -17,4 +17,6 @@ kops update cluster --out=$TERRAFORM_OUTPUT_PATH --target=terraform --state $STA
 echo "Terraform output in ${TERRAFORM_OUTPUT_PATH}"
 cd $TERRAFORM_OUTPUT_PATH
 terraform apply --auto-approve
-echo "Update finished." #TODO add rolling update
+echo "Terraform changes have been applied, starting kops rolling-update..."
+kops rolling-update cluster --state $STATE --name $CLUSTER_NAME --yes
+echo "Update finished."
