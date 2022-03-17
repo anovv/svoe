@@ -21,7 +21,7 @@ module "apn1_kops_resources" {
 
 module "ecr" {
   source = "./modules/aws/ecr"
-  ecr_repo_name = var.ecr_repo_name
+  svoe_data_feed_ecr_repo_name = var.svoe_data_feed_ecr_repo_name
 }
 
 # TODO move everything below to a multicluster module

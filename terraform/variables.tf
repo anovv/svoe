@@ -13,7 +13,7 @@ variable "domain" {
   description = "Domain to host clusters"
 }
 
-variable "ecr_repo_name" {
+variable "svoe_data_feed_ecr_repo_name" {
   type        = string
-  description = "Repository name in ECR"
+  description = "Repository name in ECR for Svoe Data Feed service"
 }

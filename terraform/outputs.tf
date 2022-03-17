@@ -16,14 +16,14 @@ output "kops_hosted_zone_name_servers" {
   value = module.apn1_kops_resources.kops_hosted_zone_name_servers
 }
 
-output "ecr_repo_name" {
-  value = module.ecr.ecr_repo_name
+output "svoe_data_feed_ecr_repo_name" {
+  value = module.ecr.svoe_data_feed_ecr_repo_name
 }
 
-output "ecr_repo_registry_id" {
-  value = module.ecr.ecr_repo_registry_id
+output "svoe_data_feed_ecr_repo_registry_id" {
+  value = module.ecr.svoe_data_feed_ecr_repo_registry_id
 }
 
-output "ecr_repo_url" {
-  value = module.ecr.ecr_repo_url
+output "svoe_data_feed_ecr_repo_url" {
+  value = module.ecr.svoe_data_feed_ecr_repo_url
 }
