@@ -23,13 +23,13 @@ before_script:
   - terraform --version
   - terraform init
 
-stages:
-  - validate
+#stages:
+#  - validate
 
 validate:
   stage: validate
   script:
-    - terraform validatedsds
+    - terraform validate
   only:
     refs:
       - main
