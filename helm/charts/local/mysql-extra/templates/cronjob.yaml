@@ -13,12 +13,12 @@ spec:
           labels:
             app: mysqls3backup
         spec:
+          # TODO disable restarts ??
+          automountServiceAccountToken: false
           containers:
             - name: dumper
               image: alpine:latest
-              command:
-                - /scripts/mysqls3init.sh
-                - /scripts/mysqls3dump.sh
+              command: ["/bin/sh", "-c", "/scripts/mysqls3init.sh && /scripts/mysqls3dump.sh"]
               volumeMounts:
                 - name: mysqls3backup-vol
                   mountPath: /scripts
@@ -26,7 +26,7 @@ spec:
                 - secretRef:
                     name: mysqls3backup-secret
           volumes:
-            - name: mysqls3backup-vol # should be synced with mysql chart
+            - name: mysqls3backup-vol
               configMap:
                 name: mysqls3backup-cm
                 defaultMode: 365

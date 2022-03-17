@@ -9,10 +9,10 @@ primary:
       command: ["/bin/sh", "-c"]
       args:
         - /scripts/mysqls3init.sh;
-          /scripts/mysqls3restore.sh
+          /scripts/mysqls3restore.sh;
           while true; do sleep 2; done;
       volumeMounts:
-        - name: mysqls3backup-vol # should be synced with mysql-extra
+        - name: mysqls3-vol
           mountPath: /scripts
       envFrom:
         - secretRef:
@@ -22,12 +22,17 @@ primary:
           exec:
             command:
               - /scripts/mysqls3dump.sh
+  extraVolumes:
+    - name: mysqls3-vol
+      configMap:
+        name: mysqls3backup-cm # should be synced with mysql chart
+        defaultMode: 365
   persistance:
     enabled: true
     existingClaim: ""
     accessModes:
       - ReadWriteOnce
-    size: 4Gi # init script downloads packages 400mb + s3 backup
+    size: 4Gi
   service:
     type: ClusterIP
 metrics:
@@ -38,7 +43,7 @@ metrics:
     annotations:
       prometheus.io/scrape: "true"
       prometheus.io/port: "9104"
-  serviceMonitor:
-    enabled: true
-    namespace: mysql # should be synced with release namespace
-    interval: 10s
+#  serviceMonitor: # TODO when enabling this, dependancy should be added on monitoring/monitoring-extra charts
+#    enabled: true
+#    namespace: mysql # should be synced with release namespace
+#    interval: 10s

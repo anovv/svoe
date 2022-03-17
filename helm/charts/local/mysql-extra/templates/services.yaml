@@ -13,5 +13,5 @@ spec:
       targetPort: {{ .Values.mysql.port }}
   {{ if .Values.isMysqlHost }}
   selector:
-    todo: todo # TODO
+    todo: todo # TODO mysql.mysql.svc.cluster.local
   {{ end }}
