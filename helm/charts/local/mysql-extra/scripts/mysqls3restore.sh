@@ -3,7 +3,7 @@
 # TODO figure out users/priviliges
 
 MYSQL_S3_INITED_FLAG_FILE=/tmp/mysql_s3_is.inited
-echo "[$(date -Iseconds)] Started mysql restore from s3"
+echo "[$(date -Iseconds)] Started mysql restore from s3..."
 
 if ! [ -f "$MYSQL_S3_INITED_FLAG_FILE" ]; then
   echo "[$(date -Iseconds)] mysqls3 is not inited, exiting"
@@ -24,8 +24,8 @@ if [ $not_exist ]; then
     if [ $? -eq 0 ]; then
       SUCCESS=true
     else
-      echo "[$(date -Iseconds)] Failed creating db. Retrying in 30s..."
-      sleep 30
+      echo "[$(date -Iseconds)] Failed creating db. Retrying in 5s..."
+      sleep 5 #TODO interrupt on SIGTERM
     fi
   done
   return 0
@@ -39,14 +39,14 @@ else
   SUCCESS=false
   while [ "$SUCCESS" = false ]
   do
-    echo "[$(date -Iseconds)] Restoring dump file"
+    echo "[$(date -Iseconds)] Restoring dump file..."
     # https://stackoverflow.com/questions/14011968/user-cant-access-a-database
     mysql -h "${MYSQL_HOST}" -P "${MYSQL_PORT}" -u root  -p"${MYSQL_ROOT_PASSWORD}" < "${s3filename_latest_unzip}"
     if [ $? -eq 0 ]; then
       SUCCESS=true
     else
-      echo "[$(date -Iseconds)] Failed restoring dump file. Retrying in 30s..."
-      sleep 30
+      echo "[$(date -Iseconds)] Failed restoring dump file. Retrying in 5s..."
+      sleep 5 #TODO interrupt on SIGTERM
     fi
   done
   rm -rf "${s3filename_latest_unzip}"

@@ -2,31 +2,95 @@ auth:
   rootPassword: {{ .Values | get "mysqlRootPassword" }}
 ## TODO terminationGracePeriodSeconds
 primary:
-  args: ["--default-authentication-plugin=mysql_native_password"]
+  ## TODO
+#  /opt/bitnami/scripts/mysql/entrypoint.sh:
+#    line 26:
+#      exec:
+#        --: invalid option
+#  exec:
+#    usage: exec [-cl] [-a name] [command [arguments ...]] [redirection ...]
+#  2022-03-17T14:10:11.176083687Z
+  # This causes error on start
+  # https://github.com/bitnami/bitnami-docker-mysql/blob/master/5.7/debian-10/rootfs/opt/bitnami/scripts/mysql/entrypoint.sh
+#  command: ["--default-authentication-plugin=mysql_native_password"] # TODO looks like this is not needed?? Test data_feed as well
+  # https://stackoverflow.com/questions/52148322/control-order-of-container-termination-in-a-single-pod-in-kubernetes
+  # https://github.com/bitnami/bitnami-docker-mysql/blob/master/8.0/debian-10/Dockerfile
+#  command: ["/opt/bitnami/scripts/mysql/entrypoint.sh", "/opt/bitnami/scripts/mysql/run.sh"]
+  command: ["/bin/sh", "-c"]
+  args:
+    - |
+      /opt/bitnami/scripts/mysql/entrypoint.sh /opt/bitnami/scripts/mysql/run.sh &
+      PID=$!
+
+      stop () {
+        while true; do
+          if [ -f "/lifecycle/dump-finished" ]; then
+            echo "Dumper finished."
+            kill $PID
+          fi
+          sleep 1
+        done
+      }
+      trap stop EXIT
+      # We explicitly call stop to ensure the sidecar will terminate
+      # if the main container exits outside a request from Kubernetes
+      # to kill the Pod.
+      stop &
+      wait $PID
+      echo "Exited."
   sidecars:
     - name: dumper-restorer
       image: alpine:latest
       command: ["/bin/sh", "-c"]
+#      args:
+#        - /scripts/mysqls3init.sh &&
+#          /scripts/mysqls3restore.sh &&
+#          while true; do echo "Sleeping..."; sleep 5; done
       args:
-        - /scripts/mysqls3init.sh;
-          /scripts/mysqls3restore.sh;
-          while true; do sleep 2; done;
+        - |
+          /scripts/mysqls3init.sh
+          echo "Waiting 20s for mysql to warmup before s3 restore..."
+          sleep 20
+          echo "Starting restore..."
+          /scripts/mysqls3restore.sh
+
+          dump () {
+            echo "Starting dump..."
+            /scripts/mysqls3dump.sh
+            touch /lifecycle/dump-finished
+            echo "Flagged dump finished."
+          }
+
+          trap dump EXIT
+
+          while :
+          do
+            echo "Sleeping..."
+            sleep 10 &
+            wait $!
+          done
       volumeMounts:
         - name: mysqls3-vol
           mountPath: /scripts
+        - name: lifecycle
+          mountPath: /lifecycle
       envFrom:
         - secretRef:
             name: mysqls3backup-secret # should be synced with mysql-extra
-      lifecycle:
-        preStop:
-          exec:
-            command:
-              - /scripts/mysqls3dump.sh
+#      lifecycle:
+#        preStop:
+#          exec:
+#            command: ["/bin/sh", "-c", "/scripts/mysqls3dump.sh", "touch /lifecycle/dump-finished"]
+  extraVolumeMounts:
+    - name: lifecycle
+      mountPath: /lifecycle
   extraVolumes:
     - name: mysqls3-vol
       configMap:
         name: mysqls3backup-cm # should be synced with mysql chart
         defaultMode: 365
+    - name: lifecycle
+      emptyDir: {}
   persistance:
     enabled: true
     existingClaim: ""

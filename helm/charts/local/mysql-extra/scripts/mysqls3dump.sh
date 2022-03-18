@@ -4,7 +4,7 @@
 # TODO figure out users/priviliges
 
 MYSQL_S3_INITED_FLAG_FILE=/tmp/mysql_s3_is.inited
-echo "[$(date -Iseconds)] Started mysqldump"
+echo "[$(date -Iseconds)] Started mysqldump..."
 
 if ! [ -f "$MYSQL_S3_INITED_FLAG_FILE" ]; then
   echo "[$(date -Iseconds)] mysqls3 is not inited, exiting"
@@ -20,13 +20,13 @@ else
 fi
 
 mysqldump --no-tablespaces -h "${MYSQL_HOST}" -P "${MYSQL_PORT}" -u root -p"${MYSQL_ROOT_PASSWORD}" ${MYSQL_DATABASE} > "${filename}"
-echo "[$(date -Iseconds)] mysqldump finished. Started compression"
+echo "[$(date -Iseconds)] mysqldump finished. Started compression..."
 gzip "${filename}"
 echo "[$(date -Iseconds)] Compression finished"
 
 s3filename_latest="mysqldump_latest.sql.gz"
 s3filename_prev="mysqldump_prev.sql.gz"
-echo "[$(date -Iseconds)] Started s3 upload"
+echo "[$(date -Iseconds)] Started s3 upload..."
 
 aws s3api head-object --bucket ${AWS_S3_MYSQL_BUCKET} --key ${s3filename_latest} || latest_not_exist=true
 if [ $latest_not_exist ]; then
@@ -57,3 +57,4 @@ else
 fi
 rm -rf "${filename}.gz"
 echo "[$(date -Iseconds)] Done."
+# TODO indicate failure in container
