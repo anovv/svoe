@@ -4,8 +4,7 @@ mysql:
   rootPassword: {{ .Values | get "mysqlRootPassword" }}
   database: {{ .Values | get "mysqlDefaultSvoeDb" }}
   port: 3306
-#  host: mysql-global-svc.mysql.svc.local # namespace should be synced with mysql chart
-  host: mysql.mysql.svc.cluster.local # TODO switch back to global service
+  host: mysql-global-svc.mysql.svc.local # namespace should be synced with mysql chart
 s3:
   mysqlBucket: svoe-mysql-backup
   accessKeyId: {{ .Values | get "awsKey" }}

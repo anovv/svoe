@@ -25,7 +25,7 @@ if [ $not_exist ]; then
       SUCCESS=true
     else
       echo "[$(date -Iseconds)] Failed creating db. Retrying in 5s..."
-      sleep 5 #TODO interrupt on SIGTERM
+      sleep 5
     fi
   done
   return 0
@@ -46,7 +46,7 @@ else
       SUCCESS=true
     else
       echo "[$(date -Iseconds)] Failed restoring dump file. Retrying in 5s..."
-      sleep 5 #TODO interrupt on SIGTERM
+      sleep 5
     fi
   done
   rm -rf "${s3filename_latest_unzip}"

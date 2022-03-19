@@ -5,7 +5,7 @@ metadata:
   annotations:
     io.cilium/global-service: "true"
 spec:
-  type: ExternalName # TODO ClusterIP
+  type: ExternalName
   ports:
     - name: http
       protocol: TCP
@@ -13,8 +13,4 @@ spec:
       targetPort: {{ .Values.mysql.port }}
   {{ if .Values.isMysqlHost }}
   externalName: mysql.mysql.svc.cluster.local
-# TODO if using ClusterIP use selector
-#  selector:
-#    app.kubernetes.io/component: primary
-# TODO add other labels (common.labels)
   {{ end }}
