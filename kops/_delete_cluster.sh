@@ -14,7 +14,7 @@ TERRAFORM_OUTPUT_PATH="${OUTPUT_PATH}/terraform/"
 
 cd $TERRAFORM_OUTPUT_PATH
 
-# TODO drain cluster first for workloads to gracefully shutdown
+# TODO drain worker nodes first for workloads to gracefully shutdown
 terraform destroy --auto-approve
 kops delete cluster --yes --name $CLUSTER_NAME --state $STATE
 echo "Cluster deletion done"
