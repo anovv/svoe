@@ -14,7 +14,14 @@ TERRAFORM_OUTPUT_PATH="${OUTPUT_PATH}/terraform/"
 
 cd $TERRAFORM_OUTPUT_PATH
 
-# TODO drain worker nodes first for workloads to gracefully shutdown
+echo "Draining nodes..."
+NODES=$(kubectl --context $CLUSTER_NAME get nodes -l kubernetes.io/role=node | awk '{print $1}' | tail -n +2)
+for node in $NODES
+do
+  kubectl --context $CLUSTER_NAME drain --ignore-daemonsets --delete-emptydir-data --force $node &
+done
+wait
+echo "All nodes are drained."
 terraform destroy --auto-approve
 kops delete cluster --yes --name $CLUSTER_NAME --state $STATE
 echo "Cluster deletion done"
