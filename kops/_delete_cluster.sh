@@ -22,6 +22,9 @@ do
 done
 wait
 echo "All nodes are drained."
+
 terraform destroy --auto-approve
+
 kops delete cluster --yes --name $CLUSTER_NAME --state $STATE
+
 echo "Cluster deletion done"

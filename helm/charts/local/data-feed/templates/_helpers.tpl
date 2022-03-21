@@ -28,6 +28,7 @@ spec:
 {{- $prefix := include "data-feed.data-feed-name-prefix" . }}
 # TODO set terminationGracePeriodSeconds
 # TODO namespace
+# TODO make one pod per statefulset
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -35,7 +36,7 @@ metadata:
     name: {{ $prefix }}-ss
   name: {{ $prefix }}-ss
 spec:
-  replicas: 0
+  replicas: 1
   selector:
     matchLabels:
       name: {{ $prefix }}-ss

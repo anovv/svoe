@@ -1,3 +1,5 @@
+# TODO make one pod per statefulset
+
 {% for cluster_id, feed_configs in cluster_feed_configs_mapping.items() %}
 {%- raw %}{{ if eq .Values.clusterId {% endraw %}{{cluster_id}}{% raw %} }}{% endraw %}
 commonSecrets:

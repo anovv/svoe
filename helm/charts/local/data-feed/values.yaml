@@ -1,6 +1,6 @@
 # TODO nodeSelectors, clusterId, clusterName labels
 # TODO add versioning, versions to ss,svc,cm names
-# TODO add prometheus metrics config
+# TODO make one pod per statefulset
 # version/config hash/commit hash per pod labels
 # az/region/instance config hash/info in labels
 # instrumentType/instrumentExtra/base/quotes/symbols labels

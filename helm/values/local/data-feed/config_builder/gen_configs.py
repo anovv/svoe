@@ -11,6 +11,7 @@ MASTER_CONFIG = yaml.safe_load(open('master-config.yaml', 'r'))
 
 
 # TODO az distribution + az changes to config/hash
+# TODO validate no duplicate configurations
 def gen_helm_values():
     feed_configs = []
     for exchange in MASTER_CONFIG['exchangeConfigSets']:
