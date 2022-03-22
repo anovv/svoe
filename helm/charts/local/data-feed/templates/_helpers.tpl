@@ -38,6 +38,9 @@ spec:
     metadata:
       labels:
         name: {{ .name }}-ss
+        {{- range $k, $v := .labels }}
+        {{ $k }}: {{ $v }}
+        {{- end }}
     spec:
       containers:
       - image: redis:alpine
