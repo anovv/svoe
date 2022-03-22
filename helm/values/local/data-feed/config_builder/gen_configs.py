@@ -10,37 +10,68 @@ from hashlib import sha1
 MASTER_CONFIG = yaml.safe_load(open('master-config.yaml', 'r'))
 
 
-# TODO az distribution + az changes to config/hash
-# TODO validate no duplicate configurations
 def gen_helm_values():
-    feed_configs = []
+    pod_configs = []
     for exchange in MASTER_CONFIG['exchangeConfigSets']:
         for exchange_config in MASTER_CONFIG['exchangeConfigSets'][exchange]:
-            feed_configs.extend(build_feed_configs(exchange, exchange_config))
+            pod_configs.extend(build_pod_configs(exchange, exchange_config))
 
-    cluster_feed_configs_mapping = {}
-    for feed_config in feed_configs:
-        cluster_id = feed_config['cluster_id']
-        if cluster_id in cluster_feed_configs_mapping:
-            cluster_feed_configs_mapping[cluster_id].append(feed_config)
+    cluster_pod_configs_mapping = {}
+    for pod_config in pod_configs:
+        cluster_id = pod_config['cluster_id']
+        if cluster_id in cluster_pod_configs_mapping:
+            cluster_pod_configs_mapping[cluster_id].append(pod_config)
         else:
-            cluster_feed_configs_mapping[cluster_id] = [feed_config]
+            cluster_pod_configs_mapping[cluster_id] = [pod_config]
 
-    values = Template(open('feed-configs-template.yaml', 'r').read()).render(
-        cluster_feed_configs_mapping=cluster_feed_configs_mapping
+    values = Template(open('pod-configs-template.yaml', 'r').read()).render(
+        cluster_pod_configs_mapping=cluster_pod_configs_mapping
     )
     with open('../values.yaml.gotmpl', 'w+') as outfile:
         outfile.write(values)
 
 
-def build_feed_configs(exchange, exchange_config):
-    feed_configs = []
+def build_pod_configs(exchange, exchange_config):
+    # TODO az distribution + az changes to config/hash
+    # TODO handle strike_price, option_type, expiry_date params
+    # TODO handle duplicates (Symbol equal method)
+    # TODO add explicit symbol excludes
+
     instrument_type = exchange_config['instrumentType']
     symbol_distribution_strategy = exchange_config['symbolPodDistributionStrategy']
 
-    bases = _readSymbolSet(exchange_config, 'bases')
-    quotes = _readSymbolSet(exchange_config, 'quotes')
-    exclude_bases = _readSymbolSet(exchange_config, 'excludeBases')
+    bases = _read_symbol_set(exchange_config, 'bases')
+    quotes = _read_symbol_set(exchange_config, 'quotes')
+    explicit_symbols = exchange_config['symbols']
+
+    exclude_bases = _read_excludes(exchange_config, 'bases')
+    exclude_quotes = _read_excludes(exchange_config, 'quotes')
+
+    symbols = []
+    for explicit_symbol in explicit_symbols:
+        symbols.append(Symbol(explicit_symbol['base'], explicit_symbol['quote'], instrument_type))
+    for quote in quotes:
+        for base in bases:
+            symbols.append(Symbol(base, quote, instrument_type))
+
+    # filter excludes
+    for exclude_base in exclude_bases:
+        for symbol in symbols:
+            if symbol.base == exclude_base:
+                symbols.remove(symbol)
+                print(f'Skipping {symbol.normalized} for {exchange} {instrument_type} due to {exclude_base} exclude base...')
+
+    for exclude_quote in exclude_quotes:
+        for symbol in symbols:
+            if symbol.quote == exclude_quote:
+                symbols.remove(symbol)
+                print(f'Skipping {symbol.normalized} for {exchange} {instrument_type} due to {exclude_quote} exclude quote...')
+
+    # validate symbol exists
+    exchange_symbols = EXCHANGE_MAP[exchange].symbols()
+    for symbol in symbols:
+        if symbol.normalized not in exchange_symbols:
+            raise ValueError(f'Symbol {symbol.normalized} does not exist in exchange {exchange}')
 
     # validate channels
     channels = exchange_config['channels']
@@ -48,84 +79,93 @@ def build_feed_configs(exchange, exchange_config):
         # this will throw if channel does not exist
         EXCHANGE_MAP[exchange].std_channel_to_exchange(channel)
 
-    for quote in quotes:
-        symbols_for_quote = []
-        base_tuples = []
-        for base in bases:
-            if base in exclude_bases:
-                # TODO make excludes per quote
-                print(f'Skipping {base} for {exchange} {instrument_type} in exclude...')
-                continue
-            # TODO handle options/futures
-            symbol = Symbol(base, quote, instrument_type)
-            # validate symbol exists
-            exchange_symbols = EXCHANGE_MAP[exchange].symbols()
-            if symbol.normalized not in exchange_symbols:
-                raise ValueError(f'Symbol {symbol.normalized} does not exist in exchange {exchange}')
-            symbols_for_quote.append(symbol.normalized)
-            base_tuples.append((symbol.normalized, base))
+    symbol_pod_mapping = _distributeSymbols(exchange, symbols, symbol_distribution_strategy)
+    data_feed_config_pod_mapping = []
+    for pod_id in symbol_pod_mapping:
+        data_feed_config_pod_mapping.append(
+            (pod_id, _build_data_feed_config(exchange, exchange_config, symbol_pod_mapping[pod_id], channels))
+        )
 
-        symbol_pod_mapping = _distributeSymbols(exchange, symbols_for_quote, symbol_distribution_strategy)
-        pod_configs_raw = []
-        for pod_id in symbol_pod_mapping:
-            pod_configs_raw.append(
-                (pod_id, _build_cryptostore_config(exchange, exchange_config, symbol_pod_mapping[pod_id], channels)))
+    pod_configs = []
+    # hashify pod configs:
+    for (pod_id, config) in data_feed_config_pod_mapping:
+        # TODO figure out which fields of config are hash-sensitive
+        hash_pod_config = _hash(config)
+        hash_short = _hash_short(hash_pod_config)
+        name = 'data-feed-' + exchange + '-' + instrument_type + '-' + hash_short # TODO unique name, handle same hash pods
+        config['svoe']['version'] = hash_pod_config # version is long
+        config['svoe']['hash_short'] = hash_short
+        config['prometheus']['multiproc_dir'] = config['prometheus']['multiproc_dir_prefix'] + '_' + hash_short
+        config['svoe']['data_feed_image'] = exchange_config['dataFeedImage']
+        config['svoe']['cluster_id'] = exchange_config['clusterId']
 
-        pod_configs = []
-        # hashify pod configs:
-        for p in pod_configs_raw:
-            # TODO figure out which fields of config are hash-sensitive
-            hash_pod_config = _hash(p[1])
-            p[1]['svoe']['version'] = hash_pod_config
-            p[1]['prometheus']['multiproc_dir'] = p[1]['prometheus']['multiproc_dir_prefix'] + '_' + _hash_short(hash_pod_config)
-            p[1]['svoe']['data_feed_image'] = exchange_config['dataFeedImage']
-            p[1]['svoe']['cluster_id'] = exchange_config['clusterId']
-            pod_configs.append((p[0], yaml.dump(p[1], default_flow_style=False)))
+        labels = {
+            'svoe.service': 'data-feed',
+            'svoe.version': hash_pod_config,
+            'svoe.hash-short': hash_short,
+            'svoe.instrument-type': instrument_type, # TODO strike/expiration/etc.
+            'svoe.exchange': exchange,
+            'svoe.name': name,
+            'svoe.cluster-id': exchange_config['clusterId'],
+            'svoe.data-feed-image': exchange_config['dataFeedImage']
+        }
 
-        feed_configs.append({
+        for s in symbol_pod_mapping[pod_id]:
+            labels['svoe.base.' + s.base] = True
+            labels['svoe.quote.' + s.quote] = True
+            labels['svoe.symbol.' + s.normalized] = True
+
+        pod_configs.append({
+            'name': name,
             'exchange': exchange,
-            'instrument_type': instrument_type,
-            'quote': quote,
-            'base_tuples': base_tuples,
+            'instrument_type': instrument_type, # TODO strike,expiration,etc
+            'symbols': list(map(
+                lambda s:
+                    {'base': s.base,
+                     'quote': s.quote,
+                     'symbol': s.normalized},
+                symbol_pod_mapping[pod_id]
+            )),
             'data_feed_image': exchange_config['dataFeedImage'],
-            'pod_configs': pod_configs,
-            'cluster_id': exchange_config['clusterId']
+            'data_feed_config': yaml.dump(config, default_flow_style=False),
+            'cluster_id': exchange_config['clusterId'],
+            'labels': labels,
         })
 
-    return feed_configs
+    return pod_configs
 
 
-def _build_cryptostore_config(exchange, exchange_config, symbols, channels):
-    config = yaml.safe_load(open('cryptostore-config-template.yaml', 'r'))
+def _build_data_feed_config(exchange, exchange_config, symbols, channels):
+    config = yaml.safe_load(open('data-feed-config-template.yaml', 'r'))
 
-    cryptostoreConfigOverrides = exchange_config['cryptostoreConfigOverrides']
-    exchangeConfigOverrides = exchange_config['exchangeConfigOverrides']
-    channelsConfigOverrides = exchange_config['channelsConfigOverrides']
+    data_feed_config_overrides = exchange_config['dataFeedConfigOverrides']
+    exchange_config_overrides = exchange_config['exchangeConfigOverrides']
+    channels_config_overrides = exchange_config['channelsConfigOverrides']
 
-    for k in cryptostoreConfigOverrides:
-        config[k] = cryptostoreConfigOverrides[k]
+    for k in data_feed_config_overrides:
+        config[k] = data_feed_config_overrides[k]
 
-    channels_config = _build_cryptostore_channels_config(symbols, channels, channelsConfigOverrides)
+    channels_config = _build_data_feed_channels_config(symbols, channels, channels_config_overrides)
     if 'exchanges' not in config:
         config['exchanges'] = {}
     config['exchanges'][exchange] = channels_config
 
-    for k in exchangeConfigOverrides:
-        config['exchanges'][exchange][k] = exchangeConfigOverrides[k]
+    for k in exchange_config_overrides:
+        config['exchanges'][exchange][k] = exchange_config_overrides[k]
 
     return config
 
 
-def _build_cryptostore_channels_config(symbols, channels, overrides):
+def _build_data_feed_channels_config(symbols, channels, overrides):
     # TODO validate result against template (make one) for testing purposes?
     config = {}
     for channel in channels:
         # special case
         if channel in [L2_BOOK, L3_BOOK]:
             config[channel] = {}
-            config[channel]['symbols'] = symbols
+            config[channel]['symbols'] = list(map(lambda s: s.normalized, symbols))
         else:
-            config[channel] = symbols
+            config[channel] = list(map(lambda s: s.normalized, symbols))
 
     # set channel overrides
     for channel in overrides:
@@ -149,12 +189,20 @@ def _distributeSymbols(exchange, symbols, strategy):
     return dist
 
 
-def _readSymbolSet(exchange_config, field):
+def _read_symbol_set(exchange_config, field):
     # bases and quotes can be either explicit list of symbols or a reference to symbolSet
-    if isinstance(exchange_config[field], list):
-        return exchange_config[field]
+    if isinstance(exchange_config['symbolSets'][field], list):
+        return exchange_config['symbolSets'][field]
     else:
-        return MASTER_CONFIG['symbolSets'][exchange_config[field]]
+        return MASTER_CONFIG['symbolSets'][exchange_config['symbolSets'][field]]
+
+
+def _read_excludes(exchange_config, field):
+    # bases and quotes can be either explicit list of symbols or a reference to symbolSet
+    if isinstance(exchange_config['excludes'][field], list):
+        return exchange_config['excludes'][field]
+    else:
+        return MASTER_CONFIG['symbolSets'][exchange_config['excludes'][field]]
 
 
 def _hash(config):
@@ -162,7 +210,7 @@ def _hash(config):
 
 
 def _hash_short(hash):
-    return hash[:6]
+    return hash[:10]
 
 
 gen_helm_values()

@@ -18,6 +18,7 @@ svoe:
   glue_database: svoe_glue_db
   compression: gzip
   version: unchanged
+  hash_short: unchanged
   data_feed_image: unchanged
   cluster_id: unchanged
 storage_interval: 30

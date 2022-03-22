@@ -4,10 +4,13 @@ symbolSets:
 exchangeConfigSets: # TODO add numPods (per quote? or make dynamic for desired coins?) # TODO add resource (req/lim) provider: via thanos api or manual config
   BINANCE:
     - instrumentType: spot
-      quotes: [USDT]
-      bases: TOP_20
-      excludeBases: [BSV]
-      # TODO add explicit pairs field
+      symbolSets:
+        quotes: [USDT]
+        bases: TOP_20
+      symbols: [] # map of -base -quote
+      excludes:
+        quotes: []
+        bases: [BSV]
       channels: [ticker, l2_book, trades]
       dataFeedImage: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7 # TODO use terraform ecr_url value and make global var for latest image version
       channelsConfigOverrides:
@@ -16,17 +19,22 @@ exchangeConfigSets: # TODO add numPods (per quote? or make dynamic for desired c
           book_delta: true
       exchangeConfigOverrides: # TODO snapshot_interval ?
         retries: -1
-      cryptostoreConfigOverrides: {}
+      dataFeedConfigOverrides: {}
       clusterId: 1
       availabilityZone: a
       symbolPodDistributionStrategy: ONE_TO_ONE
       description: |
-        Common configuration for Binance spot top 20
+        Common configuration for Binance USDT spot top 20
   BYBIT:
     - instrumentType: perpetual
-      quotes: [USDT]
-      bases: TOP_20
-      excludeBases: [SHIB]
+      symbolSets:
+        quotes: [USDT]
+        bases: TOP_20
+      symbols: []
+      excludes:
+        quotes: []
+        bases: [SHIB]
+        symbols: []
       channels: [l2_book, trades, liquidations, open_interest, funding]
       dataFeedImage: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
       channelsConfigOverrides:
@@ -35,9 +43,9 @@ exchangeConfigSets: # TODO add numPods (per quote? or make dynamic for desired c
           book_delta: true
       exchangeConfigOverrides:
         retries: -1
-      cryptostoreConfigOverrides: {}
+      dataFeedConfigOverrides: {}
       clusterId: 2
       availabilityZone: a
       symbolPodDistributionStrategy: ONE_TO_ONE
       description: |
-        Common configuration for Bybit perpetual futures top 20
+        Common configuration for Bybit perpetual USDT futures top 20

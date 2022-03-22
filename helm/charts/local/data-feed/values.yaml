@@ -15,75 +15,63 @@ commonSecrets:
     accessKeyId: accessKeyId
     secretAccessKey: secretAccessKey
     region: region
-feedConfigs:
+podConfigs:
   - exchange: BINANCE
-    instrumentType: SPOT
+    name: unchanged
+    instrumentType: spot
     instrumentExtra:
       strikePrice: 1
       expirationDate: TODO
-    quote: USDT
-    bases:
+    symbols:
       - symbol: BTC-USDT
         base: BTC
+        quote: USDT
     redis:
       port: 6379
       exporterPort: 9121
+    labels:
+      svoe.name: unchanged
+      svoe.symbol.BTC-USDT: True
     dataFeed:
       image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
-      podConfigsVolumeMountPath: /etc/svoe/data_feed/configs
-      podConfigs:
-        - name: data-feed-config-0.yaml
-          config: |
-            cache: redis
-            redis:
-              del_after_read: true
-              ip: 127.0.0.1
-              port: 6379
-              retention_time: null
-              socket: null
-              start_flush: true
-            exchanges:
-              BINANCE:
-                l2_book:
-                  book_delta: true
-                  max_depth: 100
-                  symbols:
-                    - BTC-USDT
-                trades:
-                  - BTC-USDT
-            storage:
-              - parquet
-            storage_interval: 120
-            storage_retries: 5
-            storage_retry_wait: 30
-            parquet:
-              S3:
-                bucket: bucket
-                key_id: key
-                prefix: prefix
-                secret: secret
-              append_counter: 0
-              compression:
-                codec: BROTLI
-                level: 6
-              del_file: true
-              file_format:
-                - exchange
-                - symbol
-                - data_type
-                - timestamp
-              prefix_date: true
-    initScript:
-      name: run.sh
-      configsVolumeMountPath: /mnt/data
-      scriptsVolumeMountPath: /mnt/scripts
-      script: |-
-        #!/bin/sh
-        SET_INDEX=${HOSTNAME##*-}
-        echo "Starting initializing for pod $SET_INDEX"
-        if [ "$SET_INDEX" = "0" ]; then
-            cp /mnt/scripts/data-feed-config-0.yaml /mnt/data/data-feed-config.yaml
-        else
-            echo "Invalid stateful set index"
-            exit 1
-        fi
+      configVolumeMountPath: /etc/svoe/data_feed/configs
+      config: |
+        cache: redis
+        redis:
+          del_after_read: true
+          ip: 127.0.0.1
+          port: 6379
+          retention_time: null
+          socket: null
+          start_flush: true
+        exchanges:
+          BINANCE:
+            l2_book:
+              book_delta: true
+              max_depth: 100
+              symbols:
+                - BTC-USDT
+            trades:
+              - BTC-USDT
+        storage:
+          - parquet
+        storage_interval: 120
+        storage_retries: 5
+        storage_retry_wait: 30
+        parquet:
+          S3:
+            bucket: bucket
+            key_id: key
+            prefix: prefix
+            secret: secret
+          append_counter: 0
+          compression:
+            codec: BROTLI
+            level: 6
+          del_file: true
+          file_format:
+            - exchange
+            - symbol
+            - data_type
+            - timestamp
+          prefix_date: true

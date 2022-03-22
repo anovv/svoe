@@ -4,929 +4,1343 @@ commonSecrets:
     host: mysql-global-svc.mysql.svc.local # namespace should be synced with mysql chart
     port: 3306
     database: {{ .Values | get "mysqlDefaultSvoeDb" }}
-    user: {{ .Values | get "mysqlUsername" }}
-    password: {{ .Values | get "mysqlPassword" }}
+    user: root # TODO
+    password: {{ .Values | get "mysqlRootPassword" }}
   s3:
     accessKeyId: {{ .Values | get "awsKey" }}
     secretAccessKey: {{ .Values | get "awsSecret" }}
     region: {{ .Values | get "awsDefaultRegion" }}
-feedConfigs:
-  - exchange: BINANCE
+podConfigs:
+  - name: data-feed-BINANCE-spot-7dfbc380b1
+    exchange: BINANCE
     instrumentType: spot
-    quote: USDT
-    bases:
+    symbols:
       - symbol: BTC-USDT
         base: BTC
-      - symbol: ETH-USDT
-        base: ETH
-      - symbol: BNB-USDT
-        base: BNB
-      - symbol: ADA-USDT
-        base: ADA
-      - symbol: XRP-USDT
-        base: XRP
-      - symbol: DOGE-USDT
-        base: DOGE
-      - symbol: DOT-USDT
-        base: DOT
-      - symbol: BCH-USDT
-        base: BCH
-      - symbol: UNI-USDT
-        base: UNI
-      - symbol: LTC-USDT
-        base: LTC
-      - symbol: LINK-USDT
-        base: LINK
-      - symbol: MATIC-USDT
-        base: MATIC
-      - symbol: XLM-USDT
-        base: XLM
-      - symbol: ETC-USDT
-        base: ETC
-      - symbol: VET-USDT
-        base: VET
-      - symbol: TRX-USDT
-        base: TRX
-      - symbol: EOS-USDT
-        base: EOS
-      - symbol: FIL-USDT
-        base: FIL
-      - symbol: SHIB-USDT
-        base: SHIB
+        quote: USDT
+    labels:
+      svoe.service: data-feed
+      svoe.version: 7dfbc380b15ff2bef30d2832361290b5f5949b41
+      svoe.hash-short: 7dfbc380b1
+      svoe.instrument-type: spot
+      svoe.exchange: BINANCE
+      svoe.name: data-feed-BINANCE-spot-7dfbc380b1
+      svoe.cluster-id: 1
+      svoe.data-feed-image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+      svoe.base.BTC: True
+      svoe.quote.USDT: True
+      svoe.symbol.BTC-USDT: True
     redis:
       port: 6379
       exporterPort: 9121
     dataFeed:
       image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
-      podConfigsVolumeMountPath: /etc/svoe/data_feed/configs
-      podConfigs:
-        - name: data-feed-config-0.yaml
-          config: |
-            cache: redis
-            exchanges:
-              BINANCE:
-                l2_book:
-                  book_delta: true
-                  max_depth: 100
-                  symbols: &id001
-                  - BTC-USDT
-                retries: -1
-                ticker: *id001
-                trades: *id001
-            health_check:
-              path: /health
-              port: 1234
-            num_write_threads: 100
-            prometheus:
-              multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_f8e87a
-              multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
-              port: 8000
-            redis:
-              del_after_read: true
-              ip: 127.0.0.1
-              port: 6379
-              retention_time: null
-              socket: null
-              start_flush: true
-            storage:
-            - svoe
-            storage_interval: 30
-            storage_retries: 3
-            storage_retry_wait: 10
-            svoe:
-              cluster_id: 1
-              compression: gzip
-              data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
-              glue_database: svoe_glue_db
-              s3_bucket: svoe.test.1
-              s3_prefix: data_lake
-              version: f8e87ac2768af3c6ccf486f2fc2eea41eadf535e
-            write_on_stop: true
+      configVolumeMountPath: /etc/svoe/data_feed/configs
+      config: |
+        cache: redis
+        exchanges:
+          BINANCE:
+            l2_book:
+              book_delta: true
+              max_depth: 100
+              symbols:
+              - BTC-USDT
+            retries: -1
+            ticker:
+            - BTC-USDT
+            trades:
+            - BTC-USDT
+        health_check:
+          path: /health
+          port: 1234
+        num_write_threads: 100
+        prometheus:
+          multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_7dfbc380b1
+          multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
+          port: 8000
+        redis:
+          del_after_read: true
+          ip: 127.0.0.1
+          port: 6379
+          retention_time: null
+          socket: null
+          start_flush: true
+        storage:
+        - svoe
+        storage_interval: 30
+        storage_retries: 3
+        storage_retry_wait: 10
+        svoe:
+          cluster_id: 1
+          compression: gzip
+          data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+          glue_database: svoe_glue_db
+          hash_short: 7dfbc380b1
+          s3_bucket: svoe.test.1
+          s3_prefix: data_lake
+          version: 7dfbc380b15ff2bef30d2832361290b5f5949b41
+        write_on_stop: true
 
-        - name: data-feed-config-1.yaml
-          config: |
-            cache: redis
-            exchanges:
-              BINANCE:
-                l2_book:
-                  book_delta: true
-                  max_depth: 100
-                  symbols: &id001
-                  - ETH-USDT
-                retries: -1
-                ticker: *id001
-                trades: *id001
-            health_check:
-              path: /health
-              port: 1234
-            num_write_threads: 100
-            prometheus:
-              multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_1df2db
-              multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
-              port: 8000
-            redis:
-              del_after_read: true
-              ip: 127.0.0.1
-              port: 6379
-              retention_time: null
-              socket: null
-              start_flush: true
-            storage:
-            - svoe
-            storage_interval: 30
-            storage_retries: 3
-            storage_retry_wait: 10
-            svoe:
-              cluster_id: 1
-              compression: gzip
-              data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
-              glue_database: svoe_glue_db
-              s3_bucket: svoe.test.1
-              s3_prefix: data_lake
-              version: 1df2db9a721883ae427ecf65f9fd02a651ec98eb
-            write_on_stop: true
+  - name: data-feed-BINANCE-spot-42941366f3
+    exchange: BINANCE
+    instrumentType: spot
+    symbols:
+      - symbol: ETH-USDT
+        base: ETH
+        quote: USDT
+    labels:
+      svoe.service: data-feed
+      svoe.version: 42941366f3132caf7e84598953292d6c51fe8de8
+      svoe.hash-short: 42941366f3
+      svoe.instrument-type: spot
+      svoe.exchange: BINANCE
+      svoe.name: data-feed-BINANCE-spot-42941366f3
+      svoe.cluster-id: 1
+      svoe.data-feed-image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+      svoe.base.ETH: True
+      svoe.quote.USDT: True
+      svoe.symbol.ETH-USDT: True
+    redis:
+      port: 6379
+      exporterPort: 9121
+    dataFeed:
+      image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+      configVolumeMountPath: /etc/svoe/data_feed/configs
+      config: |
+        cache: redis
+        exchanges:
+          BINANCE:
+            l2_book:
+              book_delta: true
+              max_depth: 100
+              symbols:
+              - ETH-USDT
+            retries: -1
+            ticker:
+            - ETH-USDT
+            trades:
+            - ETH-USDT
+        health_check:
+          path: /health
+          port: 1234
+        num_write_threads: 100
+        prometheus:
+          multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_42941366f3
+          multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
+          port: 8000
+        redis:
+          del_after_read: true
+          ip: 127.0.0.1
+          port: 6379
+          retention_time: null
+          socket: null
+          start_flush: true
+        storage:
+        - svoe
+        storage_interval: 30
+        storage_retries: 3
+        storage_retry_wait: 10
+        svoe:
+          cluster_id: 1
+          compression: gzip
+          data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+          glue_database: svoe_glue_db
+          hash_short: 42941366f3
+          s3_bucket: svoe.test.1
+          s3_prefix: data_lake
+          version: 42941366f3132caf7e84598953292d6c51fe8de8
+        write_on_stop: true
 
-        - name: data-feed-config-2.yaml
-          config: |
-            cache: redis
-            exchanges:
-              BINANCE:
-                l2_book:
-                  book_delta: true
-                  max_depth: 100
-                  symbols: &id001
-                  - BNB-USDT
-                retries: -1
-                ticker: *id001
-                trades: *id001
-            health_check:
-              path: /health
-              port: 1234
-            num_write_threads: 100
-            prometheus:
-              multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_10868a
-              multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
-              port: 8000
-            redis:
-              del_after_read: true
-              ip: 127.0.0.1
-              port: 6379
-              retention_time: null
-              socket: null
-              start_flush: true
-            storage:
-            - svoe
-            storage_interval: 30
-            storage_retries: 3
-            storage_retry_wait: 10
-            svoe:
-              cluster_id: 1
-              compression: gzip
-              data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
-              glue_database: svoe_glue_db
-              s3_bucket: svoe.test.1
-              s3_prefix: data_lake
-              version: 10868ae96de1f8a89592dfb16c4fff2b0a23fe4f
-            write_on_stop: true
+  - name: data-feed-BINANCE-spot-4cefa80290
+    exchange: BINANCE
+    instrumentType: spot
+    symbols:
+      - symbol: BNB-USDT
+        base: BNB
+        quote: USDT
+    labels:
+      svoe.service: data-feed
+      svoe.version: 4cefa80290dd16876aefb43f933a25909fd3e928
+      svoe.hash-short: 4cefa80290
+      svoe.instrument-type: spot
+      svoe.exchange: BINANCE
+      svoe.name: data-feed-BINANCE-spot-4cefa80290
+      svoe.cluster-id: 1
+      svoe.data-feed-image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+      svoe.base.BNB: True
+      svoe.quote.USDT: True
+      svoe.symbol.BNB-USDT: True
+    redis:
+      port: 6379
+      exporterPort: 9121
+    dataFeed:
+      image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+      configVolumeMountPath: /etc/svoe/data_feed/configs
+      config: |
+        cache: redis
+        exchanges:
+          BINANCE:
+            l2_book:
+              book_delta: true
+              max_depth: 100
+              symbols:
+              - BNB-USDT
+            retries: -1
+            ticker:
+            - BNB-USDT
+            trades:
+            - BNB-USDT
+        health_check:
+          path: /health
+          port: 1234
+        num_write_threads: 100
+        prometheus:
+          multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_4cefa80290
+          multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
+          port: 8000
+        redis:
+          del_after_read: true
+          ip: 127.0.0.1
+          port: 6379
+          retention_time: null
+          socket: null
+          start_flush: true
+        storage:
+        - svoe
+        storage_interval: 30
+        storage_retries: 3
+        storage_retry_wait: 10
+        svoe:
+          cluster_id: 1
+          compression: gzip
+          data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+          glue_database: svoe_glue_db
+          hash_short: 4cefa80290
+          s3_bucket: svoe.test.1
+          s3_prefix: data_lake
+          version: 4cefa80290dd16876aefb43f933a25909fd3e928
+        write_on_stop: true
 
-        - name: data-feed-config-3.yaml
-          config: |
-            cache: redis
-            exchanges:
-              BINANCE:
-                l2_book:
-                  book_delta: true
-                  max_depth: 100
-                  symbols: &id001
-                  - ADA-USDT
-                retries: -1
-                ticker: *id001
-                trades: *id001
-            health_check:
-              path: /health
-              port: 1234
-            num_write_threads: 100
-            prometheus:
-              multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_04a6cd
-              multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
-              port: 8000
-            redis:
-              del_after_read: true
-              ip: 127.0.0.1
-              port: 6379
-              retention_time: null
-              socket: null
-              start_flush: true
-            storage:
-            - svoe
-            storage_interval: 30
-            storage_retries: 3
-            storage_retry_wait: 10
-            svoe:
-              cluster_id: 1
-              compression: gzip
-              data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
-              glue_database: svoe_glue_db
-              s3_bucket: svoe.test.1
-              s3_prefix: data_lake
-              version: 04a6cd8dc2476535755f774aa9b5baa53bdc30d6
-            write_on_stop: true
+  - name: data-feed-BINANCE-spot-292f76dd15
+    exchange: BINANCE
+    instrumentType: spot
+    symbols:
+      - symbol: ADA-USDT
+        base: ADA
+        quote: USDT
+    labels:
+      svoe.service: data-feed
+      svoe.version: 292f76dd1592f529c2e08748ef4dd86dbb06ffc1
+      svoe.hash-short: 292f76dd15
+      svoe.instrument-type: spot
+      svoe.exchange: BINANCE
+      svoe.name: data-feed-BINANCE-spot-292f76dd15
+      svoe.cluster-id: 1
+      svoe.data-feed-image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+      svoe.base.ADA: True
+      svoe.quote.USDT: True
+      svoe.symbol.ADA-USDT: True
+    redis:
+      port: 6379
+      exporterPort: 9121
+    dataFeed:
+      image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+      configVolumeMountPath: /etc/svoe/data_feed/configs
+      config: |
+        cache: redis
+        exchanges:
+          BINANCE:
+            l2_book:
+              book_delta: true
+              max_depth: 100
+              symbols:
+              - ADA-USDT
+            retries: -1
+            ticker:
+            - ADA-USDT
+            trades:
+            - ADA-USDT
+        health_check:
+          path: /health
+          port: 1234
+        num_write_threads: 100
+        prometheus:
+          multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_292f76dd15
+          multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
+          port: 8000
+        redis:
+          del_after_read: true
+          ip: 127.0.0.1
+          port: 6379
+          retention_time: null
+          socket: null
+          start_flush: true
+        storage:
+        - svoe
+        storage_interval: 30
+        storage_retries: 3
+        storage_retry_wait: 10
+        svoe:
+          cluster_id: 1
+          compression: gzip
+          data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+          glue_database: svoe_glue_db
+          hash_short: 292f76dd15
+          s3_bucket: svoe.test.1
+          s3_prefix: data_lake
+          version: 292f76dd1592f529c2e08748ef4dd86dbb06ffc1
+        write_on_stop: true
 
-        - name: data-feed-config-4.yaml
-          config: |
-            cache: redis
-            exchanges:
-              BINANCE:
-                l2_book:
-                  book_delta: true
-                  max_depth: 100
-                  symbols: &id001
-                  - XRP-USDT
-                retries: -1
-                ticker: *id001
-                trades: *id001
-            health_check:
-              path: /health
-              port: 1234
-            num_write_threads: 100
-            prometheus:
-              multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_8dd313
-              multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
-              port: 8000
-            redis:
-              del_after_read: true
-              ip: 127.0.0.1
-              port: 6379
-              retention_time: null
-              socket: null
-              start_flush: true
-            storage:
-            - svoe
-            storage_interval: 30
-            storage_retries: 3
-            storage_retry_wait: 10
-            svoe:
-              cluster_id: 1
-              compression: gzip
-              data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
-              glue_database: svoe_glue_db
-              s3_bucket: svoe.test.1
-              s3_prefix: data_lake
-              version: 8dd31370a435f32904399000c2dfe8d26cae8a4c
-            write_on_stop: true
+  - name: data-feed-BINANCE-spot-fd2d75951d
+    exchange: BINANCE
+    instrumentType: spot
+    symbols:
+      - symbol: XRP-USDT
+        base: XRP
+        quote: USDT
+    labels:
+      svoe.service: data-feed
+      svoe.version: fd2d75951d4b97c4058460db0e66e903157175de
+      svoe.hash-short: fd2d75951d
+      svoe.instrument-type: spot
+      svoe.exchange: BINANCE
+      svoe.name: data-feed-BINANCE-spot-fd2d75951d
+      svoe.cluster-id: 1
+      svoe.data-feed-image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+      svoe.base.XRP: True
+      svoe.quote.USDT: True
+      svoe.symbol.XRP-USDT: True
+    redis:
+      port: 6379
+      exporterPort: 9121
+    dataFeed:
+      image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+      configVolumeMountPath: /etc/svoe/data_feed/configs
+      config: |
+        cache: redis
+        exchanges:
+          BINANCE:
+            l2_book:
+              book_delta: true
+              max_depth: 100
+              symbols:
+              - XRP-USDT
+            retries: -1
+            ticker:
+            - XRP-USDT
+            trades:
+            - XRP-USDT
+        health_check:
+          path: /health
+          port: 1234
+        num_write_threads: 100
+        prometheus:
+          multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_fd2d75951d
+          multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
+          port: 8000
+        redis:
+          del_after_read: true
+          ip: 127.0.0.1
+          port: 6379
+          retention_time: null
+          socket: null
+          start_flush: true
+        storage:
+        - svoe
+        storage_interval: 30
+        storage_retries: 3
+        storage_retry_wait: 10
+        svoe:
+          cluster_id: 1
+          compression: gzip
+          data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+          glue_database: svoe_glue_db
+          hash_short: fd2d75951d
+          s3_bucket: svoe.test.1
+          s3_prefix: data_lake
+          version: fd2d75951d4b97c4058460db0e66e903157175de
+        write_on_stop: true
 
-        - name: data-feed-config-5.yaml
-          config: |
-            cache: redis
-            exchanges:
-              BINANCE:
-                l2_book:
-                  book_delta: true
-                  max_depth: 100
-                  symbols: &id001
-                  - DOGE-USDT
-                retries: -1
-                ticker: *id001
-                trades: *id001
-            health_check:
-              path: /health
-              port: 1234
-            num_write_threads: 100
-            prometheus:
-              multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_1e9c33
-              multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
-              port: 8000
-            redis:
-              del_after_read: true
-              ip: 127.0.0.1
-              port: 6379
-              retention_time: null
-              socket: null
-              start_flush: true
-            storage:
-            - svoe
-            storage_interval: 30
-            storage_retries: 3
-            storage_retry_wait: 10
-            svoe:
-              cluster_id: 1
-              compression: gzip
-              data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
-              glue_database: svoe_glue_db
-              s3_bucket: svoe.test.1
-              s3_prefix: data_lake
-              version: 1e9c333efc8b2dfa9f1ab0e3eee0a83c4efbf15f
-            write_on_stop: true
+  - name: data-feed-BINANCE-spot-8aba6fd6f1
+    exchange: BINANCE
+    instrumentType: spot
+    symbols:
+      - symbol: DOGE-USDT
+        base: DOGE
+        quote: USDT
+    labels:
+      svoe.service: data-feed
+      svoe.version: 8aba6fd6f123a39735757b9a7b418e946fc42b5e
+      svoe.hash-short: 8aba6fd6f1
+      svoe.instrument-type: spot
+      svoe.exchange: BINANCE
+      svoe.name: data-feed-BINANCE-spot-8aba6fd6f1
+      svoe.cluster-id: 1
+      svoe.data-feed-image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+      svoe.base.DOGE: True
+      svoe.quote.USDT: True
+      svoe.symbol.DOGE-USDT: True
+    redis:
+      port: 6379
+      exporterPort: 9121
+    dataFeed:
+      image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+      configVolumeMountPath: /etc/svoe/data_feed/configs
+      config: |
+        cache: redis
+        exchanges:
+          BINANCE:
+            l2_book:
+              book_delta: true
+              max_depth: 100
+              symbols:
+              - DOGE-USDT
+            retries: -1
+            ticker:
+            - DOGE-USDT
+            trades:
+            - DOGE-USDT
+        health_check:
+          path: /health
+          port: 1234
+        num_write_threads: 100
+        prometheus:
+          multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_8aba6fd6f1
+          multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
+          port: 8000
+        redis:
+          del_after_read: true
+          ip: 127.0.0.1
+          port: 6379
+          retention_time: null
+          socket: null
+          start_flush: true
+        storage:
+        - svoe
+        storage_interval: 30
+        storage_retries: 3
+        storage_retry_wait: 10
+        svoe:
+          cluster_id: 1
+          compression: gzip
+          data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+          glue_database: svoe_glue_db
+          hash_short: 8aba6fd6f1
+          s3_bucket: svoe.test.1
+          s3_prefix: data_lake
+          version: 8aba6fd6f123a39735757b9a7b418e946fc42b5e
+        write_on_stop: true
 
-        - name: data-feed-config-6.yaml
-          config: |
-            cache: redis
-            exchanges:
-              BINANCE:
-                l2_book:
-                  book_delta: true
-                  max_depth: 100
-                  symbols: &id001
-                  - DOT-USDT
-                retries: -1
-                ticker: *id001
-                trades: *id001
-            health_check:
-              path: /health
-              port: 1234
-            num_write_threads: 100
-            prometheus:
-              multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_344ef3
-              multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
-              port: 8000
-            redis:
-              del_after_read: true
-              ip: 127.0.0.1
-              port: 6379
-              retention_time: null
-              socket: null
-              start_flush: true
-            storage:
-            - svoe
-            storage_interval: 30
-            storage_retries: 3
-            storage_retry_wait: 10
-            svoe:
-              cluster_id: 1
-              compression: gzip
-              data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
-              glue_database: svoe_glue_db
-              s3_bucket: svoe.test.1
-              s3_prefix: data_lake
-              version: 344ef3bdfdacd8c8f095296d593f1f9a8838e9fd
-            write_on_stop: true
+  - name: data-feed-BINANCE-spot-2f594eebb8
+    exchange: BINANCE
+    instrumentType: spot
+    symbols:
+      - symbol: DOT-USDT
+        base: DOT
+        quote: USDT
+    labels:
+      svoe.service: data-feed
+      svoe.version: 2f594eebb86a5ccfc36ce0f2a768387f33311667
+      svoe.hash-short: 2f594eebb8
+      svoe.instrument-type: spot
+      svoe.exchange: BINANCE
+      svoe.name: data-feed-BINANCE-spot-2f594eebb8
+      svoe.cluster-id: 1
+      svoe.data-feed-image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+      svoe.base.DOT: True
+      svoe.quote.USDT: True
+      svoe.symbol.DOT-USDT: True
+    redis:
+      port: 6379
+      exporterPort: 9121
+    dataFeed:
+      image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+      configVolumeMountPath: /etc/svoe/data_feed/configs
+      config: |
+        cache: redis
+        exchanges:
+          BINANCE:
+            l2_book:
+              book_delta: true
+              max_depth: 100
+              symbols:
+              - DOT-USDT
+            retries: -1
+            ticker:
+            - DOT-USDT
+            trades:
+            - DOT-USDT
+        health_check:
+          path: /health
+          port: 1234
+        num_write_threads: 100
+        prometheus:
+          multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_2f594eebb8
+          multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
+          port: 8000
+        redis:
+          del_after_read: true
+          ip: 127.0.0.1
+          port: 6379
+          retention_time: null
+          socket: null
+          start_flush: true
+        storage:
+        - svoe
+        storage_interval: 30
+        storage_retries: 3
+        storage_retry_wait: 10
+        svoe:
+          cluster_id: 1
+          compression: gzip
+          data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+          glue_database: svoe_glue_db
+          hash_short: 2f594eebb8
+          s3_bucket: svoe.test.1
+          s3_prefix: data_lake
+          version: 2f594eebb86a5ccfc36ce0f2a768387f33311667
+        write_on_stop: true
 
-        - name: data-feed-config-7.yaml
-          config: |
-            cache: redis
-            exchanges:
-              BINANCE:
-                l2_book:
-                  book_delta: true
-                  max_depth: 100
-                  symbols: &id001
-                  - BCH-USDT
-                retries: -1
-                ticker: *id001
-                trades: *id001
-            health_check:
-              path: /health
-              port: 1234
-            num_write_threads: 100
-            prometheus:
-              multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_a29953
-              multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
-              port: 8000
-            redis:
-              del_after_read: true
-              ip: 127.0.0.1
-              port: 6379
-              retention_time: null
-              socket: null
-              start_flush: true
-            storage:
-            - svoe
-            storage_interval: 30
-            storage_retries: 3
-            storage_retry_wait: 10
-            svoe:
-              cluster_id: 1
-              compression: gzip
-              data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
-              glue_database: svoe_glue_db
-              s3_bucket: svoe.test.1
-              s3_prefix: data_lake
-              version: a299531228adecf683eae9b19670723a685060e9
-            write_on_stop: true
+  - name: data-feed-BINANCE-spot-5d8e9a6e2c
+    exchange: BINANCE
+    instrumentType: spot
+    symbols:
+      - symbol: BCH-USDT
+        base: BCH
+        quote: USDT
+    labels:
+      svoe.service: data-feed
+      svoe.version: 5d8e9a6e2c40020d949c6af2f5f1449118fe07a3
+      svoe.hash-short: 5d8e9a6e2c
+      svoe.instrument-type: spot
+      svoe.exchange: BINANCE
+      svoe.name: data-feed-BINANCE-spot-5d8e9a6e2c
+      svoe.cluster-id: 1
+      svoe.data-feed-image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+      svoe.base.BCH: True
+      svoe.quote.USDT: True
+      svoe.symbol.BCH-USDT: True
+    redis:
+      port: 6379
+      exporterPort: 9121
+    dataFeed:
+      image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+      configVolumeMountPath: /etc/svoe/data_feed/configs
+      config: |
+        cache: redis
+        exchanges:
+          BINANCE:
+            l2_book:
+              book_delta: true
+              max_depth: 100
+              symbols:
+              - BCH-USDT
+            retries: -1
+            ticker:
+            - BCH-USDT
+            trades:
+            - BCH-USDT
+        health_check:
+          path: /health
+          port: 1234
+        num_write_threads: 100
+        prometheus:
+          multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_5d8e9a6e2c
+          multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
+          port: 8000
+        redis:
+          del_after_read: true
+          ip: 127.0.0.1
+          port: 6379
+          retention_time: null
+          socket: null
+          start_flush: true
+        storage:
+        - svoe
+        storage_interval: 30
+        storage_retries: 3
+        storage_retry_wait: 10
+        svoe:
+          cluster_id: 1
+          compression: gzip
+          data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+          glue_database: svoe_glue_db
+          hash_short: 5d8e9a6e2c
+          s3_bucket: svoe.test.1
+          s3_prefix: data_lake
+          version: 5d8e9a6e2c40020d949c6af2f5f1449118fe07a3
+        write_on_stop: true
 
-        - name: data-feed-config-8.yaml
-          config: |
-            cache: redis
-            exchanges:
-              BINANCE:
-                l2_book:
-                  book_delta: true
-                  max_depth: 100
-                  symbols: &id001
-                  - UNI-USDT
-                retries: -1
-                ticker: *id001
-                trades: *id001
-            health_check:
-              path: /health
-              port: 1234
-            num_write_threads: 100
-            prometheus:
-              multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_67bcc8
-              multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
-              port: 8000
-            redis:
-              del_after_read: true
-              ip: 127.0.0.1
-              port: 6379
-              retention_time: null
-              socket: null
-              start_flush: true
-            storage:
-            - svoe
-            storage_interval: 30
-            storage_retries: 3
-            storage_retry_wait: 10
-            svoe:
-              cluster_id: 1
-              compression: gzip
-              data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
-              glue_database: svoe_glue_db
-              s3_bucket: svoe.test.1
-              s3_prefix: data_lake
-              version: 67bcc81707043537785dff409819d44aef53003a
-            write_on_stop: true
+  - name: data-feed-BINANCE-spot-2f34373285
+    exchange: BINANCE
+    instrumentType: spot
+    symbols:
+      - symbol: UNI-USDT
+        base: UNI
+        quote: USDT
+    labels:
+      svoe.service: data-feed
+      svoe.version: 2f34373285e3e2871c615e8959c98983fafe7b05
+      svoe.hash-short: 2f34373285
+      svoe.instrument-type: spot
+      svoe.exchange: BINANCE
+      svoe.name: data-feed-BINANCE-spot-2f34373285
+      svoe.cluster-id: 1
+      svoe.data-feed-image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+      svoe.base.UNI: True
+      svoe.quote.USDT: True
+      svoe.symbol.UNI-USDT: True
+    redis:
+      port: 6379
+      exporterPort: 9121
+    dataFeed:
+      image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+      configVolumeMountPath: /etc/svoe/data_feed/configs
+      config: |
+        cache: redis
+        exchanges:
+          BINANCE:
+            l2_book:
+              book_delta: true
+              max_depth: 100
+              symbols:
+              - UNI-USDT
+            retries: -1
+            ticker:
+            - UNI-USDT
+            trades:
+            - UNI-USDT
+        health_check:
+          path: /health
+          port: 1234
+        num_write_threads: 100
+        prometheus:
+          multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_2f34373285
+          multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
+          port: 8000
+        redis:
+          del_after_read: true
+          ip: 127.0.0.1
+          port: 6379
+          retention_time: null
+          socket: null
+          start_flush: true
+        storage:
+        - svoe
+        storage_interval: 30
+        storage_retries: 3
+        storage_retry_wait: 10
+        svoe:
+          cluster_id: 1
+          compression: gzip
+          data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+          glue_database: svoe_glue_db
+          hash_short: 2f34373285
+          s3_bucket: svoe.test.1
+          s3_prefix: data_lake
+          version: 2f34373285e3e2871c615e8959c98983fafe7b05
+        write_on_stop: true
 
-        - name: data-feed-config-9.yaml
-          config: |
-            cache: redis
-            exchanges:
-              BINANCE:
-                l2_book:
-                  book_delta: true
-                  max_depth: 100
-                  symbols: &id001
-                  - LTC-USDT
-                retries: -1
-                ticker: *id001
-                trades: *id001
-            health_check:
-              path: /health
-              port: 1234
-            num_write_threads: 100
-            prometheus:
-              multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_c6e34f
-              multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
-              port: 8000
-            redis:
-              del_after_read: true
-              ip: 127.0.0.1
-              port: 6379
-              retention_time: null
-              socket: null
-              start_flush: true
-            storage:
-            - svoe
-            storage_interval: 30
-            storage_retries: 3
-            storage_retry_wait: 10
-            svoe:
-              cluster_id: 1
-              compression: gzip
-              data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
-              glue_database: svoe_glue_db
-              s3_bucket: svoe.test.1
-              s3_prefix: data_lake
-              version: c6e34ffc3cb137dd3c0c088958badada4beb7122
-            write_on_stop: true
+  - name: data-feed-BINANCE-spot-93d9fc4571
+    exchange: BINANCE
+    instrumentType: spot
+    symbols:
+      - symbol: LTC-USDT
+        base: LTC
+        quote: USDT
+    labels:
+      svoe.service: data-feed
+      svoe.version: 93d9fc4571de20e0fe2ffc80f2e6fe461c175122
+      svoe.hash-short: 93d9fc4571
+      svoe.instrument-type: spot
+      svoe.exchange: BINANCE
+      svoe.name: data-feed-BINANCE-spot-93d9fc4571
+      svoe.cluster-id: 1
+      svoe.data-feed-image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+      svoe.base.LTC: True
+      svoe.quote.USDT: True
+      svoe.symbol.LTC-USDT: True
+    redis:
+      port: 6379
+      exporterPort: 9121
+    dataFeed:
+      image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+      configVolumeMountPath: /etc/svoe/data_feed/configs
+      config: |
+        cache: redis
+        exchanges:
+          BINANCE:
+            l2_book:
+              book_delta: true
+              max_depth: 100
+              symbols:
+              - LTC-USDT
+            retries: -1
+            ticker:
+            - LTC-USDT
+            trades:
+            - LTC-USDT
+        health_check:
+          path: /health
+          port: 1234
+        num_write_threads: 100
+        prometheus:
+          multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_93d9fc4571
+          multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
+          port: 8000
+        redis:
+          del_after_read: true
+          ip: 127.0.0.1
+          port: 6379
+          retention_time: null
+          socket: null
+          start_flush: true
+        storage:
+        - svoe
+        storage_interval: 30
+        storage_retries: 3
+        storage_retry_wait: 10
+        svoe:
+          cluster_id: 1
+          compression: gzip
+          data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+          glue_database: svoe_glue_db
+          hash_short: 93d9fc4571
+          s3_bucket: svoe.test.1
+          s3_prefix: data_lake
+          version: 93d9fc4571de20e0fe2ffc80f2e6fe461c175122
+        write_on_stop: true
 
-        - name: data-feed-config-10.yaml
-          config: |
-            cache: redis
-            exchanges:
-              BINANCE:
-                l2_book:
-                  book_delta: true
-                  max_depth: 100
-                  symbols: &id001
-                  - LINK-USDT
-                retries: -1
-                ticker: *id001
-                trades: *id001
-            health_check:
-              path: /health
-              port: 1234
-            num_write_threads: 100
-            prometheus:
-              multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_04ea23
-              multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
-              port: 8000
-            redis:
-              del_after_read: true
-              ip: 127.0.0.1
-              port: 6379
-              retention_time: null
-              socket: null
-              start_flush: true
-            storage:
-            - svoe
-            storage_interval: 30
-            storage_retries: 3
-            storage_retry_wait: 10
-            svoe:
-              cluster_id: 1
-              compression: gzip
-              data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
-              glue_database: svoe_glue_db
-              s3_bucket: svoe.test.1
-              s3_prefix: data_lake
-              version: 04ea23c7b7cccfb9a34461617389077ac314c107
-            write_on_stop: true
+  - name: data-feed-BINANCE-spot-a8133d2466
+    exchange: BINANCE
+    instrumentType: spot
+    symbols:
+      - symbol: LINK-USDT
+        base: LINK
+        quote: USDT
+    labels:
+      svoe.service: data-feed
+      svoe.version: a8133d2466af06b6f3723856639f55663a6ef0d1
+      svoe.hash-short: a8133d2466
+      svoe.instrument-type: spot
+      svoe.exchange: BINANCE
+      svoe.name: data-feed-BINANCE-spot-a8133d2466
+      svoe.cluster-id: 1
+      svoe.data-feed-image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+      svoe.base.LINK: True
+      svoe.quote.USDT: True
+      svoe.symbol.LINK-USDT: True
+    redis:
+      port: 6379
+      exporterPort: 9121
+    dataFeed:
+      image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+      configVolumeMountPath: /etc/svoe/data_feed/configs
+      config: |
+        cache: redis
+        exchanges:
+          BINANCE:
+            l2_book:
+              book_delta: true
+              max_depth: 100
+              symbols:
+              - LINK-USDT
+            retries: -1
+            ticker:
+            - LINK-USDT
+            trades:
+            - LINK-USDT
+        health_check:
+          path: /health
+          port: 1234
+        num_write_threads: 100
+        prometheus:
+          multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_a8133d2466
+          multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
+          port: 8000
+        redis:
+          del_after_read: true
+          ip: 127.0.0.1
+          port: 6379
+          retention_time: null
+          socket: null
+          start_flush: true
+        storage:
+        - svoe
+        storage_interval: 30
+        storage_retries: 3
+        storage_retry_wait: 10
+        svoe:
+          cluster_id: 1
+          compression: gzip
+          data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+          glue_database: svoe_glue_db
+          hash_short: a8133d2466
+          s3_bucket: svoe.test.1
+          s3_prefix: data_lake
+          version: a8133d2466af06b6f3723856639f55663a6ef0d1
+        write_on_stop: true
 
-        - name: data-feed-config-11.yaml
-          config: |
-            cache: redis
-            exchanges:
-              BINANCE:
-                l2_book:
-                  book_delta: true
-                  max_depth: 100
-                  symbols: &id001
-                  - MATIC-USDT
-                retries: -1
-                ticker: *id001
-                trades: *id001
-            health_check:
-              path: /health
-              port: 1234
-            num_write_threads: 100
-            prometheus:
-              multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_414235
-              multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
-              port: 8000
-            redis:
-              del_after_read: true
-              ip: 127.0.0.1
-              port: 6379
-              retention_time: null
-              socket: null
-              start_flush: true
-            storage:
-            - svoe
-            storage_interval: 30
-            storage_retries: 3
-            storage_retry_wait: 10
-            svoe:
-              cluster_id: 1
-              compression: gzip
-              data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
-              glue_database: svoe_glue_db
-              s3_bucket: svoe.test.1
-              s3_prefix: data_lake
-              version: 414235f19ae5bd769178abcee97842d43ab219fc
-            write_on_stop: true
+  - name: data-feed-BINANCE-spot-999253b3cb
+    exchange: BINANCE
+    instrumentType: spot
+    symbols:
+      - symbol: MATIC-USDT
+        base: MATIC
+        quote: USDT
+    labels:
+      svoe.service: data-feed
+      svoe.version: 999253b3cb3f7343c940f5528d398c6fae224d03
+      svoe.hash-short: 999253b3cb
+      svoe.instrument-type: spot
+      svoe.exchange: BINANCE
+      svoe.name: data-feed-BINANCE-spot-999253b3cb
+      svoe.cluster-id: 1
+      svoe.data-feed-image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+      svoe.base.MATIC: True
+      svoe.quote.USDT: True
+      svoe.symbol.MATIC-USDT: True
+    redis:
+      port: 6379
+      exporterPort: 9121
+    dataFeed:
+      image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+      configVolumeMountPath: /etc/svoe/data_feed/configs
+      config: |
+        cache: redis
+        exchanges:
+          BINANCE:
+            l2_book:
+              book_delta: true
+              max_depth: 100
+              symbols:
+              - MATIC-USDT
+            retries: -1
+            ticker:
+            - MATIC-USDT
+            trades:
+            - MATIC-USDT
+        health_check:
+          path: /health
+          port: 1234
+        num_write_threads: 100
+        prometheus:
+          multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_999253b3cb
+          multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
+          port: 8000
+        redis:
+          del_after_read: true
+          ip: 127.0.0.1
+          port: 6379
+          retention_time: null
+          socket: null
+          start_flush: true
+        storage:
+        - svoe
+        storage_interval: 30
+        storage_retries: 3
+        storage_retry_wait: 10
+        svoe:
+          cluster_id: 1
+          compression: gzip
+          data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+          glue_database: svoe_glue_db
+          hash_short: 999253b3cb
+          s3_bucket: svoe.test.1
+          s3_prefix: data_lake
+          version: 999253b3cb3f7343c940f5528d398c6fae224d03
+        write_on_stop: true
 
-        - name: data-feed-config-12.yaml
-          config: |
-            cache: redis
-            exchanges:
-              BINANCE:
-                l2_book:
-                  book_delta: true
-                  max_depth: 100
-                  symbols: &id001
-                  - XLM-USDT
-                retries: -1
-                ticker: *id001
-                trades: *id001
-            health_check:
-              path: /health
-              port: 1234
-            num_write_threads: 100
-            prometheus:
-              multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_12f249
-              multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
-              port: 8000
-            redis:
-              del_after_read: true
-              ip: 127.0.0.1
-              port: 6379
-              retention_time: null
-              socket: null
-              start_flush: true
-            storage:
-            - svoe
-            storage_interval: 30
-            storage_retries: 3
-            storage_retry_wait: 10
-            svoe:
-              cluster_id: 1
-              compression: gzip
-              data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
-              glue_database: svoe_glue_db
-              s3_bucket: svoe.test.1
-              s3_prefix: data_lake
-              version: 12f24982f0a54daec5e5fe91ff203bde6271334a
-            write_on_stop: true
+  - name: data-feed-BINANCE-spot-6c2766472e
+    exchange: BINANCE
+    instrumentType: spot
+    symbols:
+      - symbol: XLM-USDT
+        base: XLM
+        quote: USDT
+    labels:
+      svoe.service: data-feed
+      svoe.version: 6c2766472ee22478f0b6cd8ac699b306a70cb497
+      svoe.hash-short: 6c2766472e
+      svoe.instrument-type: spot
+      svoe.exchange: BINANCE
+      svoe.name: data-feed-BINANCE-spot-6c2766472e
+      svoe.cluster-id: 1
+      svoe.data-feed-image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+      svoe.base.XLM: True
+      svoe.quote.USDT: True
+      svoe.symbol.XLM-USDT: True
+    redis:
+      port: 6379
+      exporterPort: 9121
+    dataFeed:
+      image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+      configVolumeMountPath: /etc/svoe/data_feed/configs
+      config: |
+        cache: redis
+        exchanges:
+          BINANCE:
+            l2_book:
+              book_delta: true
+              max_depth: 100
+              symbols:
+              - XLM-USDT
+            retries: -1
+            ticker:
+            - XLM-USDT
+            trades:
+            - XLM-USDT
+        health_check:
+          path: /health
+          port: 1234
+        num_write_threads: 100
+        prometheus:
+          multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_6c2766472e
+          multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
+          port: 8000
+        redis:
+          del_after_read: true
+          ip: 127.0.0.1
+          port: 6379
+          retention_time: null
+          socket: null
+          start_flush: true
+        storage:
+        - svoe
+        storage_interval: 30
+        storage_retries: 3
+        storage_retry_wait: 10
+        svoe:
+          cluster_id: 1
+          compression: gzip
+          data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+          glue_database: svoe_glue_db
+          hash_short: 6c2766472e
+          s3_bucket: svoe.test.1
+          s3_prefix: data_lake
+          version: 6c2766472ee22478f0b6cd8ac699b306a70cb497
+        write_on_stop: true
 
-        - name: data-feed-config-13.yaml
-          config: |
-            cache: redis
-            exchanges:
-              BINANCE:
-                l2_book:
-                  book_delta: true
-                  max_depth: 100
-                  symbols: &id001
-                  - ETC-USDT
-                retries: -1
-                ticker: *id001
-                trades: *id001
-            health_check:
-              path: /health
-              port: 1234
-            num_write_threads: 100
-            prometheus:
-              multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_a1dd44
-              multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
-              port: 8000
-            redis:
-              del_after_read: true
-              ip: 127.0.0.1
-              port: 6379
-              retention_time: null
-              socket: null
-              start_flush: true
-            storage:
-            - svoe
-            storage_interval: 30
-            storage_retries: 3
-            storage_retry_wait: 10
-            svoe:
-              cluster_id: 1
-              compression: gzip
-              data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
-              glue_database: svoe_glue_db
-              s3_bucket: svoe.test.1
-              s3_prefix: data_lake
-              version: a1dd44749ec5fd51b2541cae6c3236d8db1fbe9e
-            write_on_stop: true
+  - name: data-feed-BINANCE-spot-8dc7ce2e25
+    exchange: BINANCE
+    instrumentType: spot
+    symbols:
+      - symbol: ETC-USDT
+        base: ETC
+        quote: USDT
+    labels:
+      svoe.service: data-feed
+      svoe.version: 8dc7ce2e25d1058bb9f3689343d262e210dc6e5b
+      svoe.hash-short: 8dc7ce2e25
+      svoe.instrument-type: spot
+      svoe.exchange: BINANCE
+      svoe.name: data-feed-BINANCE-spot-8dc7ce2e25
+      svoe.cluster-id: 1
+      svoe.data-feed-image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+      svoe.base.ETC: True
+      svoe.quote.USDT: True
+      svoe.symbol.ETC-USDT: True
+    redis:
+      port: 6379
+      exporterPort: 9121
+    dataFeed:
+      image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+      configVolumeMountPath: /etc/svoe/data_feed/configs
+      config: |
+        cache: redis
+        exchanges:
+          BINANCE:
+            l2_book:
+              book_delta: true
+              max_depth: 100
+              symbols:
+              - ETC-USDT
+            retries: -1
+            ticker:
+            - ETC-USDT
+            trades:
+            - ETC-USDT
+        health_check:
+          path: /health
+          port: 1234
+        num_write_threads: 100
+        prometheus:
+          multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_8dc7ce2e25
+          multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
+          port: 8000
+        redis:
+          del_after_read: true
+          ip: 127.0.0.1
+          port: 6379
+          retention_time: null
+          socket: null
+          start_flush: true
+        storage:
+        - svoe
+        storage_interval: 30
+        storage_retries: 3
+        storage_retry_wait: 10
+        svoe:
+          cluster_id: 1
+          compression: gzip
+          data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+          glue_database: svoe_glue_db
+          hash_short: 8dc7ce2e25
+          s3_bucket: svoe.test.1
+          s3_prefix: data_lake
+          version: 8dc7ce2e25d1058bb9f3689343d262e210dc6e5b
+        write_on_stop: true
 
-        - name: data-feed-config-14.yaml
-          config: |
-            cache: redis
-            exchanges:
-              BINANCE:
-                l2_book:
-                  book_delta: true
-                  max_depth: 100
-                  symbols: &id001
-                  - VET-USDT
-                retries: -1
-                ticker: *id001
-                trades: *id001
-            health_check:
-              path: /health
-              port: 1234
-            num_write_threads: 100
-            prometheus:
-              multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_800abe
-              multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
-              port: 8000
-            redis:
-              del_after_read: true
-              ip: 127.0.0.1
-              port: 6379
-              retention_time: null
-              socket: null
-              start_flush: true
-            storage:
-            - svoe
-            storage_interval: 30
-            storage_retries: 3
-            storage_retry_wait: 10
-            svoe:
-              cluster_id: 1
-              compression: gzip
-              data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
-              glue_database: svoe_glue_db
-              s3_bucket: svoe.test.1
-              s3_prefix: data_lake
-              version: 800abe3b39756a0c87cfe902cd43bbc9aae21006
-            write_on_stop: true
+  - name: data-feed-BINANCE-spot-162929b63c
+    exchange: BINANCE
+    instrumentType: spot
+    symbols:
+      - symbol: VET-USDT
+        base: VET
+        quote: USDT
+    labels:
+      svoe.service: data-feed
+      svoe.version: 162929b63c02a2c055607bea474dc520bfd2a4da
+      svoe.hash-short: 162929b63c
+      svoe.instrument-type: spot
+      svoe.exchange: BINANCE
+      svoe.name: data-feed-BINANCE-spot-162929b63c
+      svoe.cluster-id: 1
+      svoe.data-feed-image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+      svoe.base.VET: True
+      svoe.quote.USDT: True
+      svoe.symbol.VET-USDT: True
+    redis:
+      port: 6379
+      exporterPort: 9121
+    dataFeed:
+      image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+      configVolumeMountPath: /etc/svoe/data_feed/configs
+      config: |
+        cache: redis
+        exchanges:
+          BINANCE:
+            l2_book:
+              book_delta: true
+              max_depth: 100
+              symbols:
+              - VET-USDT
+            retries: -1
+            ticker:
+            - VET-USDT
+            trades:
+            - VET-USDT
+        health_check:
+          path: /health
+          port: 1234
+        num_write_threads: 100
+        prometheus:
+          multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_162929b63c
+          multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
+          port: 8000
+        redis:
+          del_after_read: true
+          ip: 127.0.0.1
+          port: 6379
+          retention_time: null
+          socket: null
+          start_flush: true
+        storage:
+        - svoe
+        storage_interval: 30
+        storage_retries: 3
+        storage_retry_wait: 10
+        svoe:
+          cluster_id: 1
+          compression: gzip
+          data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+          glue_database: svoe_glue_db
+          hash_short: 162929b63c
+          s3_bucket: svoe.test.1
+          s3_prefix: data_lake
+          version: 162929b63c02a2c055607bea474dc520bfd2a4da
+        write_on_stop: true
 
-        - name: data-feed-config-15.yaml
-          config: |
-            cache: redis
-            exchanges:
-              BINANCE:
-                l2_book:
-                  book_delta: true
-                  max_depth: 100
-                  symbols: &id001
-                  - TRX-USDT
-                retries: -1
-                ticker: *id001
-                trades: *id001
-            health_check:
-              path: /health
-              port: 1234
-            num_write_threads: 100
-            prometheus:
-              multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_a1c1a7
-              multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
-              port: 8000
-            redis:
-              del_after_read: true
-              ip: 127.0.0.1
-              port: 6379
-              retention_time: null
-              socket: null
-              start_flush: true
-            storage:
-            - svoe
-            storage_interval: 30
-            storage_retries: 3
-            storage_retry_wait: 10
-            svoe:
-              cluster_id: 1
-              compression: gzip
-              data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
-              glue_database: svoe_glue_db
-              s3_bucket: svoe.test.1
-              s3_prefix: data_lake
-              version: a1c1a75bc845ca26e3b9a29e58ff109e1ee73d75
-            write_on_stop: true
+  - name: data-feed-BINANCE-spot-64d1e860dc
+    exchange: BINANCE
+    instrumentType: spot
+    symbols:
+      - symbol: TRX-USDT
+        base: TRX
+        quote: USDT
+    labels:
+      svoe.service: data-feed
+      svoe.version: 64d1e860dc91751434c646697031fdd4a1b8d6f3
+      svoe.hash-short: 64d1e860dc
+      svoe.instrument-type: spot
+      svoe.exchange: BINANCE
+      svoe.name: data-feed-BINANCE-spot-64d1e860dc
+      svoe.cluster-id: 1
+      svoe.data-feed-image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+      svoe.base.TRX: True
+      svoe.quote.USDT: True
+      svoe.symbol.TRX-USDT: True
+    redis:
+      port: 6379
+      exporterPort: 9121
+    dataFeed:
+      image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+      configVolumeMountPath: /etc/svoe/data_feed/configs
+      config: |
+        cache: redis
+        exchanges:
+          BINANCE:
+            l2_book:
+              book_delta: true
+              max_depth: 100
+              symbols:
+              - TRX-USDT
+            retries: -1
+            ticker:
+            - TRX-USDT
+            trades:
+            - TRX-USDT
+        health_check:
+          path: /health
+          port: 1234
+        num_write_threads: 100
+        prometheus:
+          multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_64d1e860dc
+          multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
+          port: 8000
+        redis:
+          del_after_read: true
+          ip: 127.0.0.1
+          port: 6379
+          retention_time: null
+          socket: null
+          start_flush: true
+        storage:
+        - svoe
+        storage_interval: 30
+        storage_retries: 3
+        storage_retry_wait: 10
+        svoe:
+          cluster_id: 1
+          compression: gzip
+          data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+          glue_database: svoe_glue_db
+          hash_short: 64d1e860dc
+          s3_bucket: svoe.test.1
+          s3_prefix: data_lake
+          version: 64d1e860dc91751434c646697031fdd4a1b8d6f3
+        write_on_stop: true
 
-        - name: data-feed-config-16.yaml
-          config: |
-            cache: redis
-            exchanges:
-              BINANCE:
-                l2_book:
-                  book_delta: true
-                  max_depth: 100
-                  symbols: &id001
-                  - EOS-USDT
-                retries: -1
-                ticker: *id001
-                trades: *id001
-            health_check:
-              path: /health
-              port: 1234
-            num_write_threads: 100
-            prometheus:
-              multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_c7fcef
-              multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
-              port: 8000
-            redis:
-              del_after_read: true
-              ip: 127.0.0.1
-              port: 6379
-              retention_time: null
-              socket: null
-              start_flush: true
-            storage:
-            - svoe
-            storage_interval: 30
-            storage_retries: 3
-            storage_retry_wait: 10
-            svoe:
-              cluster_id: 1
-              compression: gzip
-              data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
-              glue_database: svoe_glue_db
-              s3_bucket: svoe.test.1
-              s3_prefix: data_lake
-              version: c7fcef476445c7a40526f7da9a5c171421ddb30f
-            write_on_stop: true
+  - name: data-feed-BINANCE-spot-0e846419c7
+    exchange: BINANCE
+    instrumentType: spot
+    symbols:
+      - symbol: EOS-USDT
+        base: EOS
+        quote: USDT
+    labels:
+      svoe.service: data-feed
+      svoe.version: 0e846419c75350883ff2e2bbf6ae66bac64a0abf
+      svoe.hash-short: 0e846419c7
+      svoe.instrument-type: spot
+      svoe.exchange: BINANCE
+      svoe.name: data-feed-BINANCE-spot-0e846419c7
+      svoe.cluster-id: 1
+      svoe.data-feed-image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+      svoe.base.EOS: True
+      svoe.quote.USDT: True
+      svoe.symbol.EOS-USDT: True
+    redis:
+      port: 6379
+      exporterPort: 9121
+    dataFeed:
+      image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+      configVolumeMountPath: /etc/svoe/data_feed/configs
+      config: |
+        cache: redis
+        exchanges:
+          BINANCE:
+            l2_book:
+              book_delta: true
+              max_depth: 100
+              symbols:
+              - EOS-USDT
+            retries: -1
+            ticker:
+            - EOS-USDT
+            trades:
+            - EOS-USDT
+        health_check:
+          path: /health
+          port: 1234
+        num_write_threads: 100
+        prometheus:
+          multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_0e846419c7
+          multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
+          port: 8000
+        redis:
+          del_after_read: true
+          ip: 127.0.0.1
+          port: 6379
+          retention_time: null
+          socket: null
+          start_flush: true
+        storage:
+        - svoe
+        storage_interval: 30
+        storage_retries: 3
+        storage_retry_wait: 10
+        svoe:
+          cluster_id: 1
+          compression: gzip
+          data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+          glue_database: svoe_glue_db
+          hash_short: 0e846419c7
+          s3_bucket: svoe.test.1
+          s3_prefix: data_lake
+          version: 0e846419c75350883ff2e2bbf6ae66bac64a0abf
+        write_on_stop: true
 
-        - name: data-feed-config-17.yaml
-          config: |
-            cache: redis
-            exchanges:
-              BINANCE:
-                l2_book:
-                  book_delta: true
-                  max_depth: 100
-                  symbols: &id001
-                  - FIL-USDT
-                retries: -1
-                ticker: *id001
-                trades: *id001
-            health_check:
-              path: /health
-              port: 1234
-            num_write_threads: 100
-            prometheus:
-              multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_6c8cfb
-              multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
-              port: 8000
-            redis:
-              del_after_read: true
-              ip: 127.0.0.1
-              port: 6379
-              retention_time: null
-              socket: null
-              start_flush: true
-            storage:
-            - svoe
-            storage_interval: 30
-            storage_retries: 3
-            storage_retry_wait: 10
-            svoe:
-              cluster_id: 1
-              compression: gzip
-              data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
-              glue_database: svoe_glue_db
-              s3_bucket: svoe.test.1
-              s3_prefix: data_lake
-              version: 6c8cfb7b1aca0f503afbcd580e953a0b9d23ed99
-            write_on_stop: true
+  - name: data-feed-BINANCE-spot-e3824646b8
+    exchange: BINANCE
+    instrumentType: spot
+    symbols:
+      - symbol: FIL-USDT
+        base: FIL
+        quote: USDT
+    labels:
+      svoe.service: data-feed
+      svoe.version: e3824646b8d7cf567914890c782805746117c41c
+      svoe.hash-short: e3824646b8
+      svoe.instrument-type: spot
+      svoe.exchange: BINANCE
+      svoe.name: data-feed-BINANCE-spot-e3824646b8
+      svoe.cluster-id: 1
+      svoe.data-feed-image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+      svoe.base.FIL: True
+      svoe.quote.USDT: True
+      svoe.symbol.FIL-USDT: True
+    redis:
+      port: 6379
+      exporterPort: 9121
+    dataFeed:
+      image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+      configVolumeMountPath: /etc/svoe/data_feed/configs
+      config: |
+        cache: redis
+        exchanges:
+          BINANCE:
+            l2_book:
+              book_delta: true
+              max_depth: 100
+              symbols:
+              - FIL-USDT
+            retries: -1
+            ticker:
+            - FIL-USDT
+            trades:
+            - FIL-USDT
+        health_check:
+          path: /health
+          port: 1234
+        num_write_threads: 100
+        prometheus:
+          multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_e3824646b8
+          multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
+          port: 8000
+        redis:
+          del_after_read: true
+          ip: 127.0.0.1
+          port: 6379
+          retention_time: null
+          socket: null
+          start_flush: true
+        storage:
+        - svoe
+        storage_interval: 30
+        storage_retries: 3
+        storage_retry_wait: 10
+        svoe:
+          cluster_id: 1
+          compression: gzip
+          data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+          glue_database: svoe_glue_db
+          hash_short: e3824646b8
+          s3_bucket: svoe.test.1
+          s3_prefix: data_lake
+          version: e3824646b8d7cf567914890c782805746117c41c
+        write_on_stop: true
 
-        - name: data-feed-config-18.yaml
-          config: |
-            cache: redis
-            exchanges:
-              BINANCE:
-                l2_book:
-                  book_delta: true
-                  max_depth: 100
-                  symbols: &id001
-                  - SHIB-USDT
-                retries: -1
-                ticker: *id001
-                trades: *id001
-            health_check:
-              path: /health
-              port: 1234
-            num_write_threads: 100
-            prometheus:
-              multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_ad4d18
-              multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
-              port: 8000
-            redis:
-              del_after_read: true
-              ip: 127.0.0.1
-              port: 6379
-              retention_time: null
-              socket: null
-              start_flush: true
-            storage:
-            - svoe
-            storage_interval: 30
-            storage_retries: 3
-            storage_retry_wait: 10
-            svoe:
-              cluster_id: 1
-              compression: gzip
-              data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
-              glue_database: svoe_glue_db
-              s3_bucket: svoe.test.1
-              s3_prefix: data_lake
-              version: ad4d183503b6a54fffe294763fb74c7ec85a52cd
-            write_on_stop: true
+  - name: data-feed-BINANCE-spot-c3b5a84a25
+    exchange: BINANCE
+    instrumentType: spot
+    symbols:
+      - symbol: SHIB-USDT
+        base: SHIB
+        quote: USDT
+    labels:
+      svoe.service: data-feed
+      svoe.version: c3b5a84a2500ef8d2232a34a2994eb0eee2d8641
+      svoe.hash-short: c3b5a84a25
+      svoe.instrument-type: spot
+      svoe.exchange: BINANCE
+      svoe.name: data-feed-BINANCE-spot-c3b5a84a25
+      svoe.cluster-id: 1
+      svoe.data-feed-image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+      svoe.base.SHIB: True
+      svoe.quote.USDT: True
+      svoe.symbol.SHIB-USDT: True
+    redis:
+      port: 6379
+      exporterPort: 9121
+    dataFeed:
+      image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+      configVolumeMountPath: /etc/svoe/data_feed/configs
+      config: |
+        cache: redis
+        exchanges:
+          BINANCE:
+            l2_book:
+              book_delta: true
+              max_depth: 100
+              symbols:
+              - SHIB-USDT
+            retries: -1
+            ticker:
+            - SHIB-USDT
+            trades:
+            - SHIB-USDT
+        health_check:
+          path: /health
+          port: 1234
+        num_write_threads: 100
+        prometheus:
+          multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_c3b5a84a25
+          multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
+          port: 8000
+        redis:
+          del_after_read: true
+          ip: 127.0.0.1
+          port: 6379
+          retention_time: null
+          socket: null
+          start_flush: true
+        storage:
+        - svoe
+        storage_interval: 30
+        storage_retries: 3
+        storage_retry_wait: 10
+        svoe:
+          cluster_id: 1
+          compression: gzip
+          data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+          glue_database: svoe_glue_db
+          hash_short: c3b5a84a25
+          s3_bucket: svoe.test.1
+          s3_prefix: data_lake
+          version: c3b5a84a2500ef8d2232a34a2994eb0eee2d8641
+        write_on_stop: true
 
-    initScript:
-      name: run.sh
-      configsVolumeMountPath: /mnt/data
-      scriptsVolumeMountPath: /mnt/scripts
-      script: |-
-        #!/bin/sh
-        SET_INDEX=${HOSTNAME##*-}
-        echo "Starting initializing for pod $SET_INDEX"
-        if [ "$SET_INDEX" = "0" ]; then
-            cp /mnt/scripts/data-feed-config-0.yaml /mnt/data/data-feed-config.yaml
-        if [ "$SET_INDEX" = "1" ]; then
-            cp /mnt/scripts/data-feed-config-1.yaml /mnt/data/data-feed-config.yaml
-        if [ "$SET_INDEX" = "2" ]; then
-            cp /mnt/scripts/data-feed-config-2.yaml /mnt/data/data-feed-config.yaml
-        if [ "$SET_INDEX" = "3" ]; then
-            cp /mnt/scripts/data-feed-config-3.yaml /mnt/data/data-feed-config.yaml
-        if [ "$SET_INDEX" = "4" ]; then
-            cp /mnt/scripts/data-feed-config-4.yaml /mnt/data/data-feed-config.yaml
-        if [ "$SET_INDEX" = "5" ]; then
-            cp /mnt/scripts/data-feed-config-5.yaml /mnt/data/data-feed-config.yaml
-        if [ "$SET_INDEX" = "6" ]; then
-            cp /mnt/scripts/data-feed-config-6.yaml /mnt/data/data-feed-config.yaml
-        if [ "$SET_INDEX" = "7" ]; then
-            cp /mnt/scripts/data-feed-config-7.yaml /mnt/data/data-feed-config.yaml
-        if [ "$SET_INDEX" = "8" ]; then
-            cp /mnt/scripts/data-feed-config-8.yaml /mnt/data/data-feed-config.yaml
-        if [ "$SET_INDEX" = "9" ]; then
-            cp /mnt/scripts/data-feed-config-9.yaml /mnt/data/data-feed-config.yaml
-        if [ "$SET_INDEX" = "10" ]; then
-            cp /mnt/scripts/data-feed-config-10.yaml /mnt/data/data-feed-config.yaml
-        if [ "$SET_INDEX" = "11" ]; then
-            cp /mnt/scripts/data-feed-config-11.yaml /mnt/data/data-feed-config.yaml
-        if [ "$SET_INDEX" = "12" ]; then
-            cp /mnt/scripts/data-feed-config-12.yaml /mnt/data/data-feed-config.yaml
-        if [ "$SET_INDEX" = "13" ]; then
-            cp /mnt/scripts/data-feed-config-13.yaml /mnt/data/data-feed-config.yaml
-        if [ "$SET_INDEX" = "14" ]; then
-            cp /mnt/scripts/data-feed-config-14.yaml /mnt/data/data-feed-config.yaml
-        if [ "$SET_INDEX" = "15" ]; then
-            cp /mnt/scripts/data-feed-config-15.yaml /mnt/data/data-feed-config.yaml
-        if [ "$SET_INDEX" = "16" ]; then
-            cp /mnt/scripts/data-feed-config-16.yaml /mnt/data/data-feed-config.yaml
-        if [ "$SET_INDEX" = "17" ]; then
-            cp /mnt/scripts/data-feed-config-17.yaml /mnt/data/data-feed-config.yaml
-        if [ "$SET_INDEX" = "18" ]; then
-            cp /mnt/scripts/data-feed-config-18.yaml /mnt/data/data-feed-config.yaml
-        else
-            echo "Invalid stateful set index"
-            exit 1
-        fi
 {{ end }}
 {{ if eq .Values.clusterId 2 }}
 commonSecrets:
@@ -934,965 +1348,1417 @@ commonSecrets:
     host: mysql-global-svc.mysql.svc.local # namespace should be synced with mysql chart
     port: 3306
     database: {{ .Values | get "mysqlDefaultSvoeDb" }}
-    user: {{ .Values | get "mysqlUsername" }}
-    password: {{ .Values | get "mysqlPassword" }}
+    user: root # TODO
+    password: {{ .Values | get "mysqlRootPassword" }}
   s3:
     accessKeyId: {{ .Values | get "awsKey" }}
     secretAccessKey: {{ .Values | get "awsSecret" }}
     region: {{ .Values | get "awsDefaultRegion" }}
-feedConfigs:
-  - exchange: BYBIT
+podConfigs:
+  - name: data-feed-BYBIT-perpetual-614aa00acb
+    exchange: BYBIT
     instrumentType: perpetual
-    quote: USDT
-    bases:
+    symbols:
       - symbol: BTC-USDT-PERP
         base: BTC
-      - symbol: ETH-USDT-PERP
-        base: ETH
-      - symbol: BNB-USDT-PERP
-        base: BNB
-      - symbol: ADA-USDT-PERP
-        base: ADA
-      - symbol: XRP-USDT-PERP
-        base: XRP
-      - symbol: DOGE-USDT-PERP
-        base: DOGE
-      - symbol: DOT-USDT-PERP
-        base: DOT
-      - symbol: BCH-USDT-PERP
-        base: BCH
-      - symbol: UNI-USDT-PERP
-        base: UNI
-      - symbol: LTC-USDT-PERP
-        base: LTC
-      - symbol: LINK-USDT-PERP
-        base: LINK
-      - symbol: MATIC-USDT-PERP
-        base: MATIC
-      - symbol: XLM-USDT-PERP
-        base: XLM
-      - symbol: ETC-USDT-PERP
-        base: ETC
-      - symbol: VET-USDT-PERP
-        base: VET
-      - symbol: TRX-USDT-PERP
-        base: TRX
-      - symbol: EOS-USDT-PERP
-        base: EOS
-      - symbol: FIL-USDT-PERP
-        base: FIL
-      - symbol: BSV-USDT-PERP
-        base: BSV
+        quote: USDT
+    labels:
+      svoe.service: data-feed
+      svoe.version: 614aa00acb6ce02f92b3da7aba73b40e1b47a218
+      svoe.hash-short: 614aa00acb
+      svoe.instrument-type: perpetual
+      svoe.exchange: BYBIT
+      svoe.name: data-feed-BYBIT-perpetual-614aa00acb
+      svoe.cluster-id: 2
+      svoe.data-feed-image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+      svoe.base.BTC: True
+      svoe.quote.USDT: True
+      svoe.symbol.BTC-USDT-PERP: True
     redis:
       port: 6379
       exporterPort: 9121
     dataFeed:
       image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
-      podConfigsVolumeMountPath: /etc/svoe/data_feed/configs
-      podConfigs:
-        - name: data-feed-config-0.yaml
-          config: |
-            cache: redis
-            exchanges:
-              BYBIT:
-                funding: &id001
-                - BTC-USDT-PERP
-                l2_book:
-                  book_delta: true
-                  max_depth: 100
-                  symbols: *id001
-                liquidations: *id001
-                open_interest: *id001
-                retries: -1
-                trades: *id001
-            health_check:
-              path: /health
-              port: 1234
-            num_write_threads: 100
-            prometheus:
-              multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_0c3391
-              multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
-              port: 8000
-            redis:
-              del_after_read: true
-              ip: 127.0.0.1
-              port: 6379
-              retention_time: null
-              socket: null
-              start_flush: true
-            storage:
-            - svoe
-            storage_interval: 30
-            storage_retries: 3
-            storage_retry_wait: 10
-            svoe:
-              cluster_id: 2
-              compression: gzip
-              data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
-              glue_database: svoe_glue_db
-              s3_bucket: svoe.test.1
-              s3_prefix: data_lake
-              version: 0c3391493f891c64b76229cee22cdb6bea91b697
-            write_on_stop: true
+      configVolumeMountPath: /etc/svoe/data_feed/configs
+      config: |
+        cache: redis
+        exchanges:
+          BYBIT:
+            funding:
+            - BTC-USDT-PERP
+            l2_book:
+              book_delta: true
+              max_depth: 100
+              symbols:
+              - BTC-USDT-PERP
+            liquidations:
+            - BTC-USDT-PERP
+            open_interest:
+            - BTC-USDT-PERP
+            retries: -1
+            trades:
+            - BTC-USDT-PERP
+        health_check:
+          path: /health
+          port: 1234
+        num_write_threads: 100
+        prometheus:
+          multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_614aa00acb
+          multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
+          port: 8000
+        redis:
+          del_after_read: true
+          ip: 127.0.0.1
+          port: 6379
+          retention_time: null
+          socket: null
+          start_flush: true
+        storage:
+        - svoe
+        storage_interval: 30
+        storage_retries: 3
+        storage_retry_wait: 10
+        svoe:
+          cluster_id: 2
+          compression: gzip
+          data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+          glue_database: svoe_glue_db
+          hash_short: 614aa00acb
+          s3_bucket: svoe.test.1
+          s3_prefix: data_lake
+          version: 614aa00acb6ce02f92b3da7aba73b40e1b47a218
+        write_on_stop: true
 
-        - name: data-feed-config-1.yaml
-          config: |
-            cache: redis
-            exchanges:
-              BYBIT:
-                funding: &id001
-                - ETH-USDT-PERP
-                l2_book:
-                  book_delta: true
-                  max_depth: 100
-                  symbols: *id001
-                liquidations: *id001
-                open_interest: *id001
-                retries: -1
-                trades: *id001
-            health_check:
-              path: /health
-              port: 1234
-            num_write_threads: 100
-            prometheus:
-              multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_dcad6b
-              multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
-              port: 8000
-            redis:
-              del_after_read: true
-              ip: 127.0.0.1
-              port: 6379
-              retention_time: null
-              socket: null
-              start_flush: true
-            storage:
-            - svoe
-            storage_interval: 30
-            storage_retries: 3
-            storage_retry_wait: 10
-            svoe:
-              cluster_id: 2
-              compression: gzip
-              data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
-              glue_database: svoe_glue_db
-              s3_bucket: svoe.test.1
-              s3_prefix: data_lake
-              version: dcad6b6603fde809195990ff98bd7de4c8b1839d
-            write_on_stop: true
+  - name: data-feed-BYBIT-perpetual-05ec28054c
+    exchange: BYBIT
+    instrumentType: perpetual
+    symbols:
+      - symbol: ETH-USDT-PERP
+        base: ETH
+        quote: USDT
+    labels:
+      svoe.service: data-feed
+      svoe.version: 05ec28054cb5d32e22d3b3fb81b3e603f4932bd5
+      svoe.hash-short: 05ec28054c
+      svoe.instrument-type: perpetual
+      svoe.exchange: BYBIT
+      svoe.name: data-feed-BYBIT-perpetual-05ec28054c
+      svoe.cluster-id: 2
+      svoe.data-feed-image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+      svoe.base.ETH: True
+      svoe.quote.USDT: True
+      svoe.symbol.ETH-USDT-PERP: True
+    redis:
+      port: 6379
+      exporterPort: 9121
+    dataFeed:
+      image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+      configVolumeMountPath: /etc/svoe/data_feed/configs
+      config: |
+        cache: redis
+        exchanges:
+          BYBIT:
+            funding:
+            - ETH-USDT-PERP
+            l2_book:
+              book_delta: true
+              max_depth: 100
+              symbols:
+              - ETH-USDT-PERP
+            liquidations:
+            - ETH-USDT-PERP
+            open_interest:
+            - ETH-USDT-PERP
+            retries: -1
+            trades:
+            - ETH-USDT-PERP
+        health_check:
+          path: /health
+          port: 1234
+        num_write_threads: 100
+        prometheus:
+          multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_05ec28054c
+          multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
+          port: 8000
+        redis:
+          del_after_read: true
+          ip: 127.0.0.1
+          port: 6379
+          retention_time: null
+          socket: null
+          start_flush: true
+        storage:
+        - svoe
+        storage_interval: 30
+        storage_retries: 3
+        storage_retry_wait: 10
+        svoe:
+          cluster_id: 2
+          compression: gzip
+          data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+          glue_database: svoe_glue_db
+          hash_short: 05ec28054c
+          s3_bucket: svoe.test.1
+          s3_prefix: data_lake
+          version: 05ec28054cb5d32e22d3b3fb81b3e603f4932bd5
+        write_on_stop: true
 
-        - name: data-feed-config-2.yaml
-          config: |
-            cache: redis
-            exchanges:
-              BYBIT:
-                funding: &id001
-                - BNB-USDT-PERP
-                l2_book:
-                  book_delta: true
-                  max_depth: 100
-                  symbols: *id001
-                liquidations: *id001
-                open_interest: *id001
-                retries: -1
-                trades: *id001
-            health_check:
-              path: /health
-              port: 1234
-            num_write_threads: 100
-            prometheus:
-              multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_e3c6d5
-              multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
-              port: 8000
-            redis:
-              del_after_read: true
-              ip: 127.0.0.1
-              port: 6379
-              retention_time: null
-              socket: null
-              start_flush: true
-            storage:
-            - svoe
-            storage_interval: 30
-            storage_retries: 3
-            storage_retry_wait: 10
-            svoe:
-              cluster_id: 2
-              compression: gzip
-              data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
-              glue_database: svoe_glue_db
-              s3_bucket: svoe.test.1
-              s3_prefix: data_lake
-              version: e3c6d583e0a7ba037b9a6487b16b444b06cfd513
-            write_on_stop: true
+  - name: data-feed-BYBIT-perpetual-c33db581cf
+    exchange: BYBIT
+    instrumentType: perpetual
+    symbols:
+      - symbol: BNB-USDT-PERP
+        base: BNB
+        quote: USDT
+    labels:
+      svoe.service: data-feed
+      svoe.version: c33db581cfb6eb8e8d9bcc448505f7f572b4e31e
+      svoe.hash-short: c33db581cf
+      svoe.instrument-type: perpetual
+      svoe.exchange: BYBIT
+      svoe.name: data-feed-BYBIT-perpetual-c33db581cf
+      svoe.cluster-id: 2
+      svoe.data-feed-image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+      svoe.base.BNB: True
+      svoe.quote.USDT: True
+      svoe.symbol.BNB-USDT-PERP: True
+    redis:
+      port: 6379
+      exporterPort: 9121
+    dataFeed:
+      image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+      configVolumeMountPath: /etc/svoe/data_feed/configs
+      config: |
+        cache: redis
+        exchanges:
+          BYBIT:
+            funding:
+            - BNB-USDT-PERP
+            l2_book:
+              book_delta: true
+              max_depth: 100
+              symbols:
+              - BNB-USDT-PERP
+            liquidations:
+            - BNB-USDT-PERP
+            open_interest:
+            - BNB-USDT-PERP
+            retries: -1
+            trades:
+            - BNB-USDT-PERP
+        health_check:
+          path: /health
+          port: 1234
+        num_write_threads: 100
+        prometheus:
+          multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_c33db581cf
+          multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
+          port: 8000
+        redis:
+          del_after_read: true
+          ip: 127.0.0.1
+          port: 6379
+          retention_time: null
+          socket: null
+          start_flush: true
+        storage:
+        - svoe
+        storage_interval: 30
+        storage_retries: 3
+        storage_retry_wait: 10
+        svoe:
+          cluster_id: 2
+          compression: gzip
+          data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+          glue_database: svoe_glue_db
+          hash_short: c33db581cf
+          s3_bucket: svoe.test.1
+          s3_prefix: data_lake
+          version: c33db581cfb6eb8e8d9bcc448505f7f572b4e31e
+        write_on_stop: true
 
-        - name: data-feed-config-3.yaml
-          config: |
-            cache: redis
-            exchanges:
-              BYBIT:
-                funding: &id001
-                - ADA-USDT-PERP
-                l2_book:
-                  book_delta: true
-                  max_depth: 100
-                  symbols: *id001
-                liquidations: *id001
-                open_interest: *id001
-                retries: -1
-                trades: *id001
-            health_check:
-              path: /health
-              port: 1234
-            num_write_threads: 100
-            prometheus:
-              multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_1ac11b
-              multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
-              port: 8000
-            redis:
-              del_after_read: true
-              ip: 127.0.0.1
-              port: 6379
-              retention_time: null
-              socket: null
-              start_flush: true
-            storage:
-            - svoe
-            storage_interval: 30
-            storage_retries: 3
-            storage_retry_wait: 10
-            svoe:
-              cluster_id: 2
-              compression: gzip
-              data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
-              glue_database: svoe_glue_db
-              s3_bucket: svoe.test.1
-              s3_prefix: data_lake
-              version: 1ac11b6e7717067982b3500dcb9331218ab00334
-            write_on_stop: true
+  - name: data-feed-BYBIT-perpetual-1a58dfeecf
+    exchange: BYBIT
+    instrumentType: perpetual
+    symbols:
+      - symbol: ADA-USDT-PERP
+        base: ADA
+        quote: USDT
+    labels:
+      svoe.service: data-feed
+      svoe.version: 1a58dfeecffd0f5d911fb1ad4873f068a51e4a8d
+      svoe.hash-short: 1a58dfeecf
+      svoe.instrument-type: perpetual
+      svoe.exchange: BYBIT
+      svoe.name: data-feed-BYBIT-perpetual-1a58dfeecf
+      svoe.cluster-id: 2
+      svoe.data-feed-image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+      svoe.base.ADA: True
+      svoe.quote.USDT: True
+      svoe.symbol.ADA-USDT-PERP: True
+    redis:
+      port: 6379
+      exporterPort: 9121
+    dataFeed:
+      image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+      configVolumeMountPath: /etc/svoe/data_feed/configs
+      config: |
+        cache: redis
+        exchanges:
+          BYBIT:
+            funding:
+            - ADA-USDT-PERP
+            l2_book:
+              book_delta: true
+              max_depth: 100
+              symbols:
+              - ADA-USDT-PERP
+            liquidations:
+            - ADA-USDT-PERP
+            open_interest:
+            - ADA-USDT-PERP
+            retries: -1
+            trades:
+            - ADA-USDT-PERP
+        health_check:
+          path: /health
+          port: 1234
+        num_write_threads: 100
+        prometheus:
+          multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_1a58dfeecf
+          multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
+          port: 8000
+        redis:
+          del_after_read: true
+          ip: 127.0.0.1
+          port: 6379
+          retention_time: null
+          socket: null
+          start_flush: true
+        storage:
+        - svoe
+        storage_interval: 30
+        storage_retries: 3
+        storage_retry_wait: 10
+        svoe:
+          cluster_id: 2
+          compression: gzip
+          data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+          glue_database: svoe_glue_db
+          hash_short: 1a58dfeecf
+          s3_bucket: svoe.test.1
+          s3_prefix: data_lake
+          version: 1a58dfeecffd0f5d911fb1ad4873f068a51e4a8d
+        write_on_stop: true
 
-        - name: data-feed-config-4.yaml
-          config: |
-            cache: redis
-            exchanges:
-              BYBIT:
-                funding: &id001
-                - XRP-USDT-PERP
-                l2_book:
-                  book_delta: true
-                  max_depth: 100
-                  symbols: *id001
-                liquidations: *id001
-                open_interest: *id001
-                retries: -1
-                trades: *id001
-            health_check:
-              path: /health
-              port: 1234
-            num_write_threads: 100
-            prometheus:
-              multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_09b562
-              multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
-              port: 8000
-            redis:
-              del_after_read: true
-              ip: 127.0.0.1
-              port: 6379
-              retention_time: null
-              socket: null
-              start_flush: true
-            storage:
-            - svoe
-            storage_interval: 30
-            storage_retries: 3
-            storage_retry_wait: 10
-            svoe:
-              cluster_id: 2
-              compression: gzip
-              data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
-              glue_database: svoe_glue_db
-              s3_bucket: svoe.test.1
-              s3_prefix: data_lake
-              version: 09b562fcf9babad0d5a0d82c7398fd4311382f6e
-            write_on_stop: true
+  - name: data-feed-BYBIT-perpetual-f997a2e26d
+    exchange: BYBIT
+    instrumentType: perpetual
+    symbols:
+      - symbol: XRP-USDT-PERP
+        base: XRP
+        quote: USDT
+    labels:
+      svoe.service: data-feed
+      svoe.version: f997a2e26dce08c943cbc5bc7aa8bc44e1936be6
+      svoe.hash-short: f997a2e26d
+      svoe.instrument-type: perpetual
+      svoe.exchange: BYBIT
+      svoe.name: data-feed-BYBIT-perpetual-f997a2e26d
+      svoe.cluster-id: 2
+      svoe.data-feed-image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+      svoe.base.XRP: True
+      svoe.quote.USDT: True
+      svoe.symbol.XRP-USDT-PERP: True
+    redis:
+      port: 6379
+      exporterPort: 9121
+    dataFeed:
+      image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+      configVolumeMountPath: /etc/svoe/data_feed/configs
+      config: |
+        cache: redis
+        exchanges:
+          BYBIT:
+            funding:
+            - XRP-USDT-PERP
+            l2_book:
+              book_delta: true
+              max_depth: 100
+              symbols:
+              - XRP-USDT-PERP
+            liquidations:
+            - XRP-USDT-PERP
+            open_interest:
+            - XRP-USDT-PERP
+            retries: -1
+            trades:
+            - XRP-USDT-PERP
+        health_check:
+          path: /health
+          port: 1234
+        num_write_threads: 100
+        prometheus:
+          multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_f997a2e26d
+          multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
+          port: 8000
+        redis:
+          del_after_read: true
+          ip: 127.0.0.1
+          port: 6379
+          retention_time: null
+          socket: null
+          start_flush: true
+        storage:
+        - svoe
+        storage_interval: 30
+        storage_retries: 3
+        storage_retry_wait: 10
+        svoe:
+          cluster_id: 2
+          compression: gzip
+          data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+          glue_database: svoe_glue_db
+          hash_short: f997a2e26d
+          s3_bucket: svoe.test.1
+          s3_prefix: data_lake
+          version: f997a2e26dce08c943cbc5bc7aa8bc44e1936be6
+        write_on_stop: true
 
-        - name: data-feed-config-5.yaml
-          config: |
-            cache: redis
-            exchanges:
-              BYBIT:
-                funding: &id001
-                - DOGE-USDT-PERP
-                l2_book:
-                  book_delta: true
-                  max_depth: 100
-                  symbols: *id001
-                liquidations: *id001
-                open_interest: *id001
-                retries: -1
-                trades: *id001
-            health_check:
-              path: /health
-              port: 1234
-            num_write_threads: 100
-            prometheus:
-              multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_6e5cfd
-              multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
-              port: 8000
-            redis:
-              del_after_read: true
-              ip: 127.0.0.1
-              port: 6379
-              retention_time: null
-              socket: null
-              start_flush: true
-            storage:
-            - svoe
-            storage_interval: 30
-            storage_retries: 3
-            storage_retry_wait: 10
-            svoe:
-              cluster_id: 2
-              compression: gzip
-              data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
-              glue_database: svoe_glue_db
-              s3_bucket: svoe.test.1
-              s3_prefix: data_lake
-              version: 6e5cfddd1dec872fe07005636f01c22c47c62dc6
-            write_on_stop: true
+  - name: data-feed-BYBIT-perpetual-81469b0c76
+    exchange: BYBIT
+    instrumentType: perpetual
+    symbols:
+      - symbol: DOGE-USDT-PERP
+        base: DOGE
+        quote: USDT
+    labels:
+      svoe.service: data-feed
+      svoe.version: 81469b0c7680b1f2154c1096eb94ad09d3de1501
+      svoe.hash-short: 81469b0c76
+      svoe.instrument-type: perpetual
+      svoe.exchange: BYBIT
+      svoe.name: data-feed-BYBIT-perpetual-81469b0c76
+      svoe.cluster-id: 2
+      svoe.data-feed-image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+      svoe.base.DOGE: True
+      svoe.quote.USDT: True
+      svoe.symbol.DOGE-USDT-PERP: True
+    redis:
+      port: 6379
+      exporterPort: 9121
+    dataFeed:
+      image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+      configVolumeMountPath: /etc/svoe/data_feed/configs
+      config: |
+        cache: redis
+        exchanges:
+          BYBIT:
+            funding:
+            - DOGE-USDT-PERP
+            l2_book:
+              book_delta: true
+              max_depth: 100
+              symbols:
+              - DOGE-USDT-PERP
+            liquidations:
+            - DOGE-USDT-PERP
+            open_interest:
+            - DOGE-USDT-PERP
+            retries: -1
+            trades:
+            - DOGE-USDT-PERP
+        health_check:
+          path: /health
+          port: 1234
+        num_write_threads: 100
+        prometheus:
+          multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_81469b0c76
+          multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
+          port: 8000
+        redis:
+          del_after_read: true
+          ip: 127.0.0.1
+          port: 6379
+          retention_time: null
+          socket: null
+          start_flush: true
+        storage:
+        - svoe
+        storage_interval: 30
+        storage_retries: 3
+        storage_retry_wait: 10
+        svoe:
+          cluster_id: 2
+          compression: gzip
+          data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+          glue_database: svoe_glue_db
+          hash_short: 81469b0c76
+          s3_bucket: svoe.test.1
+          s3_prefix: data_lake
+          version: 81469b0c7680b1f2154c1096eb94ad09d3de1501
+        write_on_stop: true
 
-        - name: data-feed-config-6.yaml
-          config: |
-            cache: redis
-            exchanges:
-              BYBIT:
-                funding: &id001
-                - DOT-USDT-PERP
-                l2_book:
-                  book_delta: true
-                  max_depth: 100
-                  symbols: *id001
-                liquidations: *id001
-                open_interest: *id001
-                retries: -1
-                trades: *id001
-            health_check:
-              path: /health
-              port: 1234
-            num_write_threads: 100
-            prometheus:
-              multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_c1c510
-              multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
-              port: 8000
-            redis:
-              del_after_read: true
-              ip: 127.0.0.1
-              port: 6379
-              retention_time: null
-              socket: null
-              start_flush: true
-            storage:
-            - svoe
-            storage_interval: 30
-            storage_retries: 3
-            storage_retry_wait: 10
-            svoe:
-              cluster_id: 2
-              compression: gzip
-              data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
-              glue_database: svoe_glue_db
-              s3_bucket: svoe.test.1
-              s3_prefix: data_lake
-              version: c1c5109f8c1434bf17d782bb2e66c1a7a99dff3f
-            write_on_stop: true
+  - name: data-feed-BYBIT-perpetual-f073a711c2
+    exchange: BYBIT
+    instrumentType: perpetual
+    symbols:
+      - symbol: DOT-USDT-PERP
+        base: DOT
+        quote: USDT
+    labels:
+      svoe.service: data-feed
+      svoe.version: f073a711c2837540e562d9add569a235b1fd7ad7
+      svoe.hash-short: f073a711c2
+      svoe.instrument-type: perpetual
+      svoe.exchange: BYBIT
+      svoe.name: data-feed-BYBIT-perpetual-f073a711c2
+      svoe.cluster-id: 2
+      svoe.data-feed-image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+      svoe.base.DOT: True
+      svoe.quote.USDT: True
+      svoe.symbol.DOT-USDT-PERP: True
+    redis:
+      port: 6379
+      exporterPort: 9121
+    dataFeed:
+      image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+      configVolumeMountPath: /etc/svoe/data_feed/configs
+      config: |
+        cache: redis
+        exchanges:
+          BYBIT:
+            funding:
+            - DOT-USDT-PERP
+            l2_book:
+              book_delta: true
+              max_depth: 100
+              symbols:
+              - DOT-USDT-PERP
+            liquidations:
+            - DOT-USDT-PERP
+            open_interest:
+            - DOT-USDT-PERP
+            retries: -1
+            trades:
+            - DOT-USDT-PERP
+        health_check:
+          path: /health
+          port: 1234
+        num_write_threads: 100
+        prometheus:
+          multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_f073a711c2
+          multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
+          port: 8000
+        redis:
+          del_after_read: true
+          ip: 127.0.0.1
+          port: 6379
+          retention_time: null
+          socket: null
+          start_flush: true
+        storage:
+        - svoe
+        storage_interval: 30
+        storage_retries: 3
+        storage_retry_wait: 10
+        svoe:
+          cluster_id: 2
+          compression: gzip
+          data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+          glue_database: svoe_glue_db
+          hash_short: f073a711c2
+          s3_bucket: svoe.test.1
+          s3_prefix: data_lake
+          version: f073a711c2837540e562d9add569a235b1fd7ad7
+        write_on_stop: true
 
-        - name: data-feed-config-7.yaml
-          config: |
-            cache: redis
-            exchanges:
-              BYBIT:
-                funding: &id001
-                - BCH-USDT-PERP
-                l2_book:
-                  book_delta: true
-                  max_depth: 100
-                  symbols: *id001
-                liquidations: *id001
-                open_interest: *id001
-                retries: -1
-                trades: *id001
-            health_check:
-              path: /health
-              port: 1234
-            num_write_threads: 100
-            prometheus:
-              multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_919216
-              multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
-              port: 8000
-            redis:
-              del_after_read: true
-              ip: 127.0.0.1
-              port: 6379
-              retention_time: null
-              socket: null
-              start_flush: true
-            storage:
-            - svoe
-            storage_interval: 30
-            storage_retries: 3
-            storage_retry_wait: 10
-            svoe:
-              cluster_id: 2
-              compression: gzip
-              data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
-              glue_database: svoe_glue_db
-              s3_bucket: svoe.test.1
-              s3_prefix: data_lake
-              version: 91921674745678f0f275c54a16d4da3d0f55388b
-            write_on_stop: true
+  - name: data-feed-BYBIT-perpetual-2c85ccd903
+    exchange: BYBIT
+    instrumentType: perpetual
+    symbols:
+      - symbol: BCH-USDT-PERP
+        base: BCH
+        quote: USDT
+    labels:
+      svoe.service: data-feed
+      svoe.version: 2c85ccd90395a1aa78d018e9714c5e2cf7e9ebc2
+      svoe.hash-short: 2c85ccd903
+      svoe.instrument-type: perpetual
+      svoe.exchange: BYBIT
+      svoe.name: data-feed-BYBIT-perpetual-2c85ccd903
+      svoe.cluster-id: 2
+      svoe.data-feed-image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+      svoe.base.BCH: True
+      svoe.quote.USDT: True
+      svoe.symbol.BCH-USDT-PERP: True
+    redis:
+      port: 6379
+      exporterPort: 9121
+    dataFeed:
+      image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+      configVolumeMountPath: /etc/svoe/data_feed/configs
+      config: |
+        cache: redis
+        exchanges:
+          BYBIT:
+            funding:
+            - BCH-USDT-PERP
+            l2_book:
+              book_delta: true
+              max_depth: 100
+              symbols:
+              - BCH-USDT-PERP
+            liquidations:
+            - BCH-USDT-PERP
+            open_interest:
+            - BCH-USDT-PERP
+            retries: -1
+            trades:
+            - BCH-USDT-PERP
+        health_check:
+          path: /health
+          port: 1234
+        num_write_threads: 100
+        prometheus:
+          multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_2c85ccd903
+          multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
+          port: 8000
+        redis:
+          del_after_read: true
+          ip: 127.0.0.1
+          port: 6379
+          retention_time: null
+          socket: null
+          start_flush: true
+        storage:
+        - svoe
+        storage_interval: 30
+        storage_retries: 3
+        storage_retry_wait: 10
+        svoe:
+          cluster_id: 2
+          compression: gzip
+          data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+          glue_database: svoe_glue_db
+          hash_short: 2c85ccd903
+          s3_bucket: svoe.test.1
+          s3_prefix: data_lake
+          version: 2c85ccd90395a1aa78d018e9714c5e2cf7e9ebc2
+        write_on_stop: true
 
-        - name: data-feed-config-8.yaml
-          config: |
-            cache: redis
-            exchanges:
-              BYBIT:
-                funding: &id001
-                - UNI-USDT-PERP
-                l2_book:
-                  book_delta: true
-                  max_depth: 100
-                  symbols: *id001
-                liquidations: *id001
-                open_interest: *id001
-                retries: -1
-                trades: *id001
-            health_check:
-              path: /health
-              port: 1234
-            num_write_threads: 100
-            prometheus:
-              multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_ea46e3
-              multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
-              port: 8000
-            redis:
-              del_after_read: true
-              ip: 127.0.0.1
-              port: 6379
-              retention_time: null
-              socket: null
-              start_flush: true
-            storage:
-            - svoe
-            storage_interval: 30
-            storage_retries: 3
-            storage_retry_wait: 10
-            svoe:
-              cluster_id: 2
-              compression: gzip
-              data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
-              glue_database: svoe_glue_db
-              s3_bucket: svoe.test.1
-              s3_prefix: data_lake
-              version: ea46e3664311ebaa697b1a609246dd4070c023bc
-            write_on_stop: true
+  - name: data-feed-BYBIT-perpetual-636e8a4173
+    exchange: BYBIT
+    instrumentType: perpetual
+    symbols:
+      - symbol: UNI-USDT-PERP
+        base: UNI
+        quote: USDT
+    labels:
+      svoe.service: data-feed
+      svoe.version: 636e8a4173da58865feea60e681bc5c3b3b0929b
+      svoe.hash-short: 636e8a4173
+      svoe.instrument-type: perpetual
+      svoe.exchange: BYBIT
+      svoe.name: data-feed-BYBIT-perpetual-636e8a4173
+      svoe.cluster-id: 2
+      svoe.data-feed-image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+      svoe.base.UNI: True
+      svoe.quote.USDT: True
+      svoe.symbol.UNI-USDT-PERP: True
+    redis:
+      port: 6379
+      exporterPort: 9121
+    dataFeed:
+      image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+      configVolumeMountPath: /etc/svoe/data_feed/configs
+      config: |
+        cache: redis
+        exchanges:
+          BYBIT:
+            funding:
+            - UNI-USDT-PERP
+            l2_book:
+              book_delta: true
+              max_depth: 100
+              symbols:
+              - UNI-USDT-PERP
+            liquidations:
+            - UNI-USDT-PERP
+            open_interest:
+            - UNI-USDT-PERP
+            retries: -1
+            trades:
+            - UNI-USDT-PERP
+        health_check:
+          path: /health
+          port: 1234
+        num_write_threads: 100
+        prometheus:
+          multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_636e8a4173
+          multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
+          port: 8000
+        redis:
+          del_after_read: true
+          ip: 127.0.0.1
+          port: 6379
+          retention_time: null
+          socket: null
+          start_flush: true
+        storage:
+        - svoe
+        storage_interval: 30
+        storage_retries: 3
+        storage_retry_wait: 10
+        svoe:
+          cluster_id: 2
+          compression: gzip
+          data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+          glue_database: svoe_glue_db
+          hash_short: 636e8a4173
+          s3_bucket: svoe.test.1
+          s3_prefix: data_lake
+          version: 636e8a4173da58865feea60e681bc5c3b3b0929b
+        write_on_stop: true
 
-        - name: data-feed-config-9.yaml
-          config: |
-            cache: redis
-            exchanges:
-              BYBIT:
-                funding: &id001
-                - LTC-USDT-PERP
-                l2_book:
-                  book_delta: true
-                  max_depth: 100
-                  symbols: *id001
-                liquidations: *id001
-                open_interest: *id001
-                retries: -1
-                trades: *id001
-            health_check:
-              path: /health
-              port: 1234
-            num_write_threads: 100
-            prometheus:
-              multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_a14363
-              multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
-              port: 8000
-            redis:
-              del_after_read: true
-              ip: 127.0.0.1
-              port: 6379
-              retention_time: null
-              socket: null
-              start_flush: true
-            storage:
-            - svoe
-            storage_interval: 30
-            storage_retries: 3
-            storage_retry_wait: 10
-            svoe:
-              cluster_id: 2
-              compression: gzip
-              data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
-              glue_database: svoe_glue_db
-              s3_bucket: svoe.test.1
-              s3_prefix: data_lake
-              version: a143630ee67d5ae4b373615bc4c618de3bb780c4
-            write_on_stop: true
+  - name: data-feed-BYBIT-perpetual-aef51a87c2
+    exchange: BYBIT
+    instrumentType: perpetual
+    symbols:
+      - symbol: LTC-USDT-PERP
+        base: LTC
+        quote: USDT
+    labels:
+      svoe.service: data-feed
+      svoe.version: aef51a87c2d4271ba16d4bacfc298440cc5c9f89
+      svoe.hash-short: aef51a87c2
+      svoe.instrument-type: perpetual
+      svoe.exchange: BYBIT
+      svoe.name: data-feed-BYBIT-perpetual-aef51a87c2
+      svoe.cluster-id: 2
+      svoe.data-feed-image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+      svoe.base.LTC: True
+      svoe.quote.USDT: True
+      svoe.symbol.LTC-USDT-PERP: True
+    redis:
+      port: 6379
+      exporterPort: 9121
+    dataFeed:
+      image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+      configVolumeMountPath: /etc/svoe/data_feed/configs
+      config: |
+        cache: redis
+        exchanges:
+          BYBIT:
+            funding:
+            - LTC-USDT-PERP
+            l2_book:
+              book_delta: true
+              max_depth: 100
+              symbols:
+              - LTC-USDT-PERP
+            liquidations:
+            - LTC-USDT-PERP
+            open_interest:
+            - LTC-USDT-PERP
+            retries: -1
+            trades:
+            - LTC-USDT-PERP
+        health_check:
+          path: /health
+          port: 1234
+        num_write_threads: 100
+        prometheus:
+          multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_aef51a87c2
+          multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
+          port: 8000
+        redis:
+          del_after_read: true
+          ip: 127.0.0.1
+          port: 6379
+          retention_time: null
+          socket: null
+          start_flush: true
+        storage:
+        - svoe
+        storage_interval: 30
+        storage_retries: 3
+        storage_retry_wait: 10
+        svoe:
+          cluster_id: 2
+          compression: gzip
+          data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+          glue_database: svoe_glue_db
+          hash_short: aef51a87c2
+          s3_bucket: svoe.test.1
+          s3_prefix: data_lake
+          version: aef51a87c2d4271ba16d4bacfc298440cc5c9f89
+        write_on_stop: true
 
-        - name: data-feed-config-10.yaml
-          config: |
-            cache: redis
-            exchanges:
-              BYBIT:
-                funding: &id001
-                - LINK-USDT-PERP
-                l2_book:
-                  book_delta: true
-                  max_depth: 100
-                  symbols: *id001
-                liquidations: *id001
-                open_interest: *id001
-                retries: -1
-                trades: *id001
-            health_check:
-              path: /health
-              port: 1234
-            num_write_threads: 100
-            prometheus:
-              multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_3df38c
-              multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
-              port: 8000
-            redis:
-              del_after_read: true
-              ip: 127.0.0.1
-              port: 6379
-              retention_time: null
-              socket: null
-              start_flush: true
-            storage:
-            - svoe
-            storage_interval: 30
-            storage_retries: 3
-            storage_retry_wait: 10
-            svoe:
-              cluster_id: 2
-              compression: gzip
-              data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
-              glue_database: svoe_glue_db
-              s3_bucket: svoe.test.1
-              s3_prefix: data_lake
-              version: 3df38cb740eb02e2f2c89074ee6ba4b1e547e98c
-            write_on_stop: true
+  - name: data-feed-BYBIT-perpetual-6a84edfe1b
+    exchange: BYBIT
+    instrumentType: perpetual
+    symbols:
+      - symbol: LINK-USDT-PERP
+        base: LINK
+        quote: USDT
+    labels:
+      svoe.service: data-feed
+      svoe.version: 6a84edfe1bae9afccb840f6449bc2fc2000c19ba
+      svoe.hash-short: 6a84edfe1b
+      svoe.instrument-type: perpetual
+      svoe.exchange: BYBIT
+      svoe.name: data-feed-BYBIT-perpetual-6a84edfe1b
+      svoe.cluster-id: 2
+      svoe.data-feed-image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+      svoe.base.LINK: True
+      svoe.quote.USDT: True
+      svoe.symbol.LINK-USDT-PERP: True
+    redis:
+      port: 6379
+      exporterPort: 9121
+    dataFeed:
+      image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+      configVolumeMountPath: /etc/svoe/data_feed/configs
+      config: |
+        cache: redis
+        exchanges:
+          BYBIT:
+            funding:
+            - LINK-USDT-PERP
+            l2_book:
+              book_delta: true
+              max_depth: 100
+              symbols:
+              - LINK-USDT-PERP
+            liquidations:
+            - LINK-USDT-PERP
+            open_interest:
+            - LINK-USDT-PERP
+            retries: -1
+            trades:
+            - LINK-USDT-PERP
+        health_check:
+          path: /health
+          port: 1234
+        num_write_threads: 100
+        prometheus:
+          multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_6a84edfe1b
+          multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
+          port: 8000
+        redis:
+          del_after_read: true
+          ip: 127.0.0.1
+          port: 6379
+          retention_time: null
+          socket: null
+          start_flush: true
+        storage:
+        - svoe
+        storage_interval: 30
+        storage_retries: 3
+        storage_retry_wait: 10
+        svoe:
+          cluster_id: 2
+          compression: gzip
+          data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+          glue_database: svoe_glue_db
+          hash_short: 6a84edfe1b
+          s3_bucket: svoe.test.1
+          s3_prefix: data_lake
+          version: 6a84edfe1bae9afccb840f6449bc2fc2000c19ba
+        write_on_stop: true
 
-        - name: data-feed-config-11.yaml
-          config: |
-            cache: redis
-            exchanges:
-              BYBIT:
-                funding: &id001
-                - MATIC-USDT-PERP
-                l2_book:
-                  book_delta: true
-                  max_depth: 100
-                  symbols: *id001
-                liquidations: *id001
-                open_interest: *id001
-                retries: -1
-                trades: *id001
-            health_check:
-              path: /health
-              port: 1234
-            num_write_threads: 100
-            prometheus:
-              multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_353d85
-              multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
-              port: 8000
-            redis:
-              del_after_read: true
-              ip: 127.0.0.1
-              port: 6379
-              retention_time: null
-              socket: null
-              start_flush: true
-            storage:
-            - svoe
-            storage_interval: 30
-            storage_retries: 3
-            storage_retry_wait: 10
-            svoe:
-              cluster_id: 2
-              compression: gzip
-              data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
-              glue_database: svoe_glue_db
-              s3_bucket: svoe.test.1
-              s3_prefix: data_lake
-              version: 353d85b66cc6d59902172914b88a9e11a6f4a3ea
-            write_on_stop: true
+  - name: data-feed-BYBIT-perpetual-f891f70a00
+    exchange: BYBIT
+    instrumentType: perpetual
+    symbols:
+      - symbol: MATIC-USDT-PERP
+        base: MATIC
+        quote: USDT
+    labels:
+      svoe.service: data-feed
+      svoe.version: f891f70a000032506c7348443cdf3f18fd12f16a
+      svoe.hash-short: f891f70a00
+      svoe.instrument-type: perpetual
+      svoe.exchange: BYBIT
+      svoe.name: data-feed-BYBIT-perpetual-f891f70a00
+      svoe.cluster-id: 2
+      svoe.data-feed-image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+      svoe.base.MATIC: True
+      svoe.quote.USDT: True
+      svoe.symbol.MATIC-USDT-PERP: True
+    redis:
+      port: 6379
+      exporterPort: 9121
+    dataFeed:
+      image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+      configVolumeMountPath: /etc/svoe/data_feed/configs
+      config: |
+        cache: redis
+        exchanges:
+          BYBIT:
+            funding:
+            - MATIC-USDT-PERP
+            l2_book:
+              book_delta: true
+              max_depth: 100
+              symbols:
+              - MATIC-USDT-PERP
+            liquidations:
+            - MATIC-USDT-PERP
+            open_interest:
+            - MATIC-USDT-PERP
+            retries: -1
+            trades:
+            - MATIC-USDT-PERP
+        health_check:
+          path: /health
+          port: 1234
+        num_write_threads: 100
+        prometheus:
+          multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_f891f70a00
+          multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
+          port: 8000
+        redis:
+          del_after_read: true
+          ip: 127.0.0.1
+          port: 6379
+          retention_time: null
+          socket: null
+          start_flush: true
+        storage:
+        - svoe
+        storage_interval: 30
+        storage_retries: 3
+        storage_retry_wait: 10
+        svoe:
+          cluster_id: 2
+          compression: gzip
+          data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+          glue_database: svoe_glue_db
+          hash_short: f891f70a00
+          s3_bucket: svoe.test.1
+          s3_prefix: data_lake
+          version: f891f70a000032506c7348443cdf3f18fd12f16a
+        write_on_stop: true
 
-        - name: data-feed-config-12.yaml
-          config: |
-            cache: redis
-            exchanges:
-              BYBIT:
-                funding: &id001
-                - XLM-USDT-PERP
-                l2_book:
-                  book_delta: true
-                  max_depth: 100
-                  symbols: *id001
-                liquidations: *id001
-                open_interest: *id001
-                retries: -1
-                trades: *id001
-            health_check:
-              path: /health
-              port: 1234
-            num_write_threads: 100
-            prometheus:
-              multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_cbf290
-              multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
-              port: 8000
-            redis:
-              del_after_read: true
-              ip: 127.0.0.1
-              port: 6379
-              retention_time: null
-              socket: null
-              start_flush: true
-            storage:
-            - svoe
-            storage_interval: 30
-            storage_retries: 3
-            storage_retry_wait: 10
-            svoe:
-              cluster_id: 2
-              compression: gzip
-              data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
-              glue_database: svoe_glue_db
-              s3_bucket: svoe.test.1
-              s3_prefix: data_lake
-              version: cbf290e8f84f15469e246b60e04b22184de4869d
-            write_on_stop: true
+  - name: data-feed-BYBIT-perpetual-6d54c63219
+    exchange: BYBIT
+    instrumentType: perpetual
+    symbols:
+      - symbol: XLM-USDT-PERP
+        base: XLM
+        quote: USDT
+    labels:
+      svoe.service: data-feed
+      svoe.version: 6d54c632190e43475428e50ac275eae3714d909e
+      svoe.hash-short: 6d54c63219
+      svoe.instrument-type: perpetual
+      svoe.exchange: BYBIT
+      svoe.name: data-feed-BYBIT-perpetual-6d54c63219
+      svoe.cluster-id: 2
+      svoe.data-feed-image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+      svoe.base.XLM: True
+      svoe.quote.USDT: True
+      svoe.symbol.XLM-USDT-PERP: True
+    redis:
+      port: 6379
+      exporterPort: 9121
+    dataFeed:
+      image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+      configVolumeMountPath: /etc/svoe/data_feed/configs
+      config: |
+        cache: redis
+        exchanges:
+          BYBIT:
+            funding:
+            - XLM-USDT-PERP
+            l2_book:
+              book_delta: true
+              max_depth: 100
+              symbols:
+              - XLM-USDT-PERP
+            liquidations:
+            - XLM-USDT-PERP
+            open_interest:
+            - XLM-USDT-PERP
+            retries: -1
+            trades:
+            - XLM-USDT-PERP
+        health_check:
+          path: /health
+          port: 1234
+        num_write_threads: 100
+        prometheus:
+          multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_6d54c63219
+          multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
+          port: 8000
+        redis:
+          del_after_read: true
+          ip: 127.0.0.1
+          port: 6379
+          retention_time: null
+          socket: null
+          start_flush: true
+        storage:
+        - svoe
+        storage_interval: 30
+        storage_retries: 3
+        storage_retry_wait: 10
+        svoe:
+          cluster_id: 2
+          compression: gzip
+          data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+          glue_database: svoe_glue_db
+          hash_short: 6d54c63219
+          s3_bucket: svoe.test.1
+          s3_prefix: data_lake
+          version: 6d54c632190e43475428e50ac275eae3714d909e
+        write_on_stop: true
 
-        - name: data-feed-config-13.yaml
-          config: |
-            cache: redis
-            exchanges:
-              BYBIT:
-                funding: &id001
-                - ETC-USDT-PERP
-                l2_book:
-                  book_delta: true
-                  max_depth: 100
-                  symbols: *id001
-                liquidations: *id001
-                open_interest: *id001
-                retries: -1
-                trades: *id001
-            health_check:
-              path: /health
-              port: 1234
-            num_write_threads: 100
-            prometheus:
-              multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_48c0d1
-              multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
-              port: 8000
-            redis:
-              del_after_read: true
-              ip: 127.0.0.1
-              port: 6379
-              retention_time: null
-              socket: null
-              start_flush: true
-            storage:
-            - svoe
-            storage_interval: 30
-            storage_retries: 3
-            storage_retry_wait: 10
-            svoe:
-              cluster_id: 2
-              compression: gzip
-              data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
-              glue_database: svoe_glue_db
-              s3_bucket: svoe.test.1
-              s3_prefix: data_lake
-              version: 48c0d1b8080cb5e6be5b0bca30255029e50b9f1a
-            write_on_stop: true
+  - name: data-feed-BYBIT-perpetual-8bfcf1d9b3
+    exchange: BYBIT
+    instrumentType: perpetual
+    symbols:
+      - symbol: ETC-USDT-PERP
+        base: ETC
+        quote: USDT
+    labels:
+      svoe.service: data-feed
+      svoe.version: 8bfcf1d9b3aa1edf65267aeb3753fd94ac2ed595
+      svoe.hash-short: 8bfcf1d9b3
+      svoe.instrument-type: perpetual
+      svoe.exchange: BYBIT
+      svoe.name: data-feed-BYBIT-perpetual-8bfcf1d9b3
+      svoe.cluster-id: 2
+      svoe.data-feed-image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+      svoe.base.ETC: True
+      svoe.quote.USDT: True
+      svoe.symbol.ETC-USDT-PERP: True
+    redis:
+      port: 6379
+      exporterPort: 9121
+    dataFeed:
+      image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+      configVolumeMountPath: /etc/svoe/data_feed/configs
+      config: |
+        cache: redis
+        exchanges:
+          BYBIT:
+            funding:
+            - ETC-USDT-PERP
+            l2_book:
+              book_delta: true
+              max_depth: 100
+              symbols:
+              - ETC-USDT-PERP
+            liquidations:
+            - ETC-USDT-PERP
+            open_interest:
+            - ETC-USDT-PERP
+            retries: -1
+            trades:
+            - ETC-USDT-PERP
+        health_check:
+          path: /health
+          port: 1234
+        num_write_threads: 100
+        prometheus:
+          multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_8bfcf1d9b3
+          multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
+          port: 8000
+        redis:
+          del_after_read: true
+          ip: 127.0.0.1
+          port: 6379
+          retention_time: null
+          socket: null
+          start_flush: true
+        storage:
+        - svoe
+        storage_interval: 30
+        storage_retries: 3
+        storage_retry_wait: 10
+        svoe:
+          cluster_id: 2
+          compression: gzip
+          data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+          glue_database: svoe_glue_db
+          hash_short: 8bfcf1d9b3
+          s3_bucket: svoe.test.1
+          s3_prefix: data_lake
+          version: 8bfcf1d9b3aa1edf65267aeb3753fd94ac2ed595
+        write_on_stop: true
 
-        - name: data-feed-config-14.yaml
-          config: |
-            cache: redis
-            exchanges:
-              BYBIT:
-                funding: &id001
-                - VET-USDT-PERP
-                l2_book:
-                  book_delta: true
-                  max_depth: 100
-                  symbols: *id001
-                liquidations: *id001
-                open_interest: *id001
-                retries: -1
-                trades: *id001
-            health_check:
-              path: /health
-              port: 1234
-            num_write_threads: 100
-            prometheus:
-              multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_4f212c
-              multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
-              port: 8000
-            redis:
-              del_after_read: true
-              ip: 127.0.0.1
-              port: 6379
-              retention_time: null
-              socket: null
-              start_flush: true
-            storage:
-            - svoe
-            storage_interval: 30
-            storage_retries: 3
-            storage_retry_wait: 10
-            svoe:
-              cluster_id: 2
-              compression: gzip
-              data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
-              glue_database: svoe_glue_db
-              s3_bucket: svoe.test.1
-              s3_prefix: data_lake
-              version: 4f212cd54f5c2025a106b2900dceebe62a110fed
-            write_on_stop: true
+  - name: data-feed-BYBIT-perpetual-a4c7b0c0bb
+    exchange: BYBIT
+    instrumentType: perpetual
+    symbols:
+      - symbol: VET-USDT-PERP
+        base: VET
+        quote: USDT
+    labels:
+      svoe.service: data-feed
+      svoe.version: a4c7b0c0bb6bd8ab6765100639a0da5346dac15f
+      svoe.hash-short: a4c7b0c0bb
+      svoe.instrument-type: perpetual
+      svoe.exchange: BYBIT
+      svoe.name: data-feed-BYBIT-perpetual-a4c7b0c0bb
+      svoe.cluster-id: 2
+      svoe.data-feed-image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+      svoe.base.VET: True
+      svoe.quote.USDT: True
+      svoe.symbol.VET-USDT-PERP: True
+    redis:
+      port: 6379
+      exporterPort: 9121
+    dataFeed:
+      image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+      configVolumeMountPath: /etc/svoe/data_feed/configs
+      config: |
+        cache: redis
+        exchanges:
+          BYBIT:
+            funding:
+            - VET-USDT-PERP
+            l2_book:
+              book_delta: true
+              max_depth: 100
+              symbols:
+              - VET-USDT-PERP
+            liquidations:
+            - VET-USDT-PERP
+            open_interest:
+            - VET-USDT-PERP
+            retries: -1
+            trades:
+            - VET-USDT-PERP
+        health_check:
+          path: /health
+          port: 1234
+        num_write_threads: 100
+        prometheus:
+          multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_a4c7b0c0bb
+          multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
+          port: 8000
+        redis:
+          del_after_read: true
+          ip: 127.0.0.1
+          port: 6379
+          retention_time: null
+          socket: null
+          start_flush: true
+        storage:
+        - svoe
+        storage_interval: 30
+        storage_retries: 3
+        storage_retry_wait: 10
+        svoe:
+          cluster_id: 2
+          compression: gzip
+          data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+          glue_database: svoe_glue_db
+          hash_short: a4c7b0c0bb
+          s3_bucket: svoe.test.1
+          s3_prefix: data_lake
+          version: a4c7b0c0bb6bd8ab6765100639a0da5346dac15f
+        write_on_stop: true
 
-        - name: data-feed-config-15.yaml
-          config: |
-            cache: redis
-            exchanges:
-              BYBIT:
-                funding: &id001
-                - TRX-USDT-PERP
-                l2_book:
-                  book_delta: true
-                  max_depth: 100
-                  symbols: *id001
-                liquidations: *id001
-                open_interest: *id001
-                retries: -1
-                trades: *id001
-            health_check:
-              path: /health
-              port: 1234
-            num_write_threads: 100
-            prometheus:
-              multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_8d2d98
-              multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
-              port: 8000
-            redis:
-              del_after_read: true
-              ip: 127.0.0.1
-              port: 6379
-              retention_time: null
-              socket: null
-              start_flush: true
-            storage:
-            - svoe
-            storage_interval: 30
-            storage_retries: 3
-            storage_retry_wait: 10
-            svoe:
-              cluster_id: 2
-              compression: gzip
-              data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
-              glue_database: svoe_glue_db
-              s3_bucket: svoe.test.1
-              s3_prefix: data_lake
-              version: 8d2d9868dc622c7da5f099b85882bd09928002f7
-            write_on_stop: true
+  - name: data-feed-BYBIT-perpetual-ff6b007fbe
+    exchange: BYBIT
+    instrumentType: perpetual
+    symbols:
+      - symbol: TRX-USDT-PERP
+        base: TRX
+        quote: USDT
+    labels:
+      svoe.service: data-feed
+      svoe.version: ff6b007fbe8afb4d914257132e7b83eb6fdb5c14
+      svoe.hash-short: ff6b007fbe
+      svoe.instrument-type: perpetual
+      svoe.exchange: BYBIT
+      svoe.name: data-feed-BYBIT-perpetual-ff6b007fbe
+      svoe.cluster-id: 2
+      svoe.data-feed-image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+      svoe.base.TRX: True
+      svoe.quote.USDT: True
+      svoe.symbol.TRX-USDT-PERP: True
+    redis:
+      port: 6379
+      exporterPort: 9121
+    dataFeed:
+      image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+      configVolumeMountPath: /etc/svoe/data_feed/configs
+      config: |
+        cache: redis
+        exchanges:
+          BYBIT:
+            funding:
+            - TRX-USDT-PERP
+            l2_book:
+              book_delta: true
+              max_depth: 100
+              symbols:
+              - TRX-USDT-PERP
+            liquidations:
+            - TRX-USDT-PERP
+            open_interest:
+            - TRX-USDT-PERP
+            retries: -1
+            trades:
+            - TRX-USDT-PERP
+        health_check:
+          path: /health
+          port: 1234
+        num_write_threads: 100
+        prometheus:
+          multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_ff6b007fbe
+          multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
+          port: 8000
+        redis:
+          del_after_read: true
+          ip: 127.0.0.1
+          port: 6379
+          retention_time: null
+          socket: null
+          start_flush: true
+        storage:
+        - svoe
+        storage_interval: 30
+        storage_retries: 3
+        storage_retry_wait: 10
+        svoe:
+          cluster_id: 2
+          compression: gzip
+          data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+          glue_database: svoe_glue_db
+          hash_short: ff6b007fbe
+          s3_bucket: svoe.test.1
+          s3_prefix: data_lake
+          version: ff6b007fbe8afb4d914257132e7b83eb6fdb5c14
+        write_on_stop: true
 
-        - name: data-feed-config-16.yaml
-          config: |
-            cache: redis
-            exchanges:
-              BYBIT:
-                funding: &id001
-                - EOS-USDT-PERP
-                l2_book:
-                  book_delta: true
-                  max_depth: 100
-                  symbols: *id001
-                liquidations: *id001
-                open_interest: *id001
-                retries: -1
-                trades: *id001
-            health_check:
-              path: /health
-              port: 1234
-            num_write_threads: 100
-            prometheus:
-              multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_0d123f
-              multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
-              port: 8000
-            redis:
-              del_after_read: true
-              ip: 127.0.0.1
-              port: 6379
-              retention_time: null
-              socket: null
-              start_flush: true
-            storage:
-            - svoe
-            storage_interval: 30
-            storage_retries: 3
-            storage_retry_wait: 10
-            svoe:
-              cluster_id: 2
-              compression: gzip
-              data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
-              glue_database: svoe_glue_db
-              s3_bucket: svoe.test.1
-              s3_prefix: data_lake
-              version: 0d123f86713bb8e460300e89d2367a3edb1a1025
-            write_on_stop: true
+  - name: data-feed-BYBIT-perpetual-2e01115372
+    exchange: BYBIT
+    instrumentType: perpetual
+    symbols:
+      - symbol: EOS-USDT-PERP
+        base: EOS
+        quote: USDT
+    labels:
+      svoe.service: data-feed
+      svoe.version: 2e011153723d527aab5bd8b1b8d37278e81f6c90
+      svoe.hash-short: 2e01115372
+      svoe.instrument-type: perpetual
+      svoe.exchange: BYBIT
+      svoe.name: data-feed-BYBIT-perpetual-2e01115372
+      svoe.cluster-id: 2
+      svoe.data-feed-image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+      svoe.base.EOS: True
+      svoe.quote.USDT: True
+      svoe.symbol.EOS-USDT-PERP: True
+    redis:
+      port: 6379
+      exporterPort: 9121
+    dataFeed:
+      image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+      configVolumeMountPath: /etc/svoe/data_feed/configs
+      config: |
+        cache: redis
+        exchanges:
+          BYBIT:
+            funding:
+            - EOS-USDT-PERP
+            l2_book:
+              book_delta: true
+              max_depth: 100
+              symbols:
+              - EOS-USDT-PERP
+            liquidations:
+            - EOS-USDT-PERP
+            open_interest:
+            - EOS-USDT-PERP
+            retries: -1
+            trades:
+            - EOS-USDT-PERP
+        health_check:
+          path: /health
+          port: 1234
+        num_write_threads: 100
+        prometheus:
+          multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_2e01115372
+          multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
+          port: 8000
+        redis:
+          del_after_read: true
+          ip: 127.0.0.1
+          port: 6379
+          retention_time: null
+          socket: null
+          start_flush: true
+        storage:
+        - svoe
+        storage_interval: 30
+        storage_retries: 3
+        storage_retry_wait: 10
+        svoe:
+          cluster_id: 2
+          compression: gzip
+          data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+          glue_database: svoe_glue_db
+          hash_short: 2e01115372
+          s3_bucket: svoe.test.1
+          s3_prefix: data_lake
+          version: 2e011153723d527aab5bd8b1b8d37278e81f6c90
+        write_on_stop: true
 
-        - name: data-feed-config-17.yaml
-          config: |
-            cache: redis
-            exchanges:
-              BYBIT:
-                funding: &id001
-                - FIL-USDT-PERP
-                l2_book:
-                  book_delta: true
-                  max_depth: 100
-                  symbols: *id001
-                liquidations: *id001
-                open_interest: *id001
-                retries: -1
-                trades: *id001
-            health_check:
-              path: /health
-              port: 1234
-            num_write_threads: 100
-            prometheus:
-              multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_0ecb90
-              multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
-              port: 8000
-            redis:
-              del_after_read: true
-              ip: 127.0.0.1
-              port: 6379
-              retention_time: null
-              socket: null
-              start_flush: true
-            storage:
-            - svoe
-            storage_interval: 30
-            storage_retries: 3
-            storage_retry_wait: 10
-            svoe:
-              cluster_id: 2
-              compression: gzip
-              data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
-              glue_database: svoe_glue_db
-              s3_bucket: svoe.test.1
-              s3_prefix: data_lake
-              version: 0ecb90f8f268362f3546c433a377e30251fde603
-            write_on_stop: true
+  - name: data-feed-BYBIT-perpetual-0df34f5167
+    exchange: BYBIT
+    instrumentType: perpetual
+    symbols:
+      - symbol: FIL-USDT-PERP
+        base: FIL
+        quote: USDT
+    labels:
+      svoe.service: data-feed
+      svoe.version: 0df34f516714c88631bacbb1c6cb22c26e0c8839
+      svoe.hash-short: 0df34f5167
+      svoe.instrument-type: perpetual
+      svoe.exchange: BYBIT
+      svoe.name: data-feed-BYBIT-perpetual-0df34f5167
+      svoe.cluster-id: 2
+      svoe.data-feed-image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+      svoe.base.FIL: True
+      svoe.quote.USDT: True
+      svoe.symbol.FIL-USDT-PERP: True
+    redis:
+      port: 6379
+      exporterPort: 9121
+    dataFeed:
+      image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+      configVolumeMountPath: /etc/svoe/data_feed/configs
+      config: |
+        cache: redis
+        exchanges:
+          BYBIT:
+            funding:
+            - FIL-USDT-PERP
+            l2_book:
+              book_delta: true
+              max_depth: 100
+              symbols:
+              - FIL-USDT-PERP
+            liquidations:
+            - FIL-USDT-PERP
+            open_interest:
+            - FIL-USDT-PERP
+            retries: -1
+            trades:
+            - FIL-USDT-PERP
+        health_check:
+          path: /health
+          port: 1234
+        num_write_threads: 100
+        prometheus:
+          multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_0df34f5167
+          multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
+          port: 8000
+        redis:
+          del_after_read: true
+          ip: 127.0.0.1
+          port: 6379
+          retention_time: null
+          socket: null
+          start_flush: true
+        storage:
+        - svoe
+        storage_interval: 30
+        storage_retries: 3
+        storage_retry_wait: 10
+        svoe:
+          cluster_id: 2
+          compression: gzip
+          data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+          glue_database: svoe_glue_db
+          hash_short: 0df34f5167
+          s3_bucket: svoe.test.1
+          s3_prefix: data_lake
+          version: 0df34f516714c88631bacbb1c6cb22c26e0c8839
+        write_on_stop: true
 
-        - name: data-feed-config-18.yaml
-          config: |
-            cache: redis
-            exchanges:
-              BYBIT:
-                funding: &id001
-                - BSV-USDT-PERP
-                l2_book:
-                  book_delta: true
-                  max_depth: 100
-                  symbols: *id001
-                liquidations: *id001
-                open_interest: *id001
-                retries: -1
-                trades: *id001
-            health_check:
-              path: /health
-              port: 1234
-            num_write_threads: 100
-            prometheus:
-              multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_3546a6
-              multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
-              port: 8000
-            redis:
-              del_after_read: true
-              ip: 127.0.0.1
-              port: 6379
-              retention_time: null
-              socket: null
-              start_flush: true
-            storage:
-            - svoe
-            storage_interval: 30
-            storage_retries: 3
-            storage_retry_wait: 10
-            svoe:
-              cluster_id: 2
-              compression: gzip
-              data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
-              glue_database: svoe_glue_db
-              s3_bucket: svoe.test.1
-              s3_prefix: data_lake
-              version: 3546a6b6b0f77053a673ac933417b2cb743314cf
-            write_on_stop: true
+  - name: data-feed-BYBIT-perpetual-09b5080890
+    exchange: BYBIT
+    instrumentType: perpetual
+    symbols:
+      - symbol: BSV-USDT-PERP
+        base: BSV
+        quote: USDT
+    labels:
+      svoe.service: data-feed
+      svoe.version: 09b50808900b553836a80c7f12d8d2059f71e8aa
+      svoe.hash-short: 09b5080890
+      svoe.instrument-type: perpetual
+      svoe.exchange: BYBIT
+      svoe.name: data-feed-BYBIT-perpetual-09b5080890
+      svoe.cluster-id: 2
+      svoe.data-feed-image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+      svoe.base.BSV: True
+      svoe.quote.USDT: True
+      svoe.symbol.BSV-USDT-PERP: True
+    redis:
+      port: 6379
+      exporterPort: 9121
+    dataFeed:
+      image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+      configVolumeMountPath: /etc/svoe/data_feed/configs
+      config: |
+        cache: redis
+        exchanges:
+          BYBIT:
+            funding:
+            - BSV-USDT-PERP
+            l2_book:
+              book_delta: true
+              max_depth: 100
+              symbols:
+              - BSV-USDT-PERP
+            liquidations:
+            - BSV-USDT-PERP
+            open_interest:
+            - BSV-USDT-PERP
+            retries: -1
+            trades:
+            - BSV-USDT-PERP
+        health_check:
+          path: /health
+          port: 1234
+        num_write_threads: 100
+        prometheus:
+          multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_09b5080890
+          multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
+          port: 8000
+        redis:
+          del_after_read: true
+          ip: 127.0.0.1
+          port: 6379
+          retention_time: null
+          socket: null
+          start_flush: true
+        storage:
+        - svoe
+        storage_interval: 30
+        storage_retries: 3
+        storage_retry_wait: 10
+        svoe:
+          cluster_id: 2
+          compression: gzip
+          data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+          glue_database: svoe_glue_db
+          hash_short: 09b5080890
+          s3_bucket: svoe.test.1
+          s3_prefix: data_lake
+          version: 09b50808900b553836a80c7f12d8d2059f71e8aa
+        write_on_stop: true
 
-    initScript:
-      name: run.sh
-      configsVolumeMountPath: /mnt/data
-      scriptsVolumeMountPath: /mnt/scripts
-      script: |-
-        #!/bin/sh
-        SET_INDEX=${HOSTNAME##*-}
-        echo "Starting initializing for pod $SET_INDEX"
-        if [ "$SET_INDEX" = "0" ]; then
-            cp /mnt/scripts/data-feed-config-0.yaml /mnt/data/data-feed-config.yaml
-        if [ "$SET_INDEX" = "1" ]; then
-            cp /mnt/scripts/data-feed-config-1.yaml /mnt/data/data-feed-config.yaml
-        if [ "$SET_INDEX" = "2" ]; then
-            cp /mnt/scripts/data-feed-config-2.yaml /mnt/data/data-feed-config.yaml
-        if [ "$SET_INDEX" = "3" ]; then
-            cp /mnt/scripts/data-feed-config-3.yaml /mnt/data/data-feed-config.yaml
-        if [ "$SET_INDEX" = "4" ]; then
-            cp /mnt/scripts/data-feed-config-4.yaml /mnt/data/data-feed-config.yaml
-        if [ "$SET_INDEX" = "5" ]; then
-            cp /mnt/scripts/data-feed-config-5.yaml /mnt/data/data-feed-config.yaml
-        if [ "$SET_INDEX" = "6" ]; then
-            cp /mnt/scripts/data-feed-config-6.yaml /mnt/data/data-feed-config.yaml
-        if [ "$SET_INDEX" = "7" ]; then
-            cp /mnt/scripts/data-feed-config-7.yaml /mnt/data/data-feed-config.yaml
-        if [ "$SET_INDEX" = "8" ]; then
-            cp /mnt/scripts/data-feed-config-8.yaml /mnt/data/data-feed-config.yaml
-        if [ "$SET_INDEX" = "9" ]; then
-            cp /mnt/scripts/data-feed-config-9.yaml /mnt/data/data-feed-config.yaml
-        if [ "$SET_INDEX" = "10" ]; then
-            cp /mnt/scripts/data-feed-config-10.yaml /mnt/data/data-feed-config.yaml
-        if [ "$SET_INDEX" = "11" ]; then
-            cp /mnt/scripts/data-feed-config-11.yaml /mnt/data/data-feed-config.yaml
-        if [ "$SET_INDEX" = "12" ]; then
-            cp /mnt/scripts/data-feed-config-12.yaml /mnt/data/data-feed-config.yaml
-        if [ "$SET_INDEX" = "13" ]; then
-            cp /mnt/scripts/data-feed-config-13.yaml /mnt/data/data-feed-config.yaml
-        if [ "$SET_INDEX" = "14" ]; then
-            cp /mnt/scripts/data-feed-config-14.yaml /mnt/data/data-feed-config.yaml
-        if [ "$SET_INDEX" = "15" ]; then
-            cp /mnt/scripts/data-feed-config-15.yaml /mnt/data/data-feed-config.yaml
-        if [ "$SET_INDEX" = "16" ]; then
-            cp /mnt/scripts/data-feed-config-16.yaml /mnt/data/data-feed-config.yaml
-        if [ "$SET_INDEX" = "17" ]; then
-            cp /mnt/scripts/data-feed-config-17.yaml /mnt/data/data-feed-config.yaml
-        if [ "$SET_INDEX" = "18" ]; then
-            cp /mnt/scripts/data-feed-config-18.yaml /mnt/data/data-feed-config.yaml
-        else
-            echo "Invalid stateful set index"
-            exit 1
-        fi
 {{ end }}

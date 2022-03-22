@@ -1,0 +1,44 @@
+{% for cluster_id, pod_configs in cluster_pod_configs_mapping.items() %}
+{%- raw %}{{ if eq .Values.clusterId {% endraw %}{{cluster_id}}{% raw %} }}{% endraw %}
+commonSecrets:
+  mysql:
+    host: mysql-global-svc.mysql.svc.local # namespace should be synced with mysql chart
+    port: 3306
+    database: {%- raw %} {{ .Values | get "mysqlDefaultSvoeDb" }}{% endraw %}
+    user: root # TODO
+    password: {%- raw %} {{ .Values | get "mysqlRootPassword" }}{% endraw %}
+  s3:
+    accessKeyId: {%- raw %} {{ .Values | get "awsKey" }}{% endraw %}
+    secretAccessKey: {%- raw %} {{ .Values | get "awsSecret" }}{% endraw %}
+    region: {%- raw %} {{ .Values | get "awsDefaultRegion" }}{% endraw %}
+podConfigs:
+  {%- for pod_config in pod_configs %}
+  - name: {{ pod_config['name'] }}
+    exchange: {{ pod_config['exchange'] }}
+    instrumentType: {{ pod_config['instrument_type'] }}
+    {%- if pod_config['instrument_extra'] is defined %}
+    instrumentExtra:
+      strikePrice: {{ pod_config['instrument_extra']['strike_price'] }}
+      expirationDate: {{ pod_config['instrument_extra']['expiration_date'] }}
+    {%- endif %}
+    symbols:
+      {%- for symbol in pod_config['symbols'] %}
+      - symbol: {{ symbol['symbol'] }}
+        base: {{ symbol['base'] }}
+        quote: {{ symbol['quote'] }}
+      {%- endfor %}
+    labels:
+      {%- for key in pod_config['labels'] %}
+      {{ key }}: {{ pod_config['labels'][key] }}
+      {%- endfor %}
+    redis:
+      port: 6379
+      exporterPort: 9121
+    dataFeed:
+      image: {{ pod_config['data_feed_image'] }}
+      configVolumeMountPath: /etc/svoe/data_feed/configs
+      config: |
+        {{ pod_config['data_feed_config'] | indent(width=8) }}
+  {%- endfor %}
+{% raw %}{{ end }}{% endraw %}
+{% endfor %}
