@@ -115,6 +115,9 @@ def build_pod_configs(exchange, exchange_config):
             labels['svoe.quote.' + s.quote] = True
             labels['svoe.symbol.' + s.normalized] = True
 
+        for channel in channels:
+            labels['svoe.channel.' + channel] = True
+
         pod_configs.append({
             'name': name,
             'exchange': exchange,
