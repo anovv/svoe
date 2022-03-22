@@ -132,6 +132,15 @@ def build_pod_configs(exchange, exchange_config):
             'labels': labels,
         })
 
+    # filter by requested number of pods
+    if 'numPods' in exchange_config:
+        num_pods = exchange_config['numPods']
+        if num_pods > len(symbol_pod_mapping):
+            raise ValueError(f'Number of requested pod {num_pods} is larger than expected {len(symbol_pod_mapping)} for {exchange} {instrument_type}')
+        else:
+            print(f'Generated {num_pods} pods for {exchange} {instrument_type}') # TODO print available symbols
+        pod_configs = pod_configs[:num_pods]
+
     return pod_configs
 
 
@@ -182,9 +191,9 @@ def _distributeSymbols(exchange, symbols, strategy):
             dist[index] = [symbol]
     elif strategy == 'ONE_THREE_FIVE':
         # TODO
-        raise ValueError('Unsupported pod distribution strategy')
+        raise ValueError(f'Unsupported pod distribution strategy for {exchange}')
     else:
-        raise ValueError('Unsupported pod distribution strategy')
+        raise ValueError(f'Unsupported pod distribution strategy for {exchange}')
 
     return dist
 
@@ -214,4 +223,4 @@ def _hash_short(hash):
 
 
 gen_helm_values()
-print('Done')
+print('Done.')

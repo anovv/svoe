@@ -1,9 +1,10 @@
 # TODO separate symbol config (pairs, exchange, instrument) and rest (channels/cluster/store) ?? is this needed?
 symbolSets:
   TOP_20: [BTC, ETH, BNB, ADA, XRP, DOGE, DOT, BCH, UNI, LTC, LINK, MATIC, XLM, ETC, VET, TRX, EOS, FIL, SHIB, BSV]
-exchangeConfigSets: # TODO add numPods (per quote? or make dynamic for desired coins?) # TODO add resource (req/lim) provider: via thanos api or manual config
+exchangeConfigSets:
   BINANCE:
     - instrumentType: spot
+      numPods: 1
       symbolSets:
         quotes: [USDT]
         bases: TOP_20
@@ -27,6 +28,7 @@ exchangeConfigSets: # TODO add numPods (per quote? or make dynamic for desired c
         Common configuration for Binance USDT spot top 20
   BYBIT:
     - instrumentType: perpetual
+      numPods: 1
       symbolSets:
         quotes: [USDT]
         bases: TOP_20
