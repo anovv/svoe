@@ -1,7 +1,7 @@
 # prod configuration overrides
 services:
   svoe_data_feed:
-    # TODO image field for tags and name?
+    image: svoe_data_feed_prod
     build:
       context: .
       dockerfile: Dockerfile
