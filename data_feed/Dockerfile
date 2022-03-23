@@ -1,5 +1,4 @@
-# TODO try -slim, faster pip install
-FROM python:3.9.4-buster
+FROM python:3.8.2-slim-buster
 
 RUN mkdir -p /etc/svoe/data_feed/configs
 COPY data-feed-config.yaml /etc/svoe/data_feed/configs/data-feed-config.yaml

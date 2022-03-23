@@ -1,9 +1,12 @@
-import pyximport
-pyximport.install() # TODO should this be dev env only? Move to a script ?
+from os import environ
+if environ.get('ENV') == 'DEV':
+    print('DEV ENV')
+    import pyximport
+    pyximport.install()
 
 from cryptostore import Cryptostore
 
-# TODO this path should be synced with cryptostore_config_builder consts
+# TODO this path should be synced with Helm values
 DATA_FEED_CONFIG_PATH = '/etc/svoe/data_feed/configs/data-feed-config.yaml'
 
 class DataFeedService(object):

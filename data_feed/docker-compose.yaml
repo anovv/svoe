@@ -19,6 +19,7 @@ services:
     environment:
       - MYSQL_ROOT_PASSWORD=root
   svoe_data_feed:
+    # TODO image field for tags and name?
     build:
       context: .
       dockerfile: Dockerfile-dev
@@ -29,6 +30,8 @@ services:
       - ../../cryptostore:/etc/svoe/local_packages/cryptostore
     env_file:
       - ./secrets_DO_NOT_COMMIT.env
+    environment:
+      - ENV=DEV
     depends_on:
       - mysql
       - redis

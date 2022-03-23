@@ -22,6 +22,9 @@ spec:
 {{- end }}
 {{- define "data-feed.data-feed-stateful-set" }}
 # TODO set terminationGracePeriodSeconds
+# TODO startup probe and port
+# TODO liveness probe and port
+# TODO expose prometheus metrics port on dataFeed container
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
