@@ -1,0 +1,7 @@
+# prod configuration overrides
+services:
+  svoe_data_feed:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes: []

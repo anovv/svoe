@@ -21,7 +21,7 @@ services:
   svoe_data_feed:
     build:
       context: .
-      dockerfile: Doockerfile # dev
+      dockerfile: Dockerfile-dev
     restart: always
     volumes:
       - ./data-feed-config.yaml:/etc/svoe/data_feed/configs/data-feed-config.yaml
