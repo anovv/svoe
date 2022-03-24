@@ -14,9 +14,9 @@ spec:
     protocol: TCP
     targetPort: {{ .redis.port }}
   - name: redis-metrics
-    port: {{ .redis.exporterPort }}
+    port: 9121
     protocol: TCP
-    targetPort: {{ .redis.exporterPort }}
+    targetPort: 9121
   selector:
     name: {{ .name }}-ss
 {{- end }}
