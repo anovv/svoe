@@ -101,6 +101,7 @@ spec:
     nodes: public
 ---
 
+# TODO labels for nodeSelectors, taints and tolerations
 # TODO optimize rootVolumeSize
 # TODO for each InstanceGroup add extra security-groups to open necessary ports (e.g. Cilium etcd)
 # Create one master per AZ
@@ -129,12 +130,14 @@ spec:
 ---
   {{end}}
 
+
+# TODO labels for nodeSelectors, taints and tolerations
 apiVersion: kops/v1alpha2
 kind: InstanceGroup
 metadata:
   labels:
     kops.k8s.io/cluster: {{.cluster_name}}
-  name: nodes-on-demand
+  name: nodes-common-on-demand
 spec:
   cloudLabels:
     k8s.io/cluster-autoscaler/enabled: ""
@@ -152,7 +155,9 @@ spec:
   rootVolumeType: gp2
   securityGroupOverride: {{.security_group_override}}
   nodeLabels:
-    kops.k8s.io/instancegroup: nodes-on-demand
+    kops.k8s.io/instancegroup: nodes-common-on-demand
+    node-type: on-demand
+    workload-type: common
   subnets:
   {{range .azs}}
   - {{.}}
@@ -162,27 +167,32 @@ spec:
 # TODO set mixedInstancesPolicy
 # TODO set warmPool
 # TODO set maxPrice by instance type/dynamically
-#apiVersion: kops/v1alpha2
-#kind: InstanceGroup
-#metadata:
-#  labels:
-#    kops.k8s.io/cluster: {{.cluster_name}}
-#  name: nodes-spot
-#spec:
-#  cloudLabels:
-#    k8s.io/cluster-autoscaler/enabled: ""
-#    k8s.io/cluster-autoscaler/{{.cluster_name}}: ""
-#  machineType: t3.small
-#  maxPrice: "0.0273" # on-demand price
-#  maxSize: 2
-#  minSize: 1
-#  securityGroupOverride: {{.security_group_override}}
-#  nodeLabels:
-#    kops.k8s.io/instancegroup: nodes-spot
-#  role: Node
-#  rootVolumeSize: 20
-#  rootVolumeType: gp2
-#  subnets:
-#  {{range .azs}}
-#  - {{.}}
-#  {{end}}
+apiVersion: kops/v1alpha2
+kind: InstanceGroup
+metadata:
+  labels:
+    kops.k8s.io/cluster: {{.cluster_name}}
+  name: nodes-data-feed-spot
+spec:
+  cloudLabels:
+    k8s.io/cluster-autoscaler/enabled: ""
+    k8s.io/cluster-autoscaler/{{.cluster_name}}: ""
+  machineType: t3.small
+  maxPrice: "0.0273" # on-demand price
+  maxSize: 20
+  minSize: 1
+  securityGroupOverride: {{.security_group_override}}
+  nodeLabels:
+    kops.k8s.io/instancegroup: nodes-data-feed-spot
+    node-type: spot
+    workload-type: data-feed
+  taints:
+    - node-type=spot:NoSchedule
+    - workload-type=data-feed:NoSchedule
+  role: Node
+  rootVolumeSize: 20
+  rootVolumeType: gp2
+  subnets:
+  {{range .azs}}
+  - {{.}}
+  {{end}}
