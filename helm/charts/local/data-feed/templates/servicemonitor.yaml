@@ -1,17 +1,18 @@
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: data-feed-all-servicemonitor
+  name: data-feed-servicemonitor
   labels:
-    name: data-feed-all-servicemonitor
+    name: data-feed-servicemonitor
 spec:
   selector:
     matchLabels:
-      # TODO proper monitoring label
-      monitored: all
+      monitored-by: data-feed-servicemonitor
   namespaceSelector:
     matchNames:
       - data-feed
   endpoints:
     - port: redis-metrics
+      interval: 5s
+    - port: data-feed-metrics
       interval: 5s

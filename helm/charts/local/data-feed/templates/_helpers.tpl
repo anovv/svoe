@@ -1,10 +1,10 @@
+# TODO dummy placeholder pod for spot buffer
 {{- define "data-feed.data-feed-service" }}
 apiVersion: v1
 kind: Service
 metadata:
   labels:
-    # TODO proper monitoring label
-    monitored: all
+    monitored-by: data-feed-servicemonitor
     name: {{ .name }}-svc
   name: {{ .name }}-svc
 spec:
