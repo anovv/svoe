@@ -17,13 +17,16 @@ services:
       - mysql-db:/var/lib/mysql
       # https://iamvickyav.medium.com/mysql-init-script-on-docker-compose-e53677102e48
     environment:
-      - MYSQL_ROOT_PASSWORD=root
+      # TODO figure out why this password is not set/working
+      - MYSQL_ROOT_PASSWORD=root # should be in sync with secrets_DO_NOT_COMMIT.env
+    # TODO depends_on dumper-restorer for correct shutdown sequence and dump?
   svoe_data_feed:
     image: svoe_data_feed_dev
     build:
       context: .
       dockerfile: Dockerfile-dev
     restart: always
+    # TODO healthcheck
     volumes:
       - ./data-feed-config.yaml:/etc/svoe/data_feed/configs/data-feed-config.yaml
       - ../../cryptofeed:/etc/svoe/local_packages/cryptofeed # mounts local python project to use instead of pip packages
@@ -36,6 +39,7 @@ services:
       - mysql
       - redis
   dumper-restorer:
+    # TODO add on-destroy hook and launch dump script
     command: sh -c "/scripts/mysqls3init.sh; /scripts/mysqls3restore.sh; while true; do echo 'Sleeping 30s...' && sleep 30; done;"
     image: alpine:latest
     restart: always

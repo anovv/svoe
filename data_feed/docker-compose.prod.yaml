@@ -5,6 +5,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    volumes: []
+    # TODO healthcheck
+    volumes:
+      - ./data-feed-config.yaml:/etc/svoe/data_feed/configs/data-feed-config.yaml
     environment:
       - ENV=PROD
