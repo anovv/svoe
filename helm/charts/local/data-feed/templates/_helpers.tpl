@@ -51,7 +51,7 @@ spec:
       - image: oliver006/redis_exporter:latest
         name: redis-exporter
         ports:
-        - containerPort: {{ .redis.exporterPort }}
+        - containerPort: 9121
           name: redis-metrics
       - image: {{ .dataFeed.image }}
         imagePullPolicy: IfNotPresent

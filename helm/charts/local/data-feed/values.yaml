@@ -29,7 +29,6 @@ podConfigs:
         quote: USDT
     redis:
       port: 6379
-      exporterPort: 9121
     labels:
       svoe.name: unchanged
       svoe.symbol.BTC-USDT: True

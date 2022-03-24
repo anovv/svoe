@@ -32,8 +32,7 @@ podConfigs:
       {{ key }}: {{ pod_config['labels'][key] }}
       {%- endfor %}
     redis:
-      port: 6379
-      exporterPort: 9121
+      port: {{ pod_config['redis_port'] }}
     dataFeed:
       healthPath: {{ pod_config['data_feed_health_path'] }}
       healthPort: {{ pod_config['data_feed_health_port'] }}
