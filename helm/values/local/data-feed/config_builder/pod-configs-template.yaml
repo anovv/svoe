@@ -35,6 +35,8 @@ podConfigs:
       port: 6379
       exporterPort: 9121
     dataFeed:
+      healthPath: {{ pod_config['data_feed_health_path'] }}
+      healthPort: {{ pod_config['data_feed_health_port'] }}
       image: {{ pod_config['data_feed_image'] }}
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |

@@ -131,6 +131,9 @@ def build_pod_configs(exchange, exchange_config):
                 symbol_pod_mapping[pod_id]
             )),
             'data_feed_image': exchange_config['dataFeedImage'],
+            # TODO remove duplication and read directly from config to helm
+            'data_feed_health_path': config['health_check']['path'],
+            'data_feed_health_port': config['health_check']['port'],
             'data_feed_config': yaml.dump(config, default_flow_style=False),
             'cluster_id': exchange_config['clusterId'],
             'labels': labels,

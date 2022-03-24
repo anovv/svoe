@@ -21,9 +21,7 @@ spec:
     name: {{ .name }}-ss
 {{- end }}
 {{- define "data-feed.data-feed-stateful-set" }}
-# TODO set terminationGracePeriodSeconds
 # TODO startup probe and port
-# TODO liveness probe and port
 # TODO expose prometheus metrics port on dataFeed container
 apiVersion: apps/v1
 kind: StatefulSet
@@ -64,6 +62,13 @@ spec:
         envFrom:
           - secretRef:
               name: data-feed-common-secret
+        livenessProbe:
+          httpGet:
+            path: {{ .dataFeed.healthPath }}
+            port: {{ .dataFeed.healthPort }}
+          initialDelaySeconds: 5
+          periodSeconds: 5
+      terminationGracePeriodSeconds: 30
       volumes:
       - configMap:
           defaultMode: 365

@@ -1,3 +1,4 @@
+# TODO is this local file needed? Remove in favor of helm/values/...
 # TODO nodeSelectors, clusterId, clusterName labels
 # TODO add versioning, versions to ss,svc,cm names
 # TODO make one pod per statefulset
@@ -33,6 +34,8 @@ podConfigs:
       svoe.name: unchanged
       svoe.symbol.BTC-USDT: True
     dataFeed:
+      healthPath: /health
+      healthPort: 1234
       image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
