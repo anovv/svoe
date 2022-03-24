@@ -133,6 +133,7 @@ def build_pod_configs(exchange, exchange_config):
             'data_feed_image': exchange_config['dataFeedImage'],
             # TODO remove duplication and read directly from config to helm
             'redis_port': config['redis']['port'],
+            'prometheus_metrics_port': config['prometheus']['port'],
             'data_feed_health_path': config['health_check']['path'],
             'data_feed_health_port': config['health_check']['port'],
             'data_feed_config': yaml.dump(config, default_flow_style=False),

@@ -38,6 +38,7 @@ podConfigs:
     dataFeed:
       healthPath: /health
       healthPort: 1234
+      prometheusMetricsPort: 8000
       image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -129,6 +130,7 @@ podConfigs:
     dataFeed:
       healthPath: /health
       healthPort: 1234
+      prometheusMetricsPort: 8000
       image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |

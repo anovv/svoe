@@ -17,6 +17,10 @@ spec:
     port: 9121
     protocol: TCP
     targetPort: 9121
+  - name: data-feed-metrics
+    port: {{ .dataFeed.prometheusMetricsPort }}
+    protocol: TCP
+    targetPort: {{ .dataFeed.prometheusMetricsPort }}
   selector:
     name: {{ .name }}-ss
 {{- end }}
@@ -56,6 +60,9 @@ spec:
       - image: {{ .dataFeed.image }}
         imagePullPolicy: IfNotPresent
         name: data-feed-container
+        ports:
+        - containerPort: {{ .dataFeed.prometheusMetricsPort }}
+          name: data-feed-metrics
         volumeMounts:
         - mountPath: {{ .dataFeed.configVolumeMountPath }}
           name: {{ .name }}-conf-vol

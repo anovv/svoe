@@ -36,6 +36,7 @@ podConfigs:
     dataFeed:
       healthPath: {{ pod_config['data_feed_health_path'] }}
       healthPort: {{ pod_config['data_feed_health_port'] }}
+      prometheusMetricsPort: {{ pod_config['prometheus_metrics_port'] }}
       image: {{ pod_config['data_feed_image'] }}
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
