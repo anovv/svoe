@@ -10,8 +10,14 @@ if ! [ -f "$MYSQL_S3_INITED_FLAG_FILE" ]; then
   return 0
 fi
 
-s3filename_latest="mysqldump_latest.sql.gz"
-s3filename_latest_unzip="mysqldump_latest.sql"
+if [ -z "$MYSQL_DATABASE" ]; then
+  db_name_prefix="all-dbs"
+else
+  db_name_prefix=${MYSQL_DATABASE}
+fi
+
+s3filename_latest="${db_name_prefix}_mysqldump_latest.sql.gz"
+s3filename_latest_unzip="${db_name_prefix}_mysqldump_latest.sql"
 aws s3api head-object --bucket ${AWS_S3_MYSQL_BUCKET} --key ${s3filename_latest} || not_exist=true
 if [ $not_exist ]; then
   echo "[$(date -Iseconds)] No backup file in s3, exiting"

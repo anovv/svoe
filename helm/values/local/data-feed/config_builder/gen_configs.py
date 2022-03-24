@@ -33,7 +33,7 @@ def gen_helm_values():
 
 def build_pod_configs(exchange, exchange_config):
     # TODO az distribution + az changes to config/hash
-    # TODO handle strike_price, option_type, expiry_date params
+    # TODO handle instrument_extra (strike_price, option_type, expiry_date params)
     # TODO handle duplicates (Symbol equal method)
     # TODO add explicit symbol excludes
 
@@ -93,6 +93,7 @@ def build_pod_configs(exchange, exchange_config):
         hash_pod_config = _hash(config)
         hash_short = _hash_short(hash_pod_config)
         name = 'data-feed-' + exchange + '-' + instrument_type + '-' + hash_short # TODO unique name, handle same hash pods
+        config['svoe']['instrument_type'] = instrument_type # TODO instrument_extra (strike/expiration/etc)
         config['svoe']['version'] = hash_pod_config # version is long
         config['svoe']['hash_short'] = hash_short
         config['prometheus']['multiproc_dir'] = config['prometheus']['multiproc_dir_prefix'] + '_' + hash_short
@@ -103,7 +104,7 @@ def build_pod_configs(exchange, exchange_config):
             'svoe.service': 'data-feed',
             'svoe.version': hash_pod_config,
             'svoe.hash-short': hash_short,
-            'svoe.instrument-type': instrument_type, # TODO strike/expiration/etc.
+            'svoe.instrument-type': instrument_type, # TODO instrument_extra (strike/expiration/etc)
             'svoe.exchange': exchange,
             'svoe.name': name,
             'svoe.cluster-id': exchange_config['clusterId'],
@@ -121,7 +122,7 @@ def build_pod_configs(exchange, exchange_config):
         pod_configs.append({
             'name': name,
             'exchange': exchange,
-            'instrument_type': instrument_type, # TODO strike,expiration,etc
+            'instrument_type': instrument_type, # TODO instrument_extra (strike/expiration/etc)
             'symbols': list(map(
                 lambda s:
                     {'base': s.base,

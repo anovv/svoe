@@ -10,3 +10,6 @@ services:
       - ./data-feed-config.yaml:/etc/svoe/data_feed/configs/data-feed-config.yaml
     environment:
       - ENV=PROD
+    depends_on:
+      - mysql
+      - redis

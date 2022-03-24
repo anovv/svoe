@@ -14,10 +14,13 @@ else
 fi
 
 filename=$(mktemp)
+db_name_prefix=""
 
 if [ -z "$MYSQL_DATABASE" ]; then
+  db_name_prefix="all-dbs"
   MYSQL_DATABASE="--all-databases"
 else
+  db_name_prefix=${MYSQL_DATABASE}
   MYSQL_DATABASE="--databases ${MYSQL_DATABASE}"
 fi
 
@@ -27,8 +30,8 @@ echo "[$(date -Iseconds)] mysqldump finished. Started compression..."
 gzip "${filename}"
 echo "[$(date -Iseconds)] Compression finished"
 
-s3filename_latest="mysqldump_latest.sql.gz"
-s3filename_prev="mysqldump_prev.sql.gz"
+s3filename_latest="${db_name_prefix}_mysqldump_latest.sql.gz"
+s3filename_prev="${db_name_prefix}_mysqldump_prev.sql.gz"
 echo "[$(date -Iseconds)] Started s3 upload..."
 
 aws s3api head-object --bucket ${AWS_S3_MYSQL_BUCKET} --key ${s3filename_latest} || latest_not_exist=true

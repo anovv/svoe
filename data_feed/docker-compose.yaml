@@ -13,9 +13,7 @@ services:
       - 3306:3306
     expose:
       - 3306
-    volumes:
-      - mysql-db:/var/lib/mysql
-      # https://iamvickyav.medium.com/mysql-init-script-on-docker-compose-e53677102e48
+    # https://iamvickyav.medium.com/mysql-init-script-on-docker-compose-e53677102e48
     environment:
       # TODO figure out why this password is not set/working
       - MYSQL_ROOT_PASSWORD=root # should be in sync with secrets_DO_NOT_COMMIT.env
@@ -49,5 +47,3 @@ services:
       - ../helm/charts/local/mysql-extra/scripts/mysqls3dump.sh:/scripts/mysqls3dump.sh
     env_file:
       - ./secrets_DO_NOT_COMMIT.env
-volumes:
-  mysql-db:
