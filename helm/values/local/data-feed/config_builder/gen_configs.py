@@ -137,6 +137,7 @@ def build_pod_configs(exchange, exchange_config):
             'data_feed_health_path': config['health_check']['path'],
             'data_feed_health_port': config['health_check']['port'],
             'data_feed_config': yaml.dump(config, default_flow_style=False),
+            'data_feed_resources': _get_resources(exchange, instrument_type, symbols),
             'cluster_id': exchange_config['clusterId'],
             'labels': labels,
         })
@@ -230,6 +231,20 @@ def _hash(config):
 def _hash_short(hash):
     return hash[:10]
 
+
+def _get_resources(exchange, instrument_type, symbols):
+    # TODO pull Thanos data/make manual config
+    # TODO set resources for redis/redis-exporter sidecars
+    return {
+        'requests': {
+            'cpu': '25m',
+            'memory': '200Mi'
+        },
+        'limits': {
+            'cpu': '50m',
+            'memory': '400Mi'
+        }
+    }
 
 gen_helm_values()
 print('Done.')

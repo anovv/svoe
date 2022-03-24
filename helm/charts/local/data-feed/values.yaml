@@ -36,6 +36,13 @@ podConfigs:
       healthPath: /health
       healthPort: 1234
       prometheusMetricsPort: 8000
+      resources:
+        requests:
+          cpu: 25m
+          memory: 200Mi
+        limits:
+          cpu: 50m
+          memory: 400Mi
       image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |

@@ -47,6 +47,7 @@ spec:
         {{ $k }}: {{ $v }}
         {{- end }}
     spec:
+      # TODO set resources for redis/redis-exporter sidecars
       containers:
         - image: redis:alpine
           name: redis
@@ -75,6 +76,13 @@ spec:
               port: {{ .dataFeed.healthPort }}
             initialDelaySeconds: 5
             periodSeconds: 5
+          resources:
+            requests:
+              memory: {{ .dataFeed.resources.requests.memory }}
+              cpu: {{ .dataFeed.resources.requests.cpu }}
+            limits:
+              memory: {{ .dataFeed.resources.limits.memory }}
+              cpu: {{ .dataFeed.resources.limits.cpu }}
       terminationGracePeriodSeconds: 30
       volumes:
         - configMap:
