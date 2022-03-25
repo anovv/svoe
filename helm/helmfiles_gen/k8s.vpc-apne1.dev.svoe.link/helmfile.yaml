@@ -45,6 +45,8 @@ releases:
     namespace: monitoring
     values:
       - ../../values/bitnami/thanos/values.yaml.gotmpl
+    needs:
+      - monitoring/kube-prometheus-stack
   {{ end }}
   {{ if .Values.isMysqlHost }}
   - chart: bitnami/mysql
@@ -52,6 +54,8 @@ releases:
     namespace: mysql
     values:
       - ../../values/bitnami/mysql/values.yaml.gotmpl
+    needs:
+      - monitoring/kube-prometheus-stack
   {{ end }}
   - chart: ../../charts/local/mysql-extra
     name: mysql-extra

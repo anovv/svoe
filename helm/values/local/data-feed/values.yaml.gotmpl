@@ -11,7 +11,7 @@ commonSecrets:
     secretAccessKey: {{ .Values | get "awsSecret" }}
     region: {{ .Values | get "awsDefaultRegion" }}
 podConfigs:
-  - name: data-feed-BINANCE-spot-7dfbc380b1
+  - name: data-feed-binance-spot-7dfbc380b1
     exchange: BINANCE
     instrumentType: spot
     symbols:
@@ -24,9 +24,8 @@ podConfigs:
       svoe.hash-short: 7dfbc380b1
       svoe.instrument-type: spot
       svoe.exchange: BINANCE
-      svoe.name: data-feed-BINANCE-spot-7dfbc380b1
+      svoe.name: data-feed-binance-spot-7dfbc380b1
       svoe.cluster-id: 1
-      svoe.data-feed-image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
       svoe.base.BTC: True
       svoe.quote.USDT: True
       svoe.symbol.BTC-USDT: True
@@ -108,7 +107,7 @@ commonSecrets:
     secretAccessKey: {{ .Values | get "awsSecret" }}
     region: {{ .Values | get "awsDefaultRegion" }}
 podConfigs:
-  - name: data-feed-BYBIT-perpetual-614aa00acb
+  - name: data-feed-bybit-perpetual-614aa00acb
     exchange: BYBIT
     instrumentType: perpetual
     symbols:
@@ -121,9 +120,8 @@ podConfigs:
       svoe.hash-short: 614aa00acb
       svoe.instrument-type: perpetual
       svoe.exchange: BYBIT
-      svoe.name: data-feed-BYBIT-perpetual-614aa00acb
+      svoe.name: data-feed-bybit-perpetual-614aa00acb
       svoe.cluster-id: 2
-      svoe.data-feed-image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
       svoe.base.BTC: True
       svoe.quote.USDT: True
       svoe.symbol.BTC-USDT-PERP: True

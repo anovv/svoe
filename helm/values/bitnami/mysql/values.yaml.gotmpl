@@ -102,7 +102,7 @@ metrics:
     annotations:
       prometheus.io/scrape: "true"
       prometheus.io/port: "9104"
-#  serviceMonitor: # TODO when enabling this, dependency should be added on monitoring/monitoring-extra charts
-#    enabled: true
-#    namespace: mysql # should be synced with release namespace
-#    interval: 10s
+  serviceMonitor: # TODO when enabling this, dependency should be added on monitoring chart
+    enabled: true
+    namespace: mysql # should be synced with release namespace
+    interval: 10s

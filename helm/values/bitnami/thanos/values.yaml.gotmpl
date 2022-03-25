@@ -22,6 +22,8 @@ bucketweb:
   enabled: true
   refresh: 5m
 
+# TODO compactor crashed with
+# level=error ts=2022-03-25T08:45:49.76932454Z caller=main.go:132 err="5m resolution retention must be higher than the minimum block size after which 1h resolution downsampling will occur (10 days)\
 compactor:
   enabled: true
   retentionResolutionRaw: 7d

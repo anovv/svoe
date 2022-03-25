@@ -18,7 +18,7 @@ spec:
       port: 9121
       protocol: TCP
       targetPort: 9121
-    - name: data-feed-metrics
+    - name: df-metrics
       port: {{ .dataFeed.prometheusMetricsPort }}
       protocol: TCP
       targetPort: {{ .dataFeed.prometheusMetricsPort }}
@@ -44,7 +44,7 @@ spec:
       labels:
         name: {{ .name }}-ss
         {{- range $k, $v := .labels }}
-        {{ $k }}: {{ $v }}
+        {{ $k }}: {{ $v | quote }}
         {{- end }}
     spec:
       # TODO set resources for redis/redis-exporter sidecars
@@ -63,7 +63,7 @@ spec:
           name: data-feed-container
           ports:
             - containerPort: {{ .dataFeed.prometheusMetricsPort }}
-              name: data-feed-metrics
+              name: df-metrics
           volumeMounts:
             - mountPath: {{ .dataFeed.configVolumeMountPath }}
               name: {{ .name }}-conf-vol

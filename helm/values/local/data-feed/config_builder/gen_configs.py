@@ -92,7 +92,7 @@ def build_pod_configs(exchange, exchange_config):
         # TODO figure out which fields of config are hash-sensitive
         hash_pod_config = _hash(config)
         hash_short = _hash_short(hash_pod_config)
-        name = 'data-feed-' + exchange + '-' + instrument_type + '-' + hash_short # TODO unique name, handle same hash pods
+        name = ('data-feed-' + exchange + '-' + instrument_type + '-' + hash_short).lower() # TODO unique name, handle same hash pods
         config['svoe']['instrument_type'] = instrument_type # TODO instrument_extra (strike/expiration/etc)
         config['svoe']['version'] = hash_pod_config # version is long
         config['svoe']['hash_short'] = hash_short
@@ -108,7 +108,8 @@ def build_pod_configs(exchange, exchange_config):
             'svoe.exchange': exchange,
             'svoe.name': name,
             'svoe.cluster-id': exchange_config['clusterId'],
-            'svoe.data-feed-image': exchange_config['dataFeedImage']
+            # TODO full image name contains forbidden chars by kuber, use image version here?
+            # 'svoe.data-feed-image': exchange_config['dataFeedImage']
         }
 
         for s in symbol_pod_mapping[pod_id]:
