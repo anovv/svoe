@@ -1,0 +1,3 @@
+# Data Feed service changelog
+1.0.0
+  - initial version used to alpha test on kuber multi-cluster
