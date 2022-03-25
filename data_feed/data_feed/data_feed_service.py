@@ -7,6 +7,7 @@ if environ.get('ENV') == 'DEV':
 from cryptostore import Cryptostore
 
 # TODO this path should be synced with Helm values
+# TODO dashboard stuff on streamlit
 DATA_FEED_CONFIG_PATH = '/etc/svoe/data_feed/configs/data-feed-config.yaml'
 
 class DataFeedService(object):
