@@ -11,7 +11,7 @@ commonSecrets:
     secretAccessKey: {{ .Values | get "awsSecret" }}
     region: {{ .Values | get "awsDefaultRegion" }}
 podConfigs:
-  - name: data-feed-binance-spot-7dfbc380b1
+  - name: data-feed-binance-spot-b20b484996
     exchange: BINANCE
     instrumentType: spot
     symbols:
@@ -20,12 +20,13 @@ podConfigs:
         quote: USDT
     labels:
       svoe.service: data-feed
-      svoe.version: 7dfbc380b15ff2bef30d2832361290b5f5949b41
-      svoe.hash-short: 7dfbc380b1
+      svoe.version: b20b4849967e1a3f04321d49fec657a501e9289d
+      svoe.hash-short: b20b484996
       svoe.instrument-type: spot
       svoe.exchange: BINANCE
-      svoe.name: data-feed-binance-spot-7dfbc380b1
+      svoe.name: data-feed-binance-spot-b20b484996
       svoe.cluster-id: 1
+      svoe.data-feed-image-version: v1.0.0
       svoe.base.BTC: True
       svoe.quote.USDT: True
       svoe.symbol.BTC-USDT: True
@@ -45,7 +46,7 @@ podConfigs:
         limits:
           cpu: 50m
           memory: 400Mi
-      image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+      image: {{ .Values.dataFeedImagePrefix }}:v1.0.0
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
         cache: redis
@@ -66,7 +67,7 @@ podConfigs:
           port: 1234
         num_write_threads: 100
         prometheus:
-          multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_7dfbc380b1
+          multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_b20b484996
           multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
           port: 8000
         redis:
@@ -84,13 +85,13 @@ podConfigs:
         svoe:
           cluster_id: 1
           compression: gzip
-          data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+          data_feed_image_version: v1.0.0
           glue_database: svoe_glue_db
-          hash_short: 7dfbc380b1
+          hash_short: b20b484996
           instrument_type: spot
           s3_bucket: svoe.test.1
           s3_prefix: data_lake
-          version: 7dfbc380b15ff2bef30d2832361290b5f5949b41
+          version: b20b4849967e1a3f04321d49fec657a501e9289d
         write_on_stop: true
 
 {{ end }}
@@ -107,7 +108,7 @@ commonSecrets:
     secretAccessKey: {{ .Values | get "awsSecret" }}
     region: {{ .Values | get "awsDefaultRegion" }}
 podConfigs:
-  - name: data-feed-bybit-perpetual-614aa00acb
+  - name: data-feed-bybit-perpetual-755cf06d7f
     exchange: BYBIT
     instrumentType: perpetual
     symbols:
@@ -116,12 +117,13 @@ podConfigs:
         quote: USDT
     labels:
       svoe.service: data-feed
-      svoe.version: 614aa00acb6ce02f92b3da7aba73b40e1b47a218
-      svoe.hash-short: 614aa00acb
+      svoe.version: 755cf06d7f7a506570008afd08b6c633ee2d8a03
+      svoe.hash-short: 755cf06d7f
       svoe.instrument-type: perpetual
       svoe.exchange: BYBIT
-      svoe.name: data-feed-bybit-perpetual-614aa00acb
+      svoe.name: data-feed-bybit-perpetual-755cf06d7f
       svoe.cluster-id: 2
+      svoe.data-feed-image-version: v1.0.0
       svoe.base.BTC: True
       svoe.quote.USDT: True
       svoe.symbol.BTC-USDT-PERP: True
@@ -143,7 +145,7 @@ podConfigs:
         limits:
           cpu: 50m
           memory: 400Mi
-      image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+      image: {{ .Values.dataFeedImagePrefix }}:v1.0.0
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
         cache: redis
@@ -168,7 +170,7 @@ podConfigs:
           port: 1234
         num_write_threads: 100
         prometheus:
-          multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_614aa00acb
+          multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_755cf06d7f
           multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
           port: 8000
         redis:
@@ -186,13 +188,13 @@ podConfigs:
         svoe:
           cluster_id: 2
           compression: gzip
-          data_feed_image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v7
+          data_feed_image_version: v1.0.0
           glue_database: svoe_glue_db
-          hash_short: 614aa00acb
+          hash_short: 755cf06d7f
           instrument_type: perpetual
           s3_bucket: svoe.test.1
           s3_prefix: data_lake
-          version: 614aa00acb6ce02f92b3da7aba73b40e1b47a218
+          version: 755cf06d7f7a506570008afd08b6c633ee2d8a03
         write_on_stop: true
 
 {{ end }}

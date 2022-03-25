@@ -97,7 +97,7 @@ def build_pod_configs(exchange, exchange_config):
         config['svoe']['version'] = hash_pod_config # version is long
         config['svoe']['hash_short'] = hash_short
         config['prometheus']['multiproc_dir'] = config['prometheus']['multiproc_dir_prefix'] + '_' + hash_short
-        config['svoe']['data_feed_image'] = exchange_config['dataFeedImage']
+        config['svoe']['data_feed_image_version'] = exchange_config['dataFeedImageVersion']
         config['svoe']['cluster_id'] = exchange_config['clusterId']
 
         labels = {
@@ -108,8 +108,7 @@ def build_pod_configs(exchange, exchange_config):
             'svoe.exchange': exchange,
             'svoe.name': name,
             'svoe.cluster-id': exchange_config['clusterId'],
-            # TODO full image name contains forbidden chars by kuber, use image version here?
-            # 'svoe.data-feed-image': exchange_config['dataFeedImage']
+            'svoe.data-feed-image-version': exchange_config['dataFeedImageVersion']
         }
 
         for s in symbol_pod_mapping[pod_id]:
@@ -131,7 +130,7 @@ def build_pod_configs(exchange, exchange_config):
                      'symbol': s.normalized},
                 symbol_pod_mapping[pod_id]
             )),
-            'data_feed_image': exchange_config['dataFeedImage'],
+            'data_feed_image_version': exchange_config['dataFeedImageVersion'],
             # TODO remove duplication and read directly from config to helm
             'redis_port': config['redis']['port'],
             'prometheus_metrics_port': config['prometheus']['port'],

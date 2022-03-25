@@ -21,6 +21,10 @@ def get_env_values_per_cluster_path(cluster_name):
 tf = subprocess.getoutput('cd ../terraform && terraform output -json')
 tf_config = json.loads(tf)
 
+GLOBAL_ENV_VALUES = {
+    'dataFeedImagePrefix': tf_config['svoe_data_feed_ecr_repo_url']['value']
+}
+
 cluster_ids = [int(cluster_id) for cluster_id in tf_config['multicluster_config_output']['value']]
 
 for cluster_id in tf_config['multicluster_config_output']['value']:
@@ -28,14 +32,15 @@ for cluster_id in tf_config['multicluster_config_output']['value']:
 
     # set tf values as default env values
     cluster_name = cluster_config['cluster_name']
-    env_values = {
+    env_values = GLOBAL_ENV_VALUES.copy()
+    env_values.update({
         'clusterName': cluster_name,
         'clusterId': int(cluster_id),
         'clusterIds': cluster_ids,
         'observerClusterId': OBSERVER_CLUSTER_ID,
         'isObserver': int(cluster_id) == OBSERVER_CLUSTER_ID,
         'isMysqlHost': int(cluster_id) == MYSQL_HOST_CLUSTER_ID,
-    }
+    })
 
     env_values_path = get_env_values_per_cluster_path(cluster_name)
     os.makedirs(os.path.dirname(env_values_path), exist_ok=True)

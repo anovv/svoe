@@ -19,7 +19,7 @@ svoe:
   compression: gzip
   version: unchanged
   hash_short: unchanged
-  data_feed_image: unchanged
+  data_feed_image_version: unchanged
   cluster_id: unchanged
 storage_interval: 30
 health_check:
