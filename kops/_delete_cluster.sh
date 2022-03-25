@@ -18,7 +18,7 @@ echo "Draining nodes..."
 NODES=$(kubectl --context $CLUSTER_NAME get nodes -l kubernetes.io/role=node | awk '{print $1}' | tail -n +2)
 for node in $NODES
 do
-  kubectl --context $CLUSTER_NAME drain --ignore-daemonsets --delete-emptydir-data --force $node &
+  kubectl --context $CLUSTER_NAME drain --ignore-daemonsets --delete-emptydir-data --force --disable-eviction --skip-wait-for-delete-timeout=60 --timeout=70s $node &
 done
 wait
 echo "All nodes are drained."
