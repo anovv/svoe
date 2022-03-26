@@ -44,7 +44,7 @@ podConfigs:
         limits:
           cpu: {{ pod_config['data_feed_resources']['limits']['cpu'] }}
           memory: {{ pod_config['data_feed_resources']['limits']['memory'] }}
-      image: {%- raw %} {{ .Values.dataFeedImagePrefix }}:{% endraw %}{{ pod_config['data_feed_image_version'] }}
+      image: {%- raw %} {{ .Values.dataFeedImagePrefix }}:v{% endraw %}{{ pod_config['data_feed_image_version'] }}
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
         {{ pod_config['data_feed_config'] | indent(width=8) }}

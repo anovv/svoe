@@ -12,7 +12,7 @@ exchangeConfigSets:
         quotes: []
         bases: [BSV]
       channels: [ticker, l2_book, trades]
-      dataFeedImageVersion: v1.0.0 # sync with data_feed/ci
+      dataFeedImageVersion: 1.0.0 # sync with data_feed/ci
       channelsConfigOverrides:
         l2_book:
           max_depth: 100
@@ -37,7 +37,7 @@ exchangeConfigSets:
         bases: [SHIB]
         symbols: []
       channels: [l2_book, trades, liquidations, open_interest, funding]
-      dataFeedImageVersion: v1.0.0 # sync with data_feed/ci
+      dataFeedImageVersion: 1.0.0 # sync with data_feed/ci
       channelsConfigOverrides:
         l2_book:
           max_depth: 100

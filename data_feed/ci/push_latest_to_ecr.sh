@@ -12,7 +12,7 @@ ECR_REPO_URL=$(echo $TF_OUTPUT_JSON | jq -r .svoe_data_feed_ecr_repo_url.value)
 ECR_REGISTRY_ID=$(echo $TF_OUTPUT_JSON | jq -r .svoe_data_feed_ecr_repo_registry_id.value)
 ECR_REPO_NAME=$(echo $TF_OUTPUT_JSON | jq -r .svoe_data_feed_ecr_repo_name.value)
 
-# check if latest version id already in ECR
+# check if latest version is already in ECR
 IMAGE_TAGS=$(aws ecr describe-images --registry-id $ECR_REGISTRY_ID --repository-name $ECR_REPO_NAME --output json | jq -r ".imageDetails[].imageTags")
 LATEST_INDEX=$(echo $IMAGE_TAGS | jq -s "flatten | index([\"${LATEST_VERSION_TAG}\"])")
 if ! [ $LATEST_INDEX = null ]; then
