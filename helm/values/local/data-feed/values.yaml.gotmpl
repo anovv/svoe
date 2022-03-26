@@ -1,7 +1,7 @@
 {{ if eq .Values.clusterId 1 }}
 commonSecrets:
   mysql:
-    host: mysql-global-svc.mysql.svc.local # namespace should be synced with mysql chart
+    host: mysql-global-svc.mysql.svc.cluster.local # namespace should be synced with mysql chart
     port: 3306
     database: {{ .Values | get "mysqlDefaultSvoeDb" }}
     user: root # TODO
@@ -98,7 +98,7 @@ podConfigs:
 {{ if eq .Values.clusterId 2 }}
 commonSecrets:
   mysql:
-    host: mysql-global-svc.mysql.svc.local # namespace should be synced with mysql chart
+    host: mysql-global-svc.mysql.svc.cluster.local # namespace should be synced with mysql chart
     port: 3306
     database: {{ .Values | get "mysqlDefaultSvoeDb" }}
     user: root # TODO

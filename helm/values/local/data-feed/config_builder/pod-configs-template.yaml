@@ -2,7 +2,7 @@
 {%- raw %}{{ if eq .Values.clusterId {% endraw %}{{cluster_id}}{% raw %} }}{% endraw %}
 commonSecrets:
   mysql:
-    host: mysql-global-svc.mysql.svc.local # namespace should be synced with mysql chart
+    host: mysql-global-svc.mysql.svc.cluster.local # namespace should be synced with mysql chart
     port: 3306
     database: {%- raw %} {{ .Values | get "mysqlDefaultSvoeDb" }}{% endraw %}
     user: root # TODO
