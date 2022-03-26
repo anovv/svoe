@@ -48,6 +48,7 @@ spec:
         {{- end }}
     spec:
       # TODO set resources for redis/redis-exporter sidecars
+      # TODO sync termination order (redis after data-feed)
       containers:
         - image: redis:alpine
           name: redis
@@ -64,17 +65,20 @@ spec:
           ports:
             - containerPort: {{ .dataFeed.prometheusMetricsPort }}
               name: df-metrics
+            - containerPort: {{ .dataFeed.healthPort }}
+              name: df-health
           volumeMounts:
             - mountPath: {{ .dataFeed.configVolumeMountPath }}
               name: {{ .name }}-conf-vol
           envFrom:
             - secretRef:
                 name: data-feed-common-secret
+          # TODO startup probe on the same /health endpoint
           livenessProbe:
             httpGet:
               path: {{ .dataFeed.healthPath }}
-              port: {{ .dataFeed.healthPort }}
-            initialDelaySeconds: 5
+              port: df-health
+            initialDelaySeconds: 50 # TODO figure out timeout (sometimes takes up to 2 minutes to start)
             periodSeconds: 5
           resources:
             requests:
