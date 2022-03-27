@@ -73,12 +73,18 @@ spec:
           envFrom:
             - secretRef:
                 name: data-feed-common-secret
-          # TODO startup probe on the same /health endpoint
+          startupProbe:
+            initialDelaySeconds: 5
+            periodSeconds: 1
+            failureThreshold: 90
+            httpGet:
+              path: {{ .dataFeed.healthPath }}
+              port: df-health
           livenessProbe:
             httpGet:
               path: {{ .dataFeed.healthPath }}
               port: df-health
-            initialDelaySeconds: 50 # TODO figure out timeout (sometimes takes up to 2 minutes to start)
+            initialDelaySeconds: 5
             periodSeconds: 5
           resources:
             requests:
