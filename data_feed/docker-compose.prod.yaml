@@ -13,3 +13,9 @@ services:
     depends_on:
       - mysql
       - redis
+    ports:
+      - 1234:1234
+      - 8000:8000
+    expose:
+      - 1234
+      - 8000

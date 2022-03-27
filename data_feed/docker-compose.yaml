@@ -36,6 +36,12 @@ services:
     depends_on:
       - mysql
       - redis
+    ports:
+      - 1234:1234
+      - 8000:8000
+    expose:
+      - 1234
+      - 8000
   dumper-restorer:
     # TODO add on-destroy hook and launch dump script
     command: sh -c "/scripts/mysqls3init.sh; /scripts/mysqls3restore.sh; while true; do echo 'Sleeping 30s...' && sleep 30; done;"
