@@ -15,7 +15,6 @@ services:
       - 3306
     # https://iamvickyav.medium.com/mysql-init-script-on-docker-compose-e53677102e48
     environment:
-      # TODO figure out why this password is not set/working
       - MYSQL_ROOT_PASSWORD=root # should be in sync with secrets_DO_NOT_COMMIT.env
     # TODO depends_on dumper-restorer for correct shutdown sequence and dump?
   svoe_data_feed:
@@ -33,6 +32,7 @@ services:
       - ./secrets_DO_NOT_COMMIT.env
     environment:
       - ENV=DEV
+      - PROMETHEUS_MULTIPROC_DIR=/etc/svoe/data_feed/prometheus_multiproc_dir
     depends_on:
       - mysql
       - redis

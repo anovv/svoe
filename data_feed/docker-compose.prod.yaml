@@ -10,6 +10,7 @@ services:
       - ./data-feed-config.yaml:/etc/svoe/data_feed/configs/data-feed-config.yaml
     environment:
       - ENV=PROD
+      - PROMETHEUS_MULTIPROC_DIR=/etc/svoe/data_feed/prometheus_multiproc_dir
     depends_on:
       - mysql
       - redis
