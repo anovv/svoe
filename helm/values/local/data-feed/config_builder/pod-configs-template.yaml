@@ -36,7 +36,9 @@ podConfigs:
     dataFeed:
       healthPath: {{ pod_config['data_feed_health_path'] }}
       healthPort: {{ pod_config['data_feed_health_port'] }}
-      prometheusMetricsPort: {{ pod_config['prometheus_metrics_port'] }}
+      prometheus:
+        metricsPort: {{ pod_config['prometheus_metrics_port'] }}
+        multiprocDir: {{ pod_config['prometheus_multiproc_dir'] }}
       resources:
         requests:
           cpu: {{ pod_config['data_feed_resources']['requests']['cpu'] }}

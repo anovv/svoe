@@ -3,3 +3,5 @@
 #
 # Networking debug:
 # kk apply -f https://k8s.io/examples/admin/dns/dnsutils.yaml
+# Busybox
+# kubectl run -i --tty busybox --image=busybox

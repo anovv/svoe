@@ -134,6 +134,7 @@ def build_pod_configs(exchange, exchange_config):
             # TODO remove duplication and read directly from config to helm
             'redis_port': config['redis']['port'],
             'prometheus_metrics_port': config['prometheus']['port'],
+            'prometheus_multiproc_dir': config['prometheus']['multiproc_dir'],
             'data_feed_health_path': config['health_check']['path'],
             'data_feed_health_port': config['health_check']['port'],
             'data_feed_config': yaml.dump(config, default_flow_style=False),

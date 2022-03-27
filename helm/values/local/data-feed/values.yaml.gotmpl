@@ -38,7 +38,9 @@ podConfigs:
     dataFeed:
       healthPath: /health
       healthPort: 1234
-      prometheusMetricsPort: 8000
+      prometheus:
+        metricsPort: 8000
+        multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_b20b484996
       resources:
         requests:
           cpu: 25m
@@ -137,7 +139,9 @@ podConfigs:
     dataFeed:
       healthPath: /health
       healthPort: 1234
-      prometheusMetricsPort: 8000
+      prometheus:
+        metricsPort: 8000
+        multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_755cf06d7f
       resources:
         requests:
           cpu: 25m

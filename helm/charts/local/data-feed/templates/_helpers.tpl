@@ -19,9 +19,9 @@ spec:
       protocol: TCP
       targetPort: 9121
     - name: df-metrics
-      port: {{ .dataFeed.prometheusMetricsPort }}
+      port: {{ .dataFeed.prometheus.metricsPort }}
       protocol: TCP
-      targetPort: {{ .dataFeed.prometheusMetricsPort }}
+      targetPort: {{ .dataFeed.prometheus.metricsPort }}
   selector:
     name: {{ .name }}-ss
 {{- end }}
@@ -97,7 +97,7 @@ spec:
               touch /lifecycle/data-feed-finished
               echo "Flagged data-feed-container finished."
           ports:
-            - containerPort: {{ .dataFeed.prometheusMetricsPort }}
+            - containerPort: {{ .dataFeed.prometheus.metricsPort }}
               name: df-metrics
             - containerPort: {{ .dataFeed.healthPort }}
               name: df-health
@@ -109,10 +109,13 @@ spec:
           envFrom:
             - secretRef:
                 name: data-feed-common-secret
+          env:
+            - name: PROMETHEUS_MULTIPROC_DIR
+              value: {{ .dataFeed.prometheus.multiprocDir }}
           startupProbe:
-            initialDelaySeconds: 5
-            periodSeconds: 1
-            failureThreshold: 90
+            initialDelaySeconds: 15
+            periodSeconds: 2
+            failureThreshold: 60
             httpGet:
               path: {{ .dataFeed.healthPath }}
               port: df-health
