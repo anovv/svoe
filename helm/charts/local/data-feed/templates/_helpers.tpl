@@ -26,7 +26,6 @@ spec:
     name: {{ .name }}-ss
 {{- end }}
 {{- define "data-feed.data-feed-stateful-set" }}
-# TODO startup probe and port
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -48,12 +47,34 @@ spec:
         {{- end }}
     spec:
       # TODO set resources for redis/redis-exporter sidecars
-      # TODO sync termination order (redis after data-feed)
       containers:
         - image: redis:alpine
           name: redis
           ports:
             - containerPort: {{ .redis.port }}
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              redis-server &
+              PID=$!
+
+              stop () {
+                echo "Calling stop..."
+                while true; do
+                  if [ -f "/lifecycle/data-feed-finished" ]; then
+                    echo "Data feed container finished."
+                    kill $PID
+                    break
+                  fi
+                  sleep 1
+                done
+              }
+              trap stop TERM INT EXIT
+              wait $PID
+              echo "Exited."
+          volumeMounts:
+            - name: lifecycle
+              mountPath: /lifecycle
         - image: oliver006/redis_exporter:latest
           name: redis-exporter
           ports:
@@ -62,6 +83,19 @@ spec:
         - image: {{ .dataFeed.image }}
           imagePullPolicy: IfNotPresent
           name: data-feed-container
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              svoe_data_feed_launch &
+              PID=$!
+              echo "Waiting for termination..."
+              while kill -0 $PID
+              do
+                sleep 1
+              done
+              echo "data-feed-container process finished."
+              touch /lifecycle/data-feed-finished
+              echo "Flagged data-feed-container finished."
           ports:
             - containerPort: {{ .dataFeed.prometheusMetricsPort }}
               name: df-metrics
@@ -70,6 +104,8 @@ spec:
           volumeMounts:
             - mountPath: {{ .dataFeed.configVolumeMountPath }}
               name: {{ .name }}-conf-vol
+            - mountPath: /lifecycle
+              name: lifecycle
           envFrom:
             - secretRef:
                 name: data-feed-common-secret
@@ -99,6 +135,8 @@ spec:
             defaultMode: 365
             name: {{ .name }}-cm
           name: {{ .name }}-conf-vol
+        - name: lifecycle
+          emptyDir: {}
       affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
