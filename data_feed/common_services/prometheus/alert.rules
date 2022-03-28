@@ -1,3 +1,5 @@
+# TODO set up proper alerts
+# TODO split into dev and prod
 groups:
 - name: targets
   rules:

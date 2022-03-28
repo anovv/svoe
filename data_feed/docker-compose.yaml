@@ -1,3 +1,12 @@
+# TODO add prometheus/grafana/alertmanager
+# https://github.com/stefanprodan/dockprom/
+# https://github.com/PagerTree/prometheus-grafana-alertmanager-example
+
+# TODO telegram bot
+# https://github.com/metalmatze/alertmanager-bot
+
+# TODO cadvisor?
+
 version: "3.9"
 volumes:
   prometheus_data:
@@ -19,11 +28,25 @@ services:
     restart: always
     expose:
       - 9090
+
+  alertmanager:
+    image: prom/alertmanager:v0.23.0
+    container_name: alertmanager
+    volumes:
+      - ./common_services/alertmanager:/etc/alertmanager
+    command:
+      - '--config.file=/etc/alertmanager/config.yaml'
+      - '--storage.path=/alertmanager'
+    restart: always
+    expose:
+      - 9093
+
   redis:
     image: redis:alpine
     expose:
       - 6379
     command: [ "redis-server", "--save", "''", "--appendonly", "no" ]
+
   mysql:
     image: mysql:latest
     command: --default-authentication-plugin=mysql_native_password
@@ -33,6 +56,7 @@ services:
     environment:
       - MYSQL_ROOT_PASSWORD=root # should be in sync with secrets_DO_NOT_COMMIT.env
     # TODO depends_on dumper-restorer for correct shutdown sequence and dump?
+
   svoe_data_feed:
     image: svoe_data_feed_dev
     build:
@@ -55,6 +79,7 @@ services:
     expose:
       - 1234
       - 8000
+
   dumper-restorer:
     # TODO add on-destroy hook and launch dump script
     command: sh -c "/scripts/mysqls3init.sh; /scripts/mysqls3restore.sh; while true; do echo 'Sleeping 30s...' && sleep 30; done;"
@@ -66,7 +91,3 @@ services:
       - ../helm/charts/local/mysql-extra/scripts/mysqls3dump.sh:/scripts/mysqls3dump.sh
     env_file:
       - ./secrets_DO_NOT_COMMIT.env
-
-# TODO add prometheus/grafana/alertmanager
-# https://github.com/PagerTree/prometheus-grafana-alertmanager-example
-# https://github.com/metalmatze/alertmanager-bot
