@@ -22,6 +22,10 @@ primary:
         done
       }
       trap stop TERM INT EXIT
+      # We explicitly call stop to ensure the sidecar will terminate
+      # if the main container exits outside a request from Kubernetes
+      # to kill the Pod.
+      stop &
       wait $PID
       echo "Exited."
   sidecars:

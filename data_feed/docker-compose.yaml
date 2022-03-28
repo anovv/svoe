@@ -53,3 +53,5 @@ services:
       - ../helm/charts/local/mysql-extra/scripts/mysqls3dump.sh:/scripts/mysqls3dump.sh
     env_file:
       - ./secrets_DO_NOT_COMMIT.env
+
+# TODO add prometheus/grafana
