@@ -14,7 +14,6 @@ volumes:
 services:
   prometheus:
     image: prom/prometheus:v2.32.1
-    container_name: prometheus
     volumes:
       - ./common_services/prometheus:/etc/prometheus
       - prometheus_data:/prometheus
@@ -31,7 +30,6 @@ services:
 
   alertmanager:
     image: prom/alertmanager:v0.23.0
-    container_name: alertmanager
     volumes:
       - ./common_services/alertmanager:/etc/alertmanager
     command:
@@ -40,6 +38,20 @@ services:
     restart: always
     expose:
       - 9093
+
+  grafana:
+    image: grafana/grafana:8.3.3
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./common_services/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
+      - ./common_services/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    restart: always
+    expose:
+      - 3000
 
   redis:
     image: redis:alpine
