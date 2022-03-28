@@ -1,11 +1,7 @@
-# TODO add prometheus/grafana/alertmanager
 # https://github.com/stefanprodan/dockprom/
-# https://github.com/PagerTree/prometheus-grafana-alertmanager-example
 
 # TODO telegram bot
 # https://github.com/metalmatze/alertmanager-bot
-
-# TODO cadvisor?
 
 version: "3.9"
 volumes:
@@ -14,6 +10,7 @@ volumes:
 services:
   prometheus:
     image: prom/prometheus:v2.32.1
+    container_name: prometheus
     volumes:
       - ./common_services/prometheus:/etc/prometheus
       - prometheus_data:/prometheus
@@ -25,22 +22,28 @@ services:
       - '--storage.tsdb.retention.time=200h'
       - '--web.enable-lifecycle'
     restart: always
+    ports:
+      - '9090:9090'
     expose:
       - 9090
 
   alertmanager:
     image: prom/alertmanager:v0.23.0
+    container_name: alertmanager
     volumes:
       - ./common_services/alertmanager:/etc/alertmanager
     command:
       - '--config.file=/etc/alertmanager/config.yaml'
       - '--storage.path=/alertmanager'
     restart: always
+    ports:
+      - '9093:9093'
     expose:
       - 9093
 
   grafana:
     image: grafana/grafana:8.3.3
+    container_name: grafana
     volumes:
       - grafana_data:/var/lib/grafana
       - ./common_services/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
@@ -50,11 +53,16 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=admin
       - GF_USERS_ALLOW_SIGN_UP=false
     restart: always
+    ports:
+      - '3000:3000'
     expose:
       - 3000
 
+  # TODO is this needed?
   nodeexporter:
     image: prom/node-exporter:v1.3.1
+    container_name: nodeexporter
+    privileged: true
     volumes:
       - /proc:/host/proc:ro
       - /sys:/host/sys:ro
@@ -65,6 +73,8 @@ services:
       - '--path.sysfs=/host/sys'
       - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
     restart: always
+    ports:
+      - '9100:9100'
     expose:
       - 9100
 
@@ -81,19 +91,27 @@ services:
       - /var/lib/docker:/var/lib/docker:ro
       #- /cgroup:/cgroup:ro #doesn't work on MacOS only for Linux
     restart: always
+    ports:
+      - '8080:8080'
     expose:
       - 8080
 
   redis:
     image: redis:alpine
+    container_name: redis
+    ports:
+      - '6379:6379'
     expose:
       - 6379
     command: [ "redis-server", "--save", "''", "--appendonly", "no" ]
 
   mysql:
     image: mysql:latest
+    container_name: mysql
     command: --default-authentication-plugin=mysql_native_password
     restart: always
+    ports:
+      - '3306:3306'
     expose:
       - 3306
     environment:
@@ -102,6 +120,7 @@ services:
 
   svoe_data_feed:
     image: svoe_data_feed_dev
+    container_name: svoe_data_feed
     build:
       context: .
       dockerfile: Dockerfile-dev
@@ -119,14 +138,18 @@ services:
     depends_on:
       - mysql
       - redis
+    ports:
+      - '1234:1234'
+      - '8000:8000'
     expose:
       - 1234
       - 8000
 
-  dumper-restorer:
+  dumper_restorer:
     # TODO add on-destroy hook and launch dump script
     command: sh -c "/scripts/mysqls3init.sh; /scripts/mysqls3restore.sh; while true; do echo 'Sleeping 30s...' && sleep 30; done;"
     image: alpine:latest
+    container_name: dumper_restorer
     restart: always
     volumes:
       - ../helm/charts/local/mysql-extra/scripts/mysqls3init.sh:/scripts/mysqls3init.sh
