@@ -8,4 +8,3 @@ secrets_DO_NOT_COMMIT.env
 __pycache__
 *.egg-info
 common_services
-requirements-dev.txt
