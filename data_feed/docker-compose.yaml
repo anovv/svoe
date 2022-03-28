@@ -1,5 +1,24 @@
 version: "3.9"
+volumes:
+  prometheus_data:
+  grafana_data:
 services:
+  prometheus:
+    image: prom/prometheus:v2.32.1
+    container_name: prometheus
+    volumes:
+      - ./common_services/prometheus:/etc/prometheus
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yaml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    restart: always
+    expose:
+      - 9090
   redis:
     image: redis:alpine
     expose:
@@ -9,11 +28,8 @@ services:
     image: mysql:latest
     command: --default-authentication-plugin=mysql_native_password
     restart: always
-    ports:
-      - 3306:3306
     expose:
       - 3306
-    # https://iamvickyav.medium.com/mysql-init-script-on-docker-compose-e53677102e48
     environment:
       - MYSQL_ROOT_PASSWORD=root # should be in sync with secrets_DO_NOT_COMMIT.env
     # TODO depends_on dumper-restorer for correct shutdown sequence and dump?
@@ -36,9 +52,6 @@ services:
     depends_on:
       - mysql
       - redis
-    ports:
-      - 1234:1234
-      - 8000:8000
     expose:
       - 1234
       - 8000
@@ -54,4 +67,6 @@ services:
     env_file:
       - ./secrets_DO_NOT_COMMIT.env
 
-# TODO add prometheus/grafana
+# TODO add prometheus/grafana/alertmanager
+# https://github.com/PagerTree/prometheus-grafana-alertmanager-example
+# https://github.com/metalmatze/alertmanager-bot
