@@ -7,6 +7,8 @@ version: "3.9"
 volumes:
   prometheus_data:
   grafana_data:
+  alertmanager_telegram_bot_data:
+
 services:
   prometheus:
     image: prom/prometheus:v2.32.1
@@ -40,6 +42,23 @@ services:
       - '9093:9093'
     expose:
       - 9093
+
+  alertmanager_telegram_bot:
+    image: metalmatze/alertmanager-bot:0.4.3
+    container_name: alertmanager_telegram_bot
+    volumes:
+      - alertmanager_telegram_bot_data:/data
+    restart: always
+    env_file:
+      - ./common_services/alertmanager_telegram_bot/secrets_DO_NOT_COMMIT.env
+    environment:
+      - ENV=DEV
+      - ALERTMANAGER_URL=http://alertmanager:9093
+      - BOLT_PATH=/data/bot.db
+      - STORE=bolt
+      - LISTEN_ADDR=0.0.0.0:8081
+    ports:
+      - '8081:8081'
 
   grafana:
     image: grafana/grafana:8.3.3

@@ -1,13 +1,9 @@
-# TODO set up telegram
 # TODO split into dev and prod
 route:
-    receiver: 'slack'
+  receiver: 'alertmanager_telegram_bot'
 
 receivers:
-    - name: 'slack'
-      slack_configs:
-          - send_resolved: true
-            text: "{{ .CommonAnnotations.description }}"
-            username: 'Prometheus'
-            channel: '#<channel-name>'
-            api_url: 'https://hooks.slack.com/services/<webhook-id>'
+  - name: 'alertmanager_telegram_bot'
+    webhook_configs:
+      - send_resolved: true
+        url: 'http://alertmanager_telegram_bot:8081'
