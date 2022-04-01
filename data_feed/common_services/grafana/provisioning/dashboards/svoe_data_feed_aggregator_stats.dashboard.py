@@ -8,7 +8,7 @@ METRIC_NAME_LATENCY_BUCKET = 'svoe_latency_ms_histogram_bucket'
 # TODO figure out template per graph
 template_list = [
     G.Template(
-        default='',
+        default='l2_book',
         includeAll=True,
         multi=True,
         dataSource=PROMETHEUS_DATA_SOURCE,
@@ -17,7 +17,7 @@ template_list = [
         query=f'label_values({METRIC_NAME_LATENCY_COUNT}, data_type)'
     ),
     G.Template(
-        default='',
+        default='BINANCE',
         includeAll=True,
         multi=True,
         dataSource=PROMETHEUS_DATA_SOURCE,
@@ -26,7 +26,7 @@ template_list = [
         query=f'label_values({METRIC_NAME_LATENCY_COUNT}, exchange)'
     ),
     G.Template(
-        default='',
+        default='BTC-USDT',
         includeAll=True,
         multi=True,
         dataSource=PROMETHEUS_DATA_SOURCE,
@@ -37,36 +37,32 @@ template_list = [
 ]
 
 
-def _frequency_graph(title, operation):
+def _frequency_graph(title, operation, agg_window):
     return G.Graph(
         title=title,
         dataSource=PROMETHEUS_DATA_SOURCE,
         targets=[
             G.Target(
-                expr=f'rate({METRIC_NAME_LATENCY_COUNT}{{operation=\'{operation}\', data_type=~\'$data_type\', exchange=~\'$exchange\', symbol=~\'$symbol\'}}[1m])',
+                expr=f'rate({METRIC_NAME_LATENCY_COUNT}{{operation=\'{operation}\', data_type=~\'$data_type\', exchange=~\'$exchange\', symbol=~\'$symbol\'}}[{agg_window}])',
             ),
         ],
         yAxes=G.single_y_axis(format=G.OPS_FORMAT),
         lineWidth=1,
     )
 
-def _latency_graph(title, operation):
+
+def _latency_graph(title, operation, agg_window):
+    expr_template_lambda = \
+        lambda quantile: f'histogram_quantile({quantile}, rate({METRIC_NAME_LATENCY_BUCKET}{{operation=\'{operation}\', data_type=~\'$data_type\', exchange=~\'$exchange\', symbol=~\'$symbol\'}}[{agg_window}]))'
+    quantiles = ['0.95', '0.5']
+    targets = list(map(lambda quantile: G.Target(expr=expr_template_lambda(quantile)), quantiles))
     return G.Graph(
         title=title,
         dataSource=PROMETHEUS_DATA_SOURCE,
-        targets=[
-            # TODO add labels with percentile names
-            G.Target(
-                expr=f'histogram_quantile(0.95, rate({METRIC_NAME_LATENCY_BUCKET}{{operation=\'{operation}\', data_type=~\'$data_type\', exchange=~\'$exchange\', symbol=~\'$symbol\'}}[5m]))'
-            ),
-            G.Target(
-                expr=f'histogram_quantile(0.5, rate({METRIC_NAME_LATENCY_BUCKET}{{operation=~\'{operation}\', data_type=~\'$data_type\', exchange=~\'$exchange\', symbol=~\'$symbol\'}}[5m]))'
-            ),
-        ],
+        targets=targets,
         yAxes=G.single_y_axis(format=G.MILLISECONDS_FORMAT),
         lineWidth=1,
     )
-
 
 
 dashboard = G.Dashboard(
@@ -77,13 +73,13 @@ dashboard = G.Dashboard(
     rows=[
         # cache reads row
         G.Row(panels=[
-            _frequency_graph('Cache Reads Frequency', 'read'),
-            _latency_graph('Cache Reads Latency', 'read')
+            _frequency_graph('Cache Reads Frequency (1m agg)', 'read', '1m'),
+            _latency_graph('Cache Reads Latency (5m agg)', 'read', '5m')
         ]),
-        # remote write row
+        # remote writes row
         G.Row(panels=[
-            _frequency_graph('Remote Writes Frequency', 'write'),
-            _latency_graph('Remote Writes Latency', 'write')
+            _frequency_graph('Remote Writes Frequency (1m agg)', 'write', '1m'),
+            _latency_graph('Remote Writes Latency (5m agg)', 'write', '5m')
         ]),
     ]
 ).auto_panel_ids()
