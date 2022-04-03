@@ -76,10 +76,10 @@ which are not used by us (Kafka cache, different types of remote store connector
    * Redis (see External dependencies)
    * Mysql (see External dependencies)
    * dumper-restorer (see External dependencies)
-   * Prometheus (for local dev see svoe_data_feed/common/services/prometheus)
-   * Grafana (for local dev see svoe_data_feed/common/services/grafana)
-   * Alertmanager (for local dev see svoe_data_feed/common/services/alertmanager)
-   * AlertmanagerTelegramBot (for local dev see svoe_data_feed/common/services/alertmanager_telegram_bot)
+   * Prometheus (for local dev see `svoe_data_feed/common/services/prometheus`)
+   * Grafana (for local dev see `svoe_data_feed/common/services/grafana`)
+   * Alertmanager (for local dev `see svoe_data_feed/common/services/alertmanager`)
+   * AlertmanagerTelegramBot (for local dev see `svoe_data_feed/common/services/alertmanager_telegram_bot`)
 * For dev environment, `docker-compose.yaml` mounts `cryptofeed` and `cryptostore` folders to `svoe_data_feed` container and
    `Dockerfile-dev` makes sure mounted paths are added to `PYTHONPATH` envvar inside the container. This helps us instantly pick up
    changes in those directories outside the container without rebuilding the image on each code change. The only time we need to rebuild
@@ -147,8 +147,8 @@ should require doing steps described in `svoe/data_feed/Dockerfile-dev`. You wil
 * Update `PYTHONPATH` env var (see Dockerfile-dev) (use `sys.path.append` ?)
 * Set up necessary env vars (see `docker-compose.yaml`)
 * pip dependencies are specified in `svoe/data_feed/requirements-dev.txt` (you can run `pip install -r requirements-dev.txt`)
-* note that `cryptofeed` uses `Cython` which may require running `setuptools` by running `python setup.py install` inside cryptofeed dir.
-In docker, this step is done inside service itself via running `pyximport.install()` in the beggining of imports in `svoe/data_feed/data_feed/data_feed_service.py`.
+* note that `cryptofeed` uses `Cython` which may require running `setuptools` by running `python setup.py install` inside `cryptofeed` dir.
+In docker dev environment, this step is done inside service itself via running `pyximport.install()` in the beggining of imports in `svoe/data_feed/data_feed/data_feed_service.py`. In prod environment, `python setup.py install` is run as part of `pip install -e . ` step inside `cryptofeed` dir inside container (see `svoe/data_feed/Dockerfile`). These differeneces led to not-synced dependencies in `setup.py` files in `cryptofeed/cryptostore/data_feed`, specifically empty `install_requires` (see next bullet).
 If you have `ENV=DEV` env var set locally, this may work okay (not sure)
 * Some dependencies may still be missing and require manual installation (`setup.py` files in forks of `cryptostore`
 and `cryptofeed` are changed to remove `install_requires` values for reasons I do not fully remember now,
