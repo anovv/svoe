@@ -35,7 +35,6 @@ helm/secrets/key.txt
 helm/secrets/shared_secrets.yaml.dec
 
 cryptostore.log
-data_feed/data-feed-config.yaml
 
 data_feed/secrets_DO_NOT_COMMIT.env
 data_feed/common_services/alertmanager_telegram_bot/secrets_DO_NOT_COMMIT.env
