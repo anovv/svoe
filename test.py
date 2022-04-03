@@ -1,5 +1,3 @@
-
-
 # TODO move to PYTHONPATH
 # import sys
 # sys.path.append('/Users/anov/IdeaProjects/cryptofeed')
