@@ -28,10 +28,10 @@ Cryptostore is a python multiprocess app, utilizing cryptofeed to be executed as
 Key processes:
 
 * `Cryptostore` (`cryptostore/cryptostore/cryptostore.py`) - main process to launch an app, parse config, do one-time pre-lauch
-operations and launch other processes (namely Spawner and Aggregator)
-* `Spawner` (`cryptostore/cryptostore/spawn.py`) - process to launch Collector processes depending on current config
+operations and launch other processes (namely `Spawner` and `Aggregator`)
+* `Spawner` (`cryptostore/cryptostore/spawn.py`) - process to launch `Collector` processes depending on current config
 * `Collector` (`cryptostore/cryptostore/collector.py`) - process to launch/handle cryptofeed's FeedHandler objects as
-configured by user. We configure those to write data to Redis as a temporary cache
+configured by user. We configure those to write data to Redis as a temporary cache. App is configured to launch one `Collector` per exchange.
 (`cryptofeed/cryptofeed/backends/redis.py`).
 * `Aggregator` (`cryptostore/cryptostore/aggregator/aggregator.py`, this file contains some irrelevant to us logic) -
 process to periodically aggregate data from cache (Redis in our case) and write it to remote store (s3 + Glue Db).
