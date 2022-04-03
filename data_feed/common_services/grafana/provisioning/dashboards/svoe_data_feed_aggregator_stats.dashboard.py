@@ -4,6 +4,7 @@ import grafanalib.core as G
 PROMETHEUS_DATA_SOURCE = 'Prometheus'
 METRIC_NAME_LATENCY_COUNT = 'svoe_latency_ms_histogram_count'
 METRIC_NAME_LATENCY_BUCKET = 'svoe_latency_ms_histogram_bucket'
+METRIC_NAME_BLOCK_SIZE_GAUGE = 'svoe_data_size_kb_gauge'
 
 # TODO figure out template per graph
 template_list = [
@@ -50,6 +51,19 @@ def _frequency_graph(title, operation, agg_window):
         lineWidth=1,
     )
 
+def _cached_block_size_graph():
+    return G.Graph(
+        title='Cached Block Size',
+        dataSource=PROMETHEUS_DATA_SOURCE,
+        targets=[
+            G.Target(
+                expr=f'{METRIC_NAME_BLOCK_SIZE_GAUGE}{{object=\'aggregator_cached_on_read\', data_type=~\'$data_type\', exchange=~\'$exchange\', symbol=~\'$symbol\'}} * 1024',
+            ),
+        ],
+        yAxes=G.single_y_axis(format=G.BYTES_FORMAT),
+        lineWidth=1,
+    )
+
 
 def _latency_graph(title, operation, agg_window):
     expr_template_lambda = \
@@ -64,7 +78,7 @@ def _latency_graph(title, operation, agg_window):
         lineWidth=1,
     )
 
-
+# TODO total write times graphs
 dashboard = G.Dashboard(
     title='Data Feed Aggregator Metrics',
     description='Latency, operations frequency and object sizes for aggregator',
@@ -81,6 +95,10 @@ dashboard = G.Dashboard(
             _frequency_graph('Remote Writes Frequency (1m agg)', 'write', '1m'),
             _latency_graph('Remote Writes Latency (5m agg)', 'write', '5m')
         ]),
+        # block size row
+        G.Row(panels=[
+            _cached_block_size_graph()
+        ])
     ]
 ).auto_panel_ids()
 
