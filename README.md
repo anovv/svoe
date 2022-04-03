@@ -76,10 +76,10 @@ which are not used by us (Kafka cache, different types of remote store connector
    * Redis (see External dependencies)
    * Mysql (see External dependencies)
    * dumper-restorer (see External dependencies)
-   * Prometheus (for local dev see `svoe_data_feed/common/services/prometheus`)
-   * Grafana (for local dev see `svoe_data_feed/common/services/grafana`)
-   * Alertmanager (for local dev `see svoe_data_feed/common/services/alertmanager`)
-   * AlertmanagerTelegramBot (for local dev see `svoe_data_feed/common/services/alertmanager_telegram_bot`)
+   * Prometheus (for local dev see `svoe/data_feed/common/services/prometheus`)
+   * Grafana (for local dev see `svoe/data_feed/common/services/grafana`)
+   * Alertmanager (for local dev `see svoe/data_feed/common/services/alertmanager`)
+   * AlertmanagerTelegramBot (for local dev see `svoe/data_feed/common/services/alertmanager_telegram_bot`)
 * For dev environment, `docker-compose.yaml` mounts `cryptofeed` and `cryptostore` folders to `svoe_data_feed` container and
    `Dockerfile-dev` makes sure mounted paths are added to `PYTHONPATH` envvar inside the container. This helps us instantly pick up
    changes in those directories outside the container without rebuilding the image on each code change. The only time we need to rebuild
