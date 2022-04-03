@@ -10,7 +10,7 @@ common formats (unathenticated channels only for us - tickers, l2/l3 books, trad
 to subscribers (we aim to use ZMQ sockets for IPC/pod-to-pod communication) as well as storing small blocks of
 aggregated data to remote store (currently Amazon S3 + Amazon Glue DB to be used with Amazon Athena).
 
-Essentially, it is a wrapper around [cryptostore fork](https://github.com/dirtyValera/cryptostore), which is in turn a service utilizing [cryptofeed](https://github.com/dirtyValera/cryptofeed), entrypoint in svoe/data_feed/data_feed/data_feed_service.py
+Essentially, it is a wrapper around [cryptostore fork](https://github.com/dirtyValera/cryptostore), which is in turn a service utilizing [cryptofeed](https://github.com/dirtyValera/cryptofeed), entrypoint in `svoe/data_feed/data_feed/data_feed_service.py`
 
 ### About cryptofeed
 
@@ -42,7 +42,8 @@ corresponding Glue DB schema
 
 
 To view configuration, check out `svoe/data_feed/data-feed-config.yaml` for out fork-specific config or
-`cryptostore/cryptostore/config.yaml` for upstream version
+`cryptostore/cryptostore/config.yaml` for upstream version.
+
 Fork specific features:
 
 * Custom config (`svoe/data_feed/data-feed-config.yaml`)
