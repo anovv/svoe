@@ -19,3 +19,4 @@ aioredis
 sqlalchemy
 cryptography
 pymysql
+pympler
