@@ -30,12 +30,12 @@ Key processes:
 * `Cryptostore` (`cryptostore/cryptostore/cryptostore.py`) - main process to launch an app, parse config, do one-time pre-lauch
 operations and launch other processes (namely `Spawner` and `Aggregator`)
 * `Spawner` (`cryptostore/cryptostore/spawn.py`) - process to launch `Collector` processes depending on current config
-* `Collector` (`cryptostore/cryptostore/collector.py`) - process to launch/handle cryptofeed's FeedHandler objects as
+* `Collector` (`cryptostore/cryptostore/collector.py`) - process to launch/handle cryptofeed's `FeedHandler` objects as
 configured by user. We configure those to write data to Redis as a temporary cache. App is configured to launch one `Collector` per exchange.
 (`cryptofeed/cryptofeed/backends/redis.py`).
 * `Aggregator` (`cryptostore/cryptostore/aggregator/aggregator.py`, this file contains some irrelevant to us logic) -
 process to periodically aggregate data from cache (Redis in our case) and write it to remote store (s3 + Glue Db).
-In our case write logic is int SvoeStore object.
+In our case write logic is in `SvoeStore` object.
 * `SvoeStore` (`cryptostore/cryptostore/data/svoe_store.py`) - logic to write aggregated data to remote store. It uses
 Python's [awsdatawrangler](https://aws-data-wrangler.readthedocs.io/en/stable/) package to simply write Pandas dataframe object to s3 file and simultaneously update
 corresponding Glue DB schema
