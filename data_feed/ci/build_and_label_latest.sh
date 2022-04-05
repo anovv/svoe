@@ -31,7 +31,7 @@ cd ../svoe  # TODO set up proper paths
 svoe_last_commit_hash=$(git rev-parse --short HEAD)
 
 echo "cryptofeed-latest-tag=${cryptofeed_latest_tag}"
-echo "cryptofeed-last-commit-hash-latest-tag=${cryptofeed_last_commit_hash}"
+echo "cryptofeed-last-commit-hash=${cryptofeed_last_commit_hash}"
 echo "cryptostore-latest-tag=${cryptostore_latest_tag}"
 echo "cryptostore-last-commit-hash=${cryptostore_last_commit_hash}"
 echo "svoe-last-commit-hash=${svoe_last_commit_hash}"
