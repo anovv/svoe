@@ -4,3 +4,5 @@
 1.0.1
   - PROMETHEUS_MULTIPROC_DIR is set by orchestrator
   - Fixed health check server_address
+1.0.2
+  - Merge upstream cryptofeed/cryptostore changes
