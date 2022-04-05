@@ -1,7 +1,7 @@
 # prod configuration overrides
 services:
   svoe_data_feed:
-    image: svoe_data_feed_prod
+    image: svoe_data_feed_prod # should be synced with data_feed/ci/ scripts
     container_name: svoe_data_feed
     build:
       context: .
