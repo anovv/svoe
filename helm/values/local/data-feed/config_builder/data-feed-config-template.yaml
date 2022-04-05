@@ -22,6 +22,7 @@ svoe:
   data_feed_image_version: unchanged
   cluster_id: unchanged
 storage_interval: 30
+build_info: {}
 health_check:
   port: 1234
   path: /health

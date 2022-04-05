@@ -5,10 +5,11 @@ from cryptofeed.exchanges import EXCHANGE_MAP
 from jinja2 import Template
 import yaml
 import json
+import subprocess
 from hashlib import sha1
 
 MASTER_CONFIG = yaml.safe_load(open('master-config.yaml', 'r'))
-
+BUILD_INFO_LOOKUP = {}
 
 def gen_helm_values():
     pod_configs = []
@@ -99,6 +100,7 @@ def build_pod_configs(exchange, exchange_config):
         config['prometheus']['multiproc_dir'] = config['prometheus']['multiproc_dir_prefix'] + '_' + hash_short
         config['svoe']['data_feed_image_version'] = exchange_config['dataFeedImageVersion']
         config['svoe']['cluster_id'] = exchange_config['clusterId']
+        config['build_info'] = _get_build_info(exchange_config['dataFeedImageVersion'])
 
         labels = {
             'svoe.service': 'data-feed',
@@ -246,6 +248,17 @@ def _get_resources(exchange, instrument_type, symbols):
             'memory': '400Mi'
         }
     }
+
+def _get_build_info(version):
+    if version in BUILD_INFO_LOOKUP:
+        return BUILD_INFO_LOOKUP[version]
+    # TODO make sure it is synced with ../data_feed/ci/get_latest_labels.sh
+    labels_output = subprocess.getoutput(f'cd ../../../../../data_feed/ci && ./get_latest_labels.sh {version}')
+    labels = json.loads(str(labels_output))
+    if not labels:
+        raise Exception(f'No labels for Data Feed image version {version} to use for build_info')
+    BUILD_INFO_LOOKUP[version] = labels
+    return labels
 
 gen_helm_values()
 print('Done.')

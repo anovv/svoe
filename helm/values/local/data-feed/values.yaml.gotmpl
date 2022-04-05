@@ -11,7 +11,7 @@ commonSecrets:
     secretAccessKey: {{ .Values | get "awsSecret" }}
     region: {{ .Values | get "awsDefaultRegion" }}
 podConfigs:
-  - name: data-feed-binance-spot-b20b484996
+  - name: data-feed-binance-spot-5ee4cb78aa
     exchange: BINANCE
     instrumentType: spot
     symbols:
@@ -20,13 +20,13 @@ podConfigs:
         quote: USDT
     labels:
       svoe.service: data-feed
-      svoe.version: b20b4849967e1a3f04321d49fec657a501e9289d
-      svoe.hash-short: b20b484996
+      svoe.version: 5ee4cb78aa83b2557cad825eb148da4d36d711b7
+      svoe.hash-short: 5ee4cb78aa
       svoe.instrument-type: spot
       svoe.exchange: BINANCE
-      svoe.name: data-feed-binance-spot-b20b484996
+      svoe.name: data-feed-binance-spot-5ee4cb78aa
       svoe.cluster-id: 1
-      svoe.data-feed-image-version: 1.0.0
+      svoe.data-feed-image-version: 1.0.2
       svoe.base.BTC: True
       svoe.quote.USDT: True
       svoe.symbol.BTC-USDT: True
@@ -40,7 +40,7 @@ podConfigs:
       healthPort: 1234
       prometheus:
         metricsPort: 8000
-        multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_b20b484996
+        multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_5ee4cb78aa
       resources:
         requests:
           cpu: 25m
@@ -48,9 +48,15 @@ podConfigs:
         limits:
           cpu: 50m
           memory: 400Mi
-      image: {{ .Values.dataFeedImagePrefix }}:v1.0.0
+      image: {{ .Values.dataFeedImagePrefix }}:v1.0.2
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
+        build_info:
+          cryptofeed-last-commit-hash: '3961981'
+          cryptofeed-latest-tag: v2.2.1
+          cryptostore-last-commit-hash: 757532e
+          cryptostore-latest-tag: v1.0.2
+          svoe-last-commit-hash: d7640e4
         cache: redis
         exchanges:
           BINANCE:
@@ -69,7 +75,7 @@ podConfigs:
           port: 1234
         num_write_threads: 100
         prometheus:
-          multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_b20b484996
+          multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_5ee4cb78aa
           multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
           port: 8000
         redis:
@@ -87,13 +93,13 @@ podConfigs:
         svoe:
           cluster_id: 1
           compression: gzip
-          data_feed_image_version: 1.0.0
+          data_feed_image_version: 1.0.2
           glue_database: svoe_glue_db
-          hash_short: b20b484996
+          hash_short: 5ee4cb78aa
           instrument_type: spot
           s3_bucket: svoe.test.1
           s3_prefix: data_lake
-          version: b20b4849967e1a3f04321d49fec657a501e9289d
+          version: 5ee4cb78aa83b2557cad825eb148da4d36d711b7
         write_on_stop: true
 
 {{ end }}
@@ -110,7 +116,7 @@ commonSecrets:
     secretAccessKey: {{ .Values | get "awsSecret" }}
     region: {{ .Values | get "awsDefaultRegion" }}
 podConfigs:
-  - name: data-feed-bybit-perpetual-755cf06d7f
+  - name: data-feed-bybit-perpetual-01f29001e8
     exchange: BYBIT
     instrumentType: perpetual
     symbols:
@@ -119,13 +125,13 @@ podConfigs:
         quote: USDT
     labels:
       svoe.service: data-feed
-      svoe.version: 755cf06d7f7a506570008afd08b6c633ee2d8a03
-      svoe.hash-short: 755cf06d7f
+      svoe.version: 01f29001e85003aba3c283e94f4c8d854526888a
+      svoe.hash-short: 01f29001e8
       svoe.instrument-type: perpetual
       svoe.exchange: BYBIT
-      svoe.name: data-feed-bybit-perpetual-755cf06d7f
+      svoe.name: data-feed-bybit-perpetual-01f29001e8
       svoe.cluster-id: 2
-      svoe.data-feed-image-version: 1.0.0
+      svoe.data-feed-image-version: 1.0.2
       svoe.base.BTC: True
       svoe.quote.USDT: True
       svoe.symbol.BTC-USDT-PERP: True
@@ -141,7 +147,7 @@ podConfigs:
       healthPort: 1234
       prometheus:
         metricsPort: 8000
-        multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_755cf06d7f
+        multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_01f29001e8
       resources:
         requests:
           cpu: 25m
@@ -149,9 +155,15 @@ podConfigs:
         limits:
           cpu: 50m
           memory: 400Mi
-      image: {{ .Values.dataFeedImagePrefix }}:v1.0.0
+      image: {{ .Values.dataFeedImagePrefix }}:v1.0.2
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
+        build_info:
+          cryptofeed-last-commit-hash: '3961981'
+          cryptofeed-latest-tag: v2.2.1
+          cryptostore-last-commit-hash: 757532e
+          cryptostore-latest-tag: v1.0.2
+          svoe-last-commit-hash: d7640e4
         cache: redis
         exchanges:
           BYBIT:
@@ -174,7 +186,7 @@ podConfigs:
           port: 1234
         num_write_threads: 100
         prometheus:
-          multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_755cf06d7f
+          multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_01f29001e8
           multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
           port: 8000
         redis:
@@ -192,13 +204,13 @@ podConfigs:
         svoe:
           cluster_id: 2
           compression: gzip
-          data_feed_image_version: 1.0.0
+          data_feed_image_version: 1.0.2
           glue_database: svoe_glue_db
-          hash_short: 755cf06d7f
+          hash_short: 01f29001e8
           instrument_type: perpetual
           s3_bucket: svoe.test.1
           s3_prefix: data_lake
-          version: 755cf06d7f7a506570008afd08b6c633ee2d8a03
+          version: 01f29001e85003aba3c283e94f4c8d854526888a
         write_on_stop: true
 
 {{ end }}
