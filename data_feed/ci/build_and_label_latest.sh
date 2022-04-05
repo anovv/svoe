@@ -40,7 +40,7 @@ cd data_feed # TODO set up proper paths
 echo "Building image ${SVOE_DATA_FEED_PROD_LOCAL_DOCKER_IMAGE_NAME}:latest..."
 docker build . -f Dockerfile -t ${SVOE_DATA_FEED_PROD_LOCAL_DOCKER_IMAGE_NAME}:latest  \
   --label "cryptofeed-latest-tag=${cryptofeed_latest_tag}" \
-  --label "cryptofeed-last-commit-hash-latest-tag=${cryptofeed_last_commit_hash}" \
+  --label "cryptofeed-last-commit-hash=${cryptofeed_last_commit_hash}" \
   --label "cryptostore-latest-tag=${cryptostore_latest_tag}" \
   --label "cryptostore-last-commit-hash=${cryptostore_last_commit_hash}" \
   --label "svoe-last-commit-hash=${svoe_last_commit_hash}"
