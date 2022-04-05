@@ -64,7 +64,7 @@ def _cached_block_size_graph():
         lineWidth=1,
     )
 
-
+# TODO add avg (sum/count) graph
 def _latency_graph(title, operation, agg_window):
     # TODO read https://stackoverflow.com/questions/55162093/understanding-histogram-quantile-based-on-rate-in-prometheus
     # TODO why is it rate here instead of raw bucket values??
@@ -81,6 +81,8 @@ def _latency_graph(title, operation, agg_window):
     )
 
 # TODO total write times graphs
+# TODO aggreagte operation graph
+# TODO reads and writes frequencies are same, no need for separate dashboard/can be parametrized
 dashboard = G.Dashboard(
     title='Data Feed Aggregator Metrics',
     description='Latency, operations frequency and object sizes for aggregator',
