@@ -1,4 +1,4 @@
-# generate-dashboard -o svoe_data_feed_aggregator_stats.json svoe_data_feed_aggregator_stats.dashboard.py
+# generate-dashboard -o svoe_data_feed_collector_stats.json svoe_data_feed_collectorq_stats.dashboard.py
 import grafanalib.core as G
 
 PROMETHEUS_DATA_SOURCE = 'Prometheus'
@@ -28,7 +28,7 @@ template_list = [
     ),
     G.Template(
         default='BTC-USDT',
-        includeAll=True, # TODO disable this
+        includeAll=True,
         multi=True,
         dataSource=PROMETHEUS_DATA_SOURCE,
         name='symbol',
@@ -66,7 +66,6 @@ def _cached_block_size_graph():
 
 
 def _latency_graph(title, operation, agg_window):
-    # TODO read https://stackoverflow.com/questions/55162093/understanding-histogram-quantile-based-on-rate-in-prometheus
     # TODO why is it rate here instead of raw bucket values??
     expr_template_lambda = \
         lambda quantile: f'histogram_quantile({quantile}, rate({METRIC_NAME_LATENCY_BUCKET}{{operation=\'{operation}\', data_type=~\'$data_type\', exchange=~\'$exchange\', symbol=~\'$symbol\'}}[{agg_window}]))'
