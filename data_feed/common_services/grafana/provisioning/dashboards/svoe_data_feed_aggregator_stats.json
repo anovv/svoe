@@ -86,7 +86,7 @@
           "targets": [
             {
               "datasource": null,
-              "expr": "rate(svoe_latency_ms_histogram_count{operation='read', data_type=~'$data_type', exchange=~'$exchange', symbol=~'$symbol'}[1m])",
+              "expr": "rate(svoe_data_feed_aggregator_latency_s_histogram_count{operation='read', data_type=~'$data_type', exchange=~'$exchange', symbol=~'$symbol'}[1m])",
               "format": "time_series",
               "hide": false,
               "instant": false,
@@ -212,7 +212,7 @@
           "targets": [
             {
               "datasource": null,
-              "expr": "histogram_quantile(0.95, rate(svoe_latency_ms_histogram_bucket{operation='read', data_type=~'$data_type', exchange=~'$exchange', symbol=~'$symbol'}[5m]))",
+              "expr": "histogram_quantile(0.95, rate(svoe_data_feed_aggregator_latency_s_histogram_bucket{operation='read', data_type=~'$data_type', exchange=~'$exchange', symbol=~'$symbol'}[5m]))",
               "format": "time_series",
               "hide": false,
               "instant": false,
@@ -226,7 +226,7 @@
             },
             {
               "datasource": null,
-              "expr": "histogram_quantile(0.5, rate(svoe_latency_ms_histogram_bucket{operation='read', data_type=~'$data_type', exchange=~'$exchange', symbol=~'$symbol'}[5m]))",
+              "expr": "histogram_quantile(0.5, rate(svoe_data_feed_aggregator_latency_s_histogram_bucket{operation='read', data_type=~'$data_type', exchange=~'$exchange', symbol=~'$symbol'}[5m]))",
               "format": "time_series",
               "hide": false,
               "instant": false,
@@ -362,7 +362,7 @@
           "targets": [
             {
               "datasource": null,
-              "expr": "rate(svoe_latency_ms_histogram_count{operation='write', data_type=~'$data_type', exchange=~'$exchange', symbol=~'$symbol'}[1m])",
+              "expr": "rate(svoe_data_feed_aggregator_latency_s_histogram_count{operation='write', data_type=~'$data_type', exchange=~'$exchange', symbol=~'$symbol'}[1m])",
               "format": "time_series",
               "hide": false,
               "instant": false,
@@ -488,7 +488,7 @@
           "targets": [
             {
               "datasource": null,
-              "expr": "histogram_quantile(0.95, rate(svoe_latency_ms_histogram_bucket{operation='write', data_type=~'$data_type', exchange=~'$exchange', symbol=~'$symbol'}[5m]))",
+              "expr": "histogram_quantile(0.95, rate(svoe_data_feed_aggregator_latency_s_histogram_bucket{operation='write', data_type=~'$data_type', exchange=~'$exchange', symbol=~'$symbol'}[5m]))",
               "format": "time_series",
               "hide": false,
               "instant": false,
@@ -502,7 +502,7 @@
             },
             {
               "datasource": null,
-              "expr": "histogram_quantile(0.5, rate(svoe_latency_ms_histogram_bucket{operation='write', data_type=~'$data_type', exchange=~'$exchange', symbol=~'$symbol'}[5m]))",
+              "expr": "histogram_quantile(0.5, rate(svoe_data_feed_aggregator_latency_s_histogram_bucket{operation='write', data_type=~'$data_type', exchange=~'$exchange', symbol=~'$symbol'}[5m]))",
               "format": "time_series",
               "hide": false,
               "instant": false,
@@ -638,7 +638,7 @@
           "targets": [
             {
               "datasource": null,
-              "expr": "svoe_data_size_kb_gauge{object='aggregator_cached_on_read', data_type=~'$data_type', exchange=~'$exchange', symbol=~'$symbol'} * 1024",
+              "expr": "svoe_data_feed_aggregator_cached_block_size_kb_gauge{data_type=~'$data_type', exchange=~'$exchange', symbol=~'$symbol'} * 1024",
               "format": "time_series",
               "hide": false,
               "instant": false,
@@ -725,7 +725,7 @@
         "multi": true,
         "name": "data_type",
         "options": [],
-        "query": "label_values(svoe_latency_ms_histogram_count, data_type)",
+        "query": "label_values(svoe_data_feed_aggregator_latency_s_histogram_count, data_type)",
         "refresh": 1,
         "regex": null,
         "sort": 1,
@@ -752,7 +752,7 @@
         "multi": true,
         "name": "exchange",
         "options": [],
-        "query": "label_values(svoe_latency_ms_histogram_count, exchange)",
+        "query": "label_values(svoe_data_feed_aggregator_latency_s_histogram_count, exchange)",
         "refresh": 1,
         "regex": null,
         "sort": 1,
@@ -779,7 +779,7 @@
         "multi": true,
         "name": "symbol",
         "options": [],
-        "query": "label_values(svoe_latency_ms_histogram_count, symbol)",
+        "query": "label_values(svoe_data_feed_aggregator_latency_s_histogram_count, symbol)",
         "refresh": 1,
         "regex": null,
         "sort": 1,

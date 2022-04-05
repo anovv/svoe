@@ -2,9 +2,9 @@
 import grafanalib.core as G
 
 PROMETHEUS_DATA_SOURCE = 'Prometheus'
-METRIC_NAME_LATENCY_COUNT = 'svoe_latency_ms_histogram_count'
-METRIC_NAME_LATENCY_BUCKET = 'svoe_latency_ms_histogram_bucket'
-METRIC_NAME_BLOCK_SIZE_GAUGE = 'svoe_data_size_kb_gauge'
+METRIC_NAME_LATENCY_COUNT = 'svoe_data_feed_aggregator_latency_s_histogram_count'
+METRIC_NAME_LATENCY_BUCKET = 'svoe_data_feed_aggregator_latency_s_histogram_bucket'
+METRIC_NAME_BLOCK_SIZE_GAUGE = 'svoe_data_feed_aggregator_cached_block_size_kb_gauge'
 
 # TODO figure out template per graph
 template_list = [
@@ -57,7 +57,7 @@ def _cached_block_size_graph():
         dataSource=PROMETHEUS_DATA_SOURCE,
         targets=[
             G.Target(
-                expr=f'{METRIC_NAME_BLOCK_SIZE_GAUGE}{{object=\'aggregator_cached_on_read\', data_type=~\'$data_type\', exchange=~\'$exchange\', symbol=~\'$symbol\'}} * 1024',
+                expr=f'{METRIC_NAME_BLOCK_SIZE_GAUGE}{{data_type=~\'$data_type\', exchange=~\'$exchange\', symbol=~\'$symbol\'}} * 1024',
             ),
         ],
         yAxes=G.single_y_axis(format=G.BYTES_FORMAT),
