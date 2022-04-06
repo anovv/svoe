@@ -52,7 +52,7 @@ svoe:
   compression: gzip
   glue_database: svoe_glue_db
   s3_bucket: svoe.test.1
-  s3_prefix: data_lake
+  s3_prefix: data_lake/data_feed_market_data
   instrument_type: spot
   version: local
 write_on_stop: true
