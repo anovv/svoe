@@ -14,7 +14,7 @@ write_on_stop: true
 num_write_threads: 100
 svoe:
   s3_bucket: svoe.test.1
-  s3_prefix: data_lake
+  s3_prefix: data_lake/data_feed_market_data
   glue_database: svoe_glue_db
   compression: gzip
   version: unchanged

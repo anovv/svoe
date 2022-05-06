@@ -11,7 +11,7 @@ commonSecrets:
     secretAccessKey: {{ .Values | get "awsSecret" }}
     region: {{ .Values | get "awsDefaultRegion" }}
 podConfigs:
-  - name: data-feed-binance-spot-5ee4cb78aa
+  - name: data-feed-binance-spot-def1fe9056
     exchange: BINANCE
     instrumentType: spot
     symbols:
@@ -20,11 +20,11 @@ podConfigs:
         quote: USDT
     labels:
       svoe.service: data-feed
-      svoe.version: 5ee4cb78aa83b2557cad825eb148da4d36d711b7
-      svoe.hash-short: 5ee4cb78aa
+      svoe.version: def1fe9056263a6edbd9fe83083d02f055ad211f
+      svoe.hash-short: def1fe9056
       svoe.instrument-type: spot
       svoe.exchange: BINANCE
-      svoe.name: data-feed-binance-spot-5ee4cb78aa
+      svoe.name: data-feed-binance-spot-def1fe9056
       svoe.cluster-id: 1
       svoe.data-feed-image-version: 1.0.2
       svoe.base.BTC: True
@@ -40,7 +40,7 @@ podConfigs:
       healthPort: 1234
       prometheus:
         metricsPort: 8000
-        multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_5ee4cb78aa
+        multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_def1fe9056
       resources:
         requests:
           cpu: 25m
@@ -75,7 +75,7 @@ podConfigs:
           port: 1234
         num_write_threads: 100
         prometheus:
-          multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_5ee4cb78aa
+          multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_def1fe9056
           multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
           port: 8000
         redis:
@@ -95,11 +95,11 @@ podConfigs:
           compression: gzip
           data_feed_image_version: 1.0.2
           glue_database: svoe_glue_db
-          hash_short: 5ee4cb78aa
+          hash_short: def1fe9056
           instrument_type: spot
           s3_bucket: svoe.test.1
-          s3_prefix: data_lake
-          version: 5ee4cb78aa83b2557cad825eb148da4d36d711b7
+          s3_prefix: data_lake/data_feed_market_data
+          version: def1fe9056263a6edbd9fe83083d02f055ad211f
         write_on_stop: true
 
 {{ end }}
@@ -116,7 +116,7 @@ commonSecrets:
     secretAccessKey: {{ .Values | get "awsSecret" }}
     region: {{ .Values | get "awsDefaultRegion" }}
 podConfigs:
-  - name: data-feed-bybit-perpetual-01f29001e8
+  - name: data-feed-bybit-perpetual-e160244f4a
     exchange: BYBIT
     instrumentType: perpetual
     symbols:
@@ -125,11 +125,11 @@ podConfigs:
         quote: USDT
     labels:
       svoe.service: data-feed
-      svoe.version: 01f29001e85003aba3c283e94f4c8d854526888a
-      svoe.hash-short: 01f29001e8
+      svoe.version: e160244f4ab6314d69c17e5d128245d059455486
+      svoe.hash-short: e160244f4a
       svoe.instrument-type: perpetual
       svoe.exchange: BYBIT
-      svoe.name: data-feed-bybit-perpetual-01f29001e8
+      svoe.name: data-feed-bybit-perpetual-e160244f4a
       svoe.cluster-id: 2
       svoe.data-feed-image-version: 1.0.2
       svoe.base.BTC: True
@@ -147,7 +147,7 @@ podConfigs:
       healthPort: 1234
       prometheus:
         metricsPort: 8000
-        multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_01f29001e8
+        multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_e160244f4a
       resources:
         requests:
           cpu: 25m
@@ -186,7 +186,7 @@ podConfigs:
           port: 1234
         num_write_threads: 100
         prometheus:
-          multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_01f29001e8
+          multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_e160244f4a
           multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
           port: 8000
         redis:
@@ -206,11 +206,11 @@ podConfigs:
           compression: gzip
           data_feed_image_version: 1.0.2
           glue_database: svoe_glue_db
-          hash_short: 01f29001e8
+          hash_short: e160244f4a
           instrument_type: perpetual
           s3_bucket: svoe.test.1
-          s3_prefix: data_lake
-          version: 01f29001e85003aba3c283e94f4c8d854526888a
+          s3_prefix: data_lake/data_feed_market_data
+          version: e160244f4ab6314d69c17e5d128245d059455486
         write_on_stop: true
 
 {{ end }}
