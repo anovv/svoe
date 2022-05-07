@@ -63,8 +63,8 @@ releases:
     values:
       - ../../values/local/mysql-extra/values.yaml.gotmpl
   - chart: ../../charts/local/metrics-server-exporter
-    name: mysql-extra
-    namespace: mysql
+    name: metrics-server-exporter
+    namespace: monitoring
     values:
       - ../../values/local/metrics-server-exporter/values.yaml.gotmpl
 repositories:
