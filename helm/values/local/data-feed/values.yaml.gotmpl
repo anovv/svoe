@@ -11,111 +11,6 @@ commonSecrets:
     secretAccessKey: {{ .Values | get "awsSecret" }}
     region: {{ .Values | get "awsDefaultRegion" }}
 podConfigs:
-  - name: data-feed-binance-spot-def1fe9056
-    exchange: BINANCE
-    instrumentType: spot
-    symbols:
-      - symbol: BTC-USDT
-        base: BTC
-        quote: USDT
-    labels:
-      svoe.service: data-feed
-      svoe.version: def1fe9056263a6edbd9fe83083d02f055ad211f
-      svoe.hash-short: def1fe9056
-      svoe.instrument-type: spot
-      svoe.exchange: BINANCE
-      svoe.name: data-feed-binance-spot-def1fe9056
-      svoe.cluster-id: 1
-      svoe.data-feed-image-version: 1.0.2
-      svoe.base.BTC: True
-      svoe.quote.USDT: True
-      svoe.symbol.BTC-USDT: True
-      svoe.channel.ticker: True
-      svoe.channel.l2_book: True
-      svoe.channel.trades: True
-    redis:
-      port: 6379
-    dataFeed:
-      healthPath: /health
-      healthPort: 1234
-      prometheus:
-        metricsPort: 8000
-        multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_def1fe9056
-      resources:
-        requests:
-          cpu: 25m
-          memory: 200Mi
-        limits:
-          cpu: 50m
-          memory: 400Mi
-      image: {{ .Values.dataFeedImagePrefix }}:v1.0.2
-      configVolumeMountPath: /etc/svoe/data_feed/configs
-      config: |
-        build_info:
-          cryptofeed-last-commit-hash: '3961981'
-          cryptofeed-latest-tag: v2.2.1
-          cryptostore-last-commit-hash: 757532e
-          cryptostore-latest-tag: v1.0.2
-          svoe-last-commit-hash: d7640e4
-        cache: redis
-        exchanges:
-          BINANCE:
-            l2_book:
-              book_delta: true
-              max_depth: 100
-              symbols:
-              - BTC-USDT
-            retries: -1
-            ticker:
-            - BTC-USDT
-            trades:
-            - BTC-USDT
-        health_check:
-          path: /health
-          port: 1234
-        num_write_threads: 100
-        prometheus:
-          multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_def1fe9056
-          multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
-          port: 8000
-        redis:
-          del_after_read: true
-          ip: 127.0.0.1
-          port: 6379
-          retention_time: null
-          socket: null
-          start_flush: true
-        storage:
-        - svoe
-        storage_interval: 30
-        storage_retries: 3
-        storage_retry_wait: 10
-        svoe:
-          cluster_id: 1
-          compression: gzip
-          data_feed_image_version: 1.0.2
-          glue_database: svoe_glue_db
-          hash_short: def1fe9056
-          instrument_type: spot
-          s3_bucket: svoe.test.1
-          s3_prefix: data_lake/data_feed_market_data
-          version: def1fe9056263a6edbd9fe83083d02f055ad211f
-        write_on_stop: true
-
-{{ end }}
-{{ if eq .Values.clusterId 2 }}
-commonSecrets:
-  mysql:
-    host: mysql-global-svc.mysql.svc.cluster.local # namespace should be synced with mysql chart
-    port: 3306
-    database: {{ .Values | get "mysqlDefaultSvoeDb" }}
-    user: root # TODO
-    password: {{ .Values | get "mysqlRootPassword" }}
-  s3:
-    accessKeyId: {{ .Values | get "awsKey" }}
-    secretAccessKey: {{ .Values | get "awsSecret" }}
-    region: {{ .Values | get "awsDefaultRegion" }}
-podConfigs:
   - name: data-feed-bybit-perpetual-e160244f4a
     exchange: BYBIT
     instrumentType: perpetual
@@ -130,7 +25,7 @@ podConfigs:
       svoe.instrument-type: perpetual
       svoe.exchange: BYBIT
       svoe.name: data-feed-bybit-perpetual-e160244f4a
-      svoe.cluster-id: 2
+      svoe.cluster-id: 1
       svoe.data-feed-image-version: 1.0.2
       svoe.base.BTC: True
       svoe.quote.USDT: True
@@ -148,13 +43,6 @@ podConfigs:
       prometheus:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_e160244f4a
-      resources:
-        requests:
-          cpu: 25m
-          memory: 200Mi
-        limits:
-          cpu: 50m
-          memory: 400Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.2
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -202,7 +90,7 @@ podConfigs:
         storage_retries: 3
         storage_retry_wait: 10
         svoe:
-          cluster_id: 2
+          cluster_id: 1
           compression: gzip
           data_feed_image_version: 1.0.2
           glue_database: svoe_glue_db

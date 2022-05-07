@@ -121,7 +121,7 @@ def build_pod_configs(exchange, exchange_config):
         for channel in channels:
             labels['svoe.channel.' + channel] = True
 
-        pod_configs.append({
+        pod_config = {
             'name': name,
             'exchange': exchange,
             'instrument_type': instrument_type, # TODO instrument_extra (strike/expiration/etc)
@@ -140,10 +140,15 @@ def build_pod_configs(exchange, exchange_config):
             'data_feed_health_path': config['health_check']['path'],
             'data_feed_health_port': config['health_check']['port'],
             'data_feed_config': yaml.dump(config, default_flow_style=False),
-            'data_feed_resources': _get_resources(exchange, instrument_type, symbols),
             'cluster_id': exchange_config['clusterId'],
             'labels': labels,
-        })
+        }
+
+        data_feed_resources = _get_resources(exchange, instrument_type, symbols)
+        if data_feed_resources is not None:
+            pod_config['data_feed_resources'] = data_feed_resources
+
+        pod_configs.append(pod_config)
 
     # filter by requested number of pods
     if 'numPods' in exchange_config:
@@ -236,18 +241,19 @@ def _hash_short(hash):
 
 
 def _get_resources(exchange, instrument_type, symbols):
-    # TODO pull Thanos data/make manual config
+    # TODO pull Prom/Thanos data/make manual config
     # TODO set resources for redis/redis-exporter sidecars
-    return {
-        'requests': {
-            'cpu': '25m',
-            'memory': '200Mi'
-        },
-        'limits': {
-            'cpu': '50m',
-            'memory': '400Mi'
-        }
-    }
+    # return {
+    #     'requests': {
+    #         'cpu': '25m',
+    #         'memory': '200Mi'
+    #     },
+    #     'limits': {
+    #         'cpu': '50m',
+    #         'memory': '400Mi'
+    #     }
+    # }
+    return None
 
 def _get_build_info(version):
     if version in BUILD_INFO_LOOKUP:

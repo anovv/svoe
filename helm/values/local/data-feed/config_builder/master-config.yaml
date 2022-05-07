@@ -1,30 +1,30 @@
 symbolSets:
   TOP_20: [BTC, ETH, BNB, ADA, XRP, DOGE, DOT, BCH, UNI, LTC, LINK, MATIC, XLM, ETC, VET, TRX, EOS, FIL, SHIB, BSV]
 exchangeConfigSets:
-  BINANCE:
-    - instrumentType: spot
-      numPods: 1
-      symbolSets:
-        quotes: [USDT]
-        bases: TOP_20
-      symbols: [] # map of -base -quote
-      excludes:
-        quotes: []
-        bases: [BSV]
-      channels: [ticker, l2_book, trades]
-      dataFeedImageVersion: 1.0.2 # sync with data_feed/ci
-      channelsConfigOverrides:
-        l2_book:
-          max_depth: 100
-          book_delta: true
-      exchangeConfigOverrides: # TODO snapshot_interval ?
-        retries: -1
-      dataFeedConfigOverrides: {}
-      clusterId: 1
-      availabilityZone: a
-      symbolPodDistributionStrategy: ONE_TO_ONE
-      description: |
-        Common configuration for Binance USDT spot top 20
+#  BINANCE:
+#    - instrumentType: spot
+#      numPods: 1
+#      symbolSets:
+#        quotes: [USDT]
+#        bases: TOP_20
+#      symbols: [] # map of -base -quote
+#      excludes:
+#        quotes: []
+#        bases: [BSV]
+#      channels: [ticker, l2_book, trades]
+#      dataFeedImageVersion: 1.0.2 # sync with data_feed/ci
+#      channelsConfigOverrides:
+#        l2_book:
+#          max_depth: 100
+#          book_delta: true
+#      exchangeConfigOverrides: # TODO snapshot_interval ?
+#        retries: -1
+#      dataFeedConfigOverrides: {}
+#      clusterId: 1
+#      availabilityZone: a
+#      symbolPodDistributionStrategy: ONE_TO_ONE
+#      description: |
+#        Common configuration for Binance USDT spot top 20
   BYBIT:
     - instrumentType: perpetual
       numPods: 1
@@ -45,7 +45,7 @@ exchangeConfigSets:
       exchangeConfigOverrides:
         retries: -1
       dataFeedConfigOverrides: {}
-      clusterId: 2
+      clusterId: 1
       availabilityZone: a
       symbolPodDistributionStrategy: ONE_TO_ONE
       description: |

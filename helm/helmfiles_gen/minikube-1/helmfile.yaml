@@ -62,6 +62,11 @@ releases:
     namespace: mysql
     values:
       - ../../values/local/mysql-extra/values.yaml.gotmpl
+  - chart: ../../charts/local/metrics-server-exporter
+    name: mysql-extra
+    namespace: mysql
+    values:
+      - ../../values/local/metrics-server-exporter/values.yaml.gotmpl
 repositories:
   - name: metrics-server
     url: https://kubernetes-sigs.github.io/metrics-server/
