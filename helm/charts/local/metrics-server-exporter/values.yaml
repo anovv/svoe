@@ -1,0 +1,63 @@
+# Default values for metrics-server-exporter.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  repository: vivareal/metrics-server-exporter
+  tag: v0.0.6
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+service:
+  type: ClusterIP
+  port: 9104
+#  nodePort: 30104
+
+# custom:
+#   names_blacklist: ""
+#   k8s_endpoint: ""
+#   k8s_token: ""
+#   k8s_filepath_token: ""
+#   k8s_ca_cert_path: ""
+
+podAnnotations:
+  # When installing Prometheus from official Helm charts, it has a job rule that will
+  # discover the pods with the following annotations.
+  prometheus.io/scrape: "true"
+  prometheus.io/port: "8000"
+
+serviceAnnotations: {}
+  # Alternatively official Prometheus chart can probe services.
+  # prometheus.io/probe: "true"
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+env: {}
+  # Add ability to include more opinionated environment variables
+  # - name: POD_IP
+  #   valueFrom:
+  #     fieldRef:
+  #       fieldPath: status.podIP
+  # - name: SERVICE_8000_NAME
+  #   value: metrics-server-exporter
