@@ -33,7 +33,7 @@ metadata:
     name: {{ .name }}-ss
   name: {{ .name }}-ss
 spec:
-  replicas: 1
+  replicas: 1 # TODO 0 if reqs/limits are not set
   selector:
     matchLabels:
       name: {{ .name }}-ss

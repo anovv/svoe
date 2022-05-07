@@ -39,13 +39,19 @@ podConfigs:
       prometheus:
         metricsPort: {{ pod_config['prometheus_metrics_port'] }}
         multiprocDir: {{ pod_config['prometheus_multiproc_dir'] }}
+      {%- if pod_config['data_feed_resources'] is defined %}
       resources:
+        {%- if pod_config['data_feed_resources']['requests'] is defined %}
         requests:
           cpu: {{ pod_config['data_feed_resources']['requests']['cpu'] }}
           memory: {{ pod_config['data_feed_resources']['requests']['memory'] }}
+        {%- endif %}
+        {%- if pod_config['data_feed_resources']['limits'] is defined %}
         limits:
           cpu: {{ pod_config['data_feed_resources']['limits']['cpu'] }}
           memory: {{ pod_config['data_feed_resources']['limits']['memory'] }}
+        {%- endif %}
+      {%- endif %}
       image: {%- raw %} {{ .Values.dataFeedImagePrefix }}:v{% endraw %}{{ pod_config['data_feed_image_version'] }}
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
