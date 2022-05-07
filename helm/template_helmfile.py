@@ -39,6 +39,7 @@ for cluster_id in tf_config['multicluster_config_output']['value']:
         # set tf values as default env values
         env_values = GLOBAL_ENV_VALUES.copy()
         env_values.update({
+            'clusterType': cluster_type,
             'clusterName': cluster_name,
             'clusterId': int(cluster_id),
             'clusterIds': cluster_ids,

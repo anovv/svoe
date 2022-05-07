@@ -3,6 +3,7 @@ clusterIds:
 - 1
 - 2
 clusterName: minikube-1
+clusterType: minikube
 dataFeedImagePrefix: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed
 isMysqlHost: true
 isObserver: true

@@ -2,3 +2,7 @@ service:
   type: ClusterIP
 apiService:
   create: true
+{{ if eq .Values.clusterType "minikube" }}
+args:
+  - --kubelet-insecure-tls
+{{ end }}
