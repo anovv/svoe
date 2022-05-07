@@ -27,7 +27,7 @@ exchangeConfigSets:
 #        Common configuration for Binance USDT spot top 20
   BYBIT:
     - instrumentType: perpetual
-      numPods: 1
+      numPods: 4
       symbolSets:
         quotes: [USDT]
         bases: TOP_20

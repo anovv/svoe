@@ -33,7 +33,11 @@ metadata:
     name: {{ .name }}-ss
   name: {{ .name }}-ss
 spec:
-  replicas: 1 # TODO 0 if reqs/limits are not set
+  {{- if .dataFeed.resources }}
+  replicas: 1
+  {{- else}}
+  replicas: 0
+  {{- end}}
   selector:
     matchLabels:
       name: {{ .name }}-ss
@@ -125,13 +129,19 @@ spec:
               port: df-health
             initialDelaySeconds: 5
             periodSeconds: 5
+          {{- if .dataFeed.resources }}
           resources:
+            {{- if .dataFeed.resources.requests }}
             requests:
               memory: {{ .dataFeed.resources.requests.memory }}
               cpu: {{ .dataFeed.resources.requests.cpu }}
+            {{- end}}
+            {{- if .dataFeed.resources.limits }}
             limits:
               memory: {{ .dataFeed.resources.limits.memory }}
               cpu: {{ .dataFeed.resources.limits.cpu }}
+            {{- end}}
+          {{- end }}
       terminationGracePeriodSeconds: 30
       volumes:
         - configMap:
