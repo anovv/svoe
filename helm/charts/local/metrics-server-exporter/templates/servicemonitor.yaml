@@ -1,0 +1,17 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: metrics-server-exporter-servicemonitor
+  labels:
+    name: metrics-server-exporter-servicemonitor
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "metrics-server-exporter.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  namespaceSelector:
+    matchNames:
+      - monitoring
+  endpoints:
+    - port: http
+      interval: 5s
