@@ -14,7 +14,11 @@ grafana:
   persistence:
     enabled: true
     type: pvc
+    {{ if eq .Values.clusterType "minikube" }}
+    storageClassName: local-path
+    {{ else }}
     storageClassName: default
+    {{ end }}
     accessModes:
     - ReadWriteOnce
     size: 2Gi
@@ -91,12 +95,15 @@ prometheus:
     # set --storage.tsdb.min-block-duration and --storage.tsdb.max-block-duration
     # to same value (default 2h) to disable local Prom compactor
     # This value also defines how often Thanos uploads Prom blocks
+
+    {{ if not (eq .Values.clusterType "minikube") }} # TODO figure out minikube setup
     thanos:
       image: quay.io/thanos/thanos:v0.24.0
       version: v0.24.0
       objectStorageConfig:
         name: thanos-objstore-config-secret
         key: objstore.yml
+    {{ end }}
     serviceMonitorSelectorNilUsesHelmValues: false
     storageSpec:
       volumeClaimTemplate:
