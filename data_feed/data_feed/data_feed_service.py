@@ -2,7 +2,7 @@ from os import environ
 if environ.get('ENV') == 'DEV':
     print('DEV ENV')
     import pyximport
-    pyximport.install()
+    pyximport.install(language_level=3)
 
 from cryptostore import Cryptostore
 
