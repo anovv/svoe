@@ -11,6 +11,174 @@ commonSecrets:
     secretAccessKey: {{ .Values | get "awsSecret" }}
     region: {{ .Values | get "awsDefaultRegion" }}
 podConfigs:
+  - name: data-feed-binance-spot-def1fe9056
+    exchange: BINANCE
+    instrumentType: spot
+    symbols:
+      - symbol: BTC-USDT
+        base: BTC
+        quote: USDT
+    labels:
+      svoe.service: data-feed
+      svoe.version: def1fe9056263a6edbd9fe83083d02f055ad211f
+      svoe.hash-short: def1fe9056
+      svoe.instrument-type: spot
+      svoe.exchange: BINANCE
+      svoe.name: data-feed-binance-spot-def1fe9056
+      svoe.cluster-id: 1
+      svoe.data-feed-image-version: 1.0.3
+      svoe.base.BTC: True
+      svoe.quote.USDT: True
+      svoe.symbol.BTC-USDT: True
+      svoe.channel.ticker: True
+      svoe.channel.l2_book: True
+      svoe.channel.trades: True
+    redis:
+      port: 6379
+    dataFeed:
+      healthPath: /health
+      healthPort: 1234
+      prometheus:
+        metricsPort: 8000
+        multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_def1fe9056
+      image: {{ .Values.dataFeedImagePrefix }}:v1.0.3
+      configVolumeMountPath: /etc/svoe/data_feed/configs
+      config: |
+        build_info:
+          cryptofeed-last-commit-hash: 887345e
+          cryptofeed-latest-tag: v2.2.1
+          cryptostore-last-commit-hash: 5540e3a
+          cryptostore-latest-tag: v1.0.2
+          svoe-last-commit-hash: 8a0f350
+        cache: redis
+        exchanges:
+          BINANCE:
+            l2_book:
+              book_delta: true
+              max_depth: 100
+              symbols:
+              - BTC-USDT
+            retries: -1
+            ticker:
+            - BTC-USDT
+            trades:
+            - BTC-USDT
+        health_check:
+          path: /health
+          port: 1234
+        num_write_threads: 100
+        prometheus:
+          multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_def1fe9056
+          multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
+          port: 8000
+        redis:
+          del_after_read: true
+          ip: 127.0.0.1
+          port: 6379
+          retention_time: null
+          socket: null
+          start_flush: true
+        storage:
+        - svoe
+        storage_interval: 30
+        storage_retries: 3
+        storage_retry_wait: 10
+        svoe:
+          cluster_id: 1
+          compression: gzip
+          data_feed_image_version: 1.0.3
+          glue_database: svoe_glue_db
+          hash_short: def1fe9056
+          instrument_type: spot
+          s3_bucket: svoe.test.1
+          s3_prefix: data_lake/data_feed_market_data
+          version: def1fe9056263a6edbd9fe83083d02f055ad211f
+        write_on_stop: true
+
+  - name: data-feed-binance-spot-3a6987bf87
+    exchange: BINANCE
+    instrumentType: spot
+    symbols:
+      - symbol: ETH-USDT
+        base: ETH
+        quote: USDT
+    labels:
+      svoe.service: data-feed
+      svoe.version: 3a6987bf8760ebc5f4472389db0b434f4e5633ff
+      svoe.hash-short: 3a6987bf87
+      svoe.instrument-type: spot
+      svoe.exchange: BINANCE
+      svoe.name: data-feed-binance-spot-3a6987bf87
+      svoe.cluster-id: 1
+      svoe.data-feed-image-version: 1.0.3
+      svoe.base.ETH: True
+      svoe.quote.USDT: True
+      svoe.symbol.ETH-USDT: True
+      svoe.channel.ticker: True
+      svoe.channel.l2_book: True
+      svoe.channel.trades: True
+    redis:
+      port: 6379
+    dataFeed:
+      healthPath: /health
+      healthPort: 1234
+      prometheus:
+        metricsPort: 8000
+        multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_3a6987bf87
+      image: {{ .Values.dataFeedImagePrefix }}:v1.0.3
+      configVolumeMountPath: /etc/svoe/data_feed/configs
+      config: |
+        build_info:
+          cryptofeed-last-commit-hash: 887345e
+          cryptofeed-latest-tag: v2.2.1
+          cryptostore-last-commit-hash: 5540e3a
+          cryptostore-latest-tag: v1.0.2
+          svoe-last-commit-hash: 8a0f350
+        cache: redis
+        exchanges:
+          BINANCE:
+            l2_book:
+              book_delta: true
+              max_depth: 100
+              symbols:
+              - ETH-USDT
+            retries: -1
+            ticker:
+            - ETH-USDT
+            trades:
+            - ETH-USDT
+        health_check:
+          path: /health
+          port: 1234
+        num_write_threads: 100
+        prometheus:
+          multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_3a6987bf87
+          multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
+          port: 8000
+        redis:
+          del_after_read: true
+          ip: 127.0.0.1
+          port: 6379
+          retention_time: null
+          socket: null
+          start_flush: true
+        storage:
+        - svoe
+        storage_interval: 30
+        storage_retries: 3
+        storage_retry_wait: 10
+        svoe:
+          cluster_id: 1
+          compression: gzip
+          data_feed_image_version: 1.0.3
+          glue_database: svoe_glue_db
+          hash_short: 3a6987bf87
+          instrument_type: spot
+          s3_bucket: svoe.test.1
+          s3_prefix: data_lake/data_feed_market_data
+          version: 3a6987bf8760ebc5f4472389db0b434f4e5633ff
+        write_on_stop: true
+
   - name: data-feed-bybit-perpetual-e160244f4a
     exchange: BYBIT
     instrumentType: perpetual
@@ -26,7 +194,7 @@ podConfigs:
       svoe.exchange: BYBIT
       svoe.name: data-feed-bybit-perpetual-e160244f4a
       svoe.cluster-id: 1
-      svoe.data-feed-image-version: 1.0.2
+      svoe.data-feed-image-version: 1.0.3
       svoe.base.BTC: True
       svoe.quote.USDT: True
       svoe.symbol.BTC-USDT-PERP: True
@@ -43,15 +211,15 @@ podConfigs:
       prometheus:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_e160244f4a
-      image: {{ .Values.dataFeedImagePrefix }}:v1.0.2
+      image: {{ .Values.dataFeedImagePrefix }}:v1.0.3
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
         build_info:
-          cryptofeed-last-commit-hash: '3961981'
+          cryptofeed-last-commit-hash: 887345e
           cryptofeed-latest-tag: v2.2.1
-          cryptostore-last-commit-hash: 757532e
+          cryptostore-last-commit-hash: 5540e3a
           cryptostore-latest-tag: v1.0.2
-          svoe-last-commit-hash: d7640e4
+          svoe-last-commit-hash: 8a0f350
         cache: redis
         exchanges:
           BYBIT:
@@ -92,7 +260,7 @@ podConfigs:
         svoe:
           cluster_id: 1
           compression: gzip
-          data_feed_image_version: 1.0.2
+          data_feed_image_version: 1.0.3
           glue_database: svoe_glue_db
           hash_short: e160244f4a
           instrument_type: perpetual
@@ -116,7 +284,7 @@ podConfigs:
       svoe.exchange: BYBIT
       svoe.name: data-feed-bybit-perpetual-838a038c93
       svoe.cluster-id: 1
-      svoe.data-feed-image-version: 1.0.2
+      svoe.data-feed-image-version: 1.0.3
       svoe.base.ETH: True
       svoe.quote.USDT: True
       svoe.symbol.ETH-USDT-PERP: True
@@ -133,15 +301,15 @@ podConfigs:
       prometheus:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_838a038c93
-      image: {{ .Values.dataFeedImagePrefix }}:v1.0.2
+      image: {{ .Values.dataFeedImagePrefix }}:v1.0.3
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
         build_info:
-          cryptofeed-last-commit-hash: '3961981'
+          cryptofeed-last-commit-hash: 887345e
           cryptofeed-latest-tag: v2.2.1
-          cryptostore-last-commit-hash: 757532e
+          cryptostore-last-commit-hash: 5540e3a
           cryptostore-latest-tag: v1.0.2
-          svoe-last-commit-hash: d7640e4
+          svoe-last-commit-hash: 8a0f350
         cache: redis
         exchanges:
           BYBIT:
@@ -182,193 +350,13 @@ podConfigs:
         svoe:
           cluster_id: 1
           compression: gzip
-          data_feed_image_version: 1.0.2
+          data_feed_image_version: 1.0.3
           glue_database: svoe_glue_db
           hash_short: 838a038c93
           instrument_type: perpetual
           s3_bucket: svoe.test.1
           s3_prefix: data_lake/data_feed_market_data
           version: 838a038c93c98120ba958ee7106a89723cad3f98
-        write_on_stop: true
-
-  - name: data-feed-bybit-perpetual-b9c92d7fd5
-    exchange: BYBIT
-    instrumentType: perpetual
-    symbols:
-      - symbol: BNB-USDT-PERP
-        base: BNB
-        quote: USDT
-    labels:
-      svoe.service: data-feed
-      svoe.version: b9c92d7fd5d68fcb199fbb0e2cc9f78a943c82f7
-      svoe.hash-short: b9c92d7fd5
-      svoe.instrument-type: perpetual
-      svoe.exchange: BYBIT
-      svoe.name: data-feed-bybit-perpetual-b9c92d7fd5
-      svoe.cluster-id: 1
-      svoe.data-feed-image-version: 1.0.2
-      svoe.base.BNB: True
-      svoe.quote.USDT: True
-      svoe.symbol.BNB-USDT-PERP: True
-      svoe.channel.l2_book: True
-      svoe.channel.trades: True
-      svoe.channel.liquidations: True
-      svoe.channel.open_interest: True
-      svoe.channel.funding: True
-    redis:
-      port: 6379
-    dataFeed:
-      healthPath: /health
-      healthPort: 1234
-      prometheus:
-        metricsPort: 8000
-        multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_b9c92d7fd5
-      image: {{ .Values.dataFeedImagePrefix }}:v1.0.2
-      configVolumeMountPath: /etc/svoe/data_feed/configs
-      config: |
-        build_info:
-          cryptofeed-last-commit-hash: '3961981'
-          cryptofeed-latest-tag: v2.2.1
-          cryptostore-last-commit-hash: 757532e
-          cryptostore-latest-tag: v1.0.2
-          svoe-last-commit-hash: d7640e4
-        cache: redis
-        exchanges:
-          BYBIT:
-            funding:
-            - BNB-USDT-PERP
-            l2_book:
-              book_delta: true
-              max_depth: 100
-              symbols:
-              - BNB-USDT-PERP
-            liquidations:
-            - BNB-USDT-PERP
-            open_interest:
-            - BNB-USDT-PERP
-            retries: -1
-            trades:
-            - BNB-USDT-PERP
-        health_check:
-          path: /health
-          port: 1234
-        num_write_threads: 100
-        prometheus:
-          multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_b9c92d7fd5
-          multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
-          port: 8000
-        redis:
-          del_after_read: true
-          ip: 127.0.0.1
-          port: 6379
-          retention_time: null
-          socket: null
-          start_flush: true
-        storage:
-        - svoe
-        storage_interval: 30
-        storage_retries: 3
-        storage_retry_wait: 10
-        svoe:
-          cluster_id: 1
-          compression: gzip
-          data_feed_image_version: 1.0.2
-          glue_database: svoe_glue_db
-          hash_short: b9c92d7fd5
-          instrument_type: perpetual
-          s3_bucket: svoe.test.1
-          s3_prefix: data_lake/data_feed_market_data
-          version: b9c92d7fd5d68fcb199fbb0e2cc9f78a943c82f7
-        write_on_stop: true
-
-  - name: data-feed-bybit-perpetual-f7dd6e54e4
-    exchange: BYBIT
-    instrumentType: perpetual
-    symbols:
-      - symbol: ADA-USDT-PERP
-        base: ADA
-        quote: USDT
-    labels:
-      svoe.service: data-feed
-      svoe.version: f7dd6e54e4eed018b51bd7658385c87ad98c885d
-      svoe.hash-short: f7dd6e54e4
-      svoe.instrument-type: perpetual
-      svoe.exchange: BYBIT
-      svoe.name: data-feed-bybit-perpetual-f7dd6e54e4
-      svoe.cluster-id: 1
-      svoe.data-feed-image-version: 1.0.2
-      svoe.base.ADA: True
-      svoe.quote.USDT: True
-      svoe.symbol.ADA-USDT-PERP: True
-      svoe.channel.l2_book: True
-      svoe.channel.trades: True
-      svoe.channel.liquidations: True
-      svoe.channel.open_interest: True
-      svoe.channel.funding: True
-    redis:
-      port: 6379
-    dataFeed:
-      healthPath: /health
-      healthPort: 1234
-      prometheus:
-        metricsPort: 8000
-        multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_f7dd6e54e4
-      image: {{ .Values.dataFeedImagePrefix }}:v1.0.2
-      configVolumeMountPath: /etc/svoe/data_feed/configs
-      config: |
-        build_info:
-          cryptofeed-last-commit-hash: '3961981'
-          cryptofeed-latest-tag: v2.2.1
-          cryptostore-last-commit-hash: 757532e
-          cryptostore-latest-tag: v1.0.2
-          svoe-last-commit-hash: d7640e4
-        cache: redis
-        exchanges:
-          BYBIT:
-            funding:
-            - ADA-USDT-PERP
-            l2_book:
-              book_delta: true
-              max_depth: 100
-              symbols:
-              - ADA-USDT-PERP
-            liquidations:
-            - ADA-USDT-PERP
-            open_interest:
-            - ADA-USDT-PERP
-            retries: -1
-            trades:
-            - ADA-USDT-PERP
-        health_check:
-          path: /health
-          port: 1234
-        num_write_threads: 100
-        prometheus:
-          multiproc_dir: /etc/svoe/data_feed/prometheus_multiproc_dir_f7dd6e54e4
-          multiproc_dir_prefix: /etc/svoe/data_feed/prometheus_multiproc_dir
-          port: 8000
-        redis:
-          del_after_read: true
-          ip: 127.0.0.1
-          port: 6379
-          retention_time: null
-          socket: null
-          start_flush: true
-        storage:
-        - svoe
-        storage_interval: 30
-        storage_retries: 3
-        storage_retry_wait: 10
-        svoe:
-          cluster_id: 1
-          compression: gzip
-          data_feed_image_version: 1.0.2
-          glue_database: svoe_glue_db
-          hash_short: f7dd6e54e4
-          instrument_type: perpetual
-          s3_bucket: svoe.test.1
-          s3_prefix: data_lake/data_feed_market_data
-          version: f7dd6e54e4eed018b51bd7658385c87ad98c885d
         write_on_stop: true
 
 {{ end }}

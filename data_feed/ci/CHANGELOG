@@ -6,3 +6,8 @@
   - Fixed health check server_address
 1.0.2
   - Merge upstream cryptofeed/cryptostore changes
+1.0.3
+  * Cryptofeed:
+    - Connection health metric
+  * Cryptostore:
+    - Disable config versioning for ENV=TESTING
