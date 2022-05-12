@@ -1,6 +1,6 @@
 #!/bin/bash
 
-minikube start --nodes 3 --extra-config=kubelet.housekeeping-interval=10s -p minikube-1
+minikube start --cni=cilium --nodes 3 --extra-config=kubelet.housekeeping-interval=10s -p minikube-1
 
 # install volume provisioner
 curl https://raw.githubusercontent.com/rancher/local-path-provisioner/master/deploy/local-path-storage.yaml | sed 's/\/opt\/local-path-provisioner/\/var\/opt\/local-path-provisioner/ ' | kubectl apply -f -
