@@ -1,6 +1,6 @@
 #!/bin/bash
 
-minikube start --cni=cilium --nodes 3 --extra-config=kubelet.housekeeping-interval=10s -p minikube-1
+minikube start --nodes 2 --extra-config=kubelet.housekeeping-interval=10s -p minikube-1
 
 # install volume provisioner
 curl https://raw.githubusercontent.com/rancher/local-path-provisioner/master/deploy/local-path-storage.yaml | sed 's/\/opt\/local-path-provisioner/\/var\/opt\/local-path-provisioner/ ' | kubectl apply -f -
@@ -13,3 +13,5 @@ kubectl label nodes minikube-1-m02 node-type=spot
 
 # auth for ecr docker registry
 ./update_docker_registry_secret.sh
+
+# TODO cilium pods take some time to spin up, wait for them?
