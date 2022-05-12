@@ -102,6 +102,8 @@ def build_pod_configs(exchange, exchange_config):
         config['svoe']['cluster_id'] = exchange_config['clusterId']
         config['build_info'] = _get_build_info(exchange_config['dataFeedImageVersion'])
 
+        # config maps to data_feed_config in pod_config
+
         labels = {
             'svoe.service': 'data-feed',
             'svoe.version': hash_pod_config,
@@ -110,7 +112,8 @@ def build_pod_configs(exchange, exchange_config):
             'svoe.exchange': exchange,
             'svoe.name': name,
             'svoe.cluster-id': exchange_config['clusterId'],
-            'svoe.data-feed-image-version': exchange_config['dataFeedImageVersion']
+            'svoe.data-feed-image-version': exchange_config['dataFeedImageVersion'],
+            'svoe.payload-hash': config['payload_hash']
         }
 
         for s in symbol_pod_mapping[pod_id]:
@@ -180,6 +183,20 @@ def _build_data_feed_config(exchange, exchange_config, symbols, channels):
     for k in exchange_config_overrides:
         config['exchanges'][exchange][k] = exchange_config_overrides[k]
 
+    payload_config = _build_payload_config(exchange, symbols, channels)
+    payload_hash = _hash_short(_hash(payload_config))
+    config['payload_config'] = payload_config
+    config['payload_hash'] = payload_hash
+
+    return config
+
+
+# TODO unify payload with channels_config/deprecate channels_config
+def _build_payload_config(exchange, symbols, channels):
+    # sort channels and symbols to keep hash consistent
+    config = {exchange: {}}
+    for channel in sorted(channels):
+        config[exchange][channel] = sorted(list(map(lambda s: s.normalized, symbols)))
     return config
 
 
