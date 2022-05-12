@@ -51,6 +51,10 @@ spec:
         {{- end }}
     spec:
       # TODO set resources for redis/redis-exporter sidecars
+      {{ if .dataFeed.imagePullSecret }}
+      imagePullSecrets:
+        - name: {{ .dataFeed.imagePullSecret }}
+      {{ end }}
       containers:
         - image: redis:alpine
           name: redis

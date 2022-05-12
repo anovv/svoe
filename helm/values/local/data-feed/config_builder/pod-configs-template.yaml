@@ -34,6 +34,9 @@ podConfigs:
     redis:
       port: {{ pod_config['redis_port'] }}
     dataFeed:
+      {% raw %}{{ if eq .Values.clusterType "minikube" }}{% endraw %}
+      imagePullSecret: regcred
+      {% raw %}{{ end }}{% endraw %}
       healthPath: {{ pod_config['data_feed_health_path'] }}
       healthPort: {{ pod_config['data_feed_health_port'] }}
       prometheus:
