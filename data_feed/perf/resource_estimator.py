@@ -69,20 +69,41 @@ def scale_up(ss_name):
                                                  body={'spec': {'replicas': 1}})
     print(f'Scaled up {ss_name}')
 
-def wait_for(ss_name, time):
-    print(f'Started waiting {RUN_FOR_S} for ss {ss_name}...')
+def wait_for_pod_to_run_for(pod_name, run_for_s):
+    # TODO check status here and early exit if failure?
+    print(f'Started waiting {RUN_FOR_S} for pod {pod_name} to run...')
     # for easier interrupts use for loop with short sleeps
     start = time.time()
-    for i in range(RUN_FOR_S):
+    for i in range(int(run_for_s)):
         if i%5 == 0:
-            print(f'Waiting for ss {ss_name}: {RUN_FOR_S - (time.time() - start)}s left')
+            print(f'Waiting for pod {pod_name}: {run_for_s - (time.time() - start)}s left')
         time.sleep(1)
 
-    print(f'Waiting for {ss_name} done')
+    print(f'Done waiting for pod {pod_name} to finish')
 
-def wait_until_running(ss_name, timeout):
-    # image pull may take up to 15 min...
-    pod_name = pod_name_from_ss(ss_name)
+def wait_for_pod_to(pod_name, appear, timeout):
+    print(f'Waiting for pod {pod_name} to {"appear" if appear else "disappear"}...')
+    start = time.time()
+    while (time.time() - start < timeout):
+        try:
+            core_api.read_namespaced_pod(pod_name, DATA_FEED_NAMESPACE)
+            if appear:
+                print(f'Pod {pod_name} appeared')
+                return True
+        except:
+            if not appear:
+                print(f'Pod {pod_name} disappeared')
+                return True
+            pass
+        time.sleep(1)
+
+    print(f'Timeout waiting for pod {pod_name} to {"appear" if appear else "disappear"}')
+    return False
+
+def wait_for_pod_to_start_running(pod_name, timeout):
+    # TODO long timeout only on image pull?
+    # image pull may take up to 15 mins
+
     print(f'Waiting for pod {pod_name} to start running...')
     start = time.time()
     count = 0
@@ -91,15 +112,16 @@ def wait_until_running(ss_name, timeout):
         pod_status_phase = pod.status.phase # Pending, Running, Succeeded, Failed, Unknown
         container_state, _ = get_container_state(pod.status) # running, terminated, waiting
         if (pod_status_phase == 'Running' and container_state == 'running'):
-            printf(f'Pod {pod_name}: {pod_status_phase}, Container: {container_state}')
+            print(f'Pod {pod_name}: {pod_status_phase}, Container: {container_state}')
             return True
         if (pod_status_phase == 'Failed'):
-            printf(f'Pod {pod_name}: {pod_status_phase}, Container: {container_state}')
+            print(f'Pod {pod_name}: {pod_status_phase}, Container: {container_state}')
             return False
         if count%5 == 0:
             print(f'Waiting for pod {pod_name}: {timeout - (time.time() - start)}s left until timeout, pod: {pod_status_phase}, container: {container_state}')
         count += 1
         time.sleep(1)
+
     print(f'Timeout waiting for pod {pod_name} to start running')
     return False
 
@@ -110,30 +132,30 @@ def scale_down(ss_name):
 
 
 def estimate_resources(ss_name):
-    # ss manages pods have the same name as ss plus index, we assume 1 pod per ss
-    # pod name example data-feed-binance-spot-6d1641b134-ss-0
     pod_name = pod_name_from_ss(ss_name)
     cm_name = cm_name_from_ss(ss_name)
     payload, payload_hash = get_payload(cm_name)
+
     set_env(ss_name, 'TESTING')
     scale_up(ss_name)
-    runnning = wait_until_running(ss_name, 15*60)
-    if not runnning:
-        # TODO report timeout in data
-        finalize(ss_name)
-        return
-    wait_for(ss_name, RUN_FOR_S)
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(asyncio.gather(
-        fetch_perf_metrics(pod_name, [DATA_FEED_CONTAINER, REDIS_CONTAINER]),
-        fetch_health_metrics(pod_name, payload)
-    ))
+    appeared = wait_for_pod_to(pod_name, True, 20)
+    if appeared:
+        runnning = wait_for_pod_to_start_running(pod_name, 15 * 60)
+        if runnning:
+            wait_for_pod_to_run_for(pod_name, RUN_FOR_S)
+
+            loop = asyncio.get_event_loop()
+            loop.run_until_complete(asyncio.gather(
+                fetch_perf_metrics(pod_name, [DATA_FEED_CONTAINER, REDIS_CONTAINER]),
+                fetch_health_metrics(pod_name, payload)
+            ))
+
     finalize(ss_name)
 
 def finalize(ss_name):
     scale_down(ss_name)
     set_env(ss_name, '')
-    # TODO wait for pod to terminate?
+    wait_for_pod_to(pod_name_from_ss(ss_name), False, 60)
 
 def should_estimate(spec):
     for container in spec.spec.template.spec.containers:
@@ -227,6 +249,8 @@ def get_payload(cm_name):
     return conf['payload_config'], conf['payload_hash']
 
 def pod_name_from_ss(ss_name):
+    # ss manages pods have the same name as ss plus index, we assume 1 pod per ss
+    # pod name example data-feed-binance-spot-6d1641b134-ss-0
     return ss_name + '-0'
 
 def cm_name_from_ss(ss_name):
@@ -270,7 +294,22 @@ def run_estimator():
 # loop.run_until_complete(fetch_health_metrics('pod name'))
 # save_data()
 ss_name = 'data-feed-binance-spot-6d1641b134-ss'
-scale_up(ss_name)
+pod_name = pod_name_from_ss(ss_name)
+cm_name = cm_name_from_ss(ss_name)
+payload, payload_hash = get_payload(cm_name)
+
 set_env(ss_name, 'TESTING')
-wait_until_running(ss_name, 15*60)
-scale_down(ss_name)
+scale_up(ss_name)
+appeared = wait_for_pod_to(pod_name, True, 20)
+if not appeared:
+    # TODO report timeout in data
+    finalize(ss_name)
+    exit()
+runnning = wait_for_pod_to_start_running(pod_name, 15 * 60)
+if not runnning:
+    # TODO report timeout in data
+    finalize(ss_name)
+    exit()
+
+wait_for_pod_to_run_for(pod_name, 10)
+finalize(ss_name)
