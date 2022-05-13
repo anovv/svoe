@@ -19,14 +19,13 @@ DATA_FEED_CM_CONFIG_NAME = 'data-feed-config.yaml'
 REDIS_CONTAINER = 'redis'
 # TODO dynamic parallelism based on heuristics
 PARALLELISM = 2 # number of simultaneously running pods
-RUN_FOR_S = 2*60 # how long to run a pod
+RUN_FOR_S = 10 # how long to run a pod
 PROM_NAMESPACE = 'monitoring'
 PROM_POD_NAME = 'prometheus-kube-prometheus-stack-prometheus-0'
 PROM_PORT_FORWARD = '9090'
 PROM = f'http://localhost:{PROM_PORT_FORWARD}'
 SAVE_TO = 'resources_estimation.json'
 
-# TODO uncomment
 config.load_kube_config(context=CLUSTER)
 apps_api = client.AppsV1Api()
 core_api = client.CoreV1Api()
@@ -71,7 +70,7 @@ def scale_up(ss_name):
 
 def wait_for_pod_to_run_for(pod_name, run_for_s):
     # TODO check status here and early exit if failure?
-    print(f'Started waiting {RUN_FOR_S} for pod {pod_name} to run...')
+    print(f'Started waiting {RUN_FOR_S}s for pod {pod_name} to run...')
     # for easier interrupts use for loop with short sleeps
     start = time.time()
     for i in range(int(run_for_s)):
@@ -133,10 +132,9 @@ def scale_down(ss_name):
 
 def estimate_resources(ss_name):
     pod_name = pod_name_from_ss(ss_name)
-    cm_name = cm_name_from_ss(ss_name)
-    payload, payload_hash = get_payload(cm_name)
 
     set_env(ss_name, 'TESTING')
+    # TODO what happens if ss already scaled to 1 (pod already running) ? abort?
     scale_up(ss_name)
     appeared = wait_for_pod_to(pod_name, True, 20)
     if appeared:
@@ -144,11 +142,14 @@ def estimate_resources(ss_name):
         if runnning:
             wait_for_pod_to_run_for(pod_name, RUN_FOR_S)
 
-            loop = asyncio.get_event_loop()
-            loop.run_until_complete(asyncio.gather(
-                fetch_perf_metrics(pod_name, [DATA_FEED_CONTAINER, REDIS_CONTAINER]),
-                fetch_health_metrics(pod_name, payload)
-            ))
+            metrics = fetch_metrics(pod_name, payload_config)
+
+            # if pod_name not in data:
+            #     data[pod_name] = {}
+            # if metric_type not in data[pod_name]:
+            #     data[pod_name][metric_type] = {}
+            #
+            # data[pod_name][metric_type][metric_name] = metric_value
 
     finalize(ss_name)
 
@@ -165,43 +166,41 @@ def should_estimate(spec):
             return True
     return False
 
-async def _fetch_metric(metric, metric_name, metric_type, pod_name, session):
+async def _fetch_metric_async(metric_query, session):
     params = {
-        'query': metric,
+        'query': metric_query,
     }
+    metric_value = None
     async with session.get(PROM + '/api/v1/query', params=params) as response:
         resp = await response.json()
         res = resp['data']['result']
         if res:
             metric_value = resp['data']['result'][0]['value'][1]
-        else:
-            metric_value = '-1'
 
-    print(metric_name + ' ' + metric_value)
+    return metric_value
 
-    if pod_name not in data:
-        data[pod_name] = {}
-    if metric_type not in data[pod_name]:
-        data[pod_name][metric_type] = {}
-
-    data[pod_name][metric_type][metric_name] = metric_value
-
-async def _fetch_metrics(metrics, metric_type, pod_name):
+async def fetch_metrics_async(ss_name):
+    payload_config, payload_hash = get_payload(ss_name)
+    pod_name = pod_name_from_ss(ss_name)
+    health_metrics = get_health_metrics(pod_name, payload_config)
+    perf_metrics = get_perf_metrics(pod_name)
+    metric_queries =  {**health_metrics, **perf_metrics}
     tasks = []
-    async with ClientSession() as session:
-        for metric_name in metrics:
-            tasks.append(asyncio.ensure_future(_fetch_metric(
-                metrics[metric_name],
-                metric_name,
-                metric_type,
-                pod_name,
-                session
+    session = ClientSession()
+    async with session as _session:
+        for metric_name in metric_queries:
+            tasks.append(asyncio.ensure_future(_fetch_metric_async(
+                metric_queries[metric_name],
+                _session
             )))
+    return await asyncio.gather(*tasks)
 
-        await asyncio.gather(*tasks)
+def fetch_metrics(ss_name):
+    loop = asyncio.get_event_loop()
+    res = loop.run_until_complete(fetch_metrics_async(ss_name))
+    return res
 
-
-async def fetch_health_metrics(pod_name, payload):
+def get_health_metrics(pod_name, payload_config):
     duration = f'[{RUN_FOR_S}s]'
     metrics = {}
     for exchange in payload_config:
@@ -210,40 +209,43 @@ async def fetch_health_metrics(pod_name, payload):
             for symbol in payload_config[exchange][data_type]:
                 metrics.update({
                     # TODO add aggregation over other labels ?
-                    # TODO if we have interrupts we need to check for absent() metric (otherwise avg will be counted only when pod was run, no info about interruptions)
                     # TODO separator instead of '_'
-                    f'health_{data_type}_{symbol}': f'avg_over_time(svoe_data_feed_collector_conn_health_gauge{{exchange="{exchange}", symbol="{symbol}", data_type="{data_type}"}}{duration})'
+                    f'health_absent_{data_type}_{symbol}': f'avg_over_time(absent(svoe_data_feed_collector_conn_health_gauge{{exchange="{exchange}", symbol="{symbol}", data_type="{data_type}"}}){duration})',
+                    f'health_avg_{data_type}_{symbol}': f'avg_over_time(svoe_data_feed_collector_conn_health_gauge{{exchange="{exchange}", symbol="{symbol}", data_type="{data_type}"}}{duration})'
                 })
 
-    await _fetch_metrics(metrics, 'health', pod_name)
+    return metrics
 
-
-async def fetch_perf_metrics(pod_name, containers):
+def get_perf_metrics(pod_name):
     # https://github.com/olxbr/metrics-server-exporter to export metrics-server to prometheus
     duration = f'[{RUN_FOR_S}s]'
     metrics = {}
-    for container_name in containers:
+    for container_name in [DATA_FEED_CONTAINER, REDIS_CONTAINER]:
         metrics.update({
             # mem
+            f'mem_absent_{container_name}': f'avg_over_time(absent(kube_metrics_server_pods_mem{{pod_name="{pod_name}", pod_container_name="{container_name}"}}){duration})',
             f'mem_avg_{container_name}': f'avg_over_time(kube_metrics_server_pods_mem{{pod_name="{pod_name}", pod_container_name="{container_name}"}}{duration})',
             f'mem_max_{container_name}': f'max_over_time(kube_metrics_server_pods_mem{{pod_name="{pod_name}", pod_container_name="{container_name}"}}{duration})',
             f'mem_min_{container_name}': f'min_over_time(kube_metrics_server_pods_mem{{pod_name="{pod_name}", pod_container_name="{container_name}"}}{duration})',
             f'mem_095_{container_name}': f'quantile_over_time(0.95, kube_metrics_server_pods_mem{{pod_name="{pod_name}", pod_container_name="{container_name}"}}{duration})',
+
             # cpu
+            f'cpu_absent_{container_name}': f'avg_over_time(absent(kube_metrics_server_pods_cpu{{pod_name="{pod_name}", pod_container_name="{container_name}"}}){duration})',
             f'cpu_avg_{container_name}': f'avg_over_time(kube_metrics_server_pods_cpu{{pod_name="{pod_name}", pod_container_name="{container_name}"}}{duration})',
             f'cpu_max_{container_name}': f'max_over_time(kube_metrics_server_pods_cpu{{pod_name="{pod_name}", pod_container_name="{container_name}"}}{duration})',
             f'cpu_min_{container_name}': f'min_over_time(kube_metrics_server_pods_cpu{{pod_name="{pod_name}", pod_container_name="{container_name}"}}{duration})',
             f'cpu_095_{container_name}': f'quantile_over_time(0.95, kube_metrics_server_pods_cpu{{pod_name="{pod_name}", pod_container_name="{container_name}"}}{duration})',
         })
 
-    await _fetch_metrics(metrics, 'perf', pod_name)
+    return metrics
 
 def save_data():
     with open(SAVE_TO, 'w+') as outfile:
         json.dump(data, outfile, indent=4, sort_keys=True)
     print(f'Saved data to {SAVE_TO}')
 
-def get_payload(cm_name):
+def get_payload(ss_name):
+    cm_name = cm_name_from_ss(ss_name)
     cm = core_api.read_namespaced_config_map(cm_name, DATA_FEED_NAMESPACE)
     conf = yaml.load(cm.data[DATA_FEED_CM_CONFIG_NAME], Loader=yaml.SafeLoader)
     return conf['payload_config'], conf['payload_hash']
@@ -278,38 +280,6 @@ def run_estimator():
     save_data()
     stop_forward_prom_port()
 
-
-# run_estimator()
-
-# specs = apis_api.list_namespaced_stateful_set(namespace=DATA_FEED_NAMESPACE)
-# for spec in specs.items:
-#     print(spec.metadata.name)
-# ss_name = specs.items[0].metadata.name
-# apis_api.patch_namespaced_stateful_set_scale(name=ss_name, namespace=DATA_FEED_NAMESPACE, body={'spec': {'replicas': 0}})
-# forward_prom_port()
-# print(get_payload('data-feed-binance-spot-6d1641b134-cm'))
-# load_ss_specs()
-# loop = asyncio.get_event_loop()
-# loop.run_until_complete(fetch_perf_metrics(PROM_POD_NAME, ['prometheus']))
-# loop.run_until_complete(fetch_health_metrics('pod name'))
-# save_data()
 ss_name = 'data-feed-binance-spot-6d1641b134-ss'
-pod_name = pod_name_from_ss(ss_name)
-cm_name = cm_name_from_ss(ss_name)
-payload, payload_hash = get_payload(cm_name)
-
-set_env(ss_name, 'TESTING')
-scale_up(ss_name)
-appeared = wait_for_pod_to(pod_name, True, 20)
-if not appeared:
-    # TODO report timeout in data
-    finalize(ss_name)
-    exit()
-runnning = wait_for_pod_to_start_running(pod_name, 15 * 60)
-if not runnning:
-    # TODO report timeout in data
-    finalize(ss_name)
-    exit()
-
-wait_for_pod_to_run_for(pod_name, 10)
-finalize(ss_name)
+print(fetch_metrics(ss_name))
+# estimate_resources(ss_name)
