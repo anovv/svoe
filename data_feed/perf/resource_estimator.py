@@ -6,7 +6,7 @@ import yaml
 import concurrent.futures
 import subprocess
 import atexit
-from aiohttp import ClientSession
+import aiohttp
 
 from kubernetes import client, config
 
@@ -142,7 +142,7 @@ def estimate_resources(ss_name):
         if runnning:
             wait_for_pod_to_run_for(pod_name, RUN_FOR_S)
 
-            metrics = fetch_metrics(pod_name, payload_config)
+            metrics = fetch_metrics(ss_name, payload_config)
 
             # if pod_name not in data:
             #     data[pod_name] = {}
@@ -166,18 +166,28 @@ def should_estimate(spec):
             return True
     return False
 
-async def _fetch_metric_async(metric_query, session):
+async def _fetch_metric_async(metric_type, metric_name, metric_query, session):
     params = {
         'query': metric_query,
     }
     metric_value = None
-    async with session.get(PROM + '/api/v1/query', params=params) as response:
-        resp = await response.json()
-        res = resp['data']['result']
-        if res:
-            metric_value = resp['data']['result'][0]['value'][1]
+    error = None
+    try:
+        async with session.get(PROM + '/api/v1/query', params=params) as response:
+            resp = await response.json()
+            status = resp['status']
+            if status != 'success':
+                error = resp['error']
+            else:
+                metric_value = resp['data']['result'][0]['value'][1]
+    except Exception as e:
+        error = e.__class__.__name__ + ': ' + str(e)
 
-    return metric_value
+    if error:
+        print('Unable to fetch metric')
+        print(error)
+
+    return metric_type, metric_name, metric_value, error
 
 async def fetch_metrics_async(ss_name):
     payload_config, payload_hash = get_payload(ss_name)
@@ -186,14 +196,17 @@ async def fetch_metrics_async(ss_name):
     perf_metrics = get_perf_metrics(pod_name)
     metric_queries =  {**health_metrics, **perf_metrics}
     tasks = []
-    session = ClientSession()
-    async with session as _session:
-        for metric_name in metric_queries:
-            tasks.append(asyncio.ensure_future(_fetch_metric_async(
-                metric_queries[metric_name],
-                _session
-            )))
-    return await asyncio.gather(*tasks)
+    session = aiohttp.ClientSession()
+    for metric_name in metric_queries:
+        tasks.append(asyncio.ensure_future(_fetch_metric_async(
+            'health' if metric_name in health_metrics else 'perf',
+            metric_name,
+            metric_queries[metric_name],
+            session
+        )))
+    res = await asyncio.gather(*tasks)
+    await session.close()
+    return res
 
 def fetch_metrics(ss_name):
     loop = asyncio.get_event_loop()
@@ -210,7 +223,7 @@ def get_health_metrics(pod_name, payload_config):
                 metrics.update({
                     # TODO add aggregation over other labels ?
                     # TODO separator instead of '_'
-                    f'health_absent_{data_type}_{symbol}': f'avg_over_time(absent(svoe_data_feed_collector_conn_health_gauge{{exchange="{exchange}", symbol="{symbol}", data_type="{data_type}"}}){duration})',
+                    f'health_absent_{data_type}_{symbol}': f'absent(svoe_data_feed_collector_conn_health_gauge{{exchange="{exchange}", symbol="{symbol}", data_type="{data_type}"}}{duration})',
                     f'health_avg_{data_type}_{symbol}': f'avg_over_time(svoe_data_feed_collector_conn_health_gauge{{exchange="{exchange}", symbol="{symbol}", data_type="{data_type}"}}{duration})'
                 })
 
@@ -281,5 +294,9 @@ def run_estimator():
     stop_forward_prom_port()
 
 ss_name = 'data-feed-binance-spot-6d1641b134-ss'
-print(fetch_metrics(ss_name))
+
+pod_name = pod_name_from_ss(ss_name)
+set_env(ss_name, 'TESTING')
+scale_up(ss_name)
+# print(fetch_metrics(ss_name))
 # estimate_resources(ss_name)
