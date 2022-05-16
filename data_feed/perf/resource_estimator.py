@@ -100,7 +100,7 @@ def wait_for_pod_to(pod_name, appear, timeout):
     return False
 
 def wait_for_pod_to_start_running(pod_name, timeout):
-    # TODO long timeout only on image pull?
+    # TODO long timeout only on image pull (PodInitializing status)?
     # image pull may take up to 15 mins
 
     print(f'Waiting for pod {pod_name} to start running...')
@@ -215,6 +215,7 @@ def fetch_metrics(ss_name):
 
 def get_health_metrics(pod_name, payload_config):
     duration = f'[{RUN_FOR_S}s]'
+    duration_subquery = f'[{RUN_FOR_S}s:]'
     metrics = {}
     for exchange in payload_config:
         # TODO decide channel/data_type naming
@@ -223,7 +224,8 @@ def get_health_metrics(pod_name, payload_config):
                 metrics.update({
                     # TODO add aggregation over other labels ?
                     # TODO separator instead of '_'
-                    f'health_absent_{data_type}_{symbol}': f'absent(svoe_data_feed_collector_conn_health_gauge{{exchange="{exchange}", symbol="{symbol}", data_type="{data_type}"}}{duration})',
+                    f'health_absent_{data_type}_{symbol}':
+                        f'avg_over_time((max(absent(svoe_data_feed_collector_conn_health_gauge{{exchange="{exchange}", symbol="{symbol}", data_type="{data_type}"}})) or vector(0)){duration_subquery})',
                     f'health_avg_{data_type}_{symbol}': f'avg_over_time(svoe_data_feed_collector_conn_health_gauge{{exchange="{exchange}", symbol="{symbol}", data_type="{data_type}"}}{duration})'
                 })
 
@@ -232,18 +234,21 @@ def get_health_metrics(pod_name, payload_config):
 def get_perf_metrics(pod_name):
     # https://github.com/olxbr/metrics-server-exporter to export metrics-server to prometheus
     duration = f'[{RUN_FOR_S}s]'
+    duration_subquery = f'[{RUN_FOR_S}s:]'
     metrics = {}
     for container_name in [DATA_FEED_CONTAINER, REDIS_CONTAINER]:
         metrics.update({
             # mem
-            f'mem_absent_{container_name}': f'avg_over_time(absent(kube_metrics_server_pods_mem{{pod_name="{pod_name}", pod_container_name="{container_name}"}}){duration})',
+            f'mem_absent_{container_name}':
+                f'avg_over_time((max(absent(kube_metrics_server_pods_mem{{pod_name="{pod_name}", pod_container_name="{container_name}"}})) or vector(0)){duration_subquery})',
             f'mem_avg_{container_name}': f'avg_over_time(kube_metrics_server_pods_mem{{pod_name="{pod_name}", pod_container_name="{container_name}"}}{duration})',
             f'mem_max_{container_name}': f'max_over_time(kube_metrics_server_pods_mem{{pod_name="{pod_name}", pod_container_name="{container_name}"}}{duration})',
             f'mem_min_{container_name}': f'min_over_time(kube_metrics_server_pods_mem{{pod_name="{pod_name}", pod_container_name="{container_name}"}}{duration})',
             f'mem_095_{container_name}': f'quantile_over_time(0.95, kube_metrics_server_pods_mem{{pod_name="{pod_name}", pod_container_name="{container_name}"}}{duration})',
 
             # cpu
-            f'cpu_absent_{container_name}': f'avg_over_time(absent(kube_metrics_server_pods_cpu{{pod_name="{pod_name}", pod_container_name="{container_name}"}}){duration})',
+            f'cpu_absent_{container_name}':
+                f'avg_over_time((max(absent(kube_metrics_server_pods_cpu{{pod_name="{pod_name}", pod_container_name="{container_name}"}})) or vector(0)){duration_subquery})',
             f'cpu_avg_{container_name}': f'avg_over_time(kube_metrics_server_pods_cpu{{pod_name="{pod_name}", pod_container_name="{container_name}"}}{duration})',
             f'cpu_max_{container_name}': f'max_over_time(kube_metrics_server_pods_cpu{{pod_name="{pod_name}", pod_container_name="{container_name}"}}{duration})',
             f'cpu_min_{container_name}': f'min_over_time(kube_metrics_server_pods_cpu{{pod_name="{pod_name}", pod_container_name="{container_name}"}}{duration})',
