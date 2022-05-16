@@ -1,4 +1,4 @@
-# Script to run pods (without resource spec) and record resource consumptions (mem/cpu)
+# Script to run pods (without resource spec) and record health and resource consumptions (mem/cpu)
 import time
 import asyncio
 import json
@@ -7,10 +7,11 @@ import concurrent.futures
 import subprocess
 import atexit
 import aiohttp
+import enum
+import kubernetes
+import datetime
 
-from kubernetes import client, config
-
-# cluster should have prometheus, metrics-server, metrics-server-exporter and data-feed
+# cluster should have kube-prometheus-stack, metrics-server, metrics-server-exporter and data-feed
 # CLUSTER = 'k8s.vpc-apse1.dev.svoe.link'
 CLUSTER = 'minikube-1'
 DATA_FEED_NAMESPACE = 'data-feed'
@@ -19,16 +20,24 @@ DATA_FEED_CM_CONFIG_NAME = 'data-feed-config.yaml'
 REDIS_CONTAINER = 'redis'
 # TODO dynamic parallelism based on heuristics
 PARALLELISM = 2 # number of simultaneously running pods
-RUN_FOR_S = 10 # how long to run a pod
+RUN_FOR_S = 150 # how long to run a pod
 PROM_NAMESPACE = 'monitoring'
 PROM_POD_NAME = 'prometheus-kube-prometheus-stack-prometheus-0'
 PROM_PORT_FORWARD = '9090'
 PROM = f'http://localhost:{PROM_PORT_FORWARD}'
-SAVE_TO = 'resources_estimation.json'
 
-config.load_kube_config(context=CLUSTER)
-apps_api = client.AppsV1Api()
-core_api = client.CoreV1Api()
+class Result(str, enum.Enum):
+    # TODO ss not found, ss already running, etc.
+    STARTED_NOT_FINISHED = 'STARTED_NOT_FINISHED'
+    POD_NOT_FOUND = 'POD_NOT_FOUND'
+    POD_DIDNT_RUN = 'POD_DIDNT_RUN'
+    METRICS_MISSING = 'METRICS_MISSING'
+    ALL_OK = 'ALL_OK'
+    INTERRUPTED = 'INTERRUPTED'
+
+kubernetes.config.load_kube_config(context=CLUSTER)
+apps_api = kubernetes.client.AppsV1Api()
+core_api = kubernetes.client.CoreV1Api()
 data = {}
 forward_prom_port_proc = None
 
@@ -51,6 +60,18 @@ def stop_forward_prom_port():
         forward_prom_port_proc = None
         print(f'Stopped forwarding Prometheus port')
 
+# @atexit.register
+def save_data():
+    global data
+    if data:
+        path = f'resources-estimation-{datetime.datetime.now().strftime("%d-%m-%Y-%H:%M:%S")}.json'
+        print(path)
+        print(data)
+        with open(path, 'w+') as outfile:
+            json.dump(data, outfile, indent=4, sort_keys=True)
+        data = None
+        print(f'Saved data to {path}')
+
 def load_ss_specs():
     specs = apps_api.list_namespaced_stateful_set(namespace=DATA_FEED_NAMESPACE)
     filtered = list(filter(lambda spec: should_estimate(spec), specs.items))
@@ -67,6 +88,49 @@ def scale_up(ss_name):
     apps_api.patch_namespaced_stateful_set_scale(name=ss_name, namespace=DATA_FEED_NAMESPACE,
                                                  body={'spec': {'replicas': 1}})
     print(f'Scaled up {ss_name}')
+
+
+def scale_down(ss_name):
+    apps_api.patch_namespaced_stateful_set_scale(name=ss_name, namespace=DATA_FEED_NAMESPACE,
+                                                 body={'spec': {'replicas': 0}})
+    print(f'Scaled down {ss_name}')
+
+def finalize(ss_name):
+    scale_down(ss_name)
+    set_env(ss_name, '')
+    wait_for_pod_to(pod_name_from_ss(ss_name), False, 120)
+
+def should_estimate(spec):
+    for container in spec.spec.template.spec.containers:
+        if container.name == DATA_FEED_CONTAINER \
+                and container.resources.limits is None \
+                and container.resources.requests is None:
+            return True
+    return False
+
+def get_payload(ss_name):
+    cm_name = cm_name_from_ss(ss_name)
+    cm = core_api.read_namespaced_config_map(cm_name, DATA_FEED_NAMESPACE)
+    conf = yaml.load(cm.data[DATA_FEED_CM_CONFIG_NAME], Loader=yaml.SafeLoader)
+    return conf['payload_config'], conf['payload_hash']
+
+def pod_name_from_ss(ss_name):
+    # ss manages pods have the same name as ss plus index, we assume 1 pod per ss
+    # pod name example data-feed-binance-spot-6d1641b134-ss-0
+    return ss_name + '-0'
+
+def cm_name_from_ss(ss_name):
+    return ss_name[:-2] + 'cm'
+
+def get_container_state(pod_status):
+    container_status = next(filter(lambda c: c.name == DATA_FEED_CONTAINER, pod_status.container_statuses), None)
+    state = container_status.state
+    if state.running:
+        return 'running', state.running
+    if state.terminated:
+        return 'terminated', state.terminated
+    if state.waiting:
+        return 'waiting', state.waiting
 
 def wait_for_pod_to_run_for(pod_name, run_for_s):
     # TODO check status here and early exit if failure?
@@ -122,48 +186,6 @@ def wait_for_pod_to_start_running(pod_name, timeout):
         time.sleep(1)
 
     print(f'Timeout waiting for pod {pod_name} to start running')
-    return False
-
-def scale_down(ss_name):
-    apps_api.patch_namespaced_stateful_set_scale(name=ss_name, namespace=DATA_FEED_NAMESPACE,
-                                                 body={'spec': {'replicas': 0}})
-    print(f'Scaled down {ss_name}')
-
-
-def estimate_resources(ss_name):
-    pod_name = pod_name_from_ss(ss_name)
-
-    set_env(ss_name, 'TESTING')
-    # TODO what happens if ss already scaled to 1 (pod already running) ? abort?
-    scale_up(ss_name)
-    appeared = wait_for_pod_to(pod_name, True, 20)
-    if appeared:
-        runnning = wait_for_pod_to_start_running(pod_name, 15 * 60)
-        if runnning:
-            wait_for_pod_to_run_for(pod_name, RUN_FOR_S)
-
-            metrics = fetch_metrics(ss_name, payload_config)
-
-            # if pod_name not in data:
-            #     data[pod_name] = {}
-            # if metric_type not in data[pod_name]:
-            #     data[pod_name][metric_type] = {}
-            #
-            # data[pod_name][metric_type][metric_name] = metric_value
-
-    finalize(ss_name)
-
-def finalize(ss_name):
-    scale_down(ss_name)
-    set_env(ss_name, '')
-    wait_for_pod_to(pod_name_from_ss(ss_name), False, 60)
-
-def should_estimate(spec):
-    for container in spec.spec.template.spec.containers:
-        if container.name == DATA_FEED_CONTAINER \
-                and container.resources.limits is None \
-                and container.resources.requests is None:
-            return True
     return False
 
 async def _fetch_metric_async(metric_type, metric_name, metric_query, session):
@@ -223,9 +245,7 @@ async def fetch_metrics_async(ss_name):
     return res
 
 def fetch_metrics(ss_name):
-    loop = asyncio.get_event_loop()
-    res = loop.run_until_complete(fetch_metrics_async(ss_name))
-    return res
+    return asyncio.get_event_loop().run_until_complete(fetch_metrics_async(ss_name))
 
 def get_health_metrics(pod_name, payload_config):
     duration = f'[{RUN_FOR_S}s]'
@@ -271,56 +291,75 @@ def get_perf_metrics(pod_name):
 
     return metrics
 
-def save_data():
-    with open(SAVE_TO, 'w+') as outfile:
-        json.dump(data, outfile, indent=4, sort_keys=True)
-    print(f'Saved data to {SAVE_TO}')
+def estimate_resources(ss_name):
+    result = Result.STARTED_NOT_FINISHED
+    try:
+        pod_name = pod_name_from_ss(ss_name)
 
-def get_payload(ss_name):
-    cm_name = cm_name_from_ss(ss_name)
-    cm = core_api.read_namespaced_config_map(cm_name, DATA_FEED_NAMESPACE)
-    conf = yaml.load(cm.data[DATA_FEED_CM_CONFIG_NAME], Loader=yaml.SafeLoader)
-    return conf['payload_config'], conf['payload_hash']
+        set_env(ss_name, 'TESTING')
+        # TODO what happens if ss already scaled to 1 (pod already running) ? abort?
+        scale_up(ss_name)
+        appeared = wait_for_pod_to(pod_name, True, 20)
+        if appeared:
+            runnning = wait_for_pod_to_start_running(pod_name, 15 * 60)
+            if runnning:
+                wait_for_pod_to_run_for(pod_name, RUN_FOR_S)
 
-def pod_name_from_ss(ss_name):
-    # ss manages pods have the same name as ss plus index, we assume 1 pod per ss
-    # pod name example data-feed-binance-spot-6d1641b134-ss-0
-    return ss_name + '-0'
+                metrics = fetch_metrics(ss_name, payload_config)
+                result = Result.ALL_OK
 
-def cm_name_from_ss(ss_name):
-    return ss_name[:-2] + 'cm'
+                # write to data
+                if pod_name not in data:
+                    data[pod_name] = {}
+                    data[pod_name]['metrics'] = {}
+                for metric_type, metric_name, metric_value, error in metrics:
+                    if error:
+                        result = Result.METRICS_MISSING
+                    else:
+                        if metric_type not in data[pod_name]['metrics']:
+                            data[pod_name]['metrics'][metric_type] = {}
 
-def get_container_state(pod_status):
-    container_status = next(filter(lambda c: c.name == DATA_FEED_CONTAINER, pod_status.container_statuses), None)
-    state = container_status.state
-    if state.running:
-        return 'running', state.running
-    if state.terminated:
-        return 'terminated', state.terminated
-    if state.waiting:
-        return 'waiting', state.waiting
+                    data[pod_name][metric_type][metric_name] = metric_value
+            else:
+                result = Result.POD_DIDNT_RUN
+        else:
+            result = Result.POD_NOT_FOUND
+    except Exception as e:
+        result = Result.INTERRUPTED
+    finally:
+        if pod_name not in data:
+            data[pod_name] = {}
+        data[pod_name]['result'] = result
+        finalize(ss_name)
+
+    return result
 
 def run_estimator():
+    print('Started estimator')
     start_forward_prom_port()
     specs = load_ss_specs()
+    print(f'Scheduled estimation for {len(specs)} pods')
+    # TODO tqdm progress
     with concurrent.futures.ThreadPoolExecutor(max_workers=PARALLELISM) as executor:
-        futures = []
+        futures = {}
         for spec in specs:
-            futures.append(executor.submit(estimate_resources, ss_name=spec.metadata.name))
-        for future in concurrent.futures.as_completed(futures):
-            print(future.result())
+            futures[executor.submit(estimate_resources, ss_name=spec.metadata.name)] = spec.metadata.name
+        for future in concurrent.futures.as_completed(futures.keys()):
+            res = future.result()
+            print(f'Finished estimating resources for {futures[future]}: {res}')
     save_data()
     stop_forward_prom_port()
 
-ss_name = 'data-feed-binance-spot-6d1641b134-ss'
-
+# ss_name = 'data-feed-binance-spot-6d1641b134-ss'
 # pod_name = pod_name_from_ss(ss_name)
 # set_env(ss_name, 'TESTING')
 # scale_up(ss_name)
-print(fetch_metrics(ss_name))
+# print(fetch_metrics(ss_name))
 # loop = asyncio.get_event_loop()
 # session = aiohttp.ClientSession()
 # res = loop.run_until_complete(_fetch_metric_async('health', 'absent', 'avg_over_time((max(absent(svoe_data_feed_collector_conn_health_gauge{exchange="BINANCE", symbol="ETH-USDT", data_type="l2_book"})) or vector(0))[10m:])', session))
 # loop.run_until_complete(session.close())
 # print(res)
 # estimate_resources(ss_name)
+# run_estimator()
+save_data()
