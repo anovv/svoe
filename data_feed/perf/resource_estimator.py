@@ -167,25 +167,39 @@ def should_estimate(spec):
     return False
 
 async def _fetch_metric_async(metric_type, metric_name, metric_query, session):
+    retries = 10
+    print(f'Fetching metric {metric_name}')
     params = {
         'query': metric_query,
     }
     metric_value = None
     error = None
-    try:
-        async with session.get(PROM + '/api/v1/query', params=params) as response:
-            resp = await response.json()
-            status = resp['status']
-            if status != 'success':
-                error = resp['error']
-            else:
-                metric_value = resp['data']['result'][0]['value'][1]
-    except Exception as e:
-        error = e.__class__.__name__ + ': ' + str(e)
+    count = 0
+    while (count < retries):
+        count += 1
+        try:
+            error = None
+            async with session.get(PROM + '/api/v1/query', params=params) as response:
+                resp = await response.json()
+                status = resp['status']
+                if status != 'success':
+                    error = resp['error']
+                else:
+                    metric_value = resp['data']['result'][0]['value'][1]
+                    # metric_value = resp
+        except Exception as e:
+            error = e.__class__.__name__ + ': ' + str(e)
+
+        if error:
+            print(f'Retrying {count}/{retries} to fetch metric {metric_name}...')
+            time.sleep(1)
+        else:
+            break
 
     if error:
-        print('Unable to fetch metric')
-        print(error)
+        print(f'Unable to fetch metric {metric_name}')
+    else:
+        print(f'Succesfully fetched metric {metric_name}')
 
     return metric_type, metric_name, metric_value, error
 
@@ -300,8 +314,13 @@ def run_estimator():
 
 ss_name = 'data-feed-binance-spot-6d1641b134-ss'
 
-pod_name = pod_name_from_ss(ss_name)
-set_env(ss_name, 'TESTING')
-scale_up(ss_name)
-# print(fetch_metrics(ss_name))
+# pod_name = pod_name_from_ss(ss_name)
+# set_env(ss_name, 'TESTING')
+# scale_up(ss_name)
+print(fetch_metrics(ss_name))
+# loop = asyncio.get_event_loop()
+# session = aiohttp.ClientSession()
+# res = loop.run_until_complete(_fetch_metric_async('health', 'absent', 'avg_over_time((max(absent(svoe_data_feed_collector_conn_health_gauge{exchange="BINANCE", symbol="ETH-USDT", data_type="l2_book"})) or vector(0))[10m:])', session))
+# loop.run_until_complete(session.close())
+# print(res)
 # estimate_resources(ss_name)
