@@ -52,7 +52,7 @@ class ResourceEstimator:
                         # TODO somehow indicate per-metric errors?
                         self.data[pod_name]['metrics'][metric_type][metric_name] = error if error else metric_value
                 else:
-                    result = Result.POD_DIDNT_RUN
+                    result = Result.POD_DID_NOT_RUN
             else:
                 result = Result.POD_NOT_FOUND
         except Exception as e:
@@ -84,6 +84,7 @@ class ResourceEstimator:
             for future in concurrent.futures.as_completed(futures.keys()):
                 res = future.result()
                 print(f'Finished estimating resources for {futures[future]}: {res}')
+        self.cleanup()
 
     def cleanup(self):
         save_data(self.data)

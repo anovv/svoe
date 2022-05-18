@@ -21,7 +21,7 @@ class KubeWatcher:
             return 'waiting', state.waiting
 
     @staticmethod
-    def wait_for_pod_to_run_for(self, pod_name, run_for_s):
+    def wait_for_pod_to_run_for(pod_name, run_for_s):
         # TODO check status here and early exit if failure?
         print(f'Started running pod {pod_name} for {run_for_s}s...')
         # for easier interrupts use for loop with short sleeps
