@@ -1,5 +1,4 @@
 # Script to run pods (without resource spec) and record health and resource consumptions (mem/cpu)
-from defines import *
 from utils import *
 from metrics import *
 
@@ -7,11 +6,10 @@ import concurrent.futures
 import atexit
 import kubernetes
 import kube_api
-import kube_watcher
+from perf.kube_watcher import kube_watcher
 
 
 class ResourceEstimator:
-
     def __init__(self):
         self.data = {}
         kubernetes.config.load_kube_config(context=CLUSTER)
@@ -74,6 +72,7 @@ class ResourceEstimator:
     def run(self):
         print('Started estimator')
         self.prom_connection.start()
+        # start watcher here
         specs = self.kube_api.load_ss_specs()
         print(f'Scheduled estimation for {len(specs)} pods')
         # TODO tqdm progress
@@ -89,8 +88,12 @@ class ResourceEstimator:
     def cleanup(self):
         save_data(self.data)
         self.data = None
-        self.prom_connection.stop()
-        # TODO stop watcher
+        if self.prom_connection:
+            self.prom_connection.stop()
+            self.prom_connection = None
+        if self.kube_watcher:
+            self.kube_watcher.stop()
+            self.kube_watcher = None
 
 
 re = ResourceEstimator()
@@ -106,7 +109,10 @@ def cleanup():
 ss_name = 'data-feed-bybit-perpetual-cca5766921-ss'
 pod_name = pod_name_from_ss(ss_name)
 # check_health(pod_name)
+loop = asyncio.get_event_loop()
+re.kube_watcher.start(loop)
 re.kube_api.set_env(ss_name, 'TESTING')
+loop.run_forever()
 # scale_up(ss_name)
 # scale_down(ss_name)
 # set_env(ss_name, '')
@@ -122,5 +128,5 @@ re.kube_api.set_env(ss_name, 'TESTING')
 # t.join()
 # run_estimator()
 # watch_namespaced_events()
-re.kube_watcher.watch_pod_events(pod_name)
+# re.kube_watcher.watch_kube_events()
 # load_ss_specs()
