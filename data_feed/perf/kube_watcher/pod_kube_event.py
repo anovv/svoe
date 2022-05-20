@@ -71,7 +71,7 @@ class PodKubeEventsLog:
         #    }
         # }
         self.max_queue_size = 100
-        self.events_log = {}
+        self.event_queues_map = {} # TODO change queue per type to one queue for all event types ?
         self.unhealthy_count = {}
 
     def update_state(self, event):
@@ -94,18 +94,18 @@ class PodKubeEventsLog:
             split = event.involved_object_field_path.split('spec.containers')[1]
             container_name = split[1:-1]
 
-        if pod_name not in self.events_log:
-            self.events_log[pod_name] = {
+        if pod_name not in self.event_queues_map:
+            self.event_queues_map[pod_name] = {
                 'global': queue.Queue(maxsize=self.max_queue_size),
                 'per_container': {},
             }
 
         if container_name:
-            if container_name not in self.events_log[pod_name]['per_container']:
-                self.events_log[pod_name]['per_container'][container_name] = queue.Queue(maxsize=self.max_queue_size)
-            q = self.events_log[pod_name]['per_container'][container_name]
+            if container_name not in self.event_queues_map[pod_name]['per_container']:
+                self.event_queues_map[pod_name]['per_container'][container_name] = queue.Queue(maxsize=self.max_queue_size)
+            q = self.event_queues_map[pod_name]['per_container'][container_name]
         else:
-            q = self.events_log[pod_name]['global']
+            q = self.event_queues_map[pod_name]['global']
 
         # Unhealthy special case
         if reason == 'Unhealthy':

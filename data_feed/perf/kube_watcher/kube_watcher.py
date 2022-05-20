@@ -94,6 +94,10 @@ class KubeWatcher:
     async def _watch_pod_kube_events(self):
         count = 0
         self.pod_kube_events_watcher = kubernetes.watch.Watch()
+        # TODO watch=True param?
+        # TODO use list_event_for_all_namespaces?
+        # TODO use field_selector to filter by namespace and kind==Pod?
+        # TODO timeout_seconds=0
         stream = self.pod_kube_events_watcher.stream(self.core_api.list_namespaced_event, DATA_FEED_NAMESPACE, timeout_seconds=60 * 60)
         for raw_event in stream:
             if not self.running:
@@ -113,28 +117,36 @@ class KubeWatcher:
 
     async def _watch_pod_object_events(self):
         self.pod_object_events_watcher = kubernetes.watch.Watch()
-        # TODO timeout ?
-        stream = self.pod_object_events_watcher.stream(self.core_api.list_namespaced_pod, namespace=DATA_FEED_NAMESPACE) #field_selector=f'metadata.name=[{pod_name}]')
+
+        def _callback(logged_event_type, logged_event_key, logged_event_value, timestamp):
+            # if logged_event_type == 'CONTAINER_STATUS_CHANGE':
+            #     if type(logged_event_value) is dict and 'state' in logged_event_value and 'terminated' in logged_event_value['state']:
+            print(f'{logged_event_type}; {logged_event_key}; {logged_event_value}; {timestamp}')
+
+        self.pod_object_events_log.register_callback(_callback)
+        stream = self.pod_object_events_watcher.stream(self.core_api.list_pod_for_all_namespaces, watch=True, field_selector=f'metadata.namespace={DATA_FEED_NAMESPACE}', timeout_seconds=0) #field_selector=f'metadata.name=[{pod_name}]')
         for raw_event in stream:
             if not self.running:
                 break
             event = PodObjectEvent(raw_event)
-            # drop stale event
-            delta = time.time() - event.object_last_timestamp.timestamp()
-            if delta > 5:
-                print(f'Dropped stale event: {delta}s')
-                continue
+            # # drop stale event
+            # TODO use startTime for filtering
+            # delta = time.time() - event.object_last_timestamp.timestamp()
+            # if delta > 5:
+            #     print(f'Dropped stale event: {delta}s')
+            #     continue
             self.pod_object_events_log.update_state(event)
-            # print(json.dumps(event, indent=4, default=str))
+            # print(json.dumps(raw_event, indent=4, default=str))
             await asyncio.sleep(0)
 
     def start(self, loop):
         self.running = True
-        loop.create_task(self._watch_pod_kube_events())
-        # loop.create_task(self.watch_pod_events())
+        # loop.create_task(self._watch_pod_kube_events())
+        loop.create_task(self._watch_pod_object_events())
 
     def stop(self):
         self.running = False
+        # TODO finish/cancel running tasks in asyncio loop and close loop
         if self.pod_kube_events_watcher:
             self.pod_kube_events_watcher.stop()
             self.pod_kube_events_watcher = None

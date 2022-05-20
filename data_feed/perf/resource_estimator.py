@@ -86,7 +86,7 @@ class ResourceEstimator:
         self.cleanup()
 
     def cleanup(self):
-        save_data(self.data)
+        # save_data(self.data) # TODO uncomment
         self.data = None
         if self.prom_connection:
             self.prom_connection.stop()
