@@ -16,58 +16,63 @@ class ResourceEstimator:
         core_api = kubernetes.client.CoreV1Api()
         apps_api = kubernetes.client.AppsV1Api()
         self.kube_api = kube_api.KubeApi(core_api, apps_api)
-        self.kube_watcher = kube_watcher.KubeWatcher(core_api)
+        self.kube_watcher = kube_watcher.KubeWatcher(core_api, [self.kube_watcher_callback])
         self.prom_connection = PromConnection()
 
+    # TODO
+    # https://stackoverflow.com/questions/33000200/asyncio-wait-for-event-from-other-thread for waits
+
     def estimate_resources(self, ss_name):
-        result = Result.STARTED_NOT_FINISHED
-        pod_name = pod_name_from_ss(ss_name)
-        payload_config, _ = self.kube_api.get_payload(ss_name)
-        try:
-            self.kube_api.set_env(ss_name, 'TESTING')
-            # TODO what happens if ss already scaled to 1 (pod already running) ? abort?
-            self.kube_api.scale_up(ss_name)
-            appeared = self.kube_watcher.wait_for_pod_to(pod_name, True, 30)
-            if appeared:
-                running = self.kube_watcher.wait_for_pod_to_start_running(pod_name, 20 * 60)
-                if running:
-                    self.kube_watcher.wait_for_pod_to_run_for(pod_name, RUN_FOR_S)
-
-                    metrics = fetch_metrics(pod_name, payload_config)
-                    result = Result.ALL_OK
-
-                    # write to data
-                    if pod_name not in self.data:
-                        self.data[pod_name] = {}
-                        self.data[pod_name]['metrics'] = {}
-                    for metric_type, metric_name, metric_value, error in metrics:
-                        if error:
-                            result = Result.METRICS_MISSING
-
-                        if metric_type not in self.data[pod_name]['metrics']:
-                            self.data[pod_name]['metrics'][metric_type] = {}
-
-                        # TODO somehow indicate per-metric errors?
-                        self.data[pod_name]['metrics'][metric_type][metric_name] = error if error else metric_value
-                else:
-                    result = Result.POD_DID_NOT_RUN
-            else:
-                result = Result.POD_NOT_FOUND
-        except Exception as e:
-            result = Result.INTERRUPTED
-            raise e
-        finally:
-            if pod_name not in self.data:
-                self.data[pod_name] = {}
-            self.data[pod_name]['result'] = result
-            self.finalize(ss_name)
-
-        return result
+        return Result.STARTED_NOT_FINISHED
+        # result = Result.STARTED_NOT_FINISHED
+        # pod_name = pod_name_from_ss(ss_name)
+        # payload_config, _ = self.kube_api.get_payload(ss_name)
+        # try:
+        #     self.kube_api.set_env(ss_name, 'TESTING')
+        #     # TODO what happens if ss already scaled to 1 (pod already running) ? abort?
+        #     self.kube_api.scale_up(ss_name)
+        #     appeared = self.kube_watcher.wait_for_pod_to(pod_name, True, 30)
+        #     if appeared:
+        #         running = self.kube_watcher.wait_for_pod_to_start_running(pod_name, 20 * 60)
+        #         if running:
+        #             self.kube_watcher.wait_for_pod_to_run_for(pod_name, RUN_FOR_S)
+        #
+        #             metrics = fetch_metrics(pod_name, payload_config)
+        #             result = Result.ALL_OK
+        #
+        #             # write to data
+        #             if pod_name not in self.data:
+        #                 self.data[pod_name] = {}
+        #                 self.data[pod_name]['metrics'] = {}
+        #             for metric_type, metric_name, metric_value, error in metrics:
+        #                 if error:
+        #                     result = Result.METRICS_MISSING
+        #
+        #                 if metric_type not in self.data[pod_name]['metrics']:
+        #                     self.data[pod_name]['metrics'][metric_type] = {}
+        #
+        #                 # TODO somehow indicate per-metric errors?
+        #                 self.data[pod_name]['metrics'][metric_type][metric_name] = error if error else metric_value
+        #         else:
+        #             result = Result.POD_DID_NOT_RUN
+        #     else:
+        #         result = Result.POD_NOT_FOUND
+        # except Exception as e:
+        #     result = Result.INTERRUPTED
+        #     raise e
+        # finally:
+        #     if pod_name not in self.data:
+        #         self.data[pod_name] = {}
+        #     self.data[pod_name]['result'] = result
+        #     self.finalize(ss_name)
+        #
+        # return result
 
     def finalize(self, ss_name):
         self.kube_api.scale_down(ss_name)
         self.kube_api.set_env(ss_name, '')
-        self.kube_watcher.wait_for_pod_to(pod_name_from_ss(ss_name), False, 120)
+        # TODO
+        # self.kube_watcher.wait_for_pod_to(pod_name_from_ss(ss_name), False, 120)
 
     def run(self):
         print('Started estimator')
@@ -94,6 +99,9 @@ class ResourceEstimator:
         if self.kube_watcher:
             self.kube_watcher.stop()
             self.kube_watcher = None
+
+    def kube_watcher_callback(self, event):
+        print(event)
 
 
 re = ResourceEstimator()
