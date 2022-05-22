@@ -17,31 +17,36 @@ from perf.kube_watcher.pod_object_events_log import PodObjectLoggedEvent
 class PodEstimationState:
     # TODO ss not found, ss already running, etc.
     LAUNCHED_ESTIMATION = 'LAUNCHED_ESTIMATION'
-    WAITING_FOR_POD_TO_START = 'WAITING_FOR_POD_TO_START'
+    WAITING_FOR_POD_TO_BE_SCHEDULED = 'WAITING_FOR_POD_TO_BE_SCHEDULED'
     WAITING_FOR_DF_CONTAINER_TO_PULL_IMAGE = 'WAITING_FOR_DF_CONTAINER_TO_PULL_IMAGE'
     WAITING_FOR_POD_TO_START_ESTIMATION_RUN = 'WAITING_FOR_POD_TO_START_ESTIMATION_RUN'
     WAITING_FOR_POD_TO_FINISH_ESTIMATION_RUN = 'WAITING_FOR_POD_TO_FINISH_ESTIMATION_RUN'
     COLLECTING_METRICS = 'COLLECTING_METRICS'
-    WAITING_FOR_POD_TO_BE_DESTROYED = 'WAITING_FOR_POD_TO_BE_DESTROYED'
+    WAITING_FOR_POD_TO_BE_DELETED = 'WAITING_FOR_POD_TO_BE_DELETED'
 
 
 class Timeouts:
-    POD_START_TIMEOUT = 2 * 60
+    POD_SCHEDULED_TIMEOUT = 2 * 60
     DF_CONTAINER_PULL_IMAGE_TIMEOUT = 20 * 60
     POD_START_ESTIMATION_RUN_TIMEOUT = 2 * 60
-    POD_DESTROYED_TIMEOUT = 2 * 60
+    POD_DELETED_TIMEOUT = 2 * 60
 
 
 class PodEstimationResult:
-    POD_STARTED = 'POD_STARTED'
+    POD_SCHEDULED = 'POD_SCHEDULED'
     DF_CONTAINER_IMAGE_PULLED = 'DF_CONTAINER_IMAGE_PULLED'
     POD_STARTED_ESTIMATION_RUN = 'POD_STARTED_ESTIMATION_RUN'
     POD_FINISHED_ESTIMATION_RUN = 'POD_FINISHED_ESTIMATION_RUN'
     METRICS_COLLECTED_MISSING = 'METRICS_MISSING'
     METRICS_COLLECTED_ALL = 'ALL_OK'
-    POD_DESTROYED = 'POD_DESTROYED'
-    INTERRUPTED = 'INTERRUPTED'
+    POD_DELETED = 'POD_DELETED'
+
+    # inetrrupts
+    INTERRUPTED_INTERNAL_ERROR = 'INTERRUPTED_INTERNAL_ERROR'
     INTERRUPTED_TIMEOUT = 'INTERRUPTED_TIMEOUT'
+    INTERRUPTED_TOO_MANY_RESTARTS = 'INTERRUPTED_TOO_MANY_RESTARTS'
+    INTERRUPTED_HEALTH_READINESS = 'INTERRUPTED_HEALTH_READINESS'
+    INTERRUPTED_HEALTH_LIVENESS = 'INTERRUPTED_HEALTH_LIVENESS'
 
 class ResourceEstimator:
     def __init__(self):
@@ -67,7 +72,7 @@ class ResourceEstimator:
 
             # go through all awaitables first
             for state, result, timeout  in [
-                (PodEstimationState.WAITING_FOR_POD_TO_START, PodEstimationResult.POD_STARTED, Timeouts.POD_START_TIMEOUT),
+                (PodEstimationState.WAITING_FOR_POD_TO_BE_SCHEDULED, PodEstimationResult.POD_SCHEDULED, Timeouts.POD_SCHEDULED_TIMEOUT),
                 (PodEstimationState.WAITING_FOR_DF_CONTAINER_TO_PULL_IMAGE, PodEstimationResult.DF_CONTAINER_IMAGE_PULLED, Timeouts.DF_CONTAINER_PULL_IMAGE_TIMEOUT),
                 (PodEstimationState.WAITING_FOR_POD_TO_START_ESTIMATION_RUN, PodEstimationResult.POD_STARTED_ESTIMATION_RUN, Timeouts.POD_START_ESTIMATION_RUN_TIMEOUT),
                 (PodEstimationState.WAITING_FOR_POD_TO_FINISH_ESTIMATION_RUN, PodEstimationResult.POD_FINISHED_ESTIMATION_RUN, ESTIMATION_RUN_DURATION),
@@ -76,8 +81,14 @@ class ResourceEstimator:
                 self.wait_event_per_pod[pod_name] = threading.Event()
                 timed_out = self.wait_event_per_pod[pod_name].wait(timeout=timeout) # blocks until callback triggers specific event
                 if timed_out:
-                    result = PodEstimationResult.INTERRUPTED_TIMEOUT
-                    break
+                    if state == PodEstimationState.WAITING_FOR_POD_TO_FINISH_ESTIMATION_RUN:
+                        result = PodEstimationResult.POD_FINISHED_ESTIMATION_RUN
+                        self.estimation_result_per_pod[pod_name] = result
+                    else:
+                        result = PodEstimationResult.INTERRUPTED_TIMEOUT
+                        self.estimation_result_per_pod[pod_name] = result
+                        break
+
                 # successfully triggered event
                 self.estimation_result_per_pod[pod_name] = result
 
@@ -101,7 +112,7 @@ class ResourceEstimator:
                     self.data[pod_name]['metrics'][metric_type][metric_name] = error if error else metric_value
 
         except Exception as e:
-            self.estimation_result_per_pod[pod_name] = PodEstimationResult.INTERRUPTED
+            self.estimation_result_per_pod[pod_name] = PodEstimationResult.INTERRUPTED_INTERNAL_ERROR
             raise e # TODO should raise?
         finally:
             self.finalize(ss_name)
@@ -114,15 +125,15 @@ class ResourceEstimator:
             self.kube_api.scale_down(ss_name)
             self.kube_api.set_env(ss_name, '')
         except Exception as e:
-            self.estimation_result_per_pod[pod_name] = PodEstimationResult.INTERRUPTED
+            self.estimation_result_per_pod[pod_name] = PodEstimationResult.INTERRUPTED_INTERNAL_ERROR
             raise e # TODO should raise?
 
-        self.estimation_state_per_pod[pod_name] = PodEstimationState.WAITING_FOR_POD_TO_BE_DESTROYED
-        timed_out = self.wait_event_per_pod[pod_name].wait(timeout=Timeouts.POD_DESTROYED_TIMEOUT)
+        self.estimation_state_per_pod[pod_name] = PodEstimationState.WAITING_FOR_POD_TO_BE_DELETED
+        timed_out = self.wait_event_per_pod[pod_name].wait(timeout=Timeouts.POD_DELETED_TIMEOUT)
         if timed_out:
             self.estimation_result_per_pod[pod_name] = PodEstimationResult.INTERRUPTED_TIMEOUT
         else:
-            self.estimation_result_per_pod[pod_name] = PodEstimationResult.POD_DESTROYED
+            self.estimation_result_per_pod[pod_name] = PodEstimationResult.POD_DELETED
 
         if pod_name not in self.data:
             self.data[pod_name] = {}
@@ -156,25 +167,55 @@ class ResourceEstimator:
 
     def kube_watcher_callback(self, event):
         pod_name = event.pod_name
+        container_name = event.container_name
         if self.estimation_result_per_pod[pod_name] in [
-            PodEstimationResult.POD_DESTROYED,
-            PodEstimationResult.INTERRUPTED,
+            PodEstimationResult.POD_DELETED,
+            PodEstimationResult.INTERRUPTED_INTERNAL_ERROR,
             PodEstimationResult.INTERRUPTED_TIMEOUT
         ]:
             # TODO log?
             return
 
-        if self.estimation_result_per_pod[pod_name] == PodEstimationState.WAITING_FOR_POD_TO_START:
+        if self.estimation_result_per_pod[pod_name] == PodEstimationState.WAITING_FOR_POD_TO_BE_SCHEDULED:
             if event.type == PodKubeLoggedEvent.POD_EVENT:
                 data = event.data
-                if 'reason' in data and data['reason'] == 'Started':
+                if 'reason' in data and data['reason'] == 'Scheduled':
                     self.wait_event_per_pod[pod_name].set()
                     time.sleep(0.1) # avoid race condition
+                return
+
+        if self.estimation_result_per_pod[pod_name] == PodEstimationState.WAITING_FOR_DF_CONTAINER_TO_PULL_IMAGE:
+            if event.type == PodKubeLoggedEvent.POD_EVENT and container_name == DATA_FEED_CONTAINER:
+                data = event.data
+                if 'reason' in data and data['reason'] == 'Pulled':
+                    self.wait_event_per_pod[pod_name].set()
+                    time.sleep(0.1) # avoid race condition
+                return
 
         if self.estimation_result_per_pod[pod_name] == PodEstimationState.WAITING_FOR_POD_TO_START_ESTIMATION_RUN:
             if event.type == PodObjectLoggedEvent.POD_CONDITION_CHANGED:
-                # TODO get last_raw_event and check state
+                last_raw_event = self.kube_watcher.pod_object_events_log.get_last_raw_event(pod_name)
+
+                # TODO is this correct
+                ready = False
+                if 'conditions' in last_raw_event.status:
+                    ready = True
+                    for condition in last_raw_event.status['conditions']:
+                        if condition['status'] == 'False':
+                            ready = False
+                if ready:
+                    self.wait_event_per_pod[pod_name].set()
+                    time.sleep(0.1)  # avoid race condition
                 return
+
+        if self.estimation_result_per_pod[pod_name] == PodEstimationState.WAITING_FOR_POD_TO_BE_DELETED:
+            if event.type == PodObjectLoggedEvent.POD_DELETED:
+                self.wait_event_per_pod[pod_name].set()
+                time.sleep(0.1) # avoid race condition
+                return
+
+        # Inetrupts # TODO
+
 
 re = ResourceEstimator()
 

@@ -205,3 +205,6 @@ class PodObjectEventsLog(PodEventsLog):
                         self._log_event_and_callback(logged_event)
 
         self.last_raw_event_per_pod[pod_name] = raw_event
+
+    def get_last_raw_event(self, pod_name):
+        return self.last_raw_event_per_pod[pod_name]
