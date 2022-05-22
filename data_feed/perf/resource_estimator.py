@@ -1,4 +1,6 @@
 # Script to run pods (without resource spec) and record health and resource consumptions (mem/cpu)
+import time
+
 from utils import *
 from metrics import *
 
@@ -6,12 +8,49 @@ import concurrent.futures
 import atexit
 import kubernetes
 import kube_api
+import threading
 from perf.kube_watcher import kube_watcher
+from perf.kube_watcher.pod_kube_events_log import PodKubeLoggedEvent
+from perf.kube_watcher.pod_object_events_log import PodObjectLoggedEvent
 
+
+class PodEstimationState:
+    # TODO ss not found, ss already running, etc.
+    LAUNCHED_ESTIMATION = 'LAUNCHED_ESTIMATION'
+    WAITING_FOR_POD_TO_START = 'WAITING_FOR_POD_TO_START'
+    WAITING_FOR_DF_CONTAINER_TO_PULL_IMAGE = 'WAITING_FOR_DF_CONTAINER_TO_PULL_IMAGE'
+    WAITING_FOR_POD_TO_START_ESTIMATION_RUN = 'WAITING_FOR_POD_TO_START_ESTIMATION_RUN'
+    WAITING_FOR_POD_TO_FINISH_ESTIMATION_RUN = 'WAITING_FOR_POD_TO_FINISH_ESTIMATION_RUN'
+    COLLECTING_METRICS = 'COLLECTING_METRICS'
+    WAITING_FOR_POD_TO_BE_DESTROYED = 'WAITING_FOR_POD_TO_BE_DESTROYED'
+
+
+class Timeouts:
+    POD_START_TIMEOUT = 2 * 60
+    DF_CONTAINER_PULL_IMAGE_TIMEOUT = 20 * 60
+    POD_START_ESTIMATION_RUN_TIMEOUT = 2 * 60
+    POD_DESTROYED_TIMEOUT = 2 * 60
+
+
+class PodEstimationResult:
+    POD_STARTED = 'POD_STARTED'
+    DF_CONTAINER_IMAGE_PULLED = 'DF_CONTAINER_IMAGE_PULLED'
+    POD_STARTED_ESTIMATION_RUN = 'POD_STARTED_ESTIMATION_RUN'
+    POD_FINISHED_ESTIMATION_RUN = 'POD_FINISHED_ESTIMATION_RUN'
+    METRICS_COLLECTED_MISSING = 'METRICS_MISSING'
+    METRICS_COLLECTED_ALL = 'ALL_OK'
+    POD_DESTROYED = 'POD_DESTROYED'
+    INTERRUPTED = 'INTERRUPTED'
+    INTERRUPTED_TIMEOUT = 'INTERRUPTED_TIMEOUT'
 
 class ResourceEstimator:
     def __init__(self):
         self.data = {}
+        # self.resource_estimation_steps_per_pod = {}
+        self.estimation_state_per_pod = None
+        self.estimation_result_per_pod = None
+        self.wait_event_per_pod = None
+        # self.wait_event = threading.Event()
         kubernetes.config.load_kube_config(context=CLUSTER)
         core_api = kubernetes.client.CoreV1Api()
         apps_api = kubernetes.client.AppsV1Api()
@@ -19,65 +58,82 @@ class ResourceEstimator:
         self.kube_watcher = kube_watcher.KubeWatcher(core_api, [self.kube_watcher_callback])
         self.prom_connection = PromConnection()
 
-    # TODO
-    # https://stackoverflow.com/questions/33000200/asyncio-wait-for-event-from-other-thread for waits
-
     def estimate_resources(self, ss_name):
-        return Result.STARTED_NOT_FINISHED
-        # result = Result.STARTED_NOT_FINISHED
-        # pod_name = pod_name_from_ss(ss_name)
-        # payload_config, _ = self.kube_api.get_payload(ss_name)
-        # try:
-        #     self.kube_api.set_env(ss_name, 'TESTING')
-        #     # TODO what happens if ss already scaled to 1 (pod already running) ? abort?
-        #     self.kube_api.scale_up(ss_name)
-        #     appeared = self.kube_watcher.wait_for_pod_to(pod_name, True, 30)
-        #     if appeared:
-        #         running = self.kube_watcher.wait_for_pod_to_start_running(pod_name, 20 * 60)
-        #         if running:
-        #             self.kube_watcher.wait_for_pod_to_run_for(pod_name, RUN_FOR_S)
-        #
-        #             metrics = fetch_metrics(pod_name, payload_config)
-        #             result = Result.ALL_OK
-        #
-        #             # write to data
-        #             if pod_name not in self.data:
-        #                 self.data[pod_name] = {}
-        #                 self.data[pod_name]['metrics'] = {}
-        #             for metric_type, metric_name, metric_value, error in metrics:
-        #                 if error:
-        #                     result = Result.METRICS_MISSING
-        #
-        #                 if metric_type not in self.data[pod_name]['metrics']:
-        #                     self.data[pod_name]['metrics'][metric_type] = {}
-        #
-        #                 # TODO somehow indicate per-metric errors?
-        #                 self.data[pod_name]['metrics'][metric_type][metric_name] = error if error else metric_value
-        #         else:
-        #             result = Result.POD_DID_NOT_RUN
-        #     else:
-        #         result = Result.POD_NOT_FOUND
-        # except Exception as e:
-        #     result = Result.INTERRUPTED
-        #     raise e
-        # finally:
-        #     if pod_name not in self.data:
-        #         self.data[pod_name] = {}
-        #     self.data[pod_name]['result'] = result
-        #     self.finalize(ss_name)
-        #
-        # return result
+        pod_name = pod_name_from_ss(ss_name)
+        self.estimation_state_per_pod[pod_name] = PodEstimationState.LAUNCHED_ESTIMATION
+        payload_config, _ = self.kube_api.get_payload(ss_name)
+        try:
+            self.kube_api.set_env(ss_name, 'TESTING')
+            # TODO what happens if ss already scaled to 1 (pod already running) ? abort?
+            self.kube_api.scale_up(ss_name)
+
+            # go through all awaitables first
+            for state, result, timeout  in [
+                (PodEstimationState.WAITING_FOR_POD_TO_START, PodEstimationResult.POD_STARTED, Timeouts.POD_START_TIMEOUT),
+                (PodEstimationState.WAITING_FOR_DF_CONTAINER_TO_PULL_IMAGE, PodEstimationResult.DF_CONTAINER_IMAGE_PULLED, Timeouts.DF_CONTAINER_PULL_IMAGE_TIMEOUT),
+                (PodEstimationState.WAITING_FOR_POD_TO_START_ESTIMATION_RUN, PodEstimationResult.POD_STARTED_ESTIMATION_RUN, Timeouts.POD_START_ESTIMATION_RUN_TIMEOUT),
+                (PodEstimationState.WAITING_FOR_POD_TO_FINISH_ESTIMATION_RUN, PodEstimationResult.POD_FINISHED_ESTIMATION_RUN, ESTIMATION_RUN_DURATION),
+            ]:
+                self.estimation_state_per_pod[pod_name] = state
+                self.wait_event_per_pod[pod_name] = threading.Event()
+                timed_out = self.wait_event_per_pod[pod_name].wait(timeout=timeout) # blocks until callback triggers specific event
+                if timed_out:
+                    result = PodEstimationResult.INTERRUPTED_TIMEOUT
+                    break
+                # successfully triggered event
+                self.estimation_result_per_pod[pod_name] = result
+
+            if result == PodEstimationResult.POD_FINISHED_ESTIMATION_RUN:
+                # collect metrics
+                metrics = fetch_metrics(pod_name, payload_config)
+                self.estimation_result_per_pod[pod_name] = PodEstimationResult.METRICS_COLLECTED_ALL
+
+                # write to data
+                if pod_name not in self.data:
+                    self.data[pod_name] = {}
+                    self.data[pod_name]['metrics'] = {}
+                for metric_type, metric_name, metric_value, error in metrics:
+                    if error:
+                        self.estimation_result_per_pod[pod_name] = PodEstimationResult.METRICS_COLLECTED_MISSING
+
+                    if metric_type not in self.data[pod_name]['metrics']:
+                        self.data[pod_name]['metrics'][metric_type] = {}
+
+                    # TODO somehow indicate per-metric errors?
+                    self.data[pod_name]['metrics'][metric_type][metric_name] = error if error else metric_value
+
+        except Exception as e:
+            self.estimation_result_per_pod[pod_name] = PodEstimationResult.INTERRUPTED
+            raise e # TODO should raise?
+        finally:
+            self.finalize(ss_name)
+
+        return result
 
     def finalize(self, ss_name):
-        self.kube_api.scale_down(ss_name)
-        self.kube_api.set_env(ss_name, '')
-        # TODO
-        # self.kube_watcher.wait_for_pod_to(pod_name_from_ss(ss_name), False, 120)
+        pod_name = pod_name_from_ss(ss_name)
+        try:
+            self.kube_api.scale_down(ss_name)
+            self.kube_api.set_env(ss_name, '')
+        except Exception as e:
+            self.estimation_result_per_pod[pod_name] = PodEstimationResult.INTERRUPTED
+            raise e # TODO should raise?
+
+        self.estimation_state_per_pod[pod_name] = PodEstimationState.WAITING_FOR_POD_TO_BE_DESTROYED
+        timed_out = self.wait_event_per_pod[pod_name].wait(timeout=Timeouts.POD_DESTROYED_TIMEOUT)
+        if timed_out:
+            self.estimation_result_per_pod[pod_name] = PodEstimationResult.INTERRUPTED_TIMEOUT
+        else:
+            self.estimation_result_per_pod[pod_name] = PodEstimationResult.POD_DESTROYED
+
+        if pod_name not in self.data:
+            self.data[pod_name] = {}
+        self.data[pod_name]['result'] = self.estimation_result_per_pod[pod_name]
 
     def run(self):
         print('Started estimator')
         self.prom_connection.start()
-        # start watcher here
+        # TODO start watcher here
         specs = self.kube_api.load_ss_specs()
         print(f'Scheduled estimation for {len(specs)} pods')
         # TODO tqdm progress
@@ -101,8 +157,25 @@ class ResourceEstimator:
             self.kube_watcher = None
 
     def kube_watcher_callback(self, event):
-        print(event)
+        if self.estimation_result in [
+            PodEstimationResult.POD_DESTROYED,
+            PodEstimationResult.INTERRUPTED,
+            PodEstimationResult.INTERRUPTED_TIMEOUT
+        ]:
+            return
 
+        if self.estimation_state == PodEstimationState.WAITING_FOR_POD_TO_START:
+            if event.type == PodKubeLoggedEvent.POD_EVENT:
+                data = event.data
+                if 'reason' in data and data['reason'] == 'Started':
+                    self.wait_event.set()
+                    time.sleep(0.1) # avoid race condition
+                    
+
+        if self.estimation_state == PodEstimationState.WAITING_FOR_POD_TO_START_ESTIMATION_RUN:
+            if event.type == PodObjectLoggedEvent.POD_CONDITION_CHANGED:
+                # TODO get last_raw_event and check state
+                return
 
 re = ResourceEstimator()
 

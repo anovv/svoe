@@ -6,16 +6,6 @@ import datetime
 import json
 
 
-class Result(str, enum.Enum):
-    # TODO ss not found, ss already running, etc.
-    STARTED_NOT_FINISHED = 'STARTED_NOT_FINISHED'
-    POD_NOT_FOUND = 'POD_NOT_FOUND'
-    POD_DID_NOT_RUN = 'POD_DID_NOT_RUN'
-    METRICS_MISSING = 'METRICS_MISSING'
-    ALL_OK = 'ALL_OK'
-    INTERRUPTED = 'INTERRUPTED'
-
-
 class PromConnection:
     def __init__(self):
         self.forward_prom_port_proc = None

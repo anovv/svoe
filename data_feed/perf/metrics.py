@@ -69,8 +69,8 @@ async def _fetch_metrics_async(pod_name, payload_config):
 
 
 def _get_health_metrics(pod_name, payload_config):
-    duration = f'[{RUN_FOR_S}s]'
-    duration_subquery = f'[{RUN_FOR_S}s:]'
+    duration = f'[{ESTIMATION_RUN_DURATION}s]'
+    duration_subquery = f'[{ESTIMATION_RUN_DURATION}s:]'
     metrics = {}
     for exchange in payload_config:
         # TODO decide channel/data_type naming
@@ -89,8 +89,8 @@ def _get_health_metrics(pod_name, payload_config):
 
 def _get_perf_metrics(pod_name):
     # https://github.com/olxbr/metrics-server-exporter to export metrics-server to prometheus
-    duration = f'[{RUN_FOR_S}s]'
-    duration_subquery = f'[{RUN_FOR_S}s:]'
+    duration = f'[{ESTIMATION_RUN_DURATION}s]'
+    duration_subquery = f'[{ESTIMATION_RUN_DURATION}s:]'
     metrics = {}
     for container_name in [DATA_FEED_CONTAINER, REDIS_CONTAINER]:
         metrics.update({
