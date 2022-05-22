@@ -46,11 +46,9 @@ class PodEstimationResult:
 class ResourceEstimator:
     def __init__(self):
         self.data = {}
-        # self.resource_estimation_steps_per_pod = {}
-        self.estimation_state_per_pod = None
-        self.estimation_result_per_pod = None
-        self.wait_event_per_pod = None
-        # self.wait_event = threading.Event()
+        self.estimation_state_per_pod = {}
+        self.estimation_result_per_pod = {}
+        self.wait_event_per_pod = {}
         kubernetes.config.load_kube_config(context=CLUSTER)
         core_api = kubernetes.client.CoreV1Api()
         apps_api = kubernetes.client.AppsV1Api()
@@ -157,22 +155,23 @@ class ResourceEstimator:
             self.kube_watcher = None
 
     def kube_watcher_callback(self, event):
-        if self.estimation_result in [
+        pod_name = event.pod_name
+        if self.estimation_result_per_pod[pod_name] in [
             PodEstimationResult.POD_DESTROYED,
             PodEstimationResult.INTERRUPTED,
             PodEstimationResult.INTERRUPTED_TIMEOUT
         ]:
+            # TODO log?
             return
 
-        if self.estimation_state == PodEstimationState.WAITING_FOR_POD_TO_START:
+        if self.estimation_result_per_pod[pod_name] == PodEstimationState.WAITING_FOR_POD_TO_START:
             if event.type == PodKubeLoggedEvent.POD_EVENT:
                 data = event.data
                 if 'reason' in data and data['reason'] == 'Started':
-                    self.wait_event.set()
+                    self.wait_event_per_pod[pod_name].set()
                     time.sleep(0.1) # avoid race condition
-                    
 
-        if self.estimation_state == PodEstimationState.WAITING_FOR_POD_TO_START_ESTIMATION_RUN:
+        if self.estimation_result_per_pod[pod_name] == PodEstimationState.WAITING_FOR_POD_TO_START_ESTIMATION_RUN:
             if event.type == PodObjectLoggedEvent.POD_CONDITION_CHANGED:
                 # TODO get last_raw_event and check state
                 return
