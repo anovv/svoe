@@ -187,7 +187,7 @@ class ResourceEstimator:
 
         # TODO Kube Event 'Pulled' doesn't show up, why? or doesn't get parse/trigerred?
         if self.get_estimation_state(pod_name) == PodEstimationState.WAITING_FOR_DF_CONTAINER_TO_PULL_IMAGE \
-                and event.type == PodKubeLoggedEvent.POD_EVENT \
+                and event.type == PodKubeLoggedEvent.CONTAINER_EVENT \
                 and container_name == DATA_FEED_CONTAINER \
                 and event.data['reason'] == 'Pulled':
 
@@ -221,7 +221,7 @@ class ResourceEstimator:
 
         # Interrupts
         # Back off
-        if event.type == PodKubeLoggedEvent.POD_EVENT \
+        if event.type == PodKubeLoggedEvent.CONTAINER_EVENT \
                 and container_name == DATA_FEED_CONTAINER \
                 and event.data['reason'] == 'BackOff':
 
@@ -232,7 +232,7 @@ class ResourceEstimator:
 
         # Unexpected pod deletion
         if event.type == PodObjectLoggedEvent.POD_DELETED \
-                and self.estimation_result_per_pod[pod_name] != PodEstimationState.WAITING_FOR_POD_TO_BE_DELETED:
+                and self.get_estimation_state(pod_name) != PodEstimationState.WAITING_FOR_POD_TO_BE_DELETED:
 
             self.set_estimation_result(pod_name, PodEstimationResult.INTERRUPTED_UNEXPECTED_POD_DELETION)
             print(f'{pod_name} unexpected delete')
@@ -252,7 +252,7 @@ class ResourceEstimator:
                     return
 
         # UnhealthyLiveness:
-        if event.type == PodKubeLoggedEvent.POD_EVENT \
+        if event.type == PodKubeLoggedEvent.CONTAINER_EVENT \
                 and container_name == DATA_FEED_CONTAINER \
                 and event.data['reason'] == 'UnhealthyLiveness' \
                 and self.kube_watcher.pod_kube_events_log.get_unhealthy_count()['Liveness'] >= 5:
@@ -262,7 +262,7 @@ class ResourceEstimator:
             self.wake_event_delayed(pod_name)
             return
 
-        # TODO unhealthy readiness, pod_status_phase == 'Failed', other indicators?
+        # TODO unhealthy readiness, pod_status_phase == 'Failed', other indicators?, any other container backoff?
 
     def get_estimation_result(self, pod_name):
         if pod_name in self.estimation_result_per_pod:
@@ -317,8 +317,10 @@ ss_name = 'data-feed-binance-spot-6d1641b134-ss'
 # ss_name = 'data-feed-binance-spot-eb540d90be-ss'
 # ss_name = 'data-feed-bybit-perpetual-cca5766921-ss'
 re.kube_watcher.start()
-time.sleep(2000)
-# re.estimate_resources(ss_name)
+re.estimate_resources(ss_name)
+# re.kube_watcher.running = True
+# re.kube_watcher.watch_pod_kube_events()
+# time.sleep(2000)
 # re.kube_api.set_env(ss_name, 'TESTING')
 # scale_up(ss_name)
 # scale_down(ss_name)

@@ -1,3 +1,4 @@
+import datetime
 import threading
 
 from ..defines import *
@@ -16,20 +17,19 @@ class KubeWatcher:
         self.pod_object_events_watcher = None
         self.core_api = core_api
         self.event_queues_per_pod = {}
+        self.pod_object_events_thread = None
         self.pod_object_events_log = PodObjectEventsLog(self.event_queues_per_pod, callbacks)
+        self.pod_kube_events_thread = None
         self.pod_kube_events_log = PodKubeEventsLog(self.event_queues_per_pod, callbacks)
         self.running = False
-        self.thread = None
 
-    async def _watch_pod_kube_events(self):
+    def _watch_pod_kube_events_blocking(self):
         self.pod_kube_events_watcher = kubernetes.watch.Watch()
-        # TODO use list_event_for_all_namespaces?
-        # TODO use field_selector to filter by namespace and involved object/kind==Pod?
         start_time = time.time()
         stream = self.pod_kube_events_watcher.stream(
-            self.core_api.list_namespaced_event,
-            DATA_FEED_NAMESPACE,
+            self.core_api.list_event_for_all_namespaces,
             watch=True,
+            field_selector=f'metadata.namespace={DATA_FEED_NAMESPACE}',
             timeout_seconds=0
         )
 
@@ -40,12 +40,20 @@ class KubeWatcher:
             # drop stale event
             delta = start_time - raw_event.object_last_timestamp.timestamp()
             if delta > 5:
-                print(f'Dropped stale event: {delta}s')
                 continue
-            self.pod_kube_events_log.update_state(raw_event)
-            await asyncio.sleep(0)
 
-    async def _watch_pod_object_events(self):
+            # TODO
+            # now = datetime.datetime.now()
+            # ts = raw_event.object_last_timestamp
+            # print(f'{now}, {ts}, {raw_event.object_reason}, {raw_event.involved_object_field_path}')
+
+            self.pod_kube_events_log.update_state(raw_event)
+
+    def watch_pod_kube_events(self):
+        self.pod_kube_events_thread = threading.Thread(target=self._watch_pod_kube_events_blocking)
+        self.pod_kube_events_thread.start()
+
+    def _watch_pod_object_events_blocking(self):
         self.pod_object_events_watcher = kubernetes.watch.Watch()
         stream = self.pod_object_events_watcher.stream(
             self.core_api.list_pod_for_all_namespaces,
@@ -60,22 +68,26 @@ class KubeWatcher:
             raw_event = PodObjectRawEvent(message)
             # TODO use startTime to drop stale events
             self.pod_object_events_log.update_state(raw_event)
-            await asyncio.sleep(0)
 
-    async def _watch_events(self):
-        return await asyncio.gather(*[self._watch_pod_kube_events(), self._watch_pod_object_events()])
+    def watch_pod_object_events(self):
+        self.pod_object_events_thread = threading.Thread(target=self._watch_pod_object_events_blocking)
+        self.pod_object_events_thread.start()
 
-    def _start_loop(self):
-        loop = asyncio.new_event_loop()
-        loop.run_until_complete(self._watch_events())
+    # async def _watch_events(self):
+    #     return
+        # return await asyncio.gather(*[self._watch_pod_kube_events(), self._watch_pod_object_events()])
+
+    # def _start_loop(self):
+    #     loop = asyncio.new_event_loop()
+    #     loop.run_until_complete(self._watch_events())
 
     def start(self):
         if self.running:
             return
         print(f'KubeWatcher started')
         self.running = True
-        self.thread = threading.Thread(target=self._start_loop)
-        self.thread.start()
+        self.watch_pod_object_events()
+        self.watch_pod_kube_events()
 
     def stop(self):
         if not self.running:
@@ -90,7 +102,11 @@ class KubeWatcher:
             self.pod_object_events_watcher.stop()
             self.pod_object_events_watcher = None
 
-        if self.thread:
-            self.thread.join()
-            self.thread = None
+        if self.pod_object_events_thread:
+            self.pod_object_events_thread.join()
+            self.pod_object_events_thread = None
+
+        if self.pod_kube_events_thread:
+            self.pod_kube_events_thread.join()
+            self.pod_kube_events_thread = None
         print(f'KubeWatcher stopped')
