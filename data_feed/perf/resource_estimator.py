@@ -1,5 +1,6 @@
 # Script to run pods (without resource spec) and record health and resource consumptions (mem/cpu)
 import asyncio
+import time
 
 from utils import *
 from metrics import *
@@ -316,7 +317,8 @@ ss_name = 'data-feed-binance-spot-6d1641b134-ss'
 # ss_name = 'data-feed-binance-spot-eb540d90be-ss'
 # ss_name = 'data-feed-bybit-perpetual-cca5766921-ss'
 re.kube_watcher.start()
-re.estimate_resources(ss_name)
+time.sleep(2000)
+# re.estimate_resources(ss_name)
 # re.kube_api.set_env(ss_name, 'TESTING')
 # scale_up(ss_name)
 # scale_down(ss_name)

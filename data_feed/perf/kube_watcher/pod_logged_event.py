@@ -12,6 +12,8 @@ class PodEventsLog:
         raise ValueError('Not implemented')
 
     def _log_event_and_callback(self, logged_event):
+        if isinstance(logged_event, PodObjectLoggedEvent):
+            print(logged_event)
         pod_name = logged_event.pod_name
         if pod_name not in self.pod_event_queues:
             self.pod_event_queues[pod_name] = queue.Queue()
@@ -43,10 +45,10 @@ class PodKubeLoggedEvent(PodLoggedEvent):
 
 class PodObjectLoggedEvent(PodLoggedEvent):
     # this class corresponds to kube apis v1.Pod object changes, sourced from list_pod_for_all_namespaces
-    POD_DELETED = 'PodKubeLoggedEvent.POD_DELETED'
-    POD_PHASE_CHANGED = 'PodKubeLoggedEvent.POD_PHASE_CHANGED'
-    POD_CONDITION_CHANGED = 'PodKubeLoggedEvent.POD_CONDITION_CHANGED'
-    CONTAINER_STATE_CHANGED = 'PodKubeLoggedEvent.CONTAINER_STATE_CHANGED'
-    CONTAINER_STARTUP_PROBE_STATE_CHANGED = 'PodKubeLoggedEvent.CONTAINER_STARTUP_PROBE_STATE_CHANGED'
-    CONTAINER_READINESS_PROBE_STATE_CHANGED = 'PodKubeLoggedEvent.CONTAINER_READINESS_PROBE_STATE_CHANGED'
-    CONTAINER_RESTART_COUNT_CHANGED = 'PodKubeLoggedEvent.CONTAINER_RESTART_COUNT_CHANGED'
+    POD_DELETED = 'PodObjectLoggedEvent.POD_DELETED'
+    POD_PHASE_CHANGED = 'PodObjectLoggedEvent.POD_PHASE_CHANGED'
+    POD_CONDITION_CHANGED = 'PodObjectLoggedEvent.POD_CONDITION_CHANGED'
+    CONTAINER_STATE_CHANGED = 'PodObjectLoggedEvent.CONTAINER_STATE_CHANGED'
+    CONTAINER_STARTUP_PROBE_STATE_CHANGED = 'PodObjectLoggedEvent.CONTAINER_STARTUP_PROBE_STATE_CHANGED'
+    CONTAINER_READINESS_PROBE_STATE_CHANGED = 'PodObjectLoggedEvent.CONTAINER_READINESS_PROBE_STATE_CHANGED'
+    CONTAINER_RESTART_COUNT_CHANGED = 'PodObjectLoggedEvent.CONTAINER_RESTART_COUNT_CHANGED'
