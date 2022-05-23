@@ -32,7 +32,6 @@ async def _fetch_metric_async(metric_type, metric_name, metric_query, session):
                     error = resp['error']
                 else:
                     metric_value = resp['data']['result'][0]['value'][1]
-                    # metric_value = resp
         except Exception as e:
             error = e.__class__.__name__ + ': ' + str(e)
 
@@ -45,7 +44,7 @@ async def _fetch_metric_async(metric_type, metric_name, metric_query, session):
     if error:
         print(f'Unable to fetch metric {metric_name}')
     else:
-        print(f'Succesfully fetched metric {metric_name}')
+        print(f'Successfully fetched metric {metric_name}')
 
     return metric_type, metric_name, metric_value, error
 
@@ -53,7 +52,7 @@ async def _fetch_metric_async(metric_type, metric_name, metric_query, session):
 async def _fetch_metrics_async(pod_name, payload_config):
     health_metrics = _get_health_metrics(pod_name, payload_config)
     perf_metrics = _get_perf_metrics(pod_name)
-    metric_queries =  {**health_metrics, **perf_metrics}
+    metric_queries = {**health_metrics, **perf_metrics}
     tasks = []
     session = aiohttp.ClientSession()
     for metric_name in metric_queries:
@@ -78,7 +77,7 @@ def _get_health_metrics(pod_name, payload_config):
             for symbol in payload_config[exchange][data_type]:
                 metrics.update({
                     # TODO add aggregation over other labels ?
-                    # TODO separator instead of '_'
+                    # TODO ',' or ';' separator instead of '_'
                     f'health_absent_{data_type}_{symbol}':
                         f'avg_over_time((max(absent(svoe_data_feed_collector_conn_health_gauge{{exchange="{exchange}", symbol="{symbol}", data_type="{data_type}"}})) or vector(0)){duration_subquery})',
                     f'health_avg_{data_type}_{symbol}': f'avg_over_time(svoe_data_feed_collector_conn_health_gauge{{exchange="{exchange}", symbol="{symbol}", data_type="{data_type}"}}{duration})'
@@ -93,6 +92,7 @@ def _get_perf_metrics(pod_name):
     duration_subquery = f'[{ESTIMATION_RUN_DURATION}s:]'
     metrics = {}
     for container_name in [DATA_FEED_CONTAINER, REDIS_CONTAINER]:
+        # TODO ',' or ';' separator instead of '_'
         metrics.update({
             # mem
             f'mem_absent_{container_name}':

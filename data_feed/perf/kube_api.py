@@ -10,11 +10,11 @@ class KubeApi:
         self.core_api = core_api
         self.apps_api = apps_api
 
-    def load_ss_specs(self):
+    def load_ss_names(self):
         specs = self.apps_api.list_namespaced_stateful_set(namespace=DATA_FEED_NAMESPACE)
-        filtered = list(filter(lambda spec: self.should_estimate(spec), specs.items))
-        print(f'Processing {len(filtered)}/{len(specs.items)} ss specs')
-        return filtered
+        filtered_names = list(map(lambda spec: spec.metadata.name, filter(lambda spec: self.should_estimate(spec), specs.items)))
+        print(f'Processing {len(filtered_names)}/{len(specs.items)} ss specs')
+        return filtered_names
 
     def set_env(self, ss_name, env):
         # https://stackoverflow.com/questions/71163299/how-to-update-env-variables-in-kubernetes-deployment-in-java

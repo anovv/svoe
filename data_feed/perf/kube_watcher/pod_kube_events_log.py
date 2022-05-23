@@ -154,3 +154,6 @@ class PodKubeEventsLog(PodEventsLog):
                 self.last_event_per_type_per_pod[pod_name][PodKubeLoggedEvent.CONTAINER_EVENT][container_name] = logged_event
             else:
                 self.last_event_per_type_per_pod[pod_name][PodKubeLoggedEvent.POD_EVENT] = logged_event
+
+    def get_unhealthy_count(self):
+        return self.unhealthy_count

@@ -1,5 +1,4 @@
 from defines import *
-import enum
 import subprocess
 import time
 import datetime
@@ -11,7 +10,7 @@ class PromConnection:
         self.forward_prom_port_proc = None
 
     def start(self):
-        print(f'Forawrding Prometheus port {PROM_PORT_FORWARD}...')
+        print(f'Forwarding Prometheus port {PROM_PORT_FORWARD}...')
         # TODO check success of Popen
         self.forward_prom_port_proc = subprocess.Popen(
             f'kubectl port-forward {PROM_POD_NAME} {PROM_PORT_FORWARD}:{PROM_PORT_FORWARD} -n {PROM_NAMESPACE}',
@@ -20,9 +19,9 @@ class PromConnection:
         )
         # 5s to spin up
         wait = 5
-        print(f'Waiting {wait}s to spin up...')
+        print(f'Waiting {wait}s to spin up Prometheus connection...')
         time.sleep(wait)
-        print('Done')
+        print('Prometheus connection started')
 
     def stop(self):
         if self.forward_prom_port_proc is not None:
@@ -34,7 +33,9 @@ class PromConnection:
 
 def save_data(data):
     if data is not None:
-        path = f'resources-estimation-{datetime.datetime.now().strftime("%d-%m-%Y-%H:%M:%S")}.json'
+        # TODO
+        # path = f'resources-estimation-{datetime.datetime.now().strftime("%d-%m-%Y-%H:%M:%S")}.json'
+        path = 'resources-estimation.json'
         with open(path, 'w+') as outfile:
             json.dump(data, outfile, indent=4, sort_keys=True)
         print(f'Saved data to {path}')
