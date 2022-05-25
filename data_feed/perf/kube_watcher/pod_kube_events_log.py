@@ -145,7 +145,8 @@ class PodKubeEventsLog(PodEventsLog):
                 logged_event_type,
                 pod_name, container_name=container_name,
                 data=data,
-                cluster_time=cluster_time, local_time=datetime.datetime.now()
+                cluster_time=cluster_time, local_time=datetime.datetime.now(),
+                raw_event=raw_event
             )
             self._log_event_and_callback(logged_event)
 

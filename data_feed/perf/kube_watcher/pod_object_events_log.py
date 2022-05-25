@@ -123,7 +123,8 @@ class PodObjectEventsLog(PodEventsLog):
                 PodObjectLoggedEvent.POD_DELETED,
                 pod_name, container_name=None,
                 data=None,
-                cluster_time=None, local_time=datetime.datetime.now()
+                cluster_time=None, local_time=datetime.datetime.now(),
+                raw_event=raw_event
             )
             self._log_event_and_callback(logged_event)
             self.last_raw_event_per_pod[pod_name] = raw_event
@@ -138,7 +139,8 @@ class PodObjectEventsLog(PodEventsLog):
                     PodObjectLoggedEvent.POD_PHASE_CHANGED,
                     pod_name, container_name=None,
                     data={'phase': raw_event.status['phase']},
-                    cluster_time=None, local_time=datetime.datetime.now()
+                    cluster_time=None, local_time=datetime.datetime.now(),
+                    raw_event=raw_event
                 )
                 self._log_event_and_callback(logged_event)
 
@@ -149,16 +151,15 @@ class PodObjectEventsLog(PodEventsLog):
                 if pod_name in self.last_raw_event_per_pod \
                         and 'conditions' in self.last_raw_event_per_pod[pod_name].status:
 
-                    for lc in self.last_raw_event_per_pod[pod_name].status['conditions']:
-                        if lc['type'] == condition['type']:
-                            last_condition = lc
-                            break
+                    last_condition = next(
+                        (lc for lc in self.last_raw_event_per_pod[pod_name].status['conditions'] if
+                         lc['type'] == condition['type']), None)
 
                 filter_keys = ['status', 'reason', 'message']
                 if not equal_dicts(condition, last_condition, filter_keys):
 
                     cluster_time = None if 'lastTransitionTime' not in condition else \
-                        datetime.datetime.strptime(condition['lastTransitionTime'], '%Y-%m-%dT%H:%M:%SZ') # TODO string template
+                        datetime.datetime.strptime(condition['lastTransitionTime'], '%Y-%m-%dT%H:%M:%SZ')
 
                     data = {'type': condition['type']}
                     data.update(filtered_dict(condition, filter_keys))
@@ -167,7 +168,8 @@ class PodObjectEventsLog(PodEventsLog):
                         PodObjectLoggedEvent.POD_CONDITION_CHANGED,
                         pod_name, container_name=None,
                         data=data,
-                        cluster_time=cluster_time, local_time=datetime.datetime.now()
+                        cluster_time=cluster_time, local_time=datetime.datetime.now(),
+                        raw_event=raw_event
                     )
                     self._log_event_and_callback(logged_event)
 
@@ -178,10 +180,9 @@ class PodObjectEventsLog(PodEventsLog):
                 if pod_name in self.last_raw_event_per_pod \
                         and 'containerStatuses' in self.last_raw_event_per_pod[pod_name].status:
 
-                    for lcs in self.last_raw_event_per_pod[pod_name].status['containerStatuses']:
-                        if lcs['name'] == container_status['name']:
-                            last_container_status = lcs
-                            break
+                    last_container_status = next(
+                        (lcs for lcs in self.last_raw_event_per_pod[pod_name].status['containerStatuses'] if
+                         lcs['name'] == container_status['name']), None)
 
                 # special cases
                 # state - general container state change
@@ -200,11 +201,9 @@ class PodObjectEventsLog(PodEventsLog):
                             logged_event_type,
                             pod_name, container_name=container_name,
                             data=filtered_dict(container_status, filter_keys),
-                            cluster_time=None, local_time=datetime.datetime.now()
+                            cluster_time=None, local_time=datetime.datetime.now(),
+                            raw_event=raw_event
                         )
                         self._log_event_and_callback(logged_event)
 
         self.last_raw_event_per_pod[pod_name] = raw_event
-
-    def get_last_raw_event(self, pod_name):
-        return self.last_raw_event_per_pod[pod_name]
