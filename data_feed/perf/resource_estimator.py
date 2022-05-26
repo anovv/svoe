@@ -18,31 +18,31 @@ from perf.kube_watcher.pod_logged_event import PodLoggedEvent
 
 class PodEstimationStateEvent(PodLoggedEvent):
     # TODO ss not found, ss already running, etc.
-    WAITING_FOR_POD_TO_BE_SCHEDULED = 'WAITING_FOR_POD_TO_BE_SCHEDULED'
-    WAITING_FOR_DF_CONTAINER_TO_PULL_IMAGE = 'WAITING_FOR_DF_CONTAINER_TO_PULL_IMAGE'
-    WAITING_FOR_POD_TO_START_ESTIMATION_RUN = 'WAITING_FOR_POD_TO_START_ESTIMATION_RUN'
-    WAITING_FOR_POD_TO_FINISH_ESTIMATION_RUN = 'WAITING_FOR_POD_TO_FINISH_ESTIMATION_RUN'
-    COLLECTING_METRICS = 'COLLECTING_METRICS'
-    WAITING_FOR_POD_TO_BE_DELETED = 'WAITING_FOR_POD_TO_BE_DELETED'
+    WAITING_FOR_POD_TO_BE_SCHEDULED = 'PodEstimationStateEvent.WAITING_FOR_POD_TO_BE_SCHEDULED'
+    WAITING_FOR_DF_CONTAINER_TO_PULL_IMAGE = 'PodEstimationStateEvent.WAITING_FOR_DF_CONTAINER_TO_PULL_IMAGE'
+    WAITING_FOR_POD_TO_START_ESTIMATION_RUN = 'PodEstimationStateEvent.WAITING_FOR_POD_TO_START_ESTIMATION_RUN'
+    WAITING_FOR_POD_TO_FINISH_ESTIMATION_RUN = 'PodEstimationStateEvent.WAITING_FOR_POD_TO_FINISH_ESTIMATION_RUN'
+    COLLECTING_METRICS = 'PodEstimationStateEvent.COLLECTING_METRICS'
+    WAITING_FOR_POD_TO_BE_DELETED = 'PodEstimationStateEvent.WAITING_FOR_POD_TO_BE_DELETED'
 
 
 class PodEstimationResultEvent(PodEstimationStateEvent):
-    POD_SCHEDULED = 'POD_SCHEDULED'
-    DF_CONTAINER_IMAGE_PULLED = 'DF_CONTAINER_IMAGE_PULLED'
-    POD_STARTED_ESTIMATION_RUN = 'POD_STARTED_ESTIMATION_RUN'
-    POD_FINISHED_ESTIMATION_RUN = 'POD_FINISHED_ESTIMATION_RUN'
-    METRICS_COLLECTED_MISSING = 'METRICS_COLLECTED_MISSING'
-    METRICS_COLLECTED_ALL = 'METRICS_COLLECTED_ALL'
-    POD_DELETED = 'POD_DELETED'
+    POD_SCHEDULED = 'PodEstimationResultEvent.POD_SCHEDULED'
+    DF_CONTAINER_IMAGE_PULLED = 'PodEstimationResultEvent.DF_CONTAINER_IMAGE_PULLED'
+    POD_STARTED_ESTIMATION_RUN = 'PodEstimationResultEvent.POD_STARTED_ESTIMATION_RUN'
+    POD_FINISHED_ESTIMATION_RUN = 'PodEstimationResultEvent.POD_FINISHED_ESTIMATION_RUN'
+    METRICS_COLLECTED_MISSING = 'PodEstimationResultEvent.METRICS_COLLECTED_MISSING'
+    METRICS_COLLECTED_ALL = 'PodEstimationResultEvent.METRICS_COLLECTED_ALL'
+    POD_DELETED = 'PodEstimationResultEvent.POD_DELETED'
 
     # inetrrupts
-    INTERRUPTED_INTERNAL_ERROR = 'INTERRUPTED_INTERNAL_ERROR'
-    INTERRUPTED_TIMEOUT = 'INTERRUPTED_TIMEOUT'
-    INTERRUPTED_DF_CONTAINER_TOO_MANY_RESTARTS = 'INTERRUPTED_TOO_MANY_RESTARTS'
-    INTERRUPTED_DF_CONTAINER_HEALTH_LIVENESS = 'INTERRUPTED_HEALTH_LIVENESS'
-    INTERRUPTED_DF_CONTAINER_HEALTH_STARTUP = 'INTERRUPTED_HEALTH_STARTUP'
-    INTERRUPTED_DF_CONTAINER_BACK_OFF = 'INTERRUPTED_DF_CONTAINER_BACK_OFF'
-    INTERRUPTED_UNEXPECTED_POD_DELETION = 'INTERRUPTED_UNEXPECTED_POD_DELETION'
+    INTERRUPTED_INTERNAL_ERROR = 'PodEstimationResultEvent.INTERRUPTED_INTERNAL_ERROR'
+    INTERRUPTED_TIMEOUT = 'PodEstimationResultEvent.INTERRUPTED_TIMEOUT'
+    INTERRUPTED_DF_CONTAINER_TOO_MANY_RESTARTS = 'PodEstimationResultEvent.INTERRUPTED_TOO_MANY_RESTARTS'
+    INTERRUPTED_DF_CONTAINER_HEALTH_LIVENESS = 'PodEstimationResultEvent.INTERRUPTED_HEALTH_LIVENESS'
+    INTERRUPTED_DF_CONTAINER_HEALTH_STARTUP = 'PodEstimationResultEvent.INTERRUPTED_HEALTH_STARTUP'
+    INTERRUPTED_DF_CONTAINER_BACK_OFF = 'PodEstimationResultEvent.INTERRUPTED_DF_CONTAINER_BACK_OFF'
+    INTERRUPTED_UNEXPECTED_POD_DELETION = 'PodEstimationResultEvent.INTERRUPTED_UNEXPECTED_POD_DELETION'
 
     @classmethod
     def get_interrupts(cls):
@@ -105,6 +105,7 @@ class ResourceEstimator:
                 # successfully triggered event
                 self.add_estimation_result_event(pod_name, result)
 
+            # TODO collect metrics even on interrupts?
             if self.get_last_estimation_result(pod_name) == PodEstimationResultEvent.POD_FINISHED_ESTIMATION_RUN:
                 # collect metrics
                 self.add_estimation_result_event(pod_name, PodEstimationStateEvent.COLLECTING_METRICS)
@@ -156,6 +157,8 @@ class ResourceEstimator:
         self.data[pod_name]['events'] = self.get_all_events(pod_name, DATA_FEED_CONTAINER)
 
         # TODO clean kubewatcher api event queue/event log for this pod?
+        # TODO report effective run time in case of interrupts
+        # TODO report container logs
 
     def cleanup(self):
         # should be callable once
@@ -250,12 +253,14 @@ class ResourceEstimator:
                 and (event.data['reason'] == 'UnhealthyLiveness' or event.data['reason'] == 'UnhealthyStartup'):
 
             if self.kube_watcher.pod_kube_events_log.get_unhealthy_liveness_count(pod_name, container_name) >= 5:
+                # TODO check number in a timeframe instead of total
                 self.add_estimation_result_event(pod_name,
                                                  PodEstimationResultEvent.INTERRUPTED_DF_CONTAINER_HEALTH_LIVENESS)
                 self.wake_event(pod_name)
                 return
 
             if self.kube_watcher.pod_kube_events_log.get_unhealthy_startup_count(pod_name, container_name) >= 10:
+                # TODO check number in a timeframe instead of total
                 self.add_estimation_result_event(pod_name,
                                                  PodEstimationResultEvent.INTERRUPTED_DF_CONTAINER_HEALTH_STARTUP)
                 self.wake_event(pod_name)
@@ -325,10 +330,10 @@ class ResourceEstimator:
 
     def run(self):
         print('Started estimator')
-        # self.prom_connection.start() # TODO
+        self.prom_connection.start()
         self.kube_watcher.start()
-        # ss_names = self.kube_api.load_ss_names() # TODO
-        ss_names = ['data-feed-bybit-perpetual-cca5766921-ss']
+        ss_names = self.kube_api.load_ss_names()
+        # ss_names = ['data-feed-binance-spot-6d1641b134-ss', 'data-feed-binance-spot-eb540d90be-ss', 'data-feed-bybit-perpetual-cca5766921-ss']
         print(f'Scheduled estimation for {len(ss_names)} pods')
         # TODO tqdm progress
         with concurrent.futures.ThreadPoolExecutor(max_workers=PARALLELISM) as executor:

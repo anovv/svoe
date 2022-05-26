@@ -33,7 +33,7 @@ class PodLoggedEvent:
         self.raw_event = raw_event
 
     def __str__(self):
-        return f'{self.local_time}, {self.type}, {self.container_name}, {self.data}, {self.cluster_time}'
+        return f'[{self.local_time}][{self.pod_name}][{self.container_name}] {self.type}, {self.data}, {self.cluster_time}'
 
 
 class PodKubeLoggedEvent(PodLoggedEvent):
