@@ -185,7 +185,6 @@ class ResourceEstimator:
         if self.get_last_estimation_state(pod_name) == PodEstimationStateEvent.WAITING_FOR_POD_TO_BE_SCHEDULED \
                 and event.type == PodKubeLoggedEvent.POD_EVENT \
                 and event.data['reason'] == 'Scheduled':
-            print(f'{pod_name} scheduled')
             self.wake_event(pod_name)
             return
 
@@ -193,8 +192,6 @@ class ResourceEstimator:
                 and event.type == PodKubeLoggedEvent.CONTAINER_EVENT \
                 and container_name == DATA_FEED_CONTAINER \
                 and event.data['reason'] == 'Pulled':
-
-            print(f'{container_name} pulled')
             self.wake_event(pod_name)
             return
 
@@ -210,14 +207,11 @@ class ResourceEstimator:
                         all_containers_running = False
 
             if all_containers_running:
-                print(f'{pod_name} all containers are running')
                 self.wake_event(pod_name)
                 return
 
         if self.get_last_estimation_state(pod_name) == PodEstimationStateEvent.WAITING_FOR_POD_TO_BE_DELETED \
                 and event.type == PodObjectLoggedEvent.POD_DELETED:
-
-            print(f'{pod_name} deleted')
             self.wake_event(pod_name)
             return
 
@@ -228,7 +222,6 @@ class ResourceEstimator:
                 and event.data['reason'] == 'BackOff':
 
             self.add_estimation_result_event(pod_name, PodEstimationResultEvent.INTERRUPTED_DF_CONTAINER_BACK_OFF)
-            print(f'{container_name} backoff')
             self.wake_event(pod_name)
             return
 
@@ -237,7 +230,6 @@ class ResourceEstimator:
                 and self.get_last_estimation_state(pod_name) != PodEstimationStateEvent.WAITING_FOR_POD_TO_BE_DELETED:
 
             self.add_estimation_result_event(pod_name, PodEstimationResultEvent.INTERRUPTED_UNEXPECTED_POD_DELETION)
-            print(f'{pod_name} unexpected delete')
             self.wake_event(pod_name)
             return
 
@@ -249,7 +241,6 @@ class ResourceEstimator:
             for cs in event.data['containerStatuses']:
                 if cs['name'] == DATA_FEED_CONTAINER and int(cs['restartCount']) >= 3:
                     self.add_estimation_result_event(pod_name, PodEstimationResultEvent.INTERRUPTED_DF_CONTAINER_TOO_MANY_RESTARTS)
-                    print(f'{container_name} too many restarts')
                     self.wake_event(pod_name)
                     return
 
@@ -261,14 +252,12 @@ class ResourceEstimator:
             if self.kube_watcher.pod_kube_events_log.get_unhealthy_liveness_count(pod_name, container_name) >= 5:
                 self.add_estimation_result_event(pod_name,
                                                  PodEstimationResultEvent.INTERRUPTED_DF_CONTAINER_HEALTH_LIVENESS)
-                print(f'{container_name} too many liveness probes failed')
                 self.wake_event(pod_name)
                 return
 
             if self.kube_watcher.pod_kube_events_log.get_unhealthy_startup_count(pod_name, container_name) >= 10:
                 self.add_estimation_result_event(pod_name,
                                                  PodEstimationResultEvent.INTERRUPTED_DF_CONTAINER_HEALTH_STARTUP)
-                print(f'{container_name} too many startup probes failed')
                 self.wake_event(pod_name)
                 return
 
@@ -326,8 +315,7 @@ class ResourceEstimator:
 
     def get_all_events(self, pod_name, container_name):
         events = []
-        events.extend(self.kube_watcher.pod_kube_events_log.pod_event_queues[pod_name].queue)
-        events.extend(self.kube_watcher.pod_object_events_log.pod_event_queues[pod_name].queue)
+        events.extend(self.kube_watcher.event_queues_per_pod[pod_name].queue)
         events.extend(self.estimation_state_events_per_pod[pod_name])
         events.extend(self.estimation_result_events_per_pod[pod_name])
         events.sort(key=lambda event: event.local_time)
