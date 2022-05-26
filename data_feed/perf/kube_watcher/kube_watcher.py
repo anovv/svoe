@@ -97,7 +97,7 @@ class KubeWatcher:
             return
         print(f'KubeWatcher started')
         self.running = True
-        # self.watch_pod_object_events()
+        self.watch_pod_object_events()
         self.watch_pod_kube_events()
 
     def stop(self):

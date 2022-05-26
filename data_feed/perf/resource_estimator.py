@@ -40,6 +40,7 @@ class PodEstimationResultEvent(PodEstimationStateEvent):
     INTERRUPTED_TIMEOUT = 'INTERRUPTED_TIMEOUT'
     INTERRUPTED_DF_CONTAINER_TOO_MANY_RESTARTS = 'INTERRUPTED_TOO_MANY_RESTARTS'
     INTERRUPTED_DF_CONTAINER_HEALTH_LIVENESS = 'INTERRUPTED_HEALTH_LIVENESS'
+    INTERRUPTED_DF_CONTAINER_HEALTH_STARTUP = 'INTERRUPTED_HEALTH_STARTUP'
     INTERRUPTED_DF_CONTAINER_BACK_OFF = 'INTERRUPTED_DF_CONTAINER_BACK_OFF'
     INTERRUPTED_UNEXPECTED_POD_DELETION = 'INTERRUPTED_UNEXPECTED_POD_DELETION'
 
@@ -50,6 +51,7 @@ class PodEstimationResultEvent(PodEstimationStateEvent):
             PodEstimationResultEvent.INTERRUPTED_TIMEOUT,
             PodEstimationResultEvent.INTERRUPTED_DF_CONTAINER_HEALTH_LIVENESS,
             PodEstimationResultEvent.INTERRUPTED_DF_CONTAINER_TOO_MANY_RESTARTS,
+            PodEstimationResultEvent.INTERRUPTED_DF_CONTAINER_HEALTH_STARTUP,
             PodEstimationResultEvent.INTERRUPTED_DF_CONTAINER_BACK_OFF,
             PodEstimationResultEvent.INTERRUPTED_UNEXPECTED_POD_DELETION
         ]
@@ -177,6 +179,7 @@ class ResourceEstimator:
                     in [*PodEstimationResultEvent.get_interrupts(), PodEstimationResultEvent.POD_DELETED]:
 
             # If interrupted we skip everything except pod deletion event
+            print(f'skipped {event.data}')
             return
 
         if self.get_last_estimation_state(pod_name) == PodEstimationStateEvent.WAITING_FOR_POD_TO_BE_SCHEDULED \
@@ -250,16 +253,24 @@ class ResourceEstimator:
                     self.wake_event(pod_name)
                     return
 
-        # data-feed-container UnhealthyLiveness:
+        # data-feed-container Unhealthy(Liveness or Startup):
         if event.type == PodKubeLoggedEvent.CONTAINER_EVENT \
                 and container_name == DATA_FEED_CONTAINER \
-                and event.data['reason'] == 'UnhealthyLiveness' \
-                and self.kube_watcher.pod_kube_events_log.get_unhealthy_count()['liveness'] >= 5:
+                and (event.data['reason'] == 'UnhealthyLiveness' or event.data['reason'] == 'UnhealthyStartup'):
 
-            self.add_estimation_result_event(pod_name, PodEstimationResultEvent.INTERRUPTED_DF_CONTAINER_HEALTH_LIVENESS)
-            print(f'{container_name} too many liveness probes failed')
-            self.wake_event(pod_name)
-            return
+            if self.kube_watcher.pod_kube_events_log.get_unhealthy_liveness_count(pod_name, container_name) >= 5:
+                self.add_estimation_result_event(pod_name,
+                                                 PodEstimationResultEvent.INTERRUPTED_DF_CONTAINER_HEALTH_LIVENESS)
+                print(f'{container_name} too many liveness probes failed')
+                self.wake_event(pod_name)
+                return
+
+            if self.kube_watcher.pod_kube_events_log.get_unhealthy_startup_count(pod_name, container_name) >= 10:
+                self.add_estimation_result_event(pod_name,
+                                                 PodEstimationResultEvent.INTERRUPTED_DF_CONTAINER_HEALTH_STARTUP)
+                print(f'{container_name} too many startup probes failed')
+                self.wake_event(pod_name)
+                return
 
         # TODO kube event Failed, unhealthy readiness, pod_status_phase == 'Failed', other indicators?, any other container backoff?
 
@@ -322,7 +333,6 @@ class ResourceEstimator:
         events.sort(key=lambda event: event.local_time)
         events = list(filter(lambda event: event.container_name is None or event.container_name == container_name, events))
         events = list(map(lambda event: str(event), events))
-        # TODO events are duplicated why?
         return events
 
     def run(self):

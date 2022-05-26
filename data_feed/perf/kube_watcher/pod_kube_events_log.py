@@ -131,5 +131,8 @@ class PodKubeEventsLog(PodEventsLog):
         )
         self._log_event_and_callback(logged_event)
 
-    def get_unhealthy_count(self):
-        return self.unhealthy_count
+    def get_unhealthy_liveness_count(self, pod_name, container_name):
+        return self.unhealthy_count[pod_name][container_name]['liveness']
+
+    def get_unhealthy_startup_count(self, pod_name, container_name):
+        return self.unhealthy_count[pod_name][container_name]['startup']
