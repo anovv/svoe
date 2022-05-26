@@ -56,15 +56,13 @@ class PodKubeRawEvent:
         self.involved_object_field_path = raw_event['object'].involved_object.field_path
         self.object_first_timestamp = raw_event['object'].first_timestamp
         self.object_last_timestamp = raw_event['object'].last_timestamp
+        self.resource_version = raw_event['object'].metadata.resource_version
 
 
 class PodKubeEventsLog(PodEventsLog):
     def __init__(self, pod_event_queues, callbacks):
         super().__init__(pod_event_queues, callbacks)
 
-        # v1.Events contain info either about pod wide or container specific events, hence separation here
-        # into pod wide events and container wide events. All of this per pod
-        self.last_event_per_type_per_pod = {}
         self.unhealthy_count = {}
 
     def update_state(self, raw_event):
@@ -117,44 +115,21 @@ class PodKubeEventsLog(PodEventsLog):
             else:
                 raise ValueError(f'Unknown Unhealthy message: {message}')
 
-        if pod_name not in self.last_event_per_type_per_pod:
-            self.last_event_per_type_per_pod[pod_name] = {
-                PodKubeLoggedEvent.POD_EVENT: None,  # pod wide events
-                PodKubeLoggedEvent.CONTAINER_EVENT: {}  # container specific event
-            }
-
-        last_event = None
-        if container_name:
-            if container_name in self.last_event_per_type_per_pod[pod_name][PodKubeLoggedEvent.CONTAINER_EVENT]:
-                last_event = self.last_event_per_type_per_pod[pod_name][PodKubeLoggedEvent.CONTAINER_EVENT][container_name]
-        else:
-            last_event = self.last_event_per_type_per_pod[pod_name][PodKubeLoggedEvent.POD_EVENT]
-
         data = {
             'reason': reason,
             'count': count,
             'message': message,
         }
 
-        if last_event is None \
-                or (last_event.data['reason'] != reason
-                    or last_event.data['count'] != count
-                    or last_event.data['message'] != message):
-            logged_event_type = PodKubeLoggedEvent.CONTAINER_EVENT if container_name else PodKubeLoggedEvent.POD_EVENT
-            logged_event = PodKubeLoggedEvent(
-                logged_event_type,
-                pod_name, container_name=container_name,
-                data=data,
-                cluster_time=cluster_time, local_time=datetime.datetime.now(),
-                raw_event=raw_event
-            )
-            self._log_event_and_callback(logged_event)
-
-            # record last event
-            if logged_event_type == PodKubeLoggedEvent.CONTAINER_EVENT:
-                self.last_event_per_type_per_pod[pod_name][PodKubeLoggedEvent.CONTAINER_EVENT][container_name] = logged_event
-            else:
-                self.last_event_per_type_per_pod[pod_name][PodKubeLoggedEvent.POD_EVENT] = logged_event
+        logged_event_type = PodKubeLoggedEvent.CONTAINER_EVENT if container_name else PodKubeLoggedEvent.POD_EVENT
+        logged_event = PodKubeLoggedEvent(
+            logged_event_type,
+            pod_name, container_name=container_name,
+            data=data,
+            cluster_time=cluster_time, local_time=datetime.datetime.now(),
+            raw_event=raw_event
+        )
+        self._log_event_and_callback(logged_event)
 
     def get_unhealthy_count(self):
         return self.unhealthy_count

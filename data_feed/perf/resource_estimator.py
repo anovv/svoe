@@ -166,6 +166,9 @@ class ResourceEstimator:
             self.kube_watcher.stop()
             self.kube_watcher = None
 
+    # def kube_watcher_callback(self, event):
+    #     print(event)
+
     def kube_watcher_callback(self, event):
         pod_name = event.pod_name
         container_name = event.container_name

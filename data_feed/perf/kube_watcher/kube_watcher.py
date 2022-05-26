@@ -24,23 +24,49 @@ class KubeWatcher:
 
     def _watch_pod_kube_events_blocking(self):
         self.pod_kube_events_watcher = kubernetes.watch.Watch()
+        last_resource_version = None
+        first_init = True
+        should_filter_stale = True
         while self.running:
             start_time = time.time()
-            for message in self.pod_kube_events_watcher.stream(
-                self.core_api.list_event_for_all_namespaces,
-                watch=True,
-                field_selector=f'metadata.namespace={DATA_FEED_NAMESPACE}',
-                timeout_seconds=10
-            ):
+            if first_init:
+                # First call, resource_version is unset, events need to be filtered by timestamp
+                stream = self.pod_kube_events_watcher.stream(
+                    self.core_api.list_event_for_all_namespaces,
+                    watch=True,
+                    field_selector=f'metadata.namespace={DATA_FEED_NAMESPACE}',
+                    timeout_seconds=10
+                )
+                first_init = False
+            else:
+                if last_resource_version is None:
+                    raise Exception('last_resource_version is None')
+                should_filter_stale = False
+                stream = self.pod_kube_events_watcher.stream(
+                    self.core_api.list_event_for_all_namespaces,
+                    watch=True,
+                    resource_version=last_resource_version,
+                    field_selector=f'metadata.namespace={DATA_FEED_NAMESPACE}',
+                    timeout_seconds=10
+                )
+
+            message_count = 0
+            for message in stream:
+                message_count += 1
                 if not self.running:
                     break
                 raw_event = PodKubeRawEvent(message)
-                # drop stale events
-                delta = start_time - raw_event.object_last_timestamp.timestamp()
-                # delta should be magnitude of latency
-                if delta > 1:
-                    continue
+                last_resource_version = raw_event.resource_version
+                if should_filter_stale:
+                    # filter stale and synthetic events for first init
+                    delta = start_time - raw_event.object_last_timestamp.timestamp()
+                    if delta > 5:
+                        # if event is older 5s - drop
+                        continue
                 self.pod_kube_events_log.update_state(raw_event)
+            if message_count == 0:
+                # in case generator has no events, sleep until next call to kube to avoid empty cpu cycles
+                time.sleep(0.5)
 
     def watch_pod_kube_events(self):
         self.pod_kube_events_thread = threading.Thread(target=self._watch_pod_kube_events_blocking)
@@ -71,7 +97,7 @@ class KubeWatcher:
             return
         print(f'KubeWatcher started')
         self.running = True
-        self.watch_pod_object_events()
+        # self.watch_pod_object_events()
         self.watch_pod_kube_events()
 
     def stop(self):

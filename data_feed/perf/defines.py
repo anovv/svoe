@@ -7,7 +7,7 @@ DATA_FEED_CM_CONFIG_NAME = 'data-feed-config.yaml'
 REDIS_CONTAINER = 'redis'
 # TODO dynamic parallelism based on heuristics
 PARALLELISM = 2 # number of simultaneously running pods
-ESTIMATION_RUN_DURATION = 10 # how long to run a pod
+ESTIMATION_RUN_DURATION = 100 # how long to run a pod
 PROM_NAMESPACE = 'monitoring'
 PROM_POD_NAME = 'prometheus-kube-prometheus-stack-prometheus-0'
 PROM_PORT_FORWARD = '9090'

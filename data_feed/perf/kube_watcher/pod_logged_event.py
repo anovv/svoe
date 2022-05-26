@@ -12,8 +12,6 @@ class PodEventsLog:
         raise ValueError('Not implemented')
 
     def _log_event_and_callback(self, logged_event):
-        # if isinstance(logged_event, PodKubeLoggedEvent):
-        #     print(logged_event)
         pod_name = logged_event.pod_name
         if pod_name not in self.pod_event_queues:
             self.pod_event_queues[pod_name] = queue.Queue()
@@ -35,7 +33,7 @@ class PodLoggedEvent:
         self.raw_event = raw_event
 
     def __str__(self):
-        return f'{self.local_time}, {self.type}, {self.data}, {self.cluster_time}'
+        return f'{self.local_time}, {self.type}, {self.container_name}, {self.data}, {self.cluster_time}'
 
 
 class PodKubeLoggedEvent(PodLoggedEvent):
