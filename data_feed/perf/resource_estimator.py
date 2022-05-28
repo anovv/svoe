@@ -355,14 +355,14 @@ def cleanup():
     re.cleanup()
 
 
-re.run()
-# ss_name = 'data-feed-binance-spot-6d1641b134-ss'
+# re.run()
+ss_name = 'data-feed-binance-spot-6d1641b134-ss'
 # ss_name = 'data-feed-binance-spot-eb540d90be-ss'
 # ss_name = 'data-feed-bybit-perpetual-cca5766921-ss'
 # re.kube_watcher.running = True
 # re.kube_watcher.watch_pod_kube_events()
 # re.kube_watcher.start()
-# re.kube_api.set_env(ss_name, 'TESTING')
-# re.kube_api.scale_up(ss_name)
+re.kube_api.set_env(ss_name, 'TESTING')
+re.kube_api.scale_up(ss_name)
 # time.sleep(900)
 # re.kube_watcher.stop()
