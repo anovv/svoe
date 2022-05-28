@@ -13,6 +13,6 @@ spec:
       - data-feed
   endpoints:
     - port: redis-metrics
-      interval: 5s
+      interval: 5s # TODO figure out interval?
     - port: df-metrics
       interval: 5s

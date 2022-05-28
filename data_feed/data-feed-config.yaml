@@ -12,14 +12,14 @@ exchanges:
   BYBIT:
     funding: &id002
     - BTC-USDT-PERP
-    l2_book:
-      book_delta: true
-      max_depth: 100
-      symbols: *id002
-    liquidations: *id002
-    open_interest: *id002
-    retries: -1
-    trades: *id002
+#    l2_book:
+#      book_delta: true
+#      max_depth: 100
+#      symbols: *id002
+#    liquidations: *id002
+#    open_interest: *id002
+#    retries: -1
+#    trades: *id002
   KRAKEN:
     l2_book:
       book_delta: true

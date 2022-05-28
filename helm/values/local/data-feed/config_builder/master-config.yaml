@@ -3,7 +3,7 @@ symbolSets:
 exchangeConfigSets:
   BINANCE:
     - instrumentType: spot
-      numPods: 2
+      numPods: 10
       symbolSets:
         quotes: [USDT]
         bases: TOP_20
@@ -27,7 +27,7 @@ exchangeConfigSets:
         Common configuration for Binance USDT spot top 20
   BYBIT:
     - instrumentType: perpetual
-      numPods: 2
+      numPods: 10
       symbolSets:
         quotes: [USDT]
         bases: TOP_20

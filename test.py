@@ -1,7 +1,7 @@
 # TODO move to PYTHONPATH
-# import sys
-# sys.path.append('/Users/anov/IdeaProjects/cryptofeed')
-# sys.path.append('/Users/anov/IdeaProjects/cryptostore')
+import sys
+sys.path.append('/Users/anov/IdeaProjects/cryptofeed')
+sys.path.append('/Users/anov/IdeaProjects/cryptostore')
 # sys.path.append('/dask_cluster/')
 
 from data_feed.data_feed_service import DataFeedService
