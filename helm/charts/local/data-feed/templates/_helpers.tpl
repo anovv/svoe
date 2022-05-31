@@ -120,6 +120,9 @@ spec:
           env:
             - name: PROMETHEUS_MULTIPROC_DIR
               value: {{ .dataFeed.prometheus.multiprocDir }}
+             # TODO
+            - name: ENV
+              value: TESTING
           startupProbe:
             initialDelaySeconds: 15
             periodSeconds: 2
