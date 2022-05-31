@@ -3,7 +3,7 @@
 minikube start --nodes 2 --extra-config=kubelet.housekeeping-interval=10s -p minikube-1
 
 # memory overcommit configuration
-kubectl node-shell minikube-1-m02 -- bash -c "echo 2 > /proc/sys/vm/overcommit_memory && echo 100 > /proc/sys/vm/overcommit_ratio"
+#kubectl node-shell minikube-1-m02 -- bash -c "echo 2 > /proc/sys/vm/overcommit_memory && echo 100 > /proc/sys/vm/overcommit_ratio"
 
 # label nodes
 kubectl label nodes minikube-1-m02 workload-type=data-feed
