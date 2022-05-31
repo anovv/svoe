@@ -30,27 +30,44 @@ do
   names_regex+="$cname|"
 done
 names_regex=${names_regex%?} # remove last |
+
 shell_command=(
   "
   set -e
   ids=\$(docker ps -f name=\"$names_regex\" | awk '{print \$1}' | tail -n +2 )
   arr_ids=(\$ids)
-  pids=\$(docker inspect -f '{{.State.Pid}}' \$ids)
-  arr_pids=(\$pids)
-  len=\${#arr_pids[@]}
+  len=\${#arr_ids[@]}
 
   if [[ \"\$len\" -ne $len ]]; then
-    echo \"Error: Number of requested containers differs from number of processes. Check container names\"
+    echo \"Error: Number of requested containers differs from found number. Check container names\"
     exit 1
   fi
 
-  for pid in \$pids
+  pids_temp_file=\$(mktemp)
+
+  for id in \$ids
   do
-    echo \"$oom_score_adj\" > proc/\$pid/oom_score_adj
+    docker top \$id | awk '{print \$2}' | tail -n +2 >> \$pids_temp_file &
   done
+  wait
+
+  while read pid; do
+    path=\"proc/\$pid/oom_score_adj\"
+    if test -f \$path; then
+      echo \"$oom_score_adj\" > \$path
+    fi
+  done < \$pids_temp_file
+
+  rm -f \$pids_temp_file
 
   echo \"Success\"
   "
 )
 
 kubectl node-shell $node -- bash -c "${shell_command[@]}"
+
+# one liner to read on node
+# ids=$(docker ps -f name=$name_regex | awk '{print $1}' | tail -n +2 )
+# pids_temp_file=$(mktemp)
+# for id in $ids; do (docker top $id | awk '{print $2}' | tail -n +2 >> $pids_temp_file &); done
+# while read pid; do (path="proc/$pid/oom_score_adj"; if test -f $path; then (cat $path); else echo "huy"; fi); done < $pids_temp_file
