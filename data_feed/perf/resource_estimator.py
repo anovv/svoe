@@ -14,6 +14,7 @@ from perf.kube_watcher import kube_watcher
 from perf.kube_watcher.pod_kube_events_log import PodKubeLoggedEvent
 from perf.kube_watcher.pod_object_events_log import PodObjectLoggedEvent
 from perf.kube_watcher.pod_logged_event import PodLoggedEvent
+from perf.scheduler.scheduler import Scheduler
 
 
 class PodEstimationStateEvent(PodLoggedEvent):
@@ -347,22 +348,25 @@ class ResourceEstimator:
         self.cleanup()
 
 
-re = ResourceEstimator()
+# re = ResourceEstimator()
+#
+#
+# @atexit.register
+# def cleanup():
+#     re.cleanup()
 
-
-@atexit.register
-def cleanup():
-    re.cleanup()
-
+s = Scheduler()
+ss_names = []
+s.run(ss_names)
 
 # re.run()
-ss_name = 'data-feed-binance-spot-6d1641b134-ss'
+# ss_name = 'data-feed-binance-spot-6d1641b134-ss'
 # ss_name = 'data-feed-binance-spot-eb540d90be-ss'
 # ss_name = 'data-feed-bybit-perpetual-cca5766921-ss'
 # re.kube_watcher.running = True
 # re.kube_watcher.watch_pod_kube_events()
 # re.kube_watcher.start()
-re.kube_api.set_env(ss_name, 'TESTING')
-re.kube_api.scale_up(ss_name)
+# re.kube_api.set_env(ss_name, 'TESTING')
+# re.kube_api.scale_up(ss_name)
 # time.sleep(900)
 # re.kube_watcher.stop()
