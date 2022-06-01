@@ -1,2 +1,16 @@
 metrics:
   enabled: true
+tolerations:
+  - effect: NoSchedule
+    operator: Exists
+image:
+  repository: gcr.io/cadvisor/cadvisor
+  tag: latest
+  pullPolicy: IfNotPresent
+resources:
+  limits:
+    cpu: 100m
+    memory: 100Mi
+  requests:
+    cpu: 100m
+    memory: 100Mi
