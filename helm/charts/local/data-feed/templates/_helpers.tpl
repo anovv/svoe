@@ -123,6 +123,10 @@ spec:
              # TODO
             - name: ENV
               value: TESTING
+
+          # TODO configure startup/liveness probes based on environment
+          # TODO is liveness needed?
+          # TODO read https://habr.com/ru/company/flant/blog/470958/
           startupProbe:
             initialDelaySeconds: 15
             periodSeconds: 2
@@ -130,12 +134,12 @@ spec:
             httpGet:
               path: {{ .dataFeed.healthPath }}
               port: df-health
-          livenessProbe:
-            httpGet:
-              path: {{ .dataFeed.healthPath }}
-              port: df-health
-            initialDelaySeconds: 5
-            periodSeconds: 5
+#          livenessProbe:
+#            httpGet:
+#              path: {{ .dataFeed.healthPath }}
+#              port: df-health
+#            initialDelaySeconds: 5
+#            periodSeconds: 5
           {{- if .dataFeed.resources }}
           resources:
             {{- if .dataFeed.resources.requests }}

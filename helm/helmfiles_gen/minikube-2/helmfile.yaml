@@ -34,6 +34,11 @@ releases:
     namespace: monitoring
     values:
       - ../../values/prometheus-community/kube-prometheus-stack/values.yaml.gotmpl
+    hooks:
+      - events: ["postsync"]
+        showlogs: true
+        command: ../../scripts/patch_node_exporter_resources.sh
+
   - chart: ../../charts/local/monitoring-extra
     name: monitoring-extra
     namespace: monitoring
