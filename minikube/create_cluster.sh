@@ -13,6 +13,9 @@ kubectl label nodes minikube-1-m03 node-type=spot
 kubectl taint nodes minikube-1-m03 node-type=spot:NoSchedule
 kubectl taint nodes minikube-1-m03 workload-type=data-feed:NoSchedule
 
+# patch kube-proxy to be QoS Guaranteed
+kubectl patch daemonset kube-proxy -n kube-system -p '{"spec":{"template":{"spec":{"containers":[{"resources":{"limits":{"memory":"50Mi", "cpu": "20m"}, "requests":{"memory":"50Mi", "cpu": "20m"}},"name":"kube-proxy"}]}}}}'
+
 # install volume provisioner
 curl https://raw.githubusercontent.com/rancher/local-path-provisioner/master/deploy/local-path-storage.yaml | sed 's/\/opt\/local-path-provisioner/\/var\/opt\/local-path-provisioner/ ' | kubectl apply -f -
 kubectl patch storageclass standard -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"false"}}}'
