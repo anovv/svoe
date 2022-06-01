@@ -1,15 +1,17 @@
 #!/bin/bash
 
-minikube start --nodes 2 --extra-config=kubelet.housekeeping-interval=10s -p minikube-1
+minikube start --nodes 3 --extra-config=kubelet.housekeeping-interval=10s -p minikube-1
 
 # memory overcommit configuration
 #kubectl node-shell minikube-1-m02 -- bash -c "echo 2 > /proc/sys/vm/overcommit_memory && echo 100 > /proc/sys/vm/overcommit_ratio"
 
 # label nodes
-kubectl label nodes minikube-1-m02 workload-type=data-feed
-kubectl label nodes minikube-1-m02 node-type=spot
+kubectl label nodes minikube-1-m03 workload-type=data-feed
+kubectl label nodes minikube-1-m03 node-type=spot
 
-# TODO add taints?
+# taints
+kubectl taint nodes minikube-1-m03 node-type=spot:NoSchedule
+kubectl taint nodes minikube-1-m03 workload-type=data-feed:NoSchedule
 
 # install volume provisioner
 curl https://raw.githubusercontent.com/rancher/local-path-provisioner/master/deploy/local-path-storage.yaml | sed 's/\/opt\/local-path-provisioner/\/var\/opt\/local-path-provisioner/ ' | kubectl apply -f -
