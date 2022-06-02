@@ -131,6 +131,13 @@ prometheus:
     externalLabels:
       cluster: {{ .Values | get "clusterName" }}
       cluster_id: {{ .Values | get "clusterId" | quote}}
+    resources:
+      limits:
+        cpu: 100m
+        memory: 700Mi
+      requests:
+        cpu: 100m
+        memory: 700Mi
   server:
     persistentVolume:
       enabled: true
