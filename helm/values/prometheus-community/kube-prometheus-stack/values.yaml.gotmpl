@@ -88,6 +88,15 @@ grafana:
   enabled: false
   {{ end }}
 
+prometheusOperator:
+  resources:
+    limits:
+      cpu: 50m
+      memory: 100Mi
+    requests:
+      cpu: 50m
+      memory: 100Mi
+
 prometheus:
   thanosService:
     enabled: true
