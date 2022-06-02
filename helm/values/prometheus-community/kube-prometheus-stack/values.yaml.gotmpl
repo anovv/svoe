@@ -89,6 +89,15 @@ grafana:
   {{ end }}
 
 prometheusOperator:
+  admissionWebhooks:
+    patch:
+      resources:
+        limits:
+          cpu: 30m
+          memory: 50Mi
+        requests:
+          cpu: 30m
+          memory: 50Mi
   resources:
     limits:
       cpu: 50m
@@ -134,10 +143,10 @@ prometheus:
     resources:
       limits:
         cpu: 100m
-        memory: 700Mi
+        memory: 500Mi
       requests:
         cpu: 100m
-        memory: 700Mi
+        memory: 500Mi
   server:
     persistentVolume:
       enabled: true
