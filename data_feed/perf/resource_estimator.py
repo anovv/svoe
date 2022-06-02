@@ -356,8 +356,11 @@ class ResourceEstimator:
 #     re.cleanup()
 
 s = Scheduler()
-ss_names = []
-s.run(ss_names)
+# ss_names = []
+# s.run(ss_names)
+s.get_oom_score("minikube-1-m03", "kube-proxy-fjr9n", ["kube-proxy"])
+s.set_oom_score_adj("minikube-1-m03", "kube-proxy-fjr9n", ["kube-proxy"], -1000)
+s.get_oom_score("minikube-1-m03", "kube-proxy-fjr9n", ["kube-proxy"])
 
 # re.run()
 # ss_name = 'data-feed-binance-spot-6d1641b134-ss'

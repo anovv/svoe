@@ -37,7 +37,7 @@ releases:
     hooks:
       - events: ["postsync"]
         showlogs: true
-        command: ../../scripts/patch_node_exporter_resources.sh
+        command: ../../scripts/patch_kube_prometheus_stack_resources.sh
 
   - chart: ../../charts/local/monitoring-extra
     name: monitoring-extra
