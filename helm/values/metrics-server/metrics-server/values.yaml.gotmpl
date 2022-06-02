@@ -6,6 +6,13 @@ apiService:
 args:
   - --kubelet-insecure-tls
 {{ end }}
+resources:
+  limits:
+    cpu: 20m
+    memory: 40Mi
+  requests:
+    cpu: 20m
+    memory: 40Mi
 
 # TODO set metric-resolution
 # Default 60 seconds, can be changed using metric-resolution flag. We are not recommending setting values below 15s, as this is the resolution of metrics calculated by Kubelet.
