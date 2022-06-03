@@ -29,7 +29,7 @@ class KubeWatcher:
         should_filter_stale = True
         while self.running:
             start_time = time.time()
-            if first_init:
+            if first_init or last_resource_version is None:
                 # First call, resource_version is unset, events need to be filtered by timestamp
                 stream = self.pod_kube_events_watcher.stream(
                     self.core_api.list_event_for_all_namespaces,
@@ -39,8 +39,6 @@ class KubeWatcher:
                 )
                 first_init = False
             else:
-                if last_resource_version is None:
-                    raise Exception('last_resource_version is None')
                 should_filter_stale = False
                 stream = self.pod_kube_events_watcher.stream(
                     self.core_api.list_event_for_all_namespaces,
@@ -57,7 +55,7 @@ class KubeWatcher:
                     break
                 raw_event = PodKubeRawEvent(message)
                 last_resource_version = raw_event.resource_version
-                if should_filter_stale:
+                if should_filter_stale and first_init:
                     # filter stale and synthetic events for first init
                     delta = start_time - raw_event.object_last_timestamp.timestamp()
                     if delta > 5:

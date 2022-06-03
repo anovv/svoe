@@ -9,7 +9,7 @@ from ..defines import *
 
 
 class Scheduler:
-    def __int__(self):
+    def __init__(self):
         kubernetes.config.load_kube_config(context=CLUSTER)
         core_api = kubernetes.client.CoreV1Api()
         apps_api = kubernetes.client.AppsV1Api()

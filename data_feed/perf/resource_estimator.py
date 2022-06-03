@@ -267,6 +267,7 @@ class ResourceEstimator:
                 self.wake_event(pod_name)
                 return
 
+        # TODO watch for PodKubeLoggedEvent.CONTAINER_EVENT, {'reason': 'Failed', 'count': 2, 'message': 'Error: ErrImagePull'}
         # TODO kube event Failed, unhealthy readiness, pod_status_phase == 'Failed', other indicators?, any other container backoff?
 
     def get_last_estimation_result(self, pod_name):
@@ -355,9 +356,9 @@ class ResourceEstimator:
 # def cleanup():
 #     re.cleanup()
 
-s = Scheduler()
+sc = Scheduler()
 ss_names = []
-s.run(ss_names)
+sc.run(ss_names)
 # s.get_oom_score("minikube-1-m03", "kube-proxy-fjr9n", ["kube-proxy"])
 # s.set_oom_score_adj("minikube-1-m03", "kube-proxy-fjr9n", ["kube-proxy"], -1000)
 # s.get_oom_score("minikube-1-m03", "kube-proxy-fjr9n", ["kube-proxy"])

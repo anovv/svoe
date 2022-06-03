@@ -189,6 +189,7 @@ class PodObjectEventsLog(PodEventsLog):
                 # started - Startup Probe passed/failed
                 # ready - ReadinessP robe passed/failed
                 # restartCount - Restart event
+                # TODO add last_state to all container events
                 for logged_event_type, filter_keys in [
                     (PodObjectLoggedEvent.CONTAINER_STATE_CHANGED, ['state']),
                     (PodObjectLoggedEvent.CONTAINER_STARTUP_PROBE_STATE_CHANGED, ['started']),
