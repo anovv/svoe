@@ -1,19 +1,19 @@
 # Script to run pods (without resource spec) and record health and resource consumptions (mem/cpu)
-import asyncio
 import time
-
-from utils import *
-from metrics import *
-
+import datetime
 import concurrent.futures
-import atexit
 import kubernetes
 import kube_api
 import threading
+
+from perf.metrics import fetch_metrics
+from perf.utils import PromConnection, pod_name_from_ss, save_data
+from perf.defines import CLUSTER, DATA_FEED_CONTAINER, PARALLELISM
+
 from perf.kube_watcher import kube_watcher
-from perf.kube_watcher.pod_kube_events_log import PodKubeLoggedEvent
-from perf.kube_watcher.pod_object_events_log import PodObjectLoggedEvent
-from perf.kube_watcher.pod_logged_event import PodLoggedEvent
+from perf.kube_watcher.event.logged.kube_event.pod_kube_events_log import PodKubeLoggedEvent
+from perf.kube_watcher.event.logged.object.pod_object_events_log import PodObjectLoggedEvent
+from perf.kube_watcher.event.logged.pod_logged_event import PodLoggedEvent
 from perf.scheduler.scheduler import Scheduler
 
 
@@ -36,7 +36,7 @@ class PodEstimationResultEvent(PodEstimationStateEvent):
     METRICS_COLLECTED_ALL = 'PodEstimationResultEvent.METRICS_COLLECTED_ALL'
     POD_DELETED = 'PodEstimationResultEvent.POD_DELETED'
 
-    # inetrrupts
+    # interrupts
     INTERRUPTED_INTERNAL_ERROR = 'PodEstimationResultEvent.INTERRUPTED_INTERNAL_ERROR'
     INTERRUPTED_TIMEOUT = 'PodEstimationResultEvent.INTERRUPTED_TIMEOUT'
     INTERRUPTED_DF_CONTAINER_TOO_MANY_RESTARTS = 'PodEstimationResultEvent.INTERRUPTED_TOO_MANY_RESTARTS'
@@ -267,6 +267,7 @@ class ResourceEstimator:
                 self.wake_event(pod_name)
                 return
 
+        # TODO 'reason': 'NodeNotReady'
         # TODO watch for PodKubeLoggedEvent.CONTAINER_EVENT, {'reason': 'Failed', 'count': 2, 'message': 'Error: ErrImagePull'}
         # TODO kube event Failed, unhealthy readiness, pod_status_phase == 'Failed', other indicators?, any other container backoff?
 

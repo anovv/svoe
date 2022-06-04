@@ -1,110 +1,15 @@
-# {
-#     "type": "MODIFIED",
-#     "name": "data-feed-bybit-perpetual-cca5766921-ss-0",
-#     "status": {
-#         "phase": "Pending",
-#         "conditions": [
-#             {
-#                 "type": "Initialized",
-#                 "status": "True",
-#                 "lastProbeTime": null,
-#                 "lastTransitionTime": "2022-05-18T15:25:38Z"
-#             },
-#             {
-#                 "type": "Ready",
-#                 "status": "False",
-#                 "lastProbeTime": null,
-#                 "lastTransitionTime": "2022-05-18T15:25:38Z",
-#                 "reason": "ContainersNotReady",
-#                 "message": "containers with unready status: [redis redis-exporter data-feed-container]"
-#             },
-#             {
-#                 "type": "ContainersReady",
-#                 "status": "False",
-#                 "lastProbeTime": null,
-#                 "lastTransitionTime": "2022-05-18T15:25:38Z",
-#                 "reason": "ContainersNotReady",
-#                 "message": "containers with unready status: [redis redis-exporter data-feed-container]"
-#             },
-#             {
-#                 "type": "PodScheduled",
-#                 "status": "True",
-#                 "lastProbeTime": null,
-#                 "lastTransitionTime": "2022-05-18T15:25:38Z"
-#             }
-#         ],
-#         "containerStatuses": [
-#             {
-#                 "name": "data-feed-container",
-#                 "state": {
-#                     "waiting": {
-#                         "reason": "ContainerCreating"
-#                     }
-#                 },
-#                 "lastState": {},
-#                 "ready": false,
-#                 "restartCount": 0,
-#                 "image": "050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed:v1.0.3",
-#                 "imageID": "",
-#                 "started": false
-#             },
-#             {
-#                 "name": "redis",
-#                 "state": {
-#                     "waiting": {
-#                         "reason": "ContainerCreating"
-#                     }
-#                 },
-#                 "lastState": {},
-#                 "ready": false,
-#                 "restartCount": 0,
-#                 "image": "redis:alpine",
-#                 "imageID": "",
-#                 "started": false
-#             },
-#             {
-#                 "name": "redis-exporter",
-#                 "state": {
-#                     "waiting": {
-#                         "reason": "ContainerCreating"
-#                     }
-#                 },
-#                 "lastState": {},
-#                 "ready": false,
-#                 "restartCount": 0,
-#                 "image": "oliver006/redis_exporter:latest",
-#                 "imageID": "",
-#                 "started": false
-#             }
-#         ]
-#     }
-# }
-
 import datetime
-from ..utils import equal_dicts, filtered_dict
-from .pod_logged_event import PodObjectLoggedEvent, PodEventsLog
+from perf.utils import equal_dicts, filtered_dict
 
-
-class PodObjectRawEvent:
-    def __init__(self, raw_event):
-        status = raw_event['raw_object']['status']
-        status_filtered = {}
-        if 'phase' in status:
-            status_filtered['phase'] = status['phase']
-        if 'conditions' in status:
-            status_filtered['conditions'] = status['conditions']
-        if 'containerStatuses' in status:
-            status_filtered['containerStatuses'] = status['containerStatuses']
-
-        self.type = raw_event['type']
-        self.pod_name = raw_event['raw_object']['metadata']['name']
-        self.status = status_filtered
+from perf.kube_watcher.event.raw.object.pod_object_raw_event import PodObjectRawEvent
+from perf.kube_watcher.event.logged.object.pod_object_logged_event import PodObjectLoggedEvent
+from perf.kube_watcher.event.logged.pod_events_log import PodEventsLog
 
 
 class PodObjectEventsLog(PodEventsLog):
 
     def __init__(self, pod_event_queues, callbacks):
-        super().__init__(pod_event_queues, callbacks)
+        super(PodObjectEventsLog, self).__init__(pod_event_queues, callbacks)
         # v1 Pod object change event contains info about both pod and container specific events,
         # hence no separation per type event type, only per pod
         self.last_raw_event_per_pod = {}

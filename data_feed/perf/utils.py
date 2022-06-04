@@ -1,10 +1,6 @@
-from defines import *
+from defines import PROM_PORT_FORWARD, PROM_POD_NAME, PROM_NAMESPACE
 import subprocess
 import time
-import datetime
-import threading
-import ctypes
-import sys
 import json
 
 
