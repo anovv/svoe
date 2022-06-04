@@ -39,7 +39,7 @@ class NodeKubeEventsLog(NodeEventsLog):
         }
 
         # TODO NodeKubeLoggedEvent.NODE_EVENT, {'reason': 'SystemOOM', 'count': 1, 'message': 'System OOM encountered, victim process: svoe_data_feed_, pid: 160906'},
-        # TODO  NodeKubeLoggedEvent.NODE_EVENT, {'reason': 'OOMKilling', 'count': 1, 'message': 'Killed process 160111 (svoe_data_feed_) total-vm:842716kB, anon-rss:132948kB, file-rss:0kB, shmem-rss:0kB'}
+        # TODO NodeKubeLoggedEvent.NODE_EVENT, {'reason': 'OOMKilling', 'count': 1, 'message': 'Killed process 160111 (svoe_data_feed_) total-vm:842716kB, anon-rss:132948kB, file-rss:0kB, shmem-rss:0kB'}
 
         logged_event = NodeKubeLoggedEvent(
             NodeKubeLoggedEvent.NODE_EVENT, # TODO more types

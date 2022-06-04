@@ -106,7 +106,7 @@ class PodObjectEventsLog(PodEventsLog):
                         logged_event = PodObjectLoggedEvent(
                             logged_event_type,
                             pod_name, container_name=container_name,
-                            data=filtered_dict(container_status, filter_keys),
+                            data=filtered_dict(container_status, filter_keys + ['last_state']),
                             cluster_time=None, local_time=datetime.datetime.now(),
                             raw_event=raw_event
                         )
