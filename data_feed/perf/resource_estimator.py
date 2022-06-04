@@ -3,14 +3,15 @@ import time
 import datetime
 import concurrent.futures
 import kubernetes
-import kube_api
 import threading
+
+from perf.kube_api import KubeApi
 
 from perf.metrics import fetch_metrics
 from perf.utils import PromConnection, pod_name_from_ss, save_data
 from perf.defines import CLUSTER, DATA_FEED_CONTAINER, PARALLELISM
 
-from perf.kube_watcher import kube_watcher
+from perf.kube_watcher.kube_watcher import KubeWatcher, CHANNEL_DF_POD_KUBE_EVENTS, CHANNEL_NODE_KUBE_EVENTS, CHANNEL_DF_POD_OBJECT_EVENTS, CHANNEL_NODE_OBJECT_EVENTS
 from perf.kube_watcher.event.logged.kube_event.pod_kube_events_log import PodKubeLoggedEvent
 from perf.kube_watcher.event.logged.object.pod_object_events_log import PodObjectLoggedEvent
 from perf.kube_watcher.event.logged.pod_logged_event import PodLoggedEvent
@@ -74,8 +75,8 @@ class ResourceEstimator:
         kubernetes.config.load_kube_config(context=CLUSTER)
         core_api = kubernetes.client.CoreV1Api()
         apps_api = kubernetes.client.AppsV1Api()
-        self.kube_api = kube_api.KubeApi(core_api, apps_api)
-        self.kube_watcher = kube_watcher.KubeWatcher(core_api, [self.kube_watcher_callback])
+        self.kube_api = KubeApi(core_api, apps_api)
+        self.kube_watcher = KubeWatcher(core_api, [self.kube_watcher_callback])
         self.prom_connection = PromConnection()
 
     def estimate_resources(self, ss_name):
@@ -169,13 +170,13 @@ class ResourceEstimator:
             self.prom_connection.stop()
             self.prom_connection = None
         if self.kube_watcher:
-            self.kube_watcher.stop()
+            self.kube_watcher.stop([CHANNEL_NODE_OBJECT_EVENTS, CHANNEL_NODE_KUBE_EVENTS, CHANNEL_DF_POD_OBJECT_EVENTS, CHANNEL_DF_POD_KUBE_EVENTS])
             self.kube_watcher = None
 
-    # def kube_watcher_callback(self, event):
-    #     print(event)
-
     def kube_watcher_callback(self, event):
+        print(event)
+
+    def _kube_watcher_callback(self, event):
         pod_name = event.pod_name
         container_name = event.container_name
         if self.get_last_estimation_state(pod_name) != PodEstimationStateEvent.WAITING_FOR_POD_TO_BE_DELETED \
@@ -334,7 +335,7 @@ class ResourceEstimator:
     def run(self):
         print('Started estimator')
         self.prom_connection.start()
-        self.kube_watcher.start()
+        self.kube_watcher.start([CHANNEL_NODE_OBJECT_EVENTS, CHANNEL_NODE_KUBE_EVENTS, CHANNEL_DF_POD_OBJECT_EVENTS, CHANNEL_DF_POD_KUBE_EVENTS])
         ss_names = self.kube_api.load_ss_names()
         # ss_names = ['data-feed-binance-spot-6d1641b134-ss', 'data-feed-binance-spot-eb540d90be-ss', 'data-feed-bybit-perpetual-cca5766921-ss']
         print(f'Scheduled estimation for {len(ss_names)} pods')
@@ -350,16 +351,16 @@ class ResourceEstimator:
         self.cleanup()
 
 
-# re = ResourceEstimator()
+re = ResourceEstimator()
 #
 #
 # @atexit.register
 # def cleanup():
 #     re.cleanup()
 
-sc = Scheduler()
-ss_names = []
-sc.run(ss_names)
+# sc = Scheduler()
+# ss_names = []
+# sc.run(ss_names)
 # s.get_oom_score("minikube-1-m03", "kube-proxy-fjr9n", ["kube-proxy"])
 # s.set_oom_score_adj("minikube-1-m03", "kube-proxy-fjr9n", ["kube-proxy"], -1000)
 # s.get_oom_score("minikube-1-m03", "kube-proxy-fjr9n", ["kube-proxy"])
@@ -370,7 +371,7 @@ sc.run(ss_names)
 # ss_name = 'data-feed-bybit-perpetual-cca5766921-ss'
 # re.kube_watcher.running = True
 # re.kube_watcher.watch_pod_kube_events()
-# re.kube_watcher.start()
+re.kube_watcher.start([CHANNEL_NODE_KUBE_EVENTS])
 # re.kube_api.set_env(ss_name, 'TESTING')
 # re.kube_api.scale_up(ss_name)
 # time.sleep(900)
