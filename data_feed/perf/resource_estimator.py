@@ -371,7 +371,7 @@ re = ResourceEstimator()
 # ss_name = 'data-feed-bybit-perpetual-cca5766921-ss'
 # re.kube_watcher.running = True
 # re.kube_watcher.watch_pod_kube_events()
-re.kube_watcher.start([CHANNEL_NODE_KUBE_EVENTS])
+re.kube_watcher.start([CHANNEL_NODE_KUBE_EVENTS, CHANNEL_DF_POD_KUBE_EVENTS])
 # re.kube_api.set_env(ss_name, 'TESTING')
 # re.kube_api.scale_up(ss_name)
 # time.sleep(900)

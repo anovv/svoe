@@ -77,7 +77,6 @@ class KubeWatcher:
     def _watch_kube_events_blocking(self, watcher, field_selector, events_log):
         last_resource_version = None
         first_init = True
-        should_filter_stale = True
         while self.running:
             start_time = time.time()
             if first_init or last_resource_version is None:
@@ -88,9 +87,7 @@ class KubeWatcher:
                     watch=True,
                     timeout_seconds=10
                 )
-                first_init = False
             else:
-                should_filter_stale = False
                 stream = watcher.stream(
                     self.core_api.list_event_for_all_namespaces,
                     field_selector=field_selector,
@@ -106,15 +103,22 @@ class KubeWatcher:
                     break
                 raw_event = KubeRawEvent(message)
                 last_resource_version = raw_event.resource_version
-                if should_filter_stale and first_init:
+                if first_init:
                     # filter stale and synthetic events for first init
-                    delta = start_time - raw_event.object_last_timestamp.timestamp()
+                    delta = 0
+                    if raw_event.object_last_timestamp:
+                        delta = start_time - raw_event.object_last_timestamp.timestamp()
+                    elif raw_event.object_first_timestamp:
+                        delta = start_time - raw_event.object_first_timestamp.timestamp()
+                    elif raw_event.event_time:
+                        delta = start_time - raw_event.event_time.timestamp()
                     if delta > 5:
                         # if event is older 5s - drop
                         # TODO
-                        print('filtered')
+                        # print(f'filtered {message_count}')
                         continue
                 events_log.update_state(raw_event)
+            first_init = False
             if message_count == 0:
                 # in case generator has no events, sleep until next call to kube to avoid empty cpu cycles
                 time.sleep(0.5)
