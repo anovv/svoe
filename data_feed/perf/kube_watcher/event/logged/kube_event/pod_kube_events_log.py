@@ -41,10 +41,11 @@ class PodKubeEventsLog(PodEventsLog):
         # Unhealthy special case
         if reason == 'Unhealthy':
             if pod_name not in self.unhealthy_count:
-                self.unhealthy_count[pod_name] = {container_name: {'startup': 0, 'liveness': 0}}
+                self.unhealthy_count[pod_name] = {container_name: {'startup': 0, 'liveness': 0, 'readiness': 0}}
 
             unhealthy_startup_count = self.unhealthy_count[pod_name][container_name]['startup']
             unhealthy_liveness_count = self.unhealthy_count[pod_name][container_name]['liveness']
+            unhealthy_readiness_count = self.unhealthy_count[pod_name][container_name]['readiness']
 
             # validate consistency
             # if unhealthy_startup_count + unhealthy_liveness_count + 1 != int(count):
@@ -60,10 +61,12 @@ class PodKubeEventsLog(PodEventsLog):
                 reason = 'UnhealthyLiveness'
                 count = unhealthy_liveness_count + 1
                 self.unhealthy_count[pod_name][container_name]['liveness'] = count
+            elif message.startswith('Readiness'):
+                reason = 'UnhealthyReadiness'
+                count = unhealthy_readiness_count + 1
+                self.unhealthy_count[pod_name][container_name]['readiness'] = count
             else:
-                # TODO Readiness probe failed: Get "https://192.168.64.32:8443/readyz": net/http: TLS handshake time
-                # raise ValueError(f'Unknown Unhealthy message: {message}')
-                print(f'Unknown Unhealthy message: {message}')
+                raise ValueError(f'Unknown Unhealthy message: {message}')
 
         data = {
             'reason': reason,
@@ -86,3 +89,6 @@ class PodKubeEventsLog(PodEventsLog):
 
     def get_unhealthy_startup_count(self, pod_name, container_name):
         return self.unhealthy_count[pod_name][container_name]['startup']
+
+    def get_unhealthy_readiness_count(self, pod_name, container_name):
+        return self.unhealthy_count[pod_name][container_name]['readiness']
