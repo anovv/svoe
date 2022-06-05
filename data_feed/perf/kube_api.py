@@ -1,6 +1,7 @@
-from defines import *
-from utils import cm_name_from_ss
+from perf.defines import *
+from perf.utils import cm_name_from_ss, raw_pod_name_from_ss
 import yaml
+import json
 import kubernetes
 
 
@@ -15,6 +16,33 @@ class KubeApi:
         filtered_names = list(map(lambda spec: spec.metadata.name, filter(lambda spec: self.should_estimate(spec), specs.items)))
         print(f'Processing {len(filtered_names)}/{len(specs.items)} ss specs')
         return filtered_names
+
+    def pod_template_from_ss(self, ss_name):
+        resp = self.apps_api.list_namespaced_stateful_set(
+            namespace=DATA_FEED_NAMESPACE,
+            field_selector=f'metadata.name={ss_name}',
+            _preload_content=False,
+        )
+        # TODO edge check
+        return json.loads(resp.data)['items'][0]['spec']['template']
+
+    def create_raw_pod(self, ss_name):
+        template = self.pod_template_from_ss(ss_name)
+        definition = {
+            "apiVersion": "v1",
+            "kind": "Pod"
+        }
+        template['metadata']['name'] = raw_pod_name_from_ss(ss_name)
+        template['spec']['restartPolicy'] = 'Never'
+        # TODO env testing
+        # TODO podPriority
+        # TODO success check
+
+        definition.update(template)
+        self.core_api.create_namespaced_pod(body=definition, namespace=DATA_FEED_NAMESPACE)
+
+    def delete_pod(self, pod_name):
+        self.core_api.delete_namespaced_pod(name=pod_name, namespace=DATA_FEED_NAMESPACE)
 
     def set_env(self, ss_name, env):
         # https://stackoverflow.com/questions/71163299/how-to-update-env-variables-in-kubernetes-deployment-in-java

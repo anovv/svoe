@@ -46,6 +46,11 @@ def pod_name_from_ss(ss_name):
     return ss_name + '-0'
 
 
+def raw_pod_name_from_ss(ss_name):
+    # raw pod strips '-ss' suffix, adds '-raw'
+    return ss_name[:-3] + '-raw'
+
+
 def cm_name_from_ss(ss_name):
     return ss_name[:-2] + 'cm'
 

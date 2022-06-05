@@ -1,15 +1,15 @@
-# Script to run pods (without resource spec) and record health and resource consumptions (mem/cpu)
 import time
 import datetime
 import concurrent.futures
 import kubernetes
 import threading
+import json
 
 from perf.kube_api import KubeApi
 
 from perf.metrics import fetch_metrics
 from perf.utils import PromConnection, pod_name_from_ss, save_data
-from perf.defines import CLUSTER, DATA_FEED_CONTAINER, PARALLELISM
+from perf.defines import CLUSTER, DATA_FEED_CONTAINER, PARALLELISM, ESTIMATION_RUN_DURATION
 
 from perf.kube_watcher.kube_watcher import KubeWatcher, CHANNEL_DF_POD_KUBE_EVENTS, CHANNEL_NODE_KUBE_EVENTS, CHANNEL_DF_POD_OBJECT_EVENTS, CHANNEL_NODE_OBJECT_EVENTS
 from perf.kube_watcher.event.logged.kube_event.pod_kube_events_log import PodKubeLoggedEvent
@@ -371,8 +371,10 @@ re = ResourceEstimator()
 # ss_name = 'data-feed-bybit-perpetual-cca5766921-ss'
 # re.kube_watcher.running = True
 # re.kube_watcher.watch_pod_kube_events()
-re.kube_watcher.start([CHANNEL_NODE_KUBE_EVENTS, CHANNEL_DF_POD_KUBE_EVENTS])
+# re.kube_watcher.start([CHANNEL_NODE_KUBE_EVENTS, CHANNEL_NODE_OBJECT_EVENTS])
 # re.kube_api.set_env(ss_name, 'TESTING')
-# re.kube_api.scale_up(ss_name)
+# print(json.dumps(re.kube_api.pod_template_from_ss('data-feed-binance-spot-18257181b7-ss'), indent=4))
+# re.kube_api.create_raw_pod('data-feed-binance-spot-18257181b7-ss')
+re.kube_api.delete_pod('data-feed-binance-spot-18257181b7-raw')
 # time.sleep(900)
 # re.kube_watcher.stop()
