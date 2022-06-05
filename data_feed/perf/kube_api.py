@@ -34,11 +34,11 @@ class KubeApi:
         }
         template['metadata']['name'] = raw_pod_name_from_ss(ss_name)
         template['spec']['restartPolicy'] = 'Never'
-        # TODO env testing
+        # TODO set env testing
         # TODO podPriority
-        # TODO success check
 
         definition.update(template)
+        # TODO success check
         self.core_api.create_namespaced_pod(body=definition, namespace=DATA_FEED_NAMESPACE)
 
     def delete_pod(self, pod_name):
