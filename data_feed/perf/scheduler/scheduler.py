@@ -13,7 +13,8 @@ class Scheduler:
         kubernetes.config.load_kube_config(context=CLUSTER)
         core_api = kubernetes.client.CoreV1Api()
         apps_api = kubernetes.client.AppsV1Api()
-        self.kube_api = KubeApi(core_api, apps_api)
+        custom_objects_api = kubernetes.client.CustomObjectsApi()
+        self.kube_api = KubeApi(core_api, apps_api, custom_objects_api)
         self.kube_watcher = KubeWatcher(core_api, [self.callback])
 
     def callback(self, event):

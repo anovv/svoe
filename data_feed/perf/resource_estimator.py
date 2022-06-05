@@ -25,7 +25,8 @@ class ResourceEstimator:
         kubernetes.config.load_kube_config(context=CLUSTER)
         core_api = kubernetes.client.CoreV1Api()
         apps_api = kubernetes.client.AppsV1Api()
-        self.kube_api = KubeApi(core_api, apps_api)
+        custom_objects_api = kubernetes.client.CustomObjectsApi()
+        self.kube_api = KubeApi(core_api, apps_api, custom_objects_api)
         self.kube_watcher = KubeWatcher(core_api, [self.kube_watcher_callback])
         self.prom_connection = PromConnection()
 
@@ -200,6 +201,7 @@ class ResourceEstimator:
                     return
 
         # data-feed-container Unhealthy(Liveness or Startup):
+        # TODO unhealthy readiness
         if event.type == PodKubeLoggedEvent.CONTAINER_EVENT \
                 and container_name == DATA_FEED_CONTAINER \
                 and (event.data['reason'] == 'UnhealthyLiveness' or event.data['reason'] == 'UnhealthyStartup'):
@@ -221,6 +223,8 @@ class ResourceEstimator:
         # TODO 'reason': 'NodeNotReady'
         # TODO watch for PodKubeLoggedEvent.CONTAINER_EVENT, {'reason': 'Failed', 'count': 2, 'message': 'Error: ErrImagePull'}
         # TODO kube event Failed, unhealthy readiness, pod_status_phase == 'Failed', other indicators?, any other container backoff?
+        # TODO OOMs
+        # TODO node events
 
     def get_all_events(self, pod_name, container_name):
         events = []
@@ -275,6 +279,7 @@ re = ResourceEstimator()
 # re.kube_api.set_env(ss_name, 'TESTING')
 # print(json.dumps(re.kube_api.pod_template_from_ss('data-feed-binance-spot-18257181b7-ss'), indent=4))
 # re.kube_api.create_raw_pod('data-feed-binance-spot-18257181b7-ss')
-re.kube_api.delete_pod('data-feed-binance-spot-18257181b7-raw')
+# re.kube_api.delete_pod('data-feed-binance-spot-18257181b7-raw')
+print(re.kube_api.get_nodes_metrics())
 # time.sleep(900)
 # re.kube_watcher.stop()

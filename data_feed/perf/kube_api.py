@@ -6,10 +6,28 @@ import kubernetes
 
 
 class KubeApi:
-    def __init__(self, core_api, apps_api):
-        self.watcher = None
+    def __init__(self, core_api, apps_api, custom_objects_api):
         self.core_api = core_api
         self.apps_api = apps_api
+        self.custom_objects_api = custom_objects_api
+
+    def get_nodes_metrics(self):
+        # needs metrics-server running
+        # https://github.com/amelbakry/kube-node-utilization/blob/master/nodeutilization.py
+        # https://stackoverflow.com/questions/66453590/how-to-use-kubectl-top-node-in-kubernetes-python
+        k8s_nodes = self.custom_objects_api.list_cluster_custom_object("metrics.k8s.io", "v1beta1", "nodes")
+        res = {}
+        for item in k8s_nodes['items']:
+            node_name = item['metadata']['name']
+            cpu = item['usage']['cpu']
+            memory = item['usage']['memory']
+            res[node_name] = {
+                'cpu': cpu,
+                'memory': memory
+            }
+        # 'minikube-1-m02': {'cpu': '119561578n', 'memory': '1238864Ki'}
+        # TODO error check
+        return res
 
     def load_ss_names(self):
         specs = self.apps_api.list_namespaced_stateful_set(namespace=DATA_FEED_NAMESPACE)
