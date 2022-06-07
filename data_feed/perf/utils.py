@@ -2,6 +2,7 @@ from defines import PROM_PORT_FORWARD, PROM_POD_NAME, PROM_NAMESPACE
 import subprocess
 import time
 import json
+import re
 
 
 class PromConnection:
@@ -30,6 +31,37 @@ class PromConnection:
             print(f'Stopped forwarding Prometheus port')
 
 
+class ResourceConvert:
+    # https://github.com/amelbakry/kube-node-utilization/blob/master/nodeutilization.py
+    def cpu(value):
+        """
+        Return CPU in milicores if it is configured with value
+        """
+        if re.match(r"[0-9]{1,9}m", str(value)):
+            cpu = re.sub("[^0-9]", "", value)
+        elif re.match(r"[0-9]{1,4}$", str(value)):
+            cpu = int(value) * 1000
+        elif re.match(r"[0-9]{1,15}n", str(value)):
+            cpu = int(re.sub("[^0-9]", "", value)) // 1000000
+        elif re.match(r"[0-9]{1,15}u", str(value)):
+            cpu = int(re.sub("[^0-9]", "", value)) // 1000
+        return int(cpu)
+
+    def memory(value):
+        """
+        Return Memory in MB
+        """
+        if re.match(r"[0-9]{1,9}Mi?", str(value)):
+            mem = re.sub("[^0-9]", "", value)
+        elif re.match(r"[0-9]{1,9}Ki?", str(value)):
+            mem = re.sub("[^0-9]", "", value)
+            mem = int(mem) // 1024
+        elif re.match(r"[0-9]{1,9}Gi?", str(value)):
+            mem = re.sub("[^0-9]", "", value)
+            mem = int(mem) * 1024
+        return int(mem)
+
+
 def save_data(data):
     if data is not None:
         # TODO
@@ -56,10 +88,10 @@ def cm_name_from_ss(ss_name):
 
 
 def equal_dicts(d1, d2, compare_by_keys):
-        if not d1 or not d2:
-            return d1 == d2
-        return filtered_dict(d1, compare_by_keys) == \
-               filtered_dict(d2, compare_by_keys)
+    if not d1 or not d2:
+        return d1 == d2
+    return filtered_dict(d1, compare_by_keys) == \
+           filtered_dict(d2, compare_by_keys)
 
 
 def filtered_dict(d, filter_keys):

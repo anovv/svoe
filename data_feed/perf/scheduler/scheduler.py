@@ -48,8 +48,12 @@ class Scheduler:
         stdout, _ = process.communicate()
         print(stdout.decode("utf-8"))
 
+    def get_node(self):
+        return
+
+
     def run(self, ss_names):
-        self.kube_watcher.start()
+        # self.kube_watcher.start()
         for ss_name in ss_names:
             print(f'Scheduling {ss_name}...')
             # TODO set restartPolicy=Never

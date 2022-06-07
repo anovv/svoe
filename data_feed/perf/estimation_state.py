@@ -59,6 +59,7 @@ class EstimationState:
         self.estimation_state_events_per_pod = {}
         self.estimation_result_events_per_pod = {}
         self.wait_event_per_pod = {}
+        self.pods_per_node = {}
 
     def get_last_estimation_result(self, pod_name):
         if pod_name in self.estimation_result_events_per_pod:
@@ -109,3 +110,8 @@ class EstimationState:
         # TODO check if the previous event is awaited/reset
         self.wait_event_per_pod[pod_name] = threading.Event()
         return self.wait_event_per_pod[pod_name].wait(timeout=timeout)
+
+    # def get_last_scheduled_pod(self, node):
+    #     if node not in self.pods_per_node or len(self.pods_per_node[node]) == 0:
+    #         return None
+    #     return self.pods_per_node[node][-1]

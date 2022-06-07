@@ -148,6 +148,9 @@ class KubeWatcher:
                 raw_event = NodeObjectRawEvent(message)
                 events_log.update_state(raw_event)
 
+    def get_events_log(self, channel):
+        return self.channels[channel]['events_log']
+
     def start(self, channels):
         # https://github.com/kubernetes-client/python/issues/728
         # https://www.programcreek.com/python/example/111707/kubernetes.watch.Watch

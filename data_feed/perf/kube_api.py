@@ -1,5 +1,5 @@
 from perf.defines import *
-from perf.utils import cm_name_from_ss, raw_pod_name_from_ss
+from perf.utils import cm_name_from_ss, raw_pod_name_from_ss, ResourceConvert
 import yaml
 import json
 import kubernetes
@@ -11,7 +11,10 @@ class KubeApi:
         self.apps_api = apps_api
         self.custom_objects_api = custom_objects_api
 
-    def get_nodes_metrics(self):
+    def get_nodes(self):
+        return self.core_api.list_node()
+
+    def get_nodes_resource_usage(self):
         # needs metrics-server running
         # https://github.com/amelbakry/kube-node-utilization/blob/master/nodeutilization.py
         # https://stackoverflow.com/questions/66453590/how-to-use-kubectl-top-node-in-kubernetes-python
@@ -19,13 +22,10 @@ class KubeApi:
         res = {}
         for item in k8s_nodes['items']:
             node_name = item['metadata']['name']
-            cpu = item['usage']['cpu']
-            memory = item['usage']['memory']
             res[node_name] = {
-                'cpu': cpu,
-                'memory': memory
+                'cpu': ResourceConvert.cpu(item['usage']['cpu']),
+                'memory': ResourceConvert.memory(item['usage']['memory'])
             }
-        # 'minikube-1-m02': {'cpu': '119561578n', 'memory': '1238864Ki'}
         # TODO error check
         return res
 
