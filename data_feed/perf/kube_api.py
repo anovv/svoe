@@ -1,7 +1,7 @@
 import math
 
 from perf.defines import *
-from perf.utils import cm_name_from_ss, raw_pod_name_from_ss, ResourceConvert
+from perf.utils import cm_name_pod_name, ss_name_from_pod_name, pod_name_from_ss_name, ResourceConvert
 import yaml
 import json
 import kubernetes
@@ -33,13 +33,17 @@ class KubeApi:
         # TODO error check
         return res
 
-    def load_ss_names(self):
+    def load_pod_names_from_ss(self, subset):
         specs = self.apps_api.list_namespaced_stateful_set(namespace=DATA_FEED_NAMESPACE)
-        filtered_names = list(map(lambda spec: spec.metadata.name, filter(lambda spec: self.should_estimate(spec), specs.items)))
-        print(f'Processing {len(filtered_names)}/{len(specs.items)} ss specs')
-        return filtered_names
+        filtered_ss_names = list(map(lambda spec: spec.metadata.name, filter(lambda spec: self.should_estimate(spec), specs.items)))
+        if subset is not None and len(subset) > 0:
+            filtered_ss_names = list(map(lambda name: name in subset, filtered_ss_names))
+        pod_names = list(map(lambda name: pod_name_from_ss_name(name), filtered_ss_names))
+        print(f'Processing {len(filtered_ss_names)}/{len(specs.items)} ss specs')
+        return pod_names
 
-    def pod_template_from_ss(self, ss_name):
+    def pod_template_from_ss(self, pod_name):
+        ss_name = ss_name_from_pod_name(pod_name)
         resp = self.apps_api.list_namespaced_stateful_set(
             namespace=DATA_FEED_NAMESPACE,
             field_selector=f'metadata.name={ss_name}',
@@ -72,23 +76,38 @@ class KubeApi:
         self.priority_pool[priority] = name
         return name
 
-    def create_raw_pod(self, ss_name, node_name, pod_priority):
-        template = self.pod_template_from_ss(ss_name)
+    def create_raw_pod(self, pod_name, node_name, pod_priority):
         definition = {
             'apiVersion': 'v1',
             'kind': 'Pod'
         }
-        template['metadata']['name'] = raw_pod_name_from_ss(ss_name)
+
+        template = self.pod_template_from_ss(pod_name)
+        template['metadata']['name'] = pod_name
         template['spec']['restartPolicy'] = 'Never'
-        priority_class_name = self.get_or_create_priority_class(pod_priority)
-        template['spec']['priorityClassName'] = priority_class_name
-        # TODO set env testing
+        template['spec']['priorityClassName'] = self.get_or_create_priority_class(pod_priority)
+        template['spec']['nodeSelector'] = {
+            'kubernetes.io/hostname': node_name
+        }
+
+        # set env for DATA_FEED_CONTAINER
+        for container in template['spec']['containers']:
+            if container['name'] == DATA_FEED_CONTAINER:
+                env_vars = container['env']
+                has_env_var = False
+                for env_var in env_vars:
+                    if env_var['name'] == 'ENV':
+                        env_var['value'] = 'TEST'
+                        has_env_var = True
+                if not has_env_var:
+                    env_vars.append({'name': 'ENV', 'value': 'TEST'})
 
         definition.update(template)
         # TODO success check
         self.core_api.create_namespaced_pod(body=definition, namespace=DATA_FEED_NAMESPACE)
 
-    def delete_pod(self, pod_name):
+    def delete_raw_pod(self, ss_name):
+        pod_name = raw_pod_name_from_ss(ss_name)
         self.core_api.delete_namespaced_pod(name=pod_name, namespace=DATA_FEED_NAMESPACE)
 
     def set_env(self, ss_name, env):
@@ -107,8 +126,8 @@ class KubeApi:
                                                      body={'spec': {'replicas': 0}})
         print(f'Scaled down {ss_name}')
 
-    def get_payload(self, ss_name):
-        cm_name = cm_name_from_ss(ss_name)
+    def get_payload(self, pod_name):
+        cm_name = cm_name_pod_name(pod_name)
         cm = self.core_api.read_namespaced_config_map(cm_name, DATA_FEED_NAMESPACE)
         conf = yaml.load(cm.data[DATA_FEED_CM_CONFIG_NAME], Loader=yaml.SafeLoader)
         return conf['payload_config'], conf['payload_hash']

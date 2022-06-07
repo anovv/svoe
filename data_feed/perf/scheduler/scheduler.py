@@ -53,14 +53,13 @@ class Scheduler:
         return
 
 
-    def run(self, ss_names):
+    def run(self, pod_names):
         # self.kube_watcher.start()
-        for ss_name in ss_names:
-            print(f'Scheduling {ss_name}...')
+        for pod_names in pod_names:
+            print(f'Scheduling {pod_names}...')
             # TODO set restartPolicy=Never
             # TODO set pod priorities
-            self.kube_api.set_env(ss_name, 'TESTING')
-            self.kube_api.scale_up(ss_name)
+            # TODO use create_raw_pod
             time.sleep(30)
         time.sleep(3600)
 

@@ -32,14 +32,11 @@ class ResourceEstimator:
         self.kube_watcher = KubeWatcher(core_api, [self.kube_watcher_callback])
         self.prom_connection = PromConnection()
 
-    def estimate_resources(self, ss_name, node_name):
-        pod_name = pod_name_from_ss(ss_name)
-        payload_config, _ = self.kube_api.get_payload(ss_name)
+    def estimate_resources(self, pod_name, node_name):
+        payload_config, _ = self.kube_api.get_payload(pod_name)
         try:
-            # TODO use new creation api
-            # TODO update scheduling state per node
-            self.kube_api.set_env(ss_name, 'TESTING')
-            self.kube_api.scale_up(ss_name)
+            priority = 0 # TODO get
+            self.kube_api.create_raw_pod(pod_name, node_name, priority)
 
             for state, result, timeout in [
                 (PodEstimationPhaseEvent.WAITING_FOR_POD_TO_BE_SCHEDULED, PodEstimationResultEvent.POD_SCHEDULED,
@@ -95,17 +92,15 @@ class ResourceEstimator:
             self.state.add_estimation_result_event(pod_name, PodEstimationResultEvent.INTERRUPTED_INTERNAL_ERROR)
             raise e  # TODO should raise?
         finally:
-            self.finalize(ss_name)
+            self.finalize(pod_name)
 
         # TODO should return weather retry estimation run or not
         return result
 
-    def finalize(self, ss_name):
-        pod_name = pod_name_from_ss(ss_name)
+    def finalize(self, pod_name):
         self.state.set_estimation_phase(pod_name, PodEstimationPhaseEvent.WAITING_FOR_POD_TO_BE_DELETED)
         try:
-            self.kube_api.scale_down(ss_name)
-            self.kube_api.set_env(ss_name, '')
+            self.kube_api.delete_raw_pod(pod_name)
         except Exception as e:
             self.state.add_estimation_result_event(pod_name, PodEstimationResultEvent.INTERRUPTED_INTERNAL_ERROR)
             raise e  # TODO should raise?
@@ -262,9 +257,11 @@ class ResourceEstimator:
         self.kube_watcher.start([CHANNEL_NODE_OBJECT_EVENTS, CHANNEL_NODE_KUBE_EVENTS, CHANNEL_DF_POD_OBJECT_EVENTS,
                                  CHANNEL_DF_POD_KUBE_EVENTS])
 
+
         # TODO these should be a part of state?
-        # work_queue = ['data-feed-binance-spot-6d1641b134-ss', 'data-feed-binance-spot-eb540d90be-ss', 'data-feed-bybit-perpetual-cca5766921-ss']
-        work_queue = self.kube_api.load_ss_names()
+        # subset = ['data-feed-binance-spot-6d1641b134-ss', 'data-feed-binance-spot-eb540d90be-ss', 'data-feed-bybit-perpetual-cca5766921-ss']
+        subset = []
+        work_queue = self.kube_api.load_pod_names_from_ss(subset)
         work_queue_size = len(work_queue)
         done = []
         print(f'Scheduling estimation for {work_queue_size} pods...')
@@ -274,10 +271,10 @@ class ResourceEstimator:
             while len(done) != work_queue_size:
                 while (node := self.get_ready_node()) is None:
                     time.sleep(1)
-                ss_name = work_queue.pop()
-                futures[executor.submit(self.estimate_resources, ss_name=ss_name, node_name=node)] = ss_name
+                pod_name = work_queue.pop()
+                futures[executor.submit(self.estimate_resources, pod_name=pod_name, node_name=node)] = pod_name
 
-        # TODO ideally this is not needed and should be handeled as part of estimate_resources events
+        # TODO ideally this is not needed and should be handled as part of estimate_resources events
         # TODO should this be separated as "garbage collector" thread
         for future in concurrent.futures.as_completed(futures.keys()):
             res = future.result()
@@ -317,7 +314,6 @@ class ResourceEstimator:
             phase = self.state.get_last_estimation_phase(last_pod)
             if phase == PodEstimationPhaseEvent.WAITING_FOR_POD_TO_FINISH_ESTIMATION_RUN \
                     and time.time() - phase.local_time.timestamp() > 5:
-                # TODO return pod priority
                 return node
 
         return None
@@ -330,9 +326,7 @@ re = ResourceEstimator()
 # def cleanup():
 #     re.cleanup()
 
-# sc = Scheduler()
-# ss_names = []
-# sc.run(ss_names)
+# s = Scheduler()
 # s.get_oom_score("minikube-1-m03", "kube-proxy-fjr9n", ["kube-proxy"])
 # s.set_oom_score_adj("minikube-1-m03", "kube-proxy-fjr9n", ["kube-proxy"], -1000)
 # s.get_oom_score("minikube-1-m03", "kube-proxy-fjr9n", ["kube-proxy"])
@@ -344,8 +338,6 @@ re = ResourceEstimator()
 # re.kube_watcher.running = True
 # re.kube_watcher.watch_pod_kube_events()
 # re.kube_watcher.start([CHANNEL_NODE_KUBE_EVENTS, CHANNEL_NODE_OBJECT_EVENTS])
-# re.kube_api.set_env(ss_name, 'TESTING')
-# print(json.dumps(re.kube_api.pod_template_from_ss('data-feed-binance-spot-18257181b7-ss'), indent=4))
 # re.kube_api.create_raw_pod('data-feed-binance-spot-18257181b7-ss')
 # re.kube_api.delete_pod('data-feed-binance-spot-18257181b7-raw')
 # print(re.kube_api.get_nodes_resource_usage())

@@ -72,19 +72,18 @@ def save_data(data):
         print(f'Saved data to {path}')
 
 
-def pod_name_from_ss(ss_name):
-    # ss manages pods have the same name as ss plus index, we assume 1 pod per ss
-    # pod name example data-feed-binance-spot-6d1641b134-ss-0
-    return ss_name + '-0'
+def pod_name_from_ss_name(ss_name):
+    # ss example name data-feed-binance-spot-6d1641b134-ss
+    # pod name example data-feed-binance-spot-6d1641b134 (remove '-ss')
+    return ss_name[:-3]
 
 
-def raw_pod_name_from_ss(ss_name):
-    # raw pod strips '-ss' suffix, adds '-raw'
-    return ss_name[:-3] + '-raw'
+def ss_name_from_pod_name(pod_name):
+    pod_name + '-ss'
 
 
-def cm_name_from_ss(ss_name):
-    return ss_name[:-2] + 'cm'
+def cm_name_pod_name(pod_name):
+    return pod_name + '-cm'
 
 
 def equal_dicts(d1, d2, compare_by_keys):
