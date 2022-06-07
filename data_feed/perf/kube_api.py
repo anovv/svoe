@@ -1,3 +1,5 @@
+import math
+
 from perf.defines import *
 from perf.utils import cm_name_from_ss, raw_pod_name_from_ss, ResourceConvert
 import yaml
@@ -6,10 +8,12 @@ import kubernetes
 
 
 class KubeApi:
-    def __init__(self, core_api, apps_api, custom_objects_api):
+    def __init__(self, core_api, apps_api, custom_objects_api, scheduling_api):
         self.core_api = core_api
         self.apps_api = apps_api
         self.custom_objects_api = custom_objects_api
+        self.scheduling_api = scheduling_api
+        self.priority_pool = {}
 
     def get_nodes(self):
         return self.core_api.list_node()
@@ -44,16 +48,36 @@ class KubeApi:
         # TODO edge check
         return json.loads(resp.data)['items'][0]['spec']['template']
 
-    def create_raw_pod(self, ss_name):
+    def get_or_create_priority_class(self, priority):
+        if priority in self.priority_pool:
+            return self.priority_pool[priority]
+        name = 'data-feed-estimation-priority-class-' + priority if priority >= 0 else 'data-feed-estimation-priority-class-negative-' + math.fabs(priority)
+        definition = {
+            'apiVersion': 'scheduling.k8s.io/v1',
+            'kind': 'PriorityClass',
+            'metadata': {
+                'name': name
+            },
+            'value': priority,
+            'globalDefault': False,
+            'description': f'PriorityClass for data-feed pods for estimation runs. Value: {priority}'
+        }
+        # TODO check if exists
+        self.scheduling_api.create_priority_class(body=definition)
+        self.priority_pool[priority] = name
+        return name
+
+    def create_raw_pod(self, ss_name, node_name, pod_priority):
         template = self.pod_template_from_ss(ss_name)
         definition = {
-            "apiVersion": "v1",
-            "kind": "Pod"
+            'apiVersion': 'v1',
+            'kind': 'Pod'
         }
         template['metadata']['name'] = raw_pod_name_from_ss(ss_name)
         template['spec']['restartPolicy'] = 'Never'
+        priority_class_name = self.get_or_create_priority_class(pod_priority)
+        template['spec']['priorityClassName'] = priority_class_name
         # TODO set env testing
-        # TODO podPriority
 
         definition.update(template)
         # TODO success check

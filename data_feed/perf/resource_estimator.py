@@ -9,9 +9,10 @@ from perf.kube_api import KubeApi
 
 from perf.metrics import fetch_metrics
 from perf.utils import PromConnection, pod_name_from_ss, save_data, ResourceConvert
-from perf.defines import CLUSTER, DATA_FEED_CONTAINER, PARALLELISM, NODE_MEMORY_ALLOC_THRESHOLD
+from perf.defines import CLUSTER, DATA_FEED_CONTAINER, NODE_MEMORY_ALLOC_THRESHOLD
 
-from perf.kube_watcher.kube_watcher import KubeWatcher, CHANNEL_DF_POD_KUBE_EVENTS, CHANNEL_NODE_KUBE_EVENTS, CHANNEL_DF_POD_OBJECT_EVENTS, CHANNEL_NODE_OBJECT_EVENTS
+from perf.kube_watcher.kube_watcher import KubeWatcher, CHANNEL_DF_POD_KUBE_EVENTS, CHANNEL_NODE_KUBE_EVENTS, \
+    CHANNEL_DF_POD_OBJECT_EVENTS, CHANNEL_NODE_OBJECT_EVENTS
 from perf.kube_watcher.event.logged.kube_event.pod_kube_events_log import PodKubeLoggedEvent
 from perf.kube_watcher.event.logged.object.pod_object_events_log import PodObjectLoggedEvent
 from perf.estimation_state import EstimationState, PodEstimationPhaseEvent, PodEstimationResultEvent, Timeouts
@@ -26,7 +27,8 @@ class ResourceEstimator:
         core_api = kubernetes.client.CoreV1Api()
         apps_api = kubernetes.client.AppsV1Api()
         custom_objects_api = kubernetes.client.CustomObjectsApi()
-        self.kube_api = KubeApi(core_api, apps_api, custom_objects_api)
+        scheduling_api = kubernetes.client.SchedulingV1Api()
+        self.kube_api = KubeApi(core_api, apps_api, custom_objects_api, scheduling_api)
         self.kube_watcher = KubeWatcher(core_api, [self.kube_watcher_callback])
         self.prom_connection = PromConnection()
 
@@ -40,19 +42,25 @@ class ResourceEstimator:
             self.kube_api.scale_up(ss_name)
 
             for state, result, timeout in [
-                (PodEstimationPhaseEvent.WAITING_FOR_POD_TO_BE_SCHEDULED, PodEstimationResultEvent.POD_SCHEDULED, Timeouts.POD_SCHEDULED_TIMEOUT),
-                (PodEstimationPhaseEvent.WAITING_FOR_DF_CONTAINER_TO_PULL_IMAGE, PodEstimationResultEvent.DF_CONTAINER_IMAGE_PULLED, Timeouts.DF_CONTAINER_PULL_IMAGE_TIMEOUT),
-                (PodEstimationPhaseEvent.WAITING_FOR_POD_TO_START_ESTIMATION_RUN, PodEstimationResultEvent.POD_STARTED_ESTIMATION_RUN, Timeouts.POD_START_ESTIMATION_RUN_TIMEOUT),
-                (PodEstimationPhaseEvent.WAITING_FOR_POD_TO_FINISH_ESTIMATION_RUN, PodEstimationResultEvent.POD_FINISHED_ESTIMATION_RUN, Timeouts.POD_ESTIMATION_RUN_DURATION),
+                (PodEstimationPhaseEvent.WAITING_FOR_POD_TO_BE_SCHEDULED, PodEstimationResultEvent.POD_SCHEDULED,
+                 Timeouts.POD_SCHEDULED_TIMEOUT),
+                (PodEstimationPhaseEvent.WAITING_FOR_DF_CONTAINER_TO_PULL_IMAGE,
+                 PodEstimationResultEvent.DF_CONTAINER_IMAGE_PULLED, Timeouts.DF_CONTAINER_PULL_IMAGE_TIMEOUT),
+                (PodEstimationPhaseEvent.WAITING_FOR_POD_TO_START_ESTIMATION_RUN,
+                 PodEstimationResultEvent.POD_STARTED_ESTIMATION_RUN, Timeouts.POD_START_ESTIMATION_RUN_TIMEOUT),
+                (PodEstimationPhaseEvent.WAITING_FOR_POD_TO_FINISH_ESTIMATION_RUN,
+                 PodEstimationResultEvent.POD_FINISHED_ESTIMATION_RUN, Timeouts.POD_ESTIMATION_RUN_DURATION),
             ]:
-                self.state.set_estimation_state(pod_name, state)
-                timed_out = not self.state.wait_event(pod_name, timeout) # blocks until callback triggers specific event
+                self.state.set_estimation_phase(pod_name, state)
+                timed_out = not self.state.wait_event(pod_name,
+                                                      timeout)  # blocks until callback triggers specific event
 
                 # interrupts
                 if self.state.get_last_estimation_result(pod_name) in PodEstimationResultEvent.get_interrupts():
                     break
 
                 if timed_out and state != PodEstimationPhaseEvent.WAITING_FOR_POD_TO_FINISH_ESTIMATION_RUN:
+                    # WAITING_FOR_POD_TO_FINISH_ESTIMATION_RUN timeout special case - this timeout is success
                     result = PodEstimationResultEvent.INTERRUPTED_TIMEOUT
                     self.state.add_estimation_result_event(pod_name, result)
                     break
@@ -85,7 +93,7 @@ class ResourceEstimator:
 
         except Exception as e:
             self.state.add_estimation_result_event(pod_name, PodEstimationResultEvent.INTERRUPTED_INTERNAL_ERROR)
-            raise e # TODO should raise?
+            raise e  # TODO should raise?
         finally:
             self.finalize(ss_name)
 
@@ -94,20 +102,19 @@ class ResourceEstimator:
 
     def finalize(self, ss_name):
         pod_name = pod_name_from_ss(ss_name)
-        self.state.set_estimation_state(pod_name, PodEstimationPhaseEvent.WAITING_FOR_POD_TO_BE_DELETED)
+        self.state.set_estimation_phase(pod_name, PodEstimationPhaseEvent.WAITING_FOR_POD_TO_BE_DELETED)
         try:
             self.kube_api.scale_down(ss_name)
             self.kube_api.set_env(ss_name, '')
         except Exception as e:
             self.state.add_estimation_result_event(pod_name, PodEstimationResultEvent.INTERRUPTED_INTERNAL_ERROR)
-            raise e # TODO should raise?
+            raise e  # TODO should raise?
 
         timed_out = not self.state.wait_event(pod_name, Timeouts.POD_DELETED_TIMEOUT)
         if timed_out:
             self.state.add_estimation_result_event(pod_name, PodEstimationResultEvent.INTERRUPTED_TIMEOUT)
         else:
             self.state.add_estimation_result_event(pod_name, PodEstimationResultEvent.POD_DELETED)
-
 
         # TODO clean scheduling state
 
@@ -127,7 +134,8 @@ class ResourceEstimator:
             self.prom_connection.stop()
             self.prom_connection = None
         if self.kube_watcher:
-            self.kube_watcher.stop([CHANNEL_NODE_OBJECT_EVENTS, CHANNEL_NODE_KUBE_EVENTS, CHANNEL_DF_POD_OBJECT_EVENTS, CHANNEL_DF_POD_KUBE_EVENTS])
+            self.kube_watcher.stop([CHANNEL_NODE_OBJECT_EVENTS, CHANNEL_NODE_KUBE_EVENTS, CHANNEL_DF_POD_OBJECT_EVENTS,
+                                    CHANNEL_DF_POD_KUBE_EVENTS])
             self.kube_watcher = None
 
     def kube_watcher_callback(self, event):
@@ -136,21 +144,21 @@ class ResourceEstimator:
     def _kube_watcher_callback(self, event):
         pod_name = event.pod_name
         container_name = event.container_name
-        if self.state.get_last_estimation_state(pod_name) != PodEstimationPhaseEvent.WAITING_FOR_POD_TO_BE_DELETED \
+        if self.state.get_last_estimation_phase(pod_name) != PodEstimationPhaseEvent.WAITING_FOR_POD_TO_BE_DELETED \
                 and self.state.get_last_estimation_result(pod_name) \
-                    in [*PodEstimationResultEvent.get_interrupts(), PodEstimationResultEvent.POD_DELETED]:
-
+                in [*PodEstimationResultEvent.get_interrupts(), PodEstimationResultEvent.POD_DELETED]:
             # If interrupted we skip everything except pod deletion event
             print(f'skipped {event.data}')
             return
 
-        if self.state.get_last_estimation_state(pod_name) == PodEstimationPhaseEvent.WAITING_FOR_POD_TO_BE_SCHEDULED \
+        if self.state.get_last_estimation_phase(pod_name) == PodEstimationPhaseEvent.WAITING_FOR_POD_TO_BE_SCHEDULED \
                 and event.type == PodKubeLoggedEvent.POD_EVENT \
                 and event.data['reason'] == 'Scheduled':
             self.state.wake_event(pod_name)
             return
 
-        if self.state.get_last_estimation_state(pod_name) == PodEstimationPhaseEvent.WAITING_FOR_DF_CONTAINER_TO_PULL_IMAGE \
+        if self.state.get_last_estimation_phase(
+                pod_name) == PodEstimationPhaseEvent.WAITING_FOR_DF_CONTAINER_TO_PULL_IMAGE \
                 and event.type == PodKubeLoggedEvent.CONTAINER_EVENT \
                 and container_name == DATA_FEED_CONTAINER \
                 and event.data['reason'] == 'Pulled':
@@ -158,7 +166,8 @@ class ResourceEstimator:
             return
 
         # TODO wait for containers to started/ready==True?
-        if self.state.get_last_estimation_state(pod_name) == PodEstimationPhaseEvent.WAITING_FOR_POD_TO_START_ESTIMATION_RUN \
+        if self.state.get_last_estimation_phase(
+                pod_name) == PodEstimationPhaseEvent.WAITING_FOR_POD_TO_START_ESTIMATION_RUN \
                 and event.type == PodObjectLoggedEvent.CONTAINER_STATE_CHANGED:
 
             all_containers_running = False
@@ -172,7 +181,7 @@ class ResourceEstimator:
                 self.state.wake_event(pod_name)
                 return
 
-        if self.state.get_last_estimation_state(pod_name) == PodEstimationPhaseEvent.WAITING_FOR_POD_TO_BE_DELETED \
+        if self.state.get_last_estimation_phase(pod_name) == PodEstimationPhaseEvent.WAITING_FOR_POD_TO_BE_DELETED \
                 and event.type == PodObjectLoggedEvent.POD_DELETED:
             self.state.wake_event(pod_name)
             return
@@ -182,28 +191,29 @@ class ResourceEstimator:
         if event.type == PodKubeLoggedEvent.CONTAINER_EVENT \
                 and container_name == DATA_FEED_CONTAINER \
                 and event.data['reason'] == 'BackOff':
-
             self.state.add_estimation_result_event(pod_name, PodEstimationResultEvent.INTERRUPTED_DF_CONTAINER_BACK_OFF)
             self.state.wake_event(pod_name)
             return
 
         # Unexpected pod deletion
         if event.type == PodObjectLoggedEvent.POD_DELETED \
-                and self.state.get_last_estimation_state(pod_name) != PodEstimationPhaseEvent.WAITING_FOR_POD_TO_BE_DELETED:
-
+                and self.state.get_last_estimation_phase(
+            pod_name) != PodEstimationPhaseEvent.WAITING_FOR_POD_TO_BE_DELETED:
             # TODO clean estimation/scheduling state here
-            self.state.add_estimation_result_event(pod_name, PodEstimationResultEvent.INTERRUPTED_UNEXPECTED_POD_DELETION)
+            self.state.add_estimation_result_event(pod_name,
+                                                   PodEstimationResultEvent.INTERRUPTED_UNEXPECTED_POD_DELETION)
             self.state.wake_event(pod_name)
             return
 
         # data-feed-container Restarts
         if event.type == PodObjectLoggedEvent.CONTAINER_RESTART_COUNT_CHANGED \
-                and container_name == DATA_FEED_CONTAINER\
+                and container_name == DATA_FEED_CONTAINER \
                 and 'containerStatuses' in event.data:
 
             for cs in event.data['containerStatuses']:
                 if cs['name'] == DATA_FEED_CONTAINER and int(cs['restartCount']) >= 3:
-                    self.state.add_estimation_result_event(pod_name, PodEstimationResultEvent.INTERRUPTED_DF_CONTAINER_TOO_MANY_RESTARTS)
+                    self.state.add_estimation_result_event(pod_name,
+                                                           PodEstimationResultEvent.INTERRUPTED_DF_CONTAINER_TOO_MANY_RESTARTS)
                     self.state.wake_event(pod_name)
                     return
 
@@ -213,17 +223,19 @@ class ResourceEstimator:
                 and container_name == DATA_FEED_CONTAINER \
                 and (event.data['reason'] == 'UnhealthyLiveness' or event.data['reason'] == 'UnhealthyStartup'):
 
-            if self.kube_watcher.get_events_log(CHANNEL_DF_POD_KUBE_EVENTS).get_unhealthy_liveness_count(pod_name, container_name) >= 5:
+            if self.kube_watcher.get_events_log(CHANNEL_DF_POD_KUBE_EVENTS).get_unhealthy_liveness_count(pod_name,
+                                                                                                         container_name) >= 5:
                 # TODO check number in a timeframe instead of total
                 self.state.add_estimation_result_event(pod_name,
-                                                 PodEstimationResultEvent.INTERRUPTED_DF_CONTAINER_HEALTH_LIVENESS)
+                                                       PodEstimationResultEvent.INTERRUPTED_DF_CONTAINER_HEALTH_LIVENESS)
                 self.state.wake_event(pod_name)
                 return
 
-            if self.kube_watcher.get_events_log(CHANNEL_DF_POD_KUBE_EVENTS).get_unhealthy_startup_count(pod_name, container_name) >= 10:
+            if self.kube_watcher.get_events_log(CHANNEL_DF_POD_KUBE_EVENTS).get_unhealthy_startup_count(pod_name,
+                                                                                                        container_name) >= 10:
                 # TODO check number in a timeframe instead of total
                 self.state.add_estimation_result_event(pod_name,
-                                                 PodEstimationResultEvent.INTERRUPTED_DF_CONTAINER_HEALTH_STARTUP)
+                                                       PodEstimationResultEvent.INTERRUPTED_DF_CONTAINER_HEALTH_STARTUP)
                 self.state.wake_event(pod_name)
                 return
 
@@ -236,17 +248,19 @@ class ResourceEstimator:
     def get_all_events(self, pod_name, container_name):
         events = []
         events.extend(self.kube_watcher.event_queues_per_pod[pod_name].queue)
-        events.extend(self.state.estimation_state_events_per_pod[pod_name])
+        events.extend(self.state.estimation_phase_events_per_pod[pod_name])
         events.extend(self.state.estimation_result_events_per_pod[pod_name])
         events.sort(key=lambda event: event.local_time)
-        events = list(filter(lambda event: event.container_name is None or event.container_name == container_name, events))
+        events = list(
+            filter(lambda event: event.container_name is None or event.container_name == container_name, events))
         events = list(map(lambda event: str(event), events))
         return events
 
     def run(self):
         print('Started estimator')
         self.prom_connection.start()
-        self.kube_watcher.start([CHANNEL_NODE_OBJECT_EVENTS, CHANNEL_NODE_KUBE_EVENTS, CHANNEL_DF_POD_OBJECT_EVENTS, CHANNEL_DF_POD_KUBE_EVENTS])
+        self.kube_watcher.start([CHANNEL_NODE_OBJECT_EVENTS, CHANNEL_NODE_KUBE_EVENTS, CHANNEL_DF_POD_OBJECT_EVENTS,
+                                 CHANNEL_DF_POD_KUBE_EVENTS])
 
         # TODO these should be a part of state?
         # work_queue = ['data-feed-binance-spot-6d1641b134-ss', 'data-feed-binance-spot-eb540d90be-ss', 'data-feed-bybit-perpetual-cca5766921-ss']
@@ -255,7 +269,7 @@ class ResourceEstimator:
         done = []
         print(f'Scheduling estimation for {work_queue_size} pods...')
         # TODO tqdm progress
-        with concurrent.futures.ThreadPoolExecutor(max_workers=PARALLELISM) as executor:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=256) as executor:
             futures = {}
             while len(done) != work_queue_size:
                 while (node := self.get_ready_node()) is None:
@@ -263,7 +277,8 @@ class ResourceEstimator:
                 ss_name = work_queue.pop()
                 futures[executor.submit(self.estimate_resources, ss_name=ss_name, node_name=node)] = ss_name
 
-        # TODO this should be running in separate thread
+        # TODO ideally this is not needed and should be handeled as part of estimate_resources events
+        # TODO should this be separated as "garbage collector" thread
         for future in concurrent.futures.as_completed(futures.keys()):
             res = future.result()
             print(f'Finished estimating resources for {futures[future]}: {res}')
@@ -286,7 +301,7 @@ class ResourceEstimator:
             alloc_mem = ResourceConvert.cpu(allocatable['memory'])
 
             # TODO add cpu_alloc threshold
-            if (int(nodes_resource_usage['memory'])/int(alloc_mem)) > NODE_MEMORY_ALLOC_THRESHOLD:
+            if (int(nodes_resource_usage['memory']) / int(alloc_mem)) > NODE_MEMORY_ALLOC_THRESHOLD:
                 continue
 
             # TODO figure out heuristics to dynamically derive BULK_SCHEDULE_SIZE
@@ -296,11 +311,12 @@ class ResourceEstimator:
                 return node
 
             last_pod = self.state.pods_per_node[node][-1]
-            # only valid case is if last pod is in active estimation phase, all other phases are temporary before removal
+            # only valid case is if last pod is in active estimation phase,
+            # all other phases are temporary before removal
             # also wait 5s for last pod to run successfully before scheduling more
-            phase = self.state.get_last_estimation_state(last_pod)
+            phase = self.state.get_last_estimation_phase(last_pod)
             if phase == PodEstimationPhaseEvent.WAITING_FOR_POD_TO_FINISH_ESTIMATION_RUN \
-                and time.time() - phase.local_time.timestamp() > 5:
+                    and time.time() - phase.local_time.timestamp() > 5:
                 # TODO return pod priority
                 return node
 

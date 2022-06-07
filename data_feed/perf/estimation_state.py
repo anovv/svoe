@@ -56,10 +56,11 @@ class Timeouts:
 
 class EstimationState:
     def __init__(self):
-        self.estimation_state_events_per_pod = {}
+        self.estimation_phase_events_per_pod = {}
         self.estimation_result_events_per_pod = {}
         self.wait_event_per_pod = {}
         self.pods_per_node = {}
+        self.pods_priorities = {}
 
     def get_last_estimation_result(self, pod_name):
         if pod_name in self.estimation_result_events_per_pod:
@@ -81,13 +82,13 @@ class EstimationState:
             self.estimation_result_events_per_pod[pod_name] = [event]
         print(event)
 
-    def get_last_estimation_state(self, pod_name):
-        if pod_name in self.estimation_state_events_per_pod:
-            event = self.estimation_state_events_per_pod[pod_name][-1]
+    def get_last_estimation_phase(self, pod_name):
+        if pod_name in self.estimation_phase_events_per_pod:
+            event = self.estimation_phase_events_per_pod[pod_name][-1]
             return event.type
         return None
 
-    def set_estimation_state(self, pod_name, estimation_state):
+    def set_estimation_phase(self, pod_name, estimation_state):
         event = PodEstimationPhaseEvent(
             estimation_state,
             pod_name, container_name=None,
@@ -95,10 +96,10 @@ class EstimationState:
             cluster_time=None, local_time=datetime.datetime.now(),
             raw_event=None
         )
-        if pod_name in self.estimation_state_events_per_pod:
-            self.estimation_state_events_per_pod[pod_name].append(event)
+        if pod_name in self.estimation_phase_events_per_pod:
+            self.estimation_phase_events_per_pod[pod_name].append(event)
         else:
-            self.estimation_state_events_per_pod[pod_name] = [event]
+            self.estimation_phase_events_per_pod[pod_name] = [event]
         print(event)
 
     def wake_event(self, pod_name):

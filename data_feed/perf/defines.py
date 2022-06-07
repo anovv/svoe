@@ -5,8 +5,6 @@ DATA_FEED_NAMESPACE = 'data-feed'
 DATA_FEED_CONTAINER = 'data-feed-container'
 DATA_FEED_CM_CONFIG_NAME = 'data-feed-config.yaml'
 REDIS_CONTAINER = 'redis'
-# TODO dynamic parallelism based on heuristics
-PARALLELISM = 2 # number of simultaneously running pods
 NODE_MEMORY_ALLOC_THRESHOLD = 0.75 # do not schedule pods onto node if memory usage is above this
 PROM_NAMESPACE = 'monitoring'
 PROM_POD_NAME = 'prometheus-kube-prometheus-stack-prometheus-0'
