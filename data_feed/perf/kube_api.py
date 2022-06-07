@@ -51,7 +51,7 @@ class KubeApi:
     def get_or_create_priority_class(self, priority):
         if priority in self.priority_pool:
             return self.priority_pool[priority]
-        name = 'data-feed-estimation-priority-class-' + priority if priority >= 0 else 'data-feed-estimation-priority-class-negative-' + math.fabs(priority)
+        name = f'data-feed-estimation-priority-class-{priority}' if priority >= 0 else f'data-feed-estimation-priority-class-negative-{int(math.fabs(priority))}'
         definition = {
             'apiVersion': 'scheduling.k8s.io/v1',
             'kind': 'PriorityClass',
@@ -62,8 +62,13 @@ class KubeApi:
             'globalDefault': False,
             'description': f'PriorityClass for data-feed pods for estimation runs. Value: {priority}'
         }
-        # TODO check if exists
-        self.scheduling_api.create_priority_class(body=definition)
+        try:
+            self.scheduling_api.create_priority_class(body=definition)
+        except kubernetes.client.exceptions.ApiException as e:
+            if json.loads(e.body)['reason'] == 'AlreadyExists':
+                self.priority_pool[priority] = name
+            else:
+                raise e
         self.priority_pool[priority] = name
         return name
 
