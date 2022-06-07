@@ -86,9 +86,12 @@ class KubeApi:
         template['metadata']['name'] = pod_name
         template['spec']['restartPolicy'] = 'Never'
         template['spec']['priorityClassName'] = self.get_or_create_priority_class(pod_priority)
-        template['spec']['nodeSelector'] = {
-            'kubernetes.io/hostname': node_name
-        }
+
+        template['spec']['affinity']['nodeAffinity']['requiredDuringSchedulingIgnoredDuringExecution']['nodeSelectorTerms'][0].append({
+            'key': 'kubernetes.io/hostname',
+            'operator': 'In',
+            'values': [node_name]
+        })
 
         # set env for DATA_FEED_CONTAINER
         for container in template['spec']['containers']:
@@ -102,12 +105,18 @@ class KubeApi:
                 if not has_env_var:
                     env_vars.append({'name': 'ENV', 'value': 'TEST'})
 
+        template['spec']['tolerations'].append({
+            'key': 'svoe-role',
+            'value': 'resource-estimator',
+            'operator': 'Equal',
+            'effect': 'NoSchedule'
+        })
+
         definition.update(template)
         # TODO success check
         self.core_api.create_namespaced_pod(body=definition, namespace=DATA_FEED_NAMESPACE)
 
-    def delete_raw_pod(self, ss_name):
-        pod_name = raw_pod_name_from_ss(ss_name)
+    def delete_raw_pod(self, pod_name):
         self.core_api.delete_namespaced_pod(name=pod_name, namespace=DATA_FEED_NAMESPACE)
 
     def set_env(self, ss_name, env):

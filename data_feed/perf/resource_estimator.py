@@ -8,8 +8,8 @@ import json
 from perf.kube_api import KubeApi
 
 from perf.metrics import fetch_metrics
-from perf.utils import PromConnection, pod_name_from_ss, save_data, ResourceConvert
-from perf.defines import CLUSTER, DATA_FEED_CONTAINER, NODE_MEMORY_ALLOC_THRESHOLD
+from perf.utils import PromConnection, save_data, ResourceConvert
+from perf.defines import CLUSTER, DATA_FEED_CONTAINER, NODE_MEMORY_ALLOC_THRESHOLD, NODE_RESCHEDULE_PERIOD
 
 from perf.kube_watcher.kube_watcher import KubeWatcher, CHANNEL_DF_POD_KUBE_EVENTS, CHANNEL_NODE_KUBE_EVENTS, \
     CHANNEL_DF_POD_OBJECT_EVENTS, CHANNEL_NODE_OBJECT_EVENTS
@@ -35,7 +35,8 @@ class ResourceEstimator:
     def estimate_resources(self, pod_name, node_name):
         payload_config, _ = self.kube_api.get_payload(pod_name)
         try:
-            priority = 0 # TODO get
+            priority = self.state.get_schedulable_pod_priority(node_name)
+            self.state.add_pod_to_schedule_state(pod_name, node_name, priority)
             self.kube_api.create_raw_pod(pod_name, node_name, priority)
 
             for state, result, timeout in [
@@ -94,7 +95,7 @@ class ResourceEstimator:
         finally:
             self.finalize(pod_name)
 
-        # TODO should return weather retry estimation run or not
+        # TODO should return whether retry estimation run or not
         return result
 
     def finalize(self, pod_name):
@@ -110,8 +111,8 @@ class ResourceEstimator:
             self.state.add_estimation_result_event(pod_name, PodEstimationResultEvent.INTERRUPTED_TIMEOUT)
         else:
             self.state.add_estimation_result_event(pod_name, PodEstimationResultEvent.POD_DELETED)
-
-        # TODO clean scheduling state
+            # clean scheduling state
+            self.state.remove_pod_from_schedule_state(pod_name)
 
         if pod_name not in self.data:
             self.data[pod_name] = {}
@@ -269,10 +270,10 @@ class ResourceEstimator:
         with concurrent.futures.ThreadPoolExecutor(max_workers=256) as executor:
             futures = {}
             while len(done) != work_queue_size:
-                while (node := self.get_ready_node()) is None:
+                while (node_name := self.get_ready_node_name()) is None:
                     time.sleep(1)
                 pod_name = work_queue.pop()
-                futures[executor.submit(self.estimate_resources, pod_name=pod_name, node_name=node)] = pod_name
+                futures[executor.submit(self.estimate_resources, pod_name=pod_name, node_name=node_name)] = pod_name
 
         # TODO ideally this is not needed and should be handled as part of estimate_resources events
         # TODO should this be separated as "garbage collector" thread
@@ -282,17 +283,27 @@ class ResourceEstimator:
 
         self.cleanup()
 
-    def get_ready_node(self):
+    def get_ready_node_name(self):
         nodes = self.kube_api.get_nodes()
         nodes_resource_usage = self.kube_api.get_nodes_resource_usage()
         for node in nodes['items']:
-            conditions = node.conditions
+            has_resource_estimator_taint = False
+            if node.spec.taints:
+                for taint in node.spec.taints:
+                    if taint.to_dict()['key'] == 'svoe-role' and taint.to_dict()['value'] == 'resource-estimator':
+                        has_resource_estimator_taint = True
+                        break
+            if not has_resource_estimator_taint:
+                continue
+
             is_ready = False
-            for condition in conditions:
+            for condition in node.conditions:
                 if condition.type == 'Ready' and condition.status == 'True':
                     is_ready = True
+                    break
             if not is_ready:
                 continue
+
             allocatable = node.allocatable
             alloc_cpu = ResourceConvert.cpu(allocatable['cpu'])
             alloc_mem = ResourceConvert.cpu(allocatable['memory'])
@@ -303,18 +314,18 @@ class ResourceEstimator:
 
             # TODO figure out heuristics to dynamically derive BULK_SCHEDULE_SIZE
             BULK_SCHEDULE_SIZE = 2
-            if node not in self.state.pods_per_node or len(self.state.pods_per_node) <= BULK_SCHEDULE_SIZE:
-                # TODO return pod priority
-                return node
+            node_name = node.metadata.name
+            if node_name not in self.state.pods_per_node or len(self.state.pods_per_node) <= BULK_SCHEDULE_SIZE:
+                return node_name
 
-            last_pod = self.state.pods_per_node[node][-1]
+            last_pod = self.state.get_last_scheduled_pod(node_name)
             # only valid case is if last pod is in active estimation phase,
             # all other phases are temporary before removal
-            # also wait 5s for last pod to run successfully before scheduling more
+            # also wait NODE_RESCHEDULE_PERIOD s for last pod to run successfully before scheduling more
             phase = self.state.get_last_estimation_phase(last_pod)
             if phase == PodEstimationPhaseEvent.WAITING_FOR_POD_TO_FINISH_ESTIMATION_RUN \
-                    and time.time() - phase.local_time.timestamp() > 5:
-                return node
+                    and time.time() - phase.local_time.timestamp() > NODE_RESCHEDULE_PERIOD:
+                return node_name
 
         return None
 
