@@ -8,10 +8,12 @@ minikube start --nodes 3 --extra-config=kubelet.housekeeping-interval=10s -p min
 # label nodes
 kubectl label nodes minikube-1-m03 workload-type=data-feed
 kubectl label nodes minikube-1-m03 node-type=spot
+kubectl label nodes minikube-1-m03 svoe-role=resource-estimator
 
 # taints
 kubectl taint nodes minikube-1-m03 node-type=spot:NoSchedule
 kubectl taint nodes minikube-1-m03 workload-type=data-feed:NoSchedule
+kubectl taint nodes minikube-1-m03 svoe-role=resource-estimator:NoSchedule
 
 # patch kube-proxy to be QoS Guaranteed
 kubectl patch daemonset kube-proxy -n kube-system -p '{"spec":{"template":{"spec":{"containers":[{"resources":{"limits":{"memory":"50Mi", "cpu": "40m"}, "requests":{"memory":"50Mi", "cpu": "40m"}},"name":"kube-proxy"}]}}}}'
