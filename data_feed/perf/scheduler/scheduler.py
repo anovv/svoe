@@ -22,7 +22,7 @@ class Scheduler:
         init_work_queue_size = len(self.scheduling_state.pods_work_queue)
         print(f'Scheduling estimation for {init_work_queue_size} pods...')
         # TODO tqdm progress
-        with concurrent.futures.ThreadPoolExecutor(max_workers=256) as executor:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=1024) as executor:
             futures = {}
             while len(self.scheduling_state.pods_done) != init_work_queue_size:
                 while (node_name := self.get_ready_node_name()) is None:
@@ -64,6 +64,7 @@ class Scheduler:
         nodes = self.kube_api.get_nodes()
         nodes_resource_usage = self.kube_api.get_nodes_resource_usage()
         for node in nodes.items:
+            node_name = node.metadata.name
             has_resource_estimator_taint = False
             if node.spec.taints:
                 for taint in node.spec.taints:
@@ -83,15 +84,14 @@ class Scheduler:
 
             allocatable = node.status.allocatable
             alloc_cpu = ResourceConvert.cpu(allocatable['cpu'])
-            alloc_mem = ResourceConvert.cpu(allocatable['memory'])
+            alloc_mem = ResourceConvert.memory(allocatable['memory'])
 
             # TODO add cpu_alloc threshold
-            if (int(nodes_resource_usage['memory']) / int(alloc_mem)) > NODE_MEMORY_ALLOC_THRESHOLD:
+            if (int(nodes_resource_usage[node_name]['memory']) / int(alloc_mem)) > NODE_MEMORY_ALLOC_THRESHOLD:
                 continue
 
             # TODO figure out heuristics to dynamically derive BULK_SCHEDULE_SIZE
             BULK_SCHEDULE_SIZE = 2
-            node_name = node.metadata.name
             if node_name not in self.scheduling_state.pods_per_node or len(self.scheduling_state.pods_per_node) <= BULK_SCHEDULE_SIZE:
                 return node_name
 
