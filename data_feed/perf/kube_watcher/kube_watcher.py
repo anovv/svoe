@@ -1,19 +1,14 @@
 import threading
-
-from perf.defines import DATA_FEED_NAMESPACE
 import time
 import kubernetes
+
+from perf.defines import DATA_FEED_NAMESPACE
 from perf.kube_watcher.event.raw.kube_event.kube_raw_event import KubeRawEvent
 from perf.kube_watcher.event.raw.object.pod_object_raw_event import PodObjectRawEvent
 from perf.kube_watcher.event.raw.object.node_object_raw_event import NodeObjectRawEvent
 
-from perf.kube_watcher.event.logged.kube_event.pod_kube_events_log import PodKubeEventsLog
-from perf.kube_watcher.event.logged.kube_event.node_kube_events_log import NodeKubeEventsLog
 
-from perf.kube_watcher.event.logged.object.pod_object_events_log import PodObjectEventsLog
-from perf.kube_watcher.event.logged.object.node_object_events_log import NodeObjectEventsLog
-
-# channel names
+# channels names
 CHANNEL_NODE_KUBE_EVENTS = 'CHANNEL_NODE_KUBE_EVENTS'
 CHANNEL_NODE_OBJECT_EVENTS = 'CHANNEL_NODE_OBJECT_EVENTS'
 CHANNEL_DF_POD_KUBE_EVENTS = 'CHANNEL_DF_POD_KUBE_EVENTS'
@@ -21,47 +16,26 @@ CHANNEL_DF_POD_OBJECT_EVENTS = 'CHANNEL_DF_POD_OBJECT_EVENTS'
 
 
 class KubeWatcher:
-    def __init__(self, core_api, callbacks):
-
+    def __init__(self, core_api, kube_watcher_state):
         self.running = False
         self.core_api = core_api
-        self.event_queues_per_pod = {}
-        self.event_queues_per_node = {}
-
-        self.callbacks = callbacks
+        self.kube_watcher_state = kube_watcher_state
         self.channels = {}
 
         # init channels
-        for name, events_log, watch_blocking, namespace in [
-            (CHANNEL_NODE_KUBE_EVENTS,
-             NodeKubeEventsLog(self.event_queues_per_node, self.callbacks),
-             self._watch_node_kube_events_blocking,
-             None
-             ),
-            (CHANNEL_NODE_OBJECT_EVENTS,
-             NodeObjectEventsLog(self.event_queues_per_node, self.callbacks),
-             self._watch_node_object_events_blocking,
-             None
-             ),
-            (CHANNEL_DF_POD_KUBE_EVENTS,
-             PodKubeEventsLog(self.event_queues_per_pod, self.callbacks),
-             self._watch_pod_kube_events_blocking,
-             DATA_FEED_NAMESPACE,
-             ),
-            (CHANNEL_DF_POD_OBJECT_EVENTS,
-             PodObjectEventsLog(self.event_queues_per_pod, self.callbacks),
-             self._watch_pod_object_events_blocking,
-             DATA_FEED_NAMESPACE,
-             ),
+        for channel, watch_blocking, namespace in [
+            (CHANNEL_NODE_KUBE_EVENTS, self._watch_node_kube_events_blocking, None),
+            (CHANNEL_NODE_OBJECT_EVENTS, self._watch_node_object_events_blocking, None),
+            (CHANNEL_DF_POD_KUBE_EVENTS, self._watch_pod_kube_events_blocking, DATA_FEED_NAMESPACE),
+            (CHANNEL_DF_POD_OBJECT_EVENTS, self._watch_pod_object_events_blocking, DATA_FEED_NAMESPACE),
         ]:
             watcher = kubernetes.watch.Watch()
             if namespace:
-                thread_args = (watcher, events_log, namespace)
+                thread_args = (watcher, self.kube_watcher_state.event_logs_per_channel[channel], namespace)
             else:
-                thread_args = (watcher, events_log)
+                thread_args = (watcher, self.kube_watcher_state.event_logs_per_channel[channel])
 
-            self.channels[name] = {
-                'events_log': events_log,
+            self.channels[channel] = {
                 'thread': threading.Thread(target=watch_blocking, args=thread_args),
                 'watcher': watcher,
             }
@@ -148,9 +122,6 @@ class KubeWatcher:
                 raw_event = NodeObjectRawEvent(message)
                 events_log.update_state(raw_event)
 
-    def get_events_log(self, channel):
-        return self.channels[channel]['events_log']
-
     def start(self, channels):
         # https://github.com/kubernetes-client/python/issues/728
         # https://www.programcreek.com/python/example/111707/kubernetes.watch.Watch
@@ -167,6 +138,8 @@ class KubeWatcher:
             return
         self.running = False
         print(f'Stopping Kube Watcher...')
+
+        # TODO clean kube_watcher_state
 
         for name in channels:
             channel = self.channels[name]

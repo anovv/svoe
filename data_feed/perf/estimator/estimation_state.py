@@ -3,6 +3,7 @@ import datetime
 import threading
 
 from perf.kube_watcher.event.logged.pod_logged_event import PodLoggedEvent
+from perf.defines import RUN_ESTIMATION_FOR
 
 
 class PodEstimationPhaseEvent(PodLoggedEvent):
@@ -51,7 +52,7 @@ class Timeouts:
     DF_CONTAINER_PULL_IMAGE_TIMEOUT = 20 * 60
     POD_START_ESTIMATION_RUN_TIMEOUT = 2 * 60
     POD_DELETED_TIMEOUT = 2 * 60
-    POD_ESTIMATION_RUN_DURATION = 300
+    POD_ESTIMATION_RUN_DURATION = RUN_ESTIMATION_FOR
 
 
 class EstimationState:
@@ -59,14 +60,16 @@ class EstimationState:
         self.estimation_phase_events_per_pod = {}
         self.estimation_result_events_per_pod = {}
         self.wait_event_per_pod = {}
-        self.pods_per_node = {}
-        self.pods_priorities = {}
+        self.stats = {}
 
     def get_last_estimation_result(self, pod_name):
         if pod_name in self.estimation_result_events_per_pod:
             event = self.estimation_result_events_per_pod[pod_name][-1]
             return event.type
         return None
+
+    def get_estimation_result_events(self, pod_name):
+        return self.estimation_result_events_per_pod[pod_name]
 
     def add_estimation_result_event(self, pod_name, estimation_result):
         event = PodEstimationResultEvent(
@@ -112,44 +115,19 @@ class EstimationState:
         self.wait_event_per_pod[pod_name] = threading.Event()
         return self.wait_event_per_pod[pod_name].wait(timeout=timeout)
 
-    def get_last_scheduled_pod(self, node):
-        if node not in self.pods_per_node or len(self.pods_per_node[node]) == 0:
-            return None
-        return self.pods_per_node[node][-1]
+    def add_metrics_to_stats(self, pod_name, metrics):
+        if pod_name not in self.stats:
+            self.stats[pod_name] = {}
+            self.stats[pod_name]['metrics'] = {}
+        for metric_type, metric_name, metric_value, error in metrics:
 
-    def get_schedulable_pod_priority(self, node_name):
-        last_pod = self.get_last_scheduled_pod(node_name)
-        if last_pod is None:
-            priority = 10000
-        else:
-            # TODO what if key does not exist
-            last_priority = self.pods_priorities[last_pod]
-            priority = last_priority - 1
-        return priority
+            if metric_type not in self.stats[pod_name]['metrics']:
+                self.stats[pod_name]['metrics'][metric_type] = {}
 
-    def add_pod_to_schedule_state(self, pod_name, node_name, priority):
-        # check all nodes to make sure pod is not scheduled twice
-        for node in self.pods_per_node:
-            if pod_name in self.pods_per_node[node]:
-                raise Exception(f'Pod {pod_name} is already assigned to node {node}')
+            # TODO somehow indicate per-metric errors?
+            self.stats[pod_name]['metrics'][metric_type][metric_name] = error if error else metric_value
 
-        # scheduling state update
-        if node_name in self.pods_per_node:
-            self.pods_per_node[node_name].append(pod_name)
-        else:
-            self.pods_per_node[node_name] = [pod_name]
-
-        self.pods_priorities[pod_name] = priority
-
-    def remove_pod_from_schedule_state(self, pod_name):
-        node_name = None
-        count = 0  # to make sure only 1 pod exists
-        for node in self.pods_per_node:
-            if pod_name in self.pods_per_node[node]:
-                count += 1
-                node_name = node
-        if node_name is None or count > 1:
-            raise Exception(f'Found {count} pods with name {pod_name}, should be 1')
-        self.state.pods_per_node[node_name].remove(pod_name)
-        # clean priority
-        del self.state.pods_priorities[pod_name]
+    def add_events_to_stats(self, pod_name, events):
+        if pod_name not in self.stats:
+            self.stats[pod_name] = {}
+        self.stats[pod_name]['events'] = events

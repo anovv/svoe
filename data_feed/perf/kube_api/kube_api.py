@@ -1,7 +1,8 @@
 import math
 
 from perf.defines import *
-from perf.utils import cm_name_pod_name, ss_name_from_pod_name, pod_name_from_ss_name, ResourceConvert
+from perf.kube_api.utils import cm_name_pod_name, ss_name_from_pod_name, pod_name_from_ss_name
+from perf.kube_api.resource_convert import ResourceConvert
 import yaml
 import json
 import kubernetes
@@ -37,7 +38,7 @@ class KubeApi:
         specs = self.apps_api.list_namespaced_stateful_set(namespace=DATA_FEED_NAMESPACE)
         filtered_ss_names = list(map(lambda spec: spec.metadata.name, filter(lambda spec: self.should_estimate(spec), specs.items)))
         if subset is not None and len(subset) > 0:
-            filtered_ss_names = list(map(lambda name: name in subset, filtered_ss_names))
+            filtered_ss_names = list(filter(lambda name: name in subset, filtered_ss_names))
         pod_names = list(map(lambda name: pod_name_from_ss_name(name), filtered_ss_names))
         print(f'Processing {len(filtered_ss_names)}/{len(specs.items)} ss specs')
         return pod_names

@@ -1,6 +1,7 @@
-from defines import *
 import asyncio
 import aiohttp
+
+from perf.defines import PROM, RUN_ESTIMATION_FOR, DATA_FEED_CONTAINER, REDIS_CONTAINER
 
 
 def fetch_metrics(pod_name, payload_config):
@@ -68,8 +69,8 @@ async def _fetch_metrics_async(pod_name, payload_config):
 
 
 def _get_health_metrics(pod_name, payload_config):
-    duration = f'[{ESTIMATION_RUN_DURATION}s]'
-    duration_subquery = f'[{ESTIMATION_RUN_DURATION}s:]'
+    duration = f'[{RUN_ESTIMATION_FOR}s]'
+    duration_subquery = f'[{RUN_ESTIMATION_FOR}s:]'
     metrics = {}
     for exchange in payload_config:
         # TODO decide channel/data_type naming
@@ -88,8 +89,8 @@ def _get_health_metrics(pod_name, payload_config):
 
 def _get_perf_metrics(pod_name):
     # https://github.com/olxbr/metrics-server-exporter to export metrics-server to prometheus
-    duration = f'[{ESTIMATION_RUN_DURATION}s]'
-    duration_subquery = f'[{ESTIMATION_RUN_DURATION}s:]'
+    duration = f'[{RUN_ESTIMATION_FOR}s]'
+    duration_subquery = f'[{RUN_ESTIMATION_FOR}s:]'
     metrics = {}
     for container_name in [DATA_FEED_CONTAINER, REDIS_CONTAINER]:
         # TODO ',' or ';' separator instead of '_'
