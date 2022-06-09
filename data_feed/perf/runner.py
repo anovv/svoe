@@ -8,7 +8,7 @@ from perf.kube_watcher.kube_watcher_state import KubeWatcherState
 from perf.metrics.prom_connection import PromConnection
 from perf.estimator.estimation_state import EstimationState
 from perf.scheduler.scheduler import Scheduler
-from perf.scheduler.scheduler_state import SchedulingState
+from perf.scheduler.scheduling_state import SchedulingState
 from perf.callback import Callback
 
 

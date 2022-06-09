@@ -1,4 +1,5 @@
 import threading
+import concurrent.futures
 
 
 class SchedulingState:
@@ -8,9 +9,6 @@ class SchedulingState:
         self.pods_per_node = {}
         self.pods_priorities = {}
         self.lock = threading.Lock()
-
-    def get_lock(self):
-        return self.lock
 
     def init_pods_work_queue(self, work_queue):
         self.pods_work_queue = work_queue
@@ -57,3 +55,52 @@ class SchedulingState:
 
         # clean priority
         del self.pods_priorities[pod_name]
+
+    def pop_or_wait_work_queue(self, pending_futures):
+        pod_name = None
+        if len(self.pods_work_queue) == 0:
+            # check running tasks
+            # wait for first finished task
+            for _ in concurrent.futures.as_completed(pending_futures.keys()):
+                self.lock.acquire()
+                # check if it was the last one
+                all_done = True
+                for f in pending_futures.keys():
+                    if not f.done():
+                        all_done = False
+                if len(self.pods_work_queue) == 0:
+                    if all_done:
+                        # all tasks finished and no more queued
+                        self.lock.release()
+                        return None
+                    else:
+                        # continue waiting
+                        self.lock.release()
+                        continue
+                else:
+                    # continue scheduling
+                    pod_name = self.pods_work_queue.pop()
+        else:
+            pod_name = self.pods_work_queue.pop()
+
+        if self.lock.locked():
+            self.lock.release()
+
+        return pod_name
+
+    def reschedule_or_complete(self, pod_name, success):
+        self.lock.acquire()
+        self.remove_pod_from_schedule_state(pod_name)
+        # decide if move to done schedule state or reschedule for another run
+        # TODO add reschedule counter?
+        # TODO add reschedule reason?
+        if success:
+            # success
+            print(f'Pod {pod_name} done')
+            self.pods_done.append(pod_name)
+        else:
+            # reschedule - append to the end of the work queue
+            print(f'Pod {pod_name} rescheduled')
+            self.pods_work_queue.append(pod_name)
+
+        self.lock.release()

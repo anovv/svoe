@@ -1,10 +1,9 @@
 import time
 import concurrent.futures
-import functools
 
 from perf.defines import NODE_MEMORY_ALLOC_THRESHOLD, NODE_RESCHEDULE_PERIOD, DATA_FEED_CONTAINER
 from perf.estimator.estimator import Estimator
-from perf.estimator.estimation_state import PodEstimationResultEvent, PodEstimationPhaseEvent
+from perf.estimator.estimation_state import PodEstimationPhaseEvent
 from perf.kube_api.resource_convert import ResourceConvert
 
 
@@ -29,36 +28,10 @@ class Scheduler:
             while self.running and len(self.scheduling_state.pods_done) != init_work_queue_size:
                 while (node_name := self.get_ready_node_name()) is None and self.running:
                     time.sleep(1)
-                if len(self.scheduling_state.pods_work_queue) == 0:
-                    # check running tasks
-                    # wait for first finished task
-                    for _ in concurrent.futures.as_completed(self.futures.keys()):
-                        self.scheduling_state.get_lock().acquire()
-                        # check if it was the last one
-                        all_done = True
-                        for f in self.futures.keys():
-                            if not f.done():
-                                all_done = False
-                        if len(self.scheduling_state.pods_work_queue) == 0:
-                            if all_done:
-                                # all tasks finished and no more queued - finish scheduling
-                                self.running = False
-                                self.scheduling_state.get_lock().release()
-                                break
-                            else:
-                                # continue waiting
-                                self.scheduling_state.get_lock().release()
-                                continue
-                        else:
-                            # continue scheduling
-                            break
-
-                if not self.running:
+                pod_name = self.scheduling_state.pop_or_wait_work_queue(self.futures)
+                if pod_name is None:
+                    self.running = False
                     break
-
-                pod_name = self.scheduling_state.pods_work_queue.pop()
-                if self.scheduling_state.get_lock().locked():
-                    self.scheduling_state.get_lock().release()
 
                 priority = self.scheduling_state.get_schedulable_pod_priority(node_name)
                 self.scheduling_state.add_pod_to_schedule_state(pod_name, node_name, priority)
@@ -69,9 +42,13 @@ class Scheduler:
                     priority=priority
                 )
 
-                def done(_future):
-                    self.reschedule_or_complete(pod_name)
-                    # del futures[_future]
+                def done(fut):
+                    success = fut.result()
+                    self.scheduling_state.reschedule_or_complete(pod_name, success)
+                    if success:
+                        # TODO add reschedule event to stats on failure?
+                        self.add_df_events_to_stats(pod_name)
+                    self.clean_states(pod_name)
 
                 future.add_done_callback(done)
                 self.futures[future] = pod_name
@@ -80,31 +57,6 @@ class Scheduler:
         for future in concurrent.futures.as_completed(self.futures.keys()):
             res = future.result()
             print(f'Finished estimating resources for {self.futures[future]}: {res}')
-
-    def reschedule_or_complete(self, pod_name):
-        self.scheduling_state.get_lock().acquire()
-        self.scheduling_state.remove_pod_from_schedule_state(pod_name)
-        # decide if move to done schedule state or reschedule for another run
-        # TODO add reschedule counter?
-        # TODO add reschedule reason?
-        if self.estimation_state.has_estimation_result(pod_name, PodEstimationResultEvent.POD_FINISHED_ESTIMATION_RUN):
-            # TODO check if metrics fetched?
-            # success
-            print(f'Pod {pod_name} done')
-            self.scheduling_state.pods_done.append(pod_name)
-            self.add_df_events_to_stats(pod_name)
-        else:
-            # reschedule - append to queue end
-            print(f'Pod {pod_name} rescheduled')
-            # TODO add reschedule event to stats
-            self.scheduling_state.pods_work_queue.append(pod_name)
-
-        self.scheduling_state.get_lock().release()
-
-        # clean states
-        del self.kube_watcher_state.event_queues_per_pod[pod_name]
-        del self.estimation_state.estimation_phase_events_per_pod[pod_name]
-        del self.estimation_state.estimation_result_events_per_pod[pod_name]
 
     def get_ready_node_name(self):
         nodes = self.kube_api.get_nodes()
@@ -162,6 +114,11 @@ class Scheduler:
             filter(lambda event: event.container_name is None or event.container_name == DATA_FEED_CONTAINER, events))
         events = list(map(lambda event: str(event), events))
         self.estimation_state.add_events_to_stats(pod_name, events)
+
+    def clean_states(self, pod_name):
+        del self.kube_watcher_state.event_queues_per_pod[pod_name]
+        del self.estimation_state.estimation_phase_events_per_pod[pod_name]
+        del self.estimation_state.estimation_result_events_per_pod[pod_name]
 
     def stop(self):
         return  # TODO

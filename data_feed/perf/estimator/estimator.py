@@ -73,8 +73,8 @@ class Estimator:
         finally:
             self.finalize(pod_name)
 
-        # TODO shoudl return if reschedule or not
-        return result
+        # success or not
+        return self.estimation_state.has_estimation_result(pod_name, PodEstimationResultEvent.POD_FINISHED_ESTIMATION_RUN)
 
     # TODO move to scheduler
     def finalize(self, pod_name):
