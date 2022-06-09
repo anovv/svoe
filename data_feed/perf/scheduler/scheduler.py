@@ -36,7 +36,9 @@ class Scheduler:
                     node_name=node_name,
                     priority=priority
                 )
-                future.add_done_callback(self.reschedule_or_complete)
+                # TODO getting TypeError: add_df_events_to_stats() got multiple values for argument 'pod_name' for both
+                # TODO clean scheduling/estimation/kube_watcher states here for the pod
+                future.add_done_callback(functools.partial(self.reschedule_or_complete, pod_name=pod_name))
                 future.add_done_callback(functools.partial(self.add_df_events_to_stats, pod_name=pod_name))
                 futures[future] = pod_name
 
@@ -51,8 +53,7 @@ class Scheduler:
         # decide if move to done schedule state or reschedule for another run
         # TODO add reschedule counter?
         # TODO add reschedule reason?
-        estimation_results = self.estimation_state.get_estimation_result_events(pod_name)
-        if PodEstimationResultEvent.POD_FINISHED_ESTIMATION_RUN in estimation_results:
+        if self.estimation_state.has_estimation_result(pod_name, PodEstimationResultEvent.POD_FINISHED_ESTIMATION_RUN):
             # TODO check if metrics fetched?
             # success
             self.scheduling_state.pods_done.append(pod_name)

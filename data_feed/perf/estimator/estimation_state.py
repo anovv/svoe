@@ -28,11 +28,12 @@ class PodEstimationResultEvent(PodLoggedEvent):
     # interrupts
     INTERRUPTED_INTERNAL_ERROR = 'PodEstimationResultEvent.INTERRUPTED_INTERNAL_ERROR'
     INTERRUPTED_TIMEOUT = 'PodEstimationResultEvent.INTERRUPTED_TIMEOUT'
-    INTERRUPTED_DF_CONTAINER_TOO_MANY_RESTARTS = 'PodEstimationResultEvent.INTERRUPTED_TOO_MANY_RESTARTS'
     INTERRUPTED_DF_CONTAINER_HEALTH_LIVENESS = 'PodEstimationResultEvent.INTERRUPTED_HEALTH_LIVENESS'
     INTERRUPTED_DF_CONTAINER_HEALTH_STARTUP = 'PodEstimationResultEvent.INTERRUPTED_HEALTH_STARTUP'
-    INTERRUPTED_DF_CONTAINER_BACK_OFF = 'PodEstimationResultEvent.INTERRUPTED_DF_CONTAINER_BACK_OFF'
     INTERRUPTED_UNEXPECTED_POD_DELETION = 'PodEstimationResultEvent.INTERRUPTED_UNEXPECTED_POD_DELETION'
+    INTERRUPTED_UNEXPECTED_CONTAINER_TERMINATION = 'PodEstimationResultEvent.INTERRUPTED_UNEXPECTED_CONTAINER_TERMINATION'
+    INTERRUPTED_POD_ALREADY_EXISTS = 'PodEstimationResultEvent.INTERRUPTED_POD_ALREADY_EXISTS'
+    INTERRUPTED_POD_NOT_FOUND = 'PodEstimationResultEvent.INTERRUPTED_POD_NOT_FOUND'
 
     @classmethod
     def get_interrupts(cls):
@@ -40,10 +41,11 @@ class PodEstimationResultEvent(PodLoggedEvent):
             PodEstimationResultEvent.INTERRUPTED_INTERNAL_ERROR,
             PodEstimationResultEvent.INTERRUPTED_TIMEOUT,
             PodEstimationResultEvent.INTERRUPTED_DF_CONTAINER_HEALTH_LIVENESS,
-            PodEstimationResultEvent.INTERRUPTED_DF_CONTAINER_TOO_MANY_RESTARTS,
             PodEstimationResultEvent.INTERRUPTED_DF_CONTAINER_HEALTH_STARTUP,
-            PodEstimationResultEvent.INTERRUPTED_DF_CONTAINER_BACK_OFF,
-            PodEstimationResultEvent.INTERRUPTED_UNEXPECTED_POD_DELETION
+            PodEstimationResultEvent.INTERRUPTED_UNEXPECTED_POD_DELETION,
+            PodEstimationResultEvent.INTERRUPTED_UNEXPECTED_CONTAINER_TERMINATION,
+            PodEstimationResultEvent.INTERRUPTED_POD_ALREADY_EXISTS,
+            PodEstimationResultEvent.INTERRUPTED_POD_NOT_FOUND
         ]
 
 
@@ -68,8 +70,13 @@ class EstimationState:
             return event.type
         return None
 
-    def get_estimation_result_events(self, pod_name):
-        return self.estimation_result_events_per_pod[pod_name]
+    def has_estimation_result(self, pod_name, result):
+        if pod_name not in self.estimation_result_events_per_pod:
+            return False
+        for result_event in self.estimation_result_events_per_pod[pod_name]:
+            if result_event.type == result:
+                return True
+        return False
 
     def add_estimation_result_event(self, pod_name, estimation_result):
         event = PodEstimationResultEvent(
@@ -91,7 +98,7 @@ class EstimationState:
             return event.type
         return None
 
-    def set_estimation_phase(self, pod_name, estimation_state):
+    def add_estimation_phase(self, pod_name, estimation_state):
         event = PodEstimationPhaseEvent(
             estimation_state,
             pod_name, container_name=None,

@@ -1,3 +1,6 @@
+import kubernetes
+import json
+
 from perf.metrics.metrics import fetch_metrics
 from perf.estimator.estimation_state import PodEstimationPhaseEvent, PodEstimationResultEvent, Timeouts
 
@@ -23,7 +26,7 @@ class Estimator:
                 (PodEstimationPhaseEvent.WAITING_FOR_POD_TO_FINISH_ESTIMATION_RUN,
                  PodEstimationResultEvent.POD_FINISHED_ESTIMATION_RUN, Timeouts.POD_ESTIMATION_RUN_DURATION),
             ]:
-                self.estimation_state.set_estimation_phase(pod_name, state)
+                self.estimation_state.add_estimation_phase(pod_name, state)
                 timed_out = not self.estimation_state.wait_event(pod_name,
                                                                  timeout)  # blocks until callback triggers specific event
 
@@ -54,20 +57,36 @@ class Estimator:
                 self.estimation_state.add_metrics_to_stats(pod_name, metrics)
                 self.estimation_state.add_estimation_result_event(pod_name, metrics_fetch_result)
 
+        except kubernetes.client.exceptions.ApiException as e:
+            if json.loads(e.body)['reason'] == 'AlreadyExists':
+                result = PodEstimationResultEvent.INTERRUPTED_POD_ALREADY_EXISTS
+                self.estimation_state.add_estimation_result_event(pod_name, result)
+            else:
+                # TODO INTERRUPTED_INTERNAL_ERROR -> INTERRUPTED_UNKNOWN_ERROR and add exception to event
+                raise e
         except Exception as e:
+            # TODO INTERRUPTED_INTERNAL_ERROR -> INTERRUPTED_UNKNOWN_ERROR and add exception to event
             self.estimation_state.add_estimation_result_event(pod_name, PodEstimationResultEvent.INTERRUPTED_INTERNAL_ERROR)
             raise e  # TODO should raise?
         finally:
             self.finalize(pod_name)
 
-        # TODO should return whether retry estimation run or not
         return result
 
     def finalize(self, pod_name):
-        self.estimation_state.set_estimation_phase(pod_name, PodEstimationPhaseEvent.WAITING_FOR_POD_TO_BE_DELETED)
+        self.estimation_state.add_estimation_phase(pod_name, PodEstimationPhaseEvent.WAITING_FOR_POD_TO_BE_DELETED)
         try:
             self.kube_api.delete_raw_pod(pod_name)
+        except kubernetes.client.exceptions.ApiException as e:
+            if json.loads(e.body)['reason'] == 'NotFound':
+                result = PodEstimationResultEvent.INTERRUPTED_POD_NOT_FOUND
+                self.estimation_state.add_estimation_result_event(pod_name, result)
+                return
+            else:
+                # TODO INTERRUPTED_INTERNAL_ERROR -> INTERRUPTED_UNKNOWN_ERROR and add exception to event
+                raise e
         except Exception as e:
+            # TODO INTERRUPTED_INTERNAL_ERROR -> INTERRUPTED_UNKNOWN_ERROR and add exception to event
             self.estimation_state.add_estimation_result_event(pod_name, PodEstimationResultEvent.INTERRUPTED_INTERNAL_ERROR)
             raise e  # TODO should raise?
 

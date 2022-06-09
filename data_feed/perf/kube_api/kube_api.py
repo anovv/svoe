@@ -34,7 +34,7 @@ class KubeApi:
         # TODO error check
         return res
 
-    def load_pod_names_from_ss(self, subset):
+    def load_pod_names_from_ss(self, subset=None):
         specs = self.apps_api.list_namespaced_stateful_set(namespace=DATA_FEED_NAMESPACE)
         filtered_ss_names = list(map(lambda spec: spec.metadata.name, filter(lambda spec: self.should_estimate(spec), specs.items)))
         if subset is not None and len(subset) > 0:
@@ -88,12 +88,13 @@ class KubeApi:
         template['spec']['restartPolicy'] = 'Never'
         template['spec']['priorityClassName'] = self.get_or_create_priority_class(pod_priority)
 
-        template['spec']['affinity']['nodeAffinity']['requiredDuringSchedulingIgnoredDuringExecution']['nodeSelectorTerms'][0].append({
+        template['spec']['affinity']['nodeAffinity']['requiredDuringSchedulingIgnoredDuringExecution']['nodeSelectorTerms'][0]['matchExpressions'].append({
             'key': 'kubernetes.io/hostname',
             'operator': 'In',
             'values': [node_name]
         })
 
+        # TODO this is not being set
         # set env for DATA_FEED_CONTAINER
         for container in template['spec']['containers']:
             if container['name'] == DATA_FEED_CONTAINER:

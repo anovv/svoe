@@ -5,7 +5,7 @@ def pod_name_from_ss_name(ss_name):
 
 
 def ss_name_from_pod_name(pod_name):
-    pod_name + '-ss'
+    return pod_name + '-ss'
 
 
 def cm_name_pod_name(pod_name):
