@@ -1,5 +1,6 @@
 import time
 import concurrent.futures
+import functools
 
 from perf.defines import NODE_MEMORY_ALLOC_THRESHOLD, NODE_RESCHEDULE_PERIOD, DATA_FEED_CONTAINER
 from perf.estimator.estimator import Estimator
@@ -42,21 +43,22 @@ class Scheduler:
                     priority=priority
                 )
 
-                def done(fut):
-                    success = fut.result()
-                    self.scheduling_state.reschedule_or_complete(pod_name, success)
-                    if success:
-                        # TODO add reschedule event to stats on failure?
-                        self.add_df_events_to_stats(pod_name)
-                    self.clean_states(pod_name)
-
-                future.add_done_callback(done)
+                future.add_done_callback(functools.partial(self.done_estimation_callback, pod_name=pod_name))
                 self.futures[future] = pod_name
 
         # TODO is this needed
         for future in concurrent.futures.as_completed(self.futures.keys()):
             res = future.result()
             print(f'Finished estimating resources for {self.futures[future]}: {res}')
+
+    def done_estimation_callback(self, future, pod_name):
+        print(f'Done {pod_name}')
+        success = future.result()
+        self.scheduling_state.reschedule_or_complete(pod_name, success)
+        if success:
+            # TODO add reschedule event to stats on failure?
+            self.add_df_events_to_stats(pod_name)
+        self.clean_states(pod_name)
 
     def get_ready_node_name(self):
         nodes = self.kube_api.get_nodes()
