@@ -88,8 +88,6 @@ class KubeWatcher:
                         delta = start_time - raw_event.event_time.timestamp()
                     if delta > 5:
                         # if event is older 5s - drop
-                        # TODO
-                        # print(f'filtered {message_count}')
                         continue
                 events_log.update_state(raw_event)
             first_init = False

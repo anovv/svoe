@@ -7,7 +7,6 @@ from perf.defines import RUN_ESTIMATION_FOR
 
 
 class PodEstimationPhaseEvent(PodLoggedEvent):
-    # TODO ss not found, ss already running, etc.
     WAITING_FOR_POD_TO_BE_SCHEDULED = 'PodEstimationPhaseEvent.WAITING_FOR_POD_TO_BE_SCHEDULED'
     WAITING_FOR_DF_CONTAINER_TO_PULL_IMAGE = 'PodEstimationPhaseEvent.WAITING_FOR_DF_CONTAINER_TO_PULL_IMAGE'
     WAITING_FOR_POD_TO_START_ESTIMATION_RUN = 'PodEstimationPhaseEvent.WAITING_FOR_POD_TO_START_ESTIMATION_RUN'

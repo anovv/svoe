@@ -27,6 +27,7 @@ class Scheduler:
             while len(self.scheduling_state.pods_done) != init_work_queue_size:
                 while (node_name := self.get_ready_node_name()) is None:
                     time.sleep(1)
+                # TODO check if queue is empty
                 pod_name = self.scheduling_state.pods_work_queue.pop()
                 priority = self.scheduling_state.get_schedulable_pod_priority(node_name)
                 self.scheduling_state.add_pod_to_schedule_state(pod_name, node_name, priority)
@@ -36,14 +37,14 @@ class Scheduler:
                     node_name=node_name,
                     priority=priority
                 )
-                # TODO getting TypeError: add_df_events_to_stats() got multiple values for argument 'pod_name' for both
-                # TODO clean scheduling/estimation/kube_watcher states here for the pod
-                future.add_done_callback(functools.partial(self.reschedule_or_complete, pod_name=pod_name))
-                future.add_done_callback(functools.partial(self.add_df_events_to_stats, pod_name=pod_name))
+                def done(_future):
+                    # TODO clean scheduling/estimation/kube_watcher states here for the pod
+                    self.reschedule_or_complete(pod_name)
+                    self.add_df_events_to_stats(pod_name)
+
+                future.add_done_callback(done)
                 futures[future] = pod_name
 
-        # TODO ideally this is not needed and should be handled as part of estimate_resources events
-        # TODO should this be separated as "garbage collector" thread ?
         for future in concurrent.futures.as_completed(futures.keys()):
             res = future.result()
             print(f'Finished estimating resources for {futures[future]}: {res}')
