@@ -1,3 +1,5 @@
+import threading
+
 
 class SchedulingState:
     def __init__(self):
@@ -5,6 +7,10 @@ class SchedulingState:
         self.pods_done = []
         self.pods_per_node = {}
         self.pods_priorities = {}
+        self.lock = threading.Lock()
+
+    def get_lock(self):
+        return self.lock
 
     def init_pods_work_queue(self, work_queue):
         self.pods_work_queue = work_queue
