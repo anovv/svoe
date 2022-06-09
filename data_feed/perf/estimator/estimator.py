@@ -12,8 +12,10 @@ class Estimator:
         self.estimation_state = estimation_state
 
     def estimate_resources(self, pod_name, node_name, priority):
+        # TODO move to scheduler
         payload_config, _ = self.kube_api.get_payload(pod_name)
         try:
+            # TODO move to scheduler
             self.kube_api.create_raw_pod(pod_name, node_name, priority)
 
             for state, result, timeout in [
@@ -74,6 +76,7 @@ class Estimator:
         # TODO shoudl return if reschedule or not
         return result
 
+    # TODO move to scheduler
     def finalize(self, pod_name):
         self.estimation_state.add_estimation_phase(pod_name, PodEstimationPhaseEvent.WAITING_FOR_POD_TO_BE_DELETED)
         try:

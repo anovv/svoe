@@ -18,6 +18,8 @@ class Callback:
         if isinstance(event, NodeLoggedEvent):
             return
 
+        # TODO ignore events if estimation has not started?
+
         pod_name = event.pod_name
         container_name = event.container_name
         if self.estimation_state.get_last_estimation_phase(pod_name) != PodEstimationPhaseEvent.WAITING_FOR_POD_TO_BE_DELETED \

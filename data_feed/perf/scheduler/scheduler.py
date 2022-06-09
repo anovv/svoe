@@ -16,18 +16,43 @@ class Scheduler:
         self.kube_watcher_state = kube_watcher_state
 
         self.estimator = Estimator(self.kube_api, self.estimation_state)
+        self.running = False
 
     def run(self, subset=None):
         self.scheduling_state.init_pods_work_queue(self.kube_api.load_pod_names_from_ss(subset))
         init_work_queue_size = len(self.scheduling_state.pods_work_queue)
         print(f'Scheduling estimation for {init_work_queue_size} pods...')
         # TODO tqdm progress
+        self.running = True
         with concurrent.futures.ThreadPoolExecutor(max_workers=1024) as executor:
             futures = {}
-            while len(self.scheduling_state.pods_done) != init_work_queue_size:
-                while (node_name := self.get_ready_node_name()) is None:
+            while self.running and len(self.scheduling_state.pods_done) != init_work_queue_size:
+                while (node_name := self.get_ready_node_name()) is None and self.running:
                     time.sleep(1)
-                # TODO check if queue is empty
+                if len(self.scheduling_state.pods_work_queue) == 0:
+                    # check running tasks
+                    # wait for first finished task
+                    for _ in concurrent.futures.as_completed(futures.keys()):
+                        # check if it was the last one
+                        all_done = True
+                        for f in futures.keys():
+                            if not f.done():
+                                all_done = False
+                        if len(self.scheduling_state.pods_work_queue) == 0:
+                            if all_done:
+                                # all tasks finished and no more queued - finish scheduling
+                                self.running = False
+                                break
+                            else:
+                                # continue waiting
+                                continue
+                        else:
+                            # continue scheduling
+                            break
+
+                if not self.running:
+                    break
+
                 pod_name = self.scheduling_state.pods_work_queue.pop()
                 priority = self.scheduling_state.get_schedulable_pod_priority(node_name)
                 self.scheduling_state.add_pod_to_schedule_state(pod_name, node_name, priority)
@@ -38,9 +63,8 @@ class Scheduler:
                     priority=priority
                 )
                 def done(_future):
-                    # TODO clean scheduling/estimation/kube_watcher states here for the pod
                     self.reschedule_or_complete(pod_name)
-                    self.add_df_events_to_stats(pod_name)
+                    # del futures[_future]
 
                 future.add_done_callback(done)
                 futures[future] = pod_name
@@ -57,10 +81,19 @@ class Scheduler:
         if self.estimation_state.has_estimation_result(pod_name, PodEstimationResultEvent.POD_FINISHED_ESTIMATION_RUN):
             # TODO check if metrics fetched?
             # success
+            print(f'Pod {pod_name} done')
             self.scheduling_state.pods_done.append(pod_name)
+            self.add_df_events_to_stats(pod_name)
         else:
-            # append to queue end
+            # reschedule - append to queue end
+            print(f'Pod {pod_name} rescheduled')
+            # TODO add reschedule event to stats
             self.scheduling_state.pods_work_queue.append(pod_name)
+
+        # clean states
+        del self.kube_watcher_state.event_queues_per_pod[pod_name]
+        del self.estimation_state.estimation_phase_events_per_pod[pod_name]
+        del self.estimation_state.estimation_result_events_per_pod[pod_name]
 
     def get_ready_node_name(self):
         nodes = self.kube_api.get_nodes()
