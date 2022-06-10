@@ -22,6 +22,7 @@ class Callback:
 
         pod_name = event.pod_name
         container_name = event.container_name
+
         if self.estimation_state.get_last_estimation_phase(pod_name) != PodEstimationPhaseEvent.WAITING_FOR_POD_TO_BE_DELETED \
                 and self.estimation_state.get_last_estimation_result(pod_name) \
                 in [*PodEstimationResultEvent.get_interrupts(), PodEstimationResultEvent.POD_DELETED]:

@@ -1,6 +1,8 @@
 import threading
 import concurrent.futures
 
+MAX_RESCHEDULES = 1
+
 
 class SchedulingState:
     def __init__(self):
@@ -8,7 +10,10 @@ class SchedulingState:
         self.pods_done = []
         self.pods_per_node = {}
         self.pods_priorities = {}
-        self.lock = threading.Lock()
+        self.reschedule_counters_per_pod = {}
+
+        # TODO is this needed?
+        self.global_lock = threading.Lock()
 
     def init_pods_work_queue(self, work_queue):
         self.pods_work_queue = work_queue
@@ -61,8 +66,9 @@ class SchedulingState:
         if len(self.pods_work_queue) == 0:
             # check running tasks
             # wait for first finished task
+            print(f'No pods in queue, waiting for pending futures to finish')
             for _ in concurrent.futures.as_completed(pending_futures.keys()):
-                self.lock.acquire()
+                self.global_lock.acquire()
                 # check if it was the last one
                 all_done = True
                 for f in pending_futures.keys():
@@ -71,36 +77,55 @@ class SchedulingState:
                 if len(self.pods_work_queue) == 0:
                     if all_done:
                         # all tasks finished and no more queued
-                        self.lock.release()
+                        self.global_lock.release()
+                        print(f'All tasks finished')
                         return None
                     else:
                         # continue waiting
-                        self.lock.release()
+                        print(f'Continue waiting')
+                        self.global_lock.release()
                         continue
                 else:
                     # continue scheduling
                     pod_name = self.pods_work_queue.pop()
+                    print(f'Continue scheduling with {pod_name}')
+                    break
         else:
             pod_name = self.pods_work_queue.pop()
+            print(f'Popped {pod_name}')
 
-        if self.lock.locked():
-            self.lock.release()
+        if self.global_lock.locked():
+            self.global_lock.release()
 
         return pod_name
 
     def reschedule_or_complete(self, pod_name, success):
-        self.lock.acquire()
         self.remove_pod_from_schedule_state(pod_name)
         # decide if move to done schedule state or reschedule for another run
-        # TODO add reschedule counter?
         # TODO add reschedule reason?
+        self.global_lock.acquire()
         if success:
             # success
             print(f'Pod {pod_name} done')
             self.pods_done.append(pod_name)
         else:
-            # reschedule - append to the end of the work queue
-            print(f'Pod {pod_name} rescheduled')
-            self.pods_work_queue.append(pod_name)
+            reschedule_counter = self.get_reschedule_counter(pod_name)
+            if reschedule_counter < MAX_RESCHEDULES:
+                # reschedule - append to the end of the work queue
+                print(f'Pod {pod_name} rescheduled')
+                self.set_reschedule_counter(pod_name, reschedule_counter + 1)
+                self.pods_work_queue.append(pod_name)
+            else:
+                print(f'Pod {pod_name} done after {reschedule_counter} reschedules')
+                self.pods_done.append(pod_name)
 
-        self.lock.release()
+
+        self.global_lock.release()
+
+    def get_reschedule_counter(self, pod_name):
+        if pod_name not in self.reschedule_counters_per_pod:
+            return 0
+        return self.reschedule_counters_per_pod[pod_name]
+
+    def set_reschedule_counter(self, pod_name, counter):
+        self.reschedule_counters_per_pod[pod_name] = counter

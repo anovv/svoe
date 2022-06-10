@@ -29,6 +29,7 @@ class Scheduler:
             while self.running and len(self.scheduling_state.pods_done) != init_work_queue_size:
                 while (node_name := self.get_ready_node_name()) is None and self.running:
                     time.sleep(1)
+                self.remove_done_futures()
                 pod_name = self.scheduling_state.pop_or_wait_work_queue(self.futures)
                 if pod_name is None:
                     self.running = False
@@ -46,10 +47,16 @@ class Scheduler:
                 future.add_done_callback(functools.partial(self.done_estimation_callback, pod_name=pod_name))
                 self.futures[future] = pod_name
 
+        print('Scheduler finished')
         # TODO is this needed
-        for future in concurrent.futures.as_completed(self.futures.keys()):
-            res = future.result()
-            print(f'Finished estimating resources for {self.futures[future]}: {res}')
+        # for future in concurrent.futures.as_completed(self.futures.keys()):
+        #     res = future.result()
+        #     print(f'Finished estimating resources for {self.futures[future]}: {res}')
+
+    def remove_done_futures(self):
+        for f in list(self.futures.keys()):
+            if f.done():
+                del self.futures[f]
 
     def done_estimation_callback(self, future, pod_name):
         print(f'Done {pod_name}')
@@ -59,6 +66,8 @@ class Scheduler:
             # TODO add reschedule event to stats on failure?
             self.add_df_events_to_stats(pod_name)
         self.clean_states(pod_name)
+        # TODO delete future object to avoid memory leak and
+        # TODO make sure concurrent.futures.as_completed in pop_or_wait_work_queue is not modified
 
     def get_ready_node_name(self):
         nodes = self.kube_api.get_nodes()

@@ -64,7 +64,7 @@ r = Runner()
 # s.get_oom_score("minikube-1-m03", "kube-proxy-fjr9n", ["kube-proxy"])
 
 # subset = ['data-feed-binance-spot-6d1641b134-ss', 'data-feed-binance-spot-eb540d90be-ss', 'data-feed-bybit-perpetual-cca5766921-ss']
-sub = ['data-feed-binance-spot-6d1641b134-ss']
+sub = ['data-feed-binance-spot-6d1641b134-ss', 'data-feed-binance-spot-eb540d90be-ss']
 r.run(sub)
 # ss_name = 'data-feed-binance-spot-6d1641b134-ss'
 # ss_name = 'data-feed-binance-spot-eb540d90be-ss'
