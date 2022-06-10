@@ -27,13 +27,16 @@ class Scheduler:
         self.running = True
         with concurrent.futures.ThreadPoolExecutor(max_workers=1024) as executor:
             while self.running and len(self.scheduling_state.pods_done) != init_work_queue_size:
-                while (node_name := self.get_ready_node_name()) is None and self.running:
-                    time.sleep(1)
                 self.remove_done_futures()
                 pod_name = self.scheduling_state.pop_or_wait_work_queue(self.futures)
                 if pod_name is None:
                     self.running = False
                     break
+
+                while (node_name := self.get_ready_node_name()) is None and self.running:
+                    time.sleep(1)
+
+                print(f'Scheduling pod {pod_name} on node {node_name}')
 
                 priority = self.scheduling_state.get_schedulable_pod_priority(node_name)
                 self.scheduling_state.add_pod_to_schedule_state(pod_name, node_name, priority)
@@ -66,8 +69,6 @@ class Scheduler:
             # TODO add reschedule event to stats on failure?
             self.add_df_events_to_stats(pod_name)
         self.clean_states(pod_name)
-        # TODO delete future object to avoid memory leak and
-        # TODO make sure concurrent.futures.as_completed in pop_or_wait_work_queue is not modified
 
     def get_ready_node_name(self):
         nodes = self.kube_api.get_nodes()
@@ -108,9 +109,9 @@ class Scheduler:
             # only valid case is if last pod is in active estimation phase,
             # all other phases are temporary before removal
             # also wait NODE_RESCHEDULE_PERIOD s for last pod to run successfully before scheduling more
-            phase = self.estimation_state.get_last_estimation_phase(last_pod)
-            if phase == PodEstimationPhaseEvent.WAITING_FOR_POD_TO_FINISH_ESTIMATION_RUN \
-                    and time.time() - phase.local_time.timestamp() > NODE_RESCHEDULE_PERIOD:
+            phase_event = self.estimation_state.get_last_estimation_phase_event(last_pod)
+            if phase_event.type == PodEstimationPhaseEvent.WAITING_FOR_POD_TO_FINISH_ESTIMATION_RUN \
+                    and time.time() - phase_event.local_time.timestamp() > NODE_RESCHEDULE_PERIOD:
                 return node_name
 
         return None

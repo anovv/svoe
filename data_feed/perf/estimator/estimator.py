@@ -28,12 +28,12 @@ class Estimator:
                 (PodEstimationPhaseEvent.WAITING_FOR_POD_TO_FINISH_ESTIMATION_RUN,
                  PodEstimationResultEvent.POD_FINISHED_ESTIMATION_RUN, Timeouts.POD_ESTIMATION_RUN_DURATION),
             ]:
-                self.estimation_state.add_estimation_phase(pod_name, state)
+                self.estimation_state.add_estimation_phase_event(pod_name, state)
                 timed_out = not self.estimation_state.wait_event(pod_name,
                                                                  timeout)  # blocks until callback triggers specific event
 
                 # interrupts
-                if self.estimation_state.get_last_estimation_result(pod_name) in PodEstimationResultEvent.get_interrupts():
+                if self.estimation_state.get_last_estimation_result_event_type(pod_name) in PodEstimationResultEvent.get_interrupts():
                     break
 
                 if timed_out and state != PodEstimationPhaseEvent.WAITING_FOR_POD_TO_FINISH_ESTIMATION_RUN:
@@ -46,7 +46,7 @@ class Estimator:
                 self.estimation_state.add_estimation_result_event(pod_name, result)
 
             # TODO collect metrics even on interrupts?
-            if self.estimation_state.get_last_estimation_result(pod_name) == PodEstimationResultEvent.POD_FINISHED_ESTIMATION_RUN:
+            if self.estimation_state.get_last_estimation_result_event_type(pod_name) == PodEstimationResultEvent.POD_FINISHED_ESTIMATION_RUN:
                 # collect metrics
                 self.estimation_state.add_estimation_result_event(pod_name, PodEstimationPhaseEvent.COLLECTING_METRICS)
                 metrics = fetch_metrics(pod_name, payload_config)
@@ -74,11 +74,11 @@ class Estimator:
             self.finalize(pod_name)
 
         # success or not
-        return self.estimation_state.has_estimation_result(pod_name, PodEstimationResultEvent.POD_FINISHED_ESTIMATION_RUN)
+        return self.estimation_state.has_estimation_result_type(pod_name, PodEstimationResultEvent.POD_FINISHED_ESTIMATION_RUN)
 
     # TODO move to scheduler
     def finalize(self, pod_name):
-        self.estimation_state.add_estimation_phase(pod_name, PodEstimationPhaseEvent.WAITING_FOR_POD_TO_BE_DELETED)
+        self.estimation_state.add_estimation_phase_event(pod_name, PodEstimationPhaseEvent.WAITING_FOR_POD_TO_BE_DELETED)
         try:
             self.kube_api.delete_raw_pod(pod_name)
         except kubernetes.client.exceptions.ApiException as e:

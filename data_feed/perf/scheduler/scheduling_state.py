@@ -119,7 +119,6 @@ class SchedulingState:
                 print(f'Pod {pod_name} done after {reschedule_counter} reschedules')
                 self.pods_done.append(pod_name)
 
-
         self.global_lock.release()
 
     def get_reschedule_counter(self, pod_name):

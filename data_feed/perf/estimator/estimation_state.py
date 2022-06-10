@@ -63,23 +63,28 @@ class EstimationState:
         self.wait_event_per_pod = {}
         self.stats = {}
 
-    def get_last_estimation_result(self, pod_name):
+    def get_last_estimation_result_event(self, pod_name):
         if pod_name in self.estimation_result_events_per_pod:
-            event = self.estimation_result_events_per_pod[pod_name][-1]
-            return event.type
+            return self.estimation_result_events_per_pod[pod_name][-1]
         return None
 
-    def has_estimation_result(self, pod_name, result):
+    def get_last_estimation_result_event_type(self, pod_name):
+        event = self.get_last_estimation_result_event(pod_name)
+        if event is None:
+            return None
+        return event.type
+
+    def has_estimation_result_type(self, pod_name, result_type):
         if pod_name not in self.estimation_result_events_per_pod:
             return False
         for result_event in self.estimation_result_events_per_pod[pod_name]:
-            if result_event.type == result:
+            if result_event.type == result_type:
                 return True
         return False
 
-    def add_estimation_result_event(self, pod_name, estimation_result):
+    def add_estimation_result_event(self, pod_name, estimation_result_type):
         event = PodEstimationResultEvent(
-            estimation_result,
+            estimation_result_type,
             pod_name, container_name=None,
             data=None,
             cluster_time=None, local_time=datetime.datetime.now(),
@@ -91,15 +96,20 @@ class EstimationState:
             self.estimation_result_events_per_pod[pod_name] = [event]
         print(event)
 
-    def get_last_estimation_phase(self, pod_name):
+    def get_last_estimation_phase_event(self, pod_name):
         if pod_name in self.estimation_phase_events_per_pod:
-            event = self.estimation_phase_events_per_pod[pod_name][-1]
-            return event.type
+            return self.estimation_phase_events_per_pod[pod_name][-1]
         return None
 
-    def add_estimation_phase(self, pod_name, estimation_state):
+    def get_last_estimation_phase_event_type(self, pod_name):
+        event = self.get_last_estimation_phase_event(pod_name)
+        if event is None:
+            return None
+        return event.type
+
+    def add_estimation_phase_event(self, pod_name, estimation_state_type):
         event = PodEstimationPhaseEvent(
-            estimation_state,
+            estimation_state_type,
             pod_name, container_name=None,
             data=None,
             cluster_time=None, local_time=datetime.datetime.now(),
@@ -109,6 +119,8 @@ class EstimationState:
             self.estimation_phase_events_per_pod[pod_name].append(event)
         else:
             self.estimation_phase_events_per_pod[pod_name] = [event]
+
+        # TODO is this needed?
         print(event)
 
     def wake_event(self, pod_name):
