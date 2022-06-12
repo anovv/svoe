@@ -49,76 +49,74 @@ class KubeWatcher:
         self._watch_kube_events_blocking(watcher, field_selector, events_log)
 
     def _watch_kube_events_blocking(self, watcher, field_selector, events_log):
-        last_resource_version = None
-        first_init = True
+        # https://stackoverflow.com/questions/52717497/correct-way-to-use-kubernetes-watches
+        # TODO make it bounded to store for specific time period to avoid memory leak
+        seen_resource_versions = set()
+        event_list = self.core_api.list_event_for_all_namespaces(field_selector=field_selector)
+        last_resource_version = event_list.metadata.resource_version
         while self.running:
-            start_time = time.time()
-            if first_init or last_resource_version is None:
-                # First call, resource_version is unset, events need to be filtered by timestamp
-                stream = watcher.stream(
-                    self.core_api.list_event_for_all_namespaces,
-                    field_selector=field_selector,
-                    watch=True,
-                    timeout_seconds=10
-                )
-            else:
-                stream = watcher.stream(
-                    self.core_api.list_event_for_all_namespaces,
-                    field_selector=field_selector,
-                    watch=True,
-                    resource_version=last_resource_version,
-                    timeout_seconds=10
-                )
-
             message_count = 0
-            for message in stream:
+            for message in watcher.stream(
+                self.core_api.list_event_for_all_namespaces,
+                field_selector=field_selector,
+                watch=True,
+                resource_version=last_resource_version,
+                timeout_seconds=10
+            ):
                 message_count += 1
                 if not self.running:
                     break
                 raw_event = KubeRawEvent(message)
                 last_resource_version = raw_event.resource_version
-                if first_init:
-                    # filter stale and synthetic events for first init
-                    delta = 0
-                    if raw_event.object_last_timestamp:
-                        delta = start_time - raw_event.object_last_timestamp.timestamp()
-                    elif raw_event.object_first_timestamp:
-                        delta = start_time - raw_event.object_first_timestamp.timestamp()
-                    elif raw_event.event_time:
-                        delta = start_time - raw_event.event_time.timestamp()
-                    if delta > 5:
-                        # if event is older 5s - drop
-                        continue
+                if last_resource_version in seen_resource_versions:
+                    continue
+                seen_resource_versions.add(last_resource_version)
+
+                # if raw_event.involved_object_kind == 'Node':
+                #     print(f'[REG][{raw_event.type}][{raw_event.object_count}] Node Kube: {raw_event.object_message}')
+
                 events_log.update_state(raw_event)
-            first_init = False
+
             if message_count == 0:
                 # in case generator has no events, sleep until next call to kube to avoid empty cpu cycles
                 time.sleep(0.5)
 
     def _watch_pod_object_events_blocking(self, watcher, events_log, namespace):
         while self.running:
+            message_count = 0
             for message in watcher.stream(
                 self.core_api.list_pod_for_all_namespaces,
                 watch=True,
                 field_selector=f'metadata.namespace={namespace}',
                 timeout_seconds=10
             ):
+                message_count += 1
                 if not self.running:
                     break
                 raw_event = PodObjectRawEvent(message)
                 events_log.update_state(raw_event)
 
+            if message_count == 0:
+                # in case generator has no events, sleep until next call to kube to avoid empty cpu cycles
+                time.sleep(0.5)
+
     def _watch_node_object_events_blocking(self, watcher, events_log):
         while self.running:
+            message_count = 0
             for message in watcher.stream(
                 self.core_api.list_node,
                 watch=True,
                 timeout_seconds=10
             ):
+                message_count += 1
                 if not self.running:
                     break
                 raw_event = NodeObjectRawEvent(message)
                 events_log.update_state(raw_event)
+
+            if message_count == 0:
+                # in case generator has no events, sleep until next call to kube to avoid empty cpu cycles
+                time.sleep(0.5)
 
     def start(self, channels):
         # https://github.com/kubernetes-client/python/issues/728
@@ -137,7 +135,7 @@ class KubeWatcher:
         self.running = False
         print(f'Stopping Kube Watcher...')
 
-        # TODO clean kube_watcher_state
+        # TODO clean kube_watcher_state ?
 
         for name in channels:
             channel = self.channels[name]

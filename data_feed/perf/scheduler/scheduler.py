@@ -2,7 +2,7 @@ import time
 import concurrent.futures
 import functools
 
-from perf.defines import NODE_MEMORY_ALLOC_THRESHOLD, NODE_RESCHEDULE_PERIOD, DATA_FEED_CONTAINER
+from perf.defines import NODE_MEMORY_ALLOC_THRESHOLD, NODE_NEXT_SCHEDULE_PERIOD, DATA_FEED_CONTAINER
 from perf.estimator.estimator import Estimator
 from perf.estimator.estimation_state import PodEstimationPhaseEvent
 from perf.kube_api.resource_convert import ResourceConvert
@@ -33,10 +33,13 @@ class Scheduler:
                     self.running = False
                     break
 
-                while (node_name := self.get_ready_node_name()) is None and self.running:
+                node_name, reason, node_state = self.get_ready_node_name()
+                while node_name is None and self.running:
+                    # print(f'No ready nodes: {node_state}')
                     time.sleep(1)
+                    node_name, reason, node_state = self.get_ready_node_name()
 
-                print(f'Scheduling pod {pod_name} on node {node_name}')
+                print(f'Scheduling pod {pod_name} on node {node_name} reason {reason}')
 
                 priority = self.scheduling_state.get_schedulable_pod_priority(node_name)
                 self.scheduling_state.add_pod_to_schedule_state(pod_name, node_name, priority)
@@ -71,6 +74,11 @@ class Scheduler:
         self.clean_states(pod_name)
 
     def get_ready_node_name(self):
+        # TODO enum for reasons
+        # TODO move state to watcher
+        # TODO move this logic to watcher and use callbacks
+        nodes_state = {}
+
         nodes = self.kube_api.get_nodes()
         nodes_resource_usage = self.kube_api.get_nodes_resource_usage()
         for node in nodes.items:
@@ -82,6 +90,7 @@ class Scheduler:
                         has_resource_estimator_taint = True
                         break
             if not has_resource_estimator_taint:
+                nodes_state[node_name] = 'NO_RE_TAINT'
                 continue
 
             is_ready = False
@@ -90,6 +99,7 @@ class Scheduler:
                     is_ready = True
                     break
             if not is_ready:
+                nodes_state[node_name] = 'NO_NOT_READY'
                 continue
 
             allocatable = node.status.allocatable
@@ -97,24 +107,35 @@ class Scheduler:
             alloc_mem = ResourceConvert.memory(allocatable['memory'])
 
             # TODO add cpu_alloc threshold
-            if (int(nodes_resource_usage[node_name]['memory']) / int(alloc_mem)) > NODE_MEMORY_ALLOC_THRESHOLD:
-                continue
+            # TODO restore this after debug
+            # if (int(nodes_resource_usage[node_name]['memory']) / int(alloc_mem)) > NODE_MEMORY_ALLOC_THRESHOLD:
+            #     continue
 
             # TODO figure out heuristics to dynamically derive BULK_SCHEDULE_SIZE
             BULK_SCHEDULE_SIZE = 2
-            if node_name not in self.scheduling_state.pods_per_node or len(self.scheduling_state.pods_per_node) <= BULK_SCHEDULE_SIZE:
-                return node_name
+            if node_name not in self.scheduling_state.pods_per_node or len(self.scheduling_state.pods_per_node[node_name]) < BULK_SCHEDULE_SIZE:
+                nodes_state[node_name] = 'OK'
+                return node_name, 'BULK_SCHEDULE', nodes_state
 
             last_pod = self.scheduling_state.get_last_scheduled_pod(node_name)
             # only valid case is if last pod is in active estimation phase,
             # all other phases are temporary before removal
-            # also wait NODE_RESCHEDULE_PERIOD s for last pod to run successfully before scheduling more
+            # also wait NODE_NEXT_SCHEDULE_PERIOD s for last pod to run successfully before scheduling more
             phase_event = self.estimation_state.get_last_estimation_phase_event(last_pod)
-            if phase_event.type == PodEstimationPhaseEvent.WAITING_FOR_POD_TO_FINISH_ESTIMATION_RUN \
-                    and time.time() - phase_event.local_time.timestamp() > NODE_RESCHEDULE_PERIOD:
-                return node_name
+            if phase_event is None:
+                nodes_state[node_name] = 'NO_LAST_EVENT'
+                continue
+            if phase_event.type != PodEstimationPhaseEvent.WAITING_FOR_POD_TO_FINISH_ESTIMATION_RUN:
+                nodes_state[node_name] = 'LAST_POD_NOT_IN_WAITING_STATE'
+                continue
 
-        return None
+            if time.time() - phase_event.local_time.timestamp() > NODE_NEXT_SCHEDULE_PERIOD:
+                nodes_state[node_name] = 'OK'
+                return node_name, 'NEXT_SCHEDULE', nodes_state
+            else:
+                nodes_state[node_name] = f'WAITING_FOR_NEXT({time.time() - phase_event.local_time.timestamp()})'
+
+        return None, 'NO_SCHEDULABLE_NODES', nodes_state
 
     def add_df_events_to_stats(self, pod_name):
         events = []

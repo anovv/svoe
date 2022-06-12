@@ -12,8 +12,10 @@ class KubeRawEvent(RawEvent):
         self.involved_object_kind = raw_event['object'].involved_object.kind
         self.involved_object_name = raw_event['object'].involved_object.name
         self.involved_object_field_path = raw_event['object'].involved_object.field_path
+
         self.object_first_timestamp = raw_event['object'].first_timestamp
         self.object_last_timestamp = raw_event['object'].last_timestamp
+        self.creation_timestamp = raw_event['object'].metadata.creation_timestamp
         self.event_time = raw_event['object'].event_time
         
 # core_api.list_namespaced_event:

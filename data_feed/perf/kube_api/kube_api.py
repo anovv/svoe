@@ -20,6 +20,12 @@ class KubeApi:
         return self.core_api.list_node()
 
     def get_nodes_resource_usage(self):
+        # TODO handle metrics-server pod down:
+        # kubernetes.client.exceptions.ApiException: (503)
+        # Reason: Service Unavailable
+        # HTTP response headers: HTTPHeaderDict({'Audit-Id': 'a93de019-b23f-43d8-a9dc-743e446e32a5', 'Cache-Control': 'no-cache, private', 'Content-Type': 'text/plain; charset=utf-8', 'X-Content-Type-Options': 'nosniff', 'X-Kubernetes-Pf-Flowschema-Uid': '8f3873ec-b10f-44b5-a93f-5e2f3dca9a26', 'X-Kubernetes-Pf-Prioritylevel-Uid': '5ddc1665-06ed-4908-8c1f-5422c62f9a7c', 'Date': 'Sat, 11 Jun 2022 07:09:05 GMT', 'Content-Length': '20'})
+        # HTTP response body: service unavailable
+
         # needs metrics-server running
         # https://github.com/amelbakry/kube-node-utilization/blob/master/nodeutilization.py
         # https://stackoverflow.com/questions/66453590/how-to-use-kubectl-top-node-in-kubernetes-python
@@ -94,7 +100,6 @@ class KubeApi:
             'values': [node_name]
         })
 
-        # TODO this is not being set
         # set env for DATA_FEED_CONTAINER
         for container in template['spec']['containers']:
             if container['name'] == DATA_FEED_CONTAINER:
@@ -102,10 +107,11 @@ class KubeApi:
                 has_env_var = False
                 for env_var in env_vars:
                     if env_var['name'] == 'ENV':
-                        env_var['value'] = 'TEST'
+                        env_var['value'] = 'TESTING'
                         has_env_var = True
+                        break
                 if not has_env_var:
-                    env_vars.append({'name': 'ENV', 'value': 'TEST'})
+                    env_vars.append({'name': 'ENV', 'value': 'TESTING'})
 
         template['spec']['tolerations'].append({
             'key': 'svoe-role',

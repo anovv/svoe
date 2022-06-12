@@ -94,7 +94,9 @@ class EstimationState:
             self.estimation_result_events_per_pod[pod_name].append(event)
         else:
             self.estimation_result_events_per_pod[pod_name] = [event]
-        print(event)
+
+        # TODO debug
+        # print(event)
 
     def get_last_estimation_phase_event(self, pod_name):
         if pod_name in self.estimation_phase_events_per_pod:
@@ -120,8 +122,8 @@ class EstimationState:
         else:
             self.estimation_phase_events_per_pod[pod_name] = [event]
 
-        # TODO is this needed?
-        print(event)
+        # TODO debug
+        # print(event)
 
     def wake_event(self, pod_name):
         self.wait_event_per_pod[pod_name].set()

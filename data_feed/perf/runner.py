@@ -9,7 +9,7 @@ from perf.metrics.prom_connection import PromConnection
 from perf.estimator.estimation_state import EstimationState
 from perf.scheduler.scheduler import Scheduler
 from perf.scheduler.scheduling_state import SchedulingState
-from perf.callback import Callback
+from perf.callback import PodCallback, NodeCallback
 
 
 class Runner:
@@ -23,8 +23,11 @@ class Runner:
 
         self.scheduling_state = SchedulingState()
         self.estimation_state = EstimationState()
-        callback = Callback(self.estimation_state)
-        self.kube_watcher_state = KubeWatcherState([callback.callback])
+        pod_callback = PodCallback(self.estimation_state)
+        node_callback = NodeCallback(self.scheduling_state)
+
+        # TODO pass correct callback to correct channel
+        self.kube_watcher_state = KubeWatcherState([pod_callback.callback, node_callback.callback])
 
         self.kube_watcher = KubeWatcher(core_api, self.kube_watcher_state)
         self.prom_connection = PromConnection()
@@ -48,8 +51,11 @@ class Runner:
             self.prom_connection.stop()
             self.prom_connection = None
         if self.kube_watcher:
-            self.kube_watcher.stop([CHANNEL_NODE_OBJECT_EVENTS, CHANNEL_NODE_KUBE_EVENTS, CHANNEL_DF_POD_OBJECT_EVENTS,
-                                    CHANNEL_DF_POD_KUBE_EVENTS])
+            self.kube_watcher.stop([
+                CHANNEL_NODE_OBJECT_EVENTS,
+                CHANNEL_NODE_KUBE_EVENTS,
+                CHANNEL_DF_POD_OBJECT_EVENTS,
+                CHANNEL_DF_POD_KUBE_EVENTS])
             self.kube_watcher = None
 
 
@@ -64,7 +70,12 @@ r = Runner()
 # s.get_oom_score("minikube-1-m03", "kube-proxy-fjr9n", ["kube-proxy"])
 
 # subset = ['data-feed-binance-spot-6d1641b134-ss', 'data-feed-binance-spot-eb540d90be-ss', 'data-feed-bybit-perpetual-cca5766921-ss']
-sub = ['data-feed-binance-spot-6d1641b134-ss', 'data-feed-binance-spot-eb540d90be-ss']
+sub = ['data-feed-binance-spot-6d1641b134-ss',
+       'data-feed-binance-spot-eb540d90be-ss',
+       'data-feed-binance-spot-18257181b7-ss',
+       'data-feed-binance-spot-28150ca2ec-ss',
+       'data-feed-binance-spot-2d2a017a56-ss',
+       'data-feed-binance-spot-3dd6e42fd0-ss',]
 r.run(sub)
 # ss_name = 'data-feed-binance-spot-6d1641b134-ss'
 # ss_name = 'data-feed-binance-spot-eb540d90be-ss'

@@ -1,12 +1,17 @@
 # TODO break down into separate scenario specific callbacks
 from perf.defines import DATA_FEED_CONTAINER
+
 from perf.kube_watcher.event.logged.node_logged_event import NodeLoggedEvent
+from perf.kube_watcher.event.logged.kube_event.node_kube_logged_event import NodeKubeLoggedEvent
+
+from perf.kube_watcher.event.logged.pod_logged_event import PodLoggedEvent
 from perf.kube_watcher.event.logged.kube_event.pod_kube_events_log import PodKubeLoggedEvent
 from perf.kube_watcher.event.logged.object.pod_object_events_log import PodObjectLoggedEvent
+
 from perf.estimator.estimation_state import PodEstimationPhaseEvent, PodEstimationResultEvent
 
 
-class Callback:
+class PodCallback:
     def __init__(self, estimation_state):
         self.estimation_state = estimation_state
 
@@ -14,8 +19,8 @@ class Callback:
     #     print(event)
 
     def callback(self, event):
-        # TODO separate callback for node events?
-        if isinstance(event, NodeLoggedEvent):
+        if not isinstance(event, PodLoggedEvent):
+            # TODO raise if wrong event type
             return
 
         # TODO ignore events if estimation has not started?
@@ -27,7 +32,8 @@ class Callback:
                 and self.estimation_state.get_last_estimation_result_event_type(pod_name) \
                 in [*PodEstimationResultEvent.get_interrupts(), PodEstimationResultEvent.POD_DELETED]:
             # If interrupted we skip everything except pod deletion event
-            print(f'skipped {event.data}')
+            # TODO debug
+            # print(f'skipped {event.data}')
             return
 
         if self.estimation_state.get_last_estimation_phase_event_type(pod_name) == PodEstimationPhaseEvent.WAITING_FOR_POD_TO_BE_SCHEDULED \
@@ -110,3 +116,19 @@ class Callback:
         # TODO kube event Failed, unhealthy readiness, pod_status_phase == 'Failed', other indicators?, any other container backoff?
         # TODO OOMs
         # TODO node events
+
+
+class NodeCallback:
+    def __init__(self, scheduling_state):
+        self.scheduling_state = scheduling_state
+
+    def callback(self, event):
+        if not isinstance(event, NodeLoggedEvent):
+            # TODO raise if wrong event type
+            return
+
+        if isinstance(event, NodeKubeLoggedEvent):
+            # TODO debugs
+            print(event)
+            return
+

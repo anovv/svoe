@@ -92,7 +92,7 @@ class PodObjectEventsLog(PodEventsLog):
                 # special cases
                 # state - general container state change
                 # started - Startup Probe passed/failed
-                # ready - ReadinessP robe passed/failed
+                # ready - Readiness Probe passed/failed
                 # restartCount - Restart event
                 # TODO add last_state to all container events
                 for logged_event_type, filter_keys in [
