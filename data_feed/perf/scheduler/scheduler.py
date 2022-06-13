@@ -1,21 +1,26 @@
 import time
 import concurrent.futures
 import functools
+import kubernetes
+import json
 
-from perf.defines import NODE_MEMORY_ALLOC_THRESHOLD, NODE_NEXT_SCHEDULE_PERIOD, DATA_FEED_CONTAINER
+from perf.defines import NODE_NEXT_SCHEDULE_PERIOD
 from perf.estimator.estimator import Estimator
-from perf.estimator.estimation_state import PodEstimationPhaseEvent
+from perf.state.phase_result_scheduling_state import PodSchedulingResultEvent, PodSchedulingPhaseEvent, SchedulingTimeouts
+from perf.state.estimation_state import PodEstimationPhaseEvent
 from perf.kube_api.resource_convert import ResourceConvert
 
 
 class Scheduler:
-    def __init__(self, kube_api, scheduling_state, estimation_state, kube_watcher_state):
+    def __init__(self, kube_api, scheduling_state, estimation_state, kube_watcher_state, stats):
         self.kube_api = kube_api
         self.scheduling_state = scheduling_state
         self.estimation_state = estimation_state
         self.kube_watcher_state = kube_watcher_state
 
-        self.estimator = Estimator(self.kube_api, self.estimation_state)
+        self.stats = stats
+        self.estimator = Estimator(self.estimation_state, self.stats)
+
         self.running = False
         self.futures = {}
 
@@ -41,23 +46,75 @@ class Scheduler:
 
                 print(f'Scheduling pod {pod_name} on node {node_name} reason {reason}')
 
-                priority = self.scheduling_state.get_schedulable_pod_priority(node_name)
-                self.scheduling_state.add_pod_to_schedule_state(pod_name, node_name, priority)
                 future = executor.submit(
-                    self.estimator.estimate_resources,
+                    self.run_estimator,
                     pod_name=pod_name,
                     node_name=node_name,
-                    priority=priority
                 )
 
                 future.add_done_callback(functools.partial(self.done_estimation_callback, pod_name=pod_name))
                 self.futures[future] = pod_name
 
         print('Scheduler finished')
-        # TODO is this needed
-        # for future in concurrent.futures.as_completed(self.futures.keys()):
-        #     res = future.result()
-        #     print(f'Finished estimating resources for {self.futures[future]}: {res}')
+
+    def run_estimator(self, pod_name, node_name):
+        priority = self.scheduling_state.get_schedulable_pod_priority(node_name)
+        self.scheduling_state.add_pod_to_schedule_state(pod_name, node_name, priority)
+        self.scheduling_state.add_phase_event(pod_name, PodSchedulingPhaseEvent.WAITING_FOR_POD_TO_BE_SCHEDULED)
+        payload_config = self.schedule_pod(pod_name, node_name, priority)
+        if self.scheduling_state.get_last_result_event_type(pod_name) == PodSchedulingResultEvent.POD_SCHEDULED:
+            self.estimator.estimate_resources(pod_name, payload_config)
+        self.delete_pod(pod_name)
+
+    def schedule_pod(self, pod_name, node_name, priority):
+        payload_config = None
+        try:
+            payload_config, _ = self.kube_api.get_payload(pod_name)
+            self.kube_api.create_raw_pod(pod_name, node_name, priority)
+
+        except kubernetes.client.exceptions.ApiException as e:
+            if json.loads(e.body)['reason'] == 'AlreadyExists':
+                result = PodSchedulingResultEvent.INTERRUPTED_POD_ALREADY_EXISTS
+                self.scheduling_state.add_result_event(pod_name, result)
+                return payload_config
+            else:
+                # TODO INTERRUPTED_INTERNAL_ERROR -> INTERRUPTED_UNKNOWN_ERROR and add exception to event
+                raise e
+        except Exception as e:
+            # TODO INTERRUPTED_INTERNAL_ERROR -> INTERRUPTED_UNKNOWN_ERROR and add exception to event
+            self.scheduling_state.add_result_event(pod_name, PodSchedulingResultEvent.INTERRUPTED_INTERNAL_ERROR)
+            raise e  # TODO should raise?
+
+        timed_out = not self.scheduling_state.wait_event(pod_name, SchedulingTimeouts.POD_SCHEDULED_TIMEOUT)
+        if timed_out:
+            self.scheduling_state.add_result_event(pod_name, PodSchedulingResultEvent.INTERRUPTED_TIMEOUT)
+        else:
+            self.scheduling_state.add_result_event(pod_name, PodSchedulingResultEvent.POD_SCHEDULED)
+
+        return payload_config
+
+    def delete_pod(self, pod_name):
+        self.scheduling_state.add_phase_event(pod_name, PodSchedulingPhaseEvent.WAITING_FOR_POD_TO_BE_DELETED)
+        try:
+            self.kube_api.delete_raw_pod(pod_name)
+        except kubernetes.client.exceptions.ApiException as e:
+            if json.loads(e.body)['reason'] == 'NotFound':
+                result = PodSchedulingResultEvent.INTERRUPTED_POD_NOT_FOUND
+                self.scheduling_state.add_result_event(pod_name, result)
+                return
+            else:
+                # TODO INTERRUPTED_INTERNAL_ERROR -> INTERRUPTED_UNKNOWN_ERROR and add exception to event
+                raise e
+        except Exception as e:
+            # TODO INTERRUPTED_INTERNAL_ERROR -> INTERRUPTED_UNKNOWN_ERROR and add exception to event
+            self.scheduling_state.add_result_event(pod_name, PodSchedulingResultEvent.INTERRUPTED_INTERNAL_ERROR)
+            raise e  # TODO should raise?
+
+        timed_out = not self.scheduling_state.wait_event(pod_name, SchedulingTimeouts.POD_DELETED_TIMEOUT)
+        if timed_out:
+            self.scheduling_state.add_result_event(pod_name, PodSchedulingResultEvent.INTERRUPTED_TIMEOUT)
+        else:
+            self.scheduling_state.add_result_event(pod_name, PodSchedulingResultEvent.POD_DELETED)
 
     def remove_done_futures(self):
         for f in list(self.futures.keys()):
@@ -69,8 +126,13 @@ class Scheduler:
         success = future.result()
         self.scheduling_state.reschedule_or_complete(pod_name, success)
         if success:
-            # TODO add reschedule event to stats on failure?
-            self.add_df_events_to_stats(pod_name)
+            # TODO add reschedule event ?
+            self.stats.add_all_df_events_to_stats(
+                pod_name,
+                self.estimation_state,
+                self.scheduling_state,
+                self.kube_watcher_state
+            )
         self.clean_states(pod_name)
 
     def get_ready_node_name(self):
@@ -121,7 +183,7 @@ class Scheduler:
             # only valid case is if last pod is in active estimation phase,
             # all other phases are temporary before removal
             # also wait NODE_NEXT_SCHEDULE_PERIOD s for last pod to run successfully before scheduling more
-            phase_event = self.estimation_state.get_last_estimation_phase_event(last_pod)
+            phase_event = self.estimation_state.get_last_phase_event(last_pod)
             if phase_event is None:
                 nodes_state[node_name] = 'NO_LAST_EVENT'
                 continue
@@ -137,21 +199,10 @@ class Scheduler:
 
         return None, 'NO_SCHEDULABLE_NODES', nodes_state
 
-    def add_df_events_to_stats(self, pod_name):
-        events = []
-        events.extend(self.kube_watcher_state.event_queues_per_pod[pod_name].queue)
-        events.extend(self.estimation_state.estimation_phase_events_per_pod[pod_name])
-        events.extend(self.estimation_state.estimation_result_events_per_pod[pod_name])
-        events.sort(key=lambda event: event.local_time)
-        events = list(
-            filter(lambda event: event.container_name is None or event.container_name == DATA_FEED_CONTAINER, events))
-        events = list(map(lambda event: str(event), events))
-        self.estimation_state.add_events_to_stats(pod_name, events)
-
     def clean_states(self, pod_name):
+        self.estimation_state.clean_phase_result_events(pod_name)
+        self.scheduling_state.clean_phase_result_events(pod_name)
         del self.kube_watcher_state.event_queues_per_pod[pod_name]
-        del self.estimation_state.estimation_phase_events_per_pod[pod_name]
-        del self.estimation_state.estimation_result_events_per_pod[pod_name]
 
     def stop(self):
         return  # TODO

@@ -1,14 +1,3 @@
-import json
-
-
-def save_stats(stats):
-    # TODO
-    # path = f'resources-estimation-{datetime.datetime.now().strftime("%d-%m-%Y-%H:%M:%S")}.json'
-    path = 'resources-estimation.json'
-    with open(path, 'w+') as outfile:
-        json.dump(stats, outfile, indent=4, sort_keys=True)
-    print(f'Saved stats to {path}')
-
 
 def equal_dicts(d1, d2, compare_by_keys):
     if not d1 or not d2:

@@ -1,19 +1,16 @@
-# TODO break down into separate scenario specific callbacks
+
+from perf.callback.callback import Callback
 from perf.defines import DATA_FEED_CONTAINER
 
-from perf.kube_watcher.event.logged.node_logged_event import NodeLoggedEvent
-from perf.kube_watcher.event.logged.kube_event.node_kube_logged_event import NodeKubeLoggedEvent
+from perf.state.estimation_state import PodEstimationPhaseEvent, PodEstimationResultEvent
+from perf.state.phase_result_scheduling_state import PodSchedulingPhaseEvent, PodSchedulingResultEvent
 
 from perf.kube_watcher.event.logged.pod_logged_event import PodLoggedEvent
 from perf.kube_watcher.event.logged.kube_event.pod_kube_events_log import PodKubeLoggedEvent
 from perf.kube_watcher.event.logged.object.pod_object_events_log import PodObjectLoggedEvent
 
-from perf.estimator.estimation_state import PodEstimationPhaseEvent, PodEstimationResultEvent
 
-
-class PodCallback:
-    def __init__(self, estimation_state):
-        self.estimation_state = estimation_state
+class PodCallback(Callback):
 
     # def _callback(self, event):
     #     print(event)
@@ -28,21 +25,27 @@ class PodCallback:
         pod_name = event.pod_name
         container_name = event.container_name
 
-        if self.estimation_state.get_last_estimation_phase_event_type(pod_name) != PodEstimationPhaseEvent.WAITING_FOR_POD_TO_BE_DELETED \
-                and self.estimation_state.get_last_estimation_result_event_type(pod_name) \
-                in [*PodEstimationResultEvent.get_interrupts(), PodEstimationResultEvent.POD_DELETED]:
+        # Skips
+        if self.scheduling_state.get_last_phase_event_type(pod_name) != PodSchedulingPhaseEvent.WAITING_FOR_POD_TO_BE_DELETED \
+                and self.estimation_state.is_interrupted(pod_name):
             # If interrupted we skip everything except pod deletion event
             # TODO debug
-            # print(f'skipped {event.data}')
+            print(f'skipped {event.data}')
             return
 
-        if self.estimation_state.get_last_estimation_phase_event_type(pod_name) == PodEstimationPhaseEvent.WAITING_FOR_POD_TO_BE_SCHEDULED \
+        # Scheduling state
+        if self.scheduling_state.get_last_phase_event_type(pod_name) == PodSchedulingPhaseEvent.WAITING_FOR_POD_TO_BE_SCHEDULED \
                 and event.type == PodKubeLoggedEvent.POD_EVENT \
                 and event.data['reason'] == 'Scheduled':
-            self.estimation_state.wake_event(pod_name)
+            self.scheduling_state.wake_event(pod_name)
             return
 
-        if self.estimation_state.get_last_estimation_phase_event_type(
+        if self.scheduling_state.get_last_phase_event_type(pod_name) == PodSchedulingPhaseEvent.WAITING_FOR_POD_TO_BE_DELETED \
+                and event.type == PodObjectLoggedEvent.POD_DELETED:
+            self.scheduling_state.wake_event(pod_name)
+            return
+
+        if self.estimation_state.get_last_phase_event_type(
                 pod_name) == PodEstimationPhaseEvent.WAITING_FOR_DF_CONTAINER_TO_PULL_IMAGE \
                 and event.type == PodKubeLoggedEvent.CONTAINER_EVENT \
                 and container_name == DATA_FEED_CONTAINER \
@@ -51,7 +54,7 @@ class PodCallback:
             return
 
         # TODO wait for containers to started/ready==True?
-        if self.estimation_state.get_last_estimation_phase_event_type(
+        if self.estimation_state.get_last_phase_event_type(
                 pod_name) == PodEstimationPhaseEvent.WAITING_FOR_POD_TO_START_ESTIMATION_RUN \
                 and event.type == PodObjectLoggedEvent.CONTAINER_STATE_CHANGED:
 
@@ -66,25 +69,20 @@ class PodCallback:
                 self.estimation_state.wake_event(pod_name)
                 return
 
-        if self.estimation_state.get_last_estimation_phase_event_type(pod_name) == PodEstimationPhaseEvent.WAITING_FOR_POD_TO_BE_DELETED \
-                and event.type == PodObjectLoggedEvent.POD_DELETED:
-            self.estimation_state.wake_event(pod_name)
-            return
-
         # Interrupts
         # Unexpected container termination
         if event.type == PodObjectLoggedEvent.CONTAINER_STATE_CHANGED \
                 and 'terminated' in event.data['state'] \
-                and self.estimation_state.get_last_estimation_phase_event_type(pod_name) != PodEstimationPhaseEvent.WAITING_FOR_POD_TO_BE_DELETED \
-                and self.estimation_state.has_estimation_result_type(pod_name, PodEstimationResultEvent.POD_SCHEDULED):
+                and self.scheduling_state.get_last_phase_event_type(pod_name) != PodSchedulingPhaseEvent.WAITING_FOR_POD_TO_BE_DELETED \
+                and self.scheduling_state.has_result_type(pod_name, PodSchedulingResultEvent.POD_SCHEDULED):
             self.estimation_state.add_estimation_result_event(pod_name,
                                                               PodEstimationResultEvent.INTERRUPTED_UNEXPECTED_CONTAINER_TERMINATION)
             self.estimation_state.wake_event(pod_name)
 
         # Unexpected pod deletion
         if event.type == PodObjectLoggedEvent.POD_DELETED \
-                and self.estimation_state.get_last_estimation_phase_event_type(pod_name) != PodEstimationPhaseEvent.WAITING_FOR_POD_TO_BE_DELETED \
-                and self.estimation_state.has_estimation_result_type(pod_name, PodEstimationResultEvent.POD_SCHEDULED):
+                and self.scheduling_state.get_last_estimation_phase_event_type(pod_name) != PodSchedulingPhaseEvent.WAITING_FOR_POD_TO_BE_DELETED \
+                and self.scheduling_state.has_estimation_result_type(pod_name, PodSchedulingResultEvent.POD_SCHEDULED):
 
             self.estimation_state.add_estimation_result_event(pod_name,
                                                               PodEstimationResultEvent.INTERRUPTED_UNEXPECTED_POD_DELETION)
@@ -99,15 +97,13 @@ class PodCallback:
 
             if event.data['count'] >= 5:
                 # TODO check number in a timeframe instead of total
-                self.estimation_state.add_estimation_result_event(pod_name,
-                                                                  PodEstimationResultEvent.INTERRUPTED_DF_CONTAINER_HEALTH_LIVENESS)
+                self.estimation_state.add_result_event(pod_name, PodEstimationResultEvent.INTERRUPTED_DF_CONTAINER_HEALTH_LIVENESS)
                 self.estimation_state.wake_event(pod_name)
                 return
 
             if event.data['count'] >= 10:
                 # TODO check number in a timeframe instead of total
-                self.estimation_state.add_estimation_result_event(pod_name,
-                                                                  PodEstimationResultEvent.INTERRUPTED_DF_CONTAINER_HEALTH_STARTUP)
+                self.estimation_state.add_result_event(pod_name, PodEstimationResultEvent.INTERRUPTED_DF_CONTAINER_HEALTH_STARTUP)
                 self.estimation_state.wake_event(pod_name)
                 return
 
@@ -116,19 +112,3 @@ class PodCallback:
         # TODO kube event Failed, unhealthy readiness, pod_status_phase == 'Failed', other indicators?, any other container backoff?
         # TODO OOMs
         # TODO node events
-
-
-class NodeCallback:
-    def __init__(self, scheduling_state):
-        self.scheduling_state = scheduling_state
-
-    def callback(self, event):
-        if not isinstance(event, NodeLoggedEvent):
-            # TODO raise if wrong event type
-            return
-
-        if isinstance(event, NodeKubeLoggedEvent):
-            # TODO debugs
-            print(event)
-            return
-

@@ -1,11 +1,14 @@
 import threading
 import concurrent.futures
 
+from perf.state.phase_result_scheduling_state import PhaseResultSchedulingState
+
 MAX_RESCHEDULES = 1
 
 
-class SchedulingState:
+class SchedulingState(PhaseResultSchedulingState):
     def __init__(self):
+        super(SchedulingState, self).__init__()
         self.pods_work_queue = None
         self.pods_done = []
         self.pods_per_node = {}
