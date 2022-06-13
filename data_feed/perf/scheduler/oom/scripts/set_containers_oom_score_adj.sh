@@ -1,10 +1,10 @@
 #!/bin/bash
 
-# Script setting oom_score_adj for running containers
+# Script setting oom_score_adj and getting pids for running containers
 # Example: ./set_containers_oom_score_adj -n minikube-1-m02 -c "redis_pod1 data-feed-container_pod1" -s "-1000 0"
 # -n node name
 # -c should be in quotes e.g. -c "container1_pod1 container2_pod1 container3_pod2"
-# -s score - list of scores, maps to each container_pod string in -c
+# -s score - list of scores, maps to each container_pod string in -c. Allows empty string
 while getopts ":n:c:s:" opt; do
   case $opt in
     n) node="$OPTARG"
@@ -44,8 +44,6 @@ shell_command=(
   done
   wait
 
-  tail \$container_ids_temp_file
-
   container_pids_temp_file=\$(mktemp)
 
   function write_container_pids_to_file() {
@@ -64,27 +62,33 @@ shell_command=(
   done < \$container_ids_temp_file
   wait
 
-  tail \$container_pids_temp_file
-
   function set_oom_score_adj() {
     container_name=\$1
     pid=\$2
     score_adj=\$3
     path=\"proc/\$pid/oom_score_adj\"
     if test -f \$path; then
-      echo \"\$score_adj\" > \$path
-      echo \"{container: \$container_name, pid: \$pid, oom_score_adj: \$score_adj}\"
+      if ! test -z \$score_adj; then
+        echo \"\$score_adj\" > \$path
+        echo \"{container: \$container_name, pid: \$pid, oom_score_adj: \$score_adj}\"
+      else
+        echo \"{container: \$container_name, pid: \$pid}\"
+      fi
     fi
   }
 
   count=0
   oom_scores_adj=\"$oom_scores_adj\"
   arr_scores=(\$oom_scores_adj)
+  len_scores=\${#arr_scores[@]}
   while read container_name_pids; do
     arr=(\$container_name_pids)
     container_name=\${arr[0]}
     pids=\${arr[@]:1}
-    oom_score_adj=\${arr_scores[\$count]}
+    oom_score_adj=\"\"
+    if [[ \"\$count\" -lt \"\$len_scores\" ]]; then
+      oom_score_adj=\${arr_scores[\$count]}
+    fi
     count+=1
     for pid in \$pids
     do
