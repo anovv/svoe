@@ -142,6 +142,8 @@ class Scheduler:
         nodes_state = {}
 
         nodes = self.kube_api.get_nodes()
+        # TODO metrics-server updates info every 15s
+        # make sure we wait here for updated info?
         nodes_resource_usage = self.kube_api.get_nodes_resource_usage()
         for node in nodes.items:
             node_name = node.metadata.name

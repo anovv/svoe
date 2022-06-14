@@ -70,9 +70,9 @@ shell_command=(
     if test -f \$path; then
       if ! test -z \$score_adj; then
         echo \"\$score_adj\" > \$path
-        echo \"{container: \$container_name, pid: \$pid, oom_score_adj: \$score_adj}\"
+        echo \"container: \$container_name, pid: \$pid, oom_score_adj: \$score_adj\"
       else
-        echo \"{container: \$container_name, pid: \$pid}\"
+        echo \"container: \$container_name, pid: \$pid\"
       fi
     fi
   }

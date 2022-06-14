@@ -39,15 +39,15 @@ shell_command=(
         oom_score=\$(cat \$path_score)
         if test -f \$path_score_adj; then
           oom_score_adj=\$(cat \$path_score_adj)
-          echo \"{container: \$container, pid: \$pid, oom_score: \$oom_score, oom_score_adj: \$oom_score_adj}\"
+          echo \"container: \$container, pid: \$pid, oom_score: \$oom_score, oom_score_adj: \$oom_score_adj\"
         else
-          echo \"{container: \$container, pid: \$pid, oom_score: \$oom_score, oom_score_adj: None}\"
+          echo \"container: \$container, pid: \$pid, oom_score: \$oom_score, oom_score_adj: None\"
         fi
       else
         if test -f \$path_score_adj; then
-          echo \"{container: \$container, pid: \$pid, oom_score: None, oom_score_adj: \$oom_score_adj}\"
+          echo \"container: \$container, pid: \$pid, oom_score: None, oom_score_adj: \$oom_score_adj\"
         else
-          echo \"{container: \$container, pid: \$pid, oom_score: None, oom_score_adj: None}\"
+          echo \"container: \$container, pid: \$pid, oom_score: None, oom_score_adj: None\"
         fi
       fi
     done
