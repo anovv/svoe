@@ -9,7 +9,7 @@ from perf.estimator.estimator import Estimator
 from perf.state.phase_result_scheduling_state import PodSchedulingResultEvent, PodSchedulingPhaseEvent, SchedulingTimeouts
 from perf.state.estimation_state import PodEstimationPhaseEvent
 from perf.kube_api.resource_convert import ResourceConvert
-
+from perf.scheduler.oom.oom_handler import OOMHandler
 
 class Scheduler:
     def __init__(self, kube_api, scheduling_state, estimation_state, kube_watcher_state, stats):
@@ -20,6 +20,7 @@ class Scheduler:
 
         self.stats = stats
         self.estimator = Estimator(self.estimation_state, self.stats)
+        self.oom_handler = OOMHandler(self.scheduling_state)
 
         self.running = False
         self.futures = {}

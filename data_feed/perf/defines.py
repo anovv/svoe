@@ -5,6 +5,7 @@ DATA_FEED_NAMESPACE = 'data-feed'
 DATA_FEED_CONTAINER = 'data-feed-container'
 DATA_FEED_CM_CONFIG_NAME = 'data-feed-config.yaml'
 REDIS_CONTAINER = 'redis'
+REDIS_EXPORTER_CONTAINER = 'redis-exporter'
 NODE_MEMORY_ALLOC_THRESHOLD = 0.75 # do not schedule pods onto node if memory usage is above this
 NODE_NEXT_SCHEDULE_PERIOD = 10 # how long to wait for current pod to run until scheduling next pod
 RUN_ESTIMATION_FOR = 120 # how long to run estimation

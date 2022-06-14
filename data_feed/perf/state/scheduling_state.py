@@ -12,6 +12,8 @@ class SchedulingState(PhaseResultSchedulingState):
         self.pods_work_queue = None
         self.pods_done = []
         self.pods_per_node = {}
+        # contains info about oom_score_adj per pid per container per pod. See OOMHandler
+        self.pids_per_container_per_pod = {}
         self.pods_priorities = {}
         self.reschedule_counters_per_pod = {}
 
@@ -25,6 +27,14 @@ class SchedulingState(PhaseResultSchedulingState):
         if node not in self.pods_per_node or len(self.pods_per_node[node]) == 0:
             return None
         return self.pods_per_node[node][-1]
+
+    def get_node_for_scheduled_pod(self, pod):
+        for node in self.pods_per_node:
+            for scheduled_pod in self.pods_per_node[node]:
+                if scheduled_pod == pod:
+                    return node
+
+        raise ValueError(f'Pod {pod} is not scheduled on any node')
 
     def get_schedulable_pod_priority(self, node_name):
         last_pod = self.get_last_scheduled_pod(node_name)
