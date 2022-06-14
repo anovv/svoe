@@ -8,20 +8,27 @@ from perf.kube_watcher.event.logged.object.node_object_events_log import NodeObj
 
 
 class KubeWatcherState:
-    def __init__(self, callbacks):
-        self.callbacks = callbacks
+    def __init__(self):
+        self.node_callbacks = []
+        self.pod_callbacks = []
         self.event_queues_per_pod = {}
         self.event_queues_per_node = {}
         self.event_logs_per_channel = {}
 
         # init event logs per channel
         for channel, events_log in [
-            (CHANNEL_NODE_KUBE_EVENTS, NodeKubeEventsLog(self.event_queues_per_node, self.callbacks)),
-            (CHANNEL_NODE_OBJECT_EVENTS, NodeObjectEventsLog(self.event_queues_per_node, self.callbacks)),
-            (CHANNEL_DF_POD_KUBE_EVENTS, PodKubeEventsLog(self.event_queues_per_pod, self.callbacks)),
-            (CHANNEL_DF_POD_OBJECT_EVENTS, PodObjectEventsLog(self.event_queues_per_pod, self.callbacks)),
+            (CHANNEL_NODE_KUBE_EVENTS, NodeKubeEventsLog(self.event_queues_per_node, self.node_callbacks)),
+            (CHANNEL_NODE_OBJECT_EVENTS, NodeObjectEventsLog(self.event_queues_per_node, self.node_callbacks)),
+            (CHANNEL_DF_POD_KUBE_EVENTS, PodKubeEventsLog(self.event_queues_per_pod, self.pod_callbacks)),
+            (CHANNEL_DF_POD_OBJECT_EVENTS, PodObjectEventsLog(self.event_queues_per_pod, self.pod_callbacks)),
         ]:
             self.event_logs_per_channel[channel] = events_log
 
     def get_events_log(self, channel):
         return self.event_logs_per_channel[channel]
+
+    def register_node_callback(self, node_callback):
+        self.node_callbacks.append(node_callback)
+
+    def register_pod_callback(self, pod_callback):
+        self.pod_callbacks.append(pod_callback)

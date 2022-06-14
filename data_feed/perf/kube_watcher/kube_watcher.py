@@ -123,11 +123,11 @@ class KubeWatcher:
         # https://www.programcreek.com/python/example/111707/kubernetes.watch.Watch
         if self.running:
             return
-        print(f'KubeWatcher started')
         self.running = True
         for name in channels:
             channel = self.channels[name]
             channel['thread'].start()
+        print(f'KubeWatcher started')
 
     def stop(self, channels):
         if not self.running:

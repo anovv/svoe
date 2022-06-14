@@ -24,17 +24,8 @@ class Runner:
 
         self.scheduling_state = SchedulingState()
         self.estimation_state = EstimationState()
-        pod_callback = PodCallback(self.estimation_state, self.scheduling_state)
-        node_callback = NodeCallback(self.estimation_state, self.scheduling_state)
-
-        # TODO pass correct callback to correct channel
-        self.kube_watcher_state = KubeWatcherState([pod_callback.callback, node_callback.callback])
-
-        self.kube_watcher = KubeWatcher(core_api, self.kube_watcher_state)
-        self.prom_connection = PromConnection()
-
+        self.kube_watcher_state = KubeWatcherState()
         self.stats = Stats()
-
         self.scheduler = Scheduler(
             self.kube_api,
             self.scheduling_state,
@@ -42,6 +33,13 @@ class Runner:
             self.kube_watcher_state,
             self.stats
         )
+        pod_callback = PodCallback(self.scheduler)
+        node_callback = NodeCallback(self.scheduler)
+        self.kube_watcher_state.register_pod_callback(pod_callback.callback)
+        self.kube_watcher_state.register_node_callback(node_callback.callback)
+
+        self.kube_watcher = KubeWatcher(core_api, self.kube_watcher_state)
+        self.prom_connection = PromConnection()
 
     def run(self, subset=None):
         print('Started estimator')

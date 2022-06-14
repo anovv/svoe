@@ -1,9 +1,10 @@
 
 
 class Callback:
-    def __init__(self, estimation_state, scheduling_state):
-        self.estimation_state = estimation_state
-        self.scheduling_state = scheduling_state
+    def __init__(self, scheduler):
+        self.scheduler = scheduler
+        self.estimation_state = scheduler.estimation_state
+        self.scheduling_state = scheduler.scheduling_state
 
     def callback(self, event):
         raise ValueError('Not implemented')

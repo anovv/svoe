@@ -17,8 +17,7 @@ class PodCallback(Callback):
 
     def callback(self, event):
         if not isinstance(event, PodLoggedEvent):
-            # TODO raise if wrong event type
-            return
+            raise ValueError(f'Unsupported event class: {event.__class__.__name__} for PodCallback')
 
         # TODO ignore events if estimation has not started?
 

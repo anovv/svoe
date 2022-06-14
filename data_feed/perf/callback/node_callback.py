@@ -9,8 +9,7 @@ class NodeCallback(Callback):
 
     def callback(self, event):
         if not isinstance(event, NodeLoggedEvent):
-            # TODO raise if wrong event type
-            return
+            raise ValueError(f'Unsupported event class: {event.__class__.__name__} for NodeCallback')
 
         if isinstance(event, NodeKubeLoggedEvent):
             # TODO debugs
