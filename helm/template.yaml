@@ -82,6 +82,9 @@ releases:
     namespace: monitoring
     values:
       - ../../values/deliveryhero/node-problem-detector/values.yaml.gotmpl
+  - chart: ../../charts/local/remote-scripts
+    name: remote-scripts
+    namespace: kube-system
 repositories:
   - name: metrics-server
     url: https://kubernetes-sigs.github.io/metrics-server/

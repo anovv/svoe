@@ -1,0 +1,74 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: remote-scripts-ds
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: remote-scripts
+spec:
+  selector:
+    matchLabels:
+        app: remote-scripts
+  template:
+    metadata:
+      labels:
+        app: remote-scripts
+    spec:
+      hostPID: true
+      hostNetwork: true
+      containers:
+      - name: remote-scripts-runner
+        image: alpine:latest
+#        command: ["/bin/sh", "-c", "touch /tmp/scripts/script.sh; echo $SCRIPT > /tmp/scripts/script.sh; chmod +x /tmp/scripts/script.sh; while true; do sleep 30; done;"]
+        command: [ "while true; do sleep 30; done;" ]
+        volumeMounts:
+          - name: remote-scripts-vol
+            mountPath: /scripts
+        securityContext:
+          privileged: true
+#        env:
+#          - name: SCRIPT
+#            value: |
+#              #!/bin/sh -e
+#
+#              docker ps
+#              echo "Test"
+        resources:
+          requests:
+            cpu: 30m
+            memory: 30Mi
+          limits:
+            cpu: 30m
+            memory: 30Mi
+      volumes:
+        - name: remote-scripts-vol
+          localPath:
+            path: /tmp/scripts
+#          configMap:
+#            name: remote-scripts-cm
+#            defaultMode: 365
+      tolerations:
+      - effect: NoSchedule
+        key: node-role.kubernetes.io/master
+      - effect: NoSchedule
+        operator: Exists
+      - effect: NoExecute
+        key: node.kubernetes.io/not-ready
+        operator: Exists
+      - effect: NoExecute
+        key: node.kubernetes.io/unreachable
+        operator: Exists
+      - effect: NoSchedule
+        key: node.kubernetes.io/disk-pressure
+        operator: Exists
+      - effect: NoSchedule
+        key: node.kubernetes.io/memory-pressure
+        operator: Exists
+      - effect: NoSchedule
+        key: node.kubernetes.io/pid-pressure
+        operator: Exists
+      - effect: NoSchedule
+        key: node.kubernetes.io/unschedulable
+        operator: Exists
+  updateStrategy:
+    type: RollingUpdate

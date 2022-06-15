@@ -158,19 +158,13 @@ class KubeApi:
                 return True
         return False
 
-    def check_health(self, pod_name):
-        exec_command = [
-            '/bin/sh',
-            '-c',
-            # TODO figure out correct script
-            'echo \'import requests; print(requests.get("http://localhost:8000/metrics"))\' > p.py && python3 p.py && rm p.py']
-        resp = kubernetes.stream.stream(self.core_api.connect_get_namespaced_pod_exec,
+    def pod_exec(self, namespace, pod_name, container_name, cmd):
+        return kubernetes.stream.stream(self.core_api.connect_get_namespaced_pod_exec,
             pod_name,
-            DATA_FEED_NAMESPACE,
-            container=DATA_FEED_CONTAINER,
-            command=exec_command,
+            namespace,
+            container=container_name,
+            command=cmd,
             stderr=True, stdin=False,
             stdout=True, tty=False,
             _preload_content=True
         )
-        print("Response: " + resp)

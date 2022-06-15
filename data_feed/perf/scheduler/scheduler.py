@@ -11,6 +11,7 @@ from perf.state.estimation_state import PodEstimationPhaseEvent
 from perf.kube_api.resource_convert import ResourceConvert
 from perf.scheduler.oom.oom_handler import OOMHandler
 
+
 class Scheduler:
     def __init__(self, kube_api, scheduling_state, estimation_state, kube_watcher_state, stats):
         self.kube_api = kube_api
@@ -20,7 +21,7 @@ class Scheduler:
 
         self.stats = stats
         self.estimator = Estimator(self.estimation_state, self.stats)
-        self.oom_handler = OOMHandler(self.scheduling_state)
+        self.oom_handler = OOMHandler(self.kube_api, self.scheduling_state)
 
         self.running = False
         self.futures = {}

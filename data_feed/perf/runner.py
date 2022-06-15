@@ -67,14 +67,12 @@ class Runner:
 
 
 r = Runner()
+print(r.scheduler.oom_handler.set_oom_score_adj({'remote-scripts-ds-q26fc': {'remote-scripts-runner': '-1000'}}, 'minikube-1-m03'))
+# print(r.scheduler.oom_handler.get_oom_score({'remote-scripts-ds-q26fc': {'remote-scripts-runner': None}}, 'minikube-1-m03'))
+# print(r.scheduler.oom_handler._get_remote_scripts_pod('minikube-1-m03'))
 # @atexit.register
 # def cleanup():
 #     r.cleanup()
-
-# s = Scheduler()
-# s.get_oom_score("minikube-1-m03", "kube-proxy-fjr9n", ["kube-proxy"])
-# s.set_oom_score_adj("minikube-1-m03", "kube-proxy-fjr9n", ["kube-proxy"], -1000)
-# s.get_oom_score("minikube-1-m03", "kube-proxy-fjr9n", ["kube-proxy"])
 
 # subset = ['data-feed-binance-spot-6d1641b134-ss', 'data-feed-binance-spot-eb540d90be-ss', 'data-feed-bybit-perpetual-cca5766921-ss']
 sub = ['data-feed-binance-spot-6d1641b134-ss',
@@ -83,7 +81,7 @@ sub = ['data-feed-binance-spot-6d1641b134-ss',
        # 'data-feed-binance-spot-28150ca2ec-ss',
        # 'data-feed-binance-spot-2d2a017a56-ss',
        # 'data-feed-binance-spot-3dd6e42fd0-ss',]
-r.run(sub)
+# r.run(sub)
 # ss_name = 'data-feed-binance-spot-6d1641b134-ss'
 # ss_name = 'data-feed-binance-spot-eb540d90be-ss'
 # ss_name = 'data-feed-bybit-perpetual-cca5766921-ss'
