@@ -75,16 +75,16 @@ class PodCallback(Callback):
                 and 'terminated' in event.data['state'] \
                 and self.scheduling_state.get_last_phase_event_type(pod_name) != PodSchedulingPhaseEvent.WAITING_FOR_POD_TO_BE_DELETED \
                 and self.scheduling_state.has_result_type(pod_name, PodSchedulingResultEvent.POD_SCHEDULED):
-            self.estimation_state.add_estimation_result_event(pod_name,
+            self.estimation_state.add_result_event(pod_name,
                                                               PodEstimationResultEvent.INTERRUPTED_UNEXPECTED_CONTAINER_TERMINATION)
             self.estimation_state.wake_event(pod_name)
 
         # Unexpected pod deletion
         if event.type == PodObjectLoggedEvent.POD_DELETED \
-                and self.scheduling_state.get_last_estimation_phase_event_type(pod_name) != PodSchedulingPhaseEvent.WAITING_FOR_POD_TO_BE_DELETED \
-                and self.scheduling_state.has_estimation_result_type(pod_name, PodSchedulingResultEvent.POD_SCHEDULED):
+                and self.scheduling_state.get_last_phase_event_type(pod_name) != PodSchedulingPhaseEvent.WAITING_FOR_POD_TO_BE_DELETED \
+                and self.scheduling_state.has_result_type(pod_name, PodSchedulingResultEvent.POD_SCHEDULED):
 
-            self.estimation_state.add_estimation_result_event(pod_name,
+            self.estimation_state.add_result_event(pod_name,
                                                               PodEstimationResultEvent.INTERRUPTED_UNEXPECTED_POD_DELETION)
             self.estimation_state.wake_event(pod_name)
             return

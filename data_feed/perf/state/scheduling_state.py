@@ -1,6 +1,7 @@
 import threading
 import concurrent.futures
 
+from perf.defines import DATA_FEED_CONTAINER, REDIS_CONTAINER, REDIS_EXPORTER_CONTAINER
 from perf.state.phase_result_scheduling_state import PhaseResultSchedulingState
 
 MAX_RESCHEDULES = 1
@@ -33,8 +34,11 @@ class SchedulingState(PhaseResultSchedulingState):
             for scheduled_pod in self.pods_per_node[node]:
                 if scheduled_pod == pod:
                     return node
+        return None
 
-        raise ValueError(f'Pod {pod} is not scheduled on any node')
+    def get_containers_per_pod(self, pod):
+        # TODO make this dynamic
+        return [DATA_FEED_CONTAINER, REDIS_CONTAINER, REDIS_EXPORTER_CONTAINER]
 
     def get_schedulable_pod_priority(self, node_name):
         last_pod = self.get_last_scheduled_pod(node_name)
@@ -141,3 +145,10 @@ class SchedulingState(PhaseResultSchedulingState):
 
     def set_reschedule_counter(self, pod_name, counter):
         self.reschedule_counters_per_pod[pod_name] = counter
+
+    def find_pod_container_by_pid(self, pid):
+        for pod in self.pids_per_container_per_pod:
+            for container in self.pids_per_container_per_pod[pod]:
+                if pid in self.pids_per_container_per_pod[pod][container]:
+                    return pod, container
+        return None, None

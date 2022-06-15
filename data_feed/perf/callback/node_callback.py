@@ -12,6 +12,13 @@ class NodeCallback(Callback):
             raise ValueError(f'Unsupported event class: {event.__class__.__name__} for NodeCallback')
 
         if isinstance(event, NodeKubeLoggedEvent):
-            # TODO debugs
             print(event)
-            return
+
+        if event.type == NodeKubeLoggedEvent.OOM_KILLED_PROCESS or \
+            event.type == NodeKubeLoggedEvent.OOM_VICTIM_PROCESS:
+            pid = event.data['pid']
+            pod, container = self.scheduling_state.find_pod_container_by_pid(pid)
+            if pod is None:
+                print(f'Found no pod with pid {pid}, best guess kill...')
+            else:
+                print(f'Found {pod}, {container} by pid {pid}, will be killed...')

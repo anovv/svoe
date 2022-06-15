@@ -51,7 +51,7 @@ class PhaseResultState:
             self.result_events_per_pod[pod_name] = [event]
 
         # TODO debug
-        print(event)
+        # print(event)
 
     def get_last_phase_event(self, pod_name):
         if pod_name in self.phase_events_per_pod:
@@ -78,7 +78,8 @@ class PhaseResultState:
             self.phase_events_per_pod[pod_name] = [event]
 
         # TODO debug
-        print(event)
+        # TODO debug
+        # print(event)
 
     def wake_event(self, pod_name):
         self.wait_event_per_pod[pod_name].set()

@@ -38,14 +38,52 @@ class NodeKubeEventsLog(NodeEventsLog):
             'message': message
         }
 
-        # TODO NodeKubeLoggedEvent.NODE_EVENT, {'reason': 'SystemOOM', 'count': 1, 'message': 'System OOM encountered, victim process: svoe_data_feed_, pid: 160906'},
-        # TODO NodeKubeLoggedEvent.NODE_EVENT, {'reason': 'OOMKilling', 'count': 1, 'message': 'Killed process 160111 (svoe_data_feed_) total-vm:842716kB, anon-rss:132948kB, file-rss:0kB, shmem-rss:0kB'}
+        logged_event = None
+        # {'reason': 'SystemOOM', 'message': 'System OOM encountered, victim process: svoe_data_feed_, pid: 160906'}
+        if reason == 'SystemOOM':
+            try:
+                pid = message.split('pid:')[1].strip()
+                data.update({'pid': pid})
+                logged_event = NodeKubeLoggedEvent(
+                    NodeKubeLoggedEvent.OOM_VICTIM_PROCESS,
+                    node_name,
+                    data=data,
+                    cluster_time=cluster_time, local_time=datetime.datetime.now(),
+                    raw_event=raw_event
+                )
+            except Exception as e:
+                print(e)
+                print(f'[NodeKubeEventsLog] Unable to parse SystemOOM message: {message}')
+        # {'reason': 'OOMKilling', 'message': '(can be more stuff herer from kube) Killed process 160111 (svoe_data_feed_) total-vm:842716kB, anon-rss:132948kB, file-rss:0kB, shmem-rss:0kB'}
+        elif reason == 'OOMKilling':
+            try:
+                first = 'Killed process'
+                last = 'total-vm'
+                start = message.index(first) + len(first)
+                end = message.index(last, start)
+                s = message[start: end].strip() # 160111 (svoe_data_feed_)
+                split = s.split(' ')
+                pid = split[0]
+                pname = split[1][1:-1] # remove ()
+                data.update({'pid': pid, 'pname': pname})
+                logged_event = NodeKubeLoggedEvent(
+                    NodeKubeLoggedEvent.OOM_KILLED_PROCESS,
+                    node_name,
+                    data=data,
+                    cluster_time=cluster_time, local_time=datetime.datetime.now(),
+                    raw_event=raw_event
+                )
+            except Exception as e:
+                print(e)
+                print(f'[NodeKubeEventsLog] Unable to parse OOMKilling message: {message}')
 
-        logged_event = NodeKubeLoggedEvent(
-            NodeKubeLoggedEvent.NODE_EVENT, # TODO more types
-            node_name,
-            data=data,
-            cluster_time=cluster_time, local_time=datetime.datetime.now(),
-            raw_event=raw_event
-        )
+        # default
+        if logged_event is None:
+            logged_event = NodeKubeLoggedEvent(
+                NodeKubeLoggedEvent.NODE_EVENT,
+                node_name,
+                data=data,
+                cluster_time=cluster_time, local_time=datetime.datetime.now(),
+                raw_event=raw_event
+            )
         self._log_event_and_callback(logged_event)
