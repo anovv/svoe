@@ -51,7 +51,7 @@ class OOMHandler(multiprocessing.Process):
 
     def run(self):
         print('OOMHandler started')
-        # OOMHandler should have it's own instance of KubeApi
+        # OOMHandler should have it's own instance of KubeApi set inside it's process context
         self.kube_api = KubeApi.new_instance()
         self.running.value = 1
         while bool(self.running.value):
@@ -95,7 +95,6 @@ class OOMHandler(multiprocessing.Process):
 
     @staticmethod
     def handle_oom_score_adj_script_result(scheduling_state, res):
-        # TODO self.runnning checks
         # returns pids + oom_score_adj
         print(f'Handling oom_score_adj_script_result')
         for pod in res:
@@ -177,6 +176,7 @@ class OOMHandler(multiprocessing.Process):
             else:
                 # TODO handle kubernetes.client.exceptions.ApiException: (0)
                 # Reason: Handshake status 500 Internal Server Error
+                # when remote-scripts pod is not available
                 raise e
 
     def _get_remote_scripts_pod(self, node_name):
