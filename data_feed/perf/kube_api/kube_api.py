@@ -1,14 +1,23 @@
 import math
-
-from perf.defines import *
-from perf.kube_api.utils import cm_name_pod_name, ss_name_from_pod_name, pod_name_from_ss_name
-from perf.kube_api.resource_convert import ResourceConvert
 import yaml
 import json
 import kubernetes
 
+from perf.defines import CLUSTER, DATA_FEED_CONTAINER, DATA_FEED_CM_CONFIG_NAME, DATA_FEED_NAMESPACE
+from perf.kube_api.utils import cm_name_pod_name, ss_name_from_pod_name, pod_name_from_ss_name
+from perf.kube_api.resource_convert import ResourceConvert
+
 
 class KubeApi:
+    @staticmethod
+    def new_instance():
+        kubernetes.config.load_kube_config(context=CLUSTER)
+        core_api = kubernetes.client.CoreV1Api()
+        apps_api = kubernetes.client.AppsV1Api()
+        custom_objects_api = kubernetes.client.CustomObjectsApi()
+        scheduling_api = kubernetes.client.SchedulingV1Api()
+        return KubeApi(core_api, apps_api, custom_objects_api, scheduling_api)
+
     def __init__(self, core_api, apps_api, custom_objects_api, scheduling_api):
         self.core_api = core_api
         self.apps_api = apps_api

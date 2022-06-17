@@ -66,7 +66,7 @@ class PodCallback(Callback):
             # TODO running is not sufficient
             if all_containers_running:
                 self.estimation_state.wake_event(pod_name)
-                self.scheduler.oom_handler.try_get_pids_and_set_oom_score_adj(pod_name)
+                self.scheduler.oom_handler.notify_oom_event(self.scheduling_state, pod_name)
                 return
 
         # Interrupts

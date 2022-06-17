@@ -1,8 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: remote-scripts-cm # should be in sync with mysql dumper sidecar
-  namespace: {{ .Release.Namespace }}
-data:
-  test.sh: |-
-{{ .Files.Get "scripts/test.sh" | indent 4 }}

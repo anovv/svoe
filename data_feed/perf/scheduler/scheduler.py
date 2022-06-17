@@ -1,4 +1,5 @@
 import time
+import threading
 import concurrent.futures
 import functools
 import kubernetes
@@ -21,12 +22,18 @@ class Scheduler:
 
         self.stats = stats
         self.estimator = Estimator(self.estimation_state, self.stats)
-        self.oom_handler = OOMHandler(self.kube_api, self.scheduling_state)
+        self.oom_handler = OOMHandler()
+        self.oom_handler_return_loop_thread = threading.Thread(target=self.oom_handler.return_loop, args=(self.scheduling_state,))
 
         self.running = False
         self.futures = {}
 
+    def run_oom_handler_return_loop(self):
+        self.oom_handler_return_loop_thread.start()
+
     def run(self, subset=None):
+        self.oom_handler.start()
+        self.run_oom_handler_return_loop()
         self.scheduling_state.init_pods_work_queue(self.kube_api.load_pod_names_from_ss(subset))
         init_work_queue_size = len(self.scheduling_state.pods_work_queue)
         print(f'Scheduling estimation for {init_work_queue_size} pods...')
@@ -209,4 +216,6 @@ class Scheduler:
         del self.kube_watcher_state.event_queues_per_pod[pod_name]
 
     def stop(self):
+        # TODO stop OOMHandler
+        # self.oom_handler_return_loop_thread.join()
         return  # TODO
