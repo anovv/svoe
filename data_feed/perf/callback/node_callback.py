@@ -18,6 +18,8 @@ class NodeCallback(Callback):
             event.type == NodeKubeLoggedEvent.OOM_VICTIM_PROCESS:
             pid = event.data['pid']
             pod, container = self.scheduling_state.find_pod_container_by_pid(pid)
+            # TODO check if pod was marked by OOMHandler as min?
+            # TODO make sure to kill only for df pods
             if pod is None:
                 print(f'Found no pod with pid {pid}, best guess kill...')
             else:

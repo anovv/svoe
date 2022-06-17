@@ -3,7 +3,9 @@ import yaml
 import json
 import kubernetes
 
-from perf.defines import CLUSTER, DATA_FEED_CONTAINER, DATA_FEED_CM_CONFIG_NAME, DATA_FEED_NAMESPACE
+from perf.defines import CLUSTER, \
+    DATA_FEED_CONTAINER, DATA_FEED_CM_CONFIG_NAME, DATA_FEED_NAMESPACE, \
+    REMOTE_SCRIPTS_DS_CONTAINER, REMOTE_SCRIPTS_DS_NAMESPACE, REMOTE_SCRIPTS_DS_LABEL_SELECTOR
 from perf.kube_api.utils import cm_name_pod_name, ss_name_from_pod_name, pod_name_from_ss_name
 from perf.kube_api.resource_convert import ResourceConvert
 
@@ -24,6 +26,7 @@ class KubeApi:
         self.custom_objects_api = custom_objects_api
         self.scheduling_api = scheduling_api
         self.priority_pool = {}
+        self.remote_scripts_ds_pod_cache = {}
 
     def get_nodes(self):
         return self.core_api.list_node()
@@ -177,3 +180,46 @@ class KubeApi:
             stdout=True, tty=False,
             _preload_content=True
         )
+
+    def execute_remote_script(self, script_string, node_name):
+        cmd = ['nsenter', '--mount=/proc/1/ns/mnt', '--', 'bash', '-c', script_string]
+        if node_name not in self.remote_scripts_ds_pod_cache:
+            print(f'[KubeApi] Stale cache for remote-scripts-ds pod, updating...')
+            self.remote_scripts_ds_pod_cache[node_name] = self.get_remote_scripts_pod(node_name)
+        remote_scripts_pod = self.remote_scripts_ds_pod_cache[node_name]
+        try:
+            return self.pod_exec(
+                REMOTE_SCRIPTS_DS_NAMESPACE,
+                remote_scripts_pod,
+                REMOTE_SCRIPTS_DS_CONTAINER,
+                cmd
+            )
+        except kubernetes.client.exceptions.ApiException as e:
+            if e.reason == 'Handshake status 404 Not Found':
+                # cache stale, ask kube for latest remote-scripts-ds pod
+                print(f'[KubeApi] Stale cache for remote-scripts-ds pod, updating...')
+                remote_scripts_pod = self.get_remote_scripts_pod(node_name)
+                self.remote_scripts_ds_pod_cache[node_name] = remote_scripts_pod
+                return self.pod_exec(
+                    REMOTE_SCRIPTS_DS_NAMESPACE,
+                    remote_scripts_pod,
+                    REMOTE_SCRIPTS_DS_CONTAINER,
+                    cmd
+                )
+            else:
+                # TODO handle kubernetes.client.exceptions.ApiException: (0)
+                # Reason: Handshake status 500 Internal Server Error
+                # when remote-scripts pod is not available
+                raise e
+
+    def get_remote_scripts_pod(self, node_name):
+        res = self.core_api.list_namespaced_pod(
+            namespace=REMOTE_SCRIPTS_DS_NAMESPACE,
+            field_selector=f'spec.nodeName={node_name}',
+            label_selector=REMOTE_SCRIPTS_DS_LABEL_SELECTOR,
+        )
+        try:
+            return res.items[0].metadata.name
+        except Exception as e:
+            print(f'[OOMHandler] Unable to get remote-scripts-ds pod for node {node_name}')
+            raise e
