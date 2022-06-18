@@ -53,18 +53,24 @@ class PodCallback(Callback):
             return
 
         # TODO wait for containers to started/ready==True?
+        # TODO ContainersReady pod condition?
         if self.estimation_state.get_last_phase_event_type(
                 pod_name) == PodEstimationPhaseEvent.WAITING_FOR_POD_TO_START_ESTIMATION_RUN \
-                and event.type == PodObjectLoggedEvent.CONTAINER_STATE_CHANGED:
+                and (event.type == PodObjectLoggedEvent.CONTAINER_STATE_CHANGED
+                     or event.type == PodObjectLoggedEvent.CONTAINER_STARTUP_PROBE_STATE_CHANGED):
 
             all_containers_running = False
+            all_containers_started = False
             if 'containerStatuses' in event.raw_event.status:
                 all_containers_running = True
+                all_containers_started = True
                 for container_status in event.raw_event.status['containerStatuses']:
                     if 'running' not in container_status['state']:
                         all_containers_running = False
-            # TODO running is not sufficient
-            if all_containers_running:
+                    if not container_status['started']:
+                        all_containers_started = False
+
+            if all_containers_running and all_containers_started:
                 self.estimation_state.wake_event(pod_name)
                 self.scheduler.oom_handler_client.notify_oom_event(pod_name)
                 return
