@@ -18,7 +18,7 @@ container_ids_temp_file=$(mktemp)
 write_container_id_to_file() {
   container_name=$1
   id=$(docker ps -f name="$container_name" | awk '{print $1}' | tail -n +2 )
-  arr=("$id")
+  arr=($id) # no quotes here
   len=${#arr[@]}
   if [ "$len" -ne 1 ]; then
     echo "Error: found $len container ids for $container_name (should be 1). Check container name"
@@ -45,7 +45,7 @@ write_container_pids_to_file() {
 }
 
 while read container_name_id; do
-  arr=("$container_name_id")
+  arr=($container_name_id) # no quotes here
   container_name=${arr[0]}
   container_id=${arr[1]}
   write_container_pids_to_file $container_name $container_id
@@ -62,13 +62,13 @@ set_oom_score_adj() {
       echo "$score_adj" > $path
       echo "container: $container_name, pid: $pid, oom_score_adj: $score_adj"
     else
-      echo "container: $container_name, pid: $pid"
+      echo "container: $container_name, pid: $pid, oom_score_adj: NO_SCORE"
     fi
   fi
 }
 
 count=0
-arr_scores=("$OOM_SCORES_ADJ")
+arr_scores=($OOM_SCORES_ADJ) # no quotes here
 len_scores=${#arr_scores[@]}
 while read container_name_pids; do
   arr=($container_name_pids) # no quotes here
@@ -78,7 +78,7 @@ while read container_name_pids; do
   if [[ "$count" -lt "$len_scores" ]]; then
     oom_score_adj=${arr_scores[$count]}
   fi
-  count+=1
+  count=$((count+1))
   for pid in $pids
   do
     set_oom_score_adj $container_name $pid $oom_score_adj &

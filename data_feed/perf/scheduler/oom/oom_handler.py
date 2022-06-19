@@ -56,7 +56,6 @@ class OOMHandler(multiprocessing.Process):
         # TODO try/except ?
         # TODO remove pods from in-flight in case of exception
         # TODO add scheduling events?
-        # time.sleep(10)
         start = time.time()
         res = self.set_oom_score_adj(script_args, node)
         exec_time = time.time() - start

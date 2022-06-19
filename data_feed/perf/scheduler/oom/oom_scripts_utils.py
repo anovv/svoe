@@ -64,7 +64,7 @@ def parse_script_and_replace_param_vars(tmpl, params):
     return tmpl
 
 
-def _exec_node_shell_cmd(cmd):
+def _exec_node_shell_cmd_DEPRECATED(cmd):
     env = os.environ.copy()
     # env['KUBECTL_NODE_SHELL_POD_CPU'] = KUBECTL_NODE_SHELL_POD_CPU
     # env['KUBECTL_NODE_SHELL_POD_MEMORY'] = KUBECTL_NODE_SHELL_POD_MEMORY

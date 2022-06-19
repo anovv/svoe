@@ -12,7 +12,7 @@ CONTAINERS=$CONTAINERS_PARAM
 for container in $CONTAINERS
 do
   id=$(docker ps -f name=$container | awk '{print $1}' | tail -n +2 )
-  arr_ids=("$id")
+  arr_ids=("$id") # TODO quotes needed?
   len=${#arr_ids[@]}
 
   if [[ "$len" -ne 1 ]]; then

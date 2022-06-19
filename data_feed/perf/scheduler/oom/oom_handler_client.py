@@ -43,10 +43,6 @@ class OOMHandlerClient:
         self.oom_handler.args_wait_event.set()
         self.oom_handler.lock.release()
 
-    # a b
-
-    # b
-
     # decide which pods to mark low/high priority for OOMKiller
     def decide_pods_marking(self, pod):
         self.marking_lock.acquire()
@@ -59,6 +55,8 @@ class OOMHandlerClient:
         if self.last_marked_high_pod is not None and \
                 self.last_marked_high_pod not in self.scheduling_state.pods_per_node[node]:
             self.last_marked_high_pod = None
+
+        # TODO rescheduled pods are not triggered, why?
 
         if len(self.in_flight_pods) == 0:
             script_args = self.build_oom_script_args_for_pod(pod, MARKED_HIGH, script_args)
