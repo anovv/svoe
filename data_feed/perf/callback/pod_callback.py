@@ -52,8 +52,6 @@ class PodCallback(Callback):
             self.estimation_state.wake_event(pod_name)
             return
 
-        # TODO wait for containers to started/ready==True?
-        # TODO ContainersReady pod condition?
         if self.estimation_state.get_last_phase_event_type(
                 pod_name) == PodEstimationPhaseEvent.WAITING_FOR_POD_TO_START_ESTIMATION_RUN \
                 and (event.type == PodObjectLoggedEvent.CONTAINER_STATE_CHANGED
@@ -72,7 +70,7 @@ class PodCallback(Callback):
 
             if all_containers_running and all_containers_started:
                 self.estimation_state.wake_event(pod_name)
-                self.scheduler.oom_handler_client.notify_oom_event(pod_name)
+                self.scheduler.oom_handler_client.notify_pod_started(pod_name)
                 return
 
         # Interrupts
@@ -81,8 +79,7 @@ class PodCallback(Callback):
                 and 'terminated' in event.data['state'] \
                 and self.scheduling_state.get_last_phase_event_type(pod_name) != PodSchedulingPhaseEvent.WAITING_FOR_POD_TO_BE_DELETED \
                 and self.scheduling_state.has_result_type(pod_name, PodSchedulingResultEvent.POD_SCHEDULED):
-            self.estimation_state.add_result_event(pod_name,
-                                                              PodEstimationResultEvent.INTERRUPTED_UNEXPECTED_CONTAINER_TERMINATION)
+            self.estimation_state.add_result_event(pod_name, PodEstimationResultEvent.INTERRUPTED_UNEXPECTED_CONTAINER_TERMINATION)
             self.estimation_state.wake_event(pod_name)
 
         # Unexpected pod deletion
@@ -116,5 +113,3 @@ class PodCallback(Callback):
         # TODO 'reason': 'NodeNotReady'
         # TODO watch for PodKubeLoggedEvent.CONTAINER_EVENT, {'reason': 'Failed', 'count': 2, 'message': 'Error: ErrImagePull'}
         # TODO kube event Failed, unhealthy readiness, pod_status_phase == 'Failed', other indicators?, any other container backoff?
-        # TODO OOMs
-        # TODO node events

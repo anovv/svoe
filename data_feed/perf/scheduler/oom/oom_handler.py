@@ -1,4 +1,3 @@
-import threading
 import multiprocessing
 import time
 import pathlib
@@ -9,7 +8,6 @@ from perf.scheduler.oom.oom_scripts_utils import construct_containers_script_par
 
 
 # should be a separate process with it's own instance of kuberenetes.client and core_api
-# so we have no interference with main process' client
 # so we have no interference with main process' client
 class OOMHandler(multiprocessing.Process):
     def __init__(self):
@@ -54,7 +52,6 @@ class OOMHandler(multiprocessing.Process):
         if self.executor is None:
             self.executor = concurrent.futures.ThreadPoolExecutor(max_workers=256)
         for pod_container, score, node in pods_marking:
-            print(f'[OOMHandler] Executing {pod_container}')
             self.executor.submit(self.set_oom_score_adj_blocking, pod_container, score, node)
 
     def set_oom_score_adj_blocking(self, pod_container, score, node):

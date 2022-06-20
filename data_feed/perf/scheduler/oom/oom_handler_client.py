@@ -33,26 +33,21 @@ class OOMHandlerClient:
             self.oom_handler.return_wait_event.clear()
             self.oom_handler.lock.release()
 
-    def notify_oom_event(self, pod):
-        print(f'[OOMHandlerClient] notify triggered by pod {pod}')
+    def notify_pod_started(self, pod):
+        print(f'[OOMHandlerClient] Getting pids and setting oom scores, triggered by pod {pod}')
         pods_marking = self.decide_pods_marking(pod)
         print(pods_marking)
         self.oom_handler.lock.acquire()
         self.oom_handler.args_queue.put(pods_marking)
         self.oom_handler.args_wait_event.set()
         self.oom_handler.lock.release()
-        # for pod_container, score, node in pods_marking:
-        #     self.oom_handler.lock.acquire()
-        #     self.oom_handler.args_queue.put((pod_container, score, node))
-        #     self.oom_handler.args_wait_event.set()
-        #     self.oom_handler.lock.release()
 
     # decide which pods to mark low/high priority for OOMKiller based on already marked/in_flight pods
     def decide_pods_marking(self, pod):
         self.marking_lock.acquire()
         node = self.scheduling_state.get_node_for_scheduled_pod(pod)
         if node is None:
-            raise ValueError(f'Pod {pod} is not scheduled on any node')
+            raise ValueError(f'[OOMHandlerClient] Pod {pod} is not scheduled on any node')
         res = []
 
         # verify last_marked_high_pod is not stale

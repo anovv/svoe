@@ -1,5 +1,6 @@
 import threading
 import concurrent.futures
+import datetime
 
 from perf.defines import DATA_FEED_CONTAINER, REDIS_CONTAINER, REDIS_EXPORTER_CONTAINER
 from perf.state.phase_result_scheduling_state import PhaseResultSchedulingState
@@ -17,6 +18,7 @@ class SchedulingState(PhaseResultSchedulingState):
         self.pids_per_container_per_pod = {}
         self.pods_priorities = {}
         self.reschedule_counters_per_pod = {}
+        self.last_oom_event_ts_per_node = {}
 
         # TODO is this needed?
         self.global_lock = threading.Lock()
@@ -152,3 +154,11 @@ class SchedulingState(PhaseResultSchedulingState):
                 if pid in self.pids_per_container_per_pod[pod][container]:
                     return pod, container
         return None, None
+
+    def get_last_oom_ts(self, node):
+        if node in self.last_oom_event_ts_per_node:
+            return None
+        return self.last_oom_event_ts_per_node[node]
+
+    def mark_last_oom_ts(self, node):
+        self.last_oom_event_ts_per_node[node] = datetime.datetime.now()

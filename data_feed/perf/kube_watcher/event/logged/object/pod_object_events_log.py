@@ -1,5 +1,5 @@
 import datetime
-from perf.utils import equal_dicts, filtered_dict
+from perf.utils import equal_dicts, filtered_dict, parse_timestamp_string
 
 from perf.kube_watcher.event.raw.object.pod_object_raw_event import PodObjectRawEvent
 from perf.kube_watcher.event.logged.object.pod_object_logged_event import PodObjectLoggedEvent
@@ -64,7 +64,7 @@ class PodObjectEventsLog(PodEventsLog):
                 if not equal_dicts(condition, last_condition, filter_keys):
 
                     cluster_time = None if 'lastTransitionTime' not in condition else \
-                        datetime.datetime.strptime(condition['lastTransitionTime'], '%Y-%m-%dT%H:%M:%SZ')
+                        parse_timestamp_string(condition['lastTransitionTime'])
 
                     data = {'type': condition['type']}
                     data.update(filtered_dict(condition, filter_keys))

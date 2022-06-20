@@ -13,6 +13,23 @@ from perf.kube_api.resource_convert import ResourceConvert
 from perf.scheduler.oom.oom_handler import OOMHandler
 from perf.scheduler.oom.oom_handler_client import OOMHandlerClient
 
+# explanations for node state (schedulable or not)
+class NodeStateReason:
+    # schedulable reasons
+    SCHEDULABLE_BULK = 'SCHEDULABLE_BULK'
+    SCHEDULABLE_SEQUENCE = 'SCHEDULABLE_SEQUENCE'
+
+    # unschedulable reasons
+    NO_RESOURCE_ESTIMATOR_TAINT = 'NO_RESOURCE_ESTIMATOR_TAINT'
+    NOT_READY = 'NOT_READY'
+    NOT_ENOUGH_CPU = 'NOT_ENOUGH_CPU'
+    NOT_ENOUGH_MEMORY = 'NOT_ENOUGH_MEMORY'
+    LAST_POD_NOT_APPEARED = 'LAST_POD_NOT_APPEARED'
+    LAST_POD_NOT_IN_ESTIMATING_STATE = 'LAST_POD_NOT_IN_ESTIMATING_STATE'
+    NOT_ENOUGH_TIME_SINCE_LAST_POD_STARTED_ESTIMATION = 'NOT_ENOUGH_TIME_SINCE_LAST_POD_STARTED_ESTIMATION'
+    RESOURCES_METRICS_NOT_FRESH_SINCE_OOM_EVENT = 'RESOURCES_METRICS_NOT_FRESH_SINCE_OOM_EVENT'
+    RESOURCES_METRICS_NOT_FRESH_SINCE_LAST_POD_STARTED_ESTIMATION = 'RESOURCES_METRICS_NOT_FRESH_SINCE_LAST_POD_STARTED_ESTIMATION'
+
 
 class Scheduler:
     def __init__(self, kube_api, scheduling_state, estimation_state, kube_watcher_state, stats):
@@ -28,6 +45,7 @@ class Scheduler:
 
         self.running = False
         self.futures = {}
+        self.nodes_state = {} # node to tuple(bool (scedulable or not), reason)
 
     def run(self, subset=None):
         self.oom_handler.start()
@@ -45,11 +63,17 @@ class Scheduler:
                     self.running = False
                     break
 
-                node_name, reason, node_state = self.get_ready_node_name()
+                nodes_state = self.fetch_nodes_state()
+                node_name, reason = self.get_schedulable_node()
                 while node_name is None and self.running:
-                    # print(f'No ready nodes: {node_state}')
+                    # we want to log only on state change
+                    if self.nodes_state != nodes_state:
+                        self.nodes_state = nodes_state
+                        print(f'No ready nodes: {nodes_state}')
                     time.sleep(1)
-                    node_name, reason, node_state = self.get_ready_node_name()
+                    nodes_state = self.fetch_nodes_state()
+                    node_name, reason = self.get_schedulable_node()
+                self.nodes_state = nodes_state
 
                 print(f'Scheduling pod {pod_name} on node {node_name} reason {reason}')
 
@@ -142,16 +166,16 @@ class Scheduler:
             )
         self.clean_states(pod_name)
 
-    def get_ready_node_name(self):
-        # TODO enum for reasons
-        # TODO move state to watcher
-        # TODO move this logic to watcher and use callbacks
-        nodes_state = {}
-
+    def fetch_nodes_state(self):
+        nodes_state = {} # node to tuple(bool (scedulable or not), reason)
         nodes = self.kube_api.get_nodes()
-        # TODO metrics-server updates info every 15s
-        # make sure we wait here for updated info?
-        nodes_resource_usage = self.kube_api.get_nodes_resource_usage()
+        success, nodes_resource_usage = self.kube_api.get_nodes_resource_usage()
+        while self.running and not success:
+            print(f'[Scheduler] Failed to get resource usage metrics: {nodes_resource_usage}, retrying in 5s ...')
+            time.sleep(5)
+            nodes = self.kube_api.get_nodes()
+            success, nodes_resource_usage = self.kube_api.get_nodes_resource_usage()
+
         for node in nodes.items:
             node_name = node.metadata.name
             has_resource_estimator_taint = False
@@ -161,7 +185,7 @@ class Scheduler:
                         has_resource_estimator_taint = True
                         break
             if not has_resource_estimator_taint:
-                nodes_state[node_name] = 'NO_RE_TAINT'
+                nodes_state[node_name] = (False, NodeStateReason.NO_RESOURCE_ESTIMATOR_TAINT)
                 continue
 
             is_ready = False
@@ -170,23 +194,15 @@ class Scheduler:
                     is_ready = True
                     break
             if not is_ready:
-                nodes_state[node_name] = 'NO_NOT_READY'
+                nodes_state[node_name] = (False, NodeStateReason.NOT_READY)
                 continue
-
-            allocatable = node.status.allocatable
-            alloc_cpu = ResourceConvert.cpu(allocatable['cpu'])
-            alloc_mem = ResourceConvert.memory(allocatable['memory'])
-
-            # TODO add cpu_alloc threshold
-            # TODO restore this after debug
-            # if (int(nodes_resource_usage[node_name]['memory']) / int(alloc_mem)) > NODE_MEMORY_ALLOC_THRESHOLD:
-            #     continue
 
             # TODO figure out heuristics to dynamically derive BULK_SCHEDULE_SIZE
             BULK_SCHEDULE_SIZE = 2
-            if node_name not in self.scheduling_state.pods_per_node or len(self.scheduling_state.pods_per_node[node_name]) < BULK_SCHEDULE_SIZE:
-                nodes_state[node_name] = 'OK'
-                return node_name, 'BULK_SCHEDULE', nodes_state
+            if node_name not in self.scheduling_state.pods_per_node or len(
+                    self.scheduling_state.pods_per_node[node_name]) < BULK_SCHEDULE_SIZE:
+                nodes_state[node_name] = (True, NodeStateReason.SCHEDULABLE_BULK)
+                continue
 
             last_pod = self.scheduling_state.get_last_scheduled_pod(node_name)
             # only valid case is if last pod is in active estimation phase,
@@ -194,19 +210,47 @@ class Scheduler:
             # also wait NODE_NEXT_SCHEDULE_PERIOD s for last pod to run successfully before scheduling more
             phase_event = self.estimation_state.get_last_phase_event(last_pod)
             if phase_event is None:
-                nodes_state[node_name] = 'NO_LAST_EVENT'
+                nodes_state[node_name] = (False, NodeStateReason.LAST_POD_NOT_APPEARED)
                 continue
+
             if phase_event.type != PodEstimationPhaseEvent.WAITING_FOR_POD_TO_FINISH_ESTIMATION_RUN:
-                nodes_state[node_name] = 'LAST_POD_NOT_IN_WAITING_STATE'
+                nodes_state[node_name] = (False, NodeStateReason.LAST_POD_NOT_IN_ESTIMATING_STATE)
                 continue
 
-            if time.time() - phase_event.local_time.timestamp() > NODE_NEXT_SCHEDULE_PERIOD:
-                nodes_state[node_name] = 'OK'
-                return node_name, 'NEXT_SCHEDULE', nodes_state
-            else:
-                nodes_state[node_name] = f'WAITING_FOR_NEXT({time.time() - phase_event.local_time.timestamp()})'
+            if time.time() - phase_event.local_time.timestamp() < NODE_NEXT_SCHEDULE_PERIOD:
+                nodes_state[node_name] = (False, NodeStateReason.NOT_ENOUGH_TIME_SINCE_LAST_POD_STARTED_ESTIMATION)
+                continue
 
-        return None, 'NO_SCHEDULABLE_NODES', nodes_state
+            # resource mertics freshness
+            if phase_event.local_time.timestamp() > nodes_resource_usage[node_name]['timestamp'].timestamp():
+                nodes_state[node_name] = (False, NodeStateReason.RESOURCES_METRICS_NOT_FRESH_SINCE_LAST_POD_STARTED_ESTIMATION)
+                continue
+
+            last_oom_ts = self.scheduling_state.get_last_oom_ts(node_name)
+            if last_oom_ts and last_oom_ts.timestamp() > nodes_resource_usage[node_name]['timestamp'].timestamp():
+                nodes_state[node_name] = (False, NodeStateReason.RESOURCES_METRICS_NOT_FRESH_SINCE_OOM_EVENT)
+                continue
+
+            # check resources only after freshness check
+            allocatable = node.status.allocatable
+            alloc_cpu = ResourceConvert.cpu(allocatable['cpu'])
+            alloc_mem = ResourceConvert.memory(allocatable['memory'])
+
+            # TODO add cpu_alloc threshold
+            # TODO restore this after debug
+            # if (int(nodes_resource_usage[node_name]['memory']) / int(alloc_mem)) > NODE_MEMORY_ALLOC_THRESHOLD:
+            #     nodes_state[node_name] = (False, NodeStateReason.NOT_ENOUGH_MEMORY)
+            #     continue
+
+            nodes_state[node_name] = (True, NodeStateReason.SCHEDULABLE_SEQUENCE)
+
+        return nodes_state
+
+    def get_schedulable_node(self):
+        for node in self.nodes_state:
+            if self.nodes_state[node][0]:
+                return node, self.nodes_state[node][1] # reason
+        return None, None
 
     def clean_states(self, pod_name):
         self.estimation_state.clean_phase_result_events(pod_name)

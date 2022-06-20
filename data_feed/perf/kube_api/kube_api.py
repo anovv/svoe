@@ -3,6 +3,7 @@ import yaml
 import json
 import kubernetes
 
+from perf.utils import parse_timestamp_string
 from perf.defines import CLUSTER, \
     DATA_FEED_CONTAINER, DATA_FEED_CM_CONFIG_NAME, DATA_FEED_NAMESPACE, \
     REMOTE_SCRIPTS_DS_CONTAINER, REMOTE_SCRIPTS_DS_NAMESPACE, REMOTE_SCRIPTS_DS_LABEL_SELECTOR
@@ -41,16 +42,24 @@ class KubeApi:
         # needs metrics-server running
         # https://github.com/amelbakry/kube-node-utilization/blob/master/nodeutilization.py
         # https://stackoverflow.com/questions/66453590/how-to-use-kubectl-top-node-in-kubernetes-python
-        k8s_nodes = self.custom_objects_api.list_cluster_custom_object("metrics.k8s.io", "v1beta1", "nodes")
-        res = {}
-        for item in k8s_nodes['items']:
-            node_name = item['metadata']['name']
-            res[node_name] = {
-                'cpu': ResourceConvert.cpu(item['usage']['cpu']),
-                'memory': ResourceConvert.memory(item['usage']['memory'])
-            }
-        # TODO error check
-        return res
+        try:
+            k8s_nodes = self.custom_objects_api.list_cluster_custom_object("metrics.k8s.io", "v1beta1", "nodes")
+            res = {}
+            for item in k8s_nodes['items']:
+                node_name = item['metadata']['name']
+                res[node_name] = {
+                    'cpu': ResourceConvert.cpu(item['usage']['cpu']),
+                    'memory': ResourceConvert.memory(item['usage']['memory']),
+                    'timestamp': parse_timestamp_string(item['timestamp']),
+                }
+                return True, res
+        except kubernetes.client.exceptions.ApiException as e:
+            if e.reason == 'Service Unavailable':
+                return False, e.reason
+            else:
+                raise e
+        except Exception as e:
+            raise e
 
     def load_pod_names_from_ss(self, subset=None):
         specs = self.apps_api.list_namespaced_stateful_set(namespace=DATA_FEED_NAMESPACE)

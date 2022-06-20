@@ -1,6 +1,3 @@
-import kubernetes
-import time
-
 from perf.kube_api.kube_api import KubeApi
 from perf.kube_watcher.kube_watcher import KubeWatcher, CHANNEL_NODE_OBJECT_EVENTS, CHANNEL_NODE_KUBE_EVENTS, CHANNEL_DF_POD_OBJECT_EVENTS, CHANNEL_DF_POD_KUBE_EVENTS
 from perf.kube_watcher.kube_watcher_state import KubeWatcherState
@@ -72,22 +69,16 @@ if __name__ == '__main__':
     #     r.cleanup()
 
     # subset = ['data-feed-binance-spot-6d1641b134-ss', 'data-feed-binance-spot-eb540d90be-ss', 'data-feed-bybit-perpetual-cca5766921-ss']
-    sub = ['data-feed-binance-spot-6d1641b134-ss',
-           'data-feed-binance-spot-eb540d90be-ss',
-           'data-feed-binance-spot-18257181b7-ss',
-           'data-feed-binance-spot-28150ca2ec-ss',
-           'data-feed-binance-spot-2d2a017a56-ss',
-           'data-feed-binance-spot-3dd6e42fd0-ss']
-    r.run(sub)
-    # ss_name = 'data-feed-binance-spot-6d1641b134-ss'
-    # ss_name = 'data-feed-binance-spot-eb540d90be-ss'
-    # ss_name = 'data-feed-bybit-perpetual-cca5766921-ss'
-    # r.kube_watcher.running = True
-    # r.kube_watcher.watch_pod_kube_events()
-    # r.kube_watcher.start([CHANNEL_DF_POD_OBJECT_EVENTS])
-    # r.kube_api.create_raw_pod('data-feed-binance-spot-18257181b7-ss')
-    # r.kube_api.delete_pod('data-feed-binance-spot-18257181b7-raw')
-    # print(r.kube_api.get_nodes_resource_usage())
+    sub = [
+        'data-feed-binance-spot-6d1641b134-ss',
+        'data-feed-binance-spot-eb540d90be-ss',
+        'data-feed-binance-spot-18257181b7-ss',
+        'data-feed-binance-spot-28150ca2ec-ss',
+        'data-feed-binance-spot-2d2a017a56-ss',
+        'data-feed-binance-spot-3dd6e42fd0-ss'
+    ]
+    # r.run(sub)
+    print(r.kube_api.get_nodes_resource_usage())
     # print(r.scheduler.get_ready_node_name())
 
     # time.sleep(900)
