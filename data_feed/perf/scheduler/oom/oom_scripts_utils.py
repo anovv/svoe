@@ -2,17 +2,13 @@ import subprocess
 import os
 
 
-def construct_script_params(pod_container_score_adj):
+def construct_containers_script_param(pod_container):
     c_arg = ""
-    s_arg = ""
-    for pod in pod_container_score_adj:
-        for container in pod_container_score_adj[pod]:
-            oom_score_adj = pod_container_score_adj[pod][container]
+    for pod in pod_container:
+        for container in pod_container[pod]:
             c_arg += f'{container}_{pod} '
-            if oom_score_adj is not None:
-                s_arg += f'{oom_score_adj} '
 
-    return c_arg.strip(), s_arg.strip()
+    return c_arg.strip()
 
 
 def parse_output(output):

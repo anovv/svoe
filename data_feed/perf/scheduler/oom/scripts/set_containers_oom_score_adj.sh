@@ -7,10 +7,10 @@ set -e
 
 # SCRIPT PARAMS ARE SET AS ENV VARS IF RUN LOCALLY
 # OR PARSED BY PYTHON AND SET IN TEMPLATE. DO NOT CHANGE NAME
-OOM_SCORES_ADJ_PARAM="" # list of scores, maps to each container_pod string "1000 -1000"  Allows empty string
+OOM_SCORE_ADJ_PARAM="" # Score for all containers
 CONTAINERS_PARAM="" # example "container1_pod1 container2_pod1 container3_pod2"
 
-OOM_SCORES_ADJ=$OOM_SCORES_ADJ_PARAM
+OOM_SCORE_ADJ=$OOM_SCORE_ADJ_PARAM
 CONTAINERS=$CONTAINERS_PARAM
 
 container_ids_temp_file=$(mktemp)
@@ -55,33 +55,25 @@ wait
 set_oom_score_adj() {
   container_name=$1
   pid=$2
-  score_adj=$3
+  score_adj=$OOM_SCORE_ADJ
   path="proc/$pid/oom_score_adj"
   if test -f $path; then
     if ! test -z $score_adj; then
       echo "$score_adj" > $path
       echo "container: $container_name, pid: $pid, oom_score_adj: $score_adj"
     else
-      echo "container: $container_name, pid: $pid, oom_score_adj: NO_SCORE"
+      echo "container: $container_name, pid: $pid"
     fi
   fi
 }
 
-count=0
-arr_scores=($OOM_SCORES_ADJ) # no quotes here
-len_scores=${#arr_scores[@]}
 while read container_name_pids; do
   arr=($container_name_pids) # no quotes here
   container_name=${arr[0]}
   pids=${arr[@]:1}
-  oom_score_adj=""
-  if [[ "$count" -lt "$len_scores" ]]; then
-    oom_score_adj=${arr_scores[$count]}
-  fi
-  count=$((count+1))
   for pid in $pids
   do
-    set_oom_score_adj $container_name $pid $oom_score_adj &
+    set_oom_score_adj $container_name $pid &
   done
 done < $container_pids_temp_file
 wait

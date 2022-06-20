@@ -1,6 +1,6 @@
 import threading
 
-MIN_OOM_SCORE_ADJ = -998
+MIN_OOM_SCORE_ADJ = -997
 MAX_OOM_SCORE_ADJ = 998
 
 MARKED_LOW = 'MARKED_LOW' # marked with low probability deletion by OOMhandler
@@ -35,21 +35,25 @@ class OOMHandlerClient:
 
     def notify_oom_event(self, pod):
         print(f'[OOMHandlerClient] notify triggered by pod {pod}')
-        args, node = self.decide_pods_marking(pod)
-        if args is None:
-            return
+        pods_marking = self.decide_pods_marking(pod)
+        print(pods_marking)
         self.oom_handler.lock.acquire()
-        self.oom_handler.args_queue.put((args, node))
+        self.oom_handler.args_queue.put(pods_marking)
         self.oom_handler.args_wait_event.set()
         self.oom_handler.lock.release()
+        # for pod_container, score, node in pods_marking:
+        #     self.oom_handler.lock.acquire()
+        #     self.oom_handler.args_queue.put((pod_container, score, node))
+        #     self.oom_handler.args_wait_event.set()
+        #     self.oom_handler.lock.release()
 
-    # decide which pods to mark low/high priority for OOMKiller
+    # decide which pods to mark low/high priority for OOMKiller based on already marked/in_flight pods
     def decide_pods_marking(self, pod):
         self.marking_lock.acquire()
         node = self.scheduling_state.get_node_for_scheduled_pod(pod)
         if node is None:
             raise ValueError(f'Pod {pod} is not scheduled on any node')
-        script_args = {}
+        res = []
 
         # verify last_marked_high_pod is not stale
         if self.last_marked_high_pod is not None and \
@@ -57,17 +61,18 @@ class OOMHandlerClient:
             self.last_marked_high_pod = None
 
         # TODO rescheduled pods are not triggered, why?
-
         if len(self.in_flight_pods) == 0:
-            script_args = self.build_oom_script_args_for_pod(pod, MARKED_HIGH, script_args)
+            pod_container, score = self.build_oom_script_args(pod, MARKED_HIGH)
             self.in_flight_pods[pod] = MARKED_HIGH
+            res.append((pod_container, score, node))
             if self.last_marked_high_pod is not None:
-                script_args = self.build_oom_script_args_for_pod(self.last_marked_high_pod, MARKED_LOW, script_args)
+                pod_container, score = self.build_oom_script_args(self.last_marked_high_pod, MARKED_LOW)
                 self.in_flight_pods[self.last_marked_high_pod] = MARKED_LOW
+                res.append((pod_container, score, node))
             self.last_marked_high_pod = pod
         else:
             if pod in self.in_flight_pods:
-                return None, None
+                return res
             has_high = False
             for p in self.in_flight_pods:
                 if self.in_flight_pods[p] == MARKED_HIGH:
@@ -75,19 +80,21 @@ class OOMHandlerClient:
                     break
 
             mark = MARKED_LOW if has_high else MARKED_HIGH
-            script_args = self.build_oom_script_args_for_pod(pod, mark, script_args)
+            pod_container, score = self.build_oom_script_args(pod, mark)
+            res.append((pod_container, score, node))
             self.in_flight_pods[pod] = mark
             if mark == MARKED_HIGH:
                 self.last_marked_high_pod = pod
 
         self.marking_lock.release()
-        return script_args, node
+        return res
 
-    def build_oom_script_args_for_pod(self, pod, mark, script_args):
-        script_args[pod] = {}
+    # create pod_container mapping and score for them
+    def build_oom_script_args(self, pod, mark):
+        pod_container = {pod: []}
         for container in self.scheduling_state.get_containers_per_pod(pod):
-            script_args[pod][container] = MAX_OOM_SCORE_ADJ if mark == MARKED_HIGH else MIN_OOM_SCORE_ADJ
-        return script_args
+            pod_container[pod].append(container)
+        return pod_container, MAX_OOM_SCORE_ADJ if mark == MARKED_HIGH else MIN_OOM_SCORE_ADJ
 
     def handle_oom_score_adj_script_result(self, res, exec_time):
         # returns pids + oom_score_adj
