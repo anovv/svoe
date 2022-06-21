@@ -9,6 +9,7 @@ from perf.callback.pod_callback import PodCallback
 from perf.callback.node_callback import NodeCallback
 from perf.stats.stats import Stats
 
+import datetime
 
 class Runner:
     def __init__(self):
@@ -77,8 +78,7 @@ if __name__ == '__main__':
         'data-feed-binance-spot-2d2a017a56-ss',
         'data-feed-binance-spot-3dd6e42fd0-ss'
     ]
-    # r.run(sub)
-    print(r.kube_api.get_nodes_resource_usage())
+    r.run(sub)
     # print(r.scheduler.get_ready_node_name())
 
     # time.sleep(900)

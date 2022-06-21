@@ -36,7 +36,6 @@ class OOMHandlerClient:
     def notify_pod_started(self, pod):
         print(f'[OOMHandlerClient] Getting pids and setting oom scores, triggered by pod {pod}')
         pods_marking = self.decide_pods_marking(pod)
-        print(pods_marking)
         self.oom_handler.lock.acquire()
         self.oom_handler.args_queue.put(pods_marking)
         self.oom_handler.args_wait_event.set()

@@ -12,6 +12,8 @@ from perf.state.estimation_state import PodEstimationPhaseEvent
 from perf.kube_api.resource_convert import ResourceConvert
 from perf.scheduler.oom.oom_handler import OOMHandler
 from perf.scheduler.oom.oom_handler_client import OOMHandlerClient
+from perf.utils import local_now
+
 
 # explanations for node state (schedulable or not)
 class NodeStateReason:
@@ -64,23 +66,29 @@ class Scheduler:
                     break
 
                 nodes_state = self.fetch_nodes_state()
-                node_name, reason = self.get_schedulable_node()
-                while node_name is None and self.running:
+                node_name, reason = self.get_schedulable_node(nodes_state)
+                while self.running and node_name is None:
                     # we want to log only on state change
                     if self.nodes_state != nodes_state:
                         self.nodes_state = nodes_state
                         print(f'No ready nodes: {nodes_state}')
                     time.sleep(1)
                     nodes_state = self.fetch_nodes_state()
-                    node_name, reason = self.get_schedulable_node()
+                    node_name, reason = self.get_schedulable_node(nodes_state)
                 self.nodes_state = nodes_state
 
                 print(f'Scheduling pod {pod_name} on node {node_name} reason {reason}')
+                print(f'Nodes state: {nodes_state}')
+
+                # these should be in scheduler thread to avoid race condition
+                priority = self.scheduling_state.get_schedulable_pod_priority(node_name)
+                self.scheduling_state.add_pod_to_schedule_state(pod_name, node_name, priority)
 
                 future = executor.submit(
                     self.run_estimator,
                     pod_name=pod_name,
                     node_name=node_name,
+                    priority=priority,
                 )
 
                 future.add_done_callback(functools.partial(self.done_estimation_callback, pod_name=pod_name))
@@ -88,9 +96,7 @@ class Scheduler:
 
         print('Scheduler finished')
 
-    def run_estimator(self, pod_name, node_name):
-        priority = self.scheduling_state.get_schedulable_pod_priority(node_name)
-        self.scheduling_state.add_pod_to_schedule_state(pod_name, node_name, priority)
+    def run_estimator(self, pod_name, node_name, priority):
         self.scheduling_state.add_phase_event(pod_name, PodSchedulingPhaseEvent.WAITING_FOR_POD_TO_BE_SCHEDULED)
         payload_config = self.schedule_pod(pod_name, node_name, priority)
         if self.scheduling_state.get_last_result_event_type(pod_name) == PodSchedulingResultEvent.POD_SCHEDULED:
@@ -171,8 +177,8 @@ class Scheduler:
         nodes = self.kube_api.get_nodes()
         success, nodes_resource_usage = self.kube_api.get_nodes_resource_usage()
         while self.running and not success:
-            print(f'[Scheduler] Failed to get resource usage metrics: {nodes_resource_usage}, retrying in 5s ...')
-            time.sleep(5)
+            print(f'[Scheduler] Failed to get resource usage metrics: {nodes_resource_usage}, retrying in 10s ...')
+            time.sleep(10)
             nodes = self.kube_api.get_nodes()
             success, nodes_resource_usage = self.kube_api.get_nodes_resource_usage()
 
@@ -199,8 +205,8 @@ class Scheduler:
 
             # TODO figure out heuristics to dynamically derive BULK_SCHEDULE_SIZE
             BULK_SCHEDULE_SIZE = 2
-            if node_name not in self.scheduling_state.pods_per_node or len(
-                    self.scheduling_state.pods_per_node[node_name]) < BULK_SCHEDULE_SIZE:
+            if node_name not in self.scheduling_state.pods_per_node or \
+                    len(self.scheduling_state.pods_per_node[node_name]) < BULK_SCHEDULE_SIZE:
                 nodes_state[node_name] = (True, NodeStateReason.SCHEDULABLE_BULK)
                 continue
 
@@ -217,17 +223,17 @@ class Scheduler:
                 nodes_state[node_name] = (False, NodeStateReason.LAST_POD_NOT_IN_ESTIMATING_STATE)
                 continue
 
-            if time.time() - phase_event.local_time.timestamp() < NODE_NEXT_SCHEDULE_PERIOD:
+            if int((local_now() - phase_event.local_time).total_seconds()) < NODE_NEXT_SCHEDULE_PERIOD:
                 nodes_state[node_name] = (False, NodeStateReason.NOT_ENOUGH_TIME_SINCE_LAST_POD_STARTED_ESTIMATION)
                 continue
 
             # resource mertics freshness
-            if phase_event.local_time.timestamp() > nodes_resource_usage[node_name]['timestamp'].timestamp():
+            if phase_event.local_time > nodes_resource_usage[node_name]['cluster_timestamp']:
                 nodes_state[node_name] = (False, NodeStateReason.RESOURCES_METRICS_NOT_FRESH_SINCE_LAST_POD_STARTED_ESTIMATION)
                 continue
 
-            last_oom_ts = self.scheduling_state.get_last_oom_ts(node_name)
-            if last_oom_ts and last_oom_ts.timestamp() > nodes_resource_usage[node_name]['timestamp'].timestamp():
+            last_oom_time = self.scheduling_state.get_last_oom_time(node_name)
+            if last_oom_time is not None and last_oom_time > nodes_resource_usage[node_name]['cluster_timestamp']:
                 nodes_state[node_name] = (False, NodeStateReason.RESOURCES_METRICS_NOT_FRESH_SINCE_OOM_EVENT)
                 continue
 
@@ -246,10 +252,11 @@ class Scheduler:
 
         return nodes_state
 
-    def get_schedulable_node(self):
-        for node in self.nodes_state:
-            if self.nodes_state[node][0]:
-                return node, self.nodes_state[node][1] # reason
+    @staticmethod
+    def get_schedulable_node(nodes_state):
+        for node in nodes_state:
+            if nodes_state[node][0]:
+                return node, nodes_state[node][1] # reason
         return None, None
 
     def clean_states(self, pod_name):

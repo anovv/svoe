@@ -33,14 +33,7 @@ class KubeApi:
         return self.core_api.list_node()
 
     def get_nodes_resource_usage(self):
-        # TODO handle metrics-server pod down:
-        # kubernetes.client.exceptions.ApiException: (503)
-        # Reason: Service Unavailable
-        # HTTP response headers: HTTPHeaderDict({'Audit-Id': 'a93de019-b23f-43d8-a9dc-743e446e32a5', 'Cache-Control': 'no-cache, private', 'Content-Type': 'text/plain; charset=utf-8', 'X-Content-Type-Options': 'nosniff', 'X-Kubernetes-Pf-Flowschema-Uid': '8f3873ec-b10f-44b5-a93f-5e2f3dca9a26', 'X-Kubernetes-Pf-Prioritylevel-Uid': '5ddc1665-06ed-4908-8c1f-5422c62f9a7c', 'Date': 'Sat, 11 Jun 2022 07:09:05 GMT', 'Content-Length': '20'})
-        # HTTP response body: service unavailable
-
         # needs metrics-server running
-        # https://github.com/amelbakry/kube-node-utilization/blob/master/nodeutilization.py
         # https://stackoverflow.com/questions/66453590/how-to-use-kubectl-top-node-in-kubernetes-python
         try:
             k8s_nodes = self.custom_objects_api.list_cluster_custom_object("metrics.k8s.io", "v1beta1", "nodes")
@@ -50,9 +43,9 @@ class KubeApi:
                 res[node_name] = {
                     'cpu': ResourceConvert.cpu(item['usage']['cpu']),
                     'memory': ResourceConvert.memory(item['usage']['memory']),
-                    'timestamp': parse_timestamp_string(item['timestamp']),
+                    'cluster_timestamp': parse_timestamp_string(item['timestamp']),
                 }
-                return True, res
+            return True, res
         except kubernetes.client.exceptions.ApiException as e:
             if e.reason == 'Service Unavailable':
                 return False, e.reason

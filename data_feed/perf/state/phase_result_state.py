@@ -1,8 +1,8 @@
-import datetime
 import time
 import threading
 
 from perf.kube_watcher.event.logged.pod_logged_event import PodLoggedEvent
+from perf.utils import local_now
 
 
 # base class for state which is made of phase->result steps
@@ -42,7 +42,7 @@ class PhaseResultState:
             estimation_result_event_type,
             pod_name, container_name=None,
             data=None,
-            cluster_time=None, local_time=datetime.datetime.now(),
+            cluster_time=None, local_time=local_now(),
             raw_event=None
         )
         if pod_name in self.result_events_per_pod:
@@ -69,7 +69,7 @@ class PhaseResultState:
             estimation_phase_event_type,
             pod_name, container_name=None,
             data=None,
-            cluster_time=None, local_time=datetime.datetime.now(),
+            cluster_time=None, local_time=local_now(),
             raw_event=None
         )
         if pod_name in self.phase_events_per_pod:

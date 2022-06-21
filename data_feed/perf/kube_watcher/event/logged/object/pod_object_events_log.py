@@ -1,5 +1,4 @@
-import datetime
-from perf.utils import equal_dicts, filtered_dict, parse_timestamp_string
+from perf.utils import equal_dicts, filtered_dict, parse_timestamp_string, local_now
 
 from perf.kube_watcher.event.raw.object.pod_object_raw_event import PodObjectRawEvent
 from perf.kube_watcher.event.logged.object.pod_object_logged_event import PodObjectLoggedEvent
@@ -28,7 +27,7 @@ class PodObjectEventsLog(PodEventsLog):
                 PodObjectLoggedEvent.POD_DELETED,
                 pod_name, container_name=None,
                 data=None,
-                cluster_time=None, local_time=datetime.datetime.now(),
+                cluster_time=None, local_time=local_now(),
                 raw_event=raw_event
             )
             self._log_event_and_callback(logged_event)
@@ -44,7 +43,7 @@ class PodObjectEventsLog(PodEventsLog):
                     PodObjectLoggedEvent.POD_PHASE_CHANGED,
                     pod_name, container_name=None,
                     data={'phase': raw_event.status['phase']},
-                    cluster_time=None, local_time=datetime.datetime.now(),
+                    cluster_time=None, local_time=local_now(),
                     raw_event=raw_event
                 )
                 self._log_event_and_callback(logged_event)
@@ -73,7 +72,7 @@ class PodObjectEventsLog(PodEventsLog):
                         PodObjectLoggedEvent.POD_CONDITION_CHANGED,
                         pod_name, container_name=None,
                         data=data,
-                        cluster_time=cluster_time, local_time=datetime.datetime.now(),
+                        cluster_time=cluster_time, local_time=local_now(),
                         raw_event=raw_event
                     )
                     self._log_event_and_callback(logged_event)
@@ -107,7 +106,7 @@ class PodObjectEventsLog(PodEventsLog):
                             logged_event_type,
                             pod_name, container_name=container_name,
                             data=filtered_dict(container_status, filter_keys + ['last_state']),
-                            cluster_time=None, local_time=datetime.datetime.now(),
+                            cluster_time=None, local_time=local_now(),
                             raw_event=raw_event
                         )
                         self._log_event_and_callback(logged_event)

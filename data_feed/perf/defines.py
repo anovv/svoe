@@ -10,7 +10,7 @@ REDIS_CONTAINER = 'redis'
 REDIS_EXPORTER_CONTAINER = 'redis-exporter'
 
 NODE_MEMORY_ALLOC_THRESHOLD = 0.75 # do not schedule pods onto node if memory usage is above this
-NODE_NEXT_SCHEDULE_PERIOD = 10 # how long to wait for current pod to run until scheduling next pod
+NODE_NEXT_SCHEDULE_PERIOD = 5 # how long to wait for current pod to run until scheduling next pod
 
 RUN_ESTIMATION_FOR = 1200 # how long to run estimation
 

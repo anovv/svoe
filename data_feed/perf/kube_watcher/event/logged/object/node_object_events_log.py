@@ -1,8 +1,7 @@
-import datetime
-
 from perf.kube_watcher.event.raw.object.node_object_raw_event import NodeObjectRawEvent
 from perf.kube_watcher.event.logged.object.node_object_logged_event import NodeObjectLoggedEvent
 from perf.kube_watcher.event.logged.node_events_log import NodeEventsLog
+from perf.utils import local_now
 
 
 class NodeObjectEventsLog(NodeEventsLog):
@@ -25,7 +24,7 @@ class NodeObjectEventsLog(NodeEventsLog):
                 NodeObjectLoggedEvent.NODE_DELETED,
                 node_name,
                 data=None,
-                cluster_time=None, local_time=datetime.datetime.now(),
+                cluster_time=None, local_time=local_now(),
                 raw_event=raw_event
             )
             self._log_event_and_callback(logged_event)
@@ -41,7 +40,7 @@ class NodeObjectEventsLog(NodeEventsLog):
             NodeObjectLoggedEvent.NODE_EVENT,
             node_name,
             data=data,
-            cluster_time=None, local_time=datetime.datetime.now(),
+            cluster_time=None, local_time=local_now(),
             raw_event=raw_event
         )
         self._log_event_and_callback(logged_event)
