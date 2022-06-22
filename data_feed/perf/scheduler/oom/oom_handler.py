@@ -2,6 +2,8 @@ import multiprocessing
 import time
 import pathlib
 import concurrent.futures
+import signal
+import os
 
 from perf.kube_api.kube_api import KubeApi
 from perf.scheduler.oom.oom_scripts_utils import construct_containers_script_param, parse_output, parse_script_and_replace_param_vars
@@ -23,6 +25,9 @@ class OOMHandler(multiprocessing.Process):
 
     def run(self):
         print('OOMHandler started')
+        self.daemon = True
+        for sig in [signal.SIGINT, signal.SIG_IGN, signal.SIGTERM]:
+            signal.signal(sig, self._interrupt)
         # OOMHandler should have it's own instance of KubeApi set inside it's process context
         self.kube_api = KubeApi.new_instance()
         self.running.value = 1
@@ -37,6 +42,8 @@ class OOMHandler(multiprocessing.Process):
             self.lock.release()
 
     def stop(self):
+        if not bool(self.running.value):
+            return
         self.running.value = 0
         if not self.args_wait_event.is_set():
             self.args_wait_event.set()
@@ -74,3 +81,12 @@ class OOMHandler(multiprocessing.Process):
         tmpl = parse_script_and_replace_param_vars(tmpl, {'OOM_SCORE_ADJ_PARAM': score, 'CONTAINERS_PARAM': c_arg})
         res = self.kube_api.execute_remote_script(tmpl, node)
         return parse_output(res)
+
+    def _interrupt(self, *args):
+        # *args are for signal.signal handler
+        if not bool(self.running.value):
+            return
+        print('[OOMHandler] Interrupted...')
+        # defer interrupt to parent
+        # inform parent to off itself
+        os.kill(os.getppid(), signal.SIGTERM)

@@ -82,9 +82,10 @@ class PhaseResultState:
         # print(event)
 
     def wake_event(self, pod_name):
-        self.wait_event_per_pod[pod_name].set()
-        # TODO use locks instead
-        time.sleep(0.01) # to avoid race between kube watcher threads and estimator thread
+        if pod_name in self.wait_event_per_pod:
+            self.wait_event_per_pod[pod_name].set()
+            # TODO use locks instead
+            time.sleep(0.01) # to avoid race between kube watcher threads and estimator thread
 
     def wait_event(self, pod_name, timeout):
         # TODO check if the previous event is awaited/reset

@@ -7,7 +7,7 @@ import json
 from perf.defines import NODE_NEXT_SCHEDULE_PERIOD, NODE_MEMORY_ALLOC_THRESHOLD
 from perf.estimator.estimator import Estimator
 from perf.state.phase_result_scheduling_state import PodSchedulingResultEvent, PodSchedulingPhaseEvent, SchedulingTimeouts
-from perf.state.estimation_state import PodEstimationPhaseEvent
+from perf.state.estimation_state import PodEstimationPhaseEvent, PodEstimationResultEvent
 from perf.kube_api.resource_convert import ResourceConvert
 from perf.scheduler.oom.oom_handler import OOMHandler
 from perf.scheduler.oom.oom_handler_client import OOMHandlerClient
@@ -53,7 +53,7 @@ class Scheduler:
         self.oom_handler_client.run()
         self.scheduling_state.init_pods_work_queue(self.kube_api.load_pod_names_from_ss(subset))
         init_work_queue_size = len(self.scheduling_state.pods_work_queue)
-        print(f'Scheduling estimation for {init_work_queue_size} pods...')
+        print(f'[Scheduler] Scheduling estimation for {init_work_queue_size} pods...')
         # TODO tqdm progress
         self.running = True
         with concurrent.futures.ThreadPoolExecutor(max_workers=1024) as executor:
@@ -70,13 +70,15 @@ class Scheduler:
                     # we want to log only on state change
                     if self.nodes_state != nodes_state:
                         self.nodes_state = nodes_state
-                        print(f'No ready nodes: {nodes_state}')
+                        print(f'[Scheduler] No ready nodes: {nodes_state}')
                     time.sleep(1)
                     nodes_state = self.fetch_nodes_state()
                     node_name, reason = self.get_schedulable_node(nodes_state)
                 self.nodes_state = nodes_state
+                if not self.running:
+                    break
 
-                print(f'Scheduling pod {pod_name} on node {node_name} reason {reason}')
+                print(f'[Scheduler] Scheduling pod {pod_name} on node {node_name} reason {reason}')
 
                 # these should be in scheduler thread to avoid race condition
                 priority = self.scheduling_state.get_schedulable_pod_priority(node_name)
@@ -92,12 +94,12 @@ class Scheduler:
                 future.add_done_callback(functools.partial(self.done_estimation_callback, pod_name=pod_name))
                 self.futures[future] = pod_name
 
-        print('Scheduler finished')
+        print('[Scheduler] Scheduler finished')
 
     def run_estimator(self, pod_name, node_name, priority):
         self.scheduling_state.add_phase_event(pod_name, PodSchedulingPhaseEvent.WAITING_FOR_POD_TO_BE_SCHEDULED)
         payload_config = self.schedule_pod(pod_name, node_name, priority)
-        if self.scheduling_state.get_last_result_event_type(pod_name) == PodSchedulingResultEvent.POD_SCHEDULED:
+        if self.running and self.scheduling_state.get_last_result_event_type(pod_name) == PodSchedulingResultEvent.POD_SCHEDULED:
             self.estimator.estimate_resources(pod_name, payload_config)
         self.delete_pod(pod_name)
 
@@ -119,6 +121,10 @@ class Scheduler:
             # TODO INTERRUPTED_INTERNAL_ERROR -> INTERRUPTED_UNKNOWN_ERROR and add exception to event
             self.scheduling_state.add_result_event(pod_name, PodSchedulingResultEvent.INTERRUPTED_INTERNAL_ERROR)
             raise e  # TODO should raise?
+
+        if not self.running:
+            # do not wait for confirm when exiting:
+            return
 
         timed_out = not self.scheduling_state.wait_event(pod_name, SchedulingTimeouts.POD_SCHEDULED_TIMEOUT)
         if timed_out:
@@ -145,6 +151,10 @@ class Scheduler:
             self.scheduling_state.add_result_event(pod_name, PodSchedulingResultEvent.INTERRUPTED_INTERNAL_ERROR)
             raise e  # TODO should raise?
 
+        if not self.running:
+            # do not wait for confirm when exiting:
+            return
+
         timed_out = not self.scheduling_state.wait_event(pod_name, SchedulingTimeouts.POD_DELETED_TIMEOUT)
         if timed_out:
             self.scheduling_state.add_result_event(pod_name, PodSchedulingResultEvent.INTERRUPTED_TIMEOUT)
@@ -157,7 +167,6 @@ class Scheduler:
                 del self.futures[f]
 
     def done_estimation_callback(self, future, pod_name):
-        print(f'Done {pod_name}')
         success = future.result()
         self.scheduling_state.reschedule_or_complete(pod_name, success)
         if success:
@@ -241,9 +250,9 @@ class Scheduler:
             alloc_mem = ResourceConvert.memory(allocatable['memory'])
 
             # TODO add cpu_alloc threshold
-            # if (int(nodes_resource_usage[node_name]['memory']) / int(alloc_mem)) > NODE_MEMORY_ALLOC_THRESHOLD:
-            #     nodes_state[node_name] = (False, NodeStateReason.NOT_ENOUGH_MEMORY)
-            #     continue
+            if (int(nodes_resource_usage[node_name]['memory']) / int(alloc_mem)) > NODE_MEMORY_ALLOC_THRESHOLD:
+                nodes_state[node_name] = (False, NodeStateReason.NOT_ENOUGH_MEMORY)
+                continue
 
             nodes_state[node_name] = (True, NodeStateReason.SCHEDULABLE_SEQUENCE)
 
@@ -262,6 +271,29 @@ class Scheduler:
         del self.kube_watcher_state.event_queues_per_pod[pod_name]
 
     def stop(self):
-        # TODO stop OOMHandler
-        # self.oom_handler_return_loop_thread.join()
-        return  # TODO
+        if not self.running:
+            return
+        print(f'[Scheduler] Stopping scheduler...')
+        self.running = False
+        # interrupt running tasks
+        print(f'[Scheduler] Interrupting {len(self.futures)} running tasks...')
+        for future in self.futures:
+            pod = self.futures[future]
+            self.scheduling_state.add_result_event(pod, PodSchedulingResultEvent.INTERRUPTED_STOP)
+            self.scheduling_state.wake_event(pod)
+            self.estimation_state.add_result_event(pod, PodEstimationResultEvent.INTERRUPTED_STOP)
+            self.estimation_state.wake_event(pod)
+        try:
+            print(f'[Scheduler] Waiting for running tasks to finish...')
+            for future in concurrent.futures.as_completed(self.futures, timeout=30):
+                future.result()
+            print(f'[Scheduler] Waiting for running tasks to finish done')
+        except concurrent.futures._base.TimeoutError:
+            print(f'[Scheduler] Waiting for running tasks to finish timeout')
+        print(f'[Scheduler] Waiting for OOMHandler to terminate')
+        self.oom_handler.stop()
+        self.oom_handler.join()
+        print(f'[Scheduler] OOMHandler terminated')
+        print(f'[Scheduler] Waiting for OOMHandlerClient to terminate')
+        self.oom_handler_client.stop()
+        print(f'[Scheduler] OOMHandlerClient terminated')

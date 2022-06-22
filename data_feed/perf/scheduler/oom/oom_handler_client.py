@@ -17,15 +17,17 @@ class OOMHandlerClient:
         self.last_marked_high_pod = None
         self.marking_lock = threading.Lock()
         self.return_loop_thread = threading.Thread(target=self.return_loop)
+        self.running = False
 
     def run(self):
         self.return_loop_thread.start()
 
     def return_loop(self):
+        self.running = True
         self.oom_handler.running.value = 1
-        while bool(self.oom_handler.running.value):
+        while self.running and bool(self.oom_handler.running.value):
             self.oom_handler.return_wait_event.wait()
-            if not bool(self.oom_handler.running.value):
+            if not bool(self.oom_handler.running.value) or not self.running:
                 return
             self.oom_handler.lock.acquire()
             res, exec_time = self.oom_handler.return_queue.get()
@@ -90,6 +92,8 @@ class OOMHandlerClient:
         return pod_container, MAX_OOM_SCORE_ADJ if mark == MARKED_HIGH else MIN_OOM_SCORE_ADJ
 
     def handle_oom_score_adj_script_result(self, res, exec_time):
+        if not self.running:
+            return
         # returns pids + oom_score_adj
         self.marking_lock.acquire()
         for pod in res:
@@ -109,4 +113,7 @@ class OOMHandlerClient:
         self.marking_lock.release()
 
     def stop(self):
-        return # TODO join thread
+        if not self.running:
+            return
+        self.running = False
+        self.return_loop_thread.join()

@@ -1,3 +1,5 @@
+import signal
+
 from perf.kube_api.kube_api import KubeApi
 from perf.kube_watcher.kube_watcher import KubeWatcher, CHANNEL_NODE_OBJECT_EVENTS, CHANNEL_NODE_KUBE_EVENTS, CHANNEL_DF_POD_OBJECT_EVENTS, CHANNEL_DF_POD_KUBE_EVENTS
 from perf.kube_watcher.kube_watcher_state import KubeWatcherState
@@ -9,7 +11,6 @@ from perf.callback.pod_callback import PodCallback
 from perf.callback.node_callback import NodeCallback
 from perf.stats.stats import Stats
 
-import datetime
 
 class Runner:
     def __init__(self):
@@ -32,9 +33,13 @@ class Runner:
 
         self.kube_watcher = KubeWatcher(self.kube_api.core_api, self.kube_watcher_state)
         self.prom_connection = PromConnection()
+        self.running = False
 
     def run(self, subset=None):
-        print('Started estimator')
+        for sig in [signal.SIGINT, signal.SIG_IGN, signal.SIGTERM]:
+            signal.signal(sig, self.cleanup)
+        self.running = True
+        print('[Runner] Started estimator')
         # self.prom_connection.start() # TODO
         self.kube_watcher.start([
             CHANNEL_NODE_OBJECT_EVENTS,
@@ -42,13 +47,20 @@ class Runner:
             CHANNEL_DF_POD_OBJECT_EVENTS,
             CHANNEL_DF_POD_KUBE_EVENTS])
         self.scheduler.run(subset)
+        self.cleanup()
 
-    def cleanup(self):
-        # should be callable once
+    def cleanup(self, *args):
+        # *args are for signal.signal handler
+        if not self.running:
+            return
+        self.running = False
         self.stats.save()
         if self.prom_connection:
             self.prom_connection.stop()
             self.prom_connection = None
+        if self.scheduler:
+            self.scheduler.stop()
+            self.scheduler = None
         if self.kube_watcher:
             self.kube_watcher.stop([
                 CHANNEL_NODE_OBJECT_EVENTS,
@@ -57,14 +69,8 @@ class Runner:
                 CHANNEL_DF_POD_KUBE_EVENTS])
             self.kube_watcher = None
 
-
 if __name__ == '__main__':
     r = Runner()
-    # print(r.scheduler.oom_handler.set_oom_score_adj({'remote-scripts-ds-q26fc': {'remote-scripts-runner': '-1000'}}, 'minikube-1-m03'))
-    # print(r.scheduler.oom_handler.get_oom_score({'remote-scripts-ds-q26fc': {'remote-scripts-runner': None}}, 'minikube-1-m03'))
-    # print(r.scheduler.oom_handler._get_remote_scripts_pod('minikube-1-m03'))
-    # r.scheduler.oom_handler.try_get_pids_and_set_oom_score_adj('data-feed-binance-spot-6d1641b134')
-    # time.sleep(60)
     # @atexit.register
     # def cleanup():
     #     r.cleanup()
@@ -79,6 +85,7 @@ if __name__ == '__main__':
         'data-feed-binance-spot-3dd6e42fd0-ss'
     ]
     r.run(sub)
+    r.cleanup()
     # print(r.scheduler.get_ready_node_name())
 
     # time.sleep(900)

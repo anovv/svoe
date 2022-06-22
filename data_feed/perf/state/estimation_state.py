@@ -26,6 +26,7 @@ class PodEstimationResultEvent(PodLoggedEvent):
     INTERRUPTED_UNEXPECTED_POD_DELETION = 'PodEstimationResultEvent.INTERRUPTED_UNEXPECTED_POD_DELETION'
     INTERRUPTED_UNEXPECTED_CONTAINER_TERMINATION = 'PodEstimationResultEvent.INTERRUPTED_UNEXPECTED_CONTAINER_TERMINATION'
     INTERRUPTED_OOM = 'PodEstimationResultEvent.INTERRUPTED_OOM'
+    INTERRUPTED_STOP = 'PodEstimationResultEvent.INTERRUPTED_STOP'
 
 
 class EstimationTimeouts:
@@ -46,5 +47,6 @@ class EstimationState(PhaseResultState):
             PodEstimationResultEvent.INTERRUPTED_DF_CONTAINER_HEALTH_STARTUP,
             PodEstimationResultEvent.INTERRUPTED_UNEXPECTED_POD_DELETION,
             PodEstimationResultEvent.INTERRUPTED_UNEXPECTED_CONTAINER_TERMINATION,
-            PodEstimationResultEvent.INTERRUPTED_OOM
+            PodEstimationResultEvent.INTERRUPTED_OOM,
+            PodEstimationResultEvent.INTERRUPTED_STOP
         ]

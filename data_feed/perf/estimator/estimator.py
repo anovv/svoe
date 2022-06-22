@@ -49,6 +49,7 @@ class Estimator:
             self.stats.add_metrics_to_stats(pod_name, metrics)
             self.estimation_state.add_result_event(pod_name, metrics_fetch_result)
 
+        # TODO make sure we do not reschedule for certain events (e.g. some interrupts)
         # success or not
         return self.estimation_state.has_result_type(pod_name, PodEstimationResultEvent.POD_FINISHED_ESTIMATION_RUN)
 

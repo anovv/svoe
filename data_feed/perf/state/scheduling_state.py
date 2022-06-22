@@ -56,7 +56,7 @@ class SchedulingState(PhaseResultSchedulingState):
         # check all nodes to make sure pod is not scheduled twice
         for node in self.pods_per_node:
             if pod_name in self.pods_per_node[node]:
-                raise Exception(f'Pod {pod_name} is already assigned to node {node}')
+                raise Exception(f'[Scheduler] Pod {pod_name} is already assigned to node {node}')
 
         # scheduling state update
         if node_name in self.pods_per_node:
@@ -73,8 +73,10 @@ class SchedulingState(PhaseResultSchedulingState):
             if pod_name in self.pods_per_node[node]:
                 count += 1
                 node_name = node
-        if node_name is None or count > 1:
-            raise Exception(f'Found {count} pods with name {pod_name}, should be 1')
+        if node_name is None:
+            return
+        if count > 1:
+            raise Exception(f'[Scheduler] Found {count} pods with name {pod_name}, should be 1')
         self.pods_per_node[node_name].remove(pod_name)
 
         # clean priority
@@ -85,7 +87,7 @@ class SchedulingState(PhaseResultSchedulingState):
         if len(self.pods_work_queue) == 0:
             # check running tasks
             # wait for first finished task
-            print(f'No pods in queue, waiting for pending futures to finish')
+            print(f'[Scheduler] No pods in queue, waiting for pending futures to finish...')
             for _ in concurrent.futures.as_completed(pending_futures.keys()):
                 self.global_lock.acquire()
                 # check if it was the last one
@@ -97,21 +99,21 @@ class SchedulingState(PhaseResultSchedulingState):
                     if all_done:
                         # all tasks finished and no more queued
                         self.global_lock.release()
-                        print(f'All tasks finished')
+                        print(f'[Scheduler] All tasks finished')
                         return None
                     else:
                         # continue waiting
-                        print(f'Continue waiting')
+                        print(f'[Scheduler] Continue waiting')
                         self.global_lock.release()
                         continue
                 else:
                     # continue scheduling
                     pod_name = self.pods_work_queue.pop()
-                    print(f'Continue scheduling with {pod_name}')
+                    print(f'[Scheduler] Continue scheduling with {pod_name}')
                     break
         else:
             pod_name = self.pods_work_queue.pop()
-            print(f'Popped {pod_name}')
+            print(f'[Scheduler] Popped {pod_name}')
 
         if self.global_lock.locked():
             self.global_lock.release()
@@ -125,17 +127,17 @@ class SchedulingState(PhaseResultSchedulingState):
         self.global_lock.acquire()
         if success:
             # success
-            print(f'Pod {pod_name} done')
+            print(f'[Scheduler] Pod {pod_name} done')
             self.pods_done.append(pod_name)
         else:
             reschedule_counter = self.get_reschedule_counter(pod_name)
             if reschedule_counter < MAX_RESCHEDULES:
                 # reschedule - append to the end of the work queue
-                print(f'Pod {pod_name} rescheduled')
+                print(f'[Scheduler] Pod {pod_name} rescheduled')
                 self.set_reschedule_counter(pod_name, reschedule_counter + 1)
                 self.pods_work_queue.append(pod_name)
             else:
-                print(f'Pod {pod_name} done after {reschedule_counter} reschedules')
+                print(f'[Scheduler] Pod {pod_name} done after {reschedule_counter} reschedules')
                 self.pods_done.append(pod_name)
 
         self.global_lock.release()

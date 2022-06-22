@@ -127,25 +127,23 @@ class KubeWatcher:
         for name in channels:
             channel = self.channels[name]
             channel['thread'].start()
-        print(f'KubeWatcher started')
+        print(f'[KubeWatcher] KubeWatcher started')
 
     def stop(self, channels):
         if not self.running:
             return
         self.running = False
-        print(f'Stopping Kube Watcher...')
-
-        # TODO clean kube_watcher_state ?
-
+        print(f'[KubeWatcher] Stopping Kube Watcher...')
         for name in channels:
             channel = self.channels[name]
             watcher = channel['watcher']
-            thread = channel['thread']
             watcher.stop()
-            print(f'Stopping {name}_watcher stopped')
-            print(f'Joining {name}_thread')
+            print(f'[KubeWatcher] {name} watcher stopped')
+        for name in channels:
+            channel = self.channels[name]
+            thread = channel['thread']
+            print(f'[KubeWatcher] Joining {name} thread')
             thread.join()
-            print(f'{name}_thread joined')
-            del self.channels[name]
+            print(f'[KubeWatcher] {name}_thread joined')
 
-        print(f'Kube Watcher stopped')
+        print(f'[KubeWatcher] Kube Watcher stopped')

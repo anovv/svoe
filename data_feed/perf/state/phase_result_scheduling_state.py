@@ -15,8 +15,9 @@ class PodSchedulingResultEvent(PodLoggedEvent):
     # interrupts
     INTERRUPTED_INTERNAL_ERROR = 'PodSchedulingResultEvent.INTERRUPTED_INTERNAL_ERROR'
     INTERRUPTED_TIMEOUT = 'PodSchedulingResultEvent.INTERRUPTED_TIMEOUT'
-    INTERRUPTED_POD_ALREADY_EXISTS = 'PodEstimationResultEvent.INTERRUPTED_POD_ALREADY_EXISTS'
-    INTERRUPTED_POD_NOT_FOUND = 'PodEstimationResultEvent.INTERRUPTED_POD_NOT_FOUND'
+    INTERRUPTED_POD_ALREADY_EXISTS = 'PodSchedulingResultEvent.INTERRUPTED_POD_ALREADY_EXISTS'
+    INTERRUPTED_POD_NOT_FOUND = 'PodSchedulingResultEvent.INTERRUPTED_POD_NOT_FOUND'
+    INTERRUPTED_STOP = 'PodSchedulingResultEvent.INTERRUPTED_STOP'
 
 
 class SchedulingTimeouts:
@@ -33,6 +34,7 @@ class PhaseResultSchedulingState(PhaseResultState):
             PodSchedulingResultEvent.INTERRUPTED_POD_NOT_FOUND,
             PodSchedulingResultEvent.INTERRUPTED_POD_ALREADY_EXISTS,
             PodSchedulingResultEvent.INTERRUPTED_TIMEOUT,
-            PodSchedulingResultEvent.INTERRUPTED_INTERNAL_ERROR
+            PodSchedulingResultEvent.INTERRUPTED_INTERNAL_ERROR,
+            PodSchedulingResultEvent.INTERRUPTED_STOP,
         ]
 
