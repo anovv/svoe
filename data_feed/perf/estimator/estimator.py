@@ -36,6 +36,7 @@ class Estimator:
         # TODO collect metrics even on interrupts?
         if self.estimation_state.get_last_result_event_type(pod_name) == PodEstimationResultEvent.POD_FINISHED_ESTIMATION_RUN:
             # collect metrics
+            print(f'[Estimator] Fetching metrics for {pod_name}')
             self.estimation_state.add_result_event(pod_name, PodEstimationPhaseEvent.COLLECTING_METRICS)
             metrics = fetch_metrics(pod_name, payload_config)
             metrics_fetch_result = PodEstimationResultEvent.METRICS_COLLECTED_ALL
@@ -43,6 +44,7 @@ class Estimator:
                 if error:
                     metrics_fetch_result = PodEstimationResultEvent.METRICS_COLLECTED_MISSING
 
+            print(f'[Estimator] Done fetching metrics for {pod_name}')
             # save stats
             self.stats.add_metrics_to_stats(pod_name, metrics)
             self.estimation_state.add_result_event(pod_name, metrics_fetch_result)

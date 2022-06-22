@@ -87,13 +87,13 @@ class PodCallback(Callback):
                 and self.scheduling_state.get_last_phase_event_type(pod_name) != PodSchedulingPhaseEvent.WAITING_FOR_POD_TO_BE_DELETED \
                 and self.scheduling_state.has_result_type(pod_name, PodSchedulingResultEvent.POD_SCHEDULED):
 
-            self.estimation_state.add_result_event(pod_name,
-                                                              PodEstimationResultEvent.INTERRUPTED_UNEXPECTED_POD_DELETION)
+            self.estimation_state.add_result_event(pod_name, PodEstimationResultEvent.INTERRUPTED_UNEXPECTED_POD_DELETION)
             self.estimation_state.wake_event(pod_name)
             return
 
         # data-feed-container Unhealthy(Liveness or Startup):
         # TODO unhealthy readiness
+        # TODO these are triggered even if no liveness probe is set (but startup is set), why?
         if event.type == PodKubeLoggedEvent.CONTAINER_EVENT \
                 and container_name == DATA_FEED_CONTAINER \
                 and (event.data['reason'] == 'UnhealthyLiveness' or event.data['reason'] == 'UnhealthyStartup'):

@@ -1,11 +1,10 @@
 import time
-import threading
 import concurrent.futures
 import functools
 import kubernetes
 import json
 
-from perf.defines import NODE_NEXT_SCHEDULE_PERIOD
+from perf.defines import NODE_NEXT_SCHEDULE_PERIOD, NODE_MEMORY_ALLOC_THRESHOLD
 from perf.estimator.estimator import Estimator
 from perf.state.phase_result_scheduling_state import PodSchedulingResultEvent, PodSchedulingPhaseEvent, SchedulingTimeouts
 from perf.state.estimation_state import PodEstimationPhaseEvent
@@ -78,7 +77,6 @@ class Scheduler:
                 self.nodes_state = nodes_state
 
                 print(f'Scheduling pod {pod_name} on node {node_name} reason {reason}')
-                print(f'Nodes state: {nodes_state}')
 
                 # these should be in scheduler thread to avoid race condition
                 priority = self.scheduling_state.get_schedulable_pod_priority(node_name)
@@ -243,7 +241,6 @@ class Scheduler:
             alloc_mem = ResourceConvert.memory(allocatable['memory'])
 
             # TODO add cpu_alloc threshold
-            # TODO restore this after debug
             # if (int(nodes_resource_usage[node_name]['memory']) / int(alloc_mem)) > NODE_MEMORY_ALLOC_THRESHOLD:
             #     nodes_state[node_name] = (False, NodeStateReason.NOT_ENOUGH_MEMORY)
             #     continue

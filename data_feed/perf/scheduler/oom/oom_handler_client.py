@@ -34,7 +34,7 @@ class OOMHandlerClient:
             self.oom_handler.lock.release()
 
     def notify_pod_started(self, pod):
-        print(f'[OOMHandlerClient] Getting pids and setting oom scores, triggered by pod {pod}')
+        print(f'[OOMHandlerClient] Marking pods, triggered by {pod}')
         pods_marking = self.decide_pods_marking(pod)
         self.oom_handler.lock.acquire()
         self.oom_handler.args_queue.put(pods_marking)
@@ -46,7 +46,7 @@ class OOMHandlerClient:
         self.marking_lock.acquire()
         node = self.scheduling_state.get_node_for_scheduled_pod(pod)
         if node is None:
-            raise ValueError(f'[OOMHandlerClient] Pod {pod} is not scheduled on any node')
+            raise ValueError(f'[OOMHandlerClient] {pod} is not scheduled on any node')
         res = []
 
         # verify last_marked_high_pod is not stale
@@ -54,7 +54,6 @@ class OOMHandlerClient:
                 self.last_marked_high_pod not in self.scheduling_state.pods_per_node[node]:
             self.last_marked_high_pod = None
 
-        # TODO rescheduled pods are not triggered, why?
         if len(self.in_flight_pods) == 0:
             pod_container, score = self.build_oom_script_args(pod, MARKED_HIGH)
             self.in_flight_pods[pod] = MARKED_HIGH
@@ -105,10 +104,8 @@ class OOMHandlerClient:
                             self.scheduling_state.pids_per_container_per_pod[pod][container] = {pid: (oom_score, oom_score_adj)}
                     else:
                         self.scheduling_state.pids_per_container_per_pod[pod] = {container: {pid: (oom_score, oom_score_adj)}}
+            print(f'[OOMHandlerClient] Done for {pod} {self.in_flight_pods[pod]} in {exec_time}s')
             del self.in_flight_pods[pod]
-        for pod in res:
-            print(f'[OOMHandlerClient] Done for pod {pod}, pids: {self.scheduling_state.pids_per_container_per_pod[pod]}')
-        print(f'[OOMHandlerClient] Done in {exec_time}s')
         self.marking_lock.release()
 
     def stop(self):

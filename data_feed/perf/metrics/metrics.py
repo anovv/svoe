@@ -15,7 +15,6 @@ def fetch_metrics(pod_name, payload_config):
 
 async def _fetch_metric_async(metric_type, metric_name, metric_query, session):
     retries = 10
-    print(f'Fetching metric {metric_name}')
     params = {
         'query': metric_query,
     }
@@ -37,15 +36,9 @@ async def _fetch_metric_async(metric_type, metric_name, metric_query, session):
             error = e.__class__.__name__ + ': ' + str(e)
 
         if error:
-            print(f'Retrying {count}/{retries} to fetch metric {metric_name}...')
             await asyncio.sleep(1)
         else:
             break
-
-    if error:
-        print(f'Unable to fetch metric {metric_name}')
-    else:
-        print(f'Successfully fetched metric {metric_name}')
 
     return metric_type, metric_name, metric_value, error
 

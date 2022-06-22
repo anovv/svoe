@@ -32,7 +32,7 @@ class OOMHandler(multiprocessing.Process):
                 return
             self.lock.acquire()
             pods_marking = self.args_queue.get()
-            self.try_get_pids_and_set_oom_score_adj(pods_marking)
+            self.mark_pods(pods_marking)
             self.args_wait_event.clear()
             self.lock.release()
 
@@ -43,7 +43,7 @@ class OOMHandler(multiprocessing.Process):
         if not self.return_wait_event.is_set():
             self.return_wait_event.set()
 
-    def try_get_pids_and_set_oom_score_adj(self, pods_marking):
+    def mark_pods(self, pods_marking):
         # For newly launched pod sets highest possible oom_score_adj for all processes inside
         # all containers in this pod (so oomkiller picks these processes first) and
         # gets back list of pids inside of all containers in this pod.

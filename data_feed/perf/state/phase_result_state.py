@@ -16,7 +16,7 @@ class PhaseResultState:
         raise ValueError('Not implemented')
 
     def is_interrupted(self, pod_name):
-        return self.get_last_result_event(pod_name) in self.get_interrupts()
+        return self.get_last_result_event_type(pod_name) in self.get_interrupts()
 
     def get_last_result_event(self, pod_name):
         if pod_name in self.result_events_per_pod:
