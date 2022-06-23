@@ -97,14 +97,14 @@ prometheusOperator:
           memory: 50Mi
         requests:
           cpu: 30m
-          memory: 50Mi
+          memory: 30Mi
   resources:
     limits:
       cpu: 50m
       memory: 150Mi
     requests:
       cpu: 50m
-      memory: 150Mi
+      memory: 100Mi
 
 prometheus:
   thanosService:
@@ -143,10 +143,10 @@ prometheus:
     resources:
       limits:
         cpu: 100m
-        memory: 500Mi
+        memory: 700Mi
       requests:
         cpu: 100m
-        memory: 500Mi
+        memory: 300Mi
   server:
     persistentVolume:
       enabled: true

@@ -13,7 +13,6 @@ class Stats:
             self.stats[pod_name] = {}
             self.stats[pod_name]['metrics'] = {}
         for metric_type, metric_name, metric_value, error in metrics:
-
             if metric_type not in self.stats[pod_name]['metrics']:
                 self.stats[pod_name]['metrics'][metric_type] = {}
 

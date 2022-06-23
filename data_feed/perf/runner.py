@@ -76,8 +76,8 @@ if __name__ == '__main__':
         'data-feed-binance-spot-6d1641b134-ss',
         'data-feed-binance-spot-eb540d90be-ss',
         'data-feed-binance-spot-18257181b7-ss',
-        'data-feed-binance-spot-28150ca2ec-ss',
-        'data-feed-binance-spot-2d2a017a56-ss',
-        'data-feed-binance-spot-3dd6e42fd0-ss'
+        # 'data-feed-binance-spot-28150ca2ec-ss',
+        # 'data-feed-binance-spot-2d2a017a56-ss',
+        # 'data-feed-binance-spot-3dd6e42fd0-ss'
     ]
     r.run(sub)
