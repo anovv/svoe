@@ -20,7 +20,7 @@ class PromConnection:
         wait = 5
         print(f'[PromConnection] Waiting {wait}s to spin up Prometheus connection...')
         time.sleep(wait)
-        print('[PromConnection] Prometheus connection started')
+        print(f'[PromConnection] Prometheus connection started on pid {self.forward_prom_port_proc.pid}')
 
     def stop(self):
         if self.forward_prom_port_proc is not None:

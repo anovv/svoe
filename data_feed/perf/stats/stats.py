@@ -44,7 +44,7 @@ class Stats:
     def save(self):
         # TODO file per run?
         # path = f'resources-estimation-{datetime.datetime.now().strftime("%d-%m-%Y-%H:%M:%S")}.json'
-        path = 'resources-estimation.json'
+        path = 'resources-estimation-out/resources-estimation.json'
         with open(path, 'w+') as outfile:
             json.dump(self.stats, outfile, indent=4, sort_keys=True)
         print(f'[Stats] Saved stats to {path}')

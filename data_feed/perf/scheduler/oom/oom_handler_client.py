@@ -108,7 +108,7 @@ class OOMHandlerClient:
                             self.scheduling_state.pids_per_container_per_pod[pod][container] = {pid: (oom_score, oom_score_adj)}
                     else:
                         self.scheduling_state.pids_per_container_per_pod[pod] = {container: {pid: (oom_score, oom_score_adj)}}
-            print(f'[OOMHandlerClient] Done for {pod} {self.in_flight_pods[pod]} in {exec_time}s')
+            print(f'[OOMHandlerClient] {self.in_flight_pods[pod]} {pod} in {exec_time}s')
             del self.in_flight_pods[pod]
         self.marking_lock.release()
 

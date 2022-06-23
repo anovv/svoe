@@ -40,7 +40,7 @@ class Runner:
             signal.signal(sig, self.cleanup)
         self.running = True
         print('[Runner] Started estimator')
-        # self.prom_connection.start() # TODO
+        self.prom_connection.start()
         self.kube_watcher.start([
             CHANNEL_NODE_OBJECT_EVENTS,
             CHANNEL_NODE_KUBE_EVENTS,
