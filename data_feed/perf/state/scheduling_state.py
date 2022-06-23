@@ -17,7 +17,7 @@ class SchedulingState(PhaseResultSchedulingState):
         # contains info about oom_score_adj per pid per container per pod. See OOMHandler
         self.pids_per_container_per_pod = {}
         self.pods_priorities = {}
-        self.reschedule_counters_per_pod = {}
+        self.reschedule_events_per_pod = {}
         self.last_oom_event_time_per_node = {}
 
         # TODO is this needed?
@@ -123,18 +123,17 @@ class SchedulingState(PhaseResultSchedulingState):
     def reschedule_or_complete(self, pod_name, reschedule, reason):
         self.remove_pod_from_schedule_state(pod_name)
         # decide if move to done schedule state or reschedule for another run
-        should_save_events_to_stats = False
         self.global_lock.acquire()
         if not reschedule:
             print(f'[Scheduler] {pod_name} done, {reason}')
             self.pods_done.append(pod_name)
             should_save_events_to_stats = True
         else:
-            reschedule_counter = self.get_reschedule_counter(pod_name)
+            reschedule_counter = len(self.get_reschedule_reasons(pod_name))
             if reschedule_counter < MAX_RESCHEDULES:
                 # reschedule - append to the end of the work queue
                 print(f'[Scheduler] {pod_name} rescheduled, {reason}')
-                self.set_reschedule_counter(pod_name, reschedule_counter + 1)
+                self.inc_reschedule_counter(pod_name, reason)
                 self.pods_work_queue.append(pod_name)
                 should_save_events_to_stats = False
             else:
@@ -145,13 +144,15 @@ class SchedulingState(PhaseResultSchedulingState):
         self.global_lock.release()
         return should_save_events_to_stats
 
-    def get_reschedule_counter(self, pod_name):
-        if pod_name not in self.reschedule_counters_per_pod:
-            return 0
-        return self.reschedule_counters_per_pod[pod_name]
+    def get_reschedule_reasons(self, pod_name):
+        if pod_name not in self.reschedule_events_per_pod:
+            return []
+        return self.reschedule_events_per_pod[pod_name]
 
-    def set_reschedule_counter(self, pod_name, counter):
-        self.reschedule_counters_per_pod[pod_name] = counter
+    def inc_reschedule_counter(self, pod_name, reason):
+        if pod_name not in self.reschedule_events_per_pod:
+            self.reschedule_events_per_pod[pod_name] = []
+        self.reschedule_events_per_pod[pod_name].append(reason)
 
     def find_pod_container_by_pid(self, pid):
         for pod in self.pids_per_container_per_pod:

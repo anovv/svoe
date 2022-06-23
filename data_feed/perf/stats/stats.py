@@ -19,7 +19,7 @@ class Stats:
             # TODO somehow indicate per-metric errors?
             self.stats[pod_name]['metrics'][metric_type][metric_name] = error if error else metric_value
 
-    def add_all_df_events_to_stats(self, pod_name, kube_watcher_state, estimation_state, scheduling_state):
+    def add_all_df_events(self, pod_name, kube_watcher_state, estimation_state, scheduling_state):
         events = []
         if pod_name in kube_watcher_state.event_queues_per_pod:
             events.extend(kube_watcher_state.event_queues_per_pod[pod_name].queue)
@@ -39,6 +39,11 @@ class Stats:
         if pod_name not in self.stats:
             self.stats[pod_name] = {}
         self.stats[pod_name]['events'] = events
+
+    def add_reschedules(self, pod_name, scheduling_state):
+        if pod_name not in self.stats:
+            self.stats[pod_name] = {}
+        self.stats[pod_name]['reschedule_reasons'] = scheduling_state.get_reschedule_reasons(pod_name)
 
     def save(self):
         # TODO file per run?
