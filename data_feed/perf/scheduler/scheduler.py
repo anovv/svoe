@@ -99,9 +99,14 @@ class Scheduler:
     def run_estimator(self, pod_name, node_name, priority):
         self.scheduling_state.add_phase_event(pod_name, PodSchedulingPhaseEvent.WAITING_FOR_POD_TO_BE_SCHEDULED)
         payload_config = self.schedule_pod(pod_name, node_name, priority)
+        reschedule, reason = False, None
         if self.running and self.scheduling_state.get_last_result_event_type(pod_name) == PodSchedulingResultEvent.POD_SCHEDULED:
-            self.estimator.estimate_resources(pod_name, payload_config)
+            reschedule, reason = self.estimator.estimate_resources(pod_name, payload_config)
         self.delete_pod(pod_name)
+        if reason is None:
+            reason = self.scheduling_state.get_last_result_event_type(pod_name)
+
+        return reschedule, reason
 
     def schedule_pod(self, pod_name, node_name, priority):
         payload_config = None

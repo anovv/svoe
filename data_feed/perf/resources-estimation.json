@@ -1,1 +1,34 @@
-{}
+{
+    "data-feed-binance-spot-6d1641b134": {
+        "events": [
+            "[2022-06-23 08:54:47.338990+03:00][data-feed-binance-spot-6d1641b134][None] PodSchedulingPhaseEvent.WAITING_FOR_POD_TO_BE_SCHEDULED, None, None",
+            "[2022-06-23 08:54:47.702180+03:00][data-feed-binance-spot-6d1641b134][None] PodObjectLoggedEvent.POD_PHASE_CHANGED, {'phase': 'Pending'}, None",
+            "[2022-06-23 08:54:47.884666+03:00][data-feed-binance-spot-6d1641b134][None] PodObjectLoggedEvent.POD_CONDITION_CHANGED, {'type': 'PodScheduled', 'status': 'True'}, 2022-06-23 05:54:47+00:00",
+            "[2022-06-23 08:54:47.950477+03:00][data-feed-binance-spot-6d1641b134][None] PodSchedulingResultEvent.INTERRUPTED_STOP, None, None",
+            "[2022-06-23 08:54:47.950960+03:00][data-feed-binance-spot-6d1641b134][None] PodSchedulingResultEvent.POD_SCHEDULED, None, None",
+            "[2022-06-23 08:54:47.951152+03:00][data-feed-binance-spot-6d1641b134][None] PodSchedulingPhaseEvent.WAITING_FOR_POD_TO_BE_DELETED, None, None",
+            "[2022-06-23 08:54:47.961288+03:00][data-feed-binance-spot-6d1641b134][None] PodEstimationResultEvent.INTERRUPTED_STOP, None, None",
+            "[2022-06-23 08:54:48.050865+03:00][data-feed-binance-spot-6d1641b134][None] PodKubeLoggedEvent.POD_EVENT, {'reason': 'Scheduled', 'count': 1, 'message': 'Successfully assigned data-feed/data-feed-binance-spot-6d1641b134 to minikube-1-m03'}, 2022-06-23 05:54:47+00:00"
+        ]
+    },
+    "data-feed-binance-spot-eb540d90be": {
+        "events": [
+            "[2022-06-23 08:54:47.168245+03:00][data-feed-binance-spot-eb540d90be][None] PodSchedulingPhaseEvent.WAITING_FOR_POD_TO_BE_SCHEDULED, None, None",
+            "[2022-06-23 08:54:47.532126+03:00][data-feed-binance-spot-eb540d90be][None] PodObjectLoggedEvent.POD_PHASE_CHANGED, {'phase': 'Pending'}, None",
+            "[2022-06-23 08:54:47.592483+03:00][data-feed-binance-spot-eb540d90be][None] PodObjectLoggedEvent.POD_CONDITION_CHANGED, {'type': 'PodScheduled', 'status': 'True'}, 2022-06-23 05:54:47+00:00",
+            "[2022-06-23 08:54:47.847217+03:00][data-feed-binance-spot-eb540d90be][None] PodKubeLoggedEvent.POD_EVENT, {'reason': 'Scheduled', 'count': 1, 'message': 'Successfully assigned data-feed/data-feed-binance-spot-eb540d90be to minikube-1-m03'}, 2022-06-23 05:54:47+00:00",
+            "[2022-06-23 08:54:47.847389+03:00][data-feed-binance-spot-eb540d90be][None] PodSchedulingResultEvent.POD_SCHEDULED, None, None",
+            "[2022-06-23 08:54:47.847451+03:00][data-feed-binance-spot-eb540d90be][None] PodEstimationPhaseEvent.WAITING_FOR_DF_CONTAINER_TO_PULL_IMAGE, None, None",
+            "[2022-06-23 08:54:47.929255+03:00][data-feed-binance-spot-eb540d90be][None] PodSchedulingResultEvent.INTERRUPTED_STOP, None, None",
+            "[2022-06-23 08:54:47.939402+03:00][data-feed-binance-spot-eb540d90be][None] PodEstimationResultEvent.INTERRUPTED_STOP, None, None",
+            "[2022-06-23 08:54:47.939535+03:00][data-feed-binance-spot-eb540d90be][None] PodSchedulingPhaseEvent.WAITING_FOR_POD_TO_BE_DELETED, None, None",
+            "[2022-06-23 08:54:48.076911+03:00][data-feed-binance-spot-eb540d90be][None] PodObjectLoggedEvent.POD_CONDITION_CHANGED, {'type': 'Initialized', 'status': 'True'}, 2022-06-23 05:54:47+00:00",
+            "[2022-06-23 08:54:48.077013+03:00][data-feed-binance-spot-eb540d90be][None] PodObjectLoggedEvent.POD_CONDITION_CHANGED, {'type': 'Ready', 'status': 'False', 'reason': 'ContainersNotReady', 'message': 'containers with unready status: [redis redis-exporter data-feed-container]'}, 2022-06-23 05:54:47+00:00",
+            "[2022-06-23 08:54:48.077081+03:00][data-feed-binance-spot-eb540d90be][None] PodObjectLoggedEvent.POD_CONDITION_CHANGED, {'type': 'ContainersReady', 'status': 'False', 'reason': 'ContainersNotReady', 'message': 'containers with unready status: [redis redis-exporter data-feed-container]'}, 2022-06-23 05:54:47+00:00",
+            "[2022-06-23 08:54:48.077135+03:00][data-feed-binance-spot-eb540d90be][data-feed-container] PodObjectLoggedEvent.CONTAINER_STATE_CHANGED, {'state': {'waiting': {'reason': 'ContainerCreating'}}}, None",
+            "[2022-06-23 08:54:48.077172+03:00][data-feed-binance-spot-eb540d90be][data-feed-container] PodObjectLoggedEvent.CONTAINER_STARTUP_PROBE_STATE_CHANGED, {'started': False}, None",
+            "[2022-06-23 08:54:48.077207+03:00][data-feed-binance-spot-eb540d90be][data-feed-container] PodObjectLoggedEvent.CONTAINER_READINESS_PROBE_STATE_CHANGED, {'ready': False}, None",
+            "[2022-06-23 08:54:48.077241+03:00][data-feed-binance-spot-eb540d90be][data-feed-container] PodObjectLoggedEvent.CONTAINER_RESTART_COUNT_CHANGED, {'restartCount': 0}, None"
+        ]
+    }
+}

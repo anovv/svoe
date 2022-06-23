@@ -1,7 +1,7 @@
-import datetime
 from perf.kube_watcher.event.raw.kube_event.kube_raw_event import KubeRawEvent
 from perf.kube_watcher.event.logged.kube_event.pod_kube_logged_event import PodKubeLoggedEvent
 from perf.kube_watcher.event.logged.pod_events_log import PodEventsLog
+from perf.utils import local_now
 
 
 class PodKubeEventsLog(PodEventsLog):
@@ -79,7 +79,7 @@ class PodKubeEventsLog(PodEventsLog):
             logged_event_type,
             pod_name, container_name=container_name,
             data=data,
-            cluster_time=cluster_time, local_time=datetime.datetime.now(),
+            cluster_time=cluster_time, local_time=local_now(),
             raw_event=raw_event
         )
         self._log_event_and_callback(logged_event)

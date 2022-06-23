@@ -54,13 +54,14 @@ class Runner:
         if not self.running:
             return
         self.running = False
-        self.stats.save()
         if self.prom_connection:
             self.prom_connection.stop()
             self.prom_connection = None
         if self.scheduler:
             self.scheduler.stop()
             self.scheduler = None
+        # save stats only after scheduler is done so we write all events
+        self.stats.save()
         if self.kube_watcher:
             self.kube_watcher.stop([
                 CHANNEL_NODE_OBJECT_EVENTS,
@@ -71,11 +72,6 @@ class Runner:
 
 if __name__ == '__main__':
     r = Runner()
-    # @atexit.register
-    # def cleanup():
-    #     r.cleanup()
-
-    # subset = ['data-feed-binance-spot-6d1641b134-ss', 'data-feed-binance-spot-eb540d90be-ss', 'data-feed-bybit-perpetual-cca5766921-ss']
     sub = [
         'data-feed-binance-spot-6d1641b134-ss',
         'data-feed-binance-spot-eb540d90be-ss',
@@ -85,8 +81,3 @@ if __name__ == '__main__':
         'data-feed-binance-spot-3dd6e42fd0-ss'
     ]
     r.run(sub)
-    r.cleanup()
-    # print(r.scheduler.get_ready_node_name())
-
-    # time.sleep(900)
-    # r.kube_watcher.stop()

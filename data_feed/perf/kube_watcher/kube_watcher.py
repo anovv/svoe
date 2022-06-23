@@ -138,12 +138,9 @@ class KubeWatcher:
             channel = self.channels[name]
             watcher = channel['watcher']
             watcher.stop()
-            print(f'[KubeWatcher] {name} watcher stopped')
         for name in channels:
             channel = self.channels[name]
             thread = channel['thread']
-            print(f'[KubeWatcher] Joining {name} thread')
             thread.join()
-            print(f'[KubeWatcher] {name}_thread joined')
 
         print(f'[KubeWatcher] Kube Watcher stopped')

@@ -1,8 +1,7 @@
-import datetime
-
 from perf.kube_watcher.event.raw.kube_event.kube_raw_event import KubeRawEvent
 from perf.kube_watcher.event.logged.node_events_log import NodeEventsLog
 from perf.kube_watcher.event.logged.kube_event.node_kube_logged_event import NodeKubeLoggedEvent
+from perf.utils import local_now
 
 
 class NodeKubeEventsLog(NodeEventsLog):
@@ -48,7 +47,7 @@ class NodeKubeEventsLog(NodeEventsLog):
                     NodeKubeLoggedEvent.OOM_VICTIM_PROCESS,
                     node_name,
                     data=data,
-                    cluster_time=cluster_time, local_time=datetime.datetime.now(),
+                    cluster_time=cluster_time, local_time=local_now(),
                     raw_event=raw_event
                 )
             except Exception as e:
@@ -70,7 +69,7 @@ class NodeKubeEventsLog(NodeEventsLog):
                     NodeKubeLoggedEvent.OOM_KILLED_PROCESS,
                     node_name,
                     data=data,
-                    cluster_time=cluster_time, local_time=datetime.datetime.now(),
+                    cluster_time=cluster_time, local_time=local_now(),
                     raw_event=raw_event
                 )
             except Exception as e:
@@ -83,7 +82,7 @@ class NodeKubeEventsLog(NodeEventsLog):
                 NodeKubeLoggedEvent.NODE_EVENT,
                 node_name,
                 data=data,
-                cluster_time=cluster_time, local_time=datetime.datetime.now(),
+                cluster_time=cluster_time, local_time=local_now(),
                 raw_event=raw_event
             )
         self._log_event_and_callback(logged_event)
