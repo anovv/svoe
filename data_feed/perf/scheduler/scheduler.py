@@ -167,15 +167,14 @@ class Scheduler:
                 del self.futures[f]
 
     def done_estimation_callback(self, future, pod_name):
-        success = future.result()
-        self.scheduling_state.reschedule_or_complete(pod_name, success)
-        if success:
-            # TODO add reschedule event ?
+        reschedule, reason = future.result()
+        should_save_events_to_stats = self.scheduling_state.reschedule_or_complete(pod_name, reschedule, reason)
+        if should_save_events_to_stats:
             self.stats.add_all_df_events_to_stats(
                 pod_name,
+                self.kube_watcher_state,
                 self.estimation_state,
-                self.scheduling_state,
-                self.kube_watcher_state
+                self.scheduling_state
             )
         self.clean_states(pod_name)
 

@@ -49,10 +49,18 @@ class Estimator:
             self.stats.add_metrics_to_stats(pod_name, metrics)
             self.estimation_state.add_result_event(pod_name, metrics_fetch_result)
 
-        # TODO make sure we do not reschedule for certain events (e.g. some interrupts)
-        # success or not
-        return self.estimation_state.has_result_type(pod_name, PodEstimationResultEvent.POD_FINISHED_ESTIMATION_RUN)
+        for result_type in [
+            PodEstimationResultEvent.INTERRUPTED_OOM,
+            PodEstimationResultEvent.INTERRUPTED_UNEXPECTED_CONTAINER_TERMINATION,
+            PodEstimationResultEvent.INTERRUPTED_UNEXPECTED_POD_DELETION,
+            # TODO This can be result of OOM, extra check in callback?
+            PodEstimationResultEvent.INTERRUPTED_DF_CONTAINER_HEALTH_LIVENESS,
+            PodEstimationResultEvent.INTERRUPTED_DF_CONTAINER_HEALTH_STARTUP,
+        ]:
+            if self.estimation_state.has_result_type(pod_name, result_type):
+                return True, result_type
 
-        # TODO clean kubewatcher api event queue/event log for this pod?
+        return False, self.estimation_state.get_last_result_event_type(pod_name)
+
         # TODO report effective run time in case of interrupts
         # TODO report container logs

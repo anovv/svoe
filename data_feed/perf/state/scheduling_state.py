@@ -120,27 +120,30 @@ class SchedulingState(PhaseResultSchedulingState):
 
         return pod_name
 
-    def reschedule_or_complete(self, pod_name, success):
+    def reschedule_or_complete(self, pod_name, reschedule, reason):
         self.remove_pod_from_schedule_state(pod_name)
         # decide if move to done schedule state or reschedule for another run
-        # TODO add reschedule reason?
+        should_save_events_to_stats = False
         self.global_lock.acquire()
-        if success:
-            # success
-            print(f'[Scheduler] Pod {pod_name} done')
+        if not reschedule:
+            print(f'[Scheduler] {pod_name} done, {reason}')
             self.pods_done.append(pod_name)
+            should_save_events_to_stats = True
         else:
             reschedule_counter = self.get_reschedule_counter(pod_name)
             if reschedule_counter < MAX_RESCHEDULES:
                 # reschedule - append to the end of the work queue
-                print(f'[Scheduler] Pod {pod_name} rescheduled')
+                print(f'[Scheduler] {pod_name} rescheduled, {reason}')
                 self.set_reschedule_counter(pod_name, reschedule_counter + 1)
                 self.pods_work_queue.append(pod_name)
+                should_save_events_to_stats = False
             else:
-                print(f'[Scheduler] Pod {pod_name} done after {reschedule_counter} reschedules')
+                print(f'[Scheduler] {pod_name} done after max {MAX_RESCHEDULES} reschedule attempts')
                 self.pods_done.append(pod_name)
+                should_save_events_to_stats = True
 
         self.global_lock.release()
+        return should_save_events_to_stats
 
     def get_reschedule_counter(self, pod_name):
         if pod_name not in self.reschedule_counters_per_pod:
