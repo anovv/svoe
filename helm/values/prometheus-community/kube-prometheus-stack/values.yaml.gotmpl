@@ -119,6 +119,8 @@ prometheus:
       repository: quay.io/prometheus/prometheus
       tag: v2.36.2
       sha: ""
+    enableFeatures:
+      - memory-snapshot-on-shutdown
     retention: 3h
     # Thanos uploads every 2 hours
     # set --storage.tsdb.min-block-duration and --storage.tsdb.max-block-duration
