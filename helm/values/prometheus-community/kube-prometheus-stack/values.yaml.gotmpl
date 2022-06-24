@@ -3,6 +3,7 @@ commonLabels:
   cluster-id: {{ .Values | get "clusterId" | quote }}
 
 alertmanager:
+  enabled: false # TODO enable after test
   alertmanagerSpec:
     resources:
       limits:
@@ -104,7 +105,7 @@ prometheusOperator:
       memory: 150Mi
     requests:
       cpu: 50m
-      memory: 100Mi
+      memory: 50Mi
 
 prometheus:
   thanosService:
@@ -114,6 +115,10 @@ prometheus:
     enabled: true
 
   prometheusSpec:
+    image:
+      repository: quay.io/prometheus/prometheus
+      tag: v2.36.2
+      sha: ""
     retention: 3h
     # Thanos uploads every 2 hours
     # set --storage.tsdb.min-block-duration and --storage.tsdb.max-block-duration
@@ -142,8 +147,8 @@ prometheus:
       cluster_id: {{ .Values | get "clusterId" | quote}}
     resources:
       limits:
-        cpu: 100m
-        memory: 700Mi
+        cpu: 500m
+        memory: 800Mi
       requests:
         cpu: 100m
         memory: 300Mi
