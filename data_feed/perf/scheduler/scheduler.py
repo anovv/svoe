@@ -21,7 +21,7 @@ class NodeStateReason:
     SCHEDULABLE_SEQUENCE = 'SCHEDULABLE_SEQUENCE'
 
     # unschedulable reasons
-    NO_RESOURCE_ESTIMATOR_TAINT = 'NO_RESOURCE_ESTIMATOR_TAINT'
+    NO_RESOURCE_ESTIMATOR_LABEL = 'NO_RESOURCE_ESTIMATOR_LABEL'
     NOT_READY = 'NOT_READY'
     NOT_ENOUGH_CPU = 'NOT_ENOUGH_CPU'
     NOT_ENOUGH_MEMORY = 'NOT_ENOUGH_MEMORY'
@@ -199,14 +199,13 @@ class Scheduler:
 
         for node in nodes.items:
             node_name = node.metadata.name
-            has_resource_estimator_taint = False
-            if node.spec.taints:
-                for taint in node.spec.taints:
-                    if taint.to_dict()['key'] == 'svoe-role' and taint.to_dict()['value'] == 'resource-estimator':
-                        has_resource_estimator_taint = True
-                        break
-            if not has_resource_estimator_taint:
-                nodes_state[node_name] = (False, NodeStateReason.NO_RESOURCE_ESTIMATOR_TAINT)
+            has_resource_estimator_label = False
+            for label in node.metadata.labels:
+                if label == 'svoe-role' and node.metadata.labels[label] == 'resource-estimator':
+                    has_resource_estimator_label = True
+                    break
+            if not has_resource_estimator_label:
+                nodes_state[node_name] = (False, NodeStateReason.NO_RESOURCE_ESTIMATOR_LABEL)
                 continue
 
             is_ready = False
