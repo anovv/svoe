@@ -23,14 +23,17 @@ class OOMHandler(multiprocessing.Process):
         self.lock = multiprocessing.Lock()
         self.executor = None
 
+    def start(self):
+        self.running.value = 1
+        super().start()
+
     def run(self):
-        print('OOMHandler started')
+        print('[OOMHandler] OOMHandler started')
         self.daemon = True
         for sig in [signal.SIGINT, signal.SIG_IGN, signal.SIGTERM]:
             signal.signal(sig, self._interrupt)
         # OOMHandler should have it's own instance of KubeApi set inside it's process context
         self.kube_api = KubeApi.new_instance()
-        self.running.value = 1
         while bool(self.running.value):
             self.args_wait_event.wait()
             if not bool(self.running.value):
