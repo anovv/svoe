@@ -62,5 +62,5 @@ class Estimator:
 
         return False, self.estimation_state.get_last_result_event_type(pod_name)
 
-        # TODO report effective run time in case of interrupts
+        # TODO report started_at, finished_at
         # TODO report container logs

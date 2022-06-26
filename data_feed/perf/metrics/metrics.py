@@ -4,6 +4,71 @@ import aiohttp
 from perf.defines import PROM, RUN_ESTIMATION_FOR, DATA_FEED_CONTAINER, REDIS_CONTAINER, REDIS_EXPORTER_CONTAINER
 
 
+class AggregateFunction:
+    ABSENT = 'absent'
+    AVG = 'avg'
+    MAX = 'max'
+    MIN = 'min'
+    P95 = 'p95'
+    INC = 'inc'
+
+    query_functions = {
+        ABSENT: lambda metric, duration_s: f'avg_over_time((max(absent({metric})) or vector(0))[{duration_s}s:])',
+        AVG: lambda metric, duration_s: f'avg_over_time({metric}[{duration_s}s])',
+        MAX: lambda metric, duration_s: f'max_over_time({metric}[{duration_s}s])',
+        MIN: lambda metric, duration_s: f'min_over_time({metric}[{duration_s}s])',
+        P95: lambda metric, duration_s: f'quantile_over_time(0.95, {metric}[{duration_s}s])',
+        INC: lambda metric, duration_s: f'increase({metric}[{duration_s}s])',
+    }
+
+
+class Metrics:
+    # data feed health
+    DATA_FEED_HEALTH = 'df_health'
+    df_health_metrics = {
+        DATA_FEED_HEALTH: lambda exchange, data_type, symbol: f'svoe_data_feed_collector_conn_health_gauge{{exchange="{exchange}", symbol="{symbol}", data_type="{data_type}"}}'
+    }
+
+    # exported by metrics-server-exporter
+    MS_MEMORY = 'metrics_server_mem'
+    MS_CPU = 'metrics_server_cpu'
+    ms_metrics = {
+        MS_MEMORY: lambda pod, container: f'kube_metrics_server_pods_mem{{pod_name="{pod}", pod_container_name="{container}"}}',
+        MS_CPU: lambda pod, container: f'kube_metrics_server_pods_cpu{{pod_name="{pod}", pod_container_name="{container}"}}',
+    }
+
+    # cadvisor metrics
+    # cpu
+    CADV_CPU_LOAD_AVG_10S = 'container_cpu_load_average_10s'
+    CADV_CPU_USAGE_S_TOTAL = 'container_cpu_usage_seconds_total'
+
+    # memory
+    # container_memory_usage_bytes
+    # container_memory_failcnt
+    # container_memory_cache # This measures the number of bytes of page cache memory
+    # container_memory_working_set_bytes
+    # container_memory_rss
+    CADV_MEM_USAGE_BYTES = ''
+
+    # network
+    # TODO Pod level only
+    # container_network_transmit_bytes_total
+    # container_network_transmit_errors_total
+    # container_network_receive_bytes_total
+    # container_network_receive_errors_total
+
+    # oom
+    # container_oom_events_total
+    
+    # processes
+    # container_processes
+
+    # disk
+    # container_fs_io_time_seconds_total
+    # container_fs_writes_bytes_total
+    # container_fs_reads_bytes_total
+
+
 def fetch_metrics(pod_name, payload_config):
     # this will be called inside pool executor, each in separate thread
     # hence we need to create a new loop instance for each thread
@@ -116,21 +181,7 @@ def _get_cadvisor_metrics(pod_name):
     for container_name in [DATA_FEED_CONTAINER, REDIS_CONTAINER, REDIS_EXPORTER_CONTAINER]:
         # TODO ',' or ';' separator instead of '_'
         metrics.update({
-            # TODO explore relevant metrics:
-            # network
-            # container_network_transmit_bytes_total
-            # container_network_transmit_errors_total
-            # container_network_receive_bytes_total
-            # container_network_receive_errors_total
 
-            # TODO https://www.metricfire.com/blog/top-10-cadvisor-metrics-for-prometheus/
-            # https://prometheus.io/docs/guides/cadvisor/
-            # https://www.cloudforecast.io/blog/cadvisor-and-kubernetes-monitoring-guide/
-            # memory
-
-            # cpu
-
-            # mem
             f'mem_absent_{container_name}':
                 f'avg_over_time((max(absent(kube_metrics_server_pods_mem{{pod_name="{pod_name}", pod_container_name="{container_name}"}})) or vector(0)){duration_subquery})',
             f'mem_avg_{container_name}': f'avg_over_time(kube_metrics_server_pods_mem{{pod_name="{pod_name}", pod_container_name="{container_name}"}}{duration})',

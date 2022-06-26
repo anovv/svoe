@@ -189,6 +189,8 @@ class KubeApi:
             print(f'[KubeApi] Stale cache for remote-scripts-ds pod, updating...')
             self.remote_scripts_ds_pod_cache[node_name] = self.get_remote_scripts_pod(node_name)
         remote_scripts_pod = self.remote_scripts_ds_pod_cache[node_name]
+        if remote_scripts_pod is None:
+            return
         try:
             return self.pod_exec(
                 REMOTE_SCRIPTS_DS_NAMESPACE,
@@ -201,6 +203,8 @@ class KubeApi:
                 # cache stale, ask kube for latest remote-scripts-ds pod
                 print(f'[KubeApi] Stale cache for remote-scripts-ds pod, updating...')
                 remote_scripts_pod = self.get_remote_scripts_pod(node_name)
+                if remote_scripts_pod is None:
+                    return
                 self.remote_scripts_ds_pod_cache[node_name] = remote_scripts_pod
                 return self.pod_exec(
                     REMOTE_SCRIPTS_DS_NAMESPACE,
@@ -223,5 +227,5 @@ class KubeApi:
         try:
             return res.items[0].metadata.name
         except Exception as e:
-            print(f'[OOMHandler] Unable to get remote-scripts-ds pod for node {node_name}')
-            raise e
+            print(f'[KubeApi] Unable to get remote-scripts-ds pod for node {node_name}')
+            return None
