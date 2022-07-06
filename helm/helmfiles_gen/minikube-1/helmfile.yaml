@@ -85,6 +85,9 @@ releases:
   - chart: ../../charts/local/remote-scripts
     name: remote-scripts
     namespace: kube-system
+  - chart: ../../charts/local/grafana-dashboards
+    name: grafana-dashboards
+    namespace: monitoring
 repositories:
   - name: metrics-server
     url: https://kubernetes-sigs.github.io/metrics-server/

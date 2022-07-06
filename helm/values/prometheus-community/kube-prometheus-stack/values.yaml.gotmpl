@@ -16,16 +16,18 @@ alertmanager:
 # TODO set pod requests/limits
 #https://github.com/particuleio/terraform-kubernetes-addons/blob/main/modules/aws/kube-prometheus.tf
 grafana:
-  {{ if and (.Values | get "isObserver") (not (eq .Values.clusterType "minikube")) }}
+  {{ if or (.Values | get "isObserver") (eq .Values.clusterType "minikube") }}
   adminPassword: {{ .Values | get "grafanaAdminPassword" }}
   service:
     type: NodePort
     annotations:
       dns.alpha.kubernetes.io/external: grafana.{{ .Values | get "clusterName" }}
+  deploymentStrategy:
+    type: Recreate
   persistence:
     enabled: true
     type: pvc
-    storageClassName: default
+#    storageClassName: default
     accessModes:
     - ReadWriteOnce
     size: 2Gi
@@ -38,19 +40,25 @@ grafana:
           enabled: true
         etcd:
           enabled: true
-    # TODO set datasources ??
     datasources:
       defaultDatasourceEnabled: false
-  # TODO additionalDataSources - Thanos, Athena, MySQL, Redis, etc
   additionalDataSources:
-    - name: prometheus
+    - name: Prometheus
+      type: prometheus
+      uid: prometheus
+      url: http://kube-prometheus-stack-prometheus.monitoring:9090/
+      access: proxy
+      isDefault: true # TODO undefault when thanos is enabled
+      jsonData:
+        timeInterval: 10s
+    - name: thanos
       access: proxy
       editable: false
       orgId: 1
       type: prometheus
       url: http://thanos-query-frontend.monitoring.svc.cluster.local:9090
       version: 1
-      isDefault: true
+      isDefault: false # TODO make default when thanos is enabled
   dashboardProviders:
     dashboardproviders.yaml:
       apiVersion: 1
@@ -60,10 +68,12 @@ grafana:
           folder: ''
           type: file
           disableDeletion: false
-          editable: true
+          editable: false
           options:
-            path: /var/lib/grafana/dashboards/default
+            path: /tmp/dashboards/
+
   dashboards:
+    # TODO set proper datasource for each (i.e. thanos/prometheus or other)
     default:
       thanos-overview:
         url: https://raw.githubusercontent.com/thanos-io/thanos/master/examples/dashboards/overview.json
@@ -84,7 +94,7 @@ grafana:
       cluster-autoscaler:
         gnetId: 3831
         revision: 1
-        datasource: prometheus
+        datasource: prometheus # TODO use thanos if enabled
   {{ else }}
   enabled: false
   {{ end }}
@@ -150,7 +160,7 @@ prometheus:
     resources:
       limits:
         cpu: 500m
-        memory: 800Mi
+        memory: 1Gi
       requests:
         cpu: 100m
         memory: 300Mi

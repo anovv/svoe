@@ -1,4 +1,5 @@
-# generate-dashboard -o svoe_data_feed_aggregator_stats.json svoe_data_feed_aggregator_stats.dashboard.py
+# json files should be in ../../../../../helm/charts/local/grafana-dashboards/dashboards/ to be mounted to kube configmaps
+# generate-dashboard -o path-above/svoe_data_feed_aggregator_stats.json svoe_data_feed_aggregator_stats.dashboard.py
 import grafanalib.core as G
 
 PROMETHEUS_DATA_SOURCE = 'Prometheus'
