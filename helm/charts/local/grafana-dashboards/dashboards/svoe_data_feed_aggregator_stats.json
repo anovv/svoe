@@ -102,7 +102,7 @@
           "thresholds": [],
           "timeFrom": null,
           "timeShift": null,
-          "title": "Cache Reads Frequency (1m agg)",
+          "title": "Cache Reads Freq (1m agg)",
           "tooltip": {
             "msResolution": true,
             "shared": true,
@@ -378,7 +378,7 @@
           "thresholds": [],
           "timeFrom": null,
           "timeShift": null,
-          "title": "Remote Writes Frequency (1m agg)",
+          "title": "Remote Writes Freq (1m agg)",
           "tooltip": {
             "msResolution": true,
             "shared": true,

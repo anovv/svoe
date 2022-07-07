@@ -5,6 +5,7 @@ metadata:
   name: {{ $path | base | trimSuffix ".json" | replace "_" "-"}}-grafana-dashboard
   annotations:
     {}
+#    k8s-sidecar-target-directory: "/var/lib/grafana/dashboards/sidecar"
   labels:
     grafana_dashboard: "1"
 data:

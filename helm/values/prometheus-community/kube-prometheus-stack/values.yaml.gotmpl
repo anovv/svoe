@@ -35,6 +35,12 @@ grafana:
     - kubernetes.io/pvc-protection
   sidecar:
     dashboards:
+      enabled: true
+      label: grafana_dashboard
+      labelValue: "1"
+      folder: /var/lib/grafana/dashboards/sidecar
+      provider:
+        foldersFromFilesStructure: true
       multicluster:
         global:
           enabled: true
@@ -59,18 +65,19 @@ grafana:
       url: http://thanos-query-frontend.monitoring.svc.cluster.local:9090
       version: 1
       isDefault: false # TODO make default when thanos is enabled
+      # https://github.com/helm/charts/issues/16006 for multipe dashboard providers with sidecar
   dashboardProviders:
     dashboardproviders.yaml:
       apiVersion: 1
       providers:
         - name: 'default'
           orgId: 1
-          folder: ''
+          folder: 'Default'
           type: file
-          disableDeletion: false
+          disableDeletion: true
           editable: false
           options:
-            path: /tmp/dashboards/
+            path: /var/lib/grafana/dashboards/default
 
   dashboards:
     # TODO set proper datasource for each (i.e. thanos/prometheus or other)

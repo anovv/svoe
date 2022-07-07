@@ -92,12 +92,12 @@ dashboard = G.Dashboard(
     rows=[
         # cache reads row
         G.Row(panels=[
-            _frequency_graph('Cache Reads Frequency (1m agg)', 'read', '1m'),
+            _frequency_graph('Cache Reads Freq (1m agg)', 'read', '1m'),
             _latency_graph('Cache Reads Latency (5m agg)', 'read', '5m')
         ]),
         # remote writes row
         G.Row(panels=[
-            _frequency_graph('Remote Writes Frequency (1m agg)', 'write', '1m'),
+            _frequency_graph('Remote Writes Freq (1m agg)', 'write', '1m'),
             _latency_graph('Remote Writes Latency (5m agg)', 'write', '5m')
         ]),
         # block size row
