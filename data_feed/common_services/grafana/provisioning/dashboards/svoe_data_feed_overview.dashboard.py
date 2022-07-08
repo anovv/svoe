@@ -19,6 +19,7 @@ def _total_conn_stat():
                 expr=f'count(group({METRIC_NAME_CONN_HEALTH_GAUGE}) by (exchange, data_type, symbol))',
             ),
         ],
+        reduceCalc='last',
     )
 
 
@@ -32,6 +33,7 @@ def _healthy_conn_stat():
                 expr=f'count(group({METRIC_NAME_CONN_HEALTH_GAUGE} == 1) by (exchange, data_type, symbol))',
             ),
         ],
+        reduceCalc='last',
     )
 
 
@@ -59,6 +61,7 @@ def _total_ss_count_stat():
                 expr=f'count(group(kube_statefulset_created{{namespace=\'{DATA_FEED_NAMESPACE}\'}}) by (statefulset))',
             ),
         ],
+        reduceCalc='last',
     )
 
 
@@ -71,6 +74,7 @@ def _total_pod_count_stat():
                 expr=f'count(group(kube_pod_info{{namespace=\'{DATA_FEED_NAMESPACE}\'}}) by (pod))',
             ),
         ],
+        reduceCalc='last',
     )
 
 
@@ -83,6 +87,7 @@ def _running_pod_count_stat():
                 expr=f'count(group(kube_pod_status_phase{{namespace=\'{DATA_FEED_NAMESPACE}\', phase=\'Running\'}}) by (pod))',
             ),
         ],
+        reduceCalc='last',
     )
 
 

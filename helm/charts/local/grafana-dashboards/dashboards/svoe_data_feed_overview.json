@@ -53,7 +53,7 @@
             "orientation": "auto",
             "reduceOptions": {
               "calcs": [
-                "mean"
+                "last"
               ],
               "fields": "",
               "values": false
@@ -122,7 +122,7 @@
             "orientation": "auto",
             "reduceOptions": {
               "calcs": [
-                "mean"
+                "last"
               ],
               "fields": "",
               "values": false
@@ -191,7 +191,7 @@
             "orientation": "auto",
             "reduceOptions": {
               "calcs": [
-                "mean"
+                "last"
               ],
               "fields": "",
               "values": false
@@ -278,7 +278,7 @@
           "targets": [
             {
               "datasource": null,
-              "expr": "max(kube_pod_status_phase{namespace='data-feed', phase!='Running'}) by (pod, instance)",
+              "expr": "max(kube_pod_status_phase{namespace='data-feed', phase!='Running'}) by (pod, phase, instance)",
               "format": "table",
               "hide": false,
               "instant": true,
@@ -342,7 +342,7 @@
           "targets": [
             {
               "datasource": null,
-              "expr": "max(kube_pod_status_ready{namespace='data-feed', condition!='true'}) by (pod, instance)",
+              "expr": "max(kube_pod_status_ready{namespace='data-feed', condition!='true'}) by (pod, condition, instance)",
               "format": "table",
               "hide": false,
               "instant": true,
@@ -408,7 +408,7 @@
             "orientation": "auto",
             "reduceOptions": {
               "calcs": [
-                "mean"
+                "last"
               ],
               "fields": "",
               "values": false
@@ -477,7 +477,7 @@
             "orientation": "auto",
             "reduceOptions": {
               "calcs": [
-                "mean"
+                "last"
               ],
               "fields": "",
               "values": false
