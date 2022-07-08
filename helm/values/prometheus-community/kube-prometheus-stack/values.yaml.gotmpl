@@ -178,3 +178,9 @@ prometheus:
 kubelet:
   serviceMonitor:
     https: true
+
+kube-state-metrics:
+  metricLabelsAllowlist:
+    - nodes=[*]
+    - pods=[*]
+    - statefulsets=[*]
