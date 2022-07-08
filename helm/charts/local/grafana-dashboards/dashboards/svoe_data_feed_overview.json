@@ -66,7 +66,7 @@
           "targets": [
             {
               "datasource": null,
-              "expr": "count(group(kube_statefulset_created{namespace='data-feed'}) by (statefulset))",
+              "expr": "count(group(kube_statefulset_created{namespace='data-feed'}) by (statefulset)) or on() vector(0)",
               "format": "time_series",
               "hide": false,
               "instant": false,
@@ -135,7 +135,7 @@
           "targets": [
             {
               "datasource": null,
-              "expr": "count(group(kube_pod_info{namespace='data-feed'}) by (pod))",
+              "expr": "count(group(kube_pod_info{namespace='data-feed'}) by (pod)) or on() vector(0)",
               "format": "time_series",
               "hide": false,
               "instant": false,
@@ -204,7 +204,7 @@
           "targets": [
             {
               "datasource": null,
-              "expr": "count(group(kube_pod_status_phase{namespace='data-feed', phase='Running'}) by (pod))",
+              "expr": "count(group(kube_pod_status_phase{namespace='data-feed', phase='Running'}) by (pod)) or on() vector(0)",
               "format": "time_series",
               "hide": false,
               "instant": false,
@@ -421,7 +421,7 @@
           "targets": [
             {
               "datasource": null,
-              "expr": "count(group(svoe_data_feed_collector_conn_health_gauge) by (exchange, data_type, symbol))",
+              "expr": "count(group(svoe_data_feed_collector_conn_health_gauge) by (exchange, data_type, symbol)) or on() vector(0)",
               "format": "time_series",
               "hide": false,
               "instant": false,
@@ -490,7 +490,7 @@
           "targets": [
             {
               "datasource": null,
-              "expr": "count(group(svoe_data_feed_collector_conn_health_gauge == 1) by (exchange, data_type, symbol))",
+              "expr": "count(group(svoe_data_feed_collector_conn_health_gauge == 1) by (exchange, data_type, symbol)) or on() vector(0)",
               "format": "time_series",
               "hide": false,
               "instant": false,

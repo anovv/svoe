@@ -4,8 +4,8 @@ import grafanalib.core as G
 
 DATA_FEED_NAMESPACE = 'data-feed'
 PROMETHEUS_DATA_SOURCE = 'Prometheus'
-METRIC_NAME_LATENCY_COUNT = 'svoe_data_feed_collector_latency_s_histogram_count'
-METRIC_NAME_LATENCY_BUCKET = 'svoe_data_feed_collector_latency_s_histogram_bucket'
+# METRIC_NAME_LATENCY_COUNT = 'svoe_data_feed_collector_latency_s_histogram_count'
+# METRIC_NAME_LATENCY_BUCKET = 'svoe_data_feed_collector_latency_s_histogram_bucket'
 METRIC_NAME_CONN_HEALTH_GAUGE = 'svoe_data_feed_collector_conn_health_gauge'
 
 
@@ -16,7 +16,7 @@ def _total_conn_stat():
         dataSource=PROMETHEUS_DATA_SOURCE,
         targets=[
             G.Target(
-                expr=f'count(group({METRIC_NAME_CONN_HEALTH_GAUGE}) by (exchange, data_type, symbol))',
+                expr=f'count(group({METRIC_NAME_CONN_HEALTH_GAUGE}) by (exchange, data_type, symbol)) or on() vector(0)',
             ),
         ],
         reduceCalc='last',
@@ -30,7 +30,7 @@ def _healthy_conn_stat():
         dataSource=PROMETHEUS_DATA_SOURCE,
         targets=[
             G.Target(
-                expr=f'count(group({METRIC_NAME_CONN_HEALTH_GAUGE} == 1) by (exchange, data_type, symbol))',
+                expr=f'count(group({METRIC_NAME_CONN_HEALTH_GAUGE} == 1) by (exchange, data_type, symbol)) or on() vector(0)',
             ),
         ],
         reduceCalc='last',
@@ -58,7 +58,7 @@ def _total_ss_count_stat():
         dataSource=PROMETHEUS_DATA_SOURCE,
         targets=[
             G.Target(
-                expr=f'count(group(kube_statefulset_created{{namespace=\'{DATA_FEED_NAMESPACE}\'}}) by (statefulset))',
+                expr=f'count(group(kube_statefulset_created{{namespace=\'{DATA_FEED_NAMESPACE}\'}}) by (statefulset)) or on() vector(0)',
             ),
         ],
         reduceCalc='last',
@@ -71,7 +71,7 @@ def _total_pod_count_stat():
         dataSource=PROMETHEUS_DATA_SOURCE,
         targets=[
             G.Target(
-                expr=f'count(group(kube_pod_info{{namespace=\'{DATA_FEED_NAMESPACE}\'}}) by (pod))',
+                expr=f'count(group(kube_pod_info{{namespace=\'{DATA_FEED_NAMESPACE}\'}}) by (pod)) or on() vector(0)',
             ),
         ],
         reduceCalc='last',
@@ -84,7 +84,7 @@ def _running_pod_count_stat():
         dataSource=PROMETHEUS_DATA_SOURCE,
         targets=[
             G.Target(
-                expr=f'count(group(kube_pod_status_phase{{namespace=\'{DATA_FEED_NAMESPACE}\', phase=\'Running\'}}) by (pod))',
+                expr=f'count(group(kube_pod_status_phase{{namespace=\'{DATA_FEED_NAMESPACE}\', phase=\'Running\'}}) by (pod)) or on() vector(0)',
             ),
         ],
         reduceCalc='last',
