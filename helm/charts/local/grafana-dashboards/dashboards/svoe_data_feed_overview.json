@@ -19,6 +19,223 @@
       "panels": [
         {
           "cacheTimeout": null,
+          "datasource": "Prometheus",
+          "description": null,
+          "editable": true,
+          "error": false,
+          "fieldConfig": {
+            "defaults": {
+              "custom": {},
+              "decimals": null,
+              "mappings": [],
+              "noValue": "none",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": ""
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": null,
+          "height": null,
+          "hideTimeOverride": false,
+          "id": 1,
+          "interval": null,
+          "links": [],
+          "maxDataPoints": 100,
+          "maxPerRow": null,
+          "minSpan": null,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "mean"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto"
+          },
+          "repeat": null,
+          "repeatDirection": null,
+          "span": 4,
+          "targets": [
+            {
+              "datasource": null,
+              "expr": "count(group(kube_statefulset_created{namespace='data-feed'}) by (statefulset))",
+              "format": "time_series",
+              "hide": false,
+              "instant": false,
+              "interval": "",
+              "intervalFactor": 2,
+              "legendFormat": "",
+              "metric": "",
+              "refId": "",
+              "step": 10,
+              "target": ""
+            }
+          ],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Total number of statefulsets",
+          "transformations": [],
+          "transparent": false,
+          "type": "stat"
+        },
+        {
+          "cacheTimeout": null,
+          "datasource": "Prometheus",
+          "description": null,
+          "editable": true,
+          "error": false,
+          "fieldConfig": {
+            "defaults": {
+              "custom": {},
+              "decimals": null,
+              "mappings": [],
+              "noValue": "none",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": ""
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": null,
+          "height": null,
+          "hideTimeOverride": false,
+          "id": 2,
+          "interval": null,
+          "links": [],
+          "maxDataPoints": 100,
+          "maxPerRow": null,
+          "minSpan": null,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "mean"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto"
+          },
+          "repeat": null,
+          "repeatDirection": null,
+          "span": 4,
+          "targets": [
+            {
+              "datasource": null,
+              "expr": "count(group(kube_pod_info{namespace='data-feed'}) by (pod))",
+              "format": "time_series",
+              "hide": false,
+              "instant": false,
+              "interval": "",
+              "intervalFactor": 2,
+              "legendFormat": "",
+              "metric": "",
+              "refId": "",
+              "step": 10,
+              "target": ""
+            }
+          ],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Total number of pods",
+          "transformations": [],
+          "transparent": false,
+          "type": "stat"
+        },
+        {
+          "cacheTimeout": null,
+          "datasource": "Prometheus",
+          "description": null,
+          "editable": true,
+          "error": false,
+          "fieldConfig": {
+            "defaults": {
+              "custom": {},
+              "decimals": null,
+              "mappings": [],
+              "noValue": "none",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": ""
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": null,
+          "height": null,
+          "hideTimeOverride": false,
+          "id": 3,
+          "interval": null,
+          "links": [],
+          "maxDataPoints": 100,
+          "maxPerRow": null,
+          "minSpan": null,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "mean"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto"
+          },
+          "repeat": null,
+          "repeatDirection": null,
+          "span": 4,
+          "targets": [
+            {
+              "datasource": null,
+              "expr": "count(group(kube_pod_status_phase{namespace='data-feed', phase='Running'}) by (pod))",
+              "format": "time_series",
+              "hide": false,
+              "instant": false,
+              "interval": "",
+              "intervalFactor": 2,
+              "legendFormat": "",
+              "metric": "",
+              "refId": "",
+              "step": 10,
+              "target": ""
+            }
+          ],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Number of running pods",
+          "transformations": [],
+          "transparent": false,
+          "type": "stat"
+        }
+      ],
+      "repeat": null,
+      "showTitle": false,
+      "title": "New row"
+    },
+    {
+      "collapse": false,
+      "editable": true,
+      "height": "250px",
+      "panels": [
+        {
+          "cacheTimeout": null,
           "color": {
             "mode": "thresholds"
           },
@@ -45,7 +262,7 @@
           "gridPos": null,
           "height": null,
           "hideTimeOverride": false,
-          "id": 1,
+          "id": 4,
           "interval": null,
           "links": [],
           "mappings": [],
@@ -61,7 +278,7 @@
           "targets": [
             {
               "datasource": null,
-              "expr": "max(kube_node_info) by (node, kernel_version, os_image)",
+              "expr": "max(kube_pod_status_phase{namespace='data-feed', phase!='Running'}) by (pod, instance)",
               "format": "table",
               "hide": false,
               "instant": true,
@@ -76,7 +293,283 @@
           ],
           "timeFrom": null,
           "timeShift": null,
-          "title": "Non-healthy channels",
+          "title": "Non running pods",
+          "transformations": [],
+          "transparent": false,
+          "type": "table"
+        },
+        {
+          "cacheTimeout": null,
+          "color": {
+            "mode": "thresholds"
+          },
+          "columns": [],
+          "datasource": "Prometheus",
+          "description": null,
+          "editable": true,
+          "error": false,
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "align": "auto",
+                "displayMode": "auto",
+                "filterable": false
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": []
+              }
+            },
+            "overrides": []
+          },
+          "fontSize": "100%",
+          "gridPos": null,
+          "height": null,
+          "hideTimeOverride": false,
+          "id": 5,
+          "interval": null,
+          "links": [],
+          "mappings": [],
+          "maxDataPoints": 100,
+          "maxPerRow": null,
+          "minSpan": null,
+          "options": {
+            "showHeader": true
+          },
+          "repeat": null,
+          "repeatDirection": null,
+          "span": 6,
+          "targets": [
+            {
+              "datasource": null,
+              "expr": "max(kube_pod_status_ready{namespace='data-feed', condition!='true'}) by (pod, instance)",
+              "format": "table",
+              "hide": false,
+              "instant": true,
+              "interval": "",
+              "intervalFactor": 2,
+              "legendFormat": "",
+              "metric": "",
+              "refId": "",
+              "step": 10,
+              "target": ""
+            }
+          ],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Non ready pods",
+          "transformations": [],
+          "transparent": false,
+          "type": "table"
+        }
+      ],
+      "repeat": null,
+      "showTitle": false,
+      "title": "New row"
+    },
+    {
+      "collapse": false,
+      "editable": true,
+      "height": "250px",
+      "panels": [
+        {
+          "cacheTimeout": null,
+          "datasource": "Prometheus",
+          "description": null,
+          "editable": true,
+          "error": false,
+          "fieldConfig": {
+            "defaults": {
+              "custom": {},
+              "decimals": null,
+              "mappings": [],
+              "noValue": "none",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": ""
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": null,
+          "height": null,
+          "hideTimeOverride": false,
+          "id": 6,
+          "interval": null,
+          "links": [],
+          "maxDataPoints": 100,
+          "maxPerRow": null,
+          "minSpan": null,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "mean"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto"
+          },
+          "repeat": null,
+          "repeatDirection": null,
+          "span": 3,
+          "targets": [
+            {
+              "datasource": null,
+              "expr": "count(group(svoe_data_feed_collector_conn_health_gauge) by (exchange, data_type, symbol))",
+              "format": "time_series",
+              "hide": false,
+              "instant": false,
+              "interval": "",
+              "intervalFactor": 2,
+              "legendFormat": "",
+              "metric": "",
+              "refId": "",
+              "step": 10,
+              "target": ""
+            }
+          ],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Total number of connections (exchange+data_type+symbol)",
+          "transformations": [],
+          "transparent": false,
+          "type": "stat"
+        },
+        {
+          "cacheTimeout": null,
+          "datasource": "Prometheus",
+          "description": null,
+          "editable": true,
+          "error": false,
+          "fieldConfig": {
+            "defaults": {
+              "custom": {},
+              "decimals": null,
+              "mappings": [],
+              "noValue": "none",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": ""
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": null,
+          "height": null,
+          "hideTimeOverride": false,
+          "id": 7,
+          "interval": null,
+          "links": [],
+          "maxDataPoints": 100,
+          "maxPerRow": null,
+          "minSpan": null,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "mean"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto"
+          },
+          "repeat": null,
+          "repeatDirection": null,
+          "span": 3,
+          "targets": [
+            {
+              "datasource": null,
+              "expr": "count(group(svoe_data_feed_collector_conn_health_gauge == 1) by (exchange, data_type, symbol))",
+              "format": "time_series",
+              "hide": false,
+              "instant": false,
+              "interval": "",
+              "intervalFactor": 2,
+              "legendFormat": "",
+              "metric": "",
+              "refId": "",
+              "step": 10,
+              "target": ""
+            }
+          ],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Total number of healthy connections (exchange+data_type+symbol)",
+          "transformations": [],
+          "transparent": false,
+          "type": "stat"
+        },
+        {
+          "cacheTimeout": null,
+          "color": {
+            "mode": "thresholds"
+          },
+          "columns": [],
+          "datasource": "Prometheus",
+          "description": null,
+          "editable": true,
+          "error": false,
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "align": "auto",
+                "displayMode": "auto",
+                "filterable": false
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": []
+              }
+            },
+            "overrides": []
+          },
+          "fontSize": "100%",
+          "gridPos": null,
+          "height": null,
+          "hideTimeOverride": false,
+          "id": 8,
+          "interval": null,
+          "links": [],
+          "mappings": [],
+          "maxDataPoints": 100,
+          "maxPerRow": null,
+          "minSpan": null,
+          "options": {
+            "showHeader": true
+          },
+          "repeat": null,
+          "repeatDirection": null,
+          "span": 6,
+          "targets": [
+            {
+              "datasource": null,
+              "expr": "max(svoe_data_feed_collector_conn_health_gauge != 1) by (exchange, data_type, symbol, pod, instance)",
+              "format": "table",
+              "hide": false,
+              "instant": true,
+              "interval": "",
+              "intervalFactor": 2,
+              "legendFormat": "",
+              "metric": "",
+              "refId": "",
+              "step": 10,
+              "target": ""
+            }
+          ],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Non-healthy connections",
           "transformations": [],
           "transparent": false,
           "type": "table"
