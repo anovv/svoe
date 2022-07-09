@@ -135,7 +135,7 @@
           "targets": [
             {
               "datasource": null,
-              "expr": "count(group(kube_pod_info{namespace='data-feed'}) by (pod)) or on() vector(0)",
+              "expr": "count(group(kube_pod_status_phase{namespace='data-feed'}) by (pod)) or on() vector(0)",
               "format": "time_series",
               "hide": false,
               "instant": false,

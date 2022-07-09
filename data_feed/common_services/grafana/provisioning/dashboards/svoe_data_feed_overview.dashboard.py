@@ -23,6 +23,7 @@ def _total_conn_stat():
     )
 
 
+# TODO show info only for last 1s
 def _healthy_conn_stat():
     # TODO add version label for case of duplicate data_type with different configs
     return G.Stat(
@@ -71,7 +72,7 @@ def _total_pod_count_stat():
         dataSource=PROMETHEUS_DATA_SOURCE,
         targets=[
             G.Target(
-                expr=f'count(group(kube_pod_info{{namespace=\'{DATA_FEED_NAMESPACE}\'}}) by (pod)) or on() vector(0)',
+                expr=f'count(group(kube_pod_status_phase{{namespace=\'{DATA_FEED_NAMESPACE}\'}}) by (pod)) or on() vector(0)',
             ),
         ],
         reduceCalc='last',
@@ -90,7 +91,7 @@ def _running_pod_count_stat():
         reduceCalc='last',
     )
 
-
+# TODO show info only for last 1s
 def _non_running_pod_table():
     return G.Table(
         title='Non running pods',
@@ -105,6 +106,7 @@ def _non_running_pod_table():
     )
 
 
+# TODO show info only for last 1s
 def _non_ready_pod_table():
     return G.Table(
         title='Non ready pods',
