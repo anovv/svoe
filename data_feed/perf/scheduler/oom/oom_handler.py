@@ -46,6 +46,7 @@ class OOMHandler(multiprocessing.Process):
 
     def stop(self):
         if not bool(self.running.value):
+            print('[OOMHandler] Already stopped...')
             return
         self.running.value = 0
         if not self.args_wait_event.is_set():
@@ -88,6 +89,7 @@ class OOMHandler(multiprocessing.Process):
     def _interrupt(self, *args):
         # *args are for signal.signal handler
         if not bool(self.running.value):
+            print('[OOMHandler] Interrupted while already stopped...')
             return
         print('[OOMHandler] Interrupted...')
         # defer interrupt to parent

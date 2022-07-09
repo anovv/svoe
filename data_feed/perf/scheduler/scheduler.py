@@ -278,8 +278,6 @@ class Scheduler:
         del self.kube_watcher_state.event_queues_per_pod[pod_name]
 
     def stop(self):
-        if not self.running:
-            return
         print(f'[Scheduler] Stopping scheduler...')
         self.running = False
         # interrupt running tasks

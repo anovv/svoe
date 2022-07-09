@@ -40,7 +40,9 @@ class Runner:
             signal.signal(sig, self.cleanup)
         self.running = True
         print('[Runner] Started estimator')
-        self.prom_connection.start()
+        self.prom_connection.start() # blocking
+        if not self.running:
+            return
         self.kube_watcher.start([
             CHANNEL_NODE_OBJECT_EVENTS,
             CHANNEL_NODE_KUBE_EVENTS,
@@ -54,15 +56,15 @@ class Runner:
         if not self.running:
             return
         self.running = False
-        if self.prom_connection:
+        if self.prom_connection is not None:
             self.prom_connection.stop()
             self.prom_connection = None
-        if self.scheduler:
+        if self.scheduler is not None:
             self.scheduler.stop()
             self.scheduler = None
         # save stats only after scheduler is done so we write all events
         self.stats.save()
-        if self.kube_watcher:
+        if self.kube_watcher is not None:
             self.kube_watcher.stop([
                 CHANNEL_NODE_OBJECT_EVENTS,
                 CHANNEL_NODE_KUBE_EVENTS,
