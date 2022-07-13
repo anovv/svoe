@@ -9,6 +9,7 @@ from perf.estimator.estimator import Estimator
 from perf.state.phase_result_scheduling_state import PodSchedulingResultEvent, PodSchedulingPhaseEvent, SchedulingTimeouts
 from perf.state.estimation_state import PodEstimationPhaseEvent, PodEstimationResultEvent
 from perf.kube_api.resource_convert import ResourceConvert
+from perf.kube_api.utils import cm_name_pod_name
 from perf.scheduler.oom.oom_handler import OOMHandler
 from perf.scheduler.oom.oom_handler_client import OOMHandlerClient
 from perf.utils import local_now
@@ -46,7 +47,7 @@ class Scheduler:
 
         self.running = False
         self.futures = {}
-        self.nodes_state = {} # node to tuple(bool (scedulable or not), reason)
+        self.nodes_state = {} # node to tuple(bool (schedulable or not), reason)
 
     def run(self, subset=None):
         self.oom_handler.start()
@@ -111,7 +112,8 @@ class Scheduler:
     def schedule_pod(self, pod_name, node_name, priority):
         payload_config = None
         try:
-            payload_config, _ = self.kube_api.get_payload(pod_name)
+            cm_name = cm_name_pod_name(pod_name)
+            payload_config, _ = self.kube_api.get_payload(cm_name)
             self.kube_api.create_raw_pod(pod_name, node_name, priority)
 
         except kubernetes.client.exceptions.ApiException as e:

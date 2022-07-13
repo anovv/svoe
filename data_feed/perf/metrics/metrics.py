@@ -1,7 +1,9 @@
 import asyncio
 import aiohttp
+import random
 
 from perf.defines import PROM, RUN_ESTIMATION_FOR, DATA_FEED_CONTAINER, REDIS_CONTAINER, REDIS_EXPORTER_CONTAINER
+from perf.utils import nested_set
 
 
 class AggregateFunction:
@@ -18,7 +20,6 @@ class AggregateFunction:
         MAX: lambda metric, duration_s: f'max_over_time({metric}[{duration_s}s])',
         MIN: lambda metric, duration_s: f'min_over_time({metric}[{duration_s}s])',
         P95: lambda metric, duration_s: f'quantile_over_time(0.95, {metric}[{duration_s}s])',
-        INC: lambda metric, duration_s: f'increase({metric}[{duration_s}s])',
     }
 
 
@@ -37,36 +38,7 @@ class Metrics:
         MS_CPU: lambda pod, container: f'kube_metrics_server_pods_cpu{{pod_name="{pod}", pod_container_name="{container}"}}',
     }
 
-    # cadvisor metrics
-    # cpu
-    CADV_CPU_LOAD_AVG_10S = 'container_cpu_load_average_10s'
-    CADV_CPU_USAGE_S_TOTAL = 'container_cpu_usage_seconds_total'
-
-    # memory
-    # container_memory_usage_bytes
-    # container_memory_failcnt
-    # container_memory_cache # This measures the number of bytes of page cache memory
-    # container_memory_working_set_bytes
-    # container_memory_rss
-    CADV_MEM_USAGE_BYTES = ''
-
-    # network
-    # TODO Pod level only
-    # container_network_transmit_bytes_total
-    # container_network_transmit_errors_total
-    # container_network_receive_bytes_total
-    # container_network_receive_errors_total
-
-    # oom
-    # container_oom_events_total
-    
-    # processes
-    # container_processes
-
-    # disk
-    # container_fs_io_time_seconds_total
-    # container_fs_writes_bytes_total
-    # container_fs_reads_bytes_total
+    # TODO add cadvisor metrics
 
 
 def fetch_metrics(pod_name, payload_config):
@@ -78,8 +50,9 @@ def fetch_metrics(pod_name, payload_config):
     return res
 
 
-async def _fetch_metric_async(metric_type, metric_name, metric_query, session):
+async def _fetch_metric_async(res, metric_query, location_keys, session):
     retries = 10
+    retry_timeout_range = (1, 1) # randomly select retry timeout for uniform distribution
     params = {
         'query': metric_query,
     }
@@ -101,11 +74,11 @@ async def _fetch_metric_async(metric_type, metric_name, metric_query, session):
             error = e.__class__.__name__ + ': ' + str(e)
 
         if error:
-            await asyncio.sleep(1)
+            await asyncio.sleep(random.randint(retry_timeout_range[0], retry_timeout_range[1]))
         else:
             break
 
-    return metric_type, metric_name, metric_value, error
+    nested_set(res, location_keys, (metric_value, error))
 
 
 async def _fetch_metrics_async(pod_name, payload_config):
@@ -113,81 +86,43 @@ async def _fetch_metrics_async(pod_name, payload_config):
     perf_metrics = _get_perf_kube_metrics_server_queries(pod_name)
     metric_queries = {**health_metrics, **perf_metrics}
     tasks = []
+    res = {}
     session = aiohttp.ClientSession()
-    for metric_name in metric_queries:
+    for metric_query in metric_queries:
+        location_keys = metric_queries[metric_query]
         tasks.append(asyncio.ensure_future(_fetch_metric_async(
-            'health' if metric_name in health_metrics else 'perf',
-            metric_name,
-            metric_queries[metric_name],
+            res,
+            metric_query,
+            location_keys,
             session
         )))
-    res = await asyncio.gather(*tasks)
+    await asyncio.gather(*tasks)
     await session.close()
     return res
 
 
 def _get_data_feed_health_metrics_queries(pod_name, payload_config):
-    duration = f'[{RUN_ESTIMATION_FOR}s]'
-    duration_subquery = f'[{RUN_ESTIMATION_FOR}s:]'
     metrics = {}
     for exchange in payload_config:
         # TODO decide channel/data_type naming
         for data_type in payload_config[exchange]:
             for symbol in payload_config[exchange][data_type]:
-                metrics.update({
-                    # TODO add aggregation over other labels ?
-                    # TODO ',' or ';' separator instead of '_'
-                    f'health_absent_{data_type}_{symbol}':
-                        f'avg_over_time((max(absent(svoe_data_feed_collector_conn_health_gauge{{exchange="{exchange}", symbol="{symbol}", data_type="{data_type}"}})) or vector(0)){duration_subquery})',
-                    f'health_avg_{data_type}_{symbol}': f'avg_over_time(svoe_data_feed_collector_conn_health_gauge{{exchange="{exchange}", symbol="{symbol}", data_type="{data_type}"}}{duration})'
-                })
+                metric_health = Metrics.df_health_metrics[Metrics.DATA_FEED_HEALTH](exchange, data_type, symbol)
+                for agg in [AggregateFunction.ABSENT, AggregateFunction.AVG]:
+                    metrics[AggregateFunction.query_functions[agg](metric_health, RUN_ESTIMATION_FOR)] = [Metrics.DATA_FEED_HEALTH, data_type, symbol, agg]
 
     return metrics
 
 
 def _get_perf_kube_metrics_server_queries(pod_name):
     # https://github.com/olxbr/metrics-server-exporter to export metrics-server to prometheus
-    duration = f'[{RUN_ESTIMATION_FOR}s]'
-    duration_subquery = f'[{RUN_ESTIMATION_FOR}s:]'
     metrics = {}
     for container_name in [DATA_FEED_CONTAINER, REDIS_CONTAINER, REDIS_EXPORTER_CONTAINER]:
-        # TODO ',' or ';' separator instead of '_'
-        metrics.update({
-            # mem
-            f'kube_metrics_server_mem_absent_{container_name}':
-                f'avg_over_time((max(absent(kube_metrics_server_pods_mem{{pod_name="{pod_name}", pod_container_name="{container_name}"}})) or vector(0)){duration_subquery})',
-            f'kube_metrics_server_mem_avg_{container_name}': f'avg_over_time(kube_metrics_server_pods_mem{{pod_name="{pod_name}", pod_container_name="{container_name}"}}{duration})',
-            f'kube_metrics_server_mem_max_{container_name}': f'max_over_time(kube_metrics_server_pods_mem{{pod_name="{pod_name}", pod_container_name="{container_name}"}}{duration})',
-            f'kube_metrics_server_mem_min_{container_name}': f'min_over_time(kube_metrics_server_pods_mem{{pod_name="{pod_name}", pod_container_name="{container_name}"}}{duration})',
-            f'kube_metrics_server_mem_095_{container_name}': f'quantile_over_time(0.95, kube_metrics_server_pods_mem{{pod_name="{pod_name}", pod_container_name="{container_name}"}}{duration})',
-
-            # cpu
-            f'kube_metrics_server_cpu_absent_{container_name}':
-                f'avg_over_time((max(absent(kube_metrics_server_pods_cpu{{pod_name="{pod_name}", pod_container_name="{container_name}"}})) or vector(0)){duration_subquery})',
-            f'kube_metrics_server_cpu_avg_{container_name}': f'avg_over_time(kube_metrics_server_pods_cpu{{pod_name="{pod_name}", pod_container_name="{container_name}"}}{duration})',
-            f'kube_metrics_server_cpu_max_{container_name}': f'max_over_time(kube_metrics_server_pods_cpu{{pod_name="{pod_name}", pod_container_name="{container_name}"}}{duration})',
-            f'kube_metrics_server_cpu_min_{container_name}': f'min_over_time(kube_metrics_server_pods_cpu{{pod_name="{pod_name}", pod_container_name="{container_name}"}}{duration})',
-            f'kube_metrics_server_cpu_095_{container_name}': f'quantile_over_time(0.95, kube_metrics_server_pods_cpu{{pod_name="{pod_name}", pod_container_name="{container_name}"}}{duration})',
-        })
-
-    return metrics
-
-
-# TODO finish this
-def _get_cadvisor_metrics(pod_name):
-    duration = f'[{RUN_ESTIMATION_FOR}s]'
-    duration_subquery = f'[{RUN_ESTIMATION_FOR}s:]'
-    metrics = {}
-    for container_name in [DATA_FEED_CONTAINER, REDIS_CONTAINER, REDIS_EXPORTER_CONTAINER]:
-        # TODO ',' or ';' separator instead of '_'
-        metrics.update({
-
-            f'mem_absent_{container_name}':
-                f'avg_over_time((max(absent(kube_metrics_server_pods_mem{{pod_name="{pod_name}", pod_container_name="{container_name}"}})) or vector(0)){duration_subquery})',
-            f'mem_avg_{container_name}': f'avg_over_time(kube_metrics_server_pods_mem{{pod_name="{pod_name}", pod_container_name="{container_name}"}}{duration})',
-            f'mem_max_{container_name}': f'max_over_time(kube_metrics_server_pods_mem{{pod_name="{pod_name}", pod_container_name="{container_name}"}}{duration})',
-            f'mem_min_{container_name}': f'min_over_time(kube_metrics_server_pods_mem{{pod_name="{pod_name}", pod_container_name="{container_name}"}}{duration})',
-            f'mem_095_{container_name}': f'quantile_over_time(0.95, kube_metrics_server_pods_mem{{pod_name="{pod_name}", pod_container_name="{container_name}"}}{duration})',
-        })
+        for metric_type in [Metrics.MS_CPU, Metrics.MS_MEMORY]:
+            metric = Metrics.ms_metrics[metric_type](pod_name, container_name)
+            for agg in [AggregateFunction.ABSENT, AggregateFunction.AVG, AggregateFunction.MIN, AggregateFunction.MAX, AggregateFunction.P95]:
+                for window in [RUN_ESTIMATION_FOR, 600]: # check different aggregation windows
+                    window_key_name = 'run_duration' if window == RUN_ESTIMATION_FOR else (str(window) + 's')
+                    metrics[AggregateFunction.query_functions[agg](metric, window)] = [metric_type, container_name, window_key_name, agg]
 
     return metrics

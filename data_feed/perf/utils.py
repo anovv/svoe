@@ -15,6 +15,12 @@ def filtered_dict(d, filter_keys):
     return {k: v for k, v in d.items() if k in filter_keys}
 
 
+def nested_set(dic, keys, value):
+    for key in keys[:-1]:
+        dic = dic.setdefault(key, {})
+    dic[keys[-1]] = value
+
+
 def parse_timestamp_string(ts_string):
     # return datetime.datetime.strptime(ts_string, '%Y-%m-%dT%H:%M:%SZ')
     return dateutil.parser.isoparse(ts_string)

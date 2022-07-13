@@ -11,6 +11,8 @@ from perf.callback.pod_callback import PodCallback
 from perf.callback.node_callback import NodeCallback
 from perf.stats.stats import Stats
 
+from perf.metrics.metrics import fetch_metrics, _get_data_feed_health_metrics_queries, _get_perf_kube_metrics_server_queries
+from perf.utils import nested_set
 
 class Runner:
     def __init__(self):
@@ -82,4 +84,13 @@ if __name__ == '__main__':
         # 'data-feed-binance-spot-2d2a017a56-ss',
         # 'data-feed-binance-spot-3dd6e42fd0-ss'
     ]
-    r.run(sub)
+    # r.run(sub)
+    pod_name = 'data-feed-binance-spot-6d1641b134-ss-0'
+    cm_name = 'data-feed-binance-spot-6d1641b134-cm'
+    payload_config, _ = r.kube_api.get_payload(cm_name)
+    # m = _get_data_feed_health_metrics_queries(pod_name, payload_config)
+    # res = {}
+    # for q in m:
+    #     nested_set(res, m[q], q)
+    # print(res)
+    print(fetch_metrics(pod_name, payload_config))
