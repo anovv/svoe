@@ -147,6 +147,7 @@ def build_pod_configs(exchange, exchange_config):
             'labels': labels,
         }
 
+        # TODO use payload hash
         data_feed_resources = _get_resources(exchange, instrument_type, symbols)
         if data_feed_resources is not None:
             pod_config['data_feed_resources'] = data_feed_resources
@@ -257,6 +258,7 @@ def _hash_short(hash):
     return hash[:10]
 
 
+# TODO use payloadhash
 def _get_resources(exchange, instrument_type, symbols):
     # TODO pull Prom/Thanos data/make manual config
     # TODO set resources for redis/redis-exporter sidecars

@@ -46,6 +46,7 @@ for cluster_id in tf_config['multicluster_config_output']['value']:
             'observerClusterId': OBSERVER_CLUSTER_ID,
             'isObserver': int(cluster_id) == OBSERVER_CLUSTER_ID,
             'isMysqlHost': int(cluster_id) == MYSQL_HOST_CLUSTER_ID,
+            'thanosEnabled': False,
         })
 
         # generate env_values.yaml for each cluster

@@ -125,11 +125,13 @@ prometheusOperator:
       memory: 50Mi
 
 prometheus:
+
+  {{ if (.Values | get "thanosEnabled") }}
   thanosService:
     enabled: true
-
   thanosServiceMonitor:
     enabled: true
+  {{ end }}
 
   prometheusSpec:
     image:
@@ -144,7 +146,7 @@ prometheus:
     # to same value (default 2h) to disable local Prom compactor
     # This value also defines how often Thanos uploads Prom blocks
 
-    {{ if not (eq .Values.clusterType "minikube") }} # TODO figure out minikube setup
+    {{ if and (not (eq .Values.clusterType "minikube")) (.Values | get "thanosEnabled") }} # TODO figure out minikube setup
     thanos:
       image: quay.io/thanos/thanos:v0.24.0
       version: v0.24.0
