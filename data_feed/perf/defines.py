@@ -23,3 +23,5 @@ REMOTE_SCRIPTS_DS_CONTAINER = 'remote-scripts-runner'
 # REMOTE_SCRIPTS_DS_NAME = 'remote-scripts-ds'
 REMOTE_SCRIPTS_DS_NAMESPACE = 'kube-system'
 REMOTE_SCRIPTS_DS_LABEL_SELECTOR = 'app=remote-scripts'
+
+BULK_SCHEDULE_SIZE = 1 # number of simultanously scheduled pods on a node without checking resourcess

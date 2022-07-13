@@ -98,7 +98,7 @@ class PodCallback(Callback):
                 and (event.data['reason'] == 'UnhealthyLiveness' or event.data['reason'] == 'UnhealthyStartup'):
 
             # TODO This can be result of OOM, extra check by directly pinging health endpoint and seeing returned result? This only needed to make reschedule decision
-            if event.data['reason'] == 'UnhealthyLiveness' and event.data['count'] >= 10:
+            if event.data['reason'] == 'UnhealthyLiveness' and event.data['count'] >= 5:
                 # TODO check number in a timeframe instead of total
                 self.estimation_state.add_result_event(pod_name, PodEstimationResultEvent.INTERRUPTED_DF_CONTAINER_HEALTH_LIVENESS)
                 self.estimation_state.wake_event(pod_name)

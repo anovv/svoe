@@ -4,7 +4,7 @@ import functools
 import kubernetes
 import json
 
-from perf.defines import NODE_NEXT_SCHEDULE_PERIOD, NODE_MEMORY_ALLOC_THRESHOLD
+from perf.defines import NODE_NEXT_SCHEDULE_PERIOD, NODE_MEMORY_ALLOC_THRESHOLD, BULK_SCHEDULE_SIZE
 from perf.estimator.estimator import Estimator
 from perf.state.phase_result_scheduling_state import PodSchedulingResultEvent, PodSchedulingPhaseEvent, SchedulingTimeouts
 from perf.state.estimation_state import PodEstimationPhaseEvent, PodEstimationResultEvent
@@ -220,7 +220,6 @@ class Scheduler:
                 continue
 
             # TODO figure out heuristics to dynamically derive BULK_SCHEDULE_SIZE
-            BULK_SCHEDULE_SIZE = 2
             if node_name not in self.scheduling_state.pods_per_node or \
                     len(self.scheduling_state.pods_per_node[node_name]) < BULK_SCHEDULE_SIZE:
                 nodes_state[node_name] = (True, NodeStateReason.SCHEDULABLE_BULK)
