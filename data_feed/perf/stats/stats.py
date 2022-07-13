@@ -8,16 +8,10 @@ class Stats:
     def __init__(self):
         self.stats = {}
 
-    def add_metrics_to_stats(self, pod_name, metrics):
+    def add_metrics_to_stats(self, pod_name, metrics_results):
         if pod_name not in self.stats:
             self.stats[pod_name] = {}
-            self.stats[pod_name]['metrics'] = {}
-        for metric_type, metric_name, metric_value, error in metrics:
-            if metric_type not in self.stats[pod_name]['metrics']:
-                self.stats[pod_name]['metrics'][metric_type] = {}
-
-            # TODO somehow indicate per-metric errors?
-            self.stats[pod_name]['metrics'][metric_type][metric_name] = error if error else metric_value
+        self.stats[pod_name]['metrics'] = metrics_results
 
     def add_all_df_events(self, pod_name, kube_watcher_state, estimation_state, scheduling_state):
         events = []
