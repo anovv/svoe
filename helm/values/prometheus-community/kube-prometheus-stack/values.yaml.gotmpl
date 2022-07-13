@@ -165,7 +165,7 @@ prometheus:
               storage: 2Gi
     externalLabels:
       cluster: {{ .Values | get "clusterName" }}
-      cluster_id: {{ .Values | get "clusterId" | quote}}
+      cluster_id: {{ .Values | get "clusterId" | quote }}
     resources:
       limits:
         cpu: 500m
