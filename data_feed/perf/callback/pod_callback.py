@@ -93,19 +93,18 @@ class PodCallback(Callback):
 
         # data-feed-container Unhealthy(Liveness or Startup):
         # TODO unhealthy readiness
-        # TODO these are triggered even if no liveness probe is set (but startup is set), why?
         if event.type == PodKubeLoggedEvent.CONTAINER_EVENT \
                 and container_name == DATA_FEED_CONTAINER \
                 and (event.data['reason'] == 'UnhealthyLiveness' or event.data['reason'] == 'UnhealthyStartup'):
 
             # TODO This can be result of OOM, extra check by directly pinging health endpoint and seeing returned result? This only needed to make reschedule decision
-            if event.data['count'] >= 5:
+            if event.data['reason'] == 'UnhealthyLiveness' and event.data['count'] >= 10:
                 # TODO check number in a timeframe instead of total
                 self.estimation_state.add_result_event(pod_name, PodEstimationResultEvent.INTERRUPTED_DF_CONTAINER_HEALTH_LIVENESS)
                 self.estimation_state.wake_event(pod_name)
                 return
 
-            if event.data['count'] >= 10:
+            if event.data['reason'] == 'UnhealthyStartup' and event.data['count'] >= 10:
                 # TODO check number in a timeframe instead of total
                 self.estimation_state.add_result_event(pod_name, PodEstimationResultEvent.INTERRUPTED_DF_CONTAINER_HEALTH_STARTUP)
                 self.estimation_state.wake_event(pod_name)

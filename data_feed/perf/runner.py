@@ -77,20 +77,12 @@ class Runner:
 if __name__ == '__main__':
     r = Runner()
     sub = [
-        'data-feed-binance-spot-6d1641b134-ss',
+        # 'data-feed-binance-spot-6d1641b134-ss',
         # 'data-feed-binance-spot-eb540d90be-ss',
         # 'data-feed-binance-spot-18257181b7-ss',
         # 'data-feed-binance-spot-28150ca2ec-ss',
         # 'data-feed-binance-spot-2d2a017a56-ss',
         # 'data-feed-binance-spot-3dd6e42fd0-ss'
+        'data-feed-bybit-perpetual-1d2c5c9c38-ss'
     ]
-    # r.run(sub)
-    pod_name = 'data-feed-binance-spot-6d1641b134-ss-0'
-    cm_name = 'data-feed-binance-spot-6d1641b134-cm'
-    payload_config, _ = r.kube_api.get_payload(cm_name)
-    # m = _get_data_feed_health_metrics_queries(pod_name, payload_config)
-    # res = {}
-    # for q in m:
-    #     nested_set(res, m[q], q)
-    # print(res)
-    print(fetch_metrics(pod_name, payload_config))
+    r.run(sub)
