@@ -40,9 +40,8 @@ class Estimator:
             self.estimation_state.add_result_event(pod_name, PodEstimationPhaseEvent.COLLECTING_METRICS)
             metrics = fetch_metrics(pod_name, payload_config)
             metrics_fetch_result = PodEstimationResultEvent.METRICS_COLLECTED_ALL
-            for _, _, _, error in metrics:
-                if error:
-                    metrics_fetch_result = PodEstimationResultEvent.METRICS_COLLECTED_MISSING
+            if 'has_errors' in metrics:
+                metrics_fetch_result = PodEstimationResultEvent.METRICS_COLLECTED_MISSING
 
             print(f'[Estimator] Done fetching metrics for {pod_name}')
             # save stats

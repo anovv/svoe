@@ -52,7 +52,7 @@ def fetch_metrics(pod_name, payload_config):
 
 async def _fetch_metric_async(res, metric_query, location_keys, session):
     retries = 10
-    retry_timeout_range = (1, 1) # randomly select retry timeout for uniform distribution
+    retry_timeout_range = (1, 3) # randomly select retry timeout for uniform distribution
     params = {
         'query': metric_query,
     }
@@ -78,6 +78,8 @@ async def _fetch_metric_async(res, metric_query, location_keys, session):
         else:
             break
 
+    if error:
+        res['has_errors'] = True
     nested_set(res, location_keys, (metric_value, error))
 
 
