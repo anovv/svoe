@@ -186,6 +186,7 @@ spec:
     kops.k8s.io/instancegroup: nodes-data-feed-spot
     node-type: spot
     workload-type: data-feed
+    svoe-role: resource-estimator
   taints:
     - node-type=spot:NoSchedule
     - workload-type=data-feed:NoSchedule
