@@ -78,14 +78,20 @@ class PhaseResultState:
             self.phase_events_per_pod[pod_name] = [event]
 
         # TODO debug
-        # TODO debug
         # print(event)
 
     def wake_event(self, pod_name):
+        # there can be latency between client and cluster, hence we need to wait for wait_event to appear
+        retry_count = 0
+        max_retries = 1000
+        while pod_name not in self.wait_event_per_pod and retry_count <= max_retries:
+            time.sleep(0.01)
+            retry_count += 1
         if pod_name in self.wait_event_per_pod:
             self.wait_event_per_pod[pod_name].set()
-            # TODO use locks instead
-            time.sleep(0.01) # to avoid race between kube watcher threads and estimator thread
+        else:
+            # TODO throw here?
+            print('[Err] Pod not in wait state')
 
     def wait_event(self, pod_name, timeout):
         # TODO check if the previous event is awaited/reset

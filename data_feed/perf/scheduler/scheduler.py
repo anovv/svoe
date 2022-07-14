@@ -175,19 +175,18 @@ class Scheduler:
 
     def done_estimation_callback(self, future, pod_name):
         reschedule, reason = future.result()
-        should_save_events_to_stats = self.scheduling_state.reschedule_or_complete(pod_name, reschedule, reason)
-        if should_save_events_to_stats:
-            self.stats.add_all_df_events(
-                pod_name,
-                self.kube_watcher_state,
-                self.estimation_state,
-                self.scheduling_state
-            )
-            self.stats.add_reschedules(
-                pod_name,
-                self.scheduling_state
-            )
+        self.stats.add_all_df_events(
+            pod_name,
+            self.kube_watcher_state,
+            self.estimation_state,
+            self.scheduling_state
+        )
+        self.stats.add_reschedules(
+            pod_name,
+            self.scheduling_state
+        )
         self.clean_states(pod_name)
+        self.scheduling_state.reschedule_or_complete(pod_name, reschedule, reason)
 
     def fetch_nodes_state(self):
         nodes_state = {} # node to tuple(bool (scedulable or not), reason)

@@ -8,7 +8,7 @@ class Estimator:
         self.stats = stats
 
     def estimate_resources(self, pod_name, payload_config):
-        for state, result, timeout in [
+        for phase, result, timeout in [
             (PodEstimationPhaseEvent.WAITING_FOR_DF_CONTAINER_TO_PULL_IMAGE,
              PodEstimationResultEvent.DF_CONTAINER_IMAGE_PULLED, EstimationTimeouts.DF_CONTAINER_PULL_IMAGE_TIMEOUT),
             (PodEstimationPhaseEvent.WAITING_FOR_POD_TO_START_ESTIMATION_RUN,
@@ -16,15 +16,15 @@ class Estimator:
             (PodEstimationPhaseEvent.WAITING_FOR_POD_TO_FINISH_ESTIMATION_RUN,
              PodEstimationResultEvent.POD_FINISHED_ESTIMATION_RUN, EstimationTimeouts.POD_ESTIMATION_RUN_DURATION),
         ]:
-            self.estimation_state.add_phase_event(pod_name, state)
+            self.estimation_state.add_phase_event(pod_name, phase)
             # blocks until callback triggers specific event
             timed_out = not self.estimation_state.wait_event(pod_name, timeout)
-
             # interrupts
             if self.estimation_state.is_interrupted(pod_name):
                 break
 
-            if timed_out and state != PodEstimationPhaseEvent.WAITING_FOR_POD_TO_FINISH_ESTIMATION_RUN:
+            # TODO use self.estimation_state.get_last_phase_event_type() instead of phase here?
+            if timed_out and phase != PodEstimationPhaseEvent.WAITING_FOR_POD_TO_FINISH_ESTIMATION_RUN:
                 # WAITING_FOR_POD_TO_FINISH_ESTIMATION_RUN timeout special case - this timeout is success
                 result = PodEstimationResultEvent.INTERRUPTED_TIMEOUT
                 self.estimation_state.add_result_event(pod_name, result)

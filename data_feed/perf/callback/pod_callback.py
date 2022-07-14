@@ -28,8 +28,7 @@ class PodCallback(Callback):
         if self.scheduling_state.get_last_phase_event_type(pod_name) != PodSchedulingPhaseEvent.WAITING_FOR_POD_TO_BE_DELETED \
                 and self.estimation_state.is_interrupted(pod_name):
             # If interrupted we skip everything except pod deletion event
-            # TODO debug
-            print(f'skipped {event.data}')
+            # print(f'skipped {event.data}')
             return
 
         # Scheduling state

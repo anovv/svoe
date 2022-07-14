@@ -40,6 +40,9 @@ class Stats:
         self.stats[pod_name]['reschedule_reasons'] = scheduling_state.get_reschedule_reasons(pod_name)
 
     def save(self):
+        if len(self.stats) == 0:
+            print('[Stats] Stats are empty, not saving')
+            return
         # TODO file per run?
         # path = f'resources-estimation-{datetime.datetime.now().strftime("%d-%m-%Y-%H:%M:%S")}.json'
         path = 'resources-estimation-out/resources-estimation.json'

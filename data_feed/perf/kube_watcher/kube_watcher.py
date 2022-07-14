@@ -71,7 +71,6 @@ class KubeWatcher:
                 if last_resource_version in seen_resource_versions:
                     continue
                 seen_resource_versions.add(last_resource_version)
-
                 # if raw_event.involved_object_kind == 'Node':
                 #     print(f'[REG][{raw_event.type}][{raw_event.object_count}] Node Kube: {raw_event.object_message}')
 
