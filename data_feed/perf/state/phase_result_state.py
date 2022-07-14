@@ -90,11 +90,9 @@ class PhaseResultState:
         if pod_name in self.wait_event_per_pod:
             self.wait_event_per_pod[pod_name].set()
         else:
-            # TODO throw here?
             print('[Err] Pod not in wait state')
 
     def wait_event(self, pod_name, timeout):
-        # TODO check if the previous event is awaited/reset
         self.wait_event_per_pod[pod_name] = threading.Event()
         return self.wait_event_per_pod[pod_name].wait(timeout=timeout)
 
@@ -103,3 +101,8 @@ class PhaseResultState:
             del self.result_events_per_pod[pod_name]
         if pod_name in self.phase_events_per_pod:
             del self.phase_events_per_pod[pod_name]
+
+    def clean_wait_event(self, pod_name):
+        if pod_name in self.wait_event_per_pod:
+            del self.wait_event_per_pod[pod_name]
+

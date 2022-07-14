@@ -273,6 +273,8 @@ class Scheduler:
         return None, None
 
     def clean_states(self, pod_name):
+        self.estimation_state.clean_wait_event(pod_name)
+        self.scheduling_state.clean_wait_event(pod_name)
         self.estimation_state.clean_phase_result_events(pod_name)
         self.scheduling_state.clean_phase_result_events(pod_name)
         del self.kube_watcher_state.event_queues_per_pod[pod_name]
