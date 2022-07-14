@@ -169,7 +169,11 @@ prometheus:
     resources:
       limits:
         cpu: 500m
+        {{ if (eq .Values.clusterType "minikube") }}
         memory: 1Gi
+        {{ else }}
+        memory: 2Gi
+        {{ end }}
       requests:
         cpu: 100m
         memory: 300Mi
