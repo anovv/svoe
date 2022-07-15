@@ -80,10 +80,9 @@ class PhaseResultState:
         # TODO debug
         # print(event)
 
-    def wake_event(self, pod_name):
+    def wake_event(self, pod_name, max_retries=300):
         # there can be latency between client and cluster, hence we need to wait for wait_event to appear
         retry_count = 0
-        max_retries = 1000
         while pod_name not in self.wait_event_per_pod and retry_count <= max_retries:
             time.sleep(0.01)
             retry_count += 1

@@ -287,9 +287,9 @@ class Scheduler:
         for future in self.futures:
             pod = self.futures[future]
             self.scheduling_state.add_result_event(pod, PodSchedulingResultEvent.INTERRUPTED_STOP)
-            self.scheduling_state.wake_event(pod)
+            self.scheduling_state.wake_event(pod, 1)
             self.estimation_state.add_result_event(pod, PodEstimationResultEvent.INTERRUPTED_STOP)
-            self.estimation_state.wake_event(pod)
+            self.estimation_state.wake_event(pod, 1)
         try:
             print(f'[Scheduler] Waiting for running tasks to finish...')
             for future in concurrent.futures.as_completed(self.futures, timeout=30):

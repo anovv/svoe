@@ -40,7 +40,8 @@ class Runner:
             signal.signal(sig, self.cleanup)
         self.running = True
         print('[Runner] Started estimator')
-        self.prom_connection.start() # blocking
+        # TODO start prom connection only for minikube (it uses port-forwarding)
+        # self.prom_connection.start() # blocking
         if not self.running:
             return
         self.kube_watcher.start([
@@ -81,6 +82,6 @@ if __name__ == '__main__':
         # 'data-feed-binance-spot-28150ca2ec-ss',
         # 'data-feed-binance-spot-2d2a017a56-ss',
         # 'data-feed-binance-spot-3dd6e42fd0-ss',
-        'data-feed-bybit-perpetual-1d2c5c9c38-ss'
+        # 'data-feed-bybit-perpetual-1d2c5c9c38-ss'
     ]
     r.run(sub)

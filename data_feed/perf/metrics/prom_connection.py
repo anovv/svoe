@@ -13,6 +13,8 @@ class PromConnection:
         self.running = True
         print(f'[PromConnection] Forwarding Prometheus port {PROM_PORT_FORWARD}...')
         # TODO check success of Popen
+        # TODO https://stackoverflow.com/questions/47484312/kubectl-port-forwarding-timeout-issue
+        # TODO fix error creating error stream for port 9090 -> 9090: Timeout occurred
         self.forward_prom_port_proc = subprocess.Popen(
             f'kubectl port-forward {PROM_POD_NAME} {PROM_PORT_FORWARD}:{PROM_PORT_FORWARD} -n {PROM_NAMESPACE}',
             shell=True,
