@@ -18,10 +18,10 @@ alertmanager:
 grafana:
   {{ if or (.Values | get "isObserver") (eq .Values.clusterType "minikube") }}
   adminPassword: {{ .Values | get "grafanaAdminPassword" }}
-  service:
-    type: NodePort
-    annotations:
-      dns.alpha.kubernetes.io/external: grafana.{{ .Values | get "clusterName" }}
+#  service:
+#    type: NodePort
+#    annotations:
+#      dns.alpha.kubernetes.io/external: grafana.{{ .Values | get "clusterName" }}
   deploymentStrategy:
     type: Recreate
   persistence:

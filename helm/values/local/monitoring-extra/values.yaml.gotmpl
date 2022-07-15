@@ -5,3 +5,4 @@ clusterId: {{ .Values | get "clusterId" }}
 clusterIds:
 {{ .Values | get "clusterIds" | toYaml | indent 2}}
 isObserver: {{ .Values | get "isObserver" }}
+clusterName: {{ .Values | get "clusterName"}}

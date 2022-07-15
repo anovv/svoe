@@ -7,3 +7,4 @@ clusterIds:
   - 1
   - 2
   - 3
+clusterName: cluster.name

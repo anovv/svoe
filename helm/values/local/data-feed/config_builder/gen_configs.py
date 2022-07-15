@@ -258,7 +258,7 @@ def _hash_short(hash):
     return hash[:10]
 
 
-# TODO use payloadhash
+# TODO use payload hash
 def _get_resources(exchange, instrument_type, symbols):
     # TODO pull Prom/Thanos data/make manual config
     # TODO set resources for redis/redis-exporter sidecars
