@@ -7,7 +7,7 @@ class Estimator:
         self.estimation_state = estimation_state
         self.stats = stats
 
-    def estimate_resources(self, pod_name, payload_config):
+    def estimate_resources(self, pod_name, payload_config, payload_hash):
         for phase, result, timeout in [
             (PodEstimationPhaseEvent.WAITING_FOR_DF_CONTAINER_TO_PULL_IMAGE,
              PodEstimationResultEvent.DF_CONTAINER_IMAGE_PULLED, EstimationTimeouts.DF_CONTAINER_PULL_IMAGE_TIMEOUT),
@@ -45,7 +45,7 @@ class Estimator:
 
             print(f'[Estimator] Done fetching metrics for {pod_name}')
             # save stats
-            self.stats.add_metrics_to_stats(pod_name, metrics)
+            self.stats.add_metrics_to_stats(payload_hash, metrics)
             self.estimation_state.add_result_event(pod_name, metrics_fetch_result)
 
         for result_type in [

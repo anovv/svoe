@@ -1,6 +1,6 @@
 # cluster should have kube-prometheus-stack, metrics-server, metrics-server-exporter and data-feed
-CLUSTER = 'k8s.vpc-apne1.dev.svoe.link'
-# CLUSTER = 'minikube-1'
+# CLUSTER = 'k8s.vpc-apne1.dev.svoe.link'
+CLUSTER = 'minikube-1'
 
 DATA_FEED_NAMESPACE = 'data-feed'
 DATA_FEED_CONTAINER = 'data-feed-container'
@@ -17,8 +17,8 @@ RUN_ESTIMATION_FOR = 120 # how long to run estimation
 PROM_NAMESPACE = 'monitoring'
 PROM_POD_NAME = 'prometheus-kube-prometheus-stack-prometheus-0'
 PROM_PORT_FORWARD = '9090'
-# PROM = f'http://localhost:{PROM_PORT_FORWARD}'
-PROM = 'http://prometheus.k8s.vpc-apne1.dev.svoe.link:30001'
+PROM = f'http://localhost:{PROM_PORT_FORWARD}'
+# PROM = 'http://prometheus.k8s.vpc-apne1.dev.svoe.link:30001'
 
 REMOTE_SCRIPTS_DS_CONTAINER = 'remote-scripts-runner'
 REMOTE_SCRIPTS_DS_NAMESPACE = 'kube-system'

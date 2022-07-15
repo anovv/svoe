@@ -8,12 +8,18 @@ class Stats:
     def __init__(self):
         self.stats = {}
 
-    def add_metrics_to_stats(self, pod_name, metrics_results):
-        if pod_name not in self.stats:
-            self.stats[pod_name] = {}
-        self.stats[pod_name]['metrics'] = metrics_results
+    def add_pod_info(self, payload_hash, pod_name, payload_config):
+        if payload_hash not in self.stats:
+            self.stats[payload_hash] = {}
+        self.stats[payload_hash]['pod_name'] = pod_name
+        self.stats[payload_hash]['payload_config'] = payload_config
 
-    def add_all_df_events(self, pod_name, kube_watcher_state, estimation_state, scheduling_state):
+    def add_metrics_to_stats(self, payload_hash, metrics_results):
+        if payload_hash not in self.stats:
+            self.stats[payload_hash] = {}
+        self.stats[payload_hash]['metrics'] = metrics_results
+
+    def add_all_df_events(self, payload_hash, pod_name, kube_watcher_state, estimation_state, scheduling_state):
         events = []
         if pod_name in kube_watcher_state.event_queues_per_pod:
             events.extend(kube_watcher_state.event_queues_per_pod[pod_name].queue)
@@ -30,14 +36,19 @@ class Stats:
             filter(lambda event: event.container_name is None or event.container_name == DATA_FEED_CONTAINER, events))
         events = list(map(lambda event: str(event), events))
 
-        if pod_name not in self.stats:
-            self.stats[pod_name] = {}
-        self.stats[pod_name]['events'] = events
+        if payload_hash not in self.stats:
+            self.stats[payload_hash] = {}
+        self.stats[payload_hash]['events'] = events
 
-    def add_reschedules(self, pod_name, scheduling_state):
-        if pod_name not in self.stats:
-            self.stats[pod_name] = {}
-        self.stats[pod_name]['reschedule_reasons'] = scheduling_state.get_reschedule_reasons(pod_name)
+    def add_final_result(self, payload_hash, pod_name, estimation_state):
+        if payload_hash not in self.stats:
+            self.stats[payload_hash] = {}
+        self.stats[payload_hash]['final_result'] = estimation_state.get_last_result_event_type(pod_name)
+
+    def add_reschedules(self, payload_hash, pod_name, scheduling_state):
+        if payload_hash not in self.stats:
+            self.stats[payload_hash] = {}
+        self.stats[payload_hash]['reschedule_reasons'] = scheduling_state.get_reschedule_reasons(pod_name)
 
     def save(self):
         if len(self.stats) == 0:

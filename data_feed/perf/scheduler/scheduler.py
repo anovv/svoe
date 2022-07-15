@@ -99,28 +99,29 @@ class Scheduler:
 
     def run_estimator(self, pod_name, node_name, priority):
         self.scheduling_state.add_phase_event(pod_name, PodSchedulingPhaseEvent.WAITING_FOR_POD_TO_BE_SCHEDULED)
-        payload_config = self.schedule_pod(pod_name, node_name, priority)
+        payload_config, payload_hash = self.schedule_pod(pod_name, node_name, priority)
         reschedule, reason = False, None
         if self.running and self.scheduling_state.get_last_result_event_type(pod_name) == PodSchedulingResultEvent.POD_SCHEDULED:
-            reschedule, reason = self.estimator.estimate_resources(pod_name, payload_config)
+            reschedule, reason = self.estimator.estimate_resources(pod_name, payload_config, payload_hash)
         self.delete_pod(pod_name)
         if reason is None:
             reason = self.scheduling_state.get_last_result_event_type(pod_name)
 
-        return reschedule, reason
+        return reschedule, reason, payload_hash, payload_config
 
     def schedule_pod(self, pod_name, node_name, priority):
         payload_config = None
+        payload_hash = None
         try:
             cm_name = cm_name_pod_name(pod_name)
-            payload_config, _ = self.kube_api.get_payload(cm_name)
+            payload_config, payload_hash = self.kube_api.get_payload(cm_name)
             self.kube_api.create_raw_pod(pod_name, node_name, priority)
 
         except kubernetes.client.exceptions.ApiException as e:
             if json.loads(e.body)['reason'] == 'AlreadyExists':
                 result = PodSchedulingResultEvent.INTERRUPTED_POD_ALREADY_EXISTS
                 self.scheduling_state.add_result_event(pod_name, result)
-                return payload_config
+                return payload_config, payload_hash
             else:
                 # TODO INTERRUPTED_INTERNAL_ERROR -> INTERRUPTED_UNKNOWN_ERROR and add exception to event
                 raise e
@@ -131,7 +132,7 @@ class Scheduler:
 
         if not self.running:
             # do not wait for confirm when exiting:
-            return
+            return payload_config, payload_hash
 
         timed_out = not self.scheduling_state.wait_event(pod_name, SchedulingTimeouts.POD_SCHEDULED_TIMEOUT)
         if timed_out:
@@ -139,7 +140,7 @@ class Scheduler:
         else:
             self.scheduling_state.add_result_event(pod_name, PodSchedulingResultEvent.POD_SCHEDULED)
 
-        return payload_config
+        return payload_config, payload_hash
 
     def delete_pod(self, pod_name):
         self.scheduling_state.add_phase_event(pod_name, PodSchedulingPhaseEvent.WAITING_FOR_POD_TO_BE_DELETED)
@@ -174,16 +175,28 @@ class Scheduler:
                 del self.futures[f]
 
     def done_estimation_callback(self, future, pod_name):
-        reschedule, reason = future.result()
+        reschedule, reason, payload_hash, payload_config = future.result()
         self.stats.add_all_df_events(
+            payload_hash,
             pod_name,
             self.kube_watcher_state,
             self.estimation_state,
             self.scheduling_state
         )
         self.stats.add_reschedules(
+            payload_hash,
             pod_name,
             self.scheduling_state
+        )
+        self.stats.add_final_result(
+            payload_hash,
+            pod_name,
+            self.estimation_state
+        )
+        self.stats.add_pod_info(
+            payload_hash,
+            pod_name,
+            payload_config
         )
         self.clean_states(pod_name)
         self.scheduling_state.reschedule_or_complete(pod_name, reschedule, reason)
