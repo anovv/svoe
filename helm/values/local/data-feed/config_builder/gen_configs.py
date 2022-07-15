@@ -1,15 +1,20 @@
+
+import yaml
+import json
+import subprocess
+import os
+
 from cryptofeed.defines import TICKER, TRADES, L2_BOOK, L3_BOOK, LIQUIDATIONS, OPEN_INTEREST, FUNDING, FUTURES, FX, \
     OPTION, PERPETUAL, SPOT, CALL, PUT, CURRENCY
 from cryptofeed.symbols import Symbols, Symbol
 from cryptofeed.exchanges import EXCHANGE_MAP
 from jinja2 import Template
-import yaml
-import json
-import subprocess
 from hashlib import sha1
 
 MASTER_CONFIG = yaml.safe_load(open('master-config.yaml', 'r'))
 BUILD_INFO_LOOKUP = {}
+
+RESOURCE_ESTIMATOR_DATA = json.load(open('../../../../../data_feed/perf/resources-estimation-out/resources-estimation.json', 'r'))
 
 def gen_helm_values():
     pod_configs = []
@@ -147,10 +152,14 @@ def build_pod_configs(exchange, exchange_config):
             'labels': labels,
         }
 
-        # TODO use payload hash
-        data_feed_resources = _get_resources(exchange, instrument_type, symbols)
+        # TODO set resources for sidecars (redis, redis-exporter)
+        data_feed_resources = _get_resources(config['payload_hash'])
         if data_feed_resources is not None:
             pod_config['data_feed_resources'] = data_feed_resources
+            pod_config['labels']['svoe.has-resources'] = True
+        else:
+            pod_config['labels']['svoe.has-resources'] = False
+
 
         pod_configs.append(pod_config)
 
@@ -258,10 +267,11 @@ def _hash_short(hash):
     return hash[:10]
 
 
-# TODO use payload hash
-def _get_resources(exchange, instrument_type, symbols):
-    # TODO pull Prom/Thanos data/make manual config
-    # TODO set resources for redis/redis-exporter sidecars
+# TODO set resources for sidecars (redis, redis-exporter)
+def _get_resources(payload_hash):
+    if payload_hash not in RESOURCE_ESTIMATOR_DATA:
+        print(f'No resource metrics found for payload_hash {payload_hash}')
+        return None
     # return {
     #     'requests': {
     #         'cpu': '25m',
