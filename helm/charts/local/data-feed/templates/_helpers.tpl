@@ -145,20 +145,20 @@ spec:
             requests:
               {{- if .dataFeed.resources.requests.memory }}
               memory: {{ .dataFeed.resources.requests.memory }}
-              {{- end}}
+              {{- end }}
               {{- if .dataFeed.resources.requests.cpu }}
               cpu: {{ .dataFeed.resources.requests.cpu }}
-              {{- end}}
-            {{- end}}
+              {{- end }}
+            {{- end }}
             {{- if .dataFeed.resources.limits }}
             limits:
               {{- if .dataFeed.resources.limits.memory }}
               memory: {{ .dataFeed.resources.limits.memory }}
-              {{- end}}
+              {{- end }}
               {{- if .dataFeed.resources.limits.cpu }}
               cpu: {{ .dataFeed.resources.limits.cpu }}
-              {{- end}}
-            {{- end}}
+              {{- end }}
+            {{- end }}
           {{- end }}
       terminationGracePeriodSeconds: 30
       volumes:
