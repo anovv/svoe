@@ -324,11 +324,10 @@ def _get_resources(payload_hash):
                 if float(absent) > 0.5:
                     print(f'[{payload_hash}][{type}] Absent metric for {container} {duration} did not pass 0.5 thresh, value: {absent}')
                     continue
-                agg = 'p95'
-                v = m[agg][0]
-                if v is None:
-                    err = m[agg][1]
-                    print(f'[{payload_hash}][{type}] {agg} metric for {container} {duration} is missing, err: {err}')
+                v_p95 = m['p95'][0]
+                v_avg = m['avg'][0]
+                if v_p95 is None or v_avg is None:
+                    print(f'[{payload_hash}][{type}] p95 or avg metric for {container} {duration} is missing')
                     continue
                 else:
                     if container not in res:
@@ -338,9 +337,9 @@ def _get_resources(payload_hash):
                         }
                     REQUEST_UP = 0.1
                     LIMIT_UP = 0.5
-                    request = (float(v)/(1000.0 * 1000.0)) * (1 + REQUEST_UP)
-                    limit = request * (1 + LIMIT_UP)
                     if type == 'metrics_server_cpu':
+                        # use avg for cpu because it spikes in the beginning
+                        request = (float(v_avg)/(1000.0 * 1000.0)) * (1 + REQUEST_UP)
                         if 'cpu' in res[container]['requests']:
                             # already set
                             continue
@@ -349,6 +348,8 @@ def _get_resources(payload_hash):
                         res[container]['requests']['cpu'] = req_str
                         print(f'[{payload_hash}][{container}][{duration}] Request cpu {req_str}')
                     else:
+                        request = (float(v_p95)/(1000.0)) * (1 + REQUEST_UP)
+                        limit = request * (1 + LIMIT_UP)
                         if 'memory' in res[container]['requests']:
                             # already set
                             continue
