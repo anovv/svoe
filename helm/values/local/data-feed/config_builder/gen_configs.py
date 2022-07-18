@@ -153,12 +153,15 @@ def build_pod_configs(exchange, exchange_config):
         }
 
         # TODO set resources for sidecars (redis, redis-exporter)
-        data_feed_resources = _get_resources(config['payload_hash'])
-        if data_feed_resources is not None:
-            pod_config['data_feed_resources'] = data_feed_resources
+        payload_hash = config['payload_hash']
+        resources = _get_resources(payload_hash)
+        if resources is not None and 'data-feed-container' in resources:
+            pod_config['data_feed_resources'] = resources['data-feed-container']
             pod_config['labels']['svoe.has-resources'] = True
+            print(f'Set resources for {payload_hash}')
         else:
             pod_config['labels']['svoe.has-resources'] = False
+            print(f'No resources for {payload_hash}')
 
 
         pod_configs.append(pod_config)
@@ -267,12 +270,38 @@ def _hash_short(hash):
     return hash[:10]
 
 
-# TODO set resources for sidecars (redis, redis-exporter)
 def _get_resources(payload_hash):
     if payload_hash not in RESOURCE_ESTIMATOR_DATA:
-        print(f'No resource metrics found for payload_hash {payload_hash}')
+        print(f'payload_hash {payload_hash} not found in stats')
         return None
-    # return {
+    final_result = RESOURCE_ESTIMATOR_DATA[payload_hash]['final_result']
+    if 'metrics' not in RESOURCE_ESTIMATOR_DATA[payload_hash]:
+        print(f'No metrics found for payload_hash {payload_hash}, final_result {final_result}')
+        return None
+
+    # check health report first
+    for data_type in RESOURCE_ESTIMATOR_DATA[payload_hash]['metrics']['df_health']:
+        for symbol in RESOURCE_ESTIMATOR_DATA[payload_hash]['metrics']['df_health'][data_type]:
+            m = RESOURCE_ESTIMATOR_DATA[payload_hash]['metrics']['df_health'][data_type][symbol]
+            absent = m['absent'][0]
+            if absent is None:
+                err = m['absent'][1]
+                print(f'[{payload_hash}][df_health] No absent metric for {data_type} {symbol}, err: {err}')
+                return None
+            if float(absent) > 0.5:
+                print(f'[{payload_hash}][df_health] Absent metric for {data_type} {symbol} did not pass 0.5 thresh, value: {absent}')
+                return None
+            avg = m['avg'][0]
+            if avg is None:
+                err = m['avg'][1]
+                print(f'[{payload_hash}][df_health] No avg metric for {data_type} {symbol}, err: {err}')
+                return None
+            if float(avg) < 0.5:
+                print(f'[{payload_hash}][df_health] Avg metric for {data_type} {symbol} did not pass 0.5 thresh, value: {avg}')
+                return None
+
+    res = {}
+    # {
     #     'requests': {
     #         'cpu': '25m',
     #         'memory': '200Mi'
@@ -282,7 +311,55 @@ def _get_resources(payload_hash):
     #         'memory': '400Mi'
     #     }
     # }
-    return None
+    # set resources
+    for type in ['metrics_server_cpu', 'metrics_server_mem']:
+        for container in RESOURCE_ESTIMATOR_DATA[payload_hash]['metrics'][type]:
+            for duration in ['run_duration', '600s']:
+                m = RESOURCE_ESTIMATOR_DATA[payload_hash]['metrics'][type][container][duration]
+                absent = m['absent'][0]
+                if absent is None:
+                    err = m['absent'][1]
+                    print(f'[{payload_hash}][{type}] No absent metric for {container} {duration}, err: {err}')
+                    continue
+                if float(absent) > 0.5:
+                    print(f'[{payload_hash}][{type}] Absent metric for {container} {duration} did not pass 0.5 thresh, value: {absent}')
+                    continue
+                agg = 'p95'
+                v = m[agg][0]
+                if v is None:
+                    err = m[agg][1]
+                    print(f'[{payload_hash}][{type}] {agg} metric for {container} {duration} is missing, err: {err}')
+                    continue
+                else:
+                    if container not in res:
+                        res[container] = {
+                            'requests' : {},
+                            'limits': {}
+                        }
+                    REQUEST_UP = 0.1
+                    LIMIT_UP = 0.5
+                    request = (float(v)/(1000.0 * 1000.0)) * (1 + REQUEST_UP)
+                    limit = request * (1 + LIMIT_UP)
+                    if type == 'metrics_server_cpu':
+                        if 'cpu' in res[container]['requests']:
+                            # already set
+                            continue
+                        # for cpu we set only requests
+                        req_str = str(int(request)) + 'm'
+                        res[container]['requests']['cpu'] = req_str
+                        print(f'[{payload_hash}][{container}][{duration}] Request cpu {req_str}')
+                    else:
+                        if 'memory' in res[container]['requests']:
+                            # already set
+                            continue
+                        req_str = str(int(request)) + 'Mi'
+                        lim_str = str(int(limit)) + 'Mi'
+                        res[container]['requests']['memory'] = req_str
+                        print(f'[{payload_hash}][{container}][{duration}] Request memory {req_str}')
+                        res[container]['limits']['memory'] = lim_str
+                        print(f'[{payload_hash}][{container}][{duration}] Limit memory {lim_str}')
+
+    return res
 
 def _get_build_info(version):
     if version in BUILD_INFO_LOOKUP:
