@@ -88,6 +88,11 @@ releases:
   - chart: ../../charts/local/grafana-dashboards
     name: grafana-dashboards
     namespace: monitoring
+  - chart: deliveryhero/cluster-overprovisioner
+    name: cluster-overprovisioner
+    namespace: overprovisioner
+    values:
+      - ../../values/deliveryhero/cluster-overprovisioner/values.yaml.gotmpl
 repositories:
   - name: metrics-server
     url: https://kubernetes-sigs.github.io/metrics-server/

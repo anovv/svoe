@@ -1,0 +1,14 @@
+# overprovision spot-workers for data-feed
+deployments[0].affinity:
+  nodeAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: workload-type
+              operator: In
+              values:
+                - data-feed
+            - key: node-type
+              operator: In
+              values:
+                - spot
