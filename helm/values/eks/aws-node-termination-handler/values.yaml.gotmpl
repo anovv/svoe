@@ -1,9 +1,12 @@
-enableSqsTerminationDraining: false
+enableSqsTerminationDraining: true
 enableSpotInterruptionDraining: true
 enableScheduledEventDraining: false
-enableRebalanceMonitoring: true
-managedAsgTag: aws-node-termination-handler/managed
-# TODO serviceMonitor (this needs enableSqsTerminationDraining=True, so only in queue-processor mode??)
+enableRebalanceMonitoring: false
+checkASGTagBeforeDraining: false
+enablePrometheusServer: true
+serviceMonitor:
+  create: true
+  interval: 5s
 # TODO set pod requests/limits
 # TODO podDisruptionBudget? priorityClassName? make sure this is not terminated when resources are starved
 # TODO emit-kubernetes-events to true
