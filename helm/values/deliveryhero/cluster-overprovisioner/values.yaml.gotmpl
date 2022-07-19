@@ -1,14 +1,39 @@
-# overprovision spot-workers for data-feed
-deployments[0].affinity:
-  nodeAffinity:
-    requiredDuringSchedulingIgnoredDuringExecution:
-      nodeSelectorTerms:
-        - matchExpressions:
-            - key: workload-type
-              operator: In
-              values:
-                - data-feed
-            - key: node-type
-              operator: In
-              values:
-                - spot
+# create deployment with dummy pod to overprovision spot worker nodes for data-feed
+deployments:
+  - name: default
+    annotations: {}
+    podAnnotations: {}
+    replicaCount: 1
+    nodeSelector: {}
+    resources:
+      limits:
+        cpu: 1000m
+        memory: 1000Mi
+      requests:
+        cpu: 1000m
+        memory: 1000Mi
+    tolerations:
+      - key: node-type
+        operator: Equal
+        value: spot
+        effect: NoSchedule
+      - key: workload-type
+        operator: Equal
+        value: data-feed
+        effect: NoSchedule
+    affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+            - matchExpressions:
+                - key: workload-type
+                  operator: In
+                  values:
+                    - data-feed
+                - key: node-type
+                  operator: In
+                  values:
+                    - spot
+    labels: {}
+    topologySpreadConstraints: []
+    pdb: {}
