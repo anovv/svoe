@@ -3,11 +3,15 @@ kind: Cluster
 metadata:
   name: {{.cluster_name}}
 spec:
-  # Needed for cluster autoscaler
   additionalPolicies:
-    node: |
+    master: |
       [
         {"Effect":"Allow","Action":["autoscaling:DescribeAutoScalingGroups","autoscaling:DescribeAutoScalingInstances","autoscaling:DescribeLaunchConfigurations","autoscaling:DescribeTags","autoscaling:SetDesiredCapacity","autoscaling:TerminateInstanceInAutoScalingGroup","ec2:DescribeInstanceTypes","ec2:DescribeLaunchTemplateVersions"],"Resource":"*"}
+      ]
+    node: |
+      [
+        {"Effect":"Allow","Action":["autoscaling:DescribeAutoScalingGroups","autoscaling:DescribeAutoScalingInstances","autoscaling:DescribeLaunchConfigurations","autoscaling:DescribeTags","autoscaling:SetDesiredCapacity","autoscaling:TerminateInstanceInAutoScalingGroup","ec2:DescribeInstanceTypes","ec2:DescribeLaunchTemplateVersions"],"Resource":"*"},
+        {"Effect":"Allow","Action":["events:DeleteRule","events:ListRules","events:ListTargetsByRule","events:ListTagsForResource","events:PutEvents","events:PutRule","events:PutTargets","events:RemoveTargets","events:TagResource","sqs:CreateQueue","sqs:DeleteQueue","sqs:GetQueueAttributes","sqs:ListQueues","sqs:ListQueueTags"],"Resource": "*"}
       ]
   api:
     dns: {}
@@ -101,7 +105,6 @@ spec:
     nodes: public
 ---
 
-# TODO labels for nodeSelectors, taints and tolerations
 # TODO optimize rootVolumeSize
 # TODO for each InstanceGroup add extra security-groups to open necessary ports (e.g. Cilium etcd)
 # Create one master per AZ
@@ -128,10 +131,9 @@ spec:
   subnets:
   - {{.}}
 ---
-  {{end}}
+{{end}}
 
 
-# TODO labels for nodeSelectors, taints and tolerations
 apiVersion: kops/v1alpha2
 kind: InstanceGroup
 metadata:
@@ -180,7 +182,7 @@ spec:
   machineType: t3.small
   maxPrice: "0.0273" # on-demand price
   maxSize: 20
-  minSize: 1
+  minSize: 5
   securityGroupOverride: {{.security_group_override}}
   nodeLabels:
     kops.k8s.io/instancegroup: nodes-data-feed-spot
