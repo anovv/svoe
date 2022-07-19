@@ -13,7 +13,7 @@ releases:
     values:
       - ../../values/metrics-server/metrics-server/values.yaml.gotmpl
   - chart: autoscaler/cluster-autoscaler
-    name: autoscaler
+    name: cluster-autoscaler
     namespace: kube-system
     values:
       - ../../values/autoscaler/cluster-autoscaler/values.yaml.gotmpl
