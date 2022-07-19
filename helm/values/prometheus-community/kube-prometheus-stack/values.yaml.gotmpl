@@ -125,14 +125,12 @@ prometheusOperator:
       memory: 50Mi
 
 prometheus:
-
   {{ if (.Values | get "thanosEnabled") }}
   thanosService:
     enabled: true
   thanosServiceMonitor:
     enabled: true
   {{ end }}
-
   prometheusSpec:
     image:
       repository: quay.io/prometheus/prometheus
@@ -155,6 +153,8 @@ prometheus:
         key: objstore.yml
     {{ end }}
     serviceMonitorSelectorNilUsesHelmValues: false
+    # https://github.com/prometheus-operator/prometheus-operator/issues/3636
+    podMonitorSelectorNilUsesHelmValues: false
     storageSpec:
       volumeClaimTemplate:
         spec:
