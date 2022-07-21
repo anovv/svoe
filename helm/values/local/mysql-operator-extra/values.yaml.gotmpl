@@ -1,5 +1,5 @@
 isMysqlHost: {{ .Values | get "isMysqlHost" }}
-backupSchedule: "0 0 * * *" # once a day
+backupSchedule: "0 0 0 * *" # once a day
 mysql:
   rootPassword: {{ .Values | get "mysqlRootPassword" }}
   database: {{ .Values | get "mysqlDefaultSvoeDb" }}
