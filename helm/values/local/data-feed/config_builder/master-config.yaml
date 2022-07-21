@@ -3,7 +3,6 @@ symbolSets:
 exchangeConfigSets:
   BINANCE:
     - instrumentType: spot
-      numPods: 10
       symbolSets:
         quotes: [USDT]
         bases: TOP_20
@@ -15,7 +14,7 @@ exchangeConfigSets:
       dataFeedImageVersion: 1.0.3 # sync with data_feed/ci
       channelsConfigOverrides:
         l2_book:
-          max_depth: 100
+          max_depth: 20
           book_delta: true
       exchangeConfigOverrides: # TODO snapshot_interval ?
         retries: -1
@@ -25,6 +24,30 @@ exchangeConfigSets:
       symbolPodDistributionStrategy: ONE_TO_ONE
       description: |
         Common configuration for Binance USDT spot top 20
+
+  BINANCE_FUTURES:
+    - instrumentType: perpetual
+      symbolSets:
+        quotes: [USDT]
+        bases: TOP_20
+      symbols: [] # map of -base -quote
+      excludes:
+        quotes: []
+        bases: [SHIB, BSV]
+      channels: [ticker, l2_book, trades, liquidations, open_interest, funding]
+      dataFeedImageVersion: 1.0.3 # sync with data_feed/ci
+      channelsConfigOverrides:
+        l2_book:
+          max_depth: 20
+          book_delta: true
+      exchangeConfigOverrides: # TODO snapshot_interval ?
+        retries: -1
+      dataFeedConfigOverrides: {}
+      clusterId: 1
+      availabilityZone: a
+      symbolPodDistributionStrategy: ONE_TO_ONE
+      description: |
+        Common configuration for Binance Futures USDT perpetual top 20
   BYBIT:
     - instrumentType: perpetual
       numPods: 10
@@ -40,7 +63,7 @@ exchangeConfigSets:
       dataFeedImageVersion: 1.0.3 # sync with data_feed/ci
       channelsConfigOverrides:
         l2_book:
-          max_depth: 100
+          max_depth: 20
           book_delta: true
       exchangeConfigOverrides:
         retries: -1
@@ -50,3 +73,166 @@ exchangeConfigSets:
       symbolPodDistributionStrategy: ONE_TO_ONE
       description: |
         Common configuration for Bybit perpetual USDT futures top 20
+  FTX:
+    - instrumentType: spot
+      symbolSets:
+        quotes: [USDT]
+        bases: TOP_20
+      symbols: []
+      excludes:
+        quotes: []
+        bases: [ADA, MATIC, XLM, ETC, VET, EOS, FIL, SHIB, BSV]
+        symbols: []
+      channels: [ticker, l2_book, trades]
+      dataFeedImageVersion: 1.0.3 # sync with data_feed/ci
+      channelsConfigOverrides:
+        l2_book:
+          max_depth: 20
+          book_delta: true
+      exchangeConfigOverrides:
+        retries: -1
+      dataFeedConfigOverrides: {}
+      clusterId: 1
+      availabilityZone: a
+      symbolPodDistributionStrategy: ONE_TO_ONE
+      description: |
+        Common configuration for FTX spot USD top 20
+
+    - instrumentType: perpetual
+      symbolSets:
+        quotes: [USD]
+        bases: TOP_20
+      symbols: []
+      excludes:
+        quotes: []
+        bases: []
+        symbols: []
+      channels: [ticker, l2_book, trades, liquidations, open_interest, funding]
+      dataFeedImageVersion: 1.0.3 # sync with data_feed/ci
+      channelsConfigOverrides:
+        l2_book:
+          max_depth: 20
+          book_delta: true
+      exchangeConfigOverrides:
+        retries: -1
+      dataFeedConfigOverrides: {}
+      clusterId: 1
+      availabilityZone: a
+      symbolPodDistributionStrategy: ONE_TO_ONE
+      description: |
+        Common configuration for FTX perpetual USD futures top 20
+  GATEIO:
+    - instrumentType: spot
+      symbolSets:
+        quotes: [USDT]
+        bases: TOP_20
+      symbols: []
+      excludes:
+        quotes: []
+        bases: []
+        symbols: []
+      channels: [ticker, l2_book, trades]
+      dataFeedImageVersion: 1.0.3 # sync with data_feed/ci
+      channelsConfigOverrides:
+        l2_book:
+          max_depth: 20
+          book_delta: true
+      exchangeConfigOverrides:
+        retries: -1
+      dataFeedConfigOverrides: {}
+      clusterId: 1
+      availabilityZone: a
+      symbolPodDistributionStrategy: ONE_TO_ONE
+      description: |
+        Common configuration for GATEIO spot USDT top 20
+
+  PHEMEX:
+    - instrumentType: spot
+      symbolSets:
+        quotes: [USDT]
+        bases: TOP_20
+      symbols: []
+      excludes:
+        quotes: []
+        bases: [VET, BSV]
+        symbols: []
+      channels: [l2_book, trades]
+      dataFeedImageVersion: 1.0.3 # sync with data_feed/ci
+      channelsConfigOverrides:
+        l2_book:
+          max_depth: 20
+          book_delta: true
+      exchangeConfigOverrides:
+        retries: -1
+      dataFeedConfigOverrides: {}
+      clusterId: 1
+      availabilityZone: a
+      symbolPodDistributionStrategy: ONE_TO_ONE
+      description: |
+        Common configuration for PHEMEX spot USDT top 20
+
+    - instrumentType: perpetual
+      symbolSets:
+        quotes: [USD]
+        bases: TOP_20
+      symbols: []
+      excludes:
+        quotes: []
+        bases: [VET, SHIB, BSV]
+        symbols: []
+      channels: [l2_book, trades]
+      dataFeedImageVersion: 1.0.3 # sync with data_feed/ci
+      channelsConfigOverrides:
+        l2_book:
+          max_depth: 20
+          book_delta: true
+      exchangeConfigOverrides:
+        retries: -1
+      dataFeedConfigOverrides: {}
+      clusterId: 1
+      availabilityZone: a
+      symbolPodDistributionStrategy: ONE_TO_ONE
+      description: |
+        Common configuration for Kraken Futures perp USDT top 20
+
+  KRAKEN_FUTURES:
+    - instrumentType: perpetual
+      symbolSets:
+        quotes: [USD]
+        bases: TOP_20
+      symbols: []
+      excludes:
+        quotes: []
+        bases: [BNB, DOGE, LINK, MATIC, ETC, VET, SHIB, BSV]
+        symbols: []
+      channels: [ticker, l2_book, trades, liquidations, open_interest, funding]
+      dataFeedImageVersion: 1.0.3 # sync with data_feed/ci
+      channelsConfigOverrides:
+        l2_book:
+          max_depth: 20
+          book_delta: true
+      exchangeConfigOverrides:
+        retries: -1
+      dataFeedConfigOverrides: {}
+      clusterId: 1
+      availabilityZone: a
+      symbolPodDistributionStrategy: ONE_TO_ONE
+      description: |
+        Common configuration for Kraken Futures perp USDT top 20
+
+
+
+  # TODO
+  # ASCENDEX
+  # ASCENDEX_FUTURES
+  # BITMEX
+  # COINBASE
+  # HUOBI
+  # KRAKEN
+  # KRAKEN_FUTURES
+  # KUCOIN
+  # OKX
+  # PHEMEX
+  # POLONIEX
+  # PROBIT
+

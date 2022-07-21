@@ -74,16 +74,28 @@ def build_pod_configs(exchange, exchange_config):
                 print(f'Skipping {symbol.normalized} for {exchange} {instrument_type} due to {exclude_quote} exclude quote...')
 
     # validate symbol exists
+    has_non_existent_symbols = False
     exchange_symbols = EXCHANGE_MAP[exchange].symbols()
     for symbol in symbols:
         if symbol.normalized not in exchange_symbols:
-            raise ValueError(f'Symbol {symbol.normalized} does not exist in exchange {exchange}')
+            has_non_existent_symbols = True
+            print(f'Symbol {symbol.normalized} does not exist in exchange {exchange}')
+
+    if has_non_existent_symbols:
+        raise ValueError(f'Exchange {exchange} has non existent symbols')
 
     # validate channels
+    has_non_existent_channels = False
     channels = exchange_config['channels']
     for channel in channels:
         # this will throw if channel does not exist
-        EXCHANGE_MAP[exchange].std_channel_to_exchange(channel)
+        try:
+            EXCHANGE_MAP[exchange].std_channel_to_exchange(channel)
+        except:
+            print(f'Channel {channel} does not exist for {exchange}')
+
+    if has_non_existent_channels:
+        raise ValueError(f'Exchange {exchange} has non existent channels')
 
     symbol_pod_mapping = _distributeSymbols(exchange, symbols, symbol_distribution_strategy)
     data_feed_config_pod_mapping = []
