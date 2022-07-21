@@ -1,0 +1,6 @@
+apiVersion: v2
+name: mysql-operator-extra
+description: Extra stuff for mysql-operator (secrets + global cilium services + mysqlcluster instances)
+type: application
+version: 0.1.0
+appVersion: "0.1.0"

@@ -54,19 +54,31 @@ releases:
       - monitoring/kube-prometheus-stack
   {{ end }}
   {{ if .Values.isMysqlHost }}
-  - chart: bitnami/mysql
+  - chart: bitnami/mysql  # TODO deprecate this chart
     name: mysql
     namespace: mysql
     values:
       - ../../values/bitnami/mysql/values.yaml.gotmpl
     needs:
       - monitoring/kube-prometheus-stack
+  - chart: bitpoke/mysql-operator
+    name: mysql-operator
+    namespace: mysql
+    values:
+      - ../../values/bitpoke/mysql-operator/values.yaml.gotmpl
+    needs:
+      - monitoring/kube-prometheus-stack
   {{ end }}
-  - chart: ../../charts/local/mysql-extra
+  - chart: ../../charts/local/mysql-extra # TODO deprecate this chart
     name: mysql-extra
     namespace: mysql
     values:
       - ../../values/local/mysql-extra/values.yaml.gotmpl
+  - chart: ../../charts/local/mysql-operator-extra
+    name: mysql-operator-extra
+    namespace: mysql
+    values:
+      - ../../values/local/mysql-operator-extra/values.yaml.gotmpl
   - chart: ../../charts/local/metrics-server-exporter
     name: metrics-server-exporter
     namespace: monitoring
@@ -106,7 +118,7 @@ repositories:
     url: https://ckotzbauer.github.io/helm-charts
   - name: deliveryhero
     url: https://charts.deliveryhero.io/
-  {{ if or .Values.isObserver .Values.isMysqlHost }}
   - name: bitnami
     url: https://charts.bitnami.com/bitnami
-  {{ end }}
+  - name: bitpoke
+    url: https://helm-charts.bitpoke.io

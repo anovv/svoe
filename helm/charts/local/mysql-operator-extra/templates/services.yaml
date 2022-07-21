@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-global-svc
+  annotations:
+    io.cilium/global-service: "true"
+spec:
+  type: ExternalName
+  ports:
+    - name: http
+      protocol: TCP
+      port: {{ .Values.mysql.port }}
+      targetPort: {{ .Values.mysql.port }}
+  {{ if .Values.isMysqlHost }}
+  externalName: svoe-mysql-cluster-mysql.mysql.svc.cluster.local
+  {{ end }}

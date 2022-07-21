@@ -1,0 +1,12 @@
+isMysqlHost: true
+backupSchedule: "0 0 0 0 0"
+mysql:
+  rootPassword: password
+  database: database
+  port: port
+s3:
+  mysqlBucket: bucket
+  mysqlInitBackupFile: svoe-mysql-cluster-backup.xbackup.gz
+  accessKeyId: accessKeyId
+  secretAccessKey: secretAccessKey
+  region: region

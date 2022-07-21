@@ -1,0 +1,15 @@
+isMysqlHost: {{ .Values | get "isMysqlHost" }}
+backupSchedule: "0 0 * * *" # once a day
+mysql:
+  rootPassword: {{ .Values | get "mysqlRootPassword" }}
+  database: {{ .Values | get "mysqlDefaultSvoeDb" }}
+  port: 3306
+s3:
+  mysqlBucket: svoe-mysql-operator-backup
+  accessKeyId: {{ .Values | get "awsKey" }}
+  secretAccessKey: {{ .Values | get "awsSecret" }}
+  region: {{ .Values | get "awsDefaultRegion" }}
+  # TODO configure presync hook to fetch latest backup from s3
+  mysqlInitBackupFile: svoe-mysql-cluster-backup.xbackup.gz
+
+# TODO set podSpec and volumeSpec for MysqlCluster instance

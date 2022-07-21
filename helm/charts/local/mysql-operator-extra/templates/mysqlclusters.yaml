@@ -1,0 +1,13 @@
+apiVersion: mysql.presslabs.org/v1alpha1
+kind: MysqlCluster
+metadata:
+  name: svoe-mysql-cluster
+spec:
+  replicas: 1
+  secretName: svoe-mysql-secret
+  backupSchedule: {{ .Values.backupSchedule }}
+  backupRemoteDeletePolicy: delete
+  backupURL: s3://{{ .Values.s3.mysqlBucket }}
+  backupSecretName: svoe-mysql-backup-secret
+  initBucketURL: s3://{{ .Values.s3.mysqlBucket }}/{{ .Values.s3.mysqlInitBackupFile }}
+  initBucketSecretName: svoe-mysql-backup-secret

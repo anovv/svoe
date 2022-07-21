@@ -1,0 +1,11 @@
+# should be triggered manually
+# helm template -s templates/backup.yaml --set manualBackup=true . | kk apply -f - -n mysql
+# https://stackoverflow.com/questions/64810052/deploy-only-one-template-from-the-helm-chart last comment
+{{ if .Values.manualBackup }}
+apiVersion: mysql.presslabs.org/v1alpha1
+kind: MysqlBackup
+metadata:
+  name: svoe-mysql-cluster-manual-backup-{{ now | date "2006-01-02t15-04-05" }}
+spec:
+  clusterName: svoe-mysql-cluster
+{{ end }}

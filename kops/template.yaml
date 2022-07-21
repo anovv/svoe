@@ -182,7 +182,7 @@ spec:
   machineType: t3.small
   maxPrice: "0.0273" # on-demand price
   maxSize: 20
-  minSize: 5
+  minSize: 1
   securityGroupOverride: {{.security_group_override}}
   nodeLabels:
     kops.k8s.io/instancegroup: nodes-data-feed-spot

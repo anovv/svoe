@@ -14,6 +14,8 @@ TERRAFORM_OUTPUT_PATH="${OUTPUT_PATH}/terraform/"
 
 cd $TERRAFORM_OUTPUT_PATH
 
+# TODO trigger mysql backup (see mysql-operator-extra chart backup.yaml)
+
 echo "Draining nodes..."
 NODES=$(kubectl --context $CLUSTER_NAME get nodes -l kubernetes.io/role=node | awk '{print $1}' | tail -n +2)
 for node in $NODES
