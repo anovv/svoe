@@ -41,7 +41,7 @@ class Scheduler:
         self.kube_watcher_state = kube_watcher_state
 
         self.stats = stats
-        self.estimator = Estimator(self.estimation_state, self.stats)
+        self.estimator = Estimator(self.kube_api, self.estimation_state, self.stats)
         self.oom_handler = OOMHandler()
         self.oom_handler_client = OOMHandlerClient(self.oom_handler, self.scheduling_state)
 

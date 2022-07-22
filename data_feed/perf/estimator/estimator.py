@@ -1,11 +1,13 @@
 from perf.metrics.metrics import fetch_metrics
 from perf.state.estimation_state import PodEstimationPhaseEvent, PodEstimationResultEvent, EstimationTimeouts
+from perf.defines import DATA_FEED_CONTAINER, DATA_FEED_NAMESPACE
 
 
 class Estimator:
-    def __init__(self, estimation_state, stats):
+    def __init__(self, kube_api, estimation_state, stats):
         self.estimation_state = estimation_state
         self.stats = stats
+        self.kube_api = kube_api
 
     def estimate_resources(self, pod_name, payload_config, payload_hash):
         for phase, result, timeout in [
@@ -34,7 +36,8 @@ class Estimator:
             self.estimation_state.add_result_event(pod_name, result)
 
         # TODO collect metrics even on interrupts?
-        if self.estimation_state.get_last_result_event_type(pod_name) == PodEstimationResultEvent.POD_FINISHED_ESTIMATION_RUN:
+        if self.estimation_state.get_last_result_event_type(
+                pod_name) == PodEstimationResultEvent.POD_FINISHED_ESTIMATION_RUN:
             # collect metrics
             print(f'[Estimator] Fetching metrics for {pod_name}')
             self.estimation_state.add_result_event(pod_name, PodEstimationPhaseEvent.COLLECTING_METRICS)
@@ -47,6 +50,17 @@ class Estimator:
             # save stats
             self.stats.add_metrics_to_stats(payload_hash, metrics)
             self.estimation_state.add_result_event(pod_name, metrics_fetch_result)
+
+        # fetch df container logs
+        for result_type in [
+            PodEstimationResultEvent.INTERRUPTED_UNEXPECTED_CONTAINER_TERMINATION,
+            PodEstimationResultEvent.INTERRUPTED_DF_CONTAINER_HEALTH_LIVENESS,
+            PodEstimationResultEvent.INTERRUPTED_DF_CONTAINER_HEALTH_STARTUP,
+        ]:
+            if self.estimation_state.has_result_type(pod_name, result_type) \
+                    and self.stats.should_fetch_df_logs(pod_name, payload_config):
+                logs = self.kube_api.fetch_logs(DATA_FEED_NAMESPACE, pod_name, DATA_FEED_CONTAINER)
+                self.stats.add_df_logs(payload_hash, pod_name, payload_config, logs)
 
         for result_type in [
             PodEstimationResultEvent.INTERRUPTED_OOM,

@@ -171,6 +171,9 @@ class KubeApi:
                 return True
         return False
 
+    def fetch_logs(self, namespace, pod_name, container_name):
+        return self.core_api.read_namespaced_pod_log(pod_name, namespace, container=container_name)
+
     def pod_exec(self, namespace, pod_name, container_name, cmd):
         return kubernetes.stream.stream(self.core_api.connect_get_namespaced_pod_exec,
             pod_name,
