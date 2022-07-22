@@ -41,7 +41,7 @@ class Runner:
         self.running = True
         print('[Runner] Started estimator')
         # TODO start prom connection only for minikube (it uses port-forwarding)
-        self.prom_connection.start() # blocking
+        # self.prom_connection.start() # blocking
         if not self.running:
             return
         self.kube_watcher.start([
@@ -76,9 +76,9 @@ class Runner:
 if __name__ == '__main__':
     r = Runner()
     sub = [
-        'data-feed-bybit-perpetual-239b6f767f-ss',
-        'data-feed-bybit-perpetual-27a48cc207-ss',
-        'data-feed-bybit-perpetual-5281a0633b-ss',
+        # 'data-feed-bybit-perpetual-239b6f767f-ss',
+        # 'data-feed-bybit-perpetual-27a48cc207-ss',
+        # 'data-feed-bybit-perpetual-5281a0633b-ss',
         # 'data-feed-binance-spot-6d1641b134-ss',
         # 'data-feed-binance-spot-eb540d90be-ss',
         # 'data-feed-binance-spot-18257181b7-ss',

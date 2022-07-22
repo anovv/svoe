@@ -49,16 +49,20 @@ class Scheduler:
         self.futures = {}
         self.nodes_state = {} # node to tuple(bool (schedulable or not), reason)
 
+        # progress report
+        self.init_work_queue_size = 0
+        self.prev_num_pods_done = 0
+
     def run(self, subset=None):
         self.oom_handler.start()
         self.oom_handler_client.run()
         self.scheduling_state.init_pods_work_queue(self.kube_api.load_pod_names_from_ss(subset))
-        init_work_queue_size = len(self.scheduling_state.pods_work_queue)
-        print(f'[Scheduler] Scheduling estimation for {init_work_queue_size} pods...')
+        self.init_work_queue_size = len(self.scheduling_state.pods_work_queue)
+        print(f'[Scheduler] Scheduling estimation for {self.init_work_queue_size} pods...')
         # TODO tqdm progress
         self.running = True
         with concurrent.futures.ThreadPoolExecutor(max_workers=1024) as executor:
-            while self.running and len(self.scheduling_state.pods_done) != init_work_queue_size:
+            while self.running and len(self.scheduling_state.pods_done) != self.init_work_queue_size:
                 self.remove_done_futures()
                 pod_name = self.scheduling_state.pop_or_wait_work_queue(self.futures)
                 if pod_name is None:
@@ -201,6 +205,11 @@ class Scheduler:
         self.clean_states(pod_name)
         self.scheduling_state.reschedule_or_complete(pod_name, reschedule, reason)
 
+        # report progress
+        if self.prev_num_pods_done != len(self.scheduling_state.pods_done):
+            self.prev_num_pods_done = len(self.scheduling_state.pods_done)
+            print(f'[Scheduler] Progress: {self.prev_num_pods_done}/{self.init_work_queue_size}')
+
     def fetch_nodes_state(self):
         nodes_state = {} # node to tuple(bool (scedulable or not), reason)
         nodes = self.kube_api.get_nodes()
@@ -253,7 +262,16 @@ class Scheduler:
             if int((local_now() - phase_event.local_time).total_seconds()) < NODE_NEXT_SCHEDULE_PERIOD:
                 nodes_state[node_name] = (False, NodeStateReason.NOT_ENOUGH_TIME_SINCE_LAST_POD_STARTED_ESTIMATION)
                 continue
-
+            # TODO handle spot termination
+            # Traceback (most recent call last):
+            #   File "/Users/anov/IdeaProjects/svoe/data_feed/perf/runner.py", line 90, in <module>
+            #     r.run(sub)
+            #   File "/Users/anov/IdeaProjects/svoe/data_feed/perf/runner.py", line 52, in run
+            #     self.scheduler.run(subset)
+            #   File "/Users/anov/IdeaProjects/svoe/data_feed/perf/scheduler/scheduler.py", line 80, in run
+            #     nodes_state = self.fetch_nodes_state()
+            #   File "/Users/anov/IdeaProjects/svoe/data_feed/perf/scheduler/scheduler.py", line 267, in fetch_nodes_state
+            #     if phase_event.local_time > nodes_resource_usage[node_name]['cluster_timestamp']:
             # resource mertics freshness
             if phase_event.local_time > nodes_resource_usage[node_name]['cluster_timestamp']:
                 nodes_state[node_name] = (False, NodeStateReason.RESOURCES_METRICS_NOT_FRESH_SINCE_LAST_POD_STARTED_ESTIMATION)
