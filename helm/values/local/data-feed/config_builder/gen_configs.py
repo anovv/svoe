@@ -92,6 +92,7 @@ def build_pod_configs(exchange, exchange_config):
         try:
             EXCHANGE_MAP[exchange].std_channel_to_exchange(channel)
         except:
+            has_non_existent_channels = True
             print(f'Channel {channel} does not exist for {exchange}')
 
     if has_non_existent_channels:
@@ -111,6 +112,7 @@ def build_pod_configs(exchange, exchange_config):
         hash_pod_config = _hash(config)
         hash_short = _hash_short(hash_pod_config)
         name = ('data-feed-' + exchange + '-' + instrument_type + '-' + hash_short).lower() # TODO unique name, handle same hash pods
+        name = name.replace('_', '-')
         config['svoe']['instrument_type'] = instrument_type # TODO instrument_extra (strike/expiration/etc)
         config['svoe']['version'] = hash_pod_config # version is long
         config['svoe']['hash_short'] = hash_short
@@ -140,6 +142,11 @@ def build_pod_configs(exchange, exchange_config):
 
         for channel in channels:
             labels['svoe.channel.' + channel] = True
+
+        # quote label strings
+        for k in labels:
+            if isinstance(labels[k], str):
+                labels[k] = f'"{labels[k]}"'
 
         pod_config = {
             'name': name,
@@ -174,7 +181,6 @@ def build_pod_configs(exchange, exchange_config):
         else:
             pod_config['labels']['svoe.has-resources'] = False
             print(f'No resources for {payload_hash}')
-
 
         pod_configs.append(pod_config)
 

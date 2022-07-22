@@ -205,7 +205,7 @@ exchangeConfigSets:
         quotes: []
         bases: [BNB, DOGE, LINK, MATIC, ETC, VET, SHIB, BSV]
         symbols: []
-      channels: [ticker, l2_book, trades, liquidations, open_interest, funding]
+      channels: [ticker, l2_book, trades, open_interest, funding]
       dataFeedImageVersion: 1.0.3 # sync with data_feed/ci
       channelsConfigOverrides:
         l2_book:
