@@ -1,13 +1,11 @@
 import json
 import os
-import matplotlib.pyplot as plt
-import numpy as np
+import plotly.graph_objects as go
 from cryptofeed.symbols import str_to_symbol
 from functools import cmp_to_key
 
-
+AGG = 'avg'
 AGGS = ['absent', 'avg', 'max', 'min', 'p95']
-COLORS = ['r', 'g', 'b', 'c', 'm', 'y', 'k', 'w']
 
 class REResultAnalyzer:
     def __init__(self):
@@ -45,6 +43,20 @@ class REResultAnalyzer:
                 bases.append(symbol.base)
 
         return bases
+
+    def get_metric(self, type, exch, symbol_base, instrument_type, agg):
+        for hash in self.data:
+            payload_config = self.data[hash]['payload_config']
+            exchange = list(payload_config.keys())[0]
+            first_channel = list(payload_config[exchange].keys())[0]
+            symbol_str = payload_config[exchange][first_channel][0]
+            symbol = str_to_symbol(symbol_str)
+            if exch == exchange and symbol.base == symbol_base and symbol.type == instrument_type:
+                if 'metrics' not in self.data[hash]:
+                    raise ValueError(f'No metrics for {exchange}, {instrument_type}, {symbol_base}')
+                return self.data[hash]['metrics'][type]['data-feed-container']['run_duration'][agg][0]
+
+        raise ValueError('Symbol not found')
 
     # groups data by exchange.instrument_type + symbol bases
     def grouped(self):
@@ -106,10 +118,12 @@ class REResultAnalyzer:
                     base2 = y[0]
                 i1 = self.find_item_in_grouped(first_key, base1, grouped)
                 i2 = self.find_item_in_grouped(first_key, base2, grouped)
-                # p95 is last elem, see AGG
-                if float(i1[-1]) < float(i2[-1]):
+                # always use p95 for sorting to keep things consistent
+                # +1 since symbol is first elem
+                _ind = AGGS.index('p95') + 1
+                if float(i1[_ind]) < float(i2[_ind]):
                     return -1
-                elif float(i1[-1]) > float(i2[-1]):
+                elif float(i1[_ind]) > float(i2[_ind]):
                     return 1
                 else:
                     return 0
@@ -118,29 +132,22 @@ class REResultAnalyzer:
 
         sorted_bases = sorted(self.get_all_symbol_bases(), key=make_compare())
         for k in grouped:
-            srtd[k] = list(map(lambda e: int(float(e[-1])/1000.0), sorted(grouped[k], key=make_compare())))
-
-        fig = plt.figure()
-        ax = fig.add_axes([0, 0, 1, 1])
-        X = np.arange(len(srtd.keys()))
-        fig = plt.figure()
-        ax = fig.add_axes([0, 0, 1, 1])
-        width = 0.25
-        accum = 0
-        index = 0
+            # +1 since symbol is first elem
+            _ind = AGGS.index(AGG) + 1
+            srtd[k] = list(map(lambda e: int(float(e[_ind])/1000.0), sorted(grouped[k], key=make_compare())))
+        data = []
         for k in srtd:
-            color = COLORS[index % (len(COLORS))]
-            ax.bar(X + accum, srtd[k], color=color, width=width)
-            accum += width
-            index += 1
-        plt.show()
-
-
+            data.append(go.Bar(name=k, x=sorted_bases, y=srtd[k]))
+        fig = go.Figure(data=data)
+        # Change the bar mode
+        fig.update_layout(barmode='group', title_text=f'Memory consumption (aggregation={AGG})')
+        fig.show()
 
 
 re = REResultAnalyzer()
 re.load_latest_data()
 # print(re.data)
 # print(re.grouped())
-print(re.plot_mem())
+re.plot_mem()
+# print(re.get_metric('metrics_server_mem', 'PHEMEX', 'ETC', 'spot', 'avg'))
 # print(re.get_all_symbol_bases())
