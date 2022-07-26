@@ -12,7 +12,7 @@ class AggregateFunction:
     MAX = 'max'
     MIN = 'min'
     P95 = 'p95'
-    INC = 'inc'
+    P50 = 'p50'
 
     query_functions = {
         ABSENT: lambda metric, duration_s: f'avg_over_time((max(absent({metric})) or vector(0))[{duration_s}s:])',
@@ -20,6 +20,7 @@ class AggregateFunction:
         MAX: lambda metric, duration_s: f'max_over_time({metric}[{duration_s}s])',
         MIN: lambda metric, duration_s: f'min_over_time({metric}[{duration_s}s])',
         P95: lambda metric, duration_s: f'quantile_over_time(0.95, {metric}[{duration_s}s])',
+        P50: lambda metric, duration_s: f'quantile_over_time(0.5, {metric}[{duration_s}s])',
     }
 
 
@@ -122,7 +123,14 @@ def _get_perf_kube_metrics_server_queries(pod_name):
     for container_name in [DATA_FEED_CONTAINER, REDIS_CONTAINER, REDIS_EXPORTER_CONTAINER]:
         for metric_type in [Metrics.MS_CPU, Metrics.MS_MEMORY]:
             metric = Metrics.ms_metrics[metric_type](pod_name, container_name)
-            for agg in [AggregateFunction.ABSENT, AggregateFunction.AVG, AggregateFunction.MIN, AggregateFunction.MAX, AggregateFunction.P95]:
+            for agg in [
+                AggregateFunction.ABSENT,
+                AggregateFunction.AVG,
+                AggregateFunction.MIN,
+                AggregateFunction.MAX,
+                AggregateFunction.P95,
+                AggregateFunction.P50
+            ]:
                 for window in [RUN_ESTIMATION_FOR, 600]: # check different aggregation windows
                     window_key_name = 'run_duration' if window == RUN_ESTIMATION_FOR else (str(window) + 's')
                     metrics[AggregateFunction.query_functions[agg](metric, window)] = [metric_type, container_name, window_key_name, agg]
