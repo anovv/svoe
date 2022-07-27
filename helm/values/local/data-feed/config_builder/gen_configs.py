@@ -1,8 +1,7 @@
-
 import yaml
 import json
 import subprocess
-import os
+import ccxt
 
 from cryptofeed.defines import TICKER, TRADES, L2_BOOK, L3_BOOK, LIQUIDATIONS, OPEN_INTEREST, FUNDING, FUTURES, FX, \
     OPTION, PERPETUAL, SPOT, CALL, PUT, CURRENCY
@@ -10,6 +9,7 @@ from cryptofeed.symbols import Symbols, Symbol
 from cryptofeed.exchanges import EXCHANGE_MAP
 from jinja2 import Template
 from hashlib import sha1
+from functools import cmp_to_key
 
 MASTER_CONFIG = yaml.safe_load(open('master-config.yaml', 'r'))
 BUILD_INFO_LOOKUP = {}
@@ -102,7 +102,7 @@ def build_pod_configs(exchange, exchange_config):
     if has_non_existent_channels:
         raise ValueError(f'Exchange {exchange} has non existent channels')
 
-    symbol_pod_mapping = _distributeSymbols(exchange, symbols, symbol_distribution_strategy)
+    symbol_pod_mapping = _distribute_symbols(exchange, symbols, symbol_distribution_strategy)
     data_feed_config_pod_mapping = []
     for pod_id in symbol_pod_mapping:
         data_feed_config_pod_mapping.append(
@@ -254,19 +254,46 @@ def _build_data_feed_channels_config(symbols, channels, overrides):
     return config
 
 
-def _distributeSymbols(exchange, symbols, strategy):
+def _distribute_symbols(exchange, symbols, strategy):
     dist = {}
+    print(f'Using {strategy} symbol distribution strategy for {exchange}')
+
     if strategy == 'ONE_TO_ONE':
+        # one symbol per pod
         for index, symbol in enumerate(symbols):
             dist[index] = [symbol]
-    elif strategy == 'ONE_THREE_FIVE':
-        # TODO
-        raise ValueError(f'Unsupported pod distribution strategy for {exchange}')
+    elif strategy == 'LARGEST_WITH_SMALLEST':
+        # sorts symbols by trading volume and groups largest with smallest
+        sorted_symbols = _sort_by_binance_usdt_trading_vol(symbols)
+        for i in range(len(sorted_symbols)):
+            j = len(sorted_symbols) - i - 1
+            if i < j:
+                dist[i] = [sorted_symbols[i], sorted_symbols[j]]
+            elif i == j:
+                dist[i] = [sorted_symbols[i]]
+            else:
+                break
     else:
         raise ValueError(f'Unsupported pod distribution strategy for {exchange}')
 
+    print(f'{exchange} dist: {dist}')
     return dist
 
+def _sort_by_binance_usdt_trading_vol(symbols):
+    ccxt_symbols = list(map(lambda s: s.base + '/USDT', symbols))
+    tickers = ccxt.binance().fetch_tickers(symbols=ccxt_symbols)
+
+    def compare(s1, s2):
+        vol1 = int(float(tickers[s1.base + '/USDT']['info']['volume']))
+        vol2 = int(float(tickers[s2.base + '/USDT']['info']['volume']))
+        if vol1 < vol2:
+            return -1
+        elif vol1 > vol2:
+            return 1
+        else:
+            return 0
+
+    return sorted(symbols, key=cmp_to_key(compare))
 
 def _read_symbol_set(exchange_config, field):
     # bases and quotes can be either explicit list of symbols or a reference to symbolSet
