@@ -78,20 +78,23 @@ class Runner:
 if __name__ == '__main__':
     r = Runner()
     sub = [
-        # 'data-feed-binance-futures-perpetual-219409651d-ss',
-        # 'data-feed-binance-futures-perpetual-2c070e8a30-ss',
-        # 'data-feed-binance-futures-perpetual-43c22ede26-ss',
-        # 'data-feed-binance-futures-perpetual-606fa9609b-ss',
-        # 'data-feed-binance-futures-perpetual-76f1efff54-ss',
-        # 'data-feed-bybit-perpetual-239b6f767f-ss',
-        # 'data-feed-bybit-perpetual-27a48cc207-ss',
-        # 'data-feed-bybit-perpetual-5281a0633b-ss',
-        # 'data-feed-binance-spot-6d1641b134-ss',
-        # 'data-feed-binance-spot-eb540d90be-ss',
-        # 'data-feed-binance-spot-18257181b7-ss',
-        # 'data-feed-binance-spot-28150ca2ec-ss',
-        # 'data-feed-binance-spot-2d2a017a56-ss',
-        # 'data-feed-binance-spot-3dd6e42fd0-ss',
-        # 'data-feed-bybit-perpetual-1d2c5c9c38-ss'
+        'data-feed-phemex-spot-0e620c0d95-ss',
+        'data-feed-phemex-spot-32ee898724-ss',
+        'data-feed-phemex-perpetual-078a670ba4-ss',
+        'data-feed-phemex-perpetual-15811a3a1b-ss',
+        'data-feed-kraken-futures-perpetual-13814beedf-ss',
+        'data-feed-kraken-futures-perpetual-17b6ccc73a-ss',
+        'data-feed-gateio-spot-0f6d99f340-ss',
+        'data-feed-gateio-spot-1cda6d1458-ss',
+        'data-feed-ftx-spot-013314981b-ss',
+        'data-feed-ftx-spot-201da94f1e-ss',
+        'data-feed-ftx-perpetual-096c2d8f51-ss',
+        'data-feed-ftx-perpetual-0d579336c0-ss',
+        'data-feed-bybit-perpetual-239b6f767f-ss',
+        'data-feed-bybit-perpetual-27a48cc207-ss',
+        'data-feed-binance-spot-05bbcd15c6-ss',
+        'data-feed-binance-spot-0cb2ff270e-ss',
+        'data-feed-binance-futures-perpetual-219409651d-ss',
+        'data-feed-binance-futures-perpetual-2c070e8a30-ss',
     ]
     r.run(sub)

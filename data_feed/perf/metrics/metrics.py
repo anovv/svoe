@@ -47,11 +47,11 @@ class MetricsFetcher:
 
     # since we call fetcher from remote machine we need to limit number of concurrent connections
     # to keep network bandwidth sane
-    PARALLELISM = 4
+    PARALLELISM = 5
 
     def __init__(self):
         self.executor = concurrent.futures.ThreadPoolExecutor(max_workers=self.PARALLELISM)
-        self.running = True
+        self.is_stopping = False
         self.futures = {}
 
     def fetch_metrics(self, pod_name, payload_config, done_callback):
@@ -83,7 +83,10 @@ class MetricsFetcher:
         metric_value = None
         error = None
         count = 0
-        while self.running and count < retries:
+        while count < retries:
+            if self.is_stopping and count >= 5:
+                # decrease retries when stopping
+                break
             count += 1
             try:
                 error = None
@@ -127,14 +130,14 @@ class MetricsFetcher:
 
     def stop(self):
         print(f'[MetricsFetcher] Stopping...')
-        self.running = False
+        self.is_stopping = True
         try:
-            print(f'[MetricsFetcher] Waiting for running tasks to finish...')
-            for future in concurrent.futures.as_completed(self.futures, timeout=30):
+            print(f'[MetricsFetcher] Waiting for queued metrics to be fetched...')
+            for future in concurrent.futures.as_completed(self.futures, timeout=300):
                 future.result()
-            print(f'[MetricsFetcher] Waiting for running tasks to finish done')
+            print(f'[MetricsFetcher] Waiting for queued metrics to be fetched done')
         except concurrent.futures._base.TimeoutError:
-            print(f'[MetricsFetcher] Waiting for running tasks to finish timeout')
+            print(f'[MetricsFetcher] Waiting for queued metrics to be fetched timeout')
 
         print(f'[MetricsFetcher] Stopped')
 
