@@ -136,7 +136,8 @@ def build_pod_configs(exchange, exchange_config):
             'svoe.name': name,
             'svoe.cluster-id': exchange_config['clusterId'],
             'svoe.data-feed-image-version': exchange_config['dataFeedImageVersion'],
-            'svoe.payload-hash': config['payload_hash']
+            'svoe.payload-hash': config['payload_hash'],
+            'svoe.symbol-distribution': symbol_distribution_strategy,
         }
 
         for s in symbol_pod_mapping[pod_id]:
@@ -278,6 +279,7 @@ def _distribute_symbols(exchange, symbols, strategy):
 
     print(f'{exchange} dist: {dist}')
     return dist
+
 
 def _sort_by_binance_usdt_trading_vol(symbols):
     ccxt_symbols = list(map(lambda s: s.base + '/USDT', symbols))
