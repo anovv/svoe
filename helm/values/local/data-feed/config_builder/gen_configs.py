@@ -14,7 +14,11 @@ from hashlib import sha1
 MASTER_CONFIG = yaml.safe_load(open('master-config.yaml', 'r'))
 BUILD_INFO_LOOKUP = {}
 
-RESOURCE_ESTIMATOR_DATA = json.load(open('../../../../../data_feed/perf/resources-estimation-out/resources-estimation.json', 'r'))
+try:
+    RESOURCE_ESTIMATOR_DATA = json.load(open('../../../../../data_feed/perf/resources-estimation-out/resources-estimation.json', 'r'))
+except:
+    print('Unable to load RESOURCE_ESTIMATOR_DATA')
+    RESOURCE_ESTIMATOR_DATA = {}
 
 def gen_helm_values():
     pod_configs = []

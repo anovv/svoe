@@ -132,7 +132,7 @@ podConfigs:
       svoe.channel.ticker: True
       svoe.channel.l2_book: True
       svoe.channel.trades: True
-      svoe.has-resources: True
+      svoe.has-resources: False
     redis:
       port: 6379
     dataFeed:
@@ -144,12 +144,6 @@ podConfigs:
       prometheus:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_f20c77314c
-      resources:
-        requests:
-          cpu: 319m
-          memory: 375Mi
-        limits:
-          memory: 562Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.3
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
