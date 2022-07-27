@@ -31,6 +31,9 @@ kind: StatefulSet
 metadata:
   labels:
     name: {{ .name }}-ss
+    {{- range $k, $v := .labels }}
+    {{ $k }}: {{ $v | quote }}
+    {{- end }}
   name: {{ .name }}-ss
 spec:
   {{- if .dataFeed.resources }}
