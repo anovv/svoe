@@ -54,8 +54,8 @@ class KubeApi:
         except Exception as e:
             raise e
 
-    def load_pod_names_from_ss(self, subset=None):
-        specs = self.apps_api.list_namespaced_stateful_set(namespace=DATA_FEED_NAMESPACE)
+    def load_pod_names_from_ss(self, subset=None, label_selector=None):
+        specs = self.apps_api.list_namespaced_stateful_set(namespace=DATA_FEED_NAMESPACE, label_selector=label_selector)
         filtered_ss_names = list(map(lambda spec: spec.metadata.name, filter(lambda spec: self.should_estimate(spec), specs.items)))
         if subset is not None and len(subset) > 0:
             filtered_ss_names = list(filter(lambda name: name in subset, filtered_ss_names))

@@ -36,7 +36,7 @@ class Runner:
         self.prom_connection = PromConnection()
         self.running = False
 
-    def run(self, subset=None):
+    def run(self, subset=None, label_selector=None):
         for sig in [signal.SIGINT, signal.SIG_IGN, signal.SIGTERM]:
             signal.signal(sig, self.cleanup)
         self.running = True
@@ -51,7 +51,7 @@ class Runner:
             CHANNEL_NODE_KUBE_EVENTS,
             CHANNEL_DF_POD_OBJECT_EVENTS,
             CHANNEL_DF_POD_KUBE_EVENTS])
-        self.scheduler.run(subset)
+        self.scheduler.run(subset, label_selector)
         self.cleanup()
 
     def cleanup(self, *args):
@@ -77,6 +77,7 @@ class Runner:
 
 if __name__ == '__main__':
     r = Runner()
+    label_selector = 'svoe.exchange in (PHEMEX, BINANCE, BINANCE_FUTURES),svoe.instrument-type in (spot, perpetual)'
     sub = [
         'data-feed-phemex-spot-0e620c0d95-ss',
         'data-feed-phemex-spot-32ee898724-ss',
@@ -97,4 +98,4 @@ if __name__ == '__main__':
         'data-feed-binance-futures-perpetual-219409651d-ss',
         'data-feed-binance-futures-perpetual-2c070e8a30-ss',
     ]
-    r.run(sub)
+    r.run(subset=sub, label_selector=label_selector)

@@ -56,10 +56,10 @@ class Scheduler:
         self.init_work_queue_size = 0
         self.prev_num_pods_done = 0
 
-    def run(self, subset=None):
+    def run(self, subset=None, label_selector=None):
         self.oom_handler.start()
         self.oom_handler_client.run()
-        self.scheduling_state.init_pods_work_queue(self.kube_api.load_pod_names_from_ss(subset))
+        self.scheduling_state.init_pods_work_queue(self.kube_api.load_pod_names_from_ss(subset, label_selector))
         self.init_work_queue_size = len(self.scheduling_state.pods_work_queue)
         print(f'[Scheduler] Scheduling estimation for {self.init_work_queue_size} pods...')
         # TODO tqdm progress
