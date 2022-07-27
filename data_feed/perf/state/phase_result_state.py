@@ -37,11 +37,11 @@ class PhaseResultState:
                 return True
         return False
 
-    def add_result_event(self, pod_name, estimation_result_event_type):
+    def add_result_event(self, pod_name, estimation_result_event_type, data=None):
         event = PodLoggedEvent(
             estimation_result_event_type,
             pod_name, container_name=None,
-            data=None,
+            data=data,
             cluster_time=None, local_time=local_now(),
             raw_event=None
         )
@@ -51,7 +51,7 @@ class PhaseResultState:
             self.result_events_per_pod[pod_name] = [event]
 
         # TODO debug
-        # print(event)
+        print(event)
 
     def get_last_phase_event(self, pod_name):
         if pod_name in self.phase_events_per_pod:
@@ -78,7 +78,7 @@ class PhaseResultState:
             self.phase_events_per_pod[pod_name] = [event]
 
         # TODO debug
-        # print(event)
+        print(event)
 
     def wake_event(self, pod_name, max_retries=300):
         # there can be latency between client and cluster, hence we need to wait for wait_event to appear

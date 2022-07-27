@@ -1,6 +1,7 @@
 import asyncio
 import aiohttp
 import random
+import concurrent.futures
 
 from perf.defines import PROM, RUN_ESTIMATION_FOR, DATA_FEED_CONTAINER, REDIS_CONTAINER, REDIS_EXPORTER_CONTAINER
 from perf.utils import nested_set
@@ -42,66 +43,100 @@ class Metrics:
     # TODO add cadvisor metrics
 
 
-def fetch_metrics(pod_name, payload_config):
-    # this will be called inside pool executor, each in separate thread
-    # hence we need to create a new loop instance for each thread
-    loop = asyncio.new_event_loop()
-    res = loop.run_until_complete(_fetch_metrics_async(pod_name, payload_config))
-    loop.close()
-    return res
+class MetricsFetcher:
 
+    # since we call fetcher from remote machine we need to limit number of concurrent connections
+    # to keep network bandwidth sane
+    PARALLELISM = 4
 
-async def _fetch_metric_async(res, metric_query, location_keys, session):
-    retries = 10
-    retry_timeout_range = (1, 3) # randomly select retry timeout for uniform distribution
-    params = {
-        'query': metric_query,
-    }
-    metric_value = None
-    error = None
-    count = 0
-    while count < retries:
-        count += 1
-        try:
-            error = None
-            async with session.get(PROM + '/api/v1/query', params=params) as response:
-                resp = await response.json()
-                status = resp['status']
-                if status != 'success':
-                    error = resp['error']
-                else:
-                    metric_value = resp['data']['result'][0]['value'][1]
-        except Exception as e:
-            error = e.__class__.__name__ + ': ' + str(e)
+    def __init__(self):
+        self.executor = concurrent.futures.ThreadPoolExecutor(max_workers=self.PARALLELISM)
+        self.running = True
+        self.futures = {}
+
+    def fetch_metrics(self, pod_name, payload_config, done_callback):
+        print(f'[MetricsFetcher] Fetching metrics request submitted for {pod_name}')
+        future = self.executor.submit(
+            self._fetch_metrics,
+            pod_name=pod_name,
+            payload_config=payload_config,
+        )
+
+        future.add_done_callback(done_callback)
+        self.futures[future] = pod_name
+
+    def _fetch_metrics(self, pod_name, payload_config):
+        print(f'[MetricsFetcher] Fetching metrics for {pod_name}')
+        # this will be called inside pool executor, each in separate thread
+        # hence we need to create a new loop instance for each thread
+        loop = asyncio.new_event_loop()
+        res = loop.run_until_complete(self._fetch_metrics_async(pod_name, payload_config))
+        loop.close()
+        return res
+
+    async def _fetch_metric_async(self, res, metric_query, location_keys, session):
+        retries = 10
+        retry_timeout_range = (1, 3) # randomly select retry timeout for uniform distribution
+        params = {
+            'query': metric_query,
+        }
+        metric_value = None
+        error = None
+        count = 0
+        while self.running and count < retries:
+            count += 1
+            try:
+                error = None
+                async with session.get(PROM + '/api/v1/query', params=params) as response:
+                    resp = await response.json()
+                    status = resp['status']
+                    if status != 'success':
+                        error = resp['error']
+                    else:
+                        metric_value = resp['data']['result'][0]['value'][1]
+            except Exception as e:
+                error = e.__class__.__name__ + ': ' + str(e)
+
+            if error:
+                await asyncio.sleep(random.randint(retry_timeout_range[0], retry_timeout_range[1]))
+            else:
+                break
 
         if error:
-            await asyncio.sleep(random.randint(retry_timeout_range[0], retry_timeout_range[1]))
-        else:
-            break
+            res['has_errors'] = True
+        nested_set(res, location_keys, (metric_value, error))
 
-    if error:
-        res['has_errors'] = True
-    nested_set(res, location_keys, (metric_value, error))
+    async def _fetch_metrics_async(self, pod_name, payload_config):
+        health_metrics = _get_data_feed_health_metrics_queries(pod_name, payload_config)
+        perf_metrics = _get_perf_kube_metrics_server_queries(pod_name)
+        metric_queries = {**health_metrics, **perf_metrics}
+        tasks = []
+        res = {}
+        session = aiohttp.ClientSession()
+        for metric_query in metric_queries:
+            location_keys = metric_queries[metric_query]
+            tasks.append(asyncio.ensure_future(self._fetch_metric_async(
+                res,
+                metric_query,
+                location_keys,
+                session
+            )))
+        await asyncio.gather(*tasks)
+        await session.close()
+        return res
 
+    def stop(self):
+        print(f'[MetricsFetcher] Stopping...')
+        self.running = False
+        try:
+            print(f'[MetricsFetcher] Waiting for running tasks to finish...')
+            for future in concurrent.futures.as_completed(self.futures, timeout=30):
+                future.result()
+            print(f'[MetricsFetcher] Waiting for running tasks to finish done')
+        except concurrent.futures._base.TimeoutError:
+            print(f'[MetricsFetcher] Waiting for running tasks to finish timeout')
 
-async def _fetch_metrics_async(pod_name, payload_config):
-    health_metrics = _get_data_feed_health_metrics_queries(pod_name, payload_config)
-    perf_metrics = _get_perf_kube_metrics_server_queries(pod_name)
-    metric_queries = {**health_metrics, **perf_metrics}
-    tasks = []
-    res = {}
-    session = aiohttp.ClientSession()
-    for metric_query in metric_queries:
-        location_keys = metric_queries[metric_query]
-        tasks.append(asyncio.ensure_future(_fetch_metric_async(
-            res,
-            metric_query,
-            location_keys,
-            session
-        )))
-    await asyncio.gather(*tasks)
-    await session.close()
-    return res
+        print(f'[MetricsFetcher] Stopped')
 
 
 def _get_data_feed_health_metrics_queries(pod_name, payload_config):

@@ -12,7 +12,7 @@ REDIS_EXPORTER_CONTAINER = 'redis-exporter'
 NODE_MEMORY_ALLOC_THRESHOLD = 0.75 # do not schedule pods onto node if memory usage is above this
 NODE_NEXT_SCHEDULE_PERIOD = 5 # how long to wait for current pod to run until scheduling next pod
 
-RUN_ESTIMATION_FOR = 300 # how long to run estimation
+RUN_ESTIMATION_FOR = 180 # how long to run estimation
 
 PROM_NAMESPACE = 'monitoring'
 PROM_POD_NAME = 'prometheus-kube-prometheus-stack-prometheus-0'
@@ -24,4 +24,4 @@ REMOTE_SCRIPTS_DS_CONTAINER = 'remote-scripts-runner'
 REMOTE_SCRIPTS_DS_NAMESPACE = 'kube-system'
 REMOTE_SCRIPTS_DS_LABEL_SELECTOR = 'app=remote-scripts'
 
-BULK_SCHEDULE_SIZE = 2 # number of simultanously scheduled pods on a node without checking resourcess
+BULK_SCHEDULE_SIZE = 2 # number of simultaneously scheduled pods on a node without checking resourcess

@@ -1,11 +1,13 @@
-from perf.metrics.metrics import fetch_metrics
+import functools
+
 from perf.state.estimation_state import PodEstimationPhaseEvent, PodEstimationResultEvent, EstimationTimeouts
 from perf.defines import DATA_FEED_CONTAINER, DATA_FEED_NAMESPACE
 
 
 class Estimator:
-    def __init__(self, kube_api, estimation_state, stats):
+    def __init__(self, kube_api, metrics_fetcher, estimation_state, stats):
         self.estimation_state = estimation_state
+        self.metrics_fetcher = metrics_fetcher
         self.stats = stats
         self.kube_api = kube_api
 
@@ -39,17 +41,31 @@ class Estimator:
         if self.estimation_state.get_last_result_event_type(
                 pod_name) == PodEstimationResultEvent.POD_FINISHED_ESTIMATION_RUN:
             # collect metrics
-            print(f'[Estimator] Fetching metrics for {pod_name}')
             self.estimation_state.add_result_event(pod_name, PodEstimationPhaseEvent.COLLECTING_METRICS)
-            metrics = fetch_metrics(pod_name, payload_config)
-            metrics_fetch_result = PodEstimationResultEvent.METRICS_COLLECTED_ALL
-            if 'has_errors' in metrics:
-                metrics_fetch_result = PodEstimationResultEvent.METRICS_COLLECTED_MISSING
 
-            print(f'[Estimator] Done fetching metrics for {pod_name}')
-            # save stats
-            self.stats.add_metrics_to_stats(payload_hash, metrics)
-            self.estimation_state.add_result_event(pod_name, metrics_fetch_result)
+            def done_callback(future, pod_name, payload_hash, stats, estimation_state):
+                metrics_fetch_result = PodEstimationResultEvent.METRICS_COLLECTED_ALL
+                metrics = future.result()
+                if 'has_errors' in metrics:
+                    metrics_fetch_result = PodEstimationResultEvent.METRICS_COLLECTED_MISSING
+
+                # save stats
+                stats.add_metrics_to_stats(payload_hash, metrics)
+                estimation_state.add_result_event(pod_name, metrics_fetch_result)
+                print(f'[MetricsFetcher] Done fetching metrics for {pod_name}')
+
+            self.metrics_fetcher.fetch_metrics(
+                pod_name,
+                payload_config,
+                functools.partial(
+                    done_callback,
+                    pod_name=pod_name,
+                    payload_hash=payload_hash,
+                    stats=self.stats,
+                    estimation_state=self.estimation_state
+                )
+            )
+
 
         # fetch df container logs
         for result_type in [
@@ -62,6 +78,7 @@ class Estimator:
                 logs = self.kube_api.fetch_logs(DATA_FEED_NAMESPACE, pod_name, DATA_FEED_CONTAINER)
                 self.stats.add_df_logs(payload_hash, pod_name, payload_config, logs)
 
+        # reschedule reasons
         for result_type in [
             PodEstimationResultEvent.INTERRUPTED_OOM,
             PodEstimationResultEvent.INTERRUPTED_UNEXPECTED_CONTAINER_TERMINATION,
@@ -69,6 +86,7 @@ class Estimator:
             # TODO This can be result of OOM, extra check in callback?
             PodEstimationResultEvent.INTERRUPTED_DF_CONTAINER_HEALTH_LIVENESS,
             PodEstimationResultEvent.INTERRUPTED_DF_CONTAINER_HEALTH_STARTUP,
+            PodEstimationResultEvent.INTERRUPTED_INTERNAL_ERROR,
         ]:
             if self.estimation_state.has_result_type(pod_name, result_type):
                 return True, result_type
@@ -76,4 +94,3 @@ class Estimator:
         return False, self.estimation_state.get_last_result_event_type(pod_name)
 
         # TODO report started_at, finished_at
-        # TODO report container logs

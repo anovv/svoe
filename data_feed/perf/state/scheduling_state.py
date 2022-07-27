@@ -139,6 +139,16 @@ class SchedulingState(PhaseResultSchedulingState):
                 self.pods_done.append(pod_name)
 
         self.global_lock.release()
+        # TODO handle
+        # exception calling callback for <Future at 0x110fa6760 state=finished returned tuple>
+        # Traceback (most recent call last):
+        #   File "/usr/local/Cellar/python@3.9/3.9.12/Frameworks/Python.framework/Versions/3.9/lib/python3.9/concurrent/futures/_base.py", line 330, in _invoke_callbacks
+        #     callback(self)
+        #   File "/Users/anov/IdeaProjects/svoe/data_feed/perf/scheduler/scheduler.py", line 305, in done_estimation_callback
+        #     self.scheduling_state.reschedule_or_complete(pod_name, reschedule, reason)
+        #   File "/Users/anov/IdeaProjects/svoe/data_feed/perf/state/scheduling_state.py", line 141, in reschedule_or_complete
+        #     self.global_lock.release()
+        # RuntimeError: release unlocked lock
 
     def get_reschedule_reasons(self, pod_name):
         if pod_name not in self.reschedule_events_per_pod:

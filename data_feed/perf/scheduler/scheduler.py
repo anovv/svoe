@@ -13,6 +13,7 @@ from perf.kube_api.utils import cm_name_pod_name
 from perf.scheduler.oom.oom_handler import OOMHandler
 from perf.scheduler.oom.oom_handler_client import OOMHandlerClient
 from perf.utils import local_now
+from perf.metrics.metrics import MetricsFetcher
 
 
 # explanations for node state (schedulable or not)
@@ -29,6 +30,7 @@ class NodeStateReason:
     LAST_POD_NOT_APPEARED = 'LAST_POD_NOT_APPEARED'
     LAST_POD_NOT_IN_ESTIMATING_STATE = 'LAST_POD_NOT_IN_ESTIMATING_STATE'
     NOT_ENOUGH_TIME_SINCE_LAST_POD_STARTED_ESTIMATION = 'NOT_ENOUGH_TIME_SINCE_LAST_POD_STARTED_ESTIMATION'
+    NO_RESOURCE_METRICS = 'NO_RESOURCE_METRICS'
     RESOURCES_METRICS_NOT_FRESH_SINCE_OOM_EVENT = 'RESOURCES_METRICS_NOT_FRESH_SINCE_OOM_EVENT'
     RESOURCES_METRICS_NOT_FRESH_SINCE_LAST_POD_STARTED_ESTIMATION = 'RESOURCES_METRICS_NOT_FRESH_SINCE_LAST_POD_STARTED_ESTIMATION'
 
@@ -40,8 +42,9 @@ class Scheduler:
         self.estimation_state = estimation_state
         self.kube_watcher_state = kube_watcher_state
 
+        self.metrics_fetcher = MetricsFetcher()
         self.stats = stats
-        self.estimator = Estimator(self.kube_api, self.estimation_state, self.stats)
+        self.estimator = Estimator(self.kube_api, self.metrics_fetcher, self.estimation_state, self.stats)
         self.oom_handler = OOMHandler()
         self.oom_handler_client = OOMHandlerClient(self.oom_handler, self.scheduling_state)
 
@@ -104,6 +107,8 @@ class Scheduler:
     def run_estimator(self, pod_name, node_name, priority):
         self.scheduling_state.add_phase_event(pod_name, PodSchedulingPhaseEvent.WAITING_FOR_POD_TO_BE_SCHEDULED)
         payload_config, payload_hash = self.schedule_pod(pod_name, node_name, priority)
+        if payload_hash is None or payload_config is None:
+            return True, self.scheduling_state.get_last_result_event_type(pod_name), None, None
         reschedule, reason = False, None
         if self.running and self.scheduling_state.get_last_result_event_type(pod_name) == PodSchedulingResultEvent.POD_SCHEDULED:
             reschedule, reason = self.estimator.estimate_resources(pod_name, payload_config, payload_hash)
@@ -116,23 +121,41 @@ class Scheduler:
     def schedule_pod(self, pod_name, node_name, priority):
         payload_config = None
         payload_hash = None
-        try:
-            cm_name = cm_name_pod_name(pod_name)
-            payload_config, payload_hash = self.kube_api.get_payload(cm_name)
-            self.kube_api.create_raw_pod(pod_name, node_name, priority)
 
-        except kubernetes.client.exceptions.ApiException as e:
-            if json.loads(e.body)['reason'] == 'AlreadyExists':
-                result = PodSchedulingResultEvent.INTERRUPTED_POD_ALREADY_EXISTS
-                self.scheduling_state.add_result_event(pod_name, result)
-                return payload_config, payload_hash
-            else:
-                # TODO INTERRUPTED_INTERNAL_ERROR -> INTERRUPTED_UNKNOWN_ERROR and add exception to event
-                raise e
-        except Exception as e:
-            # TODO INTERRUPTED_INTERNAL_ERROR -> INTERRUPTED_UNKNOWN_ERROR and add exception to event
-            self.scheduling_state.add_result_event(pod_name, PodSchedulingResultEvent.INTERRUPTED_INTERNAL_ERROR)
-            raise e  # TODO should raise?
+        retries = 6
+        wait = 10
+        success = False
+        retry_count = 0
+        exception = None
+        while self.running and ((not success) and retry_count <= retries):
+            try:
+                cm_name = cm_name_pod_name(pod_name)
+                payload_config, payload_hash = self.kube_api.get_payload(cm_name)
+                self.kube_api.create_raw_pod(pod_name, node_name, priority)
+                success = True
+            except kubernetes.client.exceptions.ApiException as e:
+                if json.loads(e.body)['reason'] == 'AlreadyExists':
+                    result = PodSchedulingResultEvent.INTERRUPTED_POD_ALREADY_EXISTS
+                    self.scheduling_state.add_result_event(pod_name, result)
+                    return payload_config, payload_hash
+                else:
+                    exception = e.__class__.__name__
+                    print(f'Retrying schedule for {pod_name} in {wait}s, reason: {exception}')
+                    time.sleep(wait)
+                    retry_count += 1
+            except Exception as e:
+                exception = e.__class__.__name__
+                print(f'Retrying schedule for {pod_name} in {wait}s, reason: {exception}')
+                time.sleep(wait)
+                retry_count += 1
+
+        if not success:
+            self.scheduling_state.add_result_event(
+                pod_name,
+                PodSchedulingResultEvent.INTERRUPTED_INTERNAL_ERROR,
+                data={'exception': exception}
+            )
+            return None, None
 
         if not self.running:
             # do not wait for confirm when exiting:
@@ -148,20 +171,39 @@ class Scheduler:
 
     def delete_pod(self, pod_name):
         self.scheduling_state.add_phase_event(pod_name, PodSchedulingPhaseEvent.WAITING_FOR_POD_TO_BE_DELETED)
-        try:
-            self.kube_api.delete_raw_pod(pod_name)
-        except kubernetes.client.exceptions.ApiException as e:
-            if json.loads(e.body)['reason'] == 'NotFound':
-                result = PodSchedulingResultEvent.INTERRUPTED_POD_NOT_FOUND
-                self.scheduling_state.add_result_event(pod_name, result)
-                return
-            else:
-                # TODO INTERRUPTED_INTERNAL_ERROR -> INTERRUPTED_UNKNOWN_ERROR and add exception to event
-                raise e
-        except Exception as e:
-            # TODO INTERRUPTED_INTERNAL_ERROR -> INTERRUPTED_UNKNOWN_ERROR and add exception to event
-            self.scheduling_state.add_result_event(pod_name, PodSchedulingResultEvent.INTERRUPTED_INTERNAL_ERROR)
-            raise e  # TODO should raise?
+
+        retries = 3
+        wait = 10
+        success = False
+        retry_count = 0
+        exception = None
+        while (not success) and retry_count <= retries:
+            try:
+                self.kube_api.delete_raw_pod(pod_name)
+                success = True
+            except kubernetes.client.exceptions.ApiException as e:
+                if json.loads(e.body)['reason'] == 'NotFound':
+                    result = PodSchedulingResultEvent.INTERRUPTED_POD_NOT_FOUND
+                    self.scheduling_state.add_result_event(pod_name, result)
+                    return
+                else:
+                    exception = e.__class__.__name__
+                    print(f'Retrying delete for {pod_name} in {wait}s, reason: {exception}')
+                    time.sleep(wait)
+                    retry_count += 1
+            except Exception as e:
+                exception = e.__class__.__name__
+                print(f'Retrying delete for {pod_name} in {wait}s, reason: {exception}')
+                time.sleep(wait)
+                retry_count += 1
+
+        if not success:
+            self.scheduling_state.add_result_event(
+                pod_name,
+                PodSchedulingResultEvent.INTERRUPTED_INTERNAL_ERROR,
+                data={'exception': exception}
+            )
+            return
 
         if not self.running:
             # do not wait for confirm when exiting:
@@ -180,28 +222,29 @@ class Scheduler:
 
     def done_estimation_callback(self, future, pod_name):
         reschedule, reason, payload_hash, payload_config = future.result()
-        self.stats.add_all_df_events(
-            payload_hash,
-            pod_name,
-            self.kube_watcher_state,
-            self.estimation_state,
-            self.scheduling_state
-        )
-        self.stats.add_reschedules(
-            payload_hash,
-            pod_name,
-            self.scheduling_state
-        )
-        self.stats.add_final_result(
-            payload_hash,
-            pod_name,
-            self.estimation_state
-        )
-        self.stats.add_pod_info(
-            payload_hash,
-            pod_name,
-            payload_config
-        )
+        if payload_hash is not None and payload_config is not None:
+            self.stats.add_all_df_events(
+                payload_hash,
+                pod_name,
+                self.kube_watcher_state,
+                self.estimation_state,
+                self.scheduling_state
+            )
+            self.stats.add_reschedules(
+                payload_hash,
+                pod_name,
+                self.scheduling_state
+            )
+            self.stats.add_final_result(
+                payload_hash,
+                pod_name,
+                self.estimation_state
+            )
+            self.stats.add_pod_info(
+                payload_hash,
+                pod_name,
+                payload_config
+            )
         self.clean_states(pod_name)
         self.scheduling_state.reschedule_or_complete(pod_name, reschedule, reason)
 
@@ -211,7 +254,7 @@ class Scheduler:
             print(f'[Scheduler] Progress: {self.prev_num_pods_done}/{self.init_work_queue_size}')
 
     def fetch_nodes_state(self):
-        nodes_state = {} # node to tuple(bool (scedulable or not), reason)
+        nodes_state = {} # node to tuple(bool (schedulable or not), reason)
         nodes = self.kube_api.get_nodes()
         success, nodes_resource_usage = self.kube_api.get_nodes_resource_usage()
         while self.running and not success:
@@ -262,16 +305,12 @@ class Scheduler:
             if int((local_now() - phase_event.local_time).total_seconds()) < NODE_NEXT_SCHEDULE_PERIOD:
                 nodes_state[node_name] = (False, NodeStateReason.NOT_ENOUGH_TIME_SINCE_LAST_POD_STARTED_ESTIMATION)
                 continue
-            # TODO handle spot termination
-            # Traceback (most recent call last):
-            #   File "/Users/anov/IdeaProjects/svoe/data_feed/perf/runner.py", line 90, in <module>
-            #     r.run(sub)
-            #   File "/Users/anov/IdeaProjects/svoe/data_feed/perf/runner.py", line 52, in run
-            #     self.scheduler.run(subset)
-            #   File "/Users/anov/IdeaProjects/svoe/data_feed/perf/scheduler/scheduler.py", line 80, in run
-            #     nodes_state = self.fetch_nodes_state()
-            #   File "/Users/anov/IdeaProjects/svoe/data_feed/perf/scheduler/scheduler.py", line 267, in fetch_nodes_state
-            #     if phase_event.local_time > nodes_resource_usage[node_name]['cluster_timestamp']:
+
+            if node_name not in nodes_resource_usage:
+                # can happen during spot interruption
+                nodes_state[node_name] = (False, NodeStateReason.NO_RESOURCE_METRICS)
+                continue
+
             # resource mertics freshness
             if phase_event.local_time > nodes_resource_usage[node_name]['cluster_timestamp']:
                 nodes_state[node_name] = (False, NodeStateReason.RESOURCES_METRICS_NOT_FRESH_SINCE_LAST_POD_STARTED_ESTIMATION)
@@ -329,6 +368,7 @@ class Scheduler:
         except concurrent.futures._base.TimeoutError:
             print(f'[Scheduler] Waiting for running tasks to finish timeout')
         print(f'[Scheduler] Waiting for OOMHandler to terminate')
+        self.metrics_fetcher.stop()
         self.oom_handler.stop()
         self.oom_handler.join()
         print(f'[Scheduler] OOMHandler terminated')

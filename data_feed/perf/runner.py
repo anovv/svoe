@@ -10,6 +10,7 @@ from perf.state.scheduling_state import SchedulingState
 from perf.callback.pod_callback import PodCallback
 from perf.callback.node_callback import NodeCallback
 from perf.stats.stats import Stats
+from perf.defines import CLUSTER
 
 
 class Runner:
@@ -40,8 +41,9 @@ class Runner:
             signal.signal(sig, self.cleanup)
         self.running = True
         print('[Runner] Started estimator')
-        # TODO start prom connection only for minikube (it uses port-forwarding)
-        # self.prom_connection.start() # blocking
+        if CLUSTER == 'minikube-1':
+            # start prom connection only for minikube (it uses port-forwarding)
+            self.prom_connection.start() # blocking
         if not self.running:
             return
         self.kube_watcher.start([
@@ -76,6 +78,11 @@ class Runner:
 if __name__ == '__main__':
     r = Runner()
     sub = [
+        # 'data-feed-binance-futures-perpetual-219409651d-ss',
+        # 'data-feed-binance-futures-perpetual-2c070e8a30-ss',
+        # 'data-feed-binance-futures-perpetual-43c22ede26-ss',
+        # 'data-feed-binance-futures-perpetual-606fa9609b-ss',
+        # 'data-feed-binance-futures-perpetual-76f1efff54-ss',
         # 'data-feed-bybit-perpetual-239b6f767f-ss',
         # 'data-feed-bybit-perpetual-27a48cc207-ss',
         # 'data-feed-bybit-perpetual-5281a0633b-ss',
