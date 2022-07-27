@@ -21,7 +21,7 @@ exchangeConfigSets:
       dataFeedConfigOverrides: {}
       clusterId: 1
       availabilityZone: a
-      symbolPodDistributionStrategy: LARGEST_WITH_SMALLEST
+      symbolPodDistributionStrategy: EQUAL_BUCKETS
       description: |
         Common configuration for Binance USDT spot top 20
 

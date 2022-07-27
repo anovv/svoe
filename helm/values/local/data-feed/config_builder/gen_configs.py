@@ -261,11 +261,12 @@ def _distribute_symbols(exchange, symbols, strategy):
 
     if strategy == 'ONE_TO_ONE':
         # one symbol per pod
-        for index, symbol in enumerate(symbols):
+        sorted_symbols, _ = _sort_by_binance_usdt_trading_vol(symbols)
+        for index, symbol in enumerate(sorted_symbols):
             dist[index] = [symbol]
     elif strategy == 'LARGEST_WITH_SMALLEST':
         # sorts symbols by trading volume and groups largest with smallest
-        sorted_symbols = _sort_by_binance_usdt_trading_vol(symbols)
+        sorted_symbols, _ = _sort_by_binance_usdt_trading_vol(symbols)
         for i in range(len(sorted_symbols)):
             j = len(sorted_symbols) - i - 1
             if i < j:
@@ -274,6 +275,21 @@ def _distribute_symbols(exchange, symbols, strategy):
                 dist[i] = [sorted_symbols[i]]
             else:
                 break
+    elif strategy == 'EQUAL_BUCKETS':
+        # greedily groups sorted by volume symbols into equal buckets of size no more than largest element
+        sorted_symbols, volumes = _sort_by_binance_usdt_trading_vol(symbols, reverse=True)
+        max_vol = volumes[0]
+        index = 0
+        i = 0
+        while i < len(sorted_symbols):
+            accum = volumes[i]
+            bucket = []
+            while i < len(sorted_symbols) and accum <= max_vol:
+                bucket.append(sorted_symbols[i])
+                accum += volumes[i]
+                i += 1
+            dist[index] = bucket
+            index += 1
     else:
         raise ValueError(f'Unsupported pod distribution strategy for {exchange}')
 
@@ -281,13 +297,14 @@ def _distribute_symbols(exchange, symbols, strategy):
     return dist
 
 
-def _sort_by_binance_usdt_trading_vol(symbols):
+def _sort_by_binance_usdt_trading_vol(symbols, reverse=False):
     ccxt_symbols = list(map(lambda s: s.base + '/USDT', symbols))
     tickers = ccxt.binance().fetch_tickers(symbols=ccxt_symbols)
 
     def compare(s1, s2):
         vol1 = int(float(tickers[s1.base + '/USDT']['info']['volume']))
         vol2 = int(float(tickers[s2.base + '/USDT']['info']['volume']))
+        # TODO figure out > - 1?
         if vol1 < vol2:
             return -1
         elif vol1 > vol2:
@@ -295,7 +312,11 @@ def _sort_by_binance_usdt_trading_vol(symbols):
         else:
             return 0
 
-    return sorted(symbols, key=cmp_to_key(compare))
+    srtd = sorted(symbols, key=cmp_to_key(compare), reverse=reverse)
+    volumes = list(map(lambda s: int(float(tickers[s.base + '/USDT']['info']['volume'])), srtd))
+
+    return srtd, volumes
+
 
 def _read_symbol_set(exchange_config, field):
     # bases and quotes can be either explicit list of symbols or a reference to symbolSet
