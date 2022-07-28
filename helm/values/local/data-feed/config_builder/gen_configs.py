@@ -2,6 +2,7 @@ import yaml
 import json
 import subprocess
 import ccxt
+import numpy as np
 
 from cryptofeed.defines import TICKER, TRADES, L2_BOOK, L3_BOOK, LIQUIDATIONS, OPEN_INTEREST, FUNDING, FUTURES, FX, \
     OPTION, PERPETUAL, SPOT, CALL, PUT, CURRENCY
@@ -261,12 +262,12 @@ def _distribute_symbols(exchange, symbols, strategy):
 
     if strategy == 'ONE_TO_ONE':
         # one symbol per pod
-        sorted_symbols, _ = _sort_by_binance_usdt_trading_vol(symbols)
+        sorted_symbols, _ = _sort_by_binance_usdt_trading_vol(symbols, reverse=True)
         for index, symbol in enumerate(sorted_symbols):
             dist[index] = [symbol]
     elif strategy == 'LARGEST_WITH_SMALLEST':
         # sorts symbols by trading volume and groups largest with smallest
-        sorted_symbols, _ = _sort_by_binance_usdt_trading_vol(symbols)
+        sorted_symbols, _ = _sort_by_binance_usdt_trading_vol(symbols, reverse=True)
         for i in range(len(sorted_symbols)):
             j = len(sorted_symbols) - i - 1
             if i < j:
@@ -276,20 +277,28 @@ def _distribute_symbols(exchange, symbols, strategy):
             else:
                 break
     elif strategy == 'EQUAL_BUCKETS':
-        # greedily groups sorted by volume symbols into equal buckets of size no more than largest element
+        # greedily groups sorted by volume symbols into equal buckets of size no more than thresh
         sorted_symbols, volumes = _sort_by_binance_usdt_trading_vol(symbols, reverse=True)
-        max_vol = volumes[0]
+        limit_per_bucket = 4
+        # thresh = volumes[0] # max value
+        a = np.array(volumes)
+        thresh = np.mean(a) # use mean as threshold
+        dist_sum_vols = {}
         index = 0
         i = 0
         while i < len(sorted_symbols):
-            accum = volumes[i]
-            bucket = []
-            while i < len(sorted_symbols) and accum <= max_vol:
-                bucket.append(sorted_symbols[i])
-                accum += volumes[i]
+            if index not in dist or (dist_sum_vols[index] < thresh and len(dist[index]) < limit_per_bucket):
+                if index not in dist:
+                    dist[index] = [sorted_symbols[i]]
+                    dist_sum_vols[index] = volumes[i]
+                else:
+                    dist[index].append(sorted_symbols[i])
+                    dist_sum_vols[index] += volumes[i]
                 i += 1
-            dist[index] = bucket
-            index += 1
+            else:
+                index += 1
+
+        # print(dist_sum_vols)
     else:
         raise ValueError(f'Unsupported pod distribution strategy for {exchange}')
 
@@ -301,10 +310,10 @@ def _sort_by_binance_usdt_trading_vol(symbols, reverse=False):
     ccxt_symbols = list(map(lambda s: s.base + '/USDT', symbols))
     tickers = ccxt.binance().fetch_tickers(symbols=ccxt_symbols)
 
+    # smallest to largest
     def compare(s1, s2):
-        vol1 = int(float(tickers[s1.base + '/USDT']['info']['volume']))
-        vol2 = int(float(tickers[s2.base + '/USDT']['info']['volume']))
-        # TODO figure out > - 1?
+        vol1 = int(float(tickers[s1.base + '/USDT']['info']['quoteVolume']))
+        vol2 = int(float(tickers[s2.base + '/USDT']['info']['quoteVolume']))
         if vol1 < vol2:
             return -1
         elif vol1 > vol2:
@@ -313,7 +322,7 @@ def _sort_by_binance_usdt_trading_vol(symbols, reverse=False):
             return 0
 
     srtd = sorted(symbols, key=cmp_to_key(compare), reverse=reverse)
-    volumes = list(map(lambda s: int(float(tickers[s.base + '/USDT']['info']['volume'])), srtd))
+    volumes = list(map(lambda s: int(float(tickers[s.base + '/USDT']['info']['quoteVolume'])), srtd))
 
     return srtd, volumes
 
