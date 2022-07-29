@@ -113,18 +113,22 @@ def build_pod_configs(exchange, exchange_config):
     pod_configs = []
     # hashify pod configs:
     for (pod_id, config) in data_feed_config_pod_mapping:
-        # TODO figure out which fields of config are hash-sensitive
-        hash_pod_config = _hash(config)
-        hash_short = _hash_short(hash_pod_config)
-        name = ('data-feed-' + exchange + '-' + instrument_type + '-' + hash_short).lower() # TODO unique name, handle same hash pods
-        name = name.replace('_', '-')
+        # hash sensitive fields
         config['svoe']['instrument_type'] = instrument_type # TODO instrument_extra (strike/expiration/etc)
-        config['svoe']['version'] = hash_pod_config # version is long
-        config['svoe']['hash_short'] = hash_short
-        config['prometheus']['multiproc_dir'] = config['prometheus']['multiproc_dir_prefix'] + '_' + hash_short
         config['svoe']['data_feed_image_version'] = exchange_config['dataFeedImageVersion']
         config['svoe']['cluster_id'] = exchange_config['clusterId']
+        config['svoe']['symbol_distribution'] = symbol_distribution_strategy
         config['build_info'] = _get_build_info(exchange_config['dataFeedImageVersion'])
+
+        hash_pod_config = _hash(config)
+        hash_short = _hash_short(hash_pod_config)
+
+        config['svoe']['version'] = hash_pod_config  # version is long
+        config['svoe']['hash_short'] = hash_short
+        config['prometheus']['multiproc_dir'] = config['prometheus']['multiproc_dir_prefix'] + '_' + hash_short
+
+        name = ('data-feed-' + exchange + '-' + instrument_type + '-' + hash_short).lower() # TODO unique name, handle same hash pods
+        name = name.replace('_', '-')
 
         # config maps to data_feed_config in pod_config
 
