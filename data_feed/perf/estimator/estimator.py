@@ -11,7 +11,7 @@ class Estimator:
         self.stats = stats
         self.kube_api = kube_api
 
-    def estimate_resources(self, pod_name, payload_config, payload_hash):
+    def estimate_resources(self, pod_name, payload):
         for phase, result, timeout in [
             (PodEstimationPhaseEvent.WAITING_FOR_DF_CONTAINER_TO_PULL_IMAGE,
              PodEstimationResultEvent.DF_CONTAINER_IMAGE_PULLED, EstimationTimeouts.DF_CONTAINER_PULL_IMAGE_TIMEOUT),
@@ -43,29 +43,28 @@ class Estimator:
             # collect metrics
             self.estimation_state.add_result_event(pod_name, PodEstimationPhaseEvent.COLLECTING_METRICS)
 
-            def done_callback(future, pod_name, payload_hash, stats, estimation_state):
+            def done_callback(future, pod_name, payload, stats, estimation_state):
                 metrics_fetch_result = PodEstimationResultEvent.METRICS_COLLECTED_ALL
                 metrics = future.result()
                 if 'has_errors' in metrics:
                     metrics_fetch_result = PodEstimationResultEvent.METRICS_COLLECTED_MISSING
 
                 # save stats
-                stats.add_metrics_to_stats(payload_hash, metrics)
+                stats.add_metrics_to_stats(payload, metrics)
                 estimation_state.add_result_event(pod_name, metrics_fetch_result)
                 print(f'[MetricsFetcher] Done fetching metrics for {pod_name}')
 
             self.metrics_fetcher.fetch_metrics(
                 pod_name,
-                payload_config,
+                payload,
                 functools.partial(
                     done_callback,
                     pod_name=pod_name,
-                    payload_hash=payload_hash,
+                    payload=payload,
                     stats=self.stats,
                     estimation_state=self.estimation_state
                 )
             )
-
 
         # fetch df container logs
         for result_type in [
@@ -74,9 +73,9 @@ class Estimator:
             PodEstimationResultEvent.INTERRUPTED_DF_CONTAINER_HEALTH_STARTUP,
         ]:
             if self.estimation_state.has_result_type(pod_name, result_type) \
-                    and self.stats.should_fetch_df_logs(pod_name, payload_config):
+                    and self.stats.should_fetch_df_logs(payload, pod_name):
                 logs = self.kube_api.fetch_logs(DATA_FEED_NAMESPACE, pod_name, DATA_FEED_CONTAINER)
-                self.stats.add_df_logs(payload_hash, pod_name, payload_config, logs)
+                self.stats.add_df_logs(payload, pod_name, logs)
 
         # reschedule reasons
         for result_type in [

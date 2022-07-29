@@ -5,6 +5,7 @@ import concurrent.futures
 
 from perf.defines import PROM, RUN_ESTIMATION_FOR, DATA_FEED_CONTAINER, REDIS_CONTAINER, REDIS_EXPORTER_CONTAINER
 from perf.utils import nested_set
+from perf.kube_api.utils import get_payload_config
 
 
 class AggregateFunction:
@@ -54,8 +55,9 @@ class MetricsFetcher:
         self.is_stopping = False
         self.futures = {}
 
-    def fetch_metrics(self, pod_name, payload_config, done_callback):
+    def fetch_metrics(self, pod_name, payload, done_callback):
         print(f'[MetricsFetcher] Fetching metrics request submitted for {pod_name}')
+        payload_config = get_payload_config(payload)
         future = self.executor.submit(
             self._fetch_metrics,
             pod_name=pod_name,

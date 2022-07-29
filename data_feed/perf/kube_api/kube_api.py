@@ -7,7 +7,7 @@ from perf.utils import parse_timestamp_string
 from perf.defines import CLUSTER, \
     DATA_FEED_CONTAINER, DATA_FEED_CM_CONFIG_NAME, DATA_FEED_NAMESPACE, \
     REMOTE_SCRIPTS_DS_CONTAINER, REMOTE_SCRIPTS_DS_NAMESPACE, REMOTE_SCRIPTS_DS_LABEL_SELECTOR
-from perf.kube_api.utils import cm_name_pod_name, ss_name_from_pod_name, pod_name_from_ss_name
+from perf.kube_api.utils import ss_name_from_pod_name, pod_name_from_ss_name
 from perf.kube_api.resource_convert import ResourceConvert
 
 
@@ -159,8 +159,7 @@ class KubeApi:
 
     def get_payload(self, cm_name):
         cm = self.core_api.read_namespaced_config_map(cm_name, DATA_FEED_NAMESPACE)
-        conf = yaml.load(cm.data[DATA_FEED_CM_CONFIG_NAME], Loader=yaml.SafeLoader)
-        return conf['payload_config'], conf['payload_hash']
+        return yaml.load(cm.data[DATA_FEED_CM_CONFIG_NAME], Loader=yaml.SafeLoader)
 
     @staticmethod
     def should_estimate(spec):

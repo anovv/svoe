@@ -3,6 +3,7 @@ import datetime
 import os
 
 from perf.defines import DATA_FEED_CONTAINER
+from perf.kube_api.utils import get_payload_config, get_payload_hash
 
 
 # class to collect statistics about estimation runs
@@ -11,18 +12,21 @@ class Stats:
         self.stats = {}
         self.logs = {}
 
-    def add_pod_info(self, payload_hash, pod_name, payload_config):
+    def add_pod_info(self, payload, pod_name):
+        payload_config = get_payload_config(payload)
+        payload_hash = get_payload_hash(payload)
         if payload_hash not in self.stats:
             self.stats[payload_hash] = {}
         self.stats[payload_hash]['pod_name'] = pod_name
         self.stats[payload_hash]['payload_config'] = payload_config
 
-    def add_metrics_to_stats(self, payload_hash, metrics_results):
+    def add_metrics_to_stats(self, payload, metrics_results):
+        payload_hash = get_payload_hash(payload)
         if payload_hash not in self.stats:
             self.stats[payload_hash] = {}
         self.stats[payload_hash]['metrics'] = metrics_results
 
-    def add_all_df_events(self, payload_hash, pod_name, kube_watcher_state, estimation_state, scheduling_state):
+    def add_all_df_events(self, payload, pod_name, kube_watcher_state, estimation_state, scheduling_state):
         events = []
         if pod_name in kube_watcher_state.event_queues_per_pod:
             events.extend(kube_watcher_state.event_queues_per_pod[pod_name].queue)
@@ -39,27 +43,33 @@ class Stats:
             filter(lambda event: event.container_name is None or event.container_name == DATA_FEED_CONTAINER, events))
         events = list(map(lambda event: str(event), events))
 
+        payload_hash = get_payload_hash(payload)
         if payload_hash not in self.stats:
             self.stats[payload_hash] = {}
         self.stats[payload_hash]['events'] = events
 
-    def add_final_result(self, payload_hash, pod_name, estimation_state):
+    def add_final_result(self, payload, pod_name, estimation_state):
+        payload_hash = get_payload_hash(payload)
         if payload_hash not in self.stats:
             self.stats[payload_hash] = {}
         self.stats[payload_hash]['final_result'] = estimation_state.get_last_result_event_type(pod_name)
 
-    def add_reschedules(self, payload_hash, pod_name, scheduling_state):
+    def add_reschedules(self, payload, pod_name, scheduling_state):
+        payload_hash = get_payload_hash(payload)
         if payload_hash not in self.stats:
             self.stats[payload_hash] = {}
         self.stats[payload_hash]['reschedule_reasons'] = scheduling_state.get_reschedule_reasons(pod_name)
 
-    def should_fetch_df_logs(self, pod_name, payload_config):
+    def should_fetch_df_logs(self, payload, pod_name):
+        payload_config = get_payload_config(payload)
         exchange, instrument_type = self._get_logs_key(pod_name, payload_config)
         return exchange not in self.logs \
                or instrument_type not in self.logs[exchange] \
                or len(self.logs[exchange][instrument_type]) < 2 # max 2 log files per exchange+instrument_type
 
-    def add_df_logs(self, payload_hash, pod_name, payload_config, logs):
+    def add_df_logs(self, payload, pod_name, logs):
+        payload_config = get_payload_config(payload)
+        payload_hash = get_payload_hash(payload)
         exchange, instrument_type = self._get_logs_key(pod_name, payload_config)
         log_file_local_name = pod_name + '.log'
         if exchange not in self.logs:

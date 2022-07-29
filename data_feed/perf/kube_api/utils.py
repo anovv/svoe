@@ -10,3 +10,10 @@ def ss_name_from_pod_name(pod_name):
 
 def cm_name_pod_name(pod_name):
     return pod_name + '-cm'
+
+
+def get_payload_config(payload):
+    return payload['payload_config']
+
+def get_payload_hash(payload):
+    return payload['payload_hash']
