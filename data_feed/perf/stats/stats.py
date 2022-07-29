@@ -19,6 +19,10 @@ class Stats:
             self.stats[payload_hash] = {}
         self.stats[payload_hash]['pod_name'] = pod_name
         self.stats[payload_hash]['payload_config'] = payload_config
+        if 'symbol_distribution' in payload['svoe']:
+            self.stats[payload_hash]['symbol_distribution'] = payload['svoe']['symbol_distribution']
+        else:
+            self.stats[payload_hash]['symbol_distribution'] = 'UNKNOWN_SYMBOL_DISTRIBUTION'
 
     def add_metrics_to_stats(self, payload, metrics_results):
         payload_hash = get_payload_hash(payload)
