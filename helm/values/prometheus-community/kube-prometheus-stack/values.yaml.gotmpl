@@ -172,7 +172,7 @@ prometheus:
         {{ if (eq .Values.clusterType "minikube") }}
         memory: 1Gi
         {{ else }}
-        memory: 3Gi
+        memory: 4Gi
         {{ end }}
       requests:
         cpu: 100m
