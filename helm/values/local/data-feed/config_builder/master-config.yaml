@@ -11,7 +11,7 @@ exchangeConfigSets:
         quotes: []
         bases: [BSV]
       channels: [ticker, l2_book, trades]
-      dataFeedImageVersion: 1.0.3 # sync with data_feed/ci
+      dataFeedImageVersion: 1.0.4 # sync with data_feed/ci
       channelsConfigOverrides:
         l2_book:
           max_depth: 20
@@ -25,17 +25,16 @@ exchangeConfigSets:
       description: |
         Common configuration for Binance USDT spot top 20
 
-  BINANCE_FUTURES:
-    - instrumentType: perpetual
+    - instrumentType: spot
       symbolSets:
         quotes: [USDT]
         bases: TOP_20
       symbols: [] # map of -base -quote
       excludes:
         quotes: []
-        bases: [SHIB, BSV]
-      channels: [ticker, l2_book, trades, liquidations, open_interest, funding]
-      dataFeedImageVersion: 1.0.3 # sync with data_feed/ci
+        bases: [BSV]
+      channels: [ticker, l2_book, trades]
+      dataFeedImageVersion: 1.0.4 # sync with data_feed/ci
       channelsConfigOverrides:
         l2_book:
           max_depth: 20
@@ -46,6 +45,100 @@ exchangeConfigSets:
       clusterId: 1
       availabilityZone: a
       symbolPodDistributionStrategy: ONE_TO_ONE
+      description: |
+        Common configuration for Binance USDT spot top 20
+
+    - instrumentType: spot
+      symbolSets:
+        quotes: [USDT]
+        bases: TOP_20
+      symbols: [] # map of -base -quote
+      excludes:
+        quotes: []
+        bases: [BSV]
+      channels: [ticker, l2_book, trades]
+      dataFeedImageVersion: 1.0.4 # sync with data_feed/ci
+      channelsConfigOverrides:
+        l2_book:
+          max_depth: 20
+          book_delta: true
+      exchangeConfigOverrides: # TODO snapshot_interval ?
+        retries: -1
+      dataFeedConfigOverrides: {}
+      clusterId: 1
+      availabilityZone: a
+      symbolPodDistributionStrategy: LARGEST_WITH_SMALLEST
+      description: |
+        Common configuration for Binance USDT spot top 20
+
+  BINANCE_FUTURES:
+    - instrumentType: perpetual
+      symbolSets:
+        quotes: [USDT]
+        bases: TOP_20
+      symbols: [] # map of -base -quote
+      excludes:
+        quotes: []
+        bases: [SHIB, BSV]
+      channels: [ticker, l2_book, trades, liquidations, open_interest, funding]
+      dataFeedImageVersion: 1.0.4 # sync with data_feed/ci
+      channelsConfigOverrides:
+        l2_book:
+          max_depth: 20
+          book_delta: true
+      exchangeConfigOverrides: # TODO snapshot_interval ?
+        retries: -1
+      dataFeedConfigOverrides: {}
+      clusterId: 1
+      availabilityZone: a
+      symbolPodDistributionStrategy: ONE_TO_ONE
+      description: |
+        Common configuration for Binance Futures USDT perpetual top 20
+
+    - instrumentType: perpetual
+      symbolSets:
+        quotes: [USDT]
+        bases: TOP_20
+      symbols: [] # map of -base -quote
+      excludes:
+        quotes: []
+        bases: [SHIB, BSV]
+      channels: [ticker, l2_book, trades, liquidations, open_interest, funding]
+      dataFeedImageVersion: 1.0.4 # sync with data_feed/ci
+      channelsConfigOverrides:
+        l2_book:
+          max_depth: 20
+          book_delta: true
+      exchangeConfigOverrides: # TODO snapshot_interval ?
+        retries: -1
+      dataFeedConfigOverrides: {}
+      clusterId: 1
+      availabilityZone: a
+      symbolPodDistributionStrategy: LARGEST_WITH_SMALLEST
+      description: |
+        Common configuration for Binance Futures USDT perpetual top 20
+
+
+    - instrumentType: perpetual
+      symbolSets:
+        quotes: [USDT]
+        bases: TOP_20
+      symbols: [] # map of -base -quote
+      excludes:
+        quotes: []
+        bases: [SHIB, BSV]
+      channels: [ticker, l2_book, trades, liquidations, open_interest, funding]
+      dataFeedImageVersion: 1.0.4 # sync with data_feed/ci
+      channelsConfigOverrides:
+        l2_book:
+          max_depth: 20
+          book_delta: true
+      exchangeConfigOverrides: # TODO snapshot_interval ?
+        retries: -1
+      dataFeedConfigOverrides: {}
+      clusterId: 1
+      availabilityZone: a
+      symbolPodDistributionStrategy: EQUAL_BUCKETS
       description: |
         Common configuration for Binance Futures USDT perpetual top 20
   BYBIT:
@@ -60,7 +153,7 @@ exchangeConfigSets:
         bases: [SHIB]
         symbols: []
       channels: [l2_book, trades, liquidations, open_interest, funding]
-      dataFeedImageVersion: 1.0.3 # sync with data_feed/ci
+      dataFeedImageVersion: 1.0.4 # sync with data_feed/ci
       channelsConfigOverrides:
         l2_book:
           max_depth: 20
@@ -84,7 +177,7 @@ exchangeConfigSets:
         bases: [ADA, MATIC, XLM, ETC, VET, EOS, FIL, SHIB, BSV]
         symbols: []
       channels: [ticker, l2_book, trades]
-      dataFeedImageVersion: 1.0.3 # sync with data_feed/ci
+      dataFeedImageVersion: 1.0.4 # sync with data_feed/ci
       channelsConfigOverrides:
         l2_book:
           max_depth: 20
@@ -108,7 +201,7 @@ exchangeConfigSets:
         bases: []
         symbols: []
       channels: [ticker, l2_book, trades, liquidations, open_interest, funding]
-      dataFeedImageVersion: 1.0.3 # sync with data_feed/ci
+      dataFeedImageVersion: 1.0.4 # sync with data_feed/ci
       channelsConfigOverrides:
         l2_book:
           max_depth: 20
@@ -132,7 +225,7 @@ exchangeConfigSets:
         bases: []
         symbols: []
       channels: [ticker, l2_book, trades]
-      dataFeedImageVersion: 1.0.3 # sync with data_feed/ci
+      dataFeedImageVersion: 1.0.4 # sync with data_feed/ci
       channelsConfigOverrides:
         l2_book:
           max_depth: 20
@@ -157,7 +250,7 @@ exchangeConfigSets:
         bases: [VET, BSV]
         symbols: []
       channels: [l2_book, trades]
-      dataFeedImageVersion: 1.0.3 # sync with data_feed/ci
+      dataFeedImageVersion: 1.0.4 # sync with data_feed/ci
       channelsConfigOverrides:
         l2_book:
           max_depth: 20
@@ -181,7 +274,7 @@ exchangeConfigSets:
         bases: [VET, SHIB, BSV]
         symbols: []
       channels: [l2_book, trades]
-      dataFeedImageVersion: 1.0.3 # sync with data_feed/ci
+      dataFeedImageVersion: 1.0.4 # sync with data_feed/ci
       channelsConfigOverrides:
         l2_book:
           max_depth: 20
@@ -193,7 +286,103 @@ exchangeConfigSets:
       availabilityZone: a
       symbolPodDistributionStrategy: ONE_TO_ONE
       description: |
-        Common configuration for Kraken Futures perp USDT top 20
+        Common configuration for Phemex perp USDT top 20
+
+    - instrumentType: spot
+      symbolSets:
+        quotes: [USDT]
+        bases: TOP_20
+      symbols: []
+      excludes:
+        quotes: []
+        bases: [VET, BSV]
+        symbols: []
+      channels: [l2_book, trades]
+      dataFeedImageVersion: 1.0.4 # sync with data_feed/ci
+      channelsConfigOverrides:
+        l2_book:
+          max_depth: 20
+          book_delta: true
+      exchangeConfigOverrides:
+        retries: -1
+      dataFeedConfigOverrides: {}
+      clusterId: 1
+      availabilityZone: a
+      symbolPodDistributionStrategy: LARGEST_WITH_SMALLEST
+      description: |
+        Common configuration for PHEMEX spot USDT top 20
+
+    - instrumentType: perpetual
+      symbolSets:
+        quotes: [USD]
+        bases: TOP_20
+      symbols: []
+      excludes:
+        quotes: []
+        bases: [VET, SHIB, BSV]
+        symbols: []
+      channels: [l2_book, trades]
+      dataFeedImageVersion: 1.0.4 # sync with data_feed/ci
+      channelsConfigOverrides:
+        l2_book:
+          max_depth: 20
+          book_delta: true
+      exchangeConfigOverrides:
+        retries: -1
+      dataFeedConfigOverrides: {}
+      clusterId: 1
+      availabilityZone: a
+      symbolPodDistributionStrategy: LARGEST_WITH_SMALLEST
+      description: |
+        Common configuration for Phemex perp USDT top 20
+
+    - instrumentType: spot
+      symbolSets:
+        quotes: [USDT]
+        bases: TOP_20
+      symbols: []
+      excludes:
+        quotes: []
+        bases: [VET, BSV]
+        symbols: []
+      channels: [l2_book, trades]
+      dataFeedImageVersion: 1.0.4 # sync with data_feed/ci
+      channelsConfigOverrides:
+        l2_book:
+          max_depth: 20
+          book_delta: true
+      exchangeConfigOverrides:
+        retries: -1
+      dataFeedConfigOverrides: {}
+      clusterId: 1
+      availabilityZone: a
+      symbolPodDistributionStrategy: EQUAL_BUCKETS
+      description: |
+        Common configuration for PHEMEX spot USDT top 20
+
+    - instrumentType: perpetual
+      symbolSets:
+        quotes: [USD]
+        bases: TOP_20
+      symbols: []
+      excludes:
+        quotes: []
+        bases: [VET, SHIB, BSV]
+        symbols: []
+      channels: [l2_book, trades]
+      dataFeedImageVersion: 1.0.4 # sync with data_feed/ci
+      channelsConfigOverrides:
+        l2_book:
+          max_depth: 20
+          book_delta: true
+      exchangeConfigOverrides:
+        retries: -1
+      dataFeedConfigOverrides: {}
+      clusterId: 1
+      availabilityZone: a
+      symbolPodDistributionStrategy: EQUAL_BUCKETS
+      description: |
+        Common configuration for Phemex perp USDT top 20
 
   KRAKEN_FUTURES:
     - instrumentType: perpetual
@@ -206,7 +395,7 @@ exchangeConfigSets:
         bases: [BNB, DOGE, LINK, MATIC, ETC, VET, SHIB, BSV]
         symbols: []
       channels: [ticker, l2_book, trades, open_interest, funding]
-      dataFeedImageVersion: 1.0.3 # sync with data_feed/ci
+      dataFeedImageVersion: 1.0.4 # sync with data_feed/ci
       channelsConfigOverrides:
         l2_book:
           max_depth: 20
