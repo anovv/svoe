@@ -77,7 +77,8 @@ class Runner:
 
 if __name__ == '__main__':
     r = Runner()
-    label_selector = 'svoe.exchange in (PHEMEX, BINANCE, BINANCE_FUTURES),svoe.instrument-type in (spot, perpetual)'
+    # TODO sort statefulsets by symbol-distribution to not have same exchange pods at the same time
+    label_selector = 'svoe.exchange in (PHEMEX, BINANCE, BINANCE_FUTURES),svoe.instrument-type in (spot, perpetual),svoe.symbol-distribution in (ONE_TO_ONE, LARGEST_WITH_SMALLEST, EQUAL_BUCKETS)'
     sub = [
         'data-feed-phemex-spot-0e620c0d95-ss',
         'data-feed-phemex-spot-32ee898724-ss',
@@ -98,4 +99,4 @@ if __name__ == '__main__':
         'data-feed-binance-futures-perpetual-219409651d-ss',
         'data-feed-binance-futures-perpetual-2c070e8a30-ss',
     ]
-    r.run(subset=sub, label_selector=label_selector)
+    r.run(subset=[], label_selector=label_selector)

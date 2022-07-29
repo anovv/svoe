@@ -2,6 +2,7 @@ import asyncio
 import aiohttp
 import random
 import concurrent.futures
+import time
 
 from perf.defines import PROM, RUN_ESTIMATION_FOR, DATA_FEED_CONTAINER, REDIS_CONTAINER, REDIS_EXPORTER_CONTAINER
 from perf.utils import nested_set
@@ -17,12 +18,12 @@ class AggregateFunction:
     P50 = 'p50'
 
     query_functions = {
-        ABSENT: lambda metric, duration_s: f'avg_over_time((max(absent({metric})) or vector(0))[{duration_s}s:])',
-        AVG: lambda metric, duration_s: f'avg_over_time({metric}[{duration_s}s])',
-        MAX: lambda metric, duration_s: f'max_over_time({metric}[{duration_s}s])',
-        MIN: lambda metric, duration_s: f'min_over_time({metric}[{duration_s}s])',
-        P95: lambda metric, duration_s: f'quantile_over_time(0.95, {metric}[{duration_s}s])',
-        P50: lambda metric, duration_s: f'quantile_over_time(0.5, {metric}[{duration_s}s])',
+        ABSENT: lambda metric, duration_s, offset_s: f'avg_over_time((max(absent({metric})) or vector(0))[{duration_s}s:] offset {offset_s}s)',
+        AVG: lambda metric, duration_s, offset_s: f'avg_over_time({metric}[{duration_s}s] offset {offset_s}s)',
+        MAX: lambda metric, duration_s, offset_s: f'max_over_time({metric}[{duration_s}s] offset {offset_s}s)',
+        MIN: lambda metric, duration_s, offset_s: f'min_over_time({metric}[{duration_s}s] offset {offset_s}s)',
+        P95: lambda metric, duration_s, offset_s: f'quantile_over_time(0.95, {metric}[{duration_s}s] offset {offset_s}s)',
+        P50: lambda metric, duration_s, offset_s: f'quantile_over_time(0.5, {metric}[{duration_s}s] offset {offset_s}s)',
     }
 
 
@@ -55,24 +56,29 @@ class MetricsFetcher:
         self.is_stopping = False
         self.futures = {}
 
-    def fetch_metrics(self, pod_name, payload, done_callback):
+    def submit_fetch_metrics_request(self, pod_name, payload, done_callback):
         print(f'[MetricsFetcher] Fetching metrics request submitted for {pod_name}')
         payload_config = get_payload_config(payload)
+        request_time = time.time()
         future = self.executor.submit(
             self._fetch_metrics,
             pod_name=pod_name,
             payload_config=payload_config,
+            request_time=request_time
         )
 
         future.add_done_callback(done_callback)
         self.futures[future] = pod_name
 
-    def _fetch_metrics(self, pod_name, payload_config):
+    # TODO add start-end time to fetch at the moment of submition
+    def _fetch_metrics(self, pod_name, payload_config, request_time):
+        if self.is_stopping:
+            return None
         print(f'[MetricsFetcher] Fetching metrics for {pod_name}')
         # this will be called inside pool executor, each in separate thread
         # hence we need to create a new loop instance for each thread
         loop = asyncio.new_event_loop()
-        res = loop.run_until_complete(self._fetch_metrics_async(pod_name, payload_config))
+        res = loop.run_until_complete(self._fetch_metrics_async(pod_name, payload_config, request_time))
         loop.close()
         return res
 
@@ -111,9 +117,10 @@ class MetricsFetcher:
             res['has_errors'] = True
         nested_set(res, location_keys, (metric_value, error))
 
-    async def _fetch_metrics_async(self, pod_name, payload_config):
-        health_metrics = _get_data_feed_health_metrics_queries(pod_name, payload_config)
-        perf_metrics = _get_perf_kube_metrics_server_queries(pod_name)
+    async def _fetch_metrics_async(self, pod_name, payload_config, request_time):
+        offset = time.time() - request_time
+        health_metrics = _get_data_feed_health_metrics_queries(pod_name, payload_config, offset)
+        perf_metrics = _get_perf_kube_metrics_server_queries(pod_name, offset)
         metric_queries = {**health_metrics, **perf_metrics}
         tasks = []
         res = {}
@@ -141,10 +148,12 @@ class MetricsFetcher:
         except concurrent.futures._base.TimeoutError:
             print(f'[MetricsFetcher] Waiting for queued metrics to be fetched timeout')
 
+        print(f'[MetricsFetcher] Shutting down executor...')
+        self.executor.shutdown(wait=True)
         print(f'[MetricsFetcher] Stopped')
 
 
-def _get_data_feed_health_metrics_queries(pod_name, payload_config):
+def _get_data_feed_health_metrics_queries(pod_name, payload_config, offset):
     metrics = {}
     for exchange in payload_config:
         # TODO decide channel/data_type naming
@@ -152,12 +161,12 @@ def _get_data_feed_health_metrics_queries(pod_name, payload_config):
             for symbol in payload_config[exchange][data_type]:
                 metric_health = Metrics.df_health_metrics[Metrics.DATA_FEED_HEALTH](exchange, data_type, symbol)
                 for agg in [AggregateFunction.ABSENT, AggregateFunction.AVG]:
-                    metrics[AggregateFunction.query_functions[agg](metric_health, RUN_ESTIMATION_FOR)] = [Metrics.DATA_FEED_HEALTH, data_type, symbol, agg]
+                    metrics[AggregateFunction.query_functions[agg](metric_health, RUN_ESTIMATION_FOR, offset)] = [Metrics.DATA_FEED_HEALTH, data_type, symbol, agg]
 
     return metrics
 
 
-def _get_perf_kube_metrics_server_queries(pod_name):
+def _get_perf_kube_metrics_server_queries(pod_name, offset):
     # https://github.com/olxbr/metrics-server-exporter to export metrics-server to prometheus
     metrics = {}
     for container_name in [DATA_FEED_CONTAINER, REDIS_CONTAINER, REDIS_EXPORTER_CONTAINER]:
@@ -173,6 +182,6 @@ def _get_perf_kube_metrics_server_queries(pod_name):
             ]:
                 for window in [RUN_ESTIMATION_FOR, 600]: # check different aggregation windows
                     window_key_name = 'run_duration' if window == RUN_ESTIMATION_FOR else (str(window) + 's')
-                    metrics[AggregateFunction.query_functions[agg](metric, window)] = [metric_type, container_name, window_key_name, agg]
+                    metrics[AggregateFunction.query_functions[agg](metric, window, offset)] = [metric_type, container_name, window_key_name, agg]
 
     return metrics

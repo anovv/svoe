@@ -46,15 +46,15 @@ class Estimator:
             def done_callback(future, pod_name, payload, stats, estimation_state):
                 metrics_fetch_result = PodEstimationResultEvent.METRICS_COLLECTED_ALL
                 metrics = future.result()
-                if 'has_errors' in metrics:
+                if metrics is None or 'has_errors' in metrics:
                     metrics_fetch_result = PodEstimationResultEvent.METRICS_COLLECTED_MISSING
 
                 # save stats
                 stats.add_metrics_to_stats(payload, metrics)
                 estimation_state.add_result_event(pod_name, metrics_fetch_result)
-                print(f'[MetricsFetcher] Done fetching metrics for {pod_name}')
+                print(f'[MetricsFetcher] Done fetching metrics for {pod_name}, {metrics_fetch_result}')
 
-            self.metrics_fetcher.fetch_metrics(
+            self.metrics_fetcher.submit_fetch_metrics_request(
                 pod_name,
                 payload,
                 functools.partial(

@@ -25,6 +25,8 @@ class Stats:
             self.stats[payload_hash]['symbol_distribution'] = 'UNKNOWN_SYMBOL_DISTRIBUTION'
 
     def add_metrics_to_stats(self, payload, metrics_results):
+        if metrics_results is None:
+            return
         payload_hash = get_payload_hash(payload)
         if payload_hash not in self.stats:
             self.stats[payload_hash] = {}
