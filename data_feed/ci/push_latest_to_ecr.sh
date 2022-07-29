@@ -3,7 +3,7 @@
 # TODO move these to terraform config?
 # manually increase on each push
 # update changelog
-LATEST_VERSION="1.0.3"
+LATEST_VERSION="1.0.4"
 SVOE_DATA_FEED_PROD_LOCAL_DOCKER_IMAGE_NAME="svoe_data_feed_prod"
 LATEST_VERSION_TAG="v${LATEST_VERSION}"
 

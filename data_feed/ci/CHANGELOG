@@ -11,3 +11,6 @@
     - Connection health metric
   * Cryptostore:
     - Disable config versioning for ENV=TESTING
+1.0.4
+  * Cryptostore:
+    - Unique store data version for ENV=TESTING
