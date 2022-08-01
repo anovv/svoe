@@ -36,7 +36,7 @@ class NodeStateReason:
 
 
 class Scheduler:
-    def __init__(self, kube_api, scheduling_state, estimation_state, kube_watcher_state, stats):
+    def __init__(self, kube_api, scheduling_state, estimation_state, kube_watcher_state, stats, enable_oom_handler):
         self.kube_api = kube_api
         self.scheduling_state = scheduling_state
         self.estimation_state = estimation_state
@@ -45,8 +45,10 @@ class Scheduler:
         self.metrics_fetcher = MetricsFetcher()
         self.stats = stats
         self.estimator = Estimator(self.kube_api, self.metrics_fetcher, self.estimation_state, self.stats)
-        self.oom_handler = OOMHandler()
-        self.oom_handler_client = OOMHandlerClient(self.oom_handler, self.scheduling_state)
+        self.enable_oom_handler = enable_oom_handler
+        if self.enable_oom_handler:
+            self.oom_handler = OOMHandler()
+            self.oom_handler_client = OOMHandlerClient(self.oom_handler, self.scheduling_state)
 
         self.running = False
         self.futures = {}
@@ -57,8 +59,9 @@ class Scheduler:
         self.prev_num_pods_done = 0
 
     def run(self, subset=None, label_selector=None):
-        self.oom_handler.start()
-        self.oom_handler_client.run()
+        if self.enable_oom_handler:
+            self.oom_handler.start()
+            self.oom_handler_client.run()
         self.scheduling_state.init_pods_work_queue(self.kube_api.load_pod_names_from_ss(subset, label_selector))
         self.init_work_queue_size = len(self.scheduling_state.pods_work_queue)
         print(f'[Scheduler] Scheduling estimation for {self.init_work_queue_size} pods...')
@@ -346,6 +349,16 @@ class Scheduler:
         self.estimation_state.clean_phase_result_events(pod_name)
         self.scheduling_state.clean_phase_result_events(pod_name)
         del self.kube_watcher_state.event_queues_per_pod[pod_name]
+        # TODO fix
+        # exception calling callback for <Future at 0x10dbb10d0 state=finished returned tuple>
+        # Traceback (most recent call last):
+        #   File "/usr/local/Cellar/python@3.9/3.9.12/Frameworks/Python.framework/Versions/3.9/lib/python3.9/concurrent/futures/_base.py", line 330, in _invoke_callbacks
+        #     callback(self)
+        #   File "/Users/anov/IdeaProjects/svoe/data_feed/perf/scheduler/scheduler.py", line 246, in done_estimation_callback
+        #     self.clean_states(pod_name)
+        #   File "/Users/anov/IdeaProjects/svoe/data_feed/perf/scheduler/scheduler.py", line 348, in clean_states
+        #     del self.kube_watcher_state.event_queues_per_pod[pod_name]
+        # KeyError: 'data-feed-binance-spot-e881bb7fe9'
 
     def stop(self):
         print(f'[Scheduler] Stopping scheduler...')
@@ -365,11 +378,12 @@ class Scheduler:
             print(f'[Scheduler] Waiting for running tasks to finish done')
         except concurrent.futures._base.TimeoutError:
             print(f'[Scheduler] Waiting for running tasks to finish timeout')
-        print(f'[Scheduler] Waiting for OOMHandler to terminate')
         self.metrics_fetcher.stop()
-        self.oom_handler.stop()
-        self.oom_handler.join()
-        print(f'[Scheduler] OOMHandler terminated')
-        print(f'[Scheduler] Waiting for OOMHandlerClient to terminate')
-        self.oom_handler_client.stop()
-        print(f'[Scheduler] OOMHandlerClient terminated')
+        if self.enable_oom_handler:
+            print(f'[Scheduler] Waiting for OOMHandler to terminate')
+            self.oom_handler.stop()
+            self.oom_handler.join()
+            print(f'[Scheduler] OOMHandler terminated')
+            print(f'[Scheduler] Waiting for OOMHandlerClient to terminate')
+            self.oom_handler_client.stop()
+            print(f'[Scheduler] OOMHandlerClient terminated')

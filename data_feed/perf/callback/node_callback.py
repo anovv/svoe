@@ -24,6 +24,7 @@ class NodeCallback(Callback):
                 if not self.estimation_state.is_interrupted(pod):
                     self.estimation_state.add_result_event(pod, PodEstimationResultEvent.INTERRUPTED_OOM)
                     self.estimation_state.wake_event(pod)
-                    marked_high = self.scheduler.oom_handler_client.last_marked_high_pod == pod
-                    print(f'[OOM NodeEvent][{node_name}] Found {pod}, {"MARKED_HIGH" if marked_high else "MARKED_LOW"}, {container} by pid {pid}, interrupting...')
+                    if self.scheduler.enable_oom_handler:
+                        marked_high = self.scheduler.oom_handler_client.last_marked_high_pod == pod
+                        print(f'[OOM NodeEvent][{node_name}] Found {pod}, {"MARKED_HIGH" if marked_high else "MARKED_LOW"}, {container} by pid {pid}, interrupting...')
 

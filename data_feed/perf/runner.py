@@ -14,7 +14,7 @@ from perf.defines import CLUSTER
 
 
 class Runner:
-    def __init__(self):
+    def __init__(self, enable_oom_handler=False):
         self.kube_api = KubeApi.new_instance()
         self.scheduling_state = SchedulingState()
         self.estimation_state = EstimationState()
@@ -25,7 +25,8 @@ class Runner:
             self.scheduling_state,
             self.estimation_state,
             self.kube_watcher_state,
-            self.stats
+            self.stats,
+            enable_oom_handler
         )
         pod_callback = PodCallback(self.scheduler)
         node_callback = NodeCallback(self.scheduler)
@@ -76,27 +77,10 @@ class Runner:
             self.kube_watcher = None
 
 if __name__ == '__main__':
-    r = Runner()
+    r = Runner(enable_oom_handler=False)
     # TODO sort statefulsets by symbol-distribution to not have same exchange pods at the same time
     label_selector = 'svoe.exchange in (PHEMEX, BINANCE, BINANCE_FUTURES),svoe.instrument-type in (spot, perpetual),svoe.symbol-distribution in (ONE_TO_ONE, LARGEST_WITH_SMALLEST, EQUAL_BUCKETS)'
     sub = [
-        'data-feed-phemex-spot-0e620c0d95-ss',
-        'data-feed-phemex-spot-32ee898724-ss',
-        'data-feed-phemex-perpetual-078a670ba4-ss',
-        'data-feed-phemex-perpetual-15811a3a1b-ss',
-        'data-feed-kraken-futures-perpetual-13814beedf-ss',
-        'data-feed-kraken-futures-perpetual-17b6ccc73a-ss',
-        'data-feed-gateio-spot-0f6d99f340-ss',
-        'data-feed-gateio-spot-1cda6d1458-ss',
-        'data-feed-ftx-spot-013314981b-ss',
-        'data-feed-ftx-spot-201da94f1e-ss',
-        'data-feed-ftx-perpetual-096c2d8f51-ss',
-        'data-feed-ftx-perpetual-0d579336c0-ss',
-        'data-feed-bybit-perpetual-239b6f767f-ss',
-        'data-feed-bybit-perpetual-27a48cc207-ss',
-        'data-feed-binance-spot-05bbcd15c6-ss',
-        'data-feed-binance-spot-0cb2ff270e-ss',
-        'data-feed-binance-futures-perpetual-219409651d-ss',
-        'data-feed-binance-futures-perpetual-2c070e8a30-ss',
+        # 'data-feed-binance-spot-f927bdcbfc-ss'
     ]
-    r.run(subset=[], label_selector=label_selector)
+    r.run(subset=sub, label_selector=label_selector)

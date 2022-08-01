@@ -69,7 +69,8 @@ class PodCallback(Callback):
 
             if all_containers_running and all_containers_started:
                 self.estimation_state.wake_event(pod_name)
-                self.scheduler.oom_handler_client.notify_pod_started(pod_name)
+                if self.scheduler.enable_oom_handler:
+                    self.scheduler.oom_handler_client.notify_pod_started(pod_name)
                 return
 
         # Interrupts

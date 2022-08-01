@@ -49,7 +49,7 @@ class MetricsFetcher:
 
     # since we call fetcher from remote machine we need to limit number of concurrent connections
     # to keep network bandwidth sane
-    PARALLELISM = 5
+    PARALLELISM = 2
 
     def __init__(self):
         self.executor = concurrent.futures.ThreadPoolExecutor(max_workers=self.PARALLELISM)
@@ -118,7 +118,9 @@ class MetricsFetcher:
         nested_set(res, location_keys, (metric_value, error))
 
     async def _fetch_metrics_async(self, pod_name, payload_config, request_time):
-        offset = time.time() - request_time
+        offset = int(time.time() - request_time)
+        if offset < 1:
+            offset = 1
         health_metrics = _get_data_feed_health_metrics_queries(pod_name, payload_config, offset)
         perf_metrics = _get_perf_kube_metrics_server_queries(pod_name, offset)
         metric_queries = {**health_metrics, **perf_metrics}

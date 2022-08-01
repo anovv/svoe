@@ -9,10 +9,10 @@ DATA_FEED_CM_CONFIG_NAME = 'data-feed-config.yaml'
 REDIS_CONTAINER = 'redis'
 REDIS_EXPORTER_CONTAINER = 'redis-exporter'
 
-NODE_MEMORY_ALLOC_THRESHOLD = 0.75 # do not schedule pods onto node if memory usage is above this
-NODE_NEXT_SCHEDULE_PERIOD = 5 # how long to wait for current pod to run until scheduling next pod
+NODE_MEMORY_ALLOC_THRESHOLD = 0.6 # do not schedule pods onto node if memory usage is above this
+NODE_NEXT_SCHEDULE_PERIOD = 20 # how long to wait for current pod to run until scheduling next pod
 
-RUN_ESTIMATION_FOR = 240 # how long to run estimation
+RUN_ESTIMATION_FOR = 180 # how long to run estimation
 
 PROM_NAMESPACE = 'monitoring'
 PROM_POD_NAME = 'prometheus-kube-prometheus-stack-prometheus-0'
