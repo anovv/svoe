@@ -1,7 +1,10 @@
 import json
 import os
+import datetime
 import plotly.graph_objects as go
+import numpy as np
 from plotly.subplots import make_subplots
+import plotly.express as px
 
 from cryptofeed.symbols import str_to_symbol, Symbol
 from functools import cmp_to_key
@@ -20,7 +23,7 @@ class REResultAnalyzer:
             if os.path.isdir(f):
                 dates.append(f)
         dates.remove('__pycache__')
-        dates.sort()
+        dates = sorted(dates, key=lambda x: datetime.datetime.strptime(x, '%d-%m-%Y-%H-%M-%S'))
         return dates[-1]
 
     def load_data(self, date):
@@ -42,67 +45,12 @@ class REResultAnalyzer:
         self.load_data(latest)
         print(f'Loaded data for {latest}')
 
-    def symbols_equal(self, s1, s2):
-        same = s1.quote == s2.quote and s1.type == s2.type
-        # treat usd and usdt base as equal
-        return same and (s1.base == s2.base or (s1.base in ('USD', 'USDT') and s2.base in ('USD', 'USDT')))
-
-    def symbol_groups_equal(self, g1, g2):
-        # assume no duplicates
-        if not len(g1) == len(g2):
-            return False
-        for s1 in g1:
-            eq = False
-            for s2 in g2:
-                if self.symbols_equal(s1, s2):
-                    eq = True
-                    break
-            if not eq:
-                return False
-        return True
-
-    def get_all_symbol_groups(self, symbol_distribution=UNKNOWN_SYMBOL_DISTRIBUTION):
-        groups = []
-        for hash in self.data[symbol_distribution]:
-            pod_data = self.data[symbol_distribution][hash]
-            payload_config = pod_data['payload_config']
-            exchange = list(payload_config.keys())[0]
-            first_channel = list(payload_config[exchange].keys())[0]
-            symbols_str = payload_config[exchange][first_channel]
-            symbols = list(map(lambda s: str_to_symbol(s), symbols_str))
-            has = False
-            for g in groups:
-                if self.symbol_groups_equal(symbols, g):
-                    has = True
-                    break
-            if not has:
-                groups.append(symbols)
-
-        return groups
-
-    def get_metric(self, metric_type, exch, symbol_str, instrument_type, agg, symbol_distribution=UNKNOWN_SYMBOL_DISTRIBUTION):
-        for hash in self.data[symbol_distribution]:
-            pod_data = self.data[symbol_distribution][hash]
-            payload_config = pod_data['payload_config']
-            exchange = list(payload_config.keys())[0]
-            first_channel = list(payload_config[exchange].keys())[0]
-            symbols_str = payload_config[exchange][first_channel]
-            symbols = list(map(lambda s: str_to_symbol(s), symbols_str))
-            if exch == exchange and symbol_str in symbols_str and instrument_type == symbols[0].type:
-                if 'metrics' not in pod_data:
-                    raise ValueError(f'No metrics for {exchange}, {instrument_type}, {symbol_str}')
-                return pod_data['metrics'][metric_type]['data-feed-container']['run_duration'][agg][0]
-
-        raise ValueError('Symbol not found')
-
     # groups data by exchange.instrument_type for each symbols group
     def grouped_by_exchange(self, symbol_distribution=UNKNOWN_SYMBOL_DISTRIBUTION):
-        all_symbol_groups = self.get_all_symbol_groups(symbol_distribution)
+        # all_symbol_groups = self.get_all_symbol_groups(symbol_distribution)
         grouped = {}
         for hash in self.data[symbol_distribution]:
             pod_data = self.data[symbol_distribution][hash]
-            if 'metrics' not in pod_data:
-                continue
             payload_config = pod_data['payload_config']
             exchange = list(payload_config.keys())[0]
             first_channel = list(payload_config[exchange].keys())[0]
@@ -110,84 +58,62 @@ class REResultAnalyzer:
             symbols = list(map(lambda s: str_to_symbol(s), symbols_str))
             instrument_type = symbols[0].type
             key = f'{exchange}.{instrument_type}'
-            df_mem_metrics = pod_data['metrics']['metrics_server_mem']['data-feed-container']['run_duration']
             item = [symbols]
-            for agg in AGGS:
-                item.append(df_mem_metrics[agg][0] if df_mem_metrics[agg][0] is not None else 0)
+            if 'metrics' not in pod_data:
+                for _ in AGGS:
+                    item.append(0)
+            else:
+                df_mem_metrics = pod_data['metrics']['metrics_server_mem']['data-feed-container']['run_duration']
+                for agg in AGGS:
+                    item.append(df_mem_metrics[agg][0] if df_mem_metrics[agg][0] is not None else 0)
             if key in grouped:
                 grouped[key].append(item)
             else:
                 grouped[key] = [item]
 
-        # pad missing bases for each exchange with 0 value metrics
-        for g in all_symbol_groups:
-            for exchange in grouped:
-                has = False
-                for item in grouped[exchange]:
-                    if self.symbol_groups_equal(g, item[0]):
-                        has = True
-                if not has:
-                    item = [g]
-                    for _ in AGGS:
-                        item.append(0)
-                    grouped[exchange].append(item)
         return grouped
-
-    def find_item(self, key, symbol_group, grouped_by_exchange):
-        for item in grouped_by_exchange[key]:
-            if self.symbol_groups_equal(item[0], symbol_group):
-                return item
-        return None
 
     def plot_mem(self):
         distr_strategies = list(self.data.keys())
+        exchange_instruments = set()
+        subplot_titles = []
+        for symbol_distribution in distr_strategies:
+            grouped_by_exchange = self.grouped_by_exchange(symbol_distribution)
+            for exchange_instrument in grouped_by_exchange:
+                exchange_instruments.add(exchange_instrument)
+
+        for _ in distr_strategies:
+            subplot_titles.extend(list(exchange_instruments))
+
         fig = make_subplots(
-            rows=len(distr_strategies), cols=1, subplot_titles=distr_strategies
+            rows=len(distr_strategies), cols=len(exchange_instruments), subplot_titles=subplot_titles
         )
         row = 1
         for symbol_distribution in distr_strategies:
+            col = 1
             grouped_by_exchange = self.grouped_by_exchange(symbol_distribution)
-            srtd = {}
-            # sort everything according to first exchange p95 memory values
-            first_key = list(grouped_by_exchange.keys())[0]
-
-            # smallest to largest
-            def compare(x, y):
-                if isinstance(x[0], str) or isinstance(x[0], Symbol):
-                    g1 = x
-                    g2 = y
-                else:
-                    g1 = x[0]
-                    g2 = y[0]
-                i1 = self.find_item(first_key, g1, grouped_by_exchange)
-                i2 = self.find_item(first_key, g2, grouped_by_exchange)
-                # always use p95 for sorting to keep things consistent
-                # +1 since symbol is first elem
-                _ind = AGGS.index('p95') + 1
-                if float(i1[_ind]) < float(i2[_ind]):
-                    return -1
-                elif float(i1[_ind]) > float(i2[_ind]):
-                    return 1
-                else:
-                    return 0
-            sorted_groups = sorted(self.get_all_symbol_groups(symbol_distribution), key=cmp_to_key(compare), reverse=True)
-            sorted_groups_str = list(map(lambda g: str(list(map(lambda s: s.normalized, g))), sorted_groups))
-            for k in grouped_by_exchange:
-                # +1 since symbol is first elem
-                _ind = AGGS.index(AGG) + 1
-                srtd[k] = list(map(lambda g: int(float(self.find_item(k, g, grouped_by_exchange)[_ind])/1000.0), sorted_groups))
-            for k in srtd:
-                fig.add_trace(go.Bar(name=k, x=sorted_groups_str, y=srtd[k]), row=row, col=1)
+            for exchange_instrument in exchange_instruments:
+                symbol_groups_str = []
+                metric_values = []
+                for item in grouped_by_exchange[exchange_instrument]:
+                    symbol_groups_str.append(str(item[0]))
+                    # +1 since symbol is first elem
+                    _ind = AGGS.index(AGG) + 1
+                    metric_value = int(float(item[_ind])/1000.0)
+                    metric_values.append(metric_value)
+                fig.add_trace(go.Bar(x=symbol_groups_str, y=metric_values), row=row, col=col)
+                col += 1
             row += 1
         # Change the bar mode
-        fig.update_layout(barmode='group', title_text=f'Memory consumption (aggregation={AGG})')
+        fig.update_layout(title_text=f'Memory consumption (aggregation={AGG})', autosize=True, width=2000, height=2000)
         fig.show()
 
 
 re = REResultAnalyzer()
 re.load_latest_data()
-# print(re.data)
-# print(re.grouped_by_exchange())
+# print(re.get_latest_date())
+# print(re.grouped_by_exchange('LARGEST_WITH_SMALLEST')['BINANCE_FUTURES.perpetual'])
 re.plot_mem()
+# print(px.data.tips())
 # print(re.get_metric('metrics_server_mem', 'BINANCE', 'ETC-USDT', 'spot', 'avg'))
 # print(re.get_all_symbol_groups())
