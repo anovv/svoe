@@ -9,7 +9,7 @@ import plotly.express as px
 from cryptofeed.symbols import str_to_symbol, Symbol
 from functools import cmp_to_key
 
-AGG = 'avg'
+AGG = 'p95'
 AGGS = ['absent', 'avg', 'max', 'min', 'p95']
 UNKNOWN_SYMBOL_DISTRIBUTION = 'UNKNOWN_SYMBOL_DISTRIBUTION'
 

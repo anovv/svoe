@@ -225,24 +225,23 @@ class Scheduler:
     def done_estimation_callback(self, future, pod_name):
         reschedule, reason, payload = future.result()
         if payload is not None:
-            self.stats.add_all_df_events(
+            self.stats.set_df_events(
                 payload,
                 pod_name,
                 self.kube_watcher_state,
                 self.estimation_state,
                 self.scheduling_state
             )
-            self.stats.add_reschedules(
+            self.stats.set_reschedule_reasons(
                 payload,
                 pod_name,
                 self.scheduling_state
             )
-            self.stats.add_final_result(
+            self.stats.set_final_result(
                 payload,
-                pod_name,
-                self.estimation_state
+                self.estimation_state.get_last_result_event_type(pod_name)
             )
-            self.stats.add_pod_info(
+            self.stats.set_pod_info(
                 payload,
                 pod_name,
             )

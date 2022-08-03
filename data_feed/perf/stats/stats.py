@@ -12,7 +12,7 @@ class Stats:
         self.stats = {}
         self.logs = {}
 
-    def add_pod_info(self, payload, pod_name):
+    def set_pod_info(self, payload, pod_name):
         payload_config = get_payload_config(payload)
         payload_hash = get_payload_hash(payload)
         if payload_hash not in self.stats:
@@ -24,7 +24,7 @@ class Stats:
         else:
             self.stats[payload_hash]['symbol_distribution'] = 'UNKNOWN_SYMBOL_DISTRIBUTION'
 
-    def add_metrics_to_stats(self, payload, metrics_results):
+    def set_metric_results(self, payload, metrics_results):
         if metrics_results is None:
             return
         payload_hash = get_payload_hash(payload)
@@ -32,7 +32,7 @@ class Stats:
             self.stats[payload_hash] = {}
         self.stats[payload_hash]['metrics'] = metrics_results
 
-    def add_all_df_events(self, payload, pod_name, kube_watcher_state, estimation_state, scheduling_state):
+    def set_df_events(self, payload, pod_name, kube_watcher_state, estimation_state, scheduling_state):
         events = []
         if pod_name in kube_watcher_state.event_queues_per_pod:
             events.extend(kube_watcher_state.event_queues_per_pod[pod_name].queue)
@@ -54,13 +54,13 @@ class Stats:
             self.stats[payload_hash] = {}
         self.stats[payload_hash]['events'] = events
 
-    def add_final_result(self, payload, pod_name, estimation_state):
+    def set_final_result(self, payload, result):
         payload_hash = get_payload_hash(payload)
         if payload_hash not in self.stats:
             self.stats[payload_hash] = {}
-        self.stats[payload_hash]['final_result'] = estimation_state.get_last_result_event_type(pod_name)
+        self.stats[payload_hash]['final_result'] = result
 
-    def add_reschedules(self, payload, pod_name, scheduling_state):
+    def set_reschedule_reasons(self, payload, pod_name, scheduling_state):
         payload_hash = get_payload_hash(payload)
         if payload_hash not in self.stats:
             self.stats[payload_hash] = {}
@@ -73,7 +73,7 @@ class Stats:
                or instrument_type not in self.logs[exchange] \
                or len(self.logs[exchange][instrument_type]) < 2 # max 2 log files per exchange+instrument_type
 
-    def add_df_logs(self, payload, pod_name, logs):
+    def set_df_logs(self, payload, pod_name, logs):
         payload_config = get_payload_config(payload)
         payload_hash = get_payload_hash(payload)
         exchange, instrument_type = self._get_logs_key(pod_name, payload_config)

@@ -50,8 +50,9 @@ class Estimator:
                     metrics_fetch_result = PodEstimationResultEvent.METRICS_COLLECTED_MISSING
 
                 # save stats
-                stats.add_metrics_to_stats(payload, metrics)
+                stats.set_metric_results(payload, metrics)
                 estimation_state.add_result_event(pod_name, metrics_fetch_result)
+                stats.set_final_result(payload, metrics_fetch_result)
                 print(f'[MetricsFetcher] Done fetching metrics for {pod_name}, {metrics_fetch_result}')
 
             self.metrics_fetcher.submit_fetch_metrics_request(
@@ -75,7 +76,7 @@ class Estimator:
             if self.estimation_state.has_result_type(pod_name, result_type) \
                     and self.stats.should_fetch_df_logs(payload, pod_name):
                 logs = self.kube_api.fetch_logs(DATA_FEED_NAMESPACE, pod_name, DATA_FEED_CONTAINER)
-                self.stats.add_df_logs(payload, pod_name, logs)
+                self.stats.set_df_logs(payload, pod_name, logs)
 
         # reschedule reasons
         for result_type in [
