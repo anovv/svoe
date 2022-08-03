@@ -11,6 +11,7 @@ from perf.callback.pod_callback import PodCallback
 from perf.callback.node_callback import NodeCallback
 from perf.stats.stats import Stats
 from perf.defines import CLUSTER
+from kube_api.utils import ss_name_from_pod_name
 
 
 class Runner:
@@ -55,6 +56,44 @@ class Runner:
         self.scheduler.run(subset, label_selector)
         self.cleanup()
 
+    def rerun(self, label_selector, date):
+        print(f'[Runner] Re-running {date}...')
+        subset = []
+        missing_metric_pods = self.missing_metric_ss(date)
+        subset.extend(missing_metric_pods)
+        print(f'[Runner] Re-running {len(missing_metric_pods)} pods with no metrics')
+        if label_selector is not None:
+            missing_queried_pods = self.missing_queried_ss(label_selector, date)
+            subset.extend(missing_queried_pods)
+            print(f'[Runner] Re-running {len(missing_queried_pods)} skipped queried pods')
+        self.run(subset=subset)
+
+    def missing_metric_ss(self, date):
+        # pods in stats with no metrics
+        res = []
+        self.stats.load_date(date) # TODO fix double loading
+        # rerun missing metrics
+        for hash in self.stats.stats:
+            item = self.stats.stats[hash]
+            pod_name = item['pod_name']
+            # TODO add rerun filter logic (do not rerun crashed, failed)
+            if 'metrics' not in item:
+                res.append(ss_name_from_pod_name(pod_name))
+        return res
+
+    def missing_queried_ss(self, label_selector, date):
+        # pods queried by label_selector which did not appear in stats
+        queried_pods = self.kube_api.load_pod_names_from_ss(subset=[], label_selector=label_selector)
+        self.stats.load_date(date)  # TODO fix double loading
+        processed_pods = []
+        for hash in self.stats.stats:
+            item = self.stats.stats[hash]
+            pod_name = item['pod_name']
+            processed_pods.append(pod_name)
+        missed_pods = list(set(queried_pods) - set(processed_pods))
+        missed_ss = list(map(lambda pod: ss_name_from_pod_name(pod), missed_pods))
+        return missed_ss
+
     def cleanup(self, *args):
         # *args are for signal.signal handler
         if not self.running:
@@ -79,8 +118,12 @@ class Runner:
 if __name__ == '__main__':
     r = Runner(enable_oom_handler=False)
     # TODO sort statefulsets by symbol-distribution to not have same exchange pods at the same time
+    # TODO create run_info field in stats
+    # TODO add label_selector to  run_info
     label_selector = 'svoe.exchange in (PHEMEX, BINANCE, BINANCE_FUTURES),svoe.instrument-type in (spot, perpetual),svoe.symbol-distribution in (ONE_TO_ONE, LARGEST_WITH_SMALLEST, EQUAL_BUCKETS)'
     sub = [
         # 'data-feed-binance-spot-f927bdcbfc-ss'
     ]
-    r.run(subset=sub, label_selector=label_selector)
+    # r.run(subset=sub, label_selector=label_selector)
+    r.rerun(label_selector, '03-08-2022-09-00-41')
+    # print(r.missing_queried_ss(label_selector, '03-08-2022-09-00-41'))

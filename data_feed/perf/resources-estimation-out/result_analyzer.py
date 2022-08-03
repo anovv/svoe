@@ -45,6 +45,16 @@ class REResultAnalyzer:
         self.load_data(latest)
         print(f'Loaded data for {latest}')
 
+    def no_metrics(self):
+        no_metrics = []
+        distr_strategies = list(self.data.keys())
+        for symbol_distribution in distr_strategies:
+            for hash in self.data[symbol_distribution]:
+                pod_data = self.data[symbol_distribution][hash]
+                if 'metrics' not in pod_data:
+                    no_metrics.append(pod_data['pod_name'])
+        return no_metrics
+
     # groups data by exchange.instrument_type for each symbols group
     def grouped_by_exchange(self, symbol_distribution=UNKNOWN_SYMBOL_DISTRIBUTION):
         # all_symbol_groups = self.get_all_symbol_groups(symbol_distribution)
@@ -112,8 +122,6 @@ class REResultAnalyzer:
 re = REResultAnalyzer()
 re.load_latest_data()
 # print(re.get_latest_date())
-# print(re.grouped_by_exchange('LARGEST_WITH_SMALLEST')['BINANCE_FUTURES.perpetual'])
-re.plot_mem()
-# print(px.data.tips())
-# print(re.get_metric('metrics_server_mem', 'BINANCE', 'ETC-USDT', 'spot', 'avg'))
-# print(re.get_all_symbol_groups())
+print(re.grouped_by_exchange('ONE_TO_ONE')['BINANCE_FUTURES.perpetual'])
+# print(re.no_metrics())
+# re.plot_mem()

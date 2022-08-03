@@ -134,3 +134,7 @@ class Stats:
                     with open(path_log, 'w+') as outfile:
                         outfile.write(logs)
                     print(f'[Stats] Saved logs to {path_log}')
+
+    def load_date(self, date):
+        path = f'resources-estimation-out/{date}/resources-estimation.json'
+        self.stats = json.load(open(path))
