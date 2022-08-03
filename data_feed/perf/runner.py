@@ -120,10 +120,11 @@ if __name__ == '__main__':
     # TODO sort statefulsets by symbol-distribution to not have same exchange pods at the same time
     # TODO create run_info field in stats
     # TODO add label_selector to  run_info
+    # r.stats.load_date('03-08-2022-16-00-45')
     label_selector = 'svoe.exchange in (PHEMEX, BINANCE, BINANCE_FUTURES),svoe.instrument-type in (spot, perpetual),svoe.symbol-distribution in (ONE_TO_ONE, LARGEST_WITH_SMALLEST, EQUAL_BUCKETS)'
-    sub = [
-        # 'data-feed-binance-spot-f927bdcbfc-ss'
-    ]
-    # r.run(subset=sub, label_selector=label_selector)
-    r.rerun(label_selector, '03-08-2022-09-00-41')
-    # print(r.missing_queried_ss(label_selector, '03-08-2022-09-00-41'))
+    # sub = [
+    #     'data-feed-binance-futures-perpetual-c0e456d94a-ss'
+    # ]
+    # r.run(subset=[], label_selector=label_selector)
+    # r.rerun(label_selector, '03-08-2022-09-00-41')
+    print(r.missing_queried_ss(label_selector, '03-08-2022-17-05-14'))

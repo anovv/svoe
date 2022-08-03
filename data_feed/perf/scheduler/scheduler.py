@@ -226,19 +226,17 @@ class Scheduler:
         reschedule, reason, payload = future.result()
         if payload is not None:
             self.stats.set_df_events(
-                payload,
                 pod_name,
                 self.kube_watcher_state,
                 self.estimation_state,
                 self.scheduling_state
             )
             self.stats.set_reschedule_reasons(
-                payload,
                 pod_name,
                 self.scheduling_state
             )
             self.stats.set_final_result(
-                payload,
+                pod_name,
                 self.estimation_state.get_last_result_event_type(pod_name)
             )
             self.stats.set_pod_info(

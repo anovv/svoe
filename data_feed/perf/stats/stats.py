@@ -13,26 +13,26 @@ class Stats:
         self.logs = {}
 
     def set_pod_info(self, payload, pod_name):
-        payload_config = get_payload_config(payload)
         payload_hash = get_payload_hash(payload)
-        if payload_hash not in self.stats:
-            self.stats[payload_hash] = {}
-        self.stats[payload_hash]['pod_name'] = pod_name
-        self.stats[payload_hash]['payload_config'] = payload_config
+        payload_config = get_payload_config(payload)
+        if pod_name not in self.stats:
+            self.stats[pod_name] = {}
+        self.stats[pod_name]['pod_name'] = pod_name
+        self.stats[pod_name]['payload_config'] = payload_config
+        self.stats[pod_name]['payload_hash'] = payload_hash
         if 'symbol_distribution' in payload['svoe']:
-            self.stats[payload_hash]['symbol_distribution'] = payload['svoe']['symbol_distribution']
+            self.stats[pod_name]['symbol_distribution'] = payload['svoe']['symbol_distribution']
         else:
-            self.stats[payload_hash]['symbol_distribution'] = 'UNKNOWN_SYMBOL_DISTRIBUTION'
+            self.stats[pod_name]['symbol_distribution'] = 'UNKNOWN_SYMBOL_DISTRIBUTION'
 
-    def set_metric_results(self, payload, metrics_results):
+    def set_metric_results(self, pod_name, metrics_results):
         if metrics_results is None:
             return
-        payload_hash = get_payload_hash(payload)
-        if payload_hash not in self.stats:
-            self.stats[payload_hash] = {}
-        self.stats[payload_hash]['metrics'] = metrics_results
+        if pod_name not in self.stats:
+            self.stats[pod_name] = {}
+        self.stats[pod_name]['metrics'] = metrics_results
 
-    def set_df_events(self, payload, pod_name, kube_watcher_state, estimation_state, scheduling_state):
+    def set_df_events(self, pod_name, kube_watcher_state, estimation_state, scheduling_state):
         events = []
         if pod_name in kube_watcher_state.event_queues_per_pod:
             events.extend(kube_watcher_state.event_queues_per_pod[pod_name].queue)
@@ -49,22 +49,19 @@ class Stats:
             filter(lambda event: event.container_name is None or event.container_name == DATA_FEED_CONTAINER, events))
         events = list(map(lambda event: str(event), events))
 
-        payload_hash = get_payload_hash(payload)
-        if payload_hash not in self.stats:
-            self.stats[payload_hash] = {}
-        self.stats[payload_hash]['events'] = events
+        if pod_name not in self.stats:
+            self.stats[pod_name] = {}
+        self.stats[pod_name]['events'] = events
 
-    def set_final_result(self, payload, result):
-        payload_hash = get_payload_hash(payload)
-        if payload_hash not in self.stats:
-            self.stats[payload_hash] = {}
-        self.stats[payload_hash]['final_result'] = result
+    def set_final_result(self, pod_name, result):
+        if pod_name not in self.stats:
+            self.stats[pod_name] = {}
+        self.stats[pod_name]['final_result'] = result
 
-    def set_reschedule_reasons(self, payload, pod_name, scheduling_state):
-        payload_hash = get_payload_hash(payload)
-        if payload_hash not in self.stats:
-            self.stats[payload_hash] = {}
-        self.stats[payload_hash]['reschedule_reasons'] = scheduling_state.get_reschedule_reasons(pod_name)
+    def set_reschedule_reasons(self, pod_name, scheduling_state):
+        if pod_name not in self.stats:
+            self.stats[pod_name] = {}
+        self.stats[pod_name]['reschedule_reasons'] = scheduling_state.get_reschedule_reasons(pod_name)
 
     def should_fetch_df_logs(self, payload, pod_name):
         payload_config = get_payload_config(payload)
@@ -75,7 +72,6 @@ class Stats:
 
     def set_df_logs(self, payload, pod_name, logs):
         payload_config = get_payload_config(payload)
-        payload_hash = get_payload_hash(payload)
         exchange, instrument_type = self._get_logs_key(pod_name, payload_config)
         log_file_local_name = pod_name + '.log'
         if exchange not in self.logs:
@@ -94,13 +90,13 @@ class Stats:
                 self.logs[exchange][instrument_type].append([log_file_local_name, logs])
 
         # add reference to stats
-        if payload_hash not in self.stats:
-            self.stats[payload_hash] = {}
-        if 'log_files' not in self.stats[payload_hash]:
-            self.stats[payload_hash]['log_files'] = [log_file_local_name]
+        if pod_name not in self.stats:
+            self.stats[pod_name] = {}
+        if 'log_files' not in self.stats[pod_name]:
+            self.stats[pod_name]['log_files'] = [log_file_local_name]
         else:
-            if log_file_local_name not in self.stats[payload_hash]['log_files']:
-                self.stats[payload_hash]['log_files'].append(log_file_local_name)
+            if log_file_local_name not in self.stats[pod_name]['log_files']:
+                self.stats[pod_name]['log_files'].append(log_file_local_name)
 
     def _get_logs_key(self, pod_name, payload_config):
         # hack, we should fetch instrument type from config

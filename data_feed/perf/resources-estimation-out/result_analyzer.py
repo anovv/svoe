@@ -2,15 +2,12 @@ import json
 import os
 import datetime
 import plotly.graph_objects as go
-import numpy as np
 from plotly.subplots import make_subplots
-import plotly.express as px
 
 from cryptofeed.symbols import str_to_symbol, Symbol
-from functools import cmp_to_key
 
-AGG = 'p95'
-AGGS = ['absent', 'avg', 'max', 'min', 'p95']
+AGG = 'p50'
+AGGS = ['absent', 'avg', 'max', 'min', 'p95', 'p50']
 UNKNOWN_SYMBOL_DISTRIBUTION = 'UNKNOWN_SYMBOL_DISTRIBUTION'
 
 class REResultAnalyzer:
@@ -31,14 +28,14 @@ class REResultAnalyzer:
         file_path = dir_path + f'/{date}/resources-estimation.json'
         with open(file_path) as json_file:
             data = json.load(json_file)
-            for hash in data:
-                if 'symbol_distribution' in data[hash]:
-                    symbol_distribution = data[hash]['symbol_distribution']
+            for key in data:
+                if 'symbol_distribution' in data[key]:
+                    symbol_distribution = data[key]['symbol_distribution']
                 else:
                     symbol_distribution = UNKNOWN_SYMBOL_DISTRIBUTION
                 if symbol_distribution not in self.data:
                     self.data[symbol_distribution] = {}
-                self.data[symbol_distribution][hash] = data[hash]
+                self.data[symbol_distribution][key] = data[key]
 
     def load_latest_data(self):
         latest = self.get_latest_date()
@@ -49,8 +46,8 @@ class REResultAnalyzer:
         no_metrics = []
         distr_strategies = list(self.data.keys())
         for symbol_distribution in distr_strategies:
-            for hash in self.data[symbol_distribution]:
-                pod_data = self.data[symbol_distribution][hash]
+            for key in self.data[symbol_distribution]:
+                pod_data = self.data[symbol_distribution][key]
                 if 'metrics' not in pod_data:
                     no_metrics.append(pod_data['pod_name'])
         return no_metrics
@@ -59,8 +56,8 @@ class REResultAnalyzer:
     def grouped_by_exchange(self, symbol_distribution=UNKNOWN_SYMBOL_DISTRIBUTION):
         # all_symbol_groups = self.get_all_symbol_groups(symbol_distribution)
         grouped = {}
-        for hash in self.data[symbol_distribution]:
-            pod_data = self.data[symbol_distribution][hash]
+        for _key in self.data[symbol_distribution]:
+            pod_data = self.data[symbol_distribution][_key]
             payload_config = pod_data['payload_config']
             exchange = list(payload_config.keys())[0]
             first_channel = list(payload_config[exchange].keys())[0]
@@ -122,6 +119,6 @@ class REResultAnalyzer:
 re = REResultAnalyzer()
 re.load_latest_data()
 # print(re.get_latest_date())
-print(re.grouped_by_exchange('ONE_TO_ONE')['BINANCE_FUTURES.perpetual'])
+# print(re.grouped_by_exchange('ONE_TO_ONE')['BINANCE_FUTURES.perpetual'])
 # print(re.no_metrics())
-# re.plot_mem()
+re.plot_mem()

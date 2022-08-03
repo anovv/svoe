@@ -50,9 +50,9 @@ class Estimator:
                     metrics_fetch_result = PodEstimationResultEvent.METRICS_COLLECTED_MISSING
 
                 # save stats
-                stats.set_metric_results(payload, metrics)
+                stats.set_metric_results(pod_name, metrics)
                 estimation_state.add_result_event(pod_name, metrics_fetch_result)
-                stats.set_final_result(payload, metrics_fetch_result)
+                stats.set_final_result(pod_name, metrics_fetch_result)
                 print(f'[MetricsFetcher] Done fetching metrics for {pod_name}, {metrics_fetch_result}')
 
             self.metrics_fetcher.submit_fetch_metrics_request(
