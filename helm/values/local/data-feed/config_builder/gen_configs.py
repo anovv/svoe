@@ -2,6 +2,7 @@ import yaml
 import json
 import subprocess
 import ccxt
+import os
 import numpy as np
 
 from cryptofeed.defines import TICKER, TRADES, L2_BOOK, L3_BOOK, LIQUIDATIONS, OPEN_INTEREST, FUNDING, FUTURES, FX, \
@@ -14,12 +15,19 @@ from functools import cmp_to_key
 
 MASTER_CONFIG = yaml.safe_load(open('master-config.yaml', 'r'))
 BUILD_INFO_LOOKUP = {}
+RESOURCE_ESTIMATION_FOLDER = '../../../../../data_feed/perf/resources-estimation-out'
+RESOURCE_INDEX_PATH = 'resource-index.json'
 
-try:
-    RESOURCE_ESTIMATOR_DATA = json.load(open('../../../../../data_feed/perf/resources-estimation-out/resources-estimation.json', 'r'))
-except:
-    print('Unable to load RESOURCE_ESTIMATOR_DATA')
-    RESOURCE_ESTIMATOR_DATA = {}
+HEALTH_THRESHOLD_PER_CHANNEL = {
+    TICKER: 0.5,
+    L2_BOOK: 0.5,
+    TRADES: 0.5,
+    OPEN_INTEREST: 0,
+    LIQUIDATIONS: 0,
+    FUNDING: 0,
+}
+RESOURCE_INDEX = None
+SUMMARY = {}
 
 def gen_helm_values():
     pod_configs = []
@@ -181,17 +189,41 @@ def build_pod_configs(exchange, exchange_config):
             'labels': labels,
         }
 
+        RESOURCE_SPEC_SUMMARY_KEY = 'resource_spec_counter'
+        if RESOURCE_SPEC_SUMMARY_KEY not in SUMMARY:
+            SUMMARY[RESOURCE_SPEC_SUMMARY_KEY] = {}
+        if exchange not in SUMMARY[RESOURCE_SPEC_SUMMARY_KEY]:
+            SUMMARY[RESOURCE_SPEC_SUMMARY_KEY][exchange] = {}
+        if instrument_type not in SUMMARY[RESOURCE_SPEC_SUMMARY_KEY][exchange]: # TODO instrument extra?
+            SUMMARY[RESOURCE_SPEC_SUMMARY_KEY][exchange][instrument_type] = {}
+        if symbol_distribution_strategy not in SUMMARY[RESOURCE_SPEC_SUMMARY_KEY][exchange][instrument_type]:
+            SUMMARY[RESOURCE_SPEC_SUMMARY_KEY][exchange][instrument_type][symbol_distribution_strategy] = \
+                {'skipped_payloads': [],
+                 'skipped_payloads_count': 0,
+                 'set_payloads': [],
+                 'set_payloads_count': 0,
+                 'total_count': len(symbol_pod_mapping)}
+
         # TODO set resources for sidecars (redis, redis-exporter)
         payload_hash = config['payload_hash']
-        resources = _get_resources(payload_hash)
-        if resources is not None and 'data-feed-container' in resources:
-            pod_config['data_feed_resources'] = resources['data-feed-container']
+        if payload_hash in RESOURCE_INDEX:
+            resource_spec = RESOURCE_INDEX[payload_hash]['resource_spec']
+            pod_config['data_feed_resources'] = resource_spec['data-feed-container']
             pod_config['labels']['svoe.has-resources'] = True
-            print(f'Set resources for {payload_hash}')
+            SUMMARY[RESOURCE_SPEC_SUMMARY_KEY][exchange][instrument_type][symbol_distribution_strategy]['set_payloads_count'] += 1
+            SUMMARY[RESOURCE_SPEC_SUMMARY_KEY][exchange][instrument_type][symbol_distribution_strategy]['set_payloads'].append(
+                {
+                    'payload_hash': payload_hash,
+                    'symbols': symbol_pod_mapping[pod_id],
+                })
         else:
             pod_config['labels']['svoe.has-resources'] = False
-            print(f'No resources for {payload_hash}')
-
+            SUMMARY[RESOURCE_SPEC_SUMMARY_KEY][exchange][instrument_type][symbol_distribution_strategy]['skipped_payloads_count'] += 1
+            SUMMARY[RESOURCE_SPEC_SUMMARY_KEY][exchange][instrument_type][symbol_distribution_strategy]['skipped_payloads'].append(
+                {
+                    'payload_hash': payload_hash,
+                    'symbols': symbol_pod_mapping[pod_id],
+                })
         pod_configs.append(pod_config)
 
     # filter by requested number of pods
@@ -355,97 +387,98 @@ def _hash_short(hash):
     return hash[:10]
 
 
-def _get_resources(payload_hash):
-    if payload_hash not in RESOURCE_ESTIMATOR_DATA:
-        print(f'payload_hash {payload_hash} not found in stats')
-        return None
-    final_result = RESOURCE_ESTIMATOR_DATA[payload_hash]['final_result']
-    if 'metrics' not in RESOURCE_ESTIMATOR_DATA[payload_hash]:
-        print(f'No metrics found for payload_hash {payload_hash}, final_result {final_result}')
-        return None
+def _build_resource_index(resource_estimation_dates):
+    index = {}
+    for date in resource_estimation_dates:
+        file_path = RESOURCE_ESTIMATION_FOLDER + f'/{date}/resources-estimation.json'
+        data = json.load(open(file_path))
+        for key in data: # key should be pod name
+            item = data[key]
+            if 'metrics' not in item:
+                continue
+            payload_hash = item['payload_hash']
+            payload_config = item['payload_config']
+            symbol_distribution = item['symbol_distribution']
+            unhealthy_channels = {}
+            for channel in item['metrics']['df_health']:
+                for symbol in item['metrics']['df_health'][channel]:
+                    m = item['metrics']['df_health'][channel][symbol]
+                    absent = m['absent'][0]
+                    avg = m['avg'][0]
+                    # mark unhealthy channels with reason
+                    if avg is None:
+                        unhealthy_channels[channel] = 'AVG_IS_NONE'
+                    elif float(absent) > 0.5:
+                        unhealthy_channels[channel] = f'ABSENT_THRESH({absent})'
+                    elif float(avg) < HEALTH_THRESHOLD_PER_CHANNEL[channel]:
+                        unhealthy_channels[channel] = f'AVG_THRESH({avg})'
 
-    # check health report first
-    for data_type in RESOURCE_ESTIMATOR_DATA[payload_hash]['metrics']['df_health']:
-        for symbol in RESOURCE_ESTIMATOR_DATA[payload_hash]['metrics']['df_health'][data_type]:
-            m = RESOURCE_ESTIMATOR_DATA[payload_hash]['metrics']['df_health'][data_type][symbol]
-            absent = m['absent'][0]
-            if absent is None:
-                err = m['absent'][1]
-                print(f'[{payload_hash}][df_health] No absent metric for {data_type} {symbol}, err: {err}')
-                return None
-            if float(absent) > 0.5:
-                print(f'[{payload_hash}][df_health] Absent metric for {data_type} {symbol} did not pass 0.5 thresh, value: {absent}')
-                return None
-            avg = m['avg'][0]
-            if avg is None:
-                err = m['avg'][1]
-                print(f'[{payload_hash}][df_health] No avg metric for {data_type} {symbol}, err: {err}')
-                return None
-            if float(avg) < 0.5:
-                print(f'[{payload_hash}][df_health] Avg metric for {data_type} {symbol} did not pass 0.5 thresh, value: {avg}')
-                return None
+            # in case of unhealthy channels we reuse healthy channels only to build resource spec
+            if len(unhealthy_channels.keys()) != 0:
+                exch = list(payload_config.keys())[0]
+                for channel in unhealthy_channels:
+                    del payload_config[exch][channel]
+                # rehash
+                payload_hash = _hash_short(_hash(payload_config))
 
-    res = {}
-    # {
-    #     'requests': {
-    #         'cpu': '25m',
-    #         'memory': '200Mi'
-    #     },
-    #     'limits': {
-    #         'cpu': '50m',
-    #         'memory': '400Mi'
-    #     }
-    # }
-    # set resources
-    for type in ['metrics_server_cpu', 'metrics_server_mem']:
-        for container in RESOURCE_ESTIMATOR_DATA[payload_hash]['metrics'][type]:
-            for duration in ['run_duration', '600s']:
-                m = RESOURCE_ESTIMATOR_DATA[payload_hash]['metrics'][type][container][duration]
-                absent = m['absent'][0]
-                if absent is None:
-                    err = m['absent'][1]
-                    print(f'[{payload_hash}][{type}] No absent metric for {container} {duration}, err: {err}')
-                    continue
-                if float(absent) > 0.5:
-                    print(f'[{payload_hash}][{type}] Absent metric for {container} {duration} did not pass 0.5 thresh, value: {absent}')
-                    continue
-                v_p95 = m['p95'][0]
-                v_avg = m['avg'][0]
-                if v_p95 is None or v_avg is None:
-                    print(f'[{payload_hash}][{type}] p95 or avg metric for {container} {duration} is missing')
-                    continue
-                else:
-                    if container not in res:
-                        res[container] = {
-                            'requests' : {},
-                            'limits': {}
-                        }
-                    REQUEST_UP = 0.1
-                    LIMIT_UP = 0.5
-                    if type == 'metrics_server_cpu':
-                        # use avg for cpu because it spikes in the beginning
-                        request = (float(v_avg)/(1000.0 * 1000.0)) * (1 + REQUEST_UP)
-                        if 'cpu' in res[container]['requests']:
-                            # already set
+            if payload_hash in index:
+                if symbol_distribution not in index[payload_hash]['symbol_distributions']:
+                    index[payload_hash]['symbol_distributions'].append(symbol_distribution)
+                continue
+
+            resource_spec = {}
+            for type in ['metrics_server_cpu', 'metrics_server_mem']:
+                for container in item['metrics'][type]:
+                    for duration in ['run_duration', '600s']:
+                        m = item['metrics'][type][container][duration]
+                        absent = m['absent'][0]
+                        if absent is None or float(absent) > 0.5:
                             continue
-                        # for cpu we set only requests
-                        req_str = str(int(request)) + 'm'
-                        res[container]['requests']['cpu'] = req_str
-                        print(f'[{payload_hash}][{container}][{duration}] Request cpu {req_str}')
-                    else:
-                        request = (float(v_p95)/(1000.0)) * (1 + REQUEST_UP)
-                        limit = request * (1 + LIMIT_UP)
-                        if 'memory' in res[container]['requests']:
-                            # already set
+                        v_p95 = m['p95'][0]
+                        v_avg = m['avg'][0]
+                        if v_p95 is None or v_avg is None:
                             continue
-                        req_str = str(int(request)) + 'Mi'
-                        lim_str = str(int(limit)) + 'Mi'
-                        res[container]['requests']['memory'] = req_str
-                        print(f'[{payload_hash}][{container}][{duration}] Request memory {req_str}')
-                        res[container]['limits']['memory'] = lim_str
-                        print(f'[{payload_hash}][{container}][{duration}] Limit memory {lim_str}')
+                        if container not in resource_spec:
+                            resource_spec[container] = {
+                                'requests': {},
+                                'limits': {}
+                            }
+                        REQUEST_UP = 0.1
+                        LIMIT_UP = 0.5
+                        if type == 'metrics_server_cpu':
+                            # use avg for cpu because it spikes in the beginning
+                            request = (float(v_avg) / (1000.0 * 1000.0)) * (1 + REQUEST_UP)
+                            if 'cpu' in resource_spec[container]['requests']:
+                                # already set
+                                continue
+                            # for cpu we set only requests
+                            req_str = str(int(request)) + 'm'
+                            resource_spec[container]['requests']['cpu'] = req_str
+                        else:
+                            request = (float(v_p95) / (1000.0)) * (1 + REQUEST_UP)
+                            limit = request * (1 + LIMIT_UP)
+                            if 'memory' in resource_spec[container]['requests']:
+                                # already set
+                                continue
+                            req_str = str(int(request)) + 'Mi'
+                            lim_str = str(int(limit)) + 'Mi'
+                            resource_spec[container]['requests']['memory'] = req_str
+                            resource_spec[container]['limits']['memory'] = lim_str
 
-    return res
+            index[payload_hash] = {
+                'payload_config': payload_config,
+                'resource_spec': resource_spec,
+                'symbol_distributions': [symbol_distribution]
+            }
+
+            if len(unhealthy_channels.keys()) != 0:
+                index[payload_hash]['skipped_channels'] = unhealthy_channels
+
+        with open(RESOURCE_INDEX_PATH, 'w+') as outfile:
+            json.dump(index, outfile, indent=4, sort_keys=True)
+
+        return index
+
 
 def _get_build_info(version):
     if version in BUILD_INFO_LOOKUP:
@@ -458,5 +491,9 @@ def _get_build_info(version):
     BUILD_INFO_LOOKUP[version] = labels
     return labels
 
+RESOURCE_INDEX = _build_resource_index(['03-08-2022-17-05-14'])
+
 gen_helm_values()
+
+print('Summary\n' + str(SUMMARY['resource_spec_counter']['BINANCE']['spot']))
 print('Done.')

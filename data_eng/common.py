@@ -39,8 +39,6 @@ def group_by_date(files: list[str]) -> dict:
     return res
 
 
-
-
 # 'svoe.test.1/parquet/BINANCE_FUTURES/l2_book/ADA-USDT/BINANCE_FUTURES-l2_book-ADA-USDT-1625077342.parquet'
 def _date(file: str) -> str:
     ts = int(file.split('-')[-1].split('.')[0])

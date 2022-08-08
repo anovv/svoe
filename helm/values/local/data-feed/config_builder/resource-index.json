@@ -1,0 +1,6133 @@
+{
+    "0124caba22": {
+        "payload_config": {
+            "PHEMEX": {
+                "l2_book": [
+                    "BTC-USD-PERP",
+                    "XLM-USD-PERP"
+                ],
+                "trades": [
+                    "BTC-USD-PERP",
+                    "XLM-USD-PERP"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "311Mi"
+                },
+                "requests": {
+                    "cpu": "34m",
+                    "memory": "207Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "4Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "3Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "12Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "8Mi"
+                }
+            }
+        },
+        "symbol_distributions": [
+            "LARGEST_WITH_SMALLEST"
+        ]
+    },
+    "04d23ecebf": {
+        "payload_config": {
+            "BINANCE": {
+                "l2_book": [
+                    "TRX-USDT"
+                ],
+                "ticker": [
+                    "TRX-USDT"
+                ],
+                "trades": [
+                    "TRX-USDT"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "550Mi"
+                },
+                "requests": {
+                    "cpu": "80m",
+                    "memory": "367Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "4Mi"
+                },
+                "requests": {
+                    "cpu": "3m",
+                    "memory": "3Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "14Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "9Mi"
+                }
+            }
+        },
+        "symbol_distributions": [
+            "ONE_TO_ONE"
+        ]
+    },
+    "0662045194": {
+        "payload_config": {
+            "BINANCE": {
+                "l2_book": [
+                    "ETH-USDT",
+                    "VET-USDT"
+                ],
+                "ticker": [
+                    "ETH-USDT",
+                    "VET-USDT"
+                ],
+                "trades": [
+                    "ETH-USDT",
+                    "VET-USDT"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "651Mi"
+                },
+                "requests": {
+                    "cpu": "193m",
+                    "memory": "434Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "8Mi"
+                },
+                "requests": {
+                    "cpu": "11m",
+                    "memory": "5Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "13Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "8Mi"
+                }
+            }
+        },
+        "symbol_distributions": [
+            "LARGEST_WITH_SMALLEST"
+        ]
+    },
+    "08c7dd60ab": {
+        "payload_config": {
+            "PHEMEX": {
+                "l2_book": [
+                    "ETH-USDT"
+                ],
+                "trades": [
+                    "ETH-USDT"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "314Mi"
+                },
+                "requests": {
+                    "cpu": "35m",
+                    "memory": "209Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "4Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "2Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "12Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "8Mi"
+                }
+            }
+        },
+        "symbol_distributions": [
+            "ONE_TO_ONE",
+            "EQUAL_BUCKETS"
+        ]
+    },
+    "096a308c46": {
+        "payload_config": {
+            "PHEMEX": {
+                "l2_book": [
+                    "BNB-USD-PERP"
+                ],
+                "trades": [
+                    "BNB-USD-PERP"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "302Mi"
+                },
+                "requests": {
+                    "cpu": "18m",
+                    "memory": "201Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "4Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "3Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "12Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "8Mi"
+                }
+            }
+        },
+        "symbol_distributions": [
+            "ONE_TO_ONE"
+        ]
+    },
+    "09922165aa": {
+        "payload_config": {
+            "BINANCE": {
+                "l2_book": [
+                    "BNB-USDT"
+                ],
+                "ticker": [
+                    "BNB-USDT"
+                ],
+                "trades": [
+                    "BNB-USDT"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "554Mi"
+                },
+                "requests": {
+                    "cpu": "91m",
+                    "memory": "369Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "5Mi"
+                },
+                "requests": {
+                    "cpu": "5m",
+                    "memory": "3Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "12Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "8Mi"
+                }
+            }
+        },
+        "symbol_distributions": [
+            "ONE_TO_ONE"
+        ]
+    },
+    "0a0643b7e5": {
+        "payload_config": {
+            "PHEMEX": {
+                "l2_book": [
+                    "XLM-USD-PERP"
+                ],
+                "trades": [
+                    "XLM-USD-PERP"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "305Mi"
+                },
+                "requests": {
+                    "cpu": "23m",
+                    "memory": "203Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "4Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "3Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "12Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "8Mi"
+                }
+            }
+        },
+        "symbol_distributions": [
+            "ONE_TO_ONE"
+        ]
+    },
+    "0e0c978ec6": {
+        "payload_config": {
+            "BINANCE_FUTURES": {
+                "funding": [
+                    "FIL-USDT-PERP",
+                    "MATIC-USDT-PERP"
+                ],
+                "l2_book": [
+                    "FIL-USDT-PERP",
+                    "MATIC-USDT-PERP"
+                ],
+                "liquidations": [
+                    "FIL-USDT-PERP",
+                    "MATIC-USDT-PERP"
+                ],
+                "ticker": [
+                    "FIL-USDT-PERP",
+                    "MATIC-USDT-PERP"
+                ],
+                "trades": [
+                    "FIL-USDT-PERP",
+                    "MATIC-USDT-PERP"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "615Mi"
+                },
+                "requests": {
+                    "cpu": "185m",
+                    "memory": "410Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "7Mi"
+                },
+                "requests": {
+                    "cpu": "8m",
+                    "memory": "4Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "11Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "7Mi"
+                }
+            }
+        },
+        "skipped_channels": {
+            "open_interest": "AVG_IS_NONE"
+        },
+        "symbol_distributions": [
+            "LARGEST_WITH_SMALLEST"
+        ]
+    },
+    "10d692a769": {
+        "payload_config": {
+            "BINANCE_FUTURES": {
+                "funding": [
+                    "DOGE-USDT-PERP",
+                    "DOT-USDT-PERP"
+                ],
+                "l2_book": [
+                    "DOGE-USDT-PERP",
+                    "DOT-USDT-PERP"
+                ],
+                "liquidations": [
+                    "DOGE-USDT-PERP",
+                    "DOT-USDT-PERP"
+                ],
+                "ticker": [
+                    "DOGE-USDT-PERP",
+                    "DOT-USDT-PERP"
+                ],
+                "trades": [
+                    "DOGE-USDT-PERP",
+                    "DOT-USDT-PERP"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "686Mi"
+                },
+                "requests": {
+                    "cpu": "212m",
+                    "memory": "457Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "7Mi"
+                },
+                "requests": {
+                    "cpu": "8m",
+                    "memory": "4Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "13Mi"
+                },
+                "requests": {
+                    "cpu": "2m",
+                    "memory": "9Mi"
+                }
+            }
+        },
+        "skipped_channels": {
+            "open_interest": "AVG_IS_NONE"
+        },
+        "symbol_distributions": [
+            "LARGEST_WITH_SMALLEST"
+        ]
+    },
+    "12ebf046e9": {
+        "payload_config": {
+            "BINANCE": {
+                "l2_book": [
+                    "DOGE-USDT",
+                    "SHIB-USDT"
+                ],
+                "ticker": [
+                    "DOGE-USDT",
+                    "SHIB-USDT"
+                ],
+                "trades": [
+                    "DOGE-USDT",
+                    "SHIB-USDT"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "586Mi"
+                },
+                "requests": {
+                    "cpu": "139m",
+                    "memory": "390Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "5Mi"
+                },
+                "requests": {
+                    "cpu": "6m",
+                    "memory": "3Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "12Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "8Mi"
+                }
+            }
+        },
+        "symbol_distributions": [
+            "LARGEST_WITH_SMALLEST"
+        ]
+    },
+    "1aebbed452": {
+        "payload_config": {
+            "BINANCE": {
+                "l2_book": [
+                    "BNB-USDT",
+                    "TRX-USDT"
+                ],
+                "ticker": [
+                    "BNB-USDT",
+                    "TRX-USDT"
+                ],
+                "trades": [
+                    "BNB-USDT",
+                    "TRX-USDT"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "591Mi"
+                },
+                "requests": {
+                    "cpu": "138m",
+                    "memory": "394Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "5Mi"
+                },
+                "requests": {
+                    "cpu": "6m",
+                    "memory": "3Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "13Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "8Mi"
+                }
+            }
+        },
+        "symbol_distributions": [
+            "LARGEST_WITH_SMALLEST"
+        ]
+    },
+    "1b8dfa02e5": {
+        "payload_config": {
+            "PHEMEX": {
+                "l2_book": [
+                    "BCH-USD-PERP",
+                    "DOT-USD-PERP"
+                ],
+                "trades": [
+                    "BCH-USD-PERP",
+                    "DOT-USD-PERP"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "306Mi"
+                },
+                "requests": {
+                    "cpu": "34m",
+                    "memory": "204Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "4Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "3Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "12Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "8Mi"
+                }
+            }
+        },
+        "symbol_distributions": [
+            "LARGEST_WITH_SMALLEST"
+        ]
+    },
+    "1ff51882e3": {
+        "payload_config": {
+            "BINANCE": {
+                "l2_book": [
+                    "DOT-USDT",
+                    "SHIB-USDT",
+                    "UNI-USDT",
+                    "XRP-USDT"
+                ],
+                "ticker": [
+                    "DOT-USDT",
+                    "SHIB-USDT",
+                    "UNI-USDT",
+                    "XRP-USDT"
+                ],
+                "trades": [
+                    "DOT-USDT",
+                    "SHIB-USDT",
+                    "UNI-USDT",
+                    "XRP-USDT"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "759Mi"
+                },
+                "requests": {
+                    "cpu": "206m",
+                    "memory": "506Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "6Mi"
+                },
+                "requests": {
+                    "cpu": "8m",
+                    "memory": "4Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "13Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "8Mi"
+                }
+            }
+        },
+        "symbol_distributions": [
+            "EQUAL_BUCKETS"
+        ]
+    },
+    "2331541903": {
+        "payload_config": {
+            "PHEMEX": {
+                "l2_book": [
+                    "BCH-USDT"
+                ],
+                "trades": [
+                    "BCH-USDT"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "312Mi"
+                },
+                "requests": {
+                    "cpu": "23m",
+                    "memory": "208Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "5Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "3Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "12Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "8Mi"
+                }
+            }
+        },
+        "symbol_distributions": [
+            "ONE_TO_ONE"
+        ]
+    },
+    "288572a4de": {
+        "payload_config": {
+            "PHEMEX": {
+                "l2_book": [
+                    "BTC-USD-PERP"
+                ],
+                "trades": [
+                    "BTC-USD-PERP"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "304Mi"
+                },
+                "requests": {
+                    "cpu": "22m",
+                    "memory": "203Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "4Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "3Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "12Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "8Mi"
+                }
+            }
+        },
+        "symbol_distributions": [
+            "EQUAL_BUCKETS",
+            "ONE_TO_ONE"
+        ]
+    },
+    "28cee28b53": {
+        "payload_config": {
+            "PHEMEX": {
+                "l2_book": [
+                    "TRX-USD-PERP"
+                ],
+                "trades": [
+                    "TRX-USD-PERP"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "301Mi"
+                },
+                "requests": {
+                    "cpu": "28m",
+                    "memory": "200Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "4Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "3Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "12Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "8Mi"
+                }
+            }
+        },
+        "symbol_distributions": [
+            "ONE_TO_ONE"
+        ]
+    },
+    "29a051744e": {
+        "payload_config": {
+            "BINANCE": {
+                "l2_book": [
+                    "VET-USDT"
+                ],
+                "ticker": [
+                    "VET-USDT"
+                ],
+                "trades": [
+                    "VET-USDT"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "566Mi"
+                },
+                "requests": {
+                    "cpu": "78m",
+                    "memory": "377Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "4Mi"
+                },
+                "requests": {
+                    "cpu": "3m",
+                    "memory": "3Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "13Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "8Mi"
+                }
+            }
+        },
+        "symbol_distributions": [
+            "ONE_TO_ONE"
+        ]
+    },
+    "2b7c362843": {
+        "payload_config": {
+            "PHEMEX": {
+                "l2_book": [
+                    "MATIC-USDT"
+                ],
+                "trades": [
+                    "MATIC-USDT"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "315Mi"
+                },
+                "requests": {
+                    "cpu": "33m",
+                    "memory": "210Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "4Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "3Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "12Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "8Mi"
+                }
+            }
+        },
+        "symbol_distributions": [
+            "ONE_TO_ONE"
+        ]
+    },
+    "33a370d690": {
+        "payload_config": {
+            "BINANCE_FUTURES": {
+                "funding": [
+                    "ADA-USDT-PERP",
+                    "BNB-USDT-PERP",
+                    "MATIC-USDT-PERP"
+                ],
+                "l2_book": [
+                    "ADA-USDT-PERP",
+                    "BNB-USDT-PERP",
+                    "MATIC-USDT-PERP"
+                ],
+                "liquidations": [
+                    "ADA-USDT-PERP",
+                    "BNB-USDT-PERP",
+                    "MATIC-USDT-PERP"
+                ],
+                "ticker": [
+                    "ADA-USDT-PERP",
+                    "BNB-USDT-PERP",
+                    "MATIC-USDT-PERP"
+                ],
+                "trades": [
+                    "ADA-USDT-PERP",
+                    "BNB-USDT-PERP",
+                    "MATIC-USDT-PERP"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "841Mi"
+                },
+                "requests": {
+                    "cpu": "340m",
+                    "memory": "560Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "8Mi"
+                },
+                "requests": {
+                    "cpu": "17m",
+                    "memory": "5Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "13Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "9Mi"
+                }
+            }
+        },
+        "skipped_channels": {
+            "open_interest": "AVG_IS_NONE"
+        },
+        "symbol_distributions": [
+            "EQUAL_BUCKETS"
+        ]
+    },
+    "375abeb366": {
+        "payload_config": {
+            "BINANCE_FUTURES": {
+                "funding": [
+                    "TRX-USDT-PERP"
+                ],
+                "l2_book": [
+                    "TRX-USDT-PERP"
+                ],
+                "liquidations": [
+                    "TRX-USDT-PERP"
+                ],
+                "ticker": [
+                    "TRX-USDT-PERP"
+                ],
+                "trades": [
+                    "TRX-USDT-PERP"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "512Mi"
+                },
+                "requests": {
+                    "cpu": "93m",
+                    "memory": "341Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "5Mi"
+                },
+                "requests": {
+                    "cpu": "4m",
+                    "memory": "3Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "12Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "8Mi"
+                }
+            }
+        },
+        "skipped_channels": {
+            "open_interest": "AVG_IS_NONE"
+        },
+        "symbol_distributions": [
+            "ONE_TO_ONE"
+        ]
+    },
+    "3b3094b048": {
+        "payload_config": {
+            "BINANCE": {
+                "l2_book": [
+                    "XLM-USDT"
+                ],
+                "ticker": [
+                    "XLM-USDT"
+                ],
+                "trades": [
+                    "XLM-USDT"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "550Mi"
+                },
+                "requests": {
+                    "cpu": "68m",
+                    "memory": "366Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "7Mi"
+                },
+                "requests": {
+                    "cpu": "3m",
+                    "memory": "5Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "12Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "8Mi"
+                }
+            }
+        },
+        "symbol_distributions": [
+            "EQUAL_BUCKETS",
+            "ONE_TO_ONE"
+        ]
+    },
+    "3dcad1ef0e": {
+        "payload_config": {
+            "PHEMEX": {
+                "l2_book": [
+                    "DOGE-USD-PERP",
+                    "LINK-USD-PERP",
+                    "LTC-USD-PERP",
+                    "TRX-USD-PERP"
+                ],
+                "trades": [
+                    "DOGE-USD-PERP",
+                    "LINK-USD-PERP",
+                    "LTC-USD-PERP",
+                    "TRX-USD-PERP"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "309Mi"
+                },
+                "requests": {
+                    "cpu": "32m",
+                    "memory": "206Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "4Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "3Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "12Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "8Mi"
+                }
+            }
+        },
+        "symbol_distributions": [
+            "EQUAL_BUCKETS"
+        ]
+    },
+    "3df66ee91b": {
+        "payload_config": {
+            "BINANCE_FUTURES": {
+                "funding": [
+                    "XLM-USDT-PERP"
+                ],
+                "l2_book": [
+                    "XLM-USDT-PERP"
+                ],
+                "liquidations": [
+                    "XLM-USDT-PERP"
+                ],
+                "ticker": [
+                    "XLM-USDT-PERP"
+                ],
+                "trades": [
+                    "XLM-USDT-PERP"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "510Mi"
+                },
+                "requests": {
+                    "cpu": "86m",
+                    "memory": "340Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "5Mi"
+                },
+                "requests": {
+                    "cpu": "3m",
+                    "memory": "3Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "13Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "8Mi"
+                }
+            }
+        },
+        "skipped_channels": {
+            "open_interest": "AVG_IS_NONE"
+        },
+        "symbol_distributions": [
+            "ONE_TO_ONE"
+        ]
+    },
+    "40adc79f32": {
+        "payload_config": {
+            "PHEMEX": {
+                "l2_book": [
+                    "TRX-USDT"
+                ],
+                "trades": [
+                    "TRX-USDT"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "320Mi"
+                },
+                "requests": {
+                    "cpu": "21m",
+                    "memory": "213Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "4Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "3Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "12Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "8Mi"
+                }
+            }
+        },
+        "symbol_distributions": [
+            "ONE_TO_ONE"
+        ]
+    },
+    "40e895c9f6": {
+        "payload_config": {
+            "BINANCE_FUTURES": {
+                "funding": [
+                    "BCH-USDT-PERP"
+                ],
+                "l2_book": [
+                    "BCH-USDT-PERP"
+                ],
+                "liquidations": [
+                    "BCH-USDT-PERP"
+                ],
+                "ticker": [
+                    "BCH-USDT-PERP"
+                ],
+                "trades": [
+                    "BCH-USDT-PERP"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "505Mi"
+                },
+                "requests": {
+                    "cpu": "114m",
+                    "memory": "337Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "5Mi"
+                },
+                "requests": {
+                    "cpu": "5m",
+                    "memory": "3Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "12Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "8Mi"
+                }
+            }
+        },
+        "skipped_channels": {
+            "open_interest": "AVG_IS_NONE"
+        },
+        "symbol_distributions": [
+            "ONE_TO_ONE"
+        ]
+    },
+    "4210bd10f5": {
+        "payload_config": {
+            "PHEMEX": {
+                "l2_book": [
+                    "BTC-USDT",
+                    "XLM-USDT"
+                ],
+                "trades": [
+                    "BTC-USDT",
+                    "XLM-USDT"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "314Mi"
+                },
+                "requests": {
+                    "cpu": "33m",
+                    "memory": "209Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "4Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "3Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "13Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "9Mi"
+                }
+            }
+        },
+        "symbol_distributions": [
+            "LARGEST_WITH_SMALLEST"
+        ]
+    },
+    "44d634ec82": {
+        "payload_config": {
+            "PHEMEX": {
+                "l2_book": [
+                    "XLM-USDT"
+                ],
+                "trades": [
+                    "XLM-USDT"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "306Mi"
+                },
+                "requests": {
+                    "cpu": "22m",
+                    "memory": "204Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "4Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "2Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "12Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "8Mi"
+                }
+            }
+        },
+        "symbol_distributions": [
+            "ONE_TO_ONE"
+        ]
+    },
+    "44e79ec15f": {
+        "payload_config": {
+            "BINANCE": {
+                "l2_book": [
+                    "BCH-USDT",
+                    "DOGE-USDT",
+                    "LINK-USDT",
+                    "LTC-USDT"
+                ],
+                "ticker": [
+                    "BCH-USDT",
+                    "DOGE-USDT",
+                    "LINK-USDT",
+                    "LTC-USDT"
+                ],
+                "trades": [
+                    "BCH-USDT",
+                    "DOGE-USDT",
+                    "LINK-USDT",
+                    "LTC-USDT"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "761Mi"
+                },
+                "requests": {
+                    "cpu": "207m",
+                    "memory": "507Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "6Mi"
+                },
+                "requests": {
+                    "cpu": "8m",
+                    "memory": "4Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "12Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "8Mi"
+                }
+            }
+        },
+        "symbol_distributions": [
+            "EQUAL_BUCKETS"
+        ]
+    },
+    "454123d11d": {
+        "payload_config": {
+            "BINANCE": {
+                "l2_book": [
+                    "LINK-USDT",
+                    "XRP-USDT"
+                ],
+                "ticker": [
+                    "LINK-USDT",
+                    "XRP-USDT"
+                ],
+                "trades": [
+                    "LINK-USDT",
+                    "XRP-USDT"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "622Mi"
+                },
+                "requests": {
+                    "cpu": "135m",
+                    "memory": "414Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "5Mi"
+                },
+                "requests": {
+                    "cpu": "6m",
+                    "memory": "3Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "11Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "7Mi"
+                }
+            }
+        },
+        "symbol_distributions": [
+            "LARGEST_WITH_SMALLEST"
+        ]
+    },
+    "466a5df393": {
+        "payload_config": {
+            "BINANCE_FUTURES": {
+                "funding": [
+                    "EOS-USDT-PERP",
+                    "FIL-USDT-PERP",
+                    "VET-USDT-PERP",
+                    "XLM-USDT-PERP"
+                ],
+                "l2_book": [
+                    "EOS-USDT-PERP",
+                    "FIL-USDT-PERP",
+                    "VET-USDT-PERP",
+                    "XLM-USDT-PERP"
+                ],
+                "liquidations": [
+                    "EOS-USDT-PERP",
+                    "FIL-USDT-PERP",
+                    "VET-USDT-PERP",
+                    "XLM-USDT-PERP"
+                ],
+                "ticker": [
+                    "EOS-USDT-PERP",
+                    "FIL-USDT-PERP",
+                    "VET-USDT-PERP",
+                    "XLM-USDT-PERP"
+                ],
+                "trades": [
+                    "EOS-USDT-PERP",
+                    "FIL-USDT-PERP",
+                    "VET-USDT-PERP",
+                    "XLM-USDT-PERP"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "849Mi"
+                },
+                "requests": {
+                    "cpu": "271m",
+                    "memory": "566Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "8Mi"
+                },
+                "requests": {
+                    "cpu": "11m",
+                    "memory": "5Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "12Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "8Mi"
+                }
+            }
+        },
+        "skipped_channels": {
+            "open_interest": "AVG_IS_NONE"
+        },
+        "symbol_distributions": [
+            "EQUAL_BUCKETS"
+        ]
+    },
+    "46b81f4569": {
+        "payload_config": {
+            "BINANCE_FUTURES": {
+                "funding": [
+                    "MATIC-USDT-PERP"
+                ],
+                "l2_book": [
+                    "MATIC-USDT-PERP"
+                ],
+                "liquidations": [
+                    "MATIC-USDT-PERP"
+                ],
+                "ticker": [
+                    "MATIC-USDT-PERP"
+                ],
+                "trades": [
+                    "MATIC-USDT-PERP"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "511Mi"
+                },
+                "requests": {
+                    "cpu": "125m",
+                    "memory": "341Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "6Mi"
+                },
+                "requests": {
+                    "cpu": "6m",
+                    "memory": "4Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "14Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "9Mi"
+                }
+            }
+        },
+        "skipped_channels": {
+            "open_interest": "AVG_IS_NONE"
+        },
+        "symbol_distributions": [
+            "ONE_TO_ONE"
+        ]
+    },
+    "4c96abcad0": {
+        "payload_config": {
+            "PHEMEX": {
+                "l2_book": [
+                    "EOS-USD-PERP",
+                    "ETH-USD-PERP"
+                ],
+                "trades": [
+                    "EOS-USD-PERP",
+                    "ETH-USD-PERP"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "306Mi"
+                },
+                "requests": {
+                    "cpu": "31m",
+                    "memory": "204Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "4Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "2Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "12Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "8Mi"
+                }
+            }
+        },
+        "symbol_distributions": [
+            "LARGEST_WITH_SMALLEST"
+        ]
+    },
+    "4e7f155f0f": {
+        "payload_config": {
+            "PHEMEX": {
+                "l2_book": [
+                    "ADA-USD-PERP",
+                    "BNB-USD-PERP",
+                    "MATIC-USD-PERP"
+                ],
+                "trades": [
+                    "ADA-USD-PERP",
+                    "BNB-USD-PERP",
+                    "MATIC-USD-PERP"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "310Mi"
+                },
+                "requests": {
+                    "cpu": "29m",
+                    "memory": "206Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "4Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "3Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "12Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "8Mi"
+                }
+            }
+        },
+        "symbol_distributions": [
+            "EQUAL_BUCKETS"
+        ]
+    },
+    "4e9e813531": {
+        "payload_config": {
+            "PHEMEX": {
+                "l2_book": [
+                    "DOT-USDT",
+                    "SHIB-USDT",
+                    "UNI-USDT",
+                    "XRP-USDT"
+                ],
+                "trades": [
+                    "DOT-USDT",
+                    "SHIB-USDT",
+                    "UNI-USDT",
+                    "XRP-USDT"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "311Mi"
+                },
+                "requests": {
+                    "cpu": "38m",
+                    "memory": "207Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "4Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "2Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "12Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "8Mi"
+                }
+            }
+        },
+        "symbol_distributions": [
+            "EQUAL_BUCKETS"
+        ]
+    },
+    "4fde30d1b7": {
+        "payload_config": {
+            "BINANCE_FUTURES": {
+                "funding": [
+                    "LINK-USDT-PERP",
+                    "XRP-USDT-PERP"
+                ],
+                "l2_book": [
+                    "LINK-USDT-PERP",
+                    "XRP-USDT-PERP"
+                ],
+                "liquidations": [
+                    "LINK-USDT-PERP",
+                    "XRP-USDT-PERP"
+                ],
+                "ticker": [
+                    "LINK-USDT-PERP",
+                    "XRP-USDT-PERP"
+                ],
+                "trades": [
+                    "LINK-USDT-PERP",
+                    "XRP-USDT-PERP"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "607Mi"
+                },
+                "requests": {
+                    "cpu": "183m",
+                    "memory": "405Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "5Mi"
+                },
+                "requests": {
+                    "cpu": "8m",
+                    "memory": "3Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "13Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "8Mi"
+                }
+            }
+        },
+        "skipped_channels": {
+            "open_interest": "AVG_IS_NONE"
+        },
+        "symbol_distributions": [
+            "LARGEST_WITH_SMALLEST"
+        ]
+    },
+    "50917508e0": {
+        "payload_config": {
+            "BINANCE_FUTURES": {
+                "funding": [
+                    "ETC-USDT-PERP"
+                ],
+                "l2_book": [
+                    "ETC-USDT-PERP"
+                ],
+                "liquidations": [
+                    "ETC-USDT-PERP"
+                ],
+                "ticker": [
+                    "ETC-USDT-PERP"
+                ],
+                "trades": [
+                    "ETC-USDT-PERP"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "533Mi"
+                },
+                "requests": {
+                    "cpu": "107m",
+                    "memory": "355Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "7Mi"
+                },
+                "requests": {
+                    "cpu": "5m",
+                    "memory": "4Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "12Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "8Mi"
+                }
+            }
+        },
+        "skipped_channels": {
+            "open_interest": "AVG_IS_NONE"
+        },
+        "symbol_distributions": [
+            "ONE_TO_ONE",
+            "EQUAL_BUCKETS"
+        ]
+    },
+    "5325c4e1ff": {
+        "payload_config": {
+            "PHEMEX": {
+                "l2_book": [
+                    "UNI-USDT"
+                ],
+                "trades": [
+                    "UNI-USDT"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "316Mi"
+                },
+                "requests": {
+                    "cpu": "28m",
+                    "memory": "211Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "6Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "4Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "13Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "8Mi"
+                }
+            }
+        },
+        "symbol_distributions": [
+            "ONE_TO_ONE"
+        ]
+    },
+    "54c5cca62a": {
+        "payload_config": {
+            "BINANCE": {
+                "l2_book": [
+                    "LTC-USDT"
+                ],
+                "ticker": [
+                    "LTC-USDT"
+                ],
+                "trades": [
+                    "LTC-USDT"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "568Mi"
+                },
+                "requests": {
+                    "cpu": "80m",
+                    "memory": "379Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "5Mi"
+                },
+                "requests": {
+                    "cpu": "4m",
+                    "memory": "3Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "12Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "8Mi"
+                }
+            }
+        },
+        "symbol_distributions": [
+            "ONE_TO_ONE"
+        ]
+    },
+    "5a4bd716b0": {
+        "payload_config": {
+            "PHEMEX": {
+                "l2_book": [
+                    "ETC-USDT",
+                    "FIL-USDT"
+                ],
+                "trades": [
+                    "ETC-USDT",
+                    "FIL-USDT"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "319Mi"
+                },
+                "requests": {
+                    "cpu": "29m",
+                    "memory": "213Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "8Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "5Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "12Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "8Mi"
+                }
+            }
+        },
+        "symbol_distributions": [
+            "LARGEST_WITH_SMALLEST"
+        ]
+    },
+    "5bdf961c62": {
+        "payload_config": {
+            "PHEMEX": {
+                "l2_book": [
+                    "ADA-USD-PERP"
+                ],
+                "trades": [
+                    "ADA-USD-PERP"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "304Mi"
+                },
+                "requests": {
+                    "cpu": "21m",
+                    "memory": "203Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "4Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "2Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "12Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "8Mi"
+                }
+            }
+        },
+        "symbol_distributions": [
+            "ONE_TO_ONE"
+        ]
+    },
+    "5c4b05e853": {
+        "payload_config": {
+            "BINANCE_FUTURES": {
+                "funding": [
+                    "VET-USDT-PERP"
+                ],
+                "l2_book": [
+                    "VET-USDT-PERP"
+                ],
+                "liquidations": [
+                    "VET-USDT-PERP"
+                ],
+                "ticker": [
+                    "VET-USDT-PERP"
+                ],
+                "trades": [
+                    "VET-USDT-PERP"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "501Mi"
+                },
+                "requests": {
+                    "cpu": "100m",
+                    "memory": "334Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "5Mi"
+                },
+                "requests": {
+                    "cpu": "4m",
+                    "memory": "3Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "11Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "7Mi"
+                }
+            }
+        },
+        "skipped_channels": {
+            "open_interest": "AVG_IS_NONE"
+        },
+        "symbol_distributions": [
+            "ONE_TO_ONE"
+        ]
+    },
+    "5c570ebafc": {
+        "payload_config": {
+            "BINANCE": {
+                "l2_book": [
+                    "DOGE-USDT"
+                ],
+                "ticker": [
+                    "DOGE-USDT"
+                ],
+                "trades": [
+                    "DOGE-USDT"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "558Mi"
+                },
+                "requests": {
+                    "cpu": "84m",
+                    "memory": "372Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "5Mi"
+                },
+                "requests": {
+                    "cpu": "5m",
+                    "memory": "3Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "12Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "8Mi"
+                }
+            }
+        },
+        "symbol_distributions": [
+            "ONE_TO_ONE"
+        ]
+    },
+    "5cbc63698a": {
+        "payload_config": {
+            "PHEMEX": {
+                "l2_book": [
+                    "BNB-USD-PERP",
+                    "LTC-USD-PERP"
+                ],
+                "trades": [
+                    "BNB-USD-PERP",
+                    "LTC-USD-PERP"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "305Mi"
+                },
+                "requests": {
+                    "cpu": "22m",
+                    "memory": "203Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "4Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "2Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "14Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "9Mi"
+                }
+            }
+        },
+        "symbol_distributions": [
+            "LARGEST_WITH_SMALLEST"
+        ]
+    },
+    "5f1a21d562": {
+        "payload_config": {
+            "PHEMEX": {
+                "l2_book": [
+                    "XRP-USDT"
+                ],
+                "trades": [
+                    "XRP-USDT"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "313Mi"
+                },
+                "requests": {
+                    "cpu": "22m",
+                    "memory": "208Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "4Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "2Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "13Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "8Mi"
+                }
+            }
+        },
+        "symbol_distributions": [
+            "ONE_TO_ONE"
+        ]
+    },
+    "608d04f3ff": {
+        "payload_config": {
+            "BINANCE": {
+                "l2_book": [
+                    "EOS-USDT",
+                    "ETC-USDT"
+                ],
+                "ticker": [
+                    "EOS-USDT",
+                    "ETC-USDT"
+                ],
+                "trades": [
+                    "EOS-USDT",
+                    "ETC-USDT"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "607Mi"
+                },
+                "requests": {
+                    "cpu": "107m",
+                    "memory": "405Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "5Mi"
+                },
+                "requests": {
+                    "cpu": "4m",
+                    "memory": "3Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "12Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "8Mi"
+                }
+            }
+        },
+        "symbol_distributions": [
+            "LARGEST_WITH_SMALLEST"
+        ]
+    },
+    "619ed36ed6": {
+        "payload_config": {
+            "BINANCE": {
+                "l2_book": [
+                    "EOS-USDT",
+                    "FIL-USDT",
+                    "TRX-USDT",
+                    "VET-USDT"
+                ],
+                "ticker": [
+                    "EOS-USDT",
+                    "FIL-USDT",
+                    "TRX-USDT",
+                    "VET-USDT"
+                ],
+                "trades": [
+                    "EOS-USDT",
+                    "FIL-USDT",
+                    "TRX-USDT",
+                    "VET-USDT"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "759Mi"
+                },
+                "requests": {
+                    "cpu": "174m",
+                    "memory": "506Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "6Mi"
+                },
+                "requests": {
+                    "cpu": "6m",
+                    "memory": "4Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "13Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "8Mi"
+                }
+            }
+        },
+        "symbol_distributions": [
+            "EQUAL_BUCKETS"
+        ]
+    },
+    "65be698a05": {
+        "payload_config": {
+            "PHEMEX": {
+                "l2_book": [
+                    "ETC-USD-PERP"
+                ],
+                "trades": [
+                    "ETC-USD-PERP"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "309Mi"
+                },
+                "requests": {
+                    "cpu": "20m",
+                    "memory": "206Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "7Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "4Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "12Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "8Mi"
+                }
+            }
+        },
+        "symbol_distributions": [
+            "EQUAL_BUCKETS",
+            "ONE_TO_ONE"
+        ]
+    },
+    "69b931baa1": {
+        "payload_config": {
+            "PHEMEX": {
+                "l2_book": [
+                    "FIL-USDT"
+                ],
+                "trades": [
+                    "FIL-USDT"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "313Mi"
+                },
+                "requests": {
+                    "cpu": "21m",
+                    "memory": "208Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "4Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "2Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "13Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "9Mi"
+                }
+            }
+        },
+        "symbol_distributions": [
+            "ONE_TO_ONE"
+        ]
+    },
+    "6a6d2a7ef7": {
+        "payload_config": {
+            "BINANCE_FUTURES": {
+                "funding": [
+                    "BTC-USDT-PERP",
+                    "XLM-USDT-PERP"
+                ],
+                "l2_book": [
+                    "BTC-USDT-PERP",
+                    "XLM-USDT-PERP"
+                ],
+                "liquidations": [
+                    "BTC-USDT-PERP",
+                    "XLM-USDT-PERP"
+                ],
+                "ticker": [
+                    "BTC-USDT-PERP",
+                    "XLM-USDT-PERP"
+                ],
+                "trades": [
+                    "BTC-USDT-PERP",
+                    "XLM-USDT-PERP"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "938Mi"
+                },
+                "requests": {
+                    "cpu": "397m",
+                    "memory": "625Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "18Mi"
+                },
+                "requests": {
+                    "cpu": "24m",
+                    "memory": "12Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "13Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "8Mi"
+                }
+            }
+        },
+        "skipped_channels": {
+            "open_interest": "AVG_IS_NONE"
+        },
+        "symbol_distributions": [
+            "LARGEST_WITH_SMALLEST"
+        ]
+    },
+    "6a88a8b26d": {
+        "payload_config": {
+            "PHEMEX": {
+                "l2_book": [
+                    "EOS-USDT"
+                ],
+                "trades": [
+                    "EOS-USDT"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "315Mi"
+                },
+                "requests": {
+                    "cpu": "19m",
+                    "memory": "210Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "4Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "3Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "13Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "8Mi"
+                }
+            }
+        },
+        "symbol_distributions": [
+            "ONE_TO_ONE"
+        ]
+    },
+    "6cc7dec0ab": {
+        "payload_config": {
+            "PHEMEX": {
+                "l2_book": [
+                    "EOS-USDT",
+                    "ETH-USDT"
+                ],
+                "trades": [
+                    "EOS-USDT",
+                    "ETH-USDT"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "309Mi"
+                },
+                "requests": {
+                    "cpu": "22m",
+                    "memory": "206Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "4Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "2Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "12Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "8Mi"
+                }
+            }
+        },
+        "symbol_distributions": [
+            "LARGEST_WITH_SMALLEST"
+        ]
+    },
+    "6d4eb78c07": {
+        "payload_config": {
+            "PHEMEX": {
+                "l2_book": [
+                    "DOT-USDT"
+                ],
+                "trades": [
+                    "DOT-USDT"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "309Mi"
+                },
+                "requests": {
+                    "cpu": "16m",
+                    "memory": "206Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "7Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "4Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "14Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "9Mi"
+                }
+            }
+        },
+        "symbol_distributions": [
+            "ONE_TO_ONE"
+        ]
+    },
+    "6e2184f3df": {
+        "payload_config": {
+            "PHEMEX": {
+                "l2_book": [
+                    "LTC-USD-PERP"
+                ],
+                "trades": [
+                    "LTC-USD-PERP"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "306Mi"
+                },
+                "requests": {
+                    "cpu": "30m",
+                    "memory": "204Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "4Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "3Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "12Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "8Mi"
+                }
+            }
+        },
+        "symbol_distributions": [
+            "ONE_TO_ONE"
+        ]
+    },
+    "7052d4db8a": {
+        "payload_config": {
+            "PHEMEX": {
+                "l2_book": [
+                    "MATIC-USD-PERP"
+                ],
+                "trades": [
+                    "MATIC-USD-PERP"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "312Mi"
+                },
+                "requests": {
+                    "cpu": "20m",
+                    "memory": "208Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "6Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "4Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "13Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "8Mi"
+                }
+            }
+        },
+        "symbol_distributions": [
+            "ONE_TO_ONE"
+        ]
+    },
+    "779366e0c4": {
+        "payload_config": {
+            "PHEMEX": {
+                "l2_book": [
+                    "DOGE-USDT",
+                    "XRP-USDT"
+                ],
+                "trades": [
+                    "DOGE-USDT",
+                    "XRP-USDT"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "321Mi"
+                },
+                "requests": {
+                    "cpu": "20m",
+                    "memory": "214Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "6Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "4Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "13Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "8Mi"
+                }
+            }
+        },
+        "symbol_distributions": [
+            "LARGEST_WITH_SMALLEST"
+        ]
+    },
+    "77ae6f4514": {
+        "payload_config": {
+            "PHEMEX": {
+                "l2_book": [
+                    "EOS-USDT",
+                    "FIL-USDT",
+                    "TRX-USDT",
+                    "XLM-USDT"
+                ],
+                "trades": [
+                    "EOS-USDT",
+                    "FIL-USDT",
+                    "TRX-USDT",
+                    "XLM-USDT"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "331Mi"
+                },
+                "requests": {
+                    "cpu": "32m",
+                    "memory": "220Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "6Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "4Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "13Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "9Mi"
+                }
+            }
+        },
+        "symbol_distributions": [
+            "EQUAL_BUCKETS"
+        ]
+    },
+    "78e9fb6107": {
+        "payload_config": {
+            "BINANCE": {
+                "l2_book": [
+                    "UNI-USDT"
+                ],
+                "ticker": [
+                    "UNI-USDT"
+                ],
+                "trades": [
+                    "UNI-USDT"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "550Mi"
+                },
+                "requests": {
+                    "cpu": "89m",
+                    "memory": "367Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "5Mi"
+                },
+                "requests": {
+                    "cpu": "4m",
+                    "memory": "3Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "13Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "8Mi"
+                }
+            }
+        },
+        "symbol_distributions": [
+            "ONE_TO_ONE",
+            "LARGEST_WITH_SMALLEST"
+        ]
+    },
+    "797302cb89": {
+        "payload_config": {
+            "PHEMEX": {
+                "l2_book": [
+                    "ADA-USDT"
+                ],
+                "trades": [
+                    "ADA-USDT"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "313Mi"
+                },
+                "requests": {
+                    "cpu": "33m",
+                    "memory": "209Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "4Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "2Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "12Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "8Mi"
+                }
+            }
+        },
+        "symbol_distributions": [
+            "ONE_TO_ONE"
+        ]
+    },
+    "7ab348fb14": {
+        "payload_config": {
+            "BINANCE_FUTURES": {
+                "funding": [
+                    "DOT-USDT-PERP"
+                ],
+                "l2_book": [
+                    "DOT-USDT-PERP"
+                ],
+                "liquidations": [
+                    "DOT-USDT-PERP"
+                ],
+                "ticker": [
+                    "DOT-USDT-PERP"
+                ],
+                "trades": [
+                    "DOT-USDT-PERP"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "520Mi"
+                },
+                "requests": {
+                    "cpu": "106m",
+                    "memory": "347Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "5Mi"
+                },
+                "requests": {
+                    "cpu": "5m",
+                    "memory": "3Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "12Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "8Mi"
+                }
+            }
+        },
+        "skipped_channels": {
+            "open_interest": "AVG_IS_NONE"
+        },
+        "symbol_distributions": [
+            "ONE_TO_ONE"
+        ]
+    },
+    "7efef178bc": {
+        "payload_config": {
+            "PHEMEX": {
+                "l2_book": [
+                    "LINK-USDT"
+                ],
+                "trades": [
+                    "LINK-USDT"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "314Mi"
+                },
+                "requests": {
+                    "cpu": "18m",
+                    "memory": "209Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "4Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "2Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "13Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "9Mi"
+                }
+            }
+        },
+        "symbol_distributions": [
+            "ONE_TO_ONE"
+        ]
+    },
+    "7faa1440b2": {
+        "payload_config": {
+            "BINANCE_FUTURES": {
+                "funding": [
+                    "BCH-USDT-PERP",
+                    "UNI-USDT-PERP"
+                ],
+                "l2_book": [
+                    "BCH-USDT-PERP",
+                    "UNI-USDT-PERP"
+                ],
+                "liquidations": [
+                    "BCH-USDT-PERP",
+                    "UNI-USDT-PERP"
+                ],
+                "ticker": [
+                    "BCH-USDT-PERP",
+                    "UNI-USDT-PERP"
+                ],
+                "trades": [
+                    "BCH-USDT-PERP",
+                    "UNI-USDT-PERP"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "673Mi"
+                },
+                "requests": {
+                    "cpu": "189m",
+                    "memory": "448Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "7Mi"
+                },
+                "requests": {
+                    "cpu": "7m",
+                    "memory": "4Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "16Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "11Mi"
+                }
+            }
+        },
+        "skipped_channels": {
+            "open_interest": "AVG_IS_NONE"
+        },
+        "symbol_distributions": [
+            "LARGEST_WITH_SMALLEST"
+        ]
+    },
+    "7ff5d028ba": {
+        "payload_config": {
+            "PHEMEX": {
+                "l2_book": [
+                    "DOGE-USD-PERP",
+                    "XRP-USD-PERP"
+                ],
+                "trades": [
+                    "DOGE-USD-PERP",
+                    "XRP-USD-PERP"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "307Mi"
+                },
+                "requests": {
+                    "cpu": "35m",
+                    "memory": "205Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "4Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "2Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "12Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "8Mi"
+                }
+            }
+        },
+        "symbol_distributions": [
+            "LARGEST_WITH_SMALLEST"
+        ]
+    },
+    "82485c1758": {
+        "payload_config": {
+            "BINANCE_FUTURES": {
+                "funding": [
+                    "EOS-USDT-PERP"
+                ],
+                "l2_book": [
+                    "EOS-USDT-PERP"
+                ],
+                "liquidations": [
+                    "EOS-USDT-PERP"
+                ],
+                "ticker": [
+                    "EOS-USDT-PERP"
+                ],
+                "trades": [
+                    "EOS-USDT-PERP"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "494Mi"
+                },
+                "requests": {
+                    "cpu": "91m",
+                    "memory": "329Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "5Mi"
+                },
+                "requests": {
+                    "cpu": "4m",
+                    "memory": "3Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "12Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "8Mi"
+                }
+            }
+        },
+        "skipped_channels": {
+            "open_interest": "AVG_IS_NONE"
+        },
+        "symbol_distributions": [
+            "ONE_TO_ONE"
+        ]
+    },
+    "847dbcb35b": {
+        "payload_config": {
+            "PHEMEX": {
+                "l2_book": [
+                    "EOS-USD-PERP"
+                ],
+                "trades": [
+                    "EOS-USD-PERP"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "302Mi"
+                },
+                "requests": {
+                    "cpu": "19m",
+                    "memory": "201Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "4Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "3Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "12Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "8Mi"
+                }
+            }
+        },
+        "symbol_distributions": [
+            "ONE_TO_ONE"
+        ]
+    },
+    "880ffc22c0": {
+        "payload_config": {
+            "PHEMEX": {
+                "l2_book": [
+                    "LTC-USDT"
+                ],
+                "trades": [
+                    "LTC-USDT"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "318Mi"
+                },
+                "requests": {
+                    "cpu": "21m",
+                    "memory": "212Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "6Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "4Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "12Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "8Mi"
+                }
+            }
+        },
+        "symbol_distributions": [
+            "ONE_TO_ONE"
+        ]
+    },
+    "897a5b5080": {
+        "payload_config": {
+            "PHEMEX": {
+                "l2_book": [
+                    "EOS-USD-PERP",
+                    "FIL-USD-PERP",
+                    "XLM-USD-PERP"
+                ],
+                "trades": [
+                    "EOS-USD-PERP",
+                    "FIL-USD-PERP",
+                    "XLM-USD-PERP"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "313Mi"
+                },
+                "requests": {
+                    "cpu": "24m",
+                    "memory": "208Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "4Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "2Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "14Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "9Mi"
+                }
+            }
+        },
+        "symbol_distributions": [
+            "EQUAL_BUCKETS"
+        ]
+    },
+    "8a76ab7443": {
+        "payload_config": {
+            "BINANCE_FUTURES": {
+                "funding": [
+                    "EOS-USDT-PERP",
+                    "ETC-USDT-PERP"
+                ],
+                "l2_book": [
+                    "EOS-USDT-PERP",
+                    "ETC-USDT-PERP"
+                ],
+                "liquidations": [
+                    "EOS-USDT-PERP",
+                    "ETC-USDT-PERP"
+                ],
+                "ticker": [
+                    "EOS-USDT-PERP",
+                    "ETC-USDT-PERP"
+                ],
+                "trades": [
+                    "EOS-USDT-PERP",
+                    "ETC-USDT-PERP"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "710Mi"
+                },
+                "requests": {
+                    "cpu": "224m",
+                    "memory": "473Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "9Mi"
+                },
+                "requests": {
+                    "cpu": "9m",
+                    "memory": "6Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "15Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "10Mi"
+                }
+            }
+        },
+        "skipped_channels": {
+            "open_interest": "AVG_IS_NONE"
+        },
+        "symbol_distributions": [
+            "LARGEST_WITH_SMALLEST"
+        ]
+    },
+    "8c41f63039": {
+        "payload_config": {
+            "BINANCE": {
+                "l2_book": [
+                    "BCH-USDT"
+                ],
+                "ticker": [
+                    "BCH-USDT"
+                ],
+                "trades": [
+                    "BCH-USDT"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "573Mi"
+                },
+                "requests": {
+                    "cpu": "73m",
+                    "memory": "382Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "5Mi"
+                },
+                "requests": {
+                    "cpu": "3m",
+                    "memory": "3Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "13Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "8Mi"
+                }
+            }
+        },
+        "symbol_distributions": [
+            "ONE_TO_ONE"
+        ]
+    },
+    "8e36e73751": {
+        "payload_config": {
+            "BINANCE": {
+                "l2_book": [
+                    "ADA-USDT",
+                    "LTC-USDT"
+                ],
+                "ticker": [
+                    "ADA-USDT",
+                    "LTC-USDT"
+                ],
+                "trades": [
+                    "ADA-USDT",
+                    "LTC-USDT"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "644Mi"
+                },
+                "requests": {
+                    "cpu": "130m",
+                    "memory": "429Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "8Mi"
+                },
+                "requests": {
+                    "cpu": "6m",
+                    "memory": "5Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "16Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "10Mi"
+                }
+            }
+        },
+        "symbol_distributions": [
+            "LARGEST_WITH_SMALLEST"
+        ]
+    },
+    "8f8b637cb2": {
+        "payload_config": {
+            "BINANCE": {
+                "l2_book": [
+                    "ADA-USDT"
+                ],
+                "ticker": [
+                    "ADA-USDT"
+                ],
+                "trades": [
+                    "ADA-USDT"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "550Mi"
+                },
+                "requests": {
+                    "cpu": "89m",
+                    "memory": "366Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "5Mi"
+                },
+                "requests": {
+                    "cpu": "4m",
+                    "memory": "3Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "12Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "8Mi"
+                }
+            }
+        },
+        "symbol_distributions": [
+            "ONE_TO_ONE"
+        ]
+    },
+    "92733da7b9": {
+        "payload_config": {
+            "PHEMEX": {
+                "l2_book": [
+                    "BCH-USDT",
+                    "SHIB-USDT"
+                ],
+                "trades": [
+                    "BCH-USDT",
+                    "SHIB-USDT"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "317Mi"
+                },
+                "requests": {
+                    "cpu": "20m",
+                    "memory": "211Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "6Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "4Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "12Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "8Mi"
+                }
+            }
+        },
+        "symbol_distributions": [
+            "LARGEST_WITH_SMALLEST"
+        ]
+    },
+    "959bc324a8": {
+        "payload_config": {
+            "BINANCE_FUTURES": {
+                "funding": [
+                    "DOGE-USDT-PERP",
+                    "LINK-USDT-PERP",
+                    "LTC-USDT-PERP",
+                    "TRX-USDT-PERP"
+                ],
+                "l2_book": [
+                    "DOGE-USDT-PERP",
+                    "LINK-USDT-PERP",
+                    "LTC-USDT-PERP",
+                    "TRX-USDT-PERP"
+                ],
+                "liquidations": [
+                    "DOGE-USDT-PERP",
+                    "LINK-USDT-PERP",
+                    "LTC-USDT-PERP",
+                    "TRX-USDT-PERP"
+                ],
+                "ticker": [
+                    "DOGE-USDT-PERP",
+                    "LINK-USDT-PERP",
+                    "LTC-USDT-PERP",
+                    "TRX-USDT-PERP"
+                ],
+                "trades": [
+                    "DOGE-USDT-PERP",
+                    "LINK-USDT-PERP",
+                    "LTC-USDT-PERP",
+                    "TRX-USDT-PERP"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "855Mi"
+                },
+                "requests": {
+                    "cpu": "282m",
+                    "memory": "570Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "6Mi"
+                },
+                "requests": {
+                    "cpu": "11m",
+                    "memory": "4Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "13Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "9Mi"
+                }
+            }
+        },
+        "skipped_channels": {
+            "open_interest": "AVG_IS_NONE"
+        },
+        "symbol_distributions": [
+            "EQUAL_BUCKETS"
+        ]
+    },
+    "9746640de7": {
+        "payload_config": {
+            "BINANCE_FUTURES": {
+                "funding": [
+                    "LTC-USDT-PERP"
+                ],
+                "l2_book": [
+                    "LTC-USDT-PERP"
+                ],
+                "liquidations": [
+                    "LTC-USDT-PERP"
+                ],
+                "ticker": [
+                    "LTC-USDT-PERP"
+                ],
+                "trades": [
+                    "LTC-USDT-PERP"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "509Mi"
+                },
+                "requests": {
+                    "cpu": "110m",
+                    "memory": "339Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "5Mi"
+                },
+                "requests": {
+                    "cpu": "4m",
+                    "memory": "3Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "13Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "8Mi"
+                }
+            }
+        },
+        "skipped_channels": {
+            "open_interest": "AVG_IS_NONE"
+        },
+        "symbol_distributions": [
+            "ONE_TO_ONE"
+        ]
+    },
+    "9d616829f2": {
+        "payload_config": {
+            "BINANCE": {
+                "l2_book": [
+                    "ADA-USDT",
+                    "BNB-USDT",
+                    "MATIC-USDT"
+                ],
+                "ticker": [
+                    "ADA-USDT",
+                    "BNB-USDT",
+                    "MATIC-USDT"
+                ],
+                "trades": [
+                    "ADA-USDT",
+                    "BNB-USDT",
+                    "MATIC-USDT"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "688Mi"
+                },
+                "requests": {
+                    "cpu": "167m",
+                    "memory": "459Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "6Mi"
+                },
+                "requests": {
+                    "cpu": "7m",
+                    "memory": "4Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "12Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "8Mi"
+                }
+            }
+        },
+        "symbol_distributions": [
+            "EQUAL_BUCKETS"
+        ]
+    },
+    "9e0e84723d": {
+        "payload_config": {
+            "BINANCE_FUTURES": {
+                "funding": [
+                    "BTC-USDT-PERP"
+                ],
+                "l2_book": [
+                    "BTC-USDT-PERP"
+                ],
+                "liquidations": [
+                    "BTC-USDT-PERP"
+                ],
+                "ticker": [
+                    "BTC-USDT-PERP"
+                ],
+                "trades": [
+                    "BTC-USDT-PERP"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "685Mi"
+                },
+                "requests": {
+                    "cpu": "340m",
+                    "memory": "456Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "16Mi"
+                },
+                "requests": {
+                    "cpu": "22m",
+                    "memory": "11Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "14Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "9Mi"
+                }
+            }
+        },
+        "skipped_channels": {
+            "open_interest": "AVG_IS_NONE"
+        },
+        "symbol_distributions": [
+            "EQUAL_BUCKETS",
+            "ONE_TO_ONE"
+        ]
+    },
+    "9f31c20f91": {
+        "payload_config": {
+            "BINANCE_FUTURES": {
+                "funding": [
+                    "LINK-USDT-PERP"
+                ],
+                "l2_book": [
+                    "LINK-USDT-PERP"
+                ],
+                "liquidations": [
+                    "LINK-USDT-PERP"
+                ],
+                "ticker": [
+                    "LINK-USDT-PERP"
+                ],
+                "trades": [
+                    "LINK-USDT-PERP"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "514Mi"
+                },
+                "requests": {
+                    "cpu": "105m",
+                    "memory": "343Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "5Mi"
+                },
+                "requests": {
+                    "cpu": "5m",
+                    "memory": "3Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "12Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "8Mi"
+                }
+            }
+        },
+        "skipped_channels": {
+            "open_interest": "AVG_IS_NONE"
+        },
+        "symbol_distributions": [
+            "ONE_TO_ONE"
+        ]
+    },
+    "a0f5e4dc15": {
+        "payload_config": {
+            "PHEMEX": {
+                "l2_book": [
+                    "UNI-USD-PERP"
+                ],
+                "trades": [
+                    "UNI-USD-PERP"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "315Mi"
+                },
+                "requests": {
+                    "cpu": "33m",
+                    "memory": "210Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "6Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "4Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "13Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "8Mi"
+                }
+            }
+        },
+        "symbol_distributions": [
+            "ONE_TO_ONE",
+            "LARGEST_WITH_SMALLEST"
+        ]
+    },
+    "a3a9052e5c": {
+        "payload_config": {
+            "PHEMEX": {
+                "l2_book": [
+                    "ADA-USDT",
+                    "LINK-USDT"
+                ],
+                "trades": [
+                    "ADA-USDT",
+                    "LINK-USDT"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "317Mi"
+                },
+                "requests": {
+                    "cpu": "30m",
+                    "memory": "211Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "4Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "2Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "12Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "8Mi"
+                }
+            }
+        },
+        "symbol_distributions": [
+            "LARGEST_WITH_SMALLEST"
+        ]
+    },
+    "a548436932": {
+        "payload_config": {
+            "BINANCE": {
+                "l2_book": [
+                    "ETH-USDT"
+                ],
+                "ticker": [
+                    "ETH-USDT"
+                ],
+                "trades": [
+                    "ETH-USDT"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "565Mi"
+                },
+                "requests": {
+                    "cpu": "128m",
+                    "memory": "376Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "8Mi"
+                },
+                "requests": {
+                    "cpu": "8m",
+                    "memory": "5Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "12Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "8Mi"
+                }
+            }
+        },
+        "symbol_distributions": [
+            "ONE_TO_ONE",
+            "EQUAL_BUCKETS"
+        ]
+    },
+    "a618c28e45": {
+        "payload_config": {
+            "BINANCE_FUTURES": {
+                "funding": [
+                    "ADA-USDT-PERP",
+                    "LTC-USDT-PERP"
+                ],
+                "l2_book": [
+                    "ADA-USDT-PERP",
+                    "LTC-USDT-PERP"
+                ],
+                "liquidations": [
+                    "ADA-USDT-PERP",
+                    "LTC-USDT-PERP"
+                ],
+                "ticker": [
+                    "ADA-USDT-PERP",
+                    "LTC-USDT-PERP"
+                ],
+                "trades": [
+                    "ADA-USDT-PERP",
+                    "LTC-USDT-PERP"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "654Mi"
+                },
+                "requests": {
+                    "cpu": "174m",
+                    "memory": "436Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "6Mi"
+                },
+                "requests": {
+                    "cpu": "7m",
+                    "memory": "4Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "13Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "9Mi"
+                }
+            }
+        },
+        "skipped_channels": {
+            "open_interest": "AVG_IS_NONE"
+        },
+        "symbol_distributions": [
+            "LARGEST_WITH_SMALLEST"
+        ]
+    },
+    "a84f8fc7b2": {
+        "payload_config": {
+            "BINANCE": {
+                "l2_book": [
+                    "BCH-USDT",
+                    "DOT-USDT"
+                ],
+                "ticker": [
+                    "BCH-USDT",
+                    "DOT-USDT"
+                ],
+                "trades": [
+                    "BCH-USDT",
+                    "DOT-USDT"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "639Mi"
+                },
+                "requests": {
+                    "cpu": "110m",
+                    "memory": "426Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "5Mi"
+                },
+                "requests": {
+                    "cpu": "5m",
+                    "memory": "3Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "12Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "8Mi"
+                }
+            }
+        },
+        "symbol_distributions": [
+            "LARGEST_WITH_SMALLEST"
+        ]
+    },
+    "a86b334068": {
+        "payload_config": {
+            "PHEMEX": {
+                "l2_book": [
+                    "DOGE-USDT"
+                ],
+                "trades": [
+                    "DOGE-USDT"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "311Mi"
+                },
+                "requests": {
+                    "cpu": "32m",
+                    "memory": "207Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "5Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "3Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "12Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "8Mi"
+                }
+            }
+        },
+        "symbol_distributions": [
+            "ONE_TO_ONE"
+        ]
+    },
+    "b133835fc4": {
+        "payload_config": {
+            "PHEMEX": {
+                "l2_book": [
+                    "FIL-USD-PERP"
+                ],
+                "trades": [
+                    "FIL-USD-PERP"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "306Mi"
+                },
+                "requests": {
+                    "cpu": "25m",
+                    "memory": "204Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "4Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "3Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "12Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "8Mi"
+                }
+            }
+        },
+        "symbol_distributions": [
+            "ONE_TO_ONE"
+        ]
+    },
+    "b34e56e897": {
+        "payload_config": {
+            "BINANCE_FUTURES": {
+                "funding": [
+                    "ETH-USDT-PERP"
+                ],
+                "l2_book": [
+                    "ETH-USDT-PERP"
+                ],
+                "liquidations": [
+                    "ETH-USDT-PERP"
+                ],
+                "ticker": [
+                    "ETH-USDT-PERP"
+                ],
+                "trades": [
+                    "ETH-USDT-PERP"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "614Mi"
+                },
+                "requests": {
+                    "cpu": "233m",
+                    "memory": "409Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "11Mi"
+                },
+                "requests": {
+                    "cpu": "14m",
+                    "memory": "7Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "12Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "8Mi"
+                }
+            }
+        },
+        "skipped_channels": {
+            "open_interest": "AVG_IS_NONE"
+        },
+        "symbol_distributions": [
+            "ONE_TO_ONE",
+            "EQUAL_BUCKETS"
+        ]
+    },
+    "b417978854": {
+        "payload_config": {
+            "PHEMEX": {
+                "l2_book": [
+                    "MATIC-USDT",
+                    "TRX-USDT"
+                ],
+                "trades": [
+                    "MATIC-USDT",
+                    "TRX-USDT"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "313Mi"
+                },
+                "requests": {
+                    "cpu": "28m",
+                    "memory": "208Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "4Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "3Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "12Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "8Mi"
+                }
+            }
+        },
+        "symbol_distributions": [
+            "LARGEST_WITH_SMALLEST"
+        ]
+    },
+    "b581946a80": {
+        "payload_config": {
+            "PHEMEX": {
+                "l2_book": [
+                    "MATIC-USD-PERP",
+                    "TRX-USD-PERP"
+                ],
+                "trades": [
+                    "MATIC-USD-PERP",
+                    "TRX-USD-PERP"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "307Mi"
+                },
+                "requests": {
+                    "cpu": "22m",
+                    "memory": "205Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "4Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "3Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "12Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "8Mi"
+                }
+            }
+        },
+        "symbol_distributions": [
+            "LARGEST_WITH_SMALLEST"
+        ]
+    },
+    "b7ab2722d8": {
+        "payload_config": {
+            "BINANCE": {
+                "l2_book": [
+                    "ETC-USDT"
+                ],
+                "ticker": [
+                    "ETC-USDT"
+                ],
+                "trades": [
+                    "ETC-USDT"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "551Mi"
+                },
+                "requests": {
+                    "cpu": "67m",
+                    "memory": "367Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "5Mi"
+                },
+                "requests": {
+                    "cpu": "3m",
+                    "memory": "3Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "13Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "8Mi"
+                }
+            }
+        },
+        "symbol_distributions": [
+            "EQUAL_BUCKETS",
+            "ONE_TO_ONE"
+        ]
+    },
+    "b7c6fe49db": {
+        "payload_config": {
+            "PHEMEX": {
+                "l2_book": [
+                    "ADA-USD-PERP",
+                    "LINK-USD-PERP"
+                ],
+                "trades": [
+                    "ADA-USD-PERP",
+                    "LINK-USD-PERP"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "317Mi"
+                },
+                "requests": {
+                    "cpu": "22m",
+                    "memory": "211Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "4Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "2Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "13Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "9Mi"
+                }
+            }
+        },
+        "symbol_distributions": [
+            "LARGEST_WITH_SMALLEST"
+        ]
+    },
+    "b884874493": {
+        "payload_config": {
+            "BINANCE": {
+                "l2_book": [
+                    "SHIB-USDT"
+                ],
+                "ticker": [
+                    "SHIB-USDT"
+                ],
+                "trades": [
+                    "SHIB-USDT"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "567Mi"
+                },
+                "requests": {
+                    "cpu": "61m",
+                    "memory": "378Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "5Mi"
+                },
+                "requests": {
+                    "cpu": "3m",
+                    "memory": "3Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "12Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "8Mi"
+                }
+            }
+        },
+        "symbol_distributions": [
+            "ONE_TO_ONE"
+        ]
+    },
+    "bce16cd894": {
+        "payload_config": {
+            "BINANCE": {
+                "l2_book": [
+                    "DOT-USDT"
+                ],
+                "ticker": [
+                    "DOT-USDT"
+                ],
+                "trades": [
+                    "DOT-USDT"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "562Mi"
+                },
+                "requests": {
+                    "cpu": "74m",
+                    "memory": "374Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "5Mi"
+                },
+                "requests": {
+                    "cpu": "3m",
+                    "memory": "3Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "12Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "8Mi"
+                }
+            }
+        },
+        "symbol_distributions": [
+            "ONE_TO_ONE"
+        ]
+    },
+    "c043284a7b": {
+        "payload_config": {
+            "PHEMEX": {
+                "l2_book": [
+                    "BNB-USDT",
+                    "LTC-USDT"
+                ],
+                "trades": [
+                    "BNB-USDT",
+                    "LTC-USDT"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "320Mi"
+                },
+                "requests": {
+                    "cpu": "34m",
+                    "memory": "213Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "6Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "4Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "13Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "9Mi"
+                }
+            }
+        },
+        "symbol_distributions": [
+            "LARGEST_WITH_SMALLEST"
+        ]
+    },
+    "c3c410e8b5": {
+        "payload_config": {
+            "BINANCE": {
+                "l2_book": [
+                    "FIL-USDT"
+                ],
+                "ticker": [
+                    "FIL-USDT"
+                ],
+                "trades": [
+                    "FIL-USDT"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "575Mi"
+                },
+                "requests": {
+                    "cpu": "93m",
+                    "memory": "383Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "5Mi"
+                },
+                "requests": {
+                    "cpu": "5m",
+                    "memory": "3Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "12Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "8Mi"
+                }
+            }
+        },
+        "symbol_distributions": [
+            "ONE_TO_ONE"
+        ]
+    },
+    "c48c445774": {
+        "payload_config": {
+            "BINANCE": {
+                "l2_book": [
+                    "BTC-USDT"
+                ],
+                "ticker": [
+                    "BTC-USDT"
+                ],
+                "trades": [
+                    "BTC-USDT"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "587Mi"
+                },
+                "requests": {
+                    "cpu": "230m",
+                    "memory": "391Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "8Mi"
+                },
+                "requests": {
+                    "cpu": "16m",
+                    "memory": "5Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "13Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "8Mi"
+                }
+            }
+        },
+        "symbol_distributions": [
+            "EQUAL_BUCKETS",
+            "ONE_TO_ONE"
+        ]
+    },
+    "c56eece1dc": {
+        "payload_config": {
+            "BINANCE_FUTURES": {
+                "funding": [
+                    "UNI-USDT-PERP"
+                ],
+                "l2_book": [
+                    "UNI-USDT-PERP"
+                ],
+                "liquidations": [
+                    "UNI-USDT-PERP"
+                ],
+                "ticker": [
+                    "UNI-USDT-PERP"
+                ],
+                "trades": [
+                    "UNI-USDT-PERP"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "510Mi"
+                },
+                "requests": {
+                    "cpu": "103m",
+                    "memory": "340Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "5Mi"
+                },
+                "requests": {
+                    "cpu": "5m",
+                    "memory": "3Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "13Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "8Mi"
+                }
+            }
+        },
+        "skipped_channels": {
+            "open_interest": "AVG_IS_NONE"
+        },
+        "symbol_distributions": [
+            "ONE_TO_ONE"
+        ]
+    },
+    "c5f4360dc9": {
+        "payload_config": {
+            "BINANCE_FUTURES": {
+                "funding": [
+                    "BNB-USDT-PERP"
+                ],
+                "l2_book": [
+                    "BNB-USDT-PERP"
+                ],
+                "liquidations": [
+                    "BNB-USDT-PERP"
+                ],
+                "ticker": [
+                    "BNB-USDT-PERP"
+                ],
+                "trades": [
+                    "BNB-USDT-PERP"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "536Mi"
+                },
+                "requests": {
+                    "cpu": "115m",
+                    "memory": "357Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "6Mi"
+                },
+                "requests": {
+                    "cpu": "5m",
+                    "memory": "4Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "13Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "8Mi"
+                }
+            }
+        },
+        "skipped_channels": {
+            "open_interest": "AVG_IS_NONE"
+        },
+        "symbol_distributions": [
+            "ONE_TO_ONE"
+        ]
+    },
+    "c633aa1225": {
+        "payload_config": {
+            "PHEMEX": {
+                "l2_book": [
+                    "BCH-USD-PERP"
+                ],
+                "trades": [
+                    "BCH-USD-PERP"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "305Mi"
+                },
+                "requests": {
+                    "cpu": "28m",
+                    "memory": "203Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "4Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "3Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "13Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "9Mi"
+                }
+            }
+        },
+        "symbol_distributions": [
+            "ONE_TO_ONE"
+        ]
+    },
+    "cdc1906348": {
+        "payload_config": {
+            "PHEMEX": {
+                "l2_book": [
+                    "ETC-USD-PERP",
+                    "FIL-USD-PERP"
+                ],
+                "trades": [
+                    "ETC-USD-PERP",
+                    "FIL-USD-PERP"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "325Mi"
+                },
+                "requests": {
+                    "cpu": "18m",
+                    "memory": "217Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "7Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "5Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "13Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "8Mi"
+                }
+            }
+        },
+        "symbol_distributions": [
+            "LARGEST_WITH_SMALLEST"
+        ]
+    },
+    "d2889ecac6": {
+        "payload_config": {
+            "PHEMEX": {
+                "l2_book": [
+                    "BTC-USDT"
+                ],
+                "trades": [
+                    "BTC-USDT"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "315Mi"
+                },
+                "requests": {
+                    "cpu": "23m",
+                    "memory": "210Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "6Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "4Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "13Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "8Mi"
+                }
+            }
+        },
+        "symbol_distributions": [
+            "ONE_TO_ONE",
+            "EQUAL_BUCKETS"
+        ]
+    },
+    "d2bc7a61b2": {
+        "payload_config": {
+            "BINANCE_FUTURES": {
+                "funding": [
+                    "ETH-USDT-PERP",
+                    "VET-USDT-PERP"
+                ],
+                "l2_book": [
+                    "ETH-USDT-PERP",
+                    "VET-USDT-PERP"
+                ],
+                "liquidations": [
+                    "ETH-USDT-PERP",
+                    "VET-USDT-PERP"
+                ],
+                "ticker": [
+                    "ETH-USDT-PERP",
+                    "VET-USDT-PERP"
+                ],
+                "trades": [
+                    "ETH-USDT-PERP",
+                    "VET-USDT-PERP"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "782Mi"
+                },
+                "requests": {
+                    "cpu": "320m",
+                    "memory": "521Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "11Mi"
+                },
+                "requests": {
+                    "cpu": "17m",
+                    "memory": "7Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "13Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "9Mi"
+                }
+            }
+        },
+        "skipped_channels": {
+            "open_interest": "AVG_IS_NONE"
+        },
+        "symbol_distributions": [
+            "LARGEST_WITH_SMALLEST"
+        ]
+    },
+    "d3bd34a302": {
+        "payload_config": {
+            "BINANCE_FUTURES": {
+                "funding": [
+                    "DOGE-USDT-PERP"
+                ],
+                "l2_book": [
+                    "DOGE-USDT-PERP"
+                ],
+                "liquidations": [
+                    "DOGE-USDT-PERP"
+                ],
+                "ticker": [
+                    "DOGE-USDT-PERP"
+                ],
+                "trades": [
+                    "DOGE-USDT-PERP"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "570Mi"
+                },
+                "requests": {
+                    "cpu": "112m",
+                    "memory": "380Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "6Mi"
+                },
+                "requests": {
+                    "cpu": "5m",
+                    "memory": "4Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "15Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "10Mi"
+                }
+            }
+        },
+        "skipped_channels": {
+            "open_interest": "AVG_IS_NONE"
+        },
+        "symbol_distributions": [
+            "ONE_TO_ONE"
+        ]
+    },
+    "d48a1478d3": {
+        "payload_config": {
+            "BINANCE_FUTURES": {
+                "funding": [
+                    "BCH-USDT-PERP",
+                    "DOT-USDT-PERP",
+                    "UNI-USDT-PERP",
+                    "XRP-USDT-PERP"
+                ],
+                "l2_book": [
+                    "BCH-USDT-PERP",
+                    "DOT-USDT-PERP",
+                    "UNI-USDT-PERP",
+                    "XRP-USDT-PERP"
+                ],
+                "liquidations": [
+                    "BCH-USDT-PERP",
+                    "DOT-USDT-PERP",
+                    "UNI-USDT-PERP",
+                    "XRP-USDT-PERP"
+                ],
+                "ticker": [
+                    "BCH-USDT-PERP",
+                    "DOT-USDT-PERP",
+                    "UNI-USDT-PERP",
+                    "XRP-USDT-PERP"
+                ],
+                "trades": [
+                    "BCH-USDT-PERP",
+                    "DOT-USDT-PERP",
+                    "UNI-USDT-PERP",
+                    "XRP-USDT-PERP"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "874Mi"
+                },
+                "requests": {
+                    "cpu": "345m",
+                    "memory": "582Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "7Mi"
+                },
+                "requests": {
+                    "cpu": "15m",
+                    "memory": "4Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "13Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "8Mi"
+                }
+            }
+        },
+        "skipped_channels": {
+            "open_interest": "AVG_IS_NONE"
+        },
+        "symbol_distributions": [
+            "EQUAL_BUCKETS"
+        ]
+    },
+    "d741194ca7": {
+        "payload_config": {
+            "PHEMEX": {
+                "l2_book": [
+                    "BCH-USD-PERP",
+                    "DOT-USD-PERP",
+                    "UNI-USD-PERP",
+                    "XRP-USD-PERP"
+                ],
+                "trades": [
+                    "BCH-USD-PERP",
+                    "DOT-USD-PERP",
+                    "UNI-USD-PERP",
+                    "XRP-USD-PERP"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "310Mi"
+                },
+                "requests": {
+                    "cpu": "28m",
+                    "memory": "206Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "4Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "3Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "12Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "8Mi"
+                }
+            }
+        },
+        "symbol_distributions": [
+            "EQUAL_BUCKETS"
+        ]
+    },
+    "d82ec5750b": {
+        "payload_config": {
+            "PHEMEX": {
+                "l2_book": [
+                    "XRP-USD-PERP"
+                ],
+                "trades": [
+                    "XRP-USD-PERP"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "305Mi"
+                },
+                "requests": {
+                    "cpu": "21m",
+                    "memory": "203Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "4Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "2Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "12Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "8Mi"
+                }
+            }
+        },
+        "symbol_distributions": [
+            "ONE_TO_ONE"
+        ]
+    },
+    "dd550350ae": {
+        "payload_config": {
+            "BINANCE": {
+                "l2_book": [
+                    "MATIC-USDT"
+                ],
+                "ticker": [
+                    "MATIC-USDT"
+                ],
+                "trades": [
+                    "MATIC-USDT"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "565Mi"
+                },
+                "requests": {
+                    "cpu": "92m",
+                    "memory": "376Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "5Mi"
+                },
+                "requests": {
+                    "cpu": "5m",
+                    "memory": "3Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "12Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "8Mi"
+                }
+            }
+        },
+        "symbol_distributions": [
+            "ONE_TO_ONE"
+        ]
+    },
+    "dd7381671e": {
+        "payload_config": {
+            "PHEMEX": {
+                "l2_book": [
+                    "DOT-USDT",
+                    "UNI-USDT"
+                ],
+                "trades": [
+                    "DOT-USDT",
+                    "UNI-USDT"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "319Mi"
+                },
+                "requests": {
+                    "cpu": "23m",
+                    "memory": "213Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "6Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "4Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "12Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "8Mi"
+                }
+            }
+        },
+        "symbol_distributions": [
+            "LARGEST_WITH_SMALLEST"
+        ]
+    },
+    "de9078db4c": {
+        "payload_config": {
+            "PHEMEX": {
+                "l2_book": [
+                    "DOGE-USD-PERP"
+                ],
+                "trades": [
+                    "DOGE-USD-PERP"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "313Mi"
+                },
+                "requests": {
+                    "cpu": "34m",
+                    "memory": "209Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "4Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "2Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "12Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "8Mi"
+                }
+            }
+        },
+        "symbol_distributions": [
+            "ONE_TO_ONE"
+        ]
+    },
+    "dec0e02663": {
+        "payload_config": {
+            "BINANCE_FUTURES": {
+                "funding": [
+                    "ADA-USDT-PERP"
+                ],
+                "l2_book": [
+                    "ADA-USDT-PERP"
+                ],
+                "liquidations": [
+                    "ADA-USDT-PERP"
+                ],
+                "ticker": [
+                    "ADA-USDT-PERP"
+                ],
+                "trades": [
+                    "ADA-USDT-PERP"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "496Mi"
+                },
+                "requests": {
+                    "cpu": "137m",
+                    "memory": "330Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "6Mi"
+                },
+                "requests": {
+                    "cpu": "6m",
+                    "memory": "4Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "15Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "10Mi"
+                }
+            }
+        },
+        "skipped_channels": {
+            "open_interest": "AVG_IS_NONE"
+        },
+        "symbol_distributions": [
+            "ONE_TO_ONE"
+        ]
+    },
+    "e16567d8c5": {
+        "payload_config": {
+            "PHEMEX": {
+                "l2_book": [
+                    "ADA-USDT",
+                    "BNB-USDT",
+                    "MATIC-USDT"
+                ],
+                "trades": [
+                    "ADA-USDT",
+                    "BNB-USDT",
+                    "MATIC-USDT"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "320Mi"
+                },
+                "requests": {
+                    "cpu": "24m",
+                    "memory": "213Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "4Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "2Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "13Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "8Mi"
+                }
+            }
+        },
+        "symbol_distributions": [
+            "EQUAL_BUCKETS"
+        ]
+    },
+    "e7b65a12b3": {
+        "payload_config": {
+            "PHEMEX": {
+                "l2_book": [
+                    "LINK-USD-PERP"
+                ],
+                "trades": [
+                    "LINK-USD-PERP"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "304Mi"
+                },
+                "requests": {
+                    "cpu": "16m",
+                    "memory": "203Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "4Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "2Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "12Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "8Mi"
+                }
+            }
+        },
+        "symbol_distributions": [
+            "ONE_TO_ONE"
+        ]
+    },
+    "e82f39e60e": {
+        "payload_config": {
+            "BINANCE_FUTURES": {
+                "funding": [
+                    "XRP-USDT-PERP"
+                ],
+                "l2_book": [
+                    "XRP-USDT-PERP"
+                ],
+                "liquidations": [
+                    "XRP-USDT-PERP"
+                ],
+                "ticker": [
+                    "XRP-USDT-PERP"
+                ],
+                "trades": [
+                    "XRP-USDT-PERP"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "503Mi"
+                },
+                "requests": {
+                    "cpu": "111m",
+                    "memory": "335Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "5Mi"
+                },
+                "requests": {
+                    "cpu": "5m",
+                    "memory": "3Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "12Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "8Mi"
+                }
+            }
+        },
+        "skipped_channels": {
+            "open_interest": "AVG_IS_NONE"
+        },
+        "symbol_distributions": [
+            "ONE_TO_ONE"
+        ]
+    },
+    "eb85228535": {
+        "payload_config": {
+            "BINANCE_FUTURES": {
+                "funding": [
+                    "FIL-USDT-PERP"
+                ],
+                "l2_book": [
+                    "FIL-USDT-PERP"
+                ],
+                "liquidations": [
+                    "FIL-USDT-PERP"
+                ],
+                "ticker": [
+                    "FIL-USDT-PERP"
+                ],
+                "trades": [
+                    "FIL-USDT-PERP"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "507Mi"
+                },
+                "requests": {
+                    "cpu": "112m",
+                    "memory": "338Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "6Mi"
+                },
+                "requests": {
+                    "cpu": "5m",
+                    "memory": "4Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "12Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "8Mi"
+                }
+            }
+        },
+        "skipped_channels": {
+            "open_interest": "AVG_IS_NONE"
+        },
+        "symbol_distributions": [
+            "ONE_TO_ONE"
+        ]
+    },
+    "ebf837badc": {
+        "payload_config": {
+            "PHEMEX": {
+                "l2_book": [
+                    "ETH-USD-PERP"
+                ],
+                "trades": [
+                    "ETH-USD-PERP"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "304Mi"
+                },
+                "requests": {
+                    "cpu": "19m",
+                    "memory": "203Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "4Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "2Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "12Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "8Mi"
+                }
+            }
+        },
+        "symbol_distributions": [
+            "EQUAL_BUCKETS",
+            "ONE_TO_ONE"
+        ]
+    },
+    "ef4dc1107d": {
+        "payload_config": {
+            "BINANCE_FUTURES": {
+                "funding": [
+                    "BNB-USDT-PERP",
+                    "TRX-USDT-PERP"
+                ],
+                "l2_book": [
+                    "BNB-USDT-PERP",
+                    "TRX-USDT-PERP"
+                ],
+                "liquidations": [
+                    "BNB-USDT-PERP",
+                    "TRX-USDT-PERP"
+                ],
+                "ticker": [
+                    "BNB-USDT-PERP",
+                    "TRX-USDT-PERP"
+                ],
+                "trades": [
+                    "BNB-USDT-PERP",
+                    "TRX-USDT-PERP"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "619Mi"
+                },
+                "requests": {
+                    "cpu": "194m",
+                    "memory": "413Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "6Mi"
+                },
+                "requests": {
+                    "cpu": "8m",
+                    "memory": "4Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "13Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "9Mi"
+                }
+            }
+        },
+        "skipped_channels": {
+            "open_interest": "AVG_IS_NONE"
+        },
+        "symbol_distributions": [
+            "LARGEST_WITH_SMALLEST"
+        ]
+    },
+    "f709a63356": {
+        "payload_config": {
+            "PHEMEX": {
+                "l2_book": [
+                    "BNB-USDT"
+                ],
+                "trades": [
+                    "BNB-USDT"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "303Mi"
+                },
+                "requests": {
+                    "cpu": "22m",
+                    "memory": "202Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "4Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "2Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "12Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "8Mi"
+                }
+            }
+        },
+        "symbol_distributions": [
+            "ONE_TO_ONE"
+        ]
+    },
+    "f723cab638": {
+        "payload_config": {
+            "BINANCE": {
+                "l2_book": [
+                    "LINK-USDT"
+                ],
+                "ticker": [
+                    "LINK-USDT"
+                ],
+                "trades": [
+                    "LINK-USDT"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "560Mi"
+                },
+                "requests": {
+                    "cpu": "76m",
+                    "memory": "373Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "5Mi"
+                },
+                "requests": {
+                    "cpu": "4m",
+                    "memory": "3Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "14Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "9Mi"
+                }
+            }
+        },
+        "symbol_distributions": [
+            "ONE_TO_ONE"
+        ]
+    },
+    "f78435488d": {
+        "payload_config": {
+            "PHEMEX": {
+                "l2_book": [
+                    "SHIB-USDT"
+                ],
+                "trades": [
+                    "SHIB-USDT"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "316Mi"
+                },
+                "requests": {
+                    "cpu": "35m",
+                    "memory": "211Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "6Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "4Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "13Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "8Mi"
+                }
+            }
+        },
+        "symbol_distributions": [
+            "ONE_TO_ONE"
+        ]
+    },
+    "f80a745892": {
+        "payload_config": {
+            "BINANCE": {
+                "l2_book": [
+                    "XRP-USDT"
+                ],
+                "ticker": [
+                    "XRP-USDT"
+                ],
+                "trades": [
+                    "XRP-USDT"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "550Mi"
+                },
+                "requests": {
+                    "cpu": "91m",
+                    "memory": "367Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "5Mi"
+                },
+                "requests": {
+                    "cpu": "4m",
+                    "memory": "3Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "12Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "8Mi"
+                }
+            }
+        },
+        "symbol_distributions": [
+            "ONE_TO_ONE"
+        ]
+    },
+    "fa34e00dfc": {
+        "payload_config": {
+            "BINANCE": {
+                "l2_book": [
+                    "EOS-USDT"
+                ],
+                "ticker": [
+                    "EOS-USDT"
+                ],
+                "trades": [
+                    "EOS-USDT"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "553Mi"
+                },
+                "requests": {
+                    "cpu": "62m",
+                    "memory": "369Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "5Mi"
+                },
+                "requests": {
+                    "cpu": "3m",
+                    "memory": "3Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "12Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "8Mi"
+                }
+            }
+        },
+        "symbol_distributions": [
+            "ONE_TO_ONE"
+        ]
+    },
+    "faed8288ff": {
+        "payload_config": {
+            "BINANCE": {
+                "l2_book": [
+                    "BTC-USDT",
+                    "XLM-USDT"
+                ],
+                "ticker": [
+                    "BTC-USDT",
+                    "XLM-USDT"
+                ],
+                "trades": [
+                    "BTC-USDT",
+                    "XLM-USDT"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "630Mi"
+                },
+                "requests": {
+                    "cpu": "252m",
+                    "memory": "420Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "10Mi"
+                },
+                "requests": {
+                    "cpu": "16m",
+                    "memory": "7Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "13Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "8Mi"
+                }
+            }
+        },
+        "symbol_distributions": [
+            "LARGEST_WITH_SMALLEST"
+        ]
+    },
+    "fc1895fceb": {
+        "payload_config": {
+            "PHEMEX": {
+                "l2_book": [
+                    "DOT-USD-PERP"
+                ],
+                "trades": [
+                    "DOT-USD-PERP"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "300Mi"
+                },
+                "requests": {
+                    "cpu": "20m",
+                    "memory": "200Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "5Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "3Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "15Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "10Mi"
+                }
+            }
+        },
+        "symbol_distributions": [
+            "ONE_TO_ONE"
+        ]
+    },
+    "fc9e0ac29c": {
+        "payload_config": {
+            "BINANCE": {
+                "l2_book": [
+                    "FIL-USDT",
+                    "MATIC-USDT"
+                ],
+                "ticker": [
+                    "FIL-USDT",
+                    "MATIC-USDT"
+                ],
+                "trades": [
+                    "FIL-USDT",
+                    "MATIC-USDT"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "610Mi"
+                },
+                "requests": {
+                    "cpu": "132m",
+                    "memory": "406Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "5Mi"
+                },
+                "requests": {
+                    "cpu": "7m",
+                    "memory": "3Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "12Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "8Mi"
+                }
+            }
+        },
+        "symbol_distributions": [
+            "LARGEST_WITH_SMALLEST"
+        ]
+    },
+    "fdc96bac9e": {
+        "payload_config": {
+            "PHEMEX": {
+                "l2_book": [
+                    "BCH-USDT",
+                    "DOGE-USDT",
+                    "LINK-USDT",
+                    "LTC-USDT"
+                ],
+                "trades": [
+                    "BCH-USDT",
+                    "DOGE-USDT",
+                    "LINK-USDT",
+                    "LTC-USDT"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "367Mi"
+                },
+                "requests": {
+                    "cpu": "37m",
+                    "memory": "245Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "5Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "3Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "17Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "11Mi"
+                }
+            }
+        },
+        "symbol_distributions": [
+            "EQUAL_BUCKETS"
+        ]
+    },
+    "ff2536f78d": {
+        "payload_config": {
+            "PHEMEX": {
+                "l2_book": [
+                    "ETC-USDT"
+                ],
+                "trades": [
+                    "ETC-USDT"
+                ]
+            }
+        },
+        "resource_spec": {
+            "data-feed-container": {
+                "limits": {
+                    "memory": "305Mi"
+                },
+                "requests": {
+                    "cpu": "22m",
+                    "memory": "203Mi"
+                }
+            },
+            "redis": {
+                "limits": {
+                    "memory": "4Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "3Mi"
+                }
+            },
+            "redis-exporter": {
+                "limits": {
+                    "memory": "12Mi"
+                },
+                "requests": {
+                    "cpu": "1m",
+                    "memory": "8Mi"
+                }
+            }
+        },
+        "symbol_distributions": [
+            "EQUAL_BUCKETS",
+            "ONE_TO_ONE"
+        ]
+    }
+}

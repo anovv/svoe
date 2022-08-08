@@ -13,9 +13,10 @@ AGG = 'p50'
 AGGS = ['absent', 'avg', 'max', 'min', 'p95', 'p50']
 UNKNOWN_SYMBOL_DISTRIBUTION = 'UNKNOWN_SYMBOL_DISTRIBUTION'
 
+
 class REResultAnalyzer:
     def __init__(self):
-        self.data = {} # grouped by symbol_distribution
+        self.grouped_by_distribution = {} # grouped by symbol_distribution
 
     def get_latest_date(self):
         dates = []
@@ -26,31 +27,33 @@ class REResultAnalyzer:
         dates = sorted(dates, key=lambda x: datetime.datetime.strptime(x, '%d-%m-%Y-%H-%M-%S'))
         return dates[-1]
 
-    def load_data(self, date):
+    def load_date(self, date):
         dir_path = os.path.dirname(os.path.realpath(__file__))
         file_path = dir_path + f'/{date}/resources-estimation.json'
-        with open(file_path) as json_file:
-            data = json.load(json_file)
-            for key in data:
-                if 'symbol_distribution' in data[key]:
-                    symbol_distribution = data[key]['symbol_distribution']
-                else:
-                    symbol_distribution = UNKNOWN_SYMBOL_DISTRIBUTION
-                if symbol_distribution not in self.data:
-                    self.data[symbol_distribution] = {}
-                self.data[symbol_distribution][key] = data[key]
+        return json.load(open(file_path))
 
-    def load_latest_data(self):
+    def load_date_and_group_by_distribution(self, date):
+        data = self.load_date(date)
+        for key in data:
+            if 'symbol_distribution' in data[key]:
+                symbol_distribution = data[key]['symbol_distribution']
+            else:
+                symbol_distribution = UNKNOWN_SYMBOL_DISTRIBUTION
+            if symbol_distribution not in self.grouped_by_distribution:
+                self.grouped_by_distribution[symbol_distribution] = {}
+            self.grouped_by_distribution[symbol_distribution][key] = data[key]
+
+    def load_latest_and_group_by_distribution(self):
         latest = self.get_latest_date()
-        self.load_data(latest)
+        self.load_date_and_group_by_distribution(latest)
         print(f'Loaded data for {latest}')
 
     def no_metrics(self):
         no_metrics = []
-        distr_strategies = list(self.data.keys())
+        distr_strategies = list(self.grouped_by_distribution.keys())
         for symbol_distribution in distr_strategies:
-            for key in self.data[symbol_distribution]:
-                pod_data = self.data[symbol_distribution][key]
+            for key in self.grouped_by_distribution[symbol_distribution]:
+                pod_data = self.grouped_by_distribution[symbol_distribution][key]
                 if 'metrics' not in pod_data:
                     no_metrics.append(pod_data['pod_name'])
         return no_metrics
@@ -58,8 +61,8 @@ class REResultAnalyzer:
     # groups data by exchange.instrument_type for each symbols group
     def grouped_perf_metrics(self, symbol_distribution=UNKNOWN_SYMBOL_DISTRIBUTION):
         grouped = {}
-        for _key in self.data[symbol_distribution]:
-            pod_data = self.data[symbol_distribution][_key]
+        for _key in self.grouped_by_distribution[symbol_distribution]:
+            pod_data = self.grouped_by_distribution[symbol_distribution][_key]
             payload_config = pod_data['payload_config']
             exchange = list(payload_config.keys())[0]
             first_channel = list(payload_config[exchange].keys())[0]
@@ -83,7 +86,7 @@ class REResultAnalyzer:
         return grouped
 
     def plot_mem(self):
-        distr_strategies = list(self.data.keys())
+        distr_strategies = list(self.grouped_by_distribution.keys())
         exchange_instruments = set()
         subplot_titles = []
         for symbol_distribution in distr_strategies:
@@ -120,8 +123,8 @@ class REResultAnalyzer:
     # groups data by exchange.instrument_type+channel for each symbol
     def grouped_health_metrics(self, symbol_distribution=UNKNOWN_SYMBOL_DISTRIBUTION):
         grouped = {}
-        for _key in self.data[symbol_distribution]:
-            pod_data = self.data[symbol_distribution][_key]
+        for _key in self.grouped_by_distribution[symbol_distribution]:
+            pod_data = self.grouped_by_distribution[symbol_distribution][_key]
             payload_config = pod_data['payload_config']
             exchange = list(payload_config.keys())[0]
             for channel in payload_config[exchange].keys():
@@ -196,10 +199,30 @@ class REResultAnalyzer:
         fig.update_layout(title_text=f'Data Feed Channels Health {symbol_distr}', autosize=True, width=2000, height=1000)
         fig.show()
 
+    def get_items(self, exchanges, distrs, symbols, date):
+        res = []
+        data = self.load_date(date)
+        for exchange in exchanges:
+            for distr in distrs:
+                for key in data:
+                    item = data[key]
+                    payload = item['payload_config']
+                    exchange = list(payload.keys())[0]
+                    first_channel = list(payload[exchange].keys())[0]
+                    s = payload[exchange][first_channel]
+                    if (len(distrs) == 0 or item['symbol_distribution'] in distrs) and \
+                            (len(exchanges) == 0 or exchange in exchanges) and \
+                            (len(symbols) == 0 or bool(set(s) & set(symbols))):
+                        res.append(item['payload_hash'])
+
+        return res
+
+
 
 re = REResultAnalyzer()
-re.load_latest_data()
+# re.load_latest_and_group_by_distribution()
 # print(re.get_latest_date())
 # print(re.grouped_health_metrics('ONE_TO_ONE'))
 # print(re.no_metrics())
-re.plot_health('ONE_TO_ONE')
+# re.plot_health('ONE_TO_ONE')
+print(re.get_items(['BINANCE'], ['EQUAL_BUCKETS'], ['ETC-USDT'], '03-08-2022-17-05-14'))

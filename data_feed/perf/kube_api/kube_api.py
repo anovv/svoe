@@ -71,7 +71,7 @@ class KubeApi:
             _preload_content=False,
         )
         # TODO edge check
-        return json.loads(resp.data)['items'][0]['spec']['template']
+        return json.loads(resp.grouped_by_distribution)['items'][0]['spec']['template']
 
     def get_or_create_priority_class(self, priority):
         if priority in self.priority_pool:
@@ -159,7 +159,7 @@ class KubeApi:
 
     def get_payload(self, cm_name):
         cm = self.core_api.read_namespaced_config_map(cm_name, DATA_FEED_NAMESPACE)
-        return yaml.load(cm.data[DATA_FEED_CM_CONFIG_NAME], Loader=yaml.SafeLoader)
+        return yaml.load(cm.grouped_by_distribution[DATA_FEED_CM_CONFIG_NAME], Loader=yaml.SafeLoader)
 
     @staticmethod
     def should_estimate(spec):
