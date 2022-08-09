@@ -28,10 +28,10 @@ GLOBAL_ENV_VALUES = {
 cluster_ids = [int(cluster_id) for cluster_id in tf_config['multicluster_config_output']['value']]
 
 for cluster_id in tf_config['multicluster_config_output']['value']:
-    for cluster_type in ['minikube', 'dev']:
+    for cluster_type in ['minikube', 'remote']:
         if cluster_type == 'minikube':
             cluster_name = 'minikube-' + cluster_id
-        elif cluster_type == 'dev':
+        elif cluster_type == 'remote':
             cluster_name = tf_config['multicluster_config_output']['value'][cluster_id]['cluster_name']
         else:
             raise ValueError('Unsupported cluster type')
@@ -60,7 +60,7 @@ for cluster_id in tf_config['multicluster_config_output']['value']:
         os.makedirs(os.path.dirname(helmfile_path), exist_ok=True)
         os.system(f'cp {TEMPLATE_HELMFILE_PATH} {helmfile_path}')
 
-        if cluster_type == 'dev':
+        if cluster_type != 'minikube':
             # ignore minikube for global helmfile (or make separate?)
             GLOBAL_HELMFILE['helmfiles'].append(helmfile_path)
 
