@@ -20,7 +20,7 @@ exchangeConfigSets:
       exchangeConfigOverrides: # TODO snapshot_interval ?
         retries: -1
       dataFeedConfigOverrides: {}
-      clusterId: 1
+      clusterId: 3
       availabilityZone: a
       symbolPodDistributionStrategy: EQUAL_BUCKETS
       description: |
@@ -136,7 +136,7 @@ exchangeConfigSets:
       exchangeConfigOverrides: # TODO snapshot_interval ?
         retries: -1
       dataFeedConfigOverrides: {}
-      clusterId: 1
+      clusterId: 3
       availabilityZone: a
       symbolPodDistributionStrategy: EQUAL_BUCKETS
       description: |
@@ -356,7 +356,7 @@ exchangeConfigSets:
       exchangeConfigOverrides:
         retries: -1
       dataFeedConfigOverrides: {}
-      clusterId: 1
+      clusterId: 3
       availabilityZone: a
       symbolPodDistributionStrategy: EQUAL_BUCKETS
       description: |
@@ -380,7 +380,7 @@ exchangeConfigSets:
       exchangeConfigOverrides:
         retries: -1
       dataFeedConfigOverrides: {}
-      clusterId: 1
+      clusterId: 3
       availabilityZone: a
       symbolPodDistributionStrategy: EQUAL_BUCKETS
       description: |
