@@ -80,7 +80,7 @@ exchangeConfigSets:
       excludes:
         quotes: []
         bases: [SHIB, BSV]
-      channels: [ticker, l2_book, trades, liquidations, open_interest, funding]
+      channels: [ticker, l2_book, trades, liquidations, funding]
       dataFeedImageVersion: 1.0.4 # sync with data_feed/ci
       channelsConfigOverrides:
         l2_book:
@@ -103,7 +103,7 @@ exchangeConfigSets:
       excludes:
         quotes: []
         bases: [SHIB, BSV]
-      channels: [ticker, l2_book, trades, liquidations, open_interest, funding]
+      channels: [ticker, l2_book, trades, liquidations, funding]
       dataFeedImageVersion: 1.0.4 # sync with data_feed/ci
       channelsConfigOverrides:
         l2_book:
@@ -118,7 +118,6 @@ exchangeConfigSets:
       description: |
         Common configuration for Binance Futures USDT perpetual top 20
 
-
     - instrumentType: perpetual
       symbolSets:
         quotes: [USDT]
@@ -127,7 +126,7 @@ exchangeConfigSets:
       excludes:
         quotes: []
         bases: [SHIB, BSV]
-      channels: [ticker, l2_book, trades, liquidations, open_interest, funding]
+      channels: [ticker, l2_book, trades, liquidations, funding]
       dataFeedImageVersion: 1.0.4 # sync with data_feed/ci
       channelsConfigOverrides:
         l2_book:
@@ -141,9 +140,9 @@ exchangeConfigSets:
       symbolPodDistributionStrategy: EQUAL_BUCKETS
       description: |
         Common configuration for Binance Futures USDT perpetual top 20
+
   BYBIT:
     - instrumentType: perpetual
-      numPods: 10
       symbolSets:
         quotes: [USDT]
         bases: TOP_20
@@ -166,6 +165,7 @@ exchangeConfigSets:
       symbolPodDistributionStrategy: ONE_TO_ONE
       description: |
         Common configuration for Bybit perpetual USDT futures top 20
+
   FTX:
     - instrumentType: spot
       symbolSets:
@@ -214,6 +214,7 @@ exchangeConfigSets:
       symbolPodDistributionStrategy: ONE_TO_ONE
       description: |
         Common configuration for FTX perpetual USD futures top 20
+
   GATEIO:
     - instrumentType: spot
       symbolSets:
