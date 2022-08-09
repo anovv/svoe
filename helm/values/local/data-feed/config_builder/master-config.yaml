@@ -11,6 +11,7 @@ exchangeConfigSets:
         quotes: []
         bases: [BSV]
       channels: [ticker, l2_book, trades]
+      launchOnDeploy: false
       dataFeedImageVersion: 1.0.4 # sync with data_feed/ci
       channelsConfigOverrides:
         l2_book:

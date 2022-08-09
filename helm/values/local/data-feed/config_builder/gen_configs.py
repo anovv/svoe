@@ -56,6 +56,7 @@ def build_pod_configs(exchange, exchange_config):
     # TODO handle duplicates (Symbol equal method)
     # TODO add explicit symbol excludes
 
+    launch_on_deploy = 'launchOnDeploy' in exchange_config and exchange_config['launchOnDeploy']
     instrument_type = exchange_config['instrumentType']
     symbol_distribution_strategy = exchange_config['symbolPodDistributionStrategy']
 
@@ -187,6 +188,7 @@ def build_pod_configs(exchange, exchange_config):
             'data_feed_config': yaml.dump(config, default_flow_style=False),
             'cluster_id': exchange_config['clusterId'],
             'labels': labels,
+            'launch_on_deploy': launch_on_deploy
         }
 
         RESOURCE_SPEC_SUMMARY_KEY = 'resource_spec_counter'

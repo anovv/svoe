@@ -36,7 +36,7 @@ metadata:
     {{- end }}
   name: {{ .name }}-ss
 spec:
-  {{- if .dataFeed.resources }}
+  {{- if and (eq .launchOnDeploy true) .dataFeed.resources }}
   replicas: 1
   {{- else}}
   replicas: 0

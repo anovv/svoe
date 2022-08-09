@@ -21,6 +21,7 @@ podConfigs:
       strikePrice: {{ pod_config['instrument_extra']['strike_price'] }}
       expirationDate: {{ pod_config['instrument_extra']['expiration_date'] }}
     {%- endif %}
+    launchOnDeploy: {{ pod_config['launch_on_deploy'] }}
     symbols:
       {%- for symbol in pod_config['symbols'] %}
       - symbol: {{ symbol['symbol'] }}
