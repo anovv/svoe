@@ -198,9 +198,9 @@ def build_pod_configs(exchange, exchange_config):
             SUMMARY[RESOURCE_SPEC_SUMMARY_KEY][exchange][instrument_type] = {}
         if symbol_distribution_strategy not in SUMMARY[RESOURCE_SPEC_SUMMARY_KEY][exchange][instrument_type]:
             SUMMARY[RESOURCE_SPEC_SUMMARY_KEY][exchange][instrument_type][symbol_distribution_strategy] = \
-                {'skipped_payloads': [],
-                 'skipped_payloads_count': 0,
-                 'set_payloads': [],
+                {'skipped_payloads_count': 0,
+                 # 'skipped_payloads': [],
+                 # 'set_payloads': [],
                  'set_payloads_count': 0,
                  'total_count': len(symbol_pod_mapping)}
 
@@ -211,19 +211,19 @@ def build_pod_configs(exchange, exchange_config):
             pod_config['data_feed_resources'] = resource_spec['data-feed-container']
             pod_config['labels']['svoe.has-resources'] = True
             SUMMARY[RESOURCE_SPEC_SUMMARY_KEY][exchange][instrument_type][symbol_distribution_strategy]['set_payloads_count'] += 1
-            SUMMARY[RESOURCE_SPEC_SUMMARY_KEY][exchange][instrument_type][symbol_distribution_strategy]['set_payloads'].append(
-                {
-                    'payload_hash': payload_hash,
-                    'symbols': symbol_pod_mapping[pod_id],
-                })
+            # SUMMARY[RESOURCE_SPEC_SUMMARY_KEY][exchange][instrument_type][symbol_distribution_strategy]['set_payloads'].append(
+            #     {
+            #         'payload_hash': payload_hash,
+            #         'symbols': symbol_pod_mapping[pod_id],
+            #     })
         else:
             pod_config['labels']['svoe.has-resources'] = False
             SUMMARY[RESOURCE_SPEC_SUMMARY_KEY][exchange][instrument_type][symbol_distribution_strategy]['skipped_payloads_count'] += 1
-            SUMMARY[RESOURCE_SPEC_SUMMARY_KEY][exchange][instrument_type][symbol_distribution_strategy]['skipped_payloads'].append(
-                {
-                    'payload_hash': payload_hash,
-                    'symbols': symbol_pod_mapping[pod_id],
-                })
+            # SUMMARY[RESOURCE_SPEC_SUMMARY_KEY][exchange][instrument_type][symbol_distribution_strategy]['skipped_payloads'].append(
+            #     {
+            #         'payload_hash': payload_hash,
+            #         'symbols': symbol_pod_mapping[pod_id],
+            #     })
         pod_configs.append(pod_config)
 
     # filter by requested number of pods
@@ -292,10 +292,47 @@ def _build_data_feed_channels_config(symbols, channels, overrides):
     return config
 
 
-def _distribute_symbols(exchange, symbols, strategy):
+def _distribute_symbols(exchange, symbols, strategy, reuse_index=True):
     dist = {}
     print(f'Using {strategy} symbol distribution strategy for {exchange}')
 
+    if reuse_index:
+        # tries to distribute symbols reusing already evaluated blocks to minimize hash inconsistency
+        buckets = []
+        while len(symbols) > 0:
+            symbol = symbols[0]
+            # find block with this symbol
+            block_hash = None
+            for payload_hash in RESOURCE_INDEX:
+                if strategy in RESOURCE_INDEX[payload_hash]['symbol_distributions']:
+                    _exchange = list(RESOURCE_INDEX[payload_hash]['payload_config'].keys())[0]
+                    first_channel = list(RESOURCE_INDEX[payload_hash]['payload_config'][_exchange].keys())[0]
+                    payload_symbols = RESOURCE_INDEX[payload_hash]['payload_config'][_exchange][first_channel]
+                    if _exchange == exchange and symbol.normalized in payload_symbols:
+                        block_hash = payload_hash
+                        bucket = []
+                        for s in payload_symbols:
+                            to_remove = [i for i in range(len(symbols)) if symbols[i].normalized == s] # should be only one elem
+                            for i in to_remove:
+                                bucket.append(symbols[i])
+                                del symbols[i]
+                        buckets.append(bucket)
+            if block_hash is None:
+                break
+
+        # append leftover symbols by splitting into buckets of 4
+        bucket_size = 4
+        leftovers = [symbols[i:i+bucket_size] for i in range(0, len(symbols), bucket_size)]
+        buckets.extend(leftovers)
+        for i in range(len(buckets)):
+            dist[i] = buckets[i]
+
+        print(f'{exchange} dist, reusing index: {dist}')
+        return dist
+
+    # TODO use consistent hashing
+    # TODO _sort_by_binance_usdt_trading_vol changes order depending on outside factors, leads to rehashing and reevaluating
+    # TODO all of it is most likely not needed or needed only for first init when index is not built
     if strategy == 'ONE_TO_ONE':
         # one symbol per pod
         sorted_symbols, _ = _sort_by_binance_usdt_trading_vol(symbols, reverse=True)
@@ -495,5 +532,5 @@ RESOURCE_INDEX = _build_resource_index(['03-08-2022-17-05-14'])
 
 gen_helm_values()
 
-print('Summary\n' + str(SUMMARY['resource_spec_counter']['BINANCE']['spot']))
+print('Summary\n' + str(SUMMARY['resource_spec_counter']))
 print('Done.')
