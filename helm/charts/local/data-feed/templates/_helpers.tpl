@@ -53,7 +53,6 @@ spec:
         {{ $k }}: {{ $v | quote }}
         {{- end }}
     spec:
-      # TODO set resources for redis/redis-exporter sidecars
       {{ if .dataFeed.imagePullSecret }}
       imagePullSecrets:
         - name: {{ .dataFeed.imagePullSecret }}
@@ -86,11 +85,57 @@ spec:
           volumeMounts:
             - name: lifecycle
               mountPath: /lifecycle
+          {{- if .dataFeed.resources }}
+          {{- if .dataFeed.resources.redis }}
+          resources:
+            {{- if .dataFeed.resources.redis.requests }}
+            requests:
+              {{- if .dataFeed.resources.redis.requests.memory }}
+              memory: {{ .dataFeed.resources.redis.requests.memory }}
+              {{- end }}
+              {{- if .dataFeed.resources.redis.requests.cpu }}
+              cpu: {{ .dataFeed.resources.redis.requests.cpu }}
+              {{- end }}
+            {{- end }}
+            {{- if .dataFeed.resources.redis.limits }}
+            limits:
+              {{- if .dataFeed.resources.redis.limits.memory }}
+              memory: {{ .dataFeed.resources.redis.limits.memory }}
+              {{- end }}
+              {{- if .dataFeed.resources.redis.limits.cpu }}
+              cpu: {{ .dataFeed.resources.redis.limits.cpu }}
+              {{- end }}
+            {{- end }}
+          {{- end }}
+          {{- end }}
         - image: oliver006/redis_exporter:latest
           name: redis-exporter
           ports:
             - containerPort: 9121
               name: redis-metrics
+          {{- if .dataFeed.resources }}
+          {{- if .dataFeed.resources.redisExporter }}
+          resources:
+            {{- if .dataFeed.resources.redisExporter.requests }}
+            requests:
+              {{- if .dataFeed.resources.redisExporter.requests.memory }}
+              memory: {{ .dataFeed.resources.redisExporter.requests.memory }}
+              {{- end }}
+              {{- if .dataFeed.resources.redisExporter.requests.cpu }}
+              cpu: {{ .dataFeed.resources.redisExporter.requests.cpu }}
+              {{- end }}
+            {{- end }}
+            {{- if .dataFeed.resources.redisExporter.limits }}
+            limits:
+              {{- if .dataFeed.resources.redisExporter.limits.memory }}
+              memory: {{ .dataFeed.resources.redisExporter.limits.memory }}
+              {{- end }}
+              {{- if .dataFeed.resources.redisExporter.limits.cpu }}
+              cpu: {{ .dataFeed.resources.redisExporter.limits.cpu }}
+              {{- end }}
+            {{- end }}
+          {{- end }}
+          {{- end }}
         - image: {{ .dataFeed.image }}
           imagePullPolicy: IfNotPresent
           name: data-feed-container
@@ -143,25 +188,27 @@ spec:
             periodSeconds: 2
             failureThreshold: 10
           {{- if .dataFeed.resources }}
+          {{- if .dataFeed.resources.dataFeedContainer }}
           resources:
-            {{- if .dataFeed.resources.requests }}
+            {{- if .dataFeed.resources.dataFeedContainer.requests }}
             requests:
-              {{- if .dataFeed.resources.requests.memory }}
-              memory: {{ .dataFeed.resources.requests.memory }}
+              {{- if .dataFeed.resources.dataFeedContainer.requests.memory }}
+              memory: {{ .dataFeed.resources.dataFeedContainer.requests.memory }}
               {{- end }}
-              {{- if .dataFeed.resources.requests.cpu }}
-              cpu: {{ .dataFeed.resources.requests.cpu }}
+              {{- if .dataFeed.resources.dataFeedContainer.requests.cpu }}
+              cpu: {{ .dataFeed.resources.dataFeedContainer.requests.cpu }}
               {{- end }}
             {{- end }}
-            {{- if .dataFeed.resources.limits }}
+            {{- if .dataFeed.resources.dataFeedContainer.limits }}
             limits:
-              {{- if .dataFeed.resources.limits.memory }}
-              memory: {{ .dataFeed.resources.limits.memory }}
+              {{- if .dataFeed.resources.dataFeedContainer.limits.memory }}
+              memory: {{ .dataFeed.resources.dataFeedContainer.limits.memory }}
               {{- end }}
-              {{- if .dataFeed.resources.limits.cpu }}
-              cpu: {{ .dataFeed.resources.limits.cpu }}
+              {{- if .dataFeed.resources.dataFeedContainer.limits.cpu }}
+              cpu: {{ .dataFeed.resources.dataFeedContainer.limits.cpu }}
               {{- end }}
             {{- end }}
+          {{- end }}
           {{- end }}
       terminationGracePeriodSeconds: 30
       volumes:

@@ -44,22 +44,67 @@ podConfigs:
         multiprocDir: {{ pod_config['prometheus_multiproc_dir'] }}
       {%- if pod_config['data_feed_resources'] is defined %}
       resources:
-        {%- if pod_config['data_feed_resources']['requests'] is defined %}
-        requests:
-          {%- if pod_config['data_feed_resources']['requests']['cpu'] is defined %}
-          cpu: {{ pod_config['data_feed_resources']['requests']['cpu'] }}
+        {%- if pod_config['data_feed_resources']['data-feed-container'] is defined %}
+        dataFeedContainer:
+          {%- if pod_config['data_feed_resources']['data-feed-container']['requests'] is defined %}
+          requests:
+            {%- if pod_config['data_feed_resources']['data-feed-container']['requests']['cpu'] is defined %}
+            cpu: {{ pod_config['data_feed_resources']['data-feed-container']['requests']['cpu'] }}
+            {%- endif %}
+            {%- if pod_config['data_feed_resources']['data-feed-container']['requests']['memory'] is defined %}
+            memory: {{ pod_config['data_feed_resources']['data-feed-container']['requests']['memory'] }}
+            {%- endif %}
           {%- endif %}
-          {%- if pod_config['data_feed_resources']['requests']['memory'] is defined %}
-          memory: {{ pod_config['data_feed_resources']['requests']['memory'] }}
+          {%- if pod_config['data_feed_resources']['data-feed-container']['limits'] is defined %}
+          limits:
+            {%- if pod_config['data_feed_resources']['data-feed-container']['limits']['cpu'] is defined %}
+            cpu: {{ pod_config['data_feed_resources']['data-feed-container']['limits']['cpu'] }}
+            {%- endif %}
+            {%- if pod_config['data_feed_resources']['data-feed-container']['limits']['memory'] is defined %}
+            memory: {{ pod_config['data_feed_resources']['data-feed-container']['limits']['memory'] }}
+            {%- endif %}
           {%- endif %}
         {%- endif %}
-        {%- if pod_config['data_feed_resources']['limits'] is defined %}
-        limits:
-          {%- if pod_config['data_feed_resources']['limits']['cpu'] is defined %}
-          cpu: {{ pod_config['data_feed_resources']['limits']['cpu'] }}
+        {%- if pod_config['data_feed_resources']['redis'] is defined %}
+        redis:
+          {%- if pod_config['data_feed_resources']['redis']['requests'] is defined %}
+          requests:
+            {%- if pod_config['data_feed_resources']['redis']['requests']['cpu'] is defined %}
+            cpu: {{ pod_config['data_feed_resources']['redis']['requests']['cpu'] }}
+            {%- endif %}
+            {%- if pod_config['data_feed_resources']['redis']['requests']['memory'] is defined %}
+            memory: {{ pod_config['data_feed_resources']['redis' ]['requests']['memory'] }}
+            {%- endif %}
           {%- endif %}
-          {%- if pod_config['data_feed_resources']['limits']['memory'] is defined %}
-          memory: {{ pod_config['data_feed_resources']['limits']['memory'] }}
+          {%- if pod_config['data_feed_resources']['redis']['limits'] is defined %}
+          limits:
+            {%- if pod_config['data_feed_resources']['redis']['limits']['cpu'] is defined %}
+            cpu: {{ pod_config['data_feed_resources']['redis']['limits']['cpu'] }}
+            {%- endif %}
+            {%- if pod_config['data_feed_resources']['redis']['limits']['memory'] is defined %}
+            memory: {{ pod_config['data_feed_resources']['redis']['limits']['memory'] }}
+            {%- endif %}
+          {%- endif %}
+        {%- endif %}
+        {%- if pod_config['data_feed_resources']['redis-exporter'] is defined %}
+        redisExporter:
+          {%- if pod_config['data_feed_resources']['redis-exporter']['requests'] is defined %}
+          requests:
+            {%- if pod_config['data_feed_resources']['redis-exporter']['requests']['cpu'] is defined %}
+            cpu: {{ pod_config['data_feed_resources']['redis-exporter']['requests']['cpu'] }}
+            {%- endif %}
+            {%- if pod_config['data_feed_resources']['redis-exporter']['requests']['memory'] is defined %}
+            memory: {{ pod_config['data_feed_resources']['redis-exporter']['requests']['memory'] }}
+            {%- endif %}
+          {%- endif %}
+          {%- if pod_config['data_feed_resources']['redis-exporter']['limits'] is defined %}
+          limits:
+            {%- if pod_config['data_feed_resources']['redis-exporter']['limits']['cpu'] is defined %}
+            cpu: {{ pod_config['data_feed_resources']['redis-exporter']['limits']['cpu'] }}
+            {%- endif %}
+            {%- if pod_config['data_feed_resources']['redis-exporter']['limits']['memory'] is defined %}
+            memory: {{ pod_config['data_feed_resources']['redis-exporter']['limits']['memory'] }}
+            {%- endif %}
           {%- endif %}
         {%- endif %}
       {%- endif %}

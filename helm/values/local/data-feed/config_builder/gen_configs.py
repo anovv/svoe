@@ -208,7 +208,14 @@ def build_pod_configs(exchange, exchange_config):
         payload_hash = config['payload_hash']
         if payload_hash in RESOURCE_INDEX:
             resource_spec = RESOURCE_INDEX[payload_hash]['resource_spec']
-            pod_config['data_feed_resources'] = resource_spec['data-feed-container']
+            pod_config['data_feed_resources'] = {}
+            if 'data-feed-container' in resource_spec:
+                pod_config['data_feed_resources']['data-feed-container'] = resource_spec['data-feed-container']
+            if 'redis' in resource_spec:
+                pod_config['data_feed_resources']['redis'] = resource_spec['redis']
+            if 'redis-exporter' in resource_spec:
+                pod_config['data_feed_resources']['redis-exporter'] = resource_spec['redis-exporter']
+
             pod_config['labels']['svoe.has-resources'] = True
             SUMMARY[RESOURCE_SPEC_SUMMARY_KEY][exchange][instrument_type][symbol_distribution_strategy]['set_payloads_count'] += 1
             # SUMMARY[RESOURCE_SPEC_SUMMARY_KEY][exchange][instrument_type][symbol_distribution_strategy]['set_payloads'].append(

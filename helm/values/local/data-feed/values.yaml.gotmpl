@@ -48,11 +48,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_551b73ef01
       resources:
-        requests:
-          cpu: 230m
-          memory: 391Mi
-        limits:
-          memory: 587Mi
+        dataFeedContainer:
+          requests:
+            cpu: 230m
+            memory: 391Mi
+          limits:
+            memory: 587Mi
+        redis:
+          requests:
+            cpu: 16m
+            memory: 5Mi
+          limits:
+            memory: 8Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 13Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -154,11 +167,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_baf6e74bf7
       resources:
-        requests:
-          cpu: 128m
-          memory: 376Mi
-        limits:
-          memory: 565Mi
+        dataFeedContainer:
+          requests:
+            cpu: 128m
+            memory: 376Mi
+          limits:
+            memory: 565Mi
+        redis:
+          requests:
+            cpu: 8m
+            memory: 5Mi
+          limits:
+            memory: 8Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 12Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -270,11 +296,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_3c8805bf31
       resources:
-        requests:
-          cpu: 167m
-          memory: 459Mi
-        limits:
-          memory: 688Mi
+        dataFeedContainer:
+          requests:
+            cpu: 167m
+            memory: 459Mi
+          limits:
+            memory: 688Mi
+        redis:
+          requests:
+            cpu: 7m
+            memory: 4Mi
+          limits:
+            memory: 6Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 12Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -403,11 +442,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_c519e40422
       resources:
-        requests:
-          cpu: 206m
-          memory: 506Mi
-        limits:
-          memory: 759Mi
+        dataFeedContainer:
+          requests:
+            cpu: 206m
+            memory: 506Mi
+          limits:
+            memory: 759Mi
+        redis:
+          requests:
+            cpu: 8m
+            memory: 4Mi
+          limits:
+            memory: 6Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 13Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -542,11 +594,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_8fb2205fe2
       resources:
-        requests:
-          cpu: 207m
-          memory: 507Mi
-        limits:
-          memory: 761Mi
+        dataFeedContainer:
+          requests:
+            cpu: 207m
+            memory: 507Mi
+          limits:
+            memory: 761Mi
+        redis:
+          requests:
+            cpu: 8m
+            memory: 4Mi
+          limits:
+            memory: 6Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 12Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -666,11 +731,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_4d56c7093d
       resources:
-        requests:
-          cpu: 68m
-          memory: 366Mi
-        limits:
-          memory: 550Mi
+        dataFeedContainer:
+          requests:
+            cpu: 68m
+            memory: 366Mi
+          limits:
+            memory: 550Mi
+        redis:
+          requests:
+            cpu: 3m
+            memory: 5Mi
+          limits:
+            memory: 7Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 12Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -772,11 +850,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_66770c3239
       resources:
-        requests:
-          cpu: 67m
-          memory: 367Mi
-        limits:
-          memory: 551Mi
+        dataFeedContainer:
+          requests:
+            cpu: 67m
+            memory: 367Mi
+          limits:
+            memory: 551Mi
+        redis:
+          requests:
+            cpu: 3m
+            memory: 3Mi
+          limits:
+            memory: 5Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 13Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -893,11 +984,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_6ffa5f6673
       resources:
-        requests:
-          cpu: 174m
-          memory: 506Mi
-        limits:
-          memory: 759Mi
+        dataFeedContainer:
+          requests:
+            cpu: 174m
+            memory: 506Mi
+          limits:
+            memory: 759Mi
+        redis:
+          requests:
+            cpu: 6m
+            memory: 4Mi
+          limits:
+            memory: 6Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 13Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -1017,11 +1121,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_89c8b1195e
       resources:
-        requests:
-          cpu: 230m
-          memory: 391Mi
-        limits:
-          memory: 587Mi
+        dataFeedContainer:
+          requests:
+            cpu: 230m
+            memory: 391Mi
+          limits:
+            memory: 587Mi
+        redis:
+          requests:
+            cpu: 16m
+            memory: 5Mi
+          limits:
+            memory: 8Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 13Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -1123,11 +1240,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_6d4903162e
       resources:
-        requests:
-          cpu: 128m
-          memory: 376Mi
-        limits:
-          memory: 565Mi
+        dataFeedContainer:
+          requests:
+            cpu: 128m
+            memory: 376Mi
+          limits:
+            memory: 565Mi
+        redis:
+          requests:
+            cpu: 8m
+            memory: 5Mi
+          limits:
+            memory: 8Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 12Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -1229,11 +1359,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_b5186c9de9
       resources:
-        requests:
-          cpu: 91m
-          memory: 369Mi
-        limits:
-          memory: 554Mi
+        dataFeedContainer:
+          requests:
+            cpu: 91m
+            memory: 369Mi
+          limits:
+            memory: 554Mi
+        redis:
+          requests:
+            cpu: 5m
+            memory: 3Mi
+          limits:
+            memory: 5Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 12Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -1335,11 +1478,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_8191ba61df
       resources:
-        requests:
-          cpu: 89m
-          memory: 366Mi
-        limits:
-          memory: 550Mi
+        dataFeedContainer:
+          requests:
+            cpu: 89m
+            memory: 366Mi
+          limits:
+            memory: 550Mi
+        redis:
+          requests:
+            cpu: 4m
+            memory: 3Mi
+          limits:
+            memory: 5Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 12Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -1441,11 +1597,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_45e5f9f3b5
       resources:
-        requests:
-          cpu: 91m
-          memory: 367Mi
-        limits:
-          memory: 550Mi
+        dataFeedContainer:
+          requests:
+            cpu: 91m
+            memory: 367Mi
+          limits:
+            memory: 550Mi
+        redis:
+          requests:
+            cpu: 4m
+            memory: 3Mi
+          limits:
+            memory: 5Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 12Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -1547,11 +1716,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_3c4e3ec539
       resources:
-        requests:
-          cpu: 84m
-          memory: 372Mi
-        limits:
-          memory: 558Mi
+        dataFeedContainer:
+          requests:
+            cpu: 84m
+            memory: 372Mi
+          limits:
+            memory: 558Mi
+        redis:
+          requests:
+            cpu: 5m
+            memory: 3Mi
+          limits:
+            memory: 5Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 12Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -1653,11 +1835,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_1c58ea81a4
       resources:
-        requests:
-          cpu: 74m
-          memory: 374Mi
-        limits:
-          memory: 562Mi
+        dataFeedContainer:
+          requests:
+            cpu: 74m
+            memory: 374Mi
+          limits:
+            memory: 562Mi
+        redis:
+          requests:
+            cpu: 3m
+            memory: 3Mi
+          limits:
+            memory: 5Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 12Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -1759,11 +1954,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_e7abb1be54
       resources:
-        requests:
-          cpu: 73m
-          memory: 382Mi
-        limits:
-          memory: 573Mi
+        dataFeedContainer:
+          requests:
+            cpu: 73m
+            memory: 382Mi
+          limits:
+            memory: 573Mi
+        redis:
+          requests:
+            cpu: 3m
+            memory: 3Mi
+          limits:
+            memory: 5Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 13Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -1865,11 +2073,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_3460ddca46
       resources:
-        requests:
-          cpu: 89m
-          memory: 367Mi
-        limits:
-          memory: 550Mi
+        dataFeedContainer:
+          requests:
+            cpu: 89m
+            memory: 367Mi
+          limits:
+            memory: 550Mi
+        redis:
+          requests:
+            cpu: 4m
+            memory: 3Mi
+          limits:
+            memory: 5Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 13Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -1971,11 +2192,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_db3fdb9624
       resources:
-        requests:
-          cpu: 80m
-          memory: 379Mi
-        limits:
-          memory: 568Mi
+        dataFeedContainer:
+          requests:
+            cpu: 80m
+            memory: 379Mi
+          limits:
+            memory: 568Mi
+        redis:
+          requests:
+            cpu: 4m
+            memory: 3Mi
+          limits:
+            memory: 5Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 12Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -2077,11 +2311,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_f927bdcbfc
       resources:
-        requests:
-          cpu: 76m
-          memory: 373Mi
-        limits:
-          memory: 560Mi
+        dataFeedContainer:
+          requests:
+            cpu: 76m
+            memory: 373Mi
+          limits:
+            memory: 560Mi
+        redis:
+          requests:
+            cpu: 4m
+            memory: 3Mi
+          limits:
+            memory: 5Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 9Mi
+          limits:
+            memory: 14Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -2183,11 +2430,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_cd83c51623
       resources:
-        requests:
-          cpu: 92m
-          memory: 376Mi
-        limits:
-          memory: 565Mi
+        dataFeedContainer:
+          requests:
+            cpu: 92m
+            memory: 376Mi
+          limits:
+            memory: 565Mi
+        redis:
+          requests:
+            cpu: 5m
+            memory: 3Mi
+          limits:
+            memory: 5Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 12Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -2289,11 +2549,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_dda68d7e66
       resources:
-        requests:
-          cpu: 68m
-          memory: 366Mi
-        limits:
-          memory: 550Mi
+        dataFeedContainer:
+          requests:
+            cpu: 68m
+            memory: 366Mi
+          limits:
+            memory: 550Mi
+        redis:
+          requests:
+            cpu: 3m
+            memory: 5Mi
+          limits:
+            memory: 7Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 12Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -2395,11 +2668,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_8a98c1d770
       resources:
-        requests:
-          cpu: 67m
-          memory: 367Mi
-        limits:
-          memory: 551Mi
+        dataFeedContainer:
+          requests:
+            cpu: 67m
+            memory: 367Mi
+          limits:
+            memory: 551Mi
+        redis:
+          requests:
+            cpu: 3m
+            memory: 3Mi
+          limits:
+            memory: 5Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 13Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -2501,11 +2787,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_e881bb7fe9
       resources:
-        requests:
-          cpu: 78m
-          memory: 377Mi
-        limits:
-          memory: 566Mi
+        dataFeedContainer:
+          requests:
+            cpu: 78m
+            memory: 377Mi
+          limits:
+            memory: 566Mi
+        redis:
+          requests:
+            cpu: 3m
+            memory: 3Mi
+          limits:
+            memory: 4Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 13Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -2607,11 +2906,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_6e41a5f1aa
       resources:
-        requests:
-          cpu: 80m
-          memory: 367Mi
-        limits:
-          memory: 550Mi
+        dataFeedContainer:
+          requests:
+            cpu: 80m
+            memory: 367Mi
+          limits:
+            memory: 550Mi
+        redis:
+          requests:
+            cpu: 3m
+            memory: 3Mi
+          limits:
+            memory: 4Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 9Mi
+          limits:
+            memory: 14Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -2713,11 +3025,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_3b54333384
       resources:
-        requests:
-          cpu: 62m
-          memory: 369Mi
-        limits:
-          memory: 553Mi
+        dataFeedContainer:
+          requests:
+            cpu: 62m
+            memory: 369Mi
+          limits:
+            memory: 553Mi
+        redis:
+          requests:
+            cpu: 3m
+            memory: 3Mi
+          limits:
+            memory: 5Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 12Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -2819,11 +3144,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_bff82fd66b
       resources:
-        requests:
-          cpu: 93m
-          memory: 383Mi
-        limits:
-          memory: 575Mi
+        dataFeedContainer:
+          requests:
+            cpu: 93m
+            memory: 383Mi
+          limits:
+            memory: 575Mi
+        redis:
+          requests:
+            cpu: 5m
+            memory: 3Mi
+          limits:
+            memory: 5Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 12Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -2925,11 +3263,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_cc8a7a8b1a
       resources:
-        requests:
-          cpu: 61m
-          memory: 378Mi
-        limits:
-          memory: 567Mi
+        dataFeedContainer:
+          requests:
+            cpu: 61m
+            memory: 378Mi
+          limits:
+            memory: 567Mi
+        redis:
+          requests:
+            cpu: 3m
+            memory: 3Mi
+          limits:
+            memory: 5Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 12Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -3036,11 +3387,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_44aa2ce7f0
       resources:
-        requests:
-          cpu: 252m
-          memory: 420Mi
-        limits:
-          memory: 630Mi
+        dataFeedContainer:
+          requests:
+            cpu: 252m
+            memory: 420Mi
+          limits:
+            memory: 630Mi
+        redis:
+          requests:
+            cpu: 16m
+            memory: 7Mi
+          limits:
+            memory: 10Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 13Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -3153,11 +3517,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_efafbec9bb
       resources:
-        requests:
-          cpu: 193m
-          memory: 434Mi
-        limits:
-          memory: 651Mi
+        dataFeedContainer:
+          requests:
+            cpu: 193m
+            memory: 434Mi
+          limits:
+            memory: 651Mi
+        redis:
+          requests:
+            cpu: 11m
+            memory: 5Mi
+          limits:
+            memory: 8Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 13Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -3270,11 +3647,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_655ca8240d
       resources:
-        requests:
-          cpu: 138m
-          memory: 394Mi
-        limits:
-          memory: 591Mi
+        dataFeedContainer:
+          requests:
+            cpu: 138m
+            memory: 394Mi
+          limits:
+            memory: 591Mi
+        redis:
+          requests:
+            cpu: 6m
+            memory: 3Mi
+          limits:
+            memory: 5Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 13Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -3387,11 +3777,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_05efea3b6c
       resources:
-        requests:
-          cpu: 130m
-          memory: 429Mi
-        limits:
-          memory: 644Mi
+        dataFeedContainer:
+          requests:
+            cpu: 130m
+            memory: 429Mi
+          limits:
+            memory: 644Mi
+        redis:
+          requests:
+            cpu: 6m
+            memory: 5Mi
+          limits:
+            memory: 8Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 10Mi
+          limits:
+            memory: 16Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -3504,11 +3907,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_2e28f976a6
       resources:
-        requests:
-          cpu: 135m
-          memory: 414Mi
-        limits:
-          memory: 622Mi
+        dataFeedContainer:
+          requests:
+            cpu: 135m
+            memory: 414Mi
+          limits:
+            memory: 622Mi
+        redis:
+          requests:
+            cpu: 6m
+            memory: 3Mi
+          limits:
+            memory: 5Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 7Mi
+          limits:
+            memory: 11Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -3621,11 +4037,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_a7a2eea852
       resources:
-        requests:
-          cpu: 139m
-          memory: 390Mi
-        limits:
-          memory: 586Mi
+        dataFeedContainer:
+          requests:
+            cpu: 139m
+            memory: 390Mi
+          limits:
+            memory: 586Mi
+        redis:
+          requests:
+            cpu: 6m
+            memory: 3Mi
+          limits:
+            memory: 5Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 12Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -3738,11 +4167,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_4f4363aead
       resources:
-        requests:
-          cpu: 110m
-          memory: 426Mi
-        limits:
-          memory: 639Mi
+        dataFeedContainer:
+          requests:
+            cpu: 110m
+            memory: 426Mi
+          limits:
+            memory: 639Mi
+        redis:
+          requests:
+            cpu: 5m
+            memory: 3Mi
+          limits:
+            memory: 5Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 12Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -3850,11 +4292,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_c7500d685f
       resources:
-        requests:
-          cpu: 89m
-          memory: 367Mi
-        limits:
-          memory: 550Mi
+        dataFeedContainer:
+          requests:
+            cpu: 89m
+            memory: 367Mi
+          limits:
+            memory: 550Mi
+        redis:
+          requests:
+            cpu: 4m
+            memory: 3Mi
+          limits:
+            memory: 5Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 13Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -3961,11 +4416,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_99aaa4c028
       resources:
-        requests:
-          cpu: 132m
-          memory: 406Mi
-        limits:
-          memory: 610Mi
+        dataFeedContainer:
+          requests:
+            cpu: 132m
+            memory: 406Mi
+          limits:
+            memory: 610Mi
+        redis:
+          requests:
+            cpu: 7m
+            memory: 3Mi
+          limits:
+            memory: 5Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 12Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -4078,11 +4546,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_3ad1ce4942
       resources:
-        requests:
-          cpu: 107m
-          memory: 405Mi
-        limits:
-          memory: 607Mi
+        dataFeedContainer:
+          requests:
+            cpu: 107m
+            memory: 405Mi
+          limits:
+            memory: 607Mi
+        redis:
+          requests:
+            cpu: 4m
+            memory: 3Mi
+          limits:
+            memory: 5Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 12Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -4192,11 +4673,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_7bd6a95e64
       resources:
-        requests:
-          cpu: 340m
-          memory: 456Mi
-        limits:
-          memory: 685Mi
+        dataFeedContainer:
+          requests:
+            cpu: 340m
+            memory: 456Mi
+          limits:
+            memory: 685Mi
+        redis:
+          requests:
+            cpu: 22m
+            memory: 11Mi
+          limits:
+            memory: 16Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 9Mi
+          limits:
+            memory: 14Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -4308,11 +4802,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_08dce3e48d
       resources:
-        requests:
-          cpu: 233m
-          memory: 409Mi
-        limits:
-          memory: 614Mi
+        dataFeedContainer:
+          requests:
+            cpu: 233m
+            memory: 409Mi
+          limits:
+            memory: 614Mi
+        redis:
+          requests:
+            cpu: 14m
+            memory: 7Mi
+          limits:
+            memory: 11Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 12Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -4424,11 +4931,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_295264f75d
       resources:
-        requests:
-          cpu: 115m
-          memory: 357Mi
-        limits:
-          memory: 536Mi
+        dataFeedContainer:
+          requests:
+            cpu: 115m
+            memory: 357Mi
+          limits:
+            memory: 536Mi
+        redis:
+          requests:
+            cpu: 5m
+            memory: 4Mi
+          limits:
+            memory: 6Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 13Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -4540,11 +5060,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_44d37a574c
       resources:
-        requests:
-          cpu: 137m
-          memory: 330Mi
-        limits:
-          memory: 496Mi
+        dataFeedContainer:
+          requests:
+            cpu: 137m
+            memory: 330Mi
+          limits:
+            memory: 496Mi
+        redis:
+          requests:
+            cpu: 6m
+            memory: 4Mi
+          limits:
+            memory: 6Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 10Mi
+          limits:
+            memory: 15Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -4656,11 +5189,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_1f7a12cfef
       resources:
-        requests:
-          cpu: 111m
-          memory: 335Mi
-        limits:
-          memory: 503Mi
+        dataFeedContainer:
+          requests:
+            cpu: 111m
+            memory: 335Mi
+          limits:
+            memory: 503Mi
+        redis:
+          requests:
+            cpu: 5m
+            memory: 3Mi
+          limits:
+            memory: 5Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 12Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -4772,11 +5318,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_98e76f552e
       resources:
-        requests:
-          cpu: 112m
-          memory: 380Mi
-        limits:
-          memory: 570Mi
+        dataFeedContainer:
+          requests:
+            cpu: 112m
+            memory: 380Mi
+          limits:
+            memory: 570Mi
+        redis:
+          requests:
+            cpu: 5m
+            memory: 4Mi
+          limits:
+            memory: 6Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 10Mi
+          limits:
+            memory: 15Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -4888,11 +5447,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_bbd84fefdb
       resources:
-        requests:
-          cpu: 106m
-          memory: 347Mi
-        limits:
-          memory: 520Mi
+        dataFeedContainer:
+          requests:
+            cpu: 106m
+            memory: 347Mi
+          limits:
+            memory: 520Mi
+        redis:
+          requests:
+            cpu: 5m
+            memory: 3Mi
+          limits:
+            memory: 5Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 12Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -5004,11 +5576,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_d0be27984d
       resources:
-        requests:
-          cpu: 114m
-          memory: 337Mi
-        limits:
-          memory: 505Mi
+        dataFeedContainer:
+          requests:
+            cpu: 114m
+            memory: 337Mi
+          limits:
+            memory: 505Mi
+        redis:
+          requests:
+            cpu: 5m
+            memory: 3Mi
+          limits:
+            memory: 5Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 12Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -5120,11 +5705,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_daee0b5599
       resources:
-        requests:
-          cpu: 103m
-          memory: 340Mi
-        limits:
-          memory: 510Mi
+        dataFeedContainer:
+          requests:
+            cpu: 103m
+            memory: 340Mi
+          limits:
+            memory: 510Mi
+        redis:
+          requests:
+            cpu: 5m
+            memory: 3Mi
+          limits:
+            memory: 5Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 13Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -5236,11 +5834,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_2ad5286e68
       resources:
-        requests:
-          cpu: 110m
-          memory: 339Mi
-        limits:
-          memory: 509Mi
+        dataFeedContainer:
+          requests:
+            cpu: 110m
+            memory: 339Mi
+          limits:
+            memory: 509Mi
+        redis:
+          requests:
+            cpu: 4m
+            memory: 3Mi
+          limits:
+            memory: 5Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 13Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -5352,11 +5963,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_40200434a5
       resources:
-        requests:
-          cpu: 105m
-          memory: 343Mi
-        limits:
-          memory: 514Mi
+        dataFeedContainer:
+          requests:
+            cpu: 105m
+            memory: 343Mi
+          limits:
+            memory: 514Mi
+        redis:
+          requests:
+            cpu: 5m
+            memory: 3Mi
+          limits:
+            memory: 5Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 12Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -5468,11 +6092,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_48f13a891b
       resources:
-        requests:
-          cpu: 125m
-          memory: 341Mi
-        limits:
-          memory: 511Mi
+        dataFeedContainer:
+          requests:
+            cpu: 125m
+            memory: 341Mi
+          limits:
+            memory: 511Mi
+        redis:
+          requests:
+            cpu: 6m
+            memory: 4Mi
+          limits:
+            memory: 6Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 9Mi
+          limits:
+            memory: 14Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -5584,11 +6221,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_ea5c07f7e5
       resources:
-        requests:
-          cpu: 86m
-          memory: 340Mi
-        limits:
-          memory: 510Mi
+        dataFeedContainer:
+          requests:
+            cpu: 86m
+            memory: 340Mi
+          limits:
+            memory: 510Mi
+        redis:
+          requests:
+            cpu: 3m
+            memory: 3Mi
+          limits:
+            memory: 5Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 13Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -5700,11 +6350,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_8654091801
       resources:
-        requests:
-          cpu: 107m
-          memory: 355Mi
-        limits:
-          memory: 533Mi
+        dataFeedContainer:
+          requests:
+            cpu: 107m
+            memory: 355Mi
+          limits:
+            memory: 533Mi
+        redis:
+          requests:
+            cpu: 5m
+            memory: 4Mi
+          limits:
+            memory: 7Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 12Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -5816,11 +6479,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_7debbfe436
       resources:
-        requests:
-          cpu: 100m
-          memory: 334Mi
-        limits:
-          memory: 501Mi
+        dataFeedContainer:
+          requests:
+            cpu: 100m
+            memory: 334Mi
+          limits:
+            memory: 501Mi
+        redis:
+          requests:
+            cpu: 4m
+            memory: 3Mi
+          limits:
+            memory: 5Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 7Mi
+          limits:
+            memory: 11Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -5932,11 +6608,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_d8828ab089
       resources:
-        requests:
-          cpu: 93m
-          memory: 341Mi
-        limits:
-          memory: 512Mi
+        dataFeedContainer:
+          requests:
+            cpu: 93m
+            memory: 341Mi
+          limits:
+            memory: 512Mi
+        redis:
+          requests:
+            cpu: 4m
+            memory: 3Mi
+          limits:
+            memory: 5Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 12Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -6048,11 +6737,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_f04c3eb262
       resources:
-        requests:
-          cpu: 91m
-          memory: 329Mi
-        limits:
-          memory: 494Mi
+        dataFeedContainer:
+          requests:
+            cpu: 91m
+            memory: 329Mi
+          limits:
+            memory: 494Mi
+        redis:
+          requests:
+            cpu: 4m
+            memory: 3Mi
+          limits:
+            memory: 5Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 12Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -6164,11 +6866,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_272ef7b3c6
       resources:
-        requests:
-          cpu: 112m
-          memory: 338Mi
-        limits:
-          memory: 507Mi
+        dataFeedContainer:
+          requests:
+            cpu: 112m
+            memory: 338Mi
+          limits:
+            memory: 507Mi
+        redis:
+          requests:
+            cpu: 5m
+            memory: 4Mi
+          limits:
+            memory: 6Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 12Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -6285,11 +7000,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_dc7ca3300e
       resources:
-        requests:
-          cpu: 397m
-          memory: 625Mi
-        limits:
-          memory: 938Mi
+        dataFeedContainer:
+          requests:
+            cpu: 397m
+            memory: 625Mi
+          limits:
+            memory: 938Mi
+        redis:
+          requests:
+            cpu: 24m
+            memory: 12Mi
+          limits:
+            memory: 18Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 13Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -6416,11 +7144,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_e75a824244
       resources:
-        requests:
-          cpu: 320m
-          memory: 521Mi
-        limits:
-          memory: 782Mi
+        dataFeedContainer:
+          requests:
+            cpu: 320m
+            memory: 521Mi
+          limits:
+            memory: 782Mi
+        redis:
+          requests:
+            cpu: 17m
+            memory: 7Mi
+          limits:
+            memory: 11Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 9Mi
+          limits:
+            memory: 13Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -6547,11 +7288,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_168c5a6560
       resources:
-        requests:
-          cpu: 194m
-          memory: 413Mi
-        limits:
-          memory: 619Mi
+        dataFeedContainer:
+          requests:
+            cpu: 194m
+            memory: 413Mi
+          limits:
+            memory: 619Mi
+        redis:
+          requests:
+            cpu: 8m
+            memory: 4Mi
+          limits:
+            memory: 6Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 9Mi
+          limits:
+            memory: 13Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -6678,11 +7432,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_556d00f83a
       resources:
-        requests:
-          cpu: 174m
-          memory: 436Mi
-        limits:
-          memory: 654Mi
+        dataFeedContainer:
+          requests:
+            cpu: 174m
+            memory: 436Mi
+          limits:
+            memory: 654Mi
+        redis:
+          requests:
+            cpu: 7m
+            memory: 4Mi
+          limits:
+            memory: 6Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 9Mi
+          limits:
+            memory: 13Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -6809,11 +7576,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_89fc0c93ed
       resources:
-        requests:
-          cpu: 183m
-          memory: 405Mi
-        limits:
-          memory: 607Mi
+        dataFeedContainer:
+          requests:
+            cpu: 183m
+            memory: 405Mi
+          limits:
+            memory: 607Mi
+        redis:
+          requests:
+            cpu: 8m
+            memory: 3Mi
+          limits:
+            memory: 5Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 13Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -6940,11 +7720,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_4cf2cbe0d5
       resources:
-        requests:
-          cpu: 212m
-          memory: 457Mi
-        limits:
-          memory: 686Mi
+        dataFeedContainer:
+          requests:
+            cpu: 212m
+            memory: 457Mi
+          limits:
+            memory: 686Mi
+        redis:
+          requests:
+            cpu: 8m
+            memory: 4Mi
+          limits:
+            memory: 7Mi
+        redisExporter:
+          requests:
+            cpu: 2m
+            memory: 9Mi
+          limits:
+            memory: 13Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -7071,11 +7864,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_1f89155c49
       resources:
-        requests:
-          cpu: 189m
-          memory: 448Mi
-        limits:
-          memory: 673Mi
+        dataFeedContainer:
+          requests:
+            cpu: 189m
+            memory: 448Mi
+          limits:
+            memory: 673Mi
+        redis:
+          requests:
+            cpu: 7m
+            memory: 4Mi
+          limits:
+            memory: 7Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 11Mi
+          limits:
+            memory: 16Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -7202,11 +8008,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_2505f305ff
       resources:
-        requests:
-          cpu: 185m
-          memory: 410Mi
-        limits:
-          memory: 615Mi
+        dataFeedContainer:
+          requests:
+            cpu: 185m
+            memory: 410Mi
+          limits:
+            memory: 615Mi
+        redis:
+          requests:
+            cpu: 8m
+            memory: 4Mi
+          limits:
+            memory: 7Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 7Mi
+          limits:
+            memory: 11Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -7333,11 +8152,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_32725bc350
       resources:
-        requests:
-          cpu: 224m
-          memory: 473Mi
-        limits:
-          memory: 710Mi
+        dataFeedContainer:
+          requests:
+            cpu: 224m
+            memory: 473Mi
+          limits:
+            memory: 710Mi
+        redis:
+          requests:
+            cpu: 9m
+            memory: 6Mi
+          limits:
+            memory: 9Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 10Mi
+          limits:
+            memory: 15Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -7459,11 +8291,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_97c8d08927
       resources:
-        requests:
-          cpu: 340m
-          memory: 456Mi
-        limits:
-          memory: 685Mi
+        dataFeedContainer:
+          requests:
+            cpu: 340m
+            memory: 456Mi
+          limits:
+            memory: 685Mi
+        redis:
+          requests:
+            cpu: 22m
+            memory: 11Mi
+          limits:
+            memory: 16Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 9Mi
+          limits:
+            memory: 14Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -7575,11 +8420,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_c645876c9e
       resources:
-        requests:
-          cpu: 233m
-          memory: 409Mi
-        limits:
-          memory: 614Mi
+        dataFeedContainer:
+          requests:
+            cpu: 233m
+            memory: 409Mi
+          limits:
+            memory: 614Mi
+        redis:
+          requests:
+            cpu: 14m
+            memory: 7Mi
+          limits:
+            memory: 11Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 12Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -7701,11 +8559,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_ea1e1b2ae9
       resources:
-        requests:
-          cpu: 340m
-          memory: 560Mi
-        limits:
-          memory: 841Mi
+        dataFeedContainer:
+          requests:
+            cpu: 340m
+            memory: 560Mi
+          limits:
+            memory: 841Mi
+        redis:
+          requests:
+            cpu: 17m
+            memory: 5Mi
+          limits:
+            memory: 8Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 9Mi
+          limits:
+            memory: 13Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -7852,11 +8723,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_88d7256aff
       resources:
-        requests:
-          cpu: 345m
-          memory: 582Mi
-        limits:
-          memory: 874Mi
+        dataFeedContainer:
+          requests:
+            cpu: 345m
+            memory: 582Mi
+          limits:
+            memory: 874Mi
+        redis:
+          requests:
+            cpu: 15m
+            memory: 4Mi
+          limits:
+            memory: 7Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 13Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -8013,11 +8897,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_4d3119bb82
       resources:
-        requests:
-          cpu: 282m
-          memory: 570Mi
-        limits:
-          memory: 855Mi
+        dataFeedContainer:
+          requests:
+            cpu: 282m
+            memory: 570Mi
+          limits:
+            memory: 855Mi
+        redis:
+          requests:
+            cpu: 11m
+            memory: 4Mi
+          limits:
+            memory: 6Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 9Mi
+          limits:
+            memory: 13Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -8174,11 +9071,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_2a470201ee
       resources:
-        requests:
-          cpu: 271m
-          memory: 566Mi
-        limits:
-          memory: 849Mi
+        dataFeedContainer:
+          requests:
+            cpu: 271m
+            memory: 566Mi
+          limits:
+            memory: 849Mi
+        redis:
+          requests:
+            cpu: 11m
+            memory: 5Mi
+          limits:
+            memory: 8Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 12Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -8320,11 +9230,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_808c433897
       resources:
-        requests:
-          cpu: 107m
-          memory: 355Mi
-        limits:
-          memory: 533Mi
+        dataFeedContainer:
+          requests:
+            cpu: 107m
+            memory: 355Mi
+          limits:
+            memory: 533Mi
+        redis:
+          requests:
+            cpu: 5m
+            memory: 4Mi
+          limits:
+            memory: 7Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 12Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -11076,11 +11999,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_63cd2f9ca8
       resources:
-        requests:
-          cpu: 23m
-          memory: 210Mi
-        limits:
-          memory: 315Mi
+        dataFeedContainer:
+          requests:
+            cpu: 23m
+            memory: 210Mi
+          limits:
+            memory: 315Mi
+        redis:
+          requests:
+            cpu: 1m
+            memory: 4Mi
+          limits:
+            memory: 6Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 13Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -11177,11 +12113,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_adf98eed13
       resources:
-        requests:
-          cpu: 35m
-          memory: 209Mi
-        limits:
-          memory: 314Mi
+        dataFeedContainer:
+          requests:
+            cpu: 35m
+            memory: 209Mi
+          limits:
+            memory: 314Mi
+        redis:
+          requests:
+            cpu: 1m
+            memory: 2Mi
+          limits:
+            memory: 4Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 12Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -11278,11 +12227,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_183e87a2ef
       resources:
-        requests:
-          cpu: 22m
-          memory: 202Mi
-        limits:
-          memory: 303Mi
+        dataFeedContainer:
+          requests:
+            cpu: 22m
+            memory: 202Mi
+          limits:
+            memory: 303Mi
+        redis:
+          requests:
+            cpu: 1m
+            memory: 2Mi
+          limits:
+            memory: 4Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 12Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -11379,11 +12341,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_d5d2a20645
       resources:
-        requests:
-          cpu: 33m
-          memory: 209Mi
-        limits:
-          memory: 313Mi
+        dataFeedContainer:
+          requests:
+            cpu: 33m
+            memory: 209Mi
+          limits:
+            memory: 313Mi
+        redis:
+          requests:
+            cpu: 1m
+            memory: 2Mi
+          limits:
+            memory: 4Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 12Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -11480,11 +12455,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_eba76d0454
       resources:
-        requests:
-          cpu: 22m
-          memory: 208Mi
-        limits:
-          memory: 313Mi
+        dataFeedContainer:
+          requests:
+            cpu: 22m
+            memory: 208Mi
+          limits:
+            memory: 313Mi
+        redis:
+          requests:
+            cpu: 1m
+            memory: 2Mi
+          limits:
+            memory: 4Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 13Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -11581,11 +12569,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_2138cb0888
       resources:
-        requests:
-          cpu: 32m
-          memory: 207Mi
-        limits:
-          memory: 311Mi
+        dataFeedContainer:
+          requests:
+            cpu: 32m
+            memory: 207Mi
+          limits:
+            memory: 311Mi
+        redis:
+          requests:
+            cpu: 1m
+            memory: 3Mi
+          limits:
+            memory: 5Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 12Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -11682,11 +12683,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_c2405d41b2
       resources:
-        requests:
-          cpu: 16m
-          memory: 206Mi
-        limits:
-          memory: 309Mi
+        dataFeedContainer:
+          requests:
+            cpu: 16m
+            memory: 206Mi
+          limits:
+            memory: 309Mi
+        redis:
+          requests:
+            cpu: 1m
+            memory: 4Mi
+          limits:
+            memory: 7Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 9Mi
+          limits:
+            memory: 14Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -11783,11 +12797,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_8fd84a9e86
       resources:
-        requests:
-          cpu: 23m
-          memory: 208Mi
-        limits:
-          memory: 312Mi
+        dataFeedContainer:
+          requests:
+            cpu: 23m
+            memory: 208Mi
+          limits:
+            memory: 312Mi
+        redis:
+          requests:
+            cpu: 1m
+            memory: 3Mi
+          limits:
+            memory: 5Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 12Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -11884,11 +12911,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_b9f9eb0a1b
       resources:
-        requests:
-          cpu: 28m
-          memory: 211Mi
-        limits:
-          memory: 316Mi
+        dataFeedContainer:
+          requests:
+            cpu: 28m
+            memory: 211Mi
+          limits:
+            memory: 316Mi
+        redis:
+          requests:
+            cpu: 1m
+            memory: 4Mi
+          limits:
+            memory: 6Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 13Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -11985,11 +13025,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_c9986a43ad
       resources:
-        requests:
-          cpu: 21m
-          memory: 212Mi
-        limits:
-          memory: 318Mi
+        dataFeedContainer:
+          requests:
+            cpu: 21m
+            memory: 212Mi
+          limits:
+            memory: 318Mi
+        redis:
+          requests:
+            cpu: 1m
+            memory: 4Mi
+          limits:
+            memory: 6Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 12Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -12086,11 +13139,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_f3d1ca0817
       resources:
-        requests:
-          cpu: 18m
-          memory: 209Mi
-        limits:
-          memory: 314Mi
+        dataFeedContainer:
+          requests:
+            cpu: 18m
+            memory: 209Mi
+          limits:
+            memory: 314Mi
+        redis:
+          requests:
+            cpu: 1m
+            memory: 2Mi
+          limits:
+            memory: 4Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 9Mi
+          limits:
+            memory: 13Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -12187,11 +13253,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_e52225fdc8
       resources:
-        requests:
-          cpu: 33m
-          memory: 210Mi
-        limits:
-          memory: 315Mi
+        dataFeedContainer:
+          requests:
+            cpu: 33m
+            memory: 210Mi
+          limits:
+            memory: 315Mi
+        redis:
+          requests:
+            cpu: 1m
+            memory: 3Mi
+          limits:
+            memory: 4Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 12Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -12288,11 +13367,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_968f869d89
       resources:
-        requests:
-          cpu: 22m
-          memory: 204Mi
-        limits:
-          memory: 306Mi
+        dataFeedContainer:
+          requests:
+            cpu: 22m
+            memory: 204Mi
+          limits:
+            memory: 306Mi
+        redis:
+          requests:
+            cpu: 1m
+            memory: 2Mi
+          limits:
+            memory: 4Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 12Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -12389,11 +13481,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_acaabfd325
       resources:
-        requests:
-          cpu: 22m
-          memory: 203Mi
-        limits:
-          memory: 305Mi
+        dataFeedContainer:
+          requests:
+            cpu: 22m
+            memory: 203Mi
+          limits:
+            memory: 305Mi
+        redis:
+          requests:
+            cpu: 1m
+            memory: 3Mi
+          limits:
+            memory: 4Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 12Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -12490,11 +13595,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_51e79cbf0b
       resources:
-        requests:
-          cpu: 21m
-          memory: 213Mi
-        limits:
-          memory: 320Mi
+        dataFeedContainer:
+          requests:
+            cpu: 21m
+            memory: 213Mi
+          limits:
+            memory: 320Mi
+        redis:
+          requests:
+            cpu: 1m
+            memory: 3Mi
+          limits:
+            memory: 4Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 12Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -12591,11 +13709,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_6dff7b94f5
       resources:
-        requests:
-          cpu: 19m
-          memory: 210Mi
-        limits:
-          memory: 315Mi
+        dataFeedContainer:
+          requests:
+            cpu: 19m
+            memory: 210Mi
+          limits:
+            memory: 315Mi
+        redis:
+          requests:
+            cpu: 1m
+            memory: 3Mi
+          limits:
+            memory: 4Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 13Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -12692,11 +13823,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_c2944811cb
       resources:
-        requests:
-          cpu: 21m
-          memory: 208Mi
-        limits:
-          memory: 313Mi
+        dataFeedContainer:
+          requests:
+            cpu: 21m
+            memory: 208Mi
+          limits:
+            memory: 313Mi
+        redis:
+          requests:
+            cpu: 1m
+            memory: 2Mi
+          limits:
+            memory: 4Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 9Mi
+          limits:
+            memory: 13Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -12793,11 +13937,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_b0087f13d0
       resources:
-        requests:
-          cpu: 35m
-          memory: 211Mi
-        limits:
-          memory: 316Mi
+        dataFeedContainer:
+          requests:
+            cpu: 35m
+            memory: 211Mi
+          limits:
+            memory: 316Mi
+        redis:
+          requests:
+            cpu: 1m
+            memory: 4Mi
+          limits:
+            memory: 6Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 13Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -12894,11 +14051,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_55b8d82584
       resources:
-        requests:
-          cpu: 22m
-          memory: 203Mi
-        limits:
-          memory: 304Mi
+        dataFeedContainer:
+          requests:
+            cpu: 22m
+            memory: 203Mi
+          limits:
+            memory: 304Mi
+        redis:
+          requests:
+            cpu: 1m
+            memory: 3Mi
+          limits:
+            memory: 4Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 12Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -12995,11 +14165,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_e6e1e52b5d
       resources:
-        requests:
-          cpu: 19m
-          memory: 203Mi
-        limits:
-          memory: 304Mi
+        dataFeedContainer:
+          requests:
+            cpu: 19m
+            memory: 203Mi
+          limits:
+            memory: 304Mi
+        redis:
+          requests:
+            cpu: 1m
+            memory: 2Mi
+          limits:
+            memory: 4Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 12Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -13096,11 +14279,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_405189d89a
       resources:
-        requests:
-          cpu: 18m
-          memory: 201Mi
-        limits:
-          memory: 302Mi
+        dataFeedContainer:
+          requests:
+            cpu: 18m
+            memory: 201Mi
+          limits:
+            memory: 302Mi
+        redis:
+          requests:
+            cpu: 1m
+            memory: 3Mi
+          limits:
+            memory: 4Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 12Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -13197,11 +14393,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_ebfe9c9a06
       resources:
-        requests:
-          cpu: 21m
-          memory: 203Mi
-        limits:
-          memory: 304Mi
+        dataFeedContainer:
+          requests:
+            cpu: 21m
+            memory: 203Mi
+          limits:
+            memory: 304Mi
+        redis:
+          requests:
+            cpu: 1m
+            memory: 2Mi
+          limits:
+            memory: 4Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 12Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -13298,11 +14507,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_ab464ff5ab
       resources:
-        requests:
-          cpu: 21m
-          memory: 203Mi
-        limits:
-          memory: 305Mi
+        dataFeedContainer:
+          requests:
+            cpu: 21m
+            memory: 203Mi
+          limits:
+            memory: 305Mi
+        redis:
+          requests:
+            cpu: 1m
+            memory: 2Mi
+          limits:
+            memory: 4Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 12Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -13399,11 +14621,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_0c2ed04a6a
       resources:
-        requests:
-          cpu: 34m
-          memory: 209Mi
-        limits:
-          memory: 313Mi
+        dataFeedContainer:
+          requests:
+            cpu: 34m
+            memory: 209Mi
+          limits:
+            memory: 313Mi
+        redis:
+          requests:
+            cpu: 1m
+            memory: 2Mi
+          limits:
+            memory: 4Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 12Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -13500,11 +14735,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_56844ce836
       resources:
-        requests:
-          cpu: 20m
-          memory: 200Mi
-        limits:
-          memory: 300Mi
+        dataFeedContainer:
+          requests:
+            cpu: 20m
+            memory: 200Mi
+          limits:
+            memory: 300Mi
+        redis:
+          requests:
+            cpu: 1m
+            memory: 3Mi
+          limits:
+            memory: 5Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 10Mi
+          limits:
+            memory: 15Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -13601,11 +14849,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_2d2a3a72b5
       resources:
-        requests:
-          cpu: 28m
-          memory: 203Mi
-        limits:
-          memory: 305Mi
+        dataFeedContainer:
+          requests:
+            cpu: 28m
+            memory: 203Mi
+          limits:
+            memory: 305Mi
+        redis:
+          requests:
+            cpu: 1m
+            memory: 3Mi
+          limits:
+            memory: 4Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 9Mi
+          limits:
+            memory: 13Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -13702,11 +14963,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_2bc9bce088
       resources:
-        requests:
-          cpu: 33m
-          memory: 210Mi
-        limits:
-          memory: 315Mi
+        dataFeedContainer:
+          requests:
+            cpu: 33m
+            memory: 210Mi
+          limits:
+            memory: 315Mi
+        redis:
+          requests:
+            cpu: 1m
+            memory: 4Mi
+          limits:
+            memory: 6Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 13Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -13803,11 +15077,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_62326b8e94
       resources:
-        requests:
-          cpu: 30m
-          memory: 204Mi
-        limits:
-          memory: 306Mi
+        dataFeedContainer:
+          requests:
+            cpu: 30m
+            memory: 204Mi
+          limits:
+            memory: 306Mi
+        redis:
+          requests:
+            cpu: 1m
+            memory: 3Mi
+          limits:
+            memory: 4Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 12Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -13904,11 +15191,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_d33d34ed9b
       resources:
-        requests:
-          cpu: 16m
-          memory: 203Mi
-        limits:
-          memory: 304Mi
+        dataFeedContainer:
+          requests:
+            cpu: 16m
+            memory: 203Mi
+          limits:
+            memory: 304Mi
+        redis:
+          requests:
+            cpu: 1m
+            memory: 2Mi
+          limits:
+            memory: 4Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 12Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -14005,11 +15305,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_7d9ba9a296
       resources:
-        requests:
-          cpu: 20m
-          memory: 208Mi
-        limits:
-          memory: 312Mi
+        dataFeedContainer:
+          requests:
+            cpu: 20m
+            memory: 208Mi
+          limits:
+            memory: 312Mi
+        redis:
+          requests:
+            cpu: 1m
+            memory: 4Mi
+          limits:
+            memory: 6Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 13Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -14106,11 +15419,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_ae8b283de6
       resources:
-        requests:
-          cpu: 23m
-          memory: 203Mi
-        limits:
-          memory: 305Mi
+        dataFeedContainer:
+          requests:
+            cpu: 23m
+            memory: 203Mi
+          limits:
+            memory: 305Mi
+        redis:
+          requests:
+            cpu: 1m
+            memory: 3Mi
+          limits:
+            memory: 4Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 12Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -14207,11 +15533,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_460ce91610
       resources:
-        requests:
-          cpu: 20m
-          memory: 206Mi
-        limits:
-          memory: 309Mi
+        dataFeedContainer:
+          requests:
+            cpu: 20m
+            memory: 206Mi
+          limits:
+            memory: 309Mi
+        redis:
+          requests:
+            cpu: 1m
+            memory: 4Mi
+          limits:
+            memory: 7Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 12Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -14308,11 +15647,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_59062e80ac
       resources:
-        requests:
-          cpu: 28m
-          memory: 200Mi
-        limits:
-          memory: 301Mi
+        dataFeedContainer:
+          requests:
+            cpu: 28m
+            memory: 200Mi
+          limits:
+            memory: 301Mi
+        redis:
+          requests:
+            cpu: 1m
+            memory: 3Mi
+          limits:
+            memory: 4Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 12Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -14409,11 +15761,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_0a07fe23a7
       resources:
-        requests:
-          cpu: 19m
-          memory: 201Mi
-        limits:
-          memory: 302Mi
+        dataFeedContainer:
+          requests:
+            cpu: 19m
+            memory: 201Mi
+          limits:
+            memory: 302Mi
+        redis:
+          requests:
+            cpu: 1m
+            memory: 3Mi
+          limits:
+            memory: 4Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 12Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -14510,11 +15875,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_47d9db8b88
       resources:
-        requests:
-          cpu: 25m
-          memory: 204Mi
-        limits:
-          memory: 306Mi
+        dataFeedContainer:
+          requests:
+            cpu: 25m
+            memory: 204Mi
+          limits:
+            memory: 306Mi
+        redis:
+          requests:
+            cpu: 1m
+            memory: 3Mi
+          limits:
+            memory: 4Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 12Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -14616,11 +15994,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_2edaafd50b
       resources:
-        requests:
-          cpu: 33m
-          memory: 209Mi
-        limits:
-          memory: 314Mi
+        dataFeedContainer:
+          requests:
+            cpu: 33m
+            memory: 209Mi
+          limits:
+            memory: 314Mi
+        redis:
+          requests:
+            cpu: 1m
+            memory: 3Mi
+          limits:
+            memory: 4Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 9Mi
+          limits:
+            memory: 13Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -14726,11 +16117,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_0553e61b19
       resources:
-        requests:
-          cpu: 22m
-          memory: 206Mi
-        limits:
-          memory: 309Mi
+        dataFeedContainer:
+          requests:
+            cpu: 22m
+            memory: 206Mi
+          limits:
+            memory: 309Mi
+        redis:
+          requests:
+            cpu: 1m
+            memory: 2Mi
+          limits:
+            memory: 4Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 12Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -14836,11 +16240,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_e8e2b1dc08
       resources:
-        requests:
-          cpu: 34m
-          memory: 213Mi
-        limits:
-          memory: 320Mi
+        dataFeedContainer:
+          requests:
+            cpu: 34m
+            memory: 213Mi
+          limits:
+            memory: 320Mi
+        redis:
+          requests:
+            cpu: 1m
+            memory: 4Mi
+          limits:
+            memory: 6Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 9Mi
+          limits:
+            memory: 13Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -14946,11 +16363,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_b4b0091af3
       resources:
-        requests:
-          cpu: 30m
-          memory: 211Mi
-        limits:
-          memory: 317Mi
+        dataFeedContainer:
+          requests:
+            cpu: 30m
+            memory: 211Mi
+          limits:
+            memory: 317Mi
+        redis:
+          requests:
+            cpu: 1m
+            memory: 2Mi
+          limits:
+            memory: 4Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 12Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -15056,11 +16486,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_d66464a4cf
       resources:
-        requests:
-          cpu: 20m
-          memory: 214Mi
-        limits:
-          memory: 321Mi
+        dataFeedContainer:
+          requests:
+            cpu: 20m
+            memory: 214Mi
+          limits:
+            memory: 321Mi
+        redis:
+          requests:
+            cpu: 1m
+            memory: 4Mi
+          limits:
+            memory: 6Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 13Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -15166,11 +16609,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_ed62149097
       resources:
-        requests:
-          cpu: 23m
-          memory: 213Mi
-        limits:
-          memory: 319Mi
+        dataFeedContainer:
+          requests:
+            cpu: 23m
+            memory: 213Mi
+          limits:
+            memory: 319Mi
+        redis:
+          requests:
+            cpu: 1m
+            memory: 4Mi
+          limits:
+            memory: 6Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 12Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -15276,11 +16732,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_1dcb2b3f5d
       resources:
-        requests:
-          cpu: 20m
-          memory: 211Mi
-        limits:
-          memory: 317Mi
+        dataFeedContainer:
+          requests:
+            cpu: 20m
+            memory: 211Mi
+          limits:
+            memory: 317Mi
+        redis:
+          requests:
+            cpu: 1m
+            memory: 4Mi
+          limits:
+            memory: 6Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 12Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -15386,11 +16855,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_06d8ee2380
       resources:
-        requests:
-          cpu: 28m
-          memory: 208Mi
-        limits:
-          memory: 313Mi
+        dataFeedContainer:
+          requests:
+            cpu: 28m
+            memory: 208Mi
+          limits:
+            memory: 313Mi
+        redis:
+          requests:
+            cpu: 1m
+            memory: 3Mi
+          limits:
+            memory: 4Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 12Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -15496,11 +16978,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_3d3f12810e
       resources:
-        requests:
-          cpu: 29m
-          memory: 213Mi
-        limits:
-          memory: 319Mi
+        dataFeedContainer:
+          requests:
+            cpu: 29m
+            memory: 213Mi
+          limits:
+            memory: 319Mi
+        redis:
+          requests:
+            cpu: 1m
+            memory: 5Mi
+          limits:
+            memory: 8Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 12Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -15606,11 +17101,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_b206af86ce
       resources:
-        requests:
-          cpu: 34m
-          memory: 207Mi
-        limits:
-          memory: 311Mi
+        dataFeedContainer:
+          requests:
+            cpu: 34m
+            memory: 207Mi
+          limits:
+            memory: 311Mi
+        redis:
+          requests:
+            cpu: 1m
+            memory: 3Mi
+          limits:
+            memory: 4Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 12Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -15716,11 +17224,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_1ce11b8ada
       resources:
-        requests:
-          cpu: 31m
-          memory: 204Mi
-        limits:
-          memory: 306Mi
+        dataFeedContainer:
+          requests:
+            cpu: 31m
+            memory: 204Mi
+          limits:
+            memory: 306Mi
+        redis:
+          requests:
+            cpu: 1m
+            memory: 2Mi
+          limits:
+            memory: 4Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 12Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -15826,11 +17347,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_05ff3cf10d
       resources:
-        requests:
-          cpu: 22m
-          memory: 203Mi
-        limits:
-          memory: 305Mi
+        dataFeedContainer:
+          requests:
+            cpu: 22m
+            memory: 203Mi
+          limits:
+            memory: 305Mi
+        redis:
+          requests:
+            cpu: 1m
+            memory: 2Mi
+          limits:
+            memory: 4Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 9Mi
+          limits:
+            memory: 14Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -15936,11 +17470,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_3131cc5e34
       resources:
-        requests:
-          cpu: 22m
-          memory: 211Mi
-        limits:
-          memory: 317Mi
+        dataFeedContainer:
+          requests:
+            cpu: 22m
+            memory: 211Mi
+          limits:
+            memory: 317Mi
+        redis:
+          requests:
+            cpu: 1m
+            memory: 2Mi
+          limits:
+            memory: 4Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 9Mi
+          limits:
+            memory: 13Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -16046,11 +17593,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_9c07d3299b
       resources:
-        requests:
-          cpu: 35m
-          memory: 205Mi
-        limits:
-          memory: 307Mi
+        dataFeedContainer:
+          requests:
+            cpu: 35m
+            memory: 205Mi
+          limits:
+            memory: 307Mi
+        redis:
+          requests:
+            cpu: 1m
+            memory: 2Mi
+          limits:
+            memory: 4Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 12Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -16156,11 +17716,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_1c5b8968f5
       resources:
-        requests:
-          cpu: 34m
-          memory: 204Mi
-        limits:
-          memory: 306Mi
+        dataFeedContainer:
+          requests:
+            cpu: 34m
+            memory: 204Mi
+          limits:
+            memory: 306Mi
+        redis:
+          requests:
+            cpu: 1m
+            memory: 3Mi
+          limits:
+            memory: 4Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 12Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -16261,11 +17834,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_8b55cb83df
       resources:
-        requests:
-          cpu: 33m
-          memory: 210Mi
-        limits:
-          memory: 315Mi
+        dataFeedContainer:
+          requests:
+            cpu: 33m
+            memory: 210Mi
+          limits:
+            memory: 315Mi
+        redis:
+          requests:
+            cpu: 1m
+            memory: 4Mi
+          limits:
+            memory: 6Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 13Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -16367,11 +17953,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_5366890fb5
       resources:
-        requests:
-          cpu: 22m
-          memory: 205Mi
-        limits:
-          memory: 307Mi
+        dataFeedContainer:
+          requests:
+            cpu: 22m
+            memory: 205Mi
+          limits:
+            memory: 307Mi
+        redis:
+          requests:
+            cpu: 1m
+            memory: 3Mi
+          limits:
+            memory: 4Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 12Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -16477,11 +18076,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_f1a789bc6b
       resources:
-        requests:
-          cpu: 18m
-          memory: 217Mi
-        limits:
-          memory: 325Mi
+        dataFeedContainer:
+          requests:
+            cpu: 18m
+            memory: 217Mi
+          limits:
+            memory: 325Mi
+        redis:
+          requests:
+            cpu: 1m
+            memory: 5Mi
+          limits:
+            memory: 7Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 13Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -16582,11 +18194,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_c12b49038c
       resources:
-        requests:
-          cpu: 23m
-          memory: 210Mi
-        limits:
-          memory: 315Mi
+        dataFeedContainer:
+          requests:
+            cpu: 23m
+            memory: 210Mi
+          limits:
+            memory: 315Mi
+        redis:
+          requests:
+            cpu: 1m
+            memory: 4Mi
+          limits:
+            memory: 6Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 13Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -16683,11 +18308,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_e39c9c431e
       resources:
-        requests:
-          cpu: 35m
-          memory: 209Mi
-        limits:
-          memory: 314Mi
+        dataFeedContainer:
+          requests:
+            cpu: 35m
+            memory: 209Mi
+          limits:
+            memory: 314Mi
+        redis:
+          requests:
+            cpu: 1m
+            memory: 2Mi
+          limits:
+            memory: 4Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 12Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -16794,11 +18432,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_0d5fc10f7e
       resources:
-        requests:
-          cpu: 24m
-          memory: 213Mi
-        limits:
-          memory: 320Mi
+        dataFeedContainer:
+          requests:
+            cpu: 24m
+            memory: 213Mi
+          limits:
+            memory: 320Mi
+        redis:
+          requests:
+            cpu: 1m
+            memory: 2Mi
+          limits:
+            memory: 4Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 13Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -16918,11 +18569,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_1f981005dc
       resources:
-        requests:
-          cpu: 38m
-          memory: 207Mi
-        limits:
-          memory: 311Mi
+        dataFeedContainer:
+          requests:
+            cpu: 38m
+            memory: 207Mi
+          limits:
+            memory: 311Mi
+        redis:
+          requests:
+            cpu: 1m
+            memory: 2Mi
+          limits:
+            memory: 4Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 12Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -17046,11 +18710,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_a7f58bea75
       resources:
-        requests:
-          cpu: 37m
-          memory: 245Mi
-        limits:
-          memory: 367Mi
+        dataFeedContainer:
+          requests:
+            cpu: 37m
+            memory: 245Mi
+          limits:
+            memory: 367Mi
+        redis:
+          requests:
+            cpu: 1m
+            memory: 3Mi
+          limits:
+            memory: 5Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 11Mi
+          limits:
+            memory: 17Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -17174,11 +18851,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_58c5632c81
       resources:
-        requests:
-          cpu: 32m
-          memory: 220Mi
-        limits:
-          memory: 331Mi
+        dataFeedContainer:
+          requests:
+            cpu: 32m
+            memory: 220Mi
+          limits:
+            memory: 331Mi
+        redis:
+          requests:
+            cpu: 1m
+            memory: 4Mi
+          limits:
+            memory: 6Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 9Mi
+          limits:
+            memory: 13Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -17287,11 +18977,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_8f83d9cd16
       resources:
-        requests:
-          cpu: 22m
-          memory: 203Mi
-        limits:
-          memory: 305Mi
+        dataFeedContainer:
+          requests:
+            cpu: 22m
+            memory: 203Mi
+          limits:
+            memory: 305Mi
+        redis:
+          requests:
+            cpu: 1m
+            memory: 3Mi
+          limits:
+            memory: 4Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 12Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -17388,11 +19091,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_09a78bfaa8
       resources:
-        requests:
-          cpu: 22m
-          memory: 203Mi
-        limits:
-          memory: 304Mi
+        dataFeedContainer:
+          requests:
+            cpu: 22m
+            memory: 203Mi
+          limits:
+            memory: 304Mi
+        redis:
+          requests:
+            cpu: 1m
+            memory: 3Mi
+          limits:
+            memory: 4Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 12Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -17489,11 +19205,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_77a38cd93b
       resources:
-        requests:
-          cpu: 19m
-          memory: 203Mi
-        limits:
-          memory: 304Mi
+        dataFeedContainer:
+          requests:
+            cpu: 19m
+            memory: 203Mi
+          limits:
+            memory: 304Mi
+        redis:
+          requests:
+            cpu: 1m
+            memory: 2Mi
+          limits:
+            memory: 4Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 12Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -17600,11 +19329,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_057e82e7f5
       resources:
-        requests:
-          cpu: 29m
-          memory: 206Mi
-        limits:
-          memory: 310Mi
+        dataFeedContainer:
+          requests:
+            cpu: 29m
+            memory: 206Mi
+          limits:
+            memory: 310Mi
+        redis:
+          requests:
+            cpu: 1m
+            memory: 3Mi
+          limits:
+            memory: 4Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 12Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -17724,11 +19466,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_77cf511fe9
       resources:
-        requests:
-          cpu: 28m
-          memory: 206Mi
-        limits:
-          memory: 310Mi
+        dataFeedContainer:
+          requests:
+            cpu: 28m
+            memory: 206Mi
+          limits:
+            memory: 310Mi
+        redis:
+          requests:
+            cpu: 1m
+            memory: 3Mi
+          limits:
+            memory: 4Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 12Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -17852,11 +19607,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_cf8e6bdcc9
       resources:
-        requests:
-          cpu: 32m
-          memory: 206Mi
-        limits:
-          memory: 309Mi
+        dataFeedContainer:
+          requests:
+            cpu: 32m
+            memory: 206Mi
+          limits:
+            memory: 309Mi
+        redis:
+          requests:
+            cpu: 1m
+            memory: 3Mi
+          limits:
+            memory: 4Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 12Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -17975,11 +19743,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_38f8d799f2
       resources:
-        requests:
-          cpu: 24m
-          memory: 208Mi
-        limits:
-          memory: 313Mi
+        dataFeedContainer:
+          requests:
+            cpu: 24m
+            memory: 208Mi
+          limits:
+            memory: 313Mi
+        redis:
+          requests:
+            cpu: 1m
+            memory: 2Mi
+          limits:
+            memory: 4Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 9Mi
+          limits:
+            memory: 14Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
@@ -18084,11 +19865,24 @@ podConfigs:
         metricsPort: 8000
         multiprocDir: /etc/svoe/data_feed/prometheus_multiproc_dir_3781d91d31
       resources:
-        requests:
-          cpu: 20m
-          memory: 206Mi
-        limits:
-          memory: 309Mi
+        dataFeedContainer:
+          requests:
+            cpu: 20m
+            memory: 206Mi
+          limits:
+            memory: 309Mi
+        redis:
+          requests:
+            cpu: 1m
+            memory: 4Mi
+          limits:
+            memory: 7Mi
+        redisExporter:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits:
+            memory: 12Mi
       image: {{ .Values.dataFeedImagePrefix }}:v1.0.4
       configVolumeMountPath: /etc/svoe/data_feed/configs
       config: |
