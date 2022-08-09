@@ -1,3 +1,4 @@
 helmfiles:
 - helmfiles_gen/k8s.vpc-apne1.dev.svoe.link/helmfile.yaml
 - helmfiles_gen/k8s.vpc-apse1.dev.svoe.link/helmfile.yaml
+- helmfiles_gen/k8s.vpc-apne1.prod.svoe.link/helmfile.yaml

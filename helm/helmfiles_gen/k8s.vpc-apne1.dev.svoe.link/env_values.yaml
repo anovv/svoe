@@ -2,8 +2,9 @@ clusterId: 1
 clusterIds:
 - 1
 - 2
+- 3
 clusterName: k8s.vpc-apne1.dev.svoe.link
-clusterType: dev
+clusterType: remote
 dataFeedImagePrefix: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/svoe_data_feed
 isMysqlHost: true
 isObserver: true

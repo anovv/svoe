@@ -9,7 +9,7 @@ helmDefaults:
 releases:
   - chart: metrics-server/metrics-server
     name: metrics-server
-    namespace: kube-system # TODO use monitoring
+    namespace: monitoring
     values:
       - ../../values/metrics-server/metrics-server/values.yaml.gotmpl
   - chart: autoscaler/cluster-autoscaler
