@@ -3,13 +3,26 @@ import awswrangler as wr
 DATABASE = 'svoe_glue_db'
 
 # TODO use max_cache_seconds
-
+# https://ahana.io/answers/how-do-i-get-the-date_diff-from-previous-rows/
 # To cast to timestamp
 # select distinct from_unixtime(timestamp) from l2_book where exchange='BINANCE' and instrument_type='spot' and symbol='BTC-USDT' and date='2022-07-13'
 
 # to get ts diffs
 # select ts, date_diff('millisecond', ts, lag(ts) over(order by ts desc)) as diff from (
 #     select distinct from_unixtime(timestamp) as ts from ticker where exchange='BINANCE' and instrument_type='spot' and symbol='BTC-USDT' and date='2022-07-13')
+
+# missing ranges by symbol
+# select prev, ts, symbol from
+# (
+#     select ts, prev, date_diff('millisecond', prev, ts) as diff_prev, symbol from
+#     (
+#         select ts, lag(ts) over(partition by symbol order by ts asc) as prev, symbol from
+#         (
+#             select distinct from_unixtime(timestamp) as ts, symbol from l2_book where exchange='BINANCE' and instrument_type='spot'
+#         )
+#     )
+# )
+# where diff_prev > 60 * 1000
 
 def get_all_dates(channel, exchange, instrument_type, symbol):
     df = wr.athena.read_sql_query(
@@ -20,8 +33,6 @@ def get_all_dates(channel, exchange, instrument_type, symbol):
     )
 
     return df
-
-
 
 
 # df = wr.athena.read_sql_query(
