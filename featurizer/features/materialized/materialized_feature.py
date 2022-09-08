@@ -11,3 +11,4 @@ class MaterializedFeature:
         #   'instrument_types': ['spot', 'perpetual']
         #   'instrument_extras' : [] # in case of options/futures can contain expiry_date/strike_price for specific symbol
         # }
+        # should alos include: sampling strategy, window params (if some aggregation happens)

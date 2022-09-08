@@ -1,3 +1,8 @@
+from tsfresh.utilities.distribution import ClusterDaskDistributor
+from tsfresh import extract_features
+from tsfresh.utilities.dataframe_functions import roll_time_series
+from streamz.dataframe import DataFrame
+
 
 # Represent service transforming FeatureDefinition -> MaterializedFeature based on user input
 class Materializer:
@@ -20,3 +25,5 @@ class Materializer:
         #   }
         # }
         return # should return list of MaterializedFeature objects
+
+# https://stackoverflow.com/questions/73358767/partition-timeseries-with-state-using-dask-dataframe-based-on-custom-condition
