@@ -1,4 +1,5 @@
 import awswrangler as wr
+import pprint
 
 DATABASE = 'svoe_glue_db'
 
@@ -34,32 +35,56 @@ def get_all_dates(channel, exchange, instrument_type, symbol):
 
     return df
 
-# TODO handle data versioning
-def get_s3_filenames(channel, exchange, instrument_type, symbol, start_date, end_date):
-    if start_date < 0:
-        # set to latest
-        start_date = '1999-01-01'
-    if end_date < 0:
-        # set to furthest possible
-        end_date = '2999-01-01'
+
+def select_versions(channel, exchange, instrument_type, symbol, start_date=None, end_date=None, compaction='raw', version_selector='random'):
+    start_date, end_date = _sanitize_dates(start_date, end_date)
+    if version_selector == 'random':
+        # in case we have multiple versions being stored at the same date
+        # (i.e parallel data feeds with different configurations)
+        # we select one at random, this avoid duplicate entries and data overlaps
+        df = wr.athena.read_sql_query(
+            sql='SELECT DISTINCT versions FROM ('
+                '   SELECT date, arbitrary(version) as versions FROM :table; WHERE exchange=:exchange; AND instrument_type=:instrument_type; AND symbol=:symbol; AND date >= :start; AND date <= :end; AND compaction=:compaction; GROUP BY date'
+                ')',
+            database=DATABASE,
+            params={'table': f'{channel}', 'exchange': f"'{exchange}'", 'instrument_type': f"'{instrument_type}'",
+                    'symbol': f"'{symbol}'", 'start': f"'{start_date}'", 'end': f"'{end_date}'", 'compaction':  f"'{compaction}'"},
+            max_cache_seconds=900
+        )
+        return df
+
+    # TODO implement alternative selection logic
+    raise ValueError('Unsupported version selector')
+
+
+def get_s3_filenames(channel, exchange, instrument_type, symbol, start_date=None, end_date=None, compaction='raw', version_selector='random'):
+    start_date, end_date = _sanitize_dates(start_date, end_date)
+    # versions = select_versions(channel, exchange, instrument_type, symbol, start_date, end_date, compaction, version_selector)
+    # versions_list = versions['versions'].to_list()
+    # versions_list = ['testing-551b73ef015edc54438bfdb219710e859e71749c', 'testing ', 'local',
+    #  'testing-44aa2ce7f07e3ceae09f839a3391d76adb5e75d0']
     df = wr.athena.read_sql_query(
-        sql='SELECT DISTINCT "$path" FROM :table; WHERE exchange=:exchange; AND instrument_type=:instrument_type; AND symbol=:symbol; AND date >= :start; AND date <= :end;',
+        sql='SELECT DISTINCT "$path" FROM :table; WHERE exchange=:exchange; AND instrument_type=:instrument_type; AND symbol=:symbol; AND date >= :start; AND date <= :end; AND compaction=:compaction; ORDER BY "$path"',
         database=DATABASE,
-        params={'table': f'{channel}', 'exchange': f"'{exchange}'", 'instrument_type': f"'{instrument_type}'", 'symbol': f"'{symbol}'", 'start': f"'{start_date}'", 'end': f"'{end_date}'"},
+        params={'table': f'{channel}', 'exchange': f"'{exchange}'", 'instrument_type': f"'{instrument_type}'", 'symbol': f"'{symbol}'", 'start': f"'{start_date}'", 'end': f"'{end_date}'", 'compaction':  f"'{compaction}'"},
         max_cache_seconds=900
     )
 
-    # TODO are these sorted
     return df
 
 
+def _sanitize_dates(start_date, end_date):
+    if start_date is None:
+        # set to latest
+        start_date = '1999-01-01'
+    if end_date is None:
+        # set to furthest possible
+        end_date = '2999-01-01'
 
-# df = wr.athena.read_sql_query(
-#     sql='SELECT count(timestamp) FROM :table; WHERE exchange=:exchange; AND instrument_type=:instrument_type; AND symbol=:symbol;',
-#     database=DATABASE,
-#     params={'table': 'l2_book', 'exchange': 'BINANCE', 'instrument_type': 'spot', 'symbol': 'BTC-USDT'}
-# )
+    return start_date, end_date
 
+# pp = pprint.PrettyPrinter()
 # print(get_all_dates('l2_book', 'BINANCE', 'spot', 'BTC-USDT'))
+# pp.pprint(get_s3_filenames('l2_book', 'BINANCE', 'spot', 'BTC-USDT', start_date='2022-08-03', end_date='2022-08-03')['$path'].to_list())
 
-print(get_s3_filenames('l2_book', 'BINANCE', 'spot', 'BTC-USDT', -1, -1))
+# print(select_versions('l2_book', 'BINANCE', 'spot', 'BTC-USDT'))
