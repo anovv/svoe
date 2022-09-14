@@ -137,6 +137,7 @@ def _parse_interval(filename):
     end = float(split[4])
     return it.Interval(start, end, data=filename)
 
+
 def _time_diff(f1, f2):
     # assumig f1 > f2
     if f1 is None or f2 is None:

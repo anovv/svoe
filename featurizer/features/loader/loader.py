@@ -18,21 +18,28 @@ class Loader:
         self.dask_cluster = None
 
     # TODO handle data versioning
-    def l2_full(self, exchange, instrument_type, symbol, start, end):
-        # TODO are these sorted
-        filenames = get_s3_filenames('l2_book', exchange, instrument_type, symbol, start, end)
-        chunked_filenames = self._chunk_filenames(filenames)
-        ds = [dask.delayed(self._load_and_repartition)(chunk_index) for chunk_index in range(0, len(chunked_filenames))]
-        return dask.dataframe.from_delayed(ds)
+    def l2_full(self, exchange, instrument_type, symbol, start=None, end=None):
+        filenames_groups, has_overlap = catalog.get_filenames_groups('l2_book', exchange, instrument_type, symbol, start, end)
+        # TODO what to do if has_overlap True? Indicate at least?
+        chunked_filenames_groups = []
+        for filenames_group in filenames_groups:
+            chunked_filenames_groups.append([filenames_group[i:i + CHUNK_SIZE] for i in range(0, len(filenames_group), CHUNK_SIZE)])
+        delayed_loaders = []
+        for chunked_filenames in chunked_filenames_groups:
+            for chunk_index in range(0, len(chunked_filenames)):
+                delayed_loaders.append(
+                    dask.delayed(self._load_and_repartition)(chunk_index, chunked_filenames)
+                )
 
-    def _chunk_filenames(self, filenames):
-        return [filenames[i:i + CHUNK_SIZE] for i in range(0, len(filenames), CHUNK_SIZE)]
+        return dask.dataframe.from_delayed(delayed_loaders)
+
+    # def _chunk_filenames(self, filenames):
+    #     return [filenames[i:i + CHUNK_SIZE] for i in range(0, len(filenames), CHUNK_SIZE)]
 
     def _load_chunk(self, chunk_index, chunked_filenames):
         return dfu._load_df(chunked_filenames[chunk_index], CHUNK_SIZE)
 
     def _load_and_repartition(self, chunk_index, chunked_filenames):
-        # TODO check time diff between chunks to discard long differences
         # load current chunk, load previous/next chunk if needed until full snapshot is restored
         current = self._load_chunk(chunk_index, chunked_filenames)
         prev_index = chunk_index - 1
