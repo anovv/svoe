@@ -114,10 +114,14 @@ class Loader:
             's3://svoe.test.1/data_lake/data_feed_market_data/l2_book/exchange=BINANCE/instrument_type=spot/instrument_extra={}/symbol=BTC-USDT/base=BTC/quote=USDT/date=2022-08-03/compaction=raw/version=testing-89c8b1195edee7636496a061321113501952d498/BINANCE*l2_book*BTC-USDT*1659534884.0946796*1659534914.007952*8915bacc10244b7ea741045973312c3f.gz.parquet'
         ]
         pp = pprint.PrettyPrinter()
-        sorted_filenames, has_overlap = catalog.get_sorted_filenames('l2_book', 'BINANCE', 'spot', 'BTC-USDT', '2022-08-03', '2022-08-03')
-        grouped_filenames, has_overlap = catalog.get_grouped_filenames('l2_book', 'BINANCE', 'spot', 'BTC-USDT', '2022-08-03', '2022-08-03')
-        print(len(grouped_filenames))
-        catalog.plot_filename_ranges(grouped_filenames[1])
+        sorted_filenames, has_overlap = catalog.get_sorted_filenames('l2_book', 'BINANCE', 'spot', 'BTC-USDT') #, '2022-08-03', '2022-08-03')
+        filenames_groups, has_overlap = catalog.get_filenames_groups('l2_book', 'BINANCE', 'spot', 'BTC-USDT') #, '2022-08-03', '2022-08-03')
+        print(len(sorted_filenames))
+        print(len(filenames_groups))
+        print(has_overlap)
+        catalog.plot_group_sizes(filenames_groups)
+        # catalog.plot_filename_ranges(filenames_groups[len(filenames_groups) - 1])
+        # pp.pprint(sorted_filenames)
 
 loader = Loader()
 loader.test()

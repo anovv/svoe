@@ -3,6 +3,7 @@
 import awswrangler as wr
 import intervaltree as it
 import matplotlib.pyplot as plt
+import numpy as np
 
 DATABASE = 'svoe_glue_db'
 GROUP_TIME_DIFF_S = 10 # if intervals difference is less than this, they are grouped
@@ -44,35 +45,46 @@ def get_available_dates(channel, exchange, instrument_type, symbol):
 def get_sorted_filenames(channel, exchange, instrument_type, symbol, start_date=None, end_date=None, compaction='raw'):
     start_date, end_date = _sanitize_dates(start_date, end_date)
     df = wr.athena.read_sql_query(
-        sql='SELECT DISTINCT "$path", version FROM :table; WHERE exchange=:exchange; AND instrument_type=:instrument_type; AND symbol=:symbol; AND date >= :start; AND date <= :end; AND compaction=:compaction;',
+        sql='SELECT DISTINCT date, version, "$path" FROM :table; WHERE exchange=:exchange; AND instrument_type=:instrument_type; AND symbol=:symbol; AND date >= :start; AND date <= :end; AND compaction=:compaction;',
         database=DATABASE,
         params={'table': f'{channel}', 'exchange': f"'{exchange}'", 'instrument_type': f"'{instrument_type}'", 'symbol': f"'{symbol}'", 'start': f"'{start_date}'", 'end': f"'{end_date}'", 'compaction':  f"'{compaction}'"},
         max_cache_seconds=900
     )
-
-    filenames_per_version = df.groupby('version')['$path'].apply(list).to_dict()
-    intervals_per_version = {
-        version: list(map(lambda filename: _parse_interval(filename), filenames_per_version[version]))
-        for version in filenames_per_version
-    }
-
-    # by default, if we have multiple versions for a date, we select one which spans longest timerange
-    # TODO alternative can be combining all versions into longest non overlaping sequence or just random select
-    longest_version_intervals = []
-    max_total_length = 0
-    # TODO here we assume that within same version we have no overlaps
-    # TODO if this is not the case, check for overlaps before calculating total length?
-    for version in intervals_per_version:
-        total_length = 0
-        for interval in intervals_per_version[version]:
-            total_length += interval.length()
-        if total_length > max_total_length:
-            longest_version_intervals = intervals_per_version[version]
+    # TODO this should be grouped by date
+    # group by date and version
+    intervals_by_date_version = {}
+    for i in df.values:
+        date = i[0]
+        version = i[1]
+        filename = i[2]
+        if date in intervals_by_date_version:
+            if version in intervals_by_date_version[date]:
+                intervals_by_date_version[date][version].append(_parse_interval(filename))
+            else:
+                intervals_by_date_version[date][version] = [_parse_interval(filename)]
+        else:
+            intervals_by_date_version[date] = {}
+            intervals_by_date_version[date][version] = [_parse_interval(filename)]
+    # # by default, if we have multiple versions for a date, we select one which spans longest timerange for this date
+    # # TODO alternative can be combining all versions for this date into longest non overlaping sequence or just random select
+    all_intervals = []
+    for date in intervals_by_date_version:
+        longest_version_intervals = []
+        max_total_length = 0
+        # TODO here we assume that within same version we have no overlaps
+        # TODO if this is not the case, check for overlaps before calculating total length?
+        for version in intervals_by_date_version[date]:
+            total_length = 0
+            for interval in intervals_by_date_version[date][version]:
+                total_length += interval.length()
+            if total_length > max_total_length:
+                longest_version_intervals = intervals_by_date_version[date][version]
+        all_intervals.extend(longest_version_intervals)
 
     # sort intervals, mark overlaps and split into groups if time range between them is too large
     tree = it.IntervalTree()
     has_overlaps = False
-    for interval in longest_version_intervals:
+    for interval in all_intervals:
         if tree.overlaps(interval):
             has_overlaps = True
         tree.add(interval)
@@ -80,7 +92,7 @@ def get_sorted_filenames(channel, exchange, instrument_type, symbol, start_date=
     return list(map(lambda i: i.data, sorted(tree))), has_overlaps
 
 
-def get_grouped_filenames(channel, exchange, instrument_type, symbol, start_date=None, end_date=None, compaction='raw'):
+def get_filenames_groups(channel, exchange, instrument_type, symbol, start_date=None, end_date=None, compaction='raw'):
     sorted_filenames, has_overlaps = get_sorted_filenames(channel, exchange, instrument_type, symbol, start_date, end_date, compaction)
     return _group_filenames(sorted_filenames), has_overlaps
 
@@ -133,8 +145,16 @@ def _time_diff(f1, f2):
     i2 = _parse_interval(f2)
     return i2.begin - i1.end
 
+
 def plot_filename_ranges(filenames):
     for i in range(0, len(filenames)):
         interval = _parse_interval(filenames[i])
         plt.hlines(i, interval.begin, interval.end, lw=4)
+    plt.show()
+
+
+def plot_group_sizes(filenames_groups):
+    sizes = list(map(lambda g: len(g), filenames_groups))
+    x = np.arange(len(sizes))
+    plt.bar(x, height=sizes)
     plt.show()
