@@ -25,3 +25,6 @@ class FeatureDefinition:
     def _materialize(self, ranges):
         # This should contain logic of running dask transform with saving result to Athena and updating feature index
         return
+
+
+# check https://github.com/bukosabino/ta

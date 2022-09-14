@@ -1,12 +1,12 @@
-from data_eng.athena import get_s3_filenames
 import featurizer.features.loader.df_utils as dfu
 import featurizer.features.loader.l2_snapshot_utils as l2u
-import featurizer.features.loader.filename_utils as fu
+import catalog
 import dask
 import dask.dataframe
 import awswrangler as wr
 import pandas as pd
 import math
+import pprint
 
 CHUNK_SIZE = 4  # how many files include in a chunk. Each chunk is an independent dask delayed object
 
@@ -113,30 +113,11 @@ class Loader:
             's3://svoe.test.1/data_lake/data_feed_market_data/l2_book/exchange=BINANCE/instrument_type=spot/instrument_extra={}/symbol=BTC-USDT/base=BTC/quote=USDT/date=2022-08-03/compaction=raw/version=testing-89c8b1195edee7636496a061321113501952d498/BINANCE*l2_book*BTC-USDT*1659534854.0795298*1659534883.9956083*17d751d9b9c145518eeda4aafa0a9240.gz.parquet',
             's3://svoe.test.1/data_lake/data_feed_market_data/l2_book/exchange=BINANCE/instrument_type=spot/instrument_extra={}/symbol=BTC-USDT/base=BTC/quote=USDT/date=2022-08-03/compaction=raw/version=testing-89c8b1195edee7636496a061321113501952d498/BINANCE*l2_book*BTC-USDT*1659534884.0946796*1659534914.007952*8915bacc10244b7ea741045973312c3f.gz.parquet'
         ]
-
-        # chunked_filenames = self._chunk_filenames(filenames_2022_08_03)
-
-        # df = self._load_and_repartition(0, chunked_filenames)
-
-        # df = _load_df(filenames_2022_08_03[0], 1)
-        # print(_time_range(df))
-        # print(_has_snapshot(df))
-        # print(_get_len(df))
-        # print(_get_size_bytes(df))
-        # dfs = dfu._load_dfs_concurrent(filenames_2022_08_03)
-        # for i in range(0, len(dfs)):
-        #     df = dfs[i]
-        #     if i > 0:
-        #         print(dfu._get_time_diff(df, dfs[i - 1]))
-        for i in range(0, len(filenames_2022_08_03)):
-            f = filenames_2022_08_03[i]
-            if i > 0:
-                prev = filenames_2022_08_03[i - 1]
-                diff = fu._get_time_diff(f, prev)
-                if math.fabs(diff) > 31:
-                    print(diff, i, i - 1)
-
-
+        pp = pprint.PrettyPrinter()
+        sorted_filenames, has_overlap = catalog.get_sorted_filenames('l2_book', 'BINANCE', 'spot', 'BTC-USDT', '2022-08-03', '2022-08-03')
+        grouped_filenames, has_overlap = catalog.get_grouped_filenames('l2_book', 'BINANCE', 'spot', 'BTC-USDT', '2022-08-03', '2022-08-03')
+        print(len(grouped_filenames))
+        catalog.plot_filename_ranges(grouped_filenames[1])
 
 loader = Loader()
 loader.test()
