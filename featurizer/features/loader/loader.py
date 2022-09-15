@@ -3,13 +3,6 @@ import featurizer.features.loader.l2_snapshot_utils as l2u
 import catalog
 import dask
 import dask.dataframe
-import awswrangler as wr
-import pandas as pd
-import math
-import pprint
-import concurrent.futures
-import asyncio
-import functools
 
 CHUNK_SIZE = 4  # how many files include in a chunk. Each chunk is an independent dask delayed object
 
@@ -35,9 +28,6 @@ class Loader:
                 )
 
         return dask.dataframe.from_delayed(delayed_loaders)
-
-    # def _chunk_filenames(self, filenames):
-    #     return [filenames[i:i + CHUNK_SIZE] for i in range(0, len(filenames), CHUNK_SIZE)]
 
     def _load_chunk(self, chunk_index, chunked_filenames):
         return dfu._load_df(chunked_filenames[chunk_index], CHUNK_SIZE)
@@ -77,7 +67,7 @@ class Loader:
             if not l2u._has_snapshot(next):
                 current = dfu._concat([current, next])
             next_index += 1
-        if l2u._has_snapshot(next):
+        if next is not None and l2u._has_snapshot(next):
             next_first_snap_start = l2u._get_first_snapshot_start(next)
             next_deltas = dfu._sub_df(next, 0, next_first_snap_start - 1)
             current = dfu._concat([current, next_deltas])
@@ -87,51 +77,3 @@ class Loader:
         current = dfu._sub_df(current, current_first_snap_start, current.iloc[-1].name)
 
         return current
-
-    def _load_and_repartition_concurrently(self, chunked_filenames):
-        # this is used only for testing
-        executor = concurrent.futures.ThreadPoolExecutor(max_workers=1024)
-        loop = asyncio.new_event_loop()
-        futures = [
-            loop.run_in_executor(
-                executor,
-                functools.partial(self._load_and_repartition, chunk_index=i, chunked_filenames=chunked_filenames)
-            )
-            for i in range(0, len(chunked_filenames))
-        ]
-        gathered = asyncio.gather(*futures, loop=loop, return_exceptions=True)
-        loop.run_until_complete(gathered)
-        dfs = []
-        for f in futures:
-            dfs.append(f.result())
-        return dfs
-
-    def test(self):
-        pp = pprint.PrettyPrinter()
-        filenames_groups, has_overlap = catalog.get_filenames_groups('l2_book', 'BINANCE', 'spot', 'BTC-USDT') #, '2022-08-03', '2022-08-03')
-        # print(len(filenames_groups))
-        group = filenames_groups[10]
-
-        dfs_a = dfu._load_dfs_concurrent(group)
-        df1 = dfu._concat(dfs_a)
-        # for df in dfs_a:
-        #     print(df)
-        #     print(l2u._get_snapshots_ranges(df))
-        dfs_b = self._load_and_repartition_concurrently(group)
-        df2 = dfu._concat(dfs_b)
-        print(l2u._get_snapshots_ranges(df1))
-        print(l2u._get_snapshots_ranges(df2))
-        # print(df_b_1)
-        # print(l2u._get_snapshots_ranges(df_b_1))
-        # print(df_b_2)
-        # print(l2u._get_snapshots_ranges(df_b_2))
-        # print(dfs_a)
-        # print(l2u._get_snapshots_ranges(df_b))
-        # catalog.plot_filename_ranges(group_1)
-        # catalog.plot_group_sizes(filenames_groups)
-        # catalog.plot_filename_ranges(filenames_groups[len(filenames_groups) - 1])
-        # pp.pprint(sorted_filenames)
-
-
-loader = Loader()
-loader.test()

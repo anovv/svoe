@@ -15,41 +15,23 @@ def _get_first_snapshot_start(df):
     return df[df.delta == False].iloc[0].name
 
 
-# def _get_snapshot_end(df, start):
-#     return 0 # TODO
-
 def _get_snapshot_start(df, end):
-    cur = end - 1
-    while cur >= 0 and df.iloc[cur].delta == False:
-        cur -= 1
-    return cur + 1
+    for r in _get_snapshots_ranges(df):
+        if r[1] == end:
+            return r[0]
+    return -1
 
 
 def _get_snapshots_ranges(df):
-    # https://towardsdatascience.com/400x-time-faster-pandas-data-frame-iteration-16fb47871a0a
-    # returns start and end indices of all snapshots
-    ranges = []
-    cur_start = None
-    index = 0
-    in_snapshot = False
-    # TODO use to_dict to iterate over dict for a speedup
-    for _, row in df.iterrows():
-        if row.delta == True:
-            if cur_start is not None and in_snapshot:
-                # cur snap finished
-                cur_end = index - 1
-                in_snapshot = False
-                # save cur snap
-                if cur_start is not None:
-                    ranges.append((cur_start, cur_end))
-        else:
-            if not in_snapshot:
-                # new snap found
-                cur_start = index
-                in_snapshot = True
-        index += 1
+    # https://stackoverflow.com/questions/60092544/how-to-get-start-and-end-index-of-group-of-1s-in-a-series
+    df = df.reset_index()
+    snapshot_rows = df['delta'].astype(int).eq(0)
+    grouper = snapshot_rows.ne(snapshot_rows.shift()).cumsum()[snapshot_rows]
+    snapshot_ranges_df = df.groupby(grouper)['index'].agg([('start', 'first'), ('end', 'last')]).reset_index(drop=True)
 
-    return ranges
+    return list(snapshot_ranges_df.itertuples(index=False, name=None))
+
+
 
 
 
