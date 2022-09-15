@@ -30,8 +30,8 @@ def _sub_df(df, start, end):
     return df[start: end + 1].reset_index(drop=True)
 
 
-def _concat(df1, df2):
-    return pd.concat([df1, df2], ignore_index=True)
+def _concat(dfs):
+    return pd.concat(dfs, ignore_index=True)
 
 
 def _time_range(df):
