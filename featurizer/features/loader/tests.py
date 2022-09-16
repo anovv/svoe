@@ -1,6 +1,6 @@
 import featurizer.features.loader.df_utils as dfu
 import featurizer.features.loader.l2_snapshot_utils as l2u
-import catalog
+import featurizer.features.loader.catalog as catalog
 import concurrent.futures
 import asyncio
 import functools

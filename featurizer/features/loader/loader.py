@@ -1,6 +1,6 @@
 import featurizer.features.loader.df_utils as dfu
 import featurizer.features.loader.l2_snapshot_utils as l2u
-import catalog
+import featurizer.features.loader.catalog as catalog
 import dask
 import dask.dataframe
 
@@ -11,6 +11,8 @@ CHUNK_SIZE = 4  # how many files include in a chunk. Each chunk is an independen
 # i.e. l2_book deltas need to be partitioned so that each partition contains full book state
 class Loader:
     def __init__(self):
+
+        # TODO is this needed
         self.dask_cluster = None
 
     # TODO handle data versioning
