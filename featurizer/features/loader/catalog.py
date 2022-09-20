@@ -97,6 +97,14 @@ def get_filenames_groups(channel, exchange, instrument_type, symbol, start_date=
     return _group_filenames(sorted_filenames), has_overlaps
 
 
+def chunk_filenames_groups(filenames_groups, chunk_size):
+    chunked_filenames_groups = []
+    for filenames_group in filenames_groups:
+        chunked_filenames_groups.append(
+            [filenames_group[i:i + chunk_size] for i in range(0, len(filenames_group), chunk_size)])
+    return chunked_filenames_groups
+
+
 def _group_filenames(sorted_filenames):
     groups = []
     cur_group = []

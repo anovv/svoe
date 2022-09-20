@@ -14,10 +14,10 @@ def test_load_and_repartition(self):
 
     filenames = filenames[0:50]
 
-    df1 = dfu._concat(dfu._load_dfs_concurrent(filenames))
-    df2 = dfu._concat(self._load_and_repartition_concurrently(filenames))
-    r1 = l2u._get_snapshots_ranges(df1)
-    r2 = l2u._get_snapshots_ranges(df2)
+    df1 = dfu.concat(dfu.load_dfs_concurrent(filenames))
+    df2 = dfu.concat(self._load_and_repartition_concurrently(filenames))
+    r1 = l2u.get_snapshots_ranges(df1)
+    r2 = l2u.get_snapshots_ranges(df2)
     assert r1 == r2
 
 
@@ -28,7 +28,7 @@ def _load_and_repartition_concurrently(self, chunked_filenames):
     futures = [
         loop.run_in_executor(
             executor,
-            functools.partial(self._load_and_repartition, chunk_index=i, chunked_filenames=chunked_filenames)
+            functools.partial(self.load_with_snapshot, chunk_index=i, chunked_filenames=chunked_filenames)
         )
         for i in range(0, len(chunked_filenames))
     ]
