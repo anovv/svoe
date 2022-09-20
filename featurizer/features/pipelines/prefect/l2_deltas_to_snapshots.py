@@ -1,15 +1,18 @@
 
 from prefect import task, flow, unmapped
+from prefect_dask.task_runners import DaskTaskRunner
 import featurizer.features.loader.loader as loader
 import featurizer.features.loader.catalog as catalog
 import time
 
+DASK_SCHEDULER_ADDRESS = 'http://127.0.0.1:8787'
 CHUNK_SIZE = 10 # number of files to treat as a single chunk/dataframe
 COMPACTION_GROUP_SIZE = 20 # number of chunks to store in the same file
 
 
 def get_compaction_groups(grouped_chunks, compaction_group_size):
     # TODO move this to utility class?
+    # TODO make logic based of file size, not fixed compaction_group_size
     # we need to make sure not to compact together chunks from different groups
     #[[[a, b, c], [d, e], [f, g]], [[h, k], [l, n]], [[n, o], [p, q, r], [s, t]]]
     id = 0
@@ -59,7 +62,7 @@ def gather_results(results):
     time.sleep(1)
     return True
 
-@flow
+@flow(task_runner=DaskTaskRunner(address=DASK_SCHEDULER_ADDRESS))
 def l2_deltas_to_snapshots_flow(exchange, instrument_type, symbol):
     grouped_chunks = load_grouped_filenames_chunks(exchange, instrument_type, symbol)
     chunks = [chunk for group in grouped_chunks for chunk in group] # flatten
@@ -71,7 +74,7 @@ def l2_deltas_to_snapshots_flow(exchange, instrument_type, symbol):
     mapped_transform = transform_deltas_to_snapshots.map(mapped_loaders)
 
     # make compaction groups
-    compaction_groups = get_compaction_groups(grouped_chunks)
+    compaction_groups = get_compaction_groups(grouped_chunks, COMPACTION_GROUP_SIZE)
 
     # store
     results = compact_and_store.map(compaction_groups, dfs=unmapped(mapped_transform))
