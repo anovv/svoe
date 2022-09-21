@@ -28,18 +28,19 @@ def l2_deltas_dask_dataframe(exchange, instrument_type, symbol, start=None, end=
     return dask.dataframe.from_delayed(delayed_loaders)
 
 
-def load_chunk(chunk_index, chunked_filenames, nthreads):
-    return dfu.load_df(chunked_filenames[chunk_index], nthreads)
+def load_chunk(chunk_index, chunked_filenames):
+    return dfu.concat(dfu.load_files(chunked_filenames[chunk_index]))
 
 
-def load_with_snapshot(chunk_index, chunked_filenames, nthreads):
+def load_with_snapshot(chunk_index, chunked_filenames):
     # load current chunk, load previous/next chunk if needed until full snapshot is restored
-    current = load_chunk(chunk_index, chunked_filenames, nthreads)
+    current = load_chunk(chunk_index, chunked_filenames)
     prev_index = chunk_index - 1
     next_index = chunk_index + 1
     if not l2u.has_snapshot(current):
         # this will be handled by previous chunk, return empty df
         # TODO the df schema should be a global shared/common variable between this and data feed service
+        # TODO partition columns?
         return pd.DataFrame({
             'timestamp': pd.Series(dtype='float64'),
             'receipt_timestamp': pd.Series(dtype='float64'),
@@ -52,7 +53,7 @@ def load_with_snapshot(chunk_index, chunked_filenames, nthreads):
 
     if l2u.starts_with_snapshot(current) and prev_index >= 0:
         # load previous in case it has leftover snapshot data
-        previous = load_chunk(prev_index, chunked_filenames, nthreads)
+        previous = load_chunk(prev_index, chunked_filenames)
         if l2u.ends_with_snapshot(previous):
             # append previous snapshot data to current head
             prev_end = previous.iloc[-1].name
@@ -63,7 +64,7 @@ def load_with_snapshot(chunk_index, chunked_filenames, nthreads):
     next = None
     if l2u.ends_with_snapshot(current) and next_index < len(chunked_filenames):
         # to make things even, remove end snapshot from current if it will be handled by next partition
-        next = load_chunk(next_index, chunked_filenames, nthreads)
+        next = load_chunk(next_index, chunked_filenames)
         if l2u.starts_with_snapshot(next):
             # remove cur snapshot data from end
             cur_end = current.iloc[-1].name
@@ -72,7 +73,7 @@ def load_with_snapshot(chunk_index, chunked_filenames, nthreads):
 
     # append deltas to current until next snapshot is reached
     while next_index < len(chunked_filenames) and (next is None or not l2u.has_snapshot(next)):
-        next = load_chunk(next_index, chunked_filenames, nthreads)
+        next = load_chunk(next_index, chunked_filenames)
         if not l2u.has_snapshot(next):
             current = dfu.concat([current, next])
         next_index += 1

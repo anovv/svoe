@@ -3,9 +3,10 @@ from prefect import task, flow, unmapped
 from prefect_dask.task_runners import DaskTaskRunner
 import featurizer.features.loader.loader as loader
 import featurizer.features.loader.catalog as catalog
+import featurizer.features.loader.df_utils as dfu
 import time
 
-DASK_SCHEDULER_ADDRESS = 'http://127.0.0.1:8787'
+DASK_SCHEDULER_ADDRESS = 'tcp://127.0.0.1:60939'
 CHUNK_SIZE = 10 # number of files to treat as a single chunk/dataframe
 COMPACTION_GROUP_SIZE = 20 # number of chunks to store in the same file
 
@@ -38,7 +39,7 @@ def load_grouped_filenames_chunks(exchange, instrument_type, symbol):
 
 @task
 def load_l2_deltas_chunk(index, chunks):
-    return loader.load_with_snapshot(index, chunks, CHUNK_SIZE)
+    return loader.load_with_snapshot(index, chunks)
 
 @task
 def transform_deltas_to_snapshots(deltas_df):
@@ -62,9 +63,12 @@ def gather_results(results):
     time.sleep(1)
     return True
 
-@flow(task_runner=DaskTaskRunner(address=DASK_SCHEDULER_ADDRESS))
+# @flow(task_runner=DaskTaskRunner(address=DASK_SCHEDULER_ADDRESS))
+@flow(task_runner=DaskTaskRunner())
 def l2_deltas_to_snapshots_flow(exchange, instrument_type, symbol):
+    # load filenames
     grouped_chunks = load_grouped_filenames_chunks(exchange, instrument_type, symbol)
+    compaction_groups = get_compaction_groups(grouped_chunks, COMPACTION_GROUP_SIZE)
     chunks = [chunk for group in grouped_chunks for chunk in group] # flatten
 
     # map loaders
@@ -73,9 +77,6 @@ def l2_deltas_to_snapshots_flow(exchange, instrument_type, symbol):
     # transform deltas to snaps
     mapped_transform = transform_deltas_to_snapshots.map(mapped_loaders)
 
-    # make compaction groups
-    compaction_groups = get_compaction_groups(grouped_chunks, COMPACTION_GROUP_SIZE)
-
     # store
     results = compact_and_store.map(compaction_groups, dfs=unmapped(mapped_transform))
 
@@ -83,3 +84,22 @@ def l2_deltas_to_snapshots_flow(exchange, instrument_type, symbol):
     stats = gather_results(results)
 
     return stats
+
+# def test():
+#     filenames, has_overlap = catalog.get_sorted_filenames('l2_book', 'BINANCE', 'spot', 'BTC-USDT')
+#     filenames = filenames[0:100]
+#
+#     # start1 = time.time()
+#     # dfs1 = dfu.load_df(filenames, len(filenames))
+#     # delta1 = time.time() - start1
+#     # print(f'Delta 1 {delta1}')
+#     start2 = time.time()
+#     dfs2 = dfu.load_files(filenames)
+#     delta2 = time.time() - start2
+#     print(f'Delta 2 {delta2}')
+
+
+
+if __name__ == "__main__":
+    print(l2_deltas_to_snapshots_flow('BINANCE', 'spot', 'BTC-USDT'))
+    # test()

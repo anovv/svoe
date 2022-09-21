@@ -5,18 +5,20 @@ import asyncio
 import functools
 
 
-def load_df(paths, nthreads=4):
-    return wr.s3.read_parquet(path=paths, use_threads=nthreads, dataset=True)
+def load_single_file(path):
+    # split path into prefix and suffix
+    # this is needed because if dataset=True data wrangler handles input path as a glob pattern,
+    # hence messing up special characters
+    split = path.split('/')
+    suffix = split[len(split) - 1]
+    prefix = path.removesuffix(suffix)
+    return wr.s3.read_parquet(path=prefix, path_suffix=suffix, dataset=True)
 
 
-def load_dfs_sequential(paths, nthreads=4):
-    return wr.s3.read_parquet(path=paths, use_threads=nthreads, chunked=True)
-
-
-def load_dfs_concurrent(paths):
+def load_files(paths):
     executor = concurrent.futures.ThreadPoolExecutor(max_workers=1024)
     loop = asyncio.new_event_loop()
-    futures = [loop.run_in_executor(executor, functools.partial(load_df, paths=path, nthreads=1)) for path in paths]
+    futures = [loop.run_in_executor(executor, functools.partial(load_single_file, path=path)) for path in paths]
     gathered = asyncio.gather(*futures, loop=loop, return_exceptions=True)
     loop.run_until_complete(gathered)
     dfs = []
