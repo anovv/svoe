@@ -1,9 +1,8 @@
 import featurizer.features.loader.df_utils as dfu
 import featurizer.features.loader.l2_snapshot_utils as l2u
 import featurizer.features.loader.catalog as catalog
+import featurizer.features.loader.concurrency_utils as cu
 import featurizer.features.loader.loader as loader
-import concurrent.futures
-import asyncio
 import functools
 import pandas as pd
 
@@ -28,19 +27,8 @@ def test_load_and_repartition():
 
 
 def _load_and_repartition_concurrently(chunked_filenames: List[List[str]]) -> List[pd.DataFrame]:
-    # this is used only for testing
-    executor = concurrent.futures.ThreadPoolExecutor(max_workers=1024)
-    loop = asyncio.new_event_loop()
-    futures = [
-        loop.run_in_executor(
-            executor,
-            functools.partial(loader.load_with_snapshot, chunk_index=i, chunked_filenames=chunked_filenames)
-        )
+    callables = [
+        functools.partial(loader.load_with_snapshot, chunk_index=i, chunked_filenames=chunked_filenames)
         for i in range(0, len(chunked_filenames))
     ]
-    gathered = asyncio.gather(*futures, loop=loop, return_exceptions=True)
-    loop.run_until_complete(gathered)
-    dfs = []
-    for f in futures:
-        dfs.append(f.result())
-    return dfs
+    return cu.run_concurrently(callables)

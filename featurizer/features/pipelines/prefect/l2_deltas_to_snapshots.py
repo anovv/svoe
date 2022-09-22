@@ -1,22 +1,25 @@
 
 from prefect import task, flow, unmapped
 from prefect_dask.task_runners import DaskTaskRunner
-from typing import List, Any, Optional
+from typing import List, Any, Optional, Dict
 
 import featurizer.features.loader.loader as loader
 import featurizer.features.loader.catalog as catalog
 import featurizer.features.loader.df_utils as dfu
+import featurizer.features.loader.l2_snapshot_utils as l2u
 import time
 import pandas as pd
 
 DASK_SCHEDULER_ADDRESS = 'tcp://127.0.0.1:60939'
-CHUNK_SIZE = 10 # number of files to treat as a single chunk/dataframe
+DASK_NUM_WORKERS = 4
+DASK_THREADS_PER_WORKER = 32
+CHUNK_SIZE = 1 # number of files to treat as a single chunk/dataframe
 COMPACTION_GROUP_SIZE = 20 # number of chunks to store in the same file
 
 
 def get_compaction_groups(grouped_chunks: List[List[List[str]]], compaction_group_size: int) -> List[List[int]]:
     # TODO move this to utility class?
-    # TODO make logic based of file size, not fixed compaction_group_size
+    # TODO make logic based on file size, not fixed compaction_group_size
     # we need to make sure not to compact together chunks from different groups
     #[[[a, b, c], [d, e], [f, g]], [[h, k], [l, n]], [[n, o], [p, q, r], [s, t]]]
     id = 0
@@ -34,21 +37,36 @@ def get_compaction_groups(grouped_chunks: List[List[List[str]]], compaction_grou
         compaction_groups.extend(compacted_ids)
     return compaction_groups
 
+
 @task
 def load_grouped_filenames_chunks(exchange: str, instrument_type: str, symbol: str) -> List[List[List[str]]]:
     filenames_groups, has_overlap = catalog.get_filenames_groups('l2_book', exchange, instrument_type, symbol)
     grouped_chunks = catalog.chunk_filenames_groups(filenames_groups, CHUNK_SIZE)
     return grouped_chunks
 
+
 @task
 def load_l2_deltas_chunk(index: int, chunks: List[List[str]]) -> pd.DataFrame:
     return loader.load_with_snapshot(index, chunks)
+
+
+@task
+def get_df_info(df: pd.DataFrame) -> Dict[str, Any]:
+    return l2u.get_info(df)
+
+
+@task
+def gather_info(infos: List[Dict[str, Any]]) -> Any:
+    sizes_kb = list(map(lambda info: info['df_size_kb'], infos))
+    return sizes_kb
+
 
 @task
 def transform_deltas_to_snapshots(deltas_df: pd.DataFrame) -> pd.DataFrame:
     # TODO
     time.sleep(1)
     return deltas_df
+
 
 @task
 def compact_and_store(ids: List[int], dfs: List[pd.DataFrame]) -> Optional[pd.DataFrame]:
@@ -59,6 +77,11 @@ def compact_and_store(ids: List[int], dfs: List[pd.DataFrame]) -> Optional[pd.Da
     time.sleep(1)
     return None
 
+def plot_loaded_data_info(info: Any):
+    return # TODO
+
+
+
 @task
 def gather_results(results: List[Any]) -> Any:
     # TODO
@@ -66,27 +89,35 @@ def gather_results(results: List[Any]) -> Any:
     time.sleep(1)
     return True
 
+
 # @flow(task_runner=DaskTaskRunner(address=DASK_SCHEDULER_ADDRESS))
-@flow(task_runner=DaskTaskRunner())
-def l2_deltas_to_snapshots_flow(exchange: str, instrument_type: str, symbol: str) -> Any:
+@flow(task_runner=DaskTaskRunner(
+    cluster_kwargs={'n_workers': DASK_NUM_WORKERS, 'threads_per_worker': DASK_THREADS_PER_WORKER}
+))
+def l2_deltas_to_snapshots_flow(exchange: str, instrument_type: str, symbol: str, limit_chunks: int = None) -> Any:
     # load filenames
     grouped_chunks = load_grouped_filenames_chunks(exchange, instrument_type, symbol)
     compaction_groups = get_compaction_groups(grouped_chunks, COMPACTION_GROUP_SIZE)
     chunks = [chunk for group in grouped_chunks for chunk in group] # flatten
+    chunks = chunks[0: limit_chunks]
 
-    # map loaders
-    mapped_loaders = load_l2_deltas_chunk.map(range(len(chunks)), chunks=unmapped(chunks))
+    # map loaded dfs
+    mapped_loaded_dfs = load_l2_deltas_chunk.map(range(len(chunks)), chunks=unmapped(chunks))
+
+    # get raw data info
+    mapped_loaded_data_info = get_df_info.map(mapped_loaded_dfs)
+    loaded_data_info = gather_info(mapped_loaded_data_info)
 
     # transform deltas to snaps
-    mapped_transform = transform_deltas_to_snapshots.map(mapped_loaders)
+    mapped_transformed_dfs = transform_deltas_to_snapshots.map(mapped_loaded_dfs)
 
     # store
-    results = compact_and_store.map(compaction_groups, dfs=unmapped(mapped_transform))
+    results = compact_and_store.map(compaction_groups, dfs=unmapped(mapped_transformed_dfs))
 
     # gather stats
     stats = gather_results(results)
 
-    return stats
+    return loaded_data_info, stats
 
 # def test():
 #     filenames, has_overlap = catalog.get_sorted_filenames('l2_book', 'BINANCE', 'spot', 'BTC-USDT')
@@ -101,8 +132,6 @@ def l2_deltas_to_snapshots_flow(exchange: str, instrument_type: str, symbol: str
 #     delta2 = time.time() - start2
 #     print(f'Delta 2 {delta2}')
 
-
-
 if __name__ == "__main__":
-    print(l2_deltas_to_snapshots_flow('BINANCE', 'spot', 'BTC-USDT'))
-    # test()
+    loaded_data_info, stats = l2_deltas_to_snapshots_flow('BINANCE', 'spot', 'BTC-USDT', 10)
+    print(loaded_data_info)

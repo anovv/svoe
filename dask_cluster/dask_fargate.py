@@ -18,7 +18,7 @@ class SvoeDaskCluster(FargateCluster):
             find_address_timeout=120,
             environment=
             {
-                'EXTRA_PIP_PACKAGES': 'pyarrow s3fs prefect[aws] fastparquet numpy order_book intervaltree prefect-dask awswrangler',
+                'EXTRA_PIP_PACKAGES': 'pyarrow s3fs prefect[aws] fastparquet numpy order_book intervaltree prefect-dask awswrangler boto3',
                 # TODO use prebuild docker image to speed up boot time
                 # TODO set AWS credentials env vars
             },

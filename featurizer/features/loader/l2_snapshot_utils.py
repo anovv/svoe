@@ -1,5 +1,6 @@
 import pandas as pd
-from typing import List, Tuple
+import featurizer.features.loader.df_utils as dfu
+from typing import List, Tuple, Dict, Any
 
 
 def starts_with_snapshot(df: pd.DataFrame) -> bool:
@@ -33,6 +34,17 @@ def get_snapshots_ranges(df: pd.DataFrame) -> List[Tuple[int, int]]:
     snapshot_ranges_df = df.groupby(grouper)['index'].agg([('start', 'first'), ('end', 'last')]).reset_index(drop=True)
 
     return list(snapshot_ranges_df.itertuples(index=False, name=None))
+
+
+def get_info(df: pd.DataFrame) -> Dict[str, Any]:
+    return {
+        'df_size_kb': dfu.get_size_kb(df),
+        'length': dfu.get_len(df),
+        'starts_with_snapshot': starts_with_snapshot(df),
+        'ends_with_snapshot': ends_with_snapshot(df),
+        'has_snapshot': has_snapshot(df),
+        'snapshot_ranges': get_snapshots_ranges(df)
+    }
 
 
 

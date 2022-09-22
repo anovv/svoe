@@ -4,6 +4,7 @@ import concurrent.futures
 import asyncio
 import functools
 from typing import List, Tuple
+import featurizer.features.loader.concurrency_utils as cu
 
 
 def load_single_file(path: str) -> pd.DataFrame:
@@ -17,15 +18,8 @@ def load_single_file(path: str) -> pd.DataFrame:
 
 
 def load_files(paths: List[str]) -> List[pd.DataFrame]:
-    executor = concurrent.futures.ThreadPoolExecutor(max_workers=1024)
-    loop = asyncio.new_event_loop()
-    futures = [loop.run_in_executor(executor, functools.partial(load_single_file, path=path)) for path in paths]
-    gathered = asyncio.gather(*futures, loop=loop, return_exceptions=True)
-    loop.run_until_complete(gathered)
-    dfs = []
-    for f in futures:
-        dfs.append(f.result())
-    return dfs
+    callables = [functools.partial(load_single_file, path=path) for path in paths]
+    return cu.run_concurrently(callables)
 
 
 def sub_df(df: pd.DataFrame, start: int, end: int) -> pd.DataFrame:
@@ -49,8 +43,8 @@ def get_len(df: pd.DataFrame) -> int:
     return len(df.index)
 
 
-def get_size_bytes(df: pd.DataFrame) -> int:
-    return df.memory_usage(index=True).sum()
+def get_size_kb(df: pd.DataFrame) -> int:
+    return int(df.memory_usage(index=True, deep=True).sum()/1000.0)
 
 
 def get_time_diff(df1: pd.DataFrame, df2: pd.DataFrame) -> float:
