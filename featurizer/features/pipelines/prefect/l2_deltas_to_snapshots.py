@@ -1,17 +1,20 @@
 
 from prefect import task, flow, unmapped
 from prefect_dask.task_runners import DaskTaskRunner
+from typing import List, Any, Optional
+
 import featurizer.features.loader.loader as loader
 import featurizer.features.loader.catalog as catalog
 import featurizer.features.loader.df_utils as dfu
 import time
+import pandas as pd
 
 DASK_SCHEDULER_ADDRESS = 'tcp://127.0.0.1:60939'
 CHUNK_SIZE = 10 # number of files to treat as a single chunk/dataframe
 COMPACTION_GROUP_SIZE = 20 # number of chunks to store in the same file
 
 
-def get_compaction_groups(grouped_chunks, compaction_group_size):
+def get_compaction_groups(grouped_chunks: List[List[List[str]]], compaction_group_size: int) -> List[List[int]]:
     # TODO move this to utility class?
     # TODO make logic based of file size, not fixed compaction_group_size
     # we need to make sure not to compact together chunks from different groups
@@ -32,24 +35,24 @@ def get_compaction_groups(grouped_chunks, compaction_group_size):
     return compaction_groups
 
 @task
-def load_grouped_filenames_chunks(exchange, instrument_type, symbol):
+def load_grouped_filenames_chunks(exchange: str, instrument_type: str, symbol: str) -> List[List[List[str]]]:
     filenames_groups, has_overlap = catalog.get_filenames_groups('l2_book', exchange, instrument_type, symbol)
     grouped_chunks = catalog.chunk_filenames_groups(filenames_groups, CHUNK_SIZE)
     return grouped_chunks
 
 @task
-def load_l2_deltas_chunk(index, chunks):
+def load_l2_deltas_chunk(index: int, chunks: List[List[str]]) -> pd.DataFrame:
     return loader.load_with_snapshot(index, chunks)
 
 @task
-def transform_deltas_to_snapshots(deltas_df):
+def transform_deltas_to_snapshots(deltas_df: pd.DataFrame) -> pd.DataFrame:
     # TODO
     time.sleep(1)
     return deltas_df
 
 @task
-def compact_and_store(ids, dfs):
-    #concatinate dataframes into one and store to data lake
+def compact_and_store(ids: List[int], dfs: List[pd.DataFrame]) -> Optional[pd.DataFrame]:
+    # concatenate dataframes into one and store to data lake
     # use data wrangler
     # update index
     # TODO
@@ -57,7 +60,7 @@ def compact_and_store(ids, dfs):
     return None
 
 @task
-def gather_results(results):
+def gather_results(results: List[Any]) -> Any:
     # TODO
     # gather pipeline stats
     time.sleep(1)
@@ -65,7 +68,7 @@ def gather_results(results):
 
 # @flow(task_runner=DaskTaskRunner(address=DASK_SCHEDULER_ADDRESS))
 @flow(task_runner=DaskTaskRunner())
-def l2_deltas_to_snapshots_flow(exchange, instrument_type, symbol):
+def l2_deltas_to_snapshots_flow(exchange: str, instrument_type: str, symbol: str) -> Any:
     # load filenames
     grouped_chunks = load_grouped_filenames_chunks(exchange, instrument_type, symbol)
     compaction_groups = get_compaction_groups(grouped_chunks, COMPACTION_GROUP_SIZE)

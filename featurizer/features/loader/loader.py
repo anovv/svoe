@@ -3,7 +3,8 @@ import featurizer.features.loader.l2_snapshot_utils as l2u
 import featurizer.features.loader.catalog as catalog
 import pandas as pd
 import dask
-import dask.dataframe
+import dask.dataframe as dd
+from typing import List
 
 CHUNK_SIZE = 100  # how many files include in a chunk. Each chunk is an independent dask delayed object
 
@@ -12,7 +13,13 @@ CHUNK_SIZE = 100  # how many files include in a chunk. Each chunk is an independ
 # i.e. l2_book deltas need to be partitioned so that each partition contains full book state
 
 # TODO handle data versioning
-def l2_deltas_dask_dataframe(exchange, instrument_type, symbol, start=None, end=None):
+def l2_deltas_dask_dataframe(
+    exchange: str,
+    instrument_type: str,
+    symbol: str,
+    start: str = None,
+    end: str = None
+) -> dd.DataFrame:
     filenames_groups, has_overlap = catalog.get_filenames_groups('l2_book', exchange, instrument_type, symbol,
                                                                  start, end)
     # TODO what to do if has_overlap True? Indicate at least?
@@ -25,14 +32,14 @@ def l2_deltas_dask_dataframe(exchange, instrument_type, symbol, start=None, end=
                 dask.delayed(load_with_snapshot)(chunk_index, chunked_filenames, CHUNK_SIZE)
             )
 
-    return dask.dataframe.from_delayed(delayed_loaders)
+    return dd.from_delayed(delayed_loaders)
 
 
-def load_chunk(chunk_index, chunked_filenames):
+def load_chunk(chunk_index: int, chunked_filenames: List[List[str]]) -> pd.DataFrame:
     return dfu.concat(dfu.load_files(chunked_filenames[chunk_index]))
 
 
-def load_with_snapshot(chunk_index, chunked_filenames):
+def load_with_snapshot(chunk_index: int, chunked_filenames: List[List[str]]) -> pd.DataFrame:
     # load current chunk, load previous/next chunk if needed until full snapshot is restored
     current = load_chunk(chunk_index, chunked_filenames)
     prev_index = chunk_index - 1

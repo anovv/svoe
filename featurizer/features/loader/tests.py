@@ -5,24 +5,29 @@ import featurizer.features.loader.loader as loader
 import concurrent.futures
 import asyncio
 import functools
+import pandas as pd
+
+from typing import List
 
 
 def test_load_and_repartition():
     filenames_groups, has_overlap = catalog.get_filenames_groups('l2_book', 'BINANCE', 'spot', 'BTC-USDT')
+
+    # limit for testing
+    filenames_groups = filenames_groups[0:10]
+
     filenames = []
     for group in filenames_groups:
         filenames.extend(group)
 
-    filenames = filenames[0:50]
-
-    df1 = dfu.concat(dfu.load_dfs_concurrent(filenames))
-    df2 = dfu.concat(_load_and_repartition_concurrently(filenames))
+    df1 = dfu.concat(dfu.load_files(filenames))
+    df2 = dfu.concat(_load_and_repartition_concurrently(filenames_groups))
     r1 = l2u.get_snapshots_ranges(df1)
     r2 = l2u.get_snapshots_ranges(df2)
     assert r1 == r2
 
 
-def _load_and_repartition_concurrently(chunked_filenames):
+def _load_and_repartition_concurrently(chunked_filenames: List[List[str]]) -> List[pd.DataFrame]:
     # this is used only for testing
     executor = concurrent.futures.ThreadPoolExecutor(max_workers=1024)
     loop = asyncio.new_event_loop()

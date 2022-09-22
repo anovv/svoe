@@ -4,9 +4,11 @@ import awswrangler as wr
 import intervaltree as it
 import matplotlib.pyplot as plt
 import numpy as np
+from typing import List, Tuple, Union
 
 DATABASE = 'svoe_glue_db'
-GROUP_TIME_DIFF_S = 10 # if intervals difference is less than this, they are grouped
+GROUP_TIME_DIFF_S = 10  # if intervals difference is less than this, they are grouped
+
 
 # TODO use max_cache_seconds
 # https://ahana.io/answers/how-do-i-get-the-date_diff-from-previous-rows/
@@ -31,23 +33,39 @@ GROUP_TIME_DIFF_S = 10 # if intervals difference is less than this, they are gro
 # where diff_prev > 60 * 1000
 
 
-def get_available_dates(channel, exchange, instrument_type, symbol):
+def get_available_dates(
+        channel: str,
+        exchange: str,
+        instrument_type: str,
+        symbol: str
+) -> List[str]:
     df = wr.athena.read_sql_query(
         sql='SELECT DISTINCT date FROM :table; WHERE exchange=:exchange; AND instrument_type=:instrument_type; AND symbol=:symbol;',
         database=DATABASE,
-        params={'table': f'{channel}', 'exchange': f"'{exchange}'", 'instrument_type': f"'{instrument_type}'", 'symbol': f"'{symbol}'"},
+        params={'table': f'{channel}', 'exchange': f"'{exchange}'", 'instrument_type': f"'{instrument_type}'",
+                'symbol': f"'{symbol}'"},
         max_cache_seconds=900
     )
 
     return df['date'].to_list()
 
 
-def get_sorted_filenames(channel, exchange, instrument_type, symbol, start_date=None, end_date=None, compaction='raw'):
+def get_sorted_filenames(
+        channel: str,
+        exchange: str,
+        instrument_type: str,
+        symbol: str,
+        start_date: str = None,
+        end_date: str = None,
+        compaction: str = 'raw'
+) -> Tuple[List[str], bool]:
     start_date, end_date = _sanitize_dates(start_date, end_date)
     df = wr.athena.read_sql_query(
         sql='SELECT DISTINCT date, version, "$path" FROM :table; WHERE exchange=:exchange; AND instrument_type=:instrument_type; AND symbol=:symbol; AND date >= :start; AND date <= :end; AND compaction=:compaction;',
         database=DATABASE,
-        params={'table': f'{channel}', 'exchange': f"'{exchange}'", 'instrument_type': f"'{instrument_type}'", 'symbol': f"'{symbol}'", 'start': f"'{start_date}'", 'end': f"'{end_date}'", 'compaction':  f"'{compaction}'"},
+        params={'table': f'{channel}', 'exchange': f"'{exchange}'", 'instrument_type': f"'{instrument_type}'",
+                'symbol': f"'{symbol}'", 'start': f"'{start_date}'", 'end': f"'{end_date}'",
+                'compaction': f"'{compaction}'"},
         max_cache_seconds=900
     )
     # TODO this should be grouped by date
@@ -92,12 +110,21 @@ def get_sorted_filenames(channel, exchange, instrument_type, symbol, start_date=
     return list(map(lambda i: i.data, sorted(tree))), has_overlaps
 
 
-def get_filenames_groups(channel, exchange, instrument_type, symbol, start_date=None, end_date=None, compaction='raw'):
-    sorted_filenames, has_overlaps = get_sorted_filenames(channel, exchange, instrument_type, symbol, start_date, end_date, compaction)
+def get_filenames_groups(
+    channel: str,
+    exchange: str,
+    instrument_type: str,
+    symbol: str,
+    start_date: str = None,
+    end_date: str = None,
+    compaction: str = 'raw'
+) -> Tuple[List[List[str]], bool]:
+    sorted_filenames, has_overlaps = get_sorted_filenames(channel, exchange, instrument_type, symbol, start_date,
+                                                          end_date, compaction)
     return _group_filenames(sorted_filenames), has_overlaps
 
 
-def chunk_filenames_groups(filenames_groups, chunk_size):
+def chunk_filenames_groups(filenames_groups: List[List[str]], chunk_size: int) -> List[List[List[str]]]:
     chunked_filenames_groups = []
     for filenames_group in filenames_groups:
         chunked_filenames_groups.append(
@@ -105,7 +132,7 @@ def chunk_filenames_groups(filenames_groups, chunk_size):
     return chunked_filenames_groups
 
 
-def _group_filenames(sorted_filenames):
+def _group_filenames(sorted_filenames: List[str]) -> List[List[str]]:
     groups = []
     cur_group = []
     for i in range(0, len(sorted_filenames)):
@@ -122,12 +149,7 @@ def _group_filenames(sorted_filenames):
     return groups
 
 
-def get_filenames_for_version(channel, exchange, instrument_type, symbol, version, start_date=None, end_date=None, compaction='raw'):
-    # TODO implement this if needed
-    return []
-
-
-def _sanitize_dates(start_date, end_date):
+def _sanitize_dates(start_date: str, end_date: str) -> Tuple[str, str]:
     if start_date is None:
         # set to latest
         start_date = '1999-01-01'
@@ -138,7 +160,7 @@ def _sanitize_dates(start_date, end_date):
     return start_date, end_date
 
 
-def _parse_interval(filename):
+def _parse_interval(filename: str) -> it.Interval:
     # ex. BINANCE*l2_book*BTC-USDT*1659534879.6234548*1659534909.2105565*8e26d2f8b00646feb569b7ee1ad9ab4f.gz.parquet
     split = filename.split('*')
     start = float(split[3])
@@ -146,7 +168,7 @@ def _parse_interval(filename):
     return it.Interval(start, end, data=filename)
 
 
-def _time_diff(f1, f2):
+def _time_diff(f1: str, f2: str) -> Union[int, float]:
     # assumig f1 > f2
     if f1 is None or f2 is None:
         return 0
@@ -155,14 +177,14 @@ def _time_diff(f1, f2):
     return i2.begin - i1.end
 
 
-def plot_filename_ranges(filenames):
+def plot_filename_ranges(filenames: List[str]):
     for i in range(0, len(filenames)):
         interval = _parse_interval(filenames[i])
         plt.hlines(i, interval.begin, interval.end, lw=4)
     plt.show()
 
 
-def plot_group_sizes(filenames_groups):
+def plot_group_sizes(filenames_groups: List[List[str]]):
     sizes = list(map(lambda g: len(g), filenames_groups))
     x = np.arange(len(sizes))
     plt.bar(x, height=sizes)
