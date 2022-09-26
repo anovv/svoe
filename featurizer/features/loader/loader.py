@@ -47,14 +47,22 @@ def load_with_snapshot(chunk_index: int, chunked_filenames: List[List[str]]) -> 
     if not l2u.has_snapshot(current):
         # this will be handled by previous chunk, return empty df
         # TODO the df schema should be a global shared/common variable between this and data feed service
-        # TODO partition columns?
         return pd.DataFrame({
             'timestamp': pd.Series(dtype='float64'),
             'receipt_timestamp': pd.Series(dtype='float64'),
             'delta': pd.Series(dtype='boolean'),
             'side': pd.Series(dtype='string'),
             'price': pd.Series(dtype='float64'),
-            'size': pd.Series(dtype='float64')
+            'size': pd.Series(dtype='float64'),
+            'exchange': pd.Series(dtype='category'),
+            'instrument_type': pd.Series(dtype='category'),
+            'instrument_extra': pd.Series(dtype='category'),
+            'symbol': pd.Series(dtype='category'),
+            'base': pd.Series(dtype='category'),
+            'quote': pd.Series(dtype='category'),
+            'date': pd.Series(dtype='category'),
+            'compaction': pd.Series(dtype='category'),
+            'version': pd.Series(dtype='category')
         })
 
 

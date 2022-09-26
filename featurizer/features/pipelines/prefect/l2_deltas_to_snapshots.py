@@ -2,18 +2,20 @@
 from prefect import task, flow, unmapped
 from prefect_dask.task_runners import DaskTaskRunner
 from typing import List, Any, Optional, Dict
+import prefect_aws
 
 import featurizer.features.loader.loader as loader
 import featurizer.features.loader.catalog as catalog
 import featurizer.features.loader.df_utils as dfu
 import featurizer.features.loader.l2_snapshot_utils as l2u
+import featurizer.features.loader.s3_utils as s3u
 import time
 import pandas as pd
 
 DASK_SCHEDULER_ADDRESS = 'tcp://127.0.0.1:60939'
 DASK_NUM_WORKERS = 4
 DASK_THREADS_PER_WORKER = 32
-CHUNK_SIZE = 1 # number of files to treat as a single chunk/dataframe
+CHUNK_SIZE = 10 # number of files to treat as a single chunk/dataframe
 COMPACTION_GROUP_SIZE = 20 # number of chunks to store in the same file
 
 
@@ -51,13 +53,18 @@ def load_l2_deltas_chunk(index: int, chunks: List[List[str]]) -> pd.DataFrame:
 
 
 @task
-def get_df_info(df: pd.DataFrame) -> Dict[str, Any]:
-    return l2u.get_info(df)
+def load_s3_chunk_metadata(index: int, chunks: List[List[str]]) -> List[int]:
+    return s3u.get_file_sizes_kb(chunks[index])
 
 
 @task
-def gather_info(infos: List[Dict[str, Any]]) -> Any:
-    sizes_kb = list(map(lambda info: info['df_size_kb'], infos))
+def gather_df_in_memory_sizes_info(dfs: List[pd.DataFrame]) -> Any:
+    sizes_kb = list(map(lambda df: l2u.get_info(df)['df_size_kb'], dfs))
+    return sizes_kb
+
+
+@task
+def gather_s3_metadata_info(sizes_kb: List[List[int]]) -> Any:
     return sizes_kb
 
 
@@ -77,9 +84,9 @@ def compact_and_store(ids: List[int], dfs: List[pd.DataFrame]) -> Optional[pd.Da
     time.sleep(1)
     return None
 
+
 def plot_loaded_data_info(info: Any):
     return # TODO
-
 
 
 @task
@@ -103,21 +110,25 @@ def l2_deltas_to_snapshots_flow(exchange: str, instrument_type: str, symbol: str
 
     # map loaded dfs
     mapped_loaded_dfs = load_l2_deltas_chunk.map(range(len(chunks)), chunks=unmapped(chunks))
+    # map loaded s3 metadata
+    # mapped_s3_metadata = load_s3_chunk_metadata.map(range(len(chunks)), chunks=unmapped(chunks))
 
-    # get raw data info
-    mapped_loaded_data_info = get_df_info.map(mapped_loaded_dfs)
-    loaded_data_info = gather_info(mapped_loaded_data_info)
-
+    # get in memory data info
+    in_memory_data_info = gather_df_in_memory_sizes_info(mapped_loaded_dfs)
+    # s3_metadata_info = gather_s3_metadata_info(mapped_s3_metadata)
+    #
     # transform deltas to snaps
-    mapped_transformed_dfs = transform_deltas_to_snapshots.map(mapped_loaded_dfs)
+    # mapped_transformed_dfs = transform_deltas_to_snapshots.map(mapped_loaded_dfs)
 
     # store
-    results = compact_and_store.map(compaction_groups, dfs=unmapped(mapped_transformed_dfs))
+    # results = compact_and_store.map(compaction_groups, dfs=unmapped(mapped_transformed_dfs))
 
     # gather stats
-    stats = gather_results(results)
+    # stats = gather_results(results)
 
-    return loaded_data_info, stats
+    # return in_memory_data_info, s3_metadata_info, stats
+    # return s3_metadata_info
+    return in_memory_data_info
 
 # def test():
 #     filenames, has_overlap = catalog.get_sorted_filenames('l2_book', 'BINANCE', 'spot', 'BTC-USDT')
@@ -133,5 +144,5 @@ def l2_deltas_to_snapshots_flow(exchange: str, instrument_type: str, symbol: str
 #     print(f'Delta 2 {delta2}')
 
 if __name__ == "__main__":
-    loaded_data_info, stats = l2_deltas_to_snapshots_flow('BINANCE', 'spot', 'BTC-USDT', 10)
-    print(loaded_data_info)
+    print(l2_deltas_to_snapshots_flow('BINANCE', 'spot', 'BTC-USDT', 10))
+

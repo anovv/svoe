@@ -34,10 +34,10 @@ GROUP_TIME_DIFF_S = 10  # if intervals difference is less than this, they are gr
 
 
 def get_available_dates(
-        channel: str,
-        exchange: str,
-        instrument_type: str,
-        symbol: str
+    channel: str,
+    exchange: str,
+    instrument_type: str,
+    symbol: str
 ) -> List[str]:
     df = wr.athena.read_sql_query(
         sql='SELECT DISTINCT date FROM :table; WHERE exchange=:exchange; AND instrument_type=:instrument_type; AND symbol=:symbol;',
@@ -51,13 +51,13 @@ def get_available_dates(
 
 
 def get_sorted_filenames(
-        channel: str,
-        exchange: str,
-        instrument_type: str,
-        symbol: str,
-        start_date: str = None,
-        end_date: str = None,
-        compaction: str = 'raw'
+    channel: str,
+    exchange: str,
+    instrument_type: str,
+    symbol: str,
+    start_date: str = None,
+    end_date: str = None,
+    compaction: str = 'raw'
 ) -> Tuple[List[str], bool]:
     start_date, end_date = _sanitize_dates(start_date, end_date)
     df = wr.athena.read_sql_query(
@@ -161,7 +161,7 @@ def _sanitize_dates(start_date: str, end_date: str) -> Tuple[str, str]:
 
 
 def _parse_interval(filename: str) -> it.Interval:
-    # ex. BINANCE*l2_book*BTC-USDT*1659534879.6234548*1659534909.2105565*8e26d2f8b00646feb569b7ee1ad9ab4f.gz.parquet
+    # ex. ../../BINANCE*l2_book*BTC-USDT*1659534879.6234548*1659534909.2105565*8e26d2f8b00646feb569b7ee1ad9ab4f.gz.parquet
     split = filename.split('*')
     start = float(split[3])
     end = float(split[4])

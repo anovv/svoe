@@ -1,24 +1,31 @@
 import awswrangler as wr
 import pandas as pd
+import boto3
+from prefect_aws.credentials import AwsCredentials
 import concurrent.futures
 import asyncio
 import functools
 from typing import List, Tuple
 import featurizer.features.loader.concurrency_utils as cu
+import featurizer.features.loader.s3_utils as s3u
 
 
-def load_single_file(path: str) -> pd.DataFrame:
+def load_single_file(path: str, credentials: AwsCredentials = None) -> pd.DataFrame:
     # split path into prefix and suffix
     # this is needed because if dataset=True data wrangler handles input path as a glob pattern,
     # hence messing up special characters
     split = path.split('/')
     suffix = split[len(split) - 1]
     prefix = path.removesuffix(suffix)
-    return wr.s3.read_parquet(path=prefix, path_suffix=suffix, dataset=True)
+    if credentials is not None:
+        session = credentials.get_boto3_session()
+    else:
+        session = boto3.session.Session()
+    return wr.s3.read_parquet(path=prefix, path_suffix=suffix, dataset=True, boto3_session=session)
 
 
-def load_files(paths: List[str]) -> List[pd.DataFrame]:
-    callables = [functools.partial(load_single_file, path=path) for path in paths]
+def load_files(paths: List[str], credentials: AwsCredentials = None) -> List[pd.DataFrame]:
+    callables = [functools.partial(load_single_file, path=path, credentials=credentials) for path in paths]
     return cu.run_concurrently(callables)
 
 
