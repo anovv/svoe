@@ -5,6 +5,7 @@ from order_book import OrderBook
 from datetime import date, datetime
 import dask.dataframe as dd
 import dask.array as da
+import streamz
 
 import numpy as np
 from numba import jit
@@ -126,6 +127,7 @@ def l2_snaps_dask(deltas: dd.DataFrame) -> da.Array:
 
 
 def l2_snaps(deltas: pd.DataFrame) -> list[tuple[float, dict]]:
+    # for reverse trnasform snap->delta see https://github.com/bmoscon/cryptofeed/blob/master/cryptofeed/util/book.py
     if not _validate_l2_deltas_df(deltas):
         raise Exception('Dataframe is not valid')
     snapshots = []
@@ -133,7 +135,7 @@ def l2_snaps(deltas: pd.DataFrame) -> list[tuple[float, dict]]:
     found_first_snapshot = False
     ob = OrderBook()
 
-    it = deltas.itertuples()
+    it = deltas.itertuples() # TODO use list of dict for faster iteration
 
     while (row := next(it, None)) is not None:
         is_snapshot = row.delta == 'False'  # TODO check dtype of delta
