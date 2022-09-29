@@ -12,7 +12,7 @@ exchangeConfigSets:
         bases: [BSV]
       channels: [ticker, l2_book, trades]
       launchOnDeploy: false
-      dataFeedImageVersion: 1.0.4 # sync with data_feed/ci
+      dataFeedImageVersion: 1.0.5 # sync with data_feed/ci
       channelsConfigOverrides:
         l2_book:
           max_depth: 20
@@ -35,7 +35,7 @@ exchangeConfigSets:
         quotes: []
         bases: [BSV]
       channels: [ticker, l2_book, trades]
-      dataFeedImageVersion: 1.0.4 # sync with data_feed/ci
+      dataFeedImageVersion: 1.0.5 # sync with data_feed/ci
       channelsConfigOverrides:
         l2_book:
           max_depth: 20
@@ -58,7 +58,7 @@ exchangeConfigSets:
         quotes: []
         bases: [BSV]
       channels: [ticker, l2_book, trades]
-      dataFeedImageVersion: 1.0.4 # sync with data_feed/ci
+      dataFeedImageVersion: 1.0.5 # sync with data_feed/ci
       channelsConfigOverrides:
         l2_book:
           max_depth: 20
@@ -82,7 +82,7 @@ exchangeConfigSets:
         quotes: []
         bases: [SHIB, BSV]
       channels: [ticker, l2_book, trades, liquidations, funding]
-      dataFeedImageVersion: 1.0.4 # sync with data_feed/ci
+      dataFeedImageVersion: 1.0.5 # sync with data_feed/ci
       channelsConfigOverrides:
         l2_book:
           max_depth: 20
@@ -105,7 +105,7 @@ exchangeConfigSets:
         quotes: []
         bases: [SHIB, BSV]
       channels: [ticker, l2_book, trades, liquidations, funding]
-      dataFeedImageVersion: 1.0.4 # sync with data_feed/ci
+      dataFeedImageVersion: 1.0.5 # sync with data_feed/ci
       channelsConfigOverrides:
         l2_book:
           max_depth: 20
@@ -128,7 +128,7 @@ exchangeConfigSets:
         quotes: []
         bases: [SHIB, BSV]
       channels: [ticker, l2_book, trades, liquidations, funding]
-      dataFeedImageVersion: 1.0.4 # sync with data_feed/ci
+      dataFeedImageVersion: 1.0.5 # sync with data_feed/ci
       channelsConfigOverrides:
         l2_book:
           max_depth: 20
@@ -153,7 +153,7 @@ exchangeConfigSets:
         bases: [SHIB]
         symbols: []
       channels: [l2_book, trades, liquidations, open_interest, funding]
-      dataFeedImageVersion: 1.0.4 # sync with data_feed/ci
+      dataFeedImageVersion: 1.0.5 # sync with data_feed/ci
       channelsConfigOverrides:
         l2_book:
           max_depth: 20
@@ -178,7 +178,7 @@ exchangeConfigSets:
         bases: [ADA, MATIC, XLM, ETC, VET, EOS, FIL, SHIB, BSV]
         symbols: []
       channels: [ticker, l2_book, trades]
-      dataFeedImageVersion: 1.0.4 # sync with data_feed/ci
+      dataFeedImageVersion: 1.0.5 # sync with data_feed/ci
       channelsConfigOverrides:
         l2_book:
           max_depth: 20
@@ -202,7 +202,7 @@ exchangeConfigSets:
         bases: []
         symbols: []
       channels: [ticker, l2_book, trades, liquidations, open_interest, funding]
-      dataFeedImageVersion: 1.0.4 # sync with data_feed/ci
+      dataFeedImageVersion: 1.0.5 # sync with data_feed/ci
       channelsConfigOverrides:
         l2_book:
           max_depth: 20
@@ -227,7 +227,7 @@ exchangeConfigSets:
         bases: []
         symbols: []
       channels: [ticker, l2_book, trades]
-      dataFeedImageVersion: 1.0.4 # sync with data_feed/ci
+      dataFeedImageVersion: 1.0.5 # sync with data_feed/ci
       channelsConfigOverrides:
         l2_book:
           max_depth: 20
@@ -252,7 +252,7 @@ exchangeConfigSets:
         bases: [VET, BSV]
         symbols: []
       channels: [l2_book, trades]
-      dataFeedImageVersion: 1.0.4 # sync with data_feed/ci
+      dataFeedImageVersion: 1.0.5 # sync with data_feed/ci
       channelsConfigOverrides:
         l2_book:
           max_depth: 20
@@ -276,7 +276,7 @@ exchangeConfigSets:
         bases: [VET, SHIB, BSV]
         symbols: []
       channels: [l2_book, trades]
-      dataFeedImageVersion: 1.0.4 # sync with data_feed/ci
+      dataFeedImageVersion: 1.0.5 # sync with data_feed/ci
       channelsConfigOverrides:
         l2_book:
           max_depth: 20
@@ -300,7 +300,7 @@ exchangeConfigSets:
         bases: [VET, BSV]
         symbols: []
       channels: [l2_book, trades]
-      dataFeedImageVersion: 1.0.4 # sync with data_feed/ci
+      dataFeedImageVersion: 1.0.5 # sync with data_feed/ci
       channelsConfigOverrides:
         l2_book:
           max_depth: 20
@@ -324,7 +324,7 @@ exchangeConfigSets:
         bases: [VET, SHIB, BSV]
         symbols: []
       channels: [l2_book, trades]
-      dataFeedImageVersion: 1.0.4 # sync with data_feed/ci
+      dataFeedImageVersion: 1.0.5 # sync with data_feed/ci
       channelsConfigOverrides:
         l2_book:
           max_depth: 20
@@ -348,7 +348,7 @@ exchangeConfigSets:
         bases: [VET, BSV]
         symbols: []
       channels: [l2_book, trades]
-      dataFeedImageVersion: 1.0.4 # sync with data_feed/ci
+      dataFeedImageVersion: 1.0.5 # sync with data_feed/ci
       channelsConfigOverrides:
         l2_book:
           max_depth: 20
@@ -372,7 +372,7 @@ exchangeConfigSets:
         bases: [VET, SHIB, BSV]
         symbols: []
       channels: [l2_book, trades]
-      dataFeedImageVersion: 1.0.4 # sync with data_feed/ci
+      dataFeedImageVersion: 1.0.5 # sync with data_feed/ci
       channelsConfigOverrides:
         l2_book:
           max_depth: 20
@@ -397,7 +397,7 @@ exchangeConfigSets:
         bases: [BNB, DOGE, LINK, MATIC, ETC, VET, SHIB, BSV]
         symbols: []
       channels: [ticker, l2_book, trades, open_interest, funding]
-      dataFeedImageVersion: 1.0.4 # sync with data_feed/ci
+      dataFeedImageVersion: 1.0.5 # sync with data_feed/ci
       channelsConfigOverrides:
         l2_book:
           max_depth: 20
