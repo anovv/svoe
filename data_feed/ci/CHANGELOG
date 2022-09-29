@@ -14,3 +14,6 @@
 1.0.4
   * Cryptostore:
     - Unique store data version for ENV=TESTING
+1.0.5
+  * Cryptostore:
+    - Fix l2 data aggregation
