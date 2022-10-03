@@ -17,3 +17,6 @@
 1.0.5
   * Cryptostore:
     - Fix l2 data aggregation
+1.0.6
+  * Cryptostore:
+    - Make sure uploaded data chunk are timestamp sorted
