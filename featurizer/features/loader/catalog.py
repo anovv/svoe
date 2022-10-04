@@ -44,10 +44,10 @@ def get_available_dates(
         database=DATABASE,
         params={'table': f'{channel}', 'exchange': f"'{exchange}'", 'instrument_type': f"'{instrument_type}'",
                 'symbol': f"'{symbol}'"},
-        max_cache_seconds=900
+        # max_cache_seconds=900
     )
 
-    return df['date'].to_list()
+    return sorted(df['date'].to_list())
 
 
 def get_sorted_filenames(
@@ -66,7 +66,7 @@ def get_sorted_filenames(
         params={'table': f'{channel}', 'exchange': f"'{exchange}'", 'instrument_type': f"'{instrument_type}'",
                 'symbol': f"'{symbol}'", 'start': f"'{start_date}'", 'end': f"'{end_date}'",
                 'compaction': f"'{compaction}'"},
-        max_cache_seconds=900
+        # max_cache_seconds=900
     )
     # TODO this should be grouped by date
     # group by date and version

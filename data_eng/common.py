@@ -51,11 +51,11 @@ def _ob_to_snap(ob: OrderBook, timestamp: float) -> dict:
 
     bid_prices = ob.bids
     ask_prices = ob.asks
-    if len(bid_prices) != len(ask_prices):
-        print('Bid/ask size mismatch for ts ' + str(timestamp))
-
-    if bid_prices.index(0)[0] >= ask_prices.index(0)[0]:
-        print('Bid ask overlap for ts ' + str(timestamp))
+    # if len(bid_prices) != len(ask_prices):
+    #     print('Bid/ask size mismatch for ts ' + str(timestamp))
+    #
+    # if bid_prices.index(0)[0] >= ask_prices.index(0)[0]:
+    #     print('Bid ask overlap for ts ' + str(timestamp))
 
     for level in range(max(len(bid_prices), len(ask_prices))):
         if level < len(bid_prices):
@@ -80,53 +80,53 @@ def _ob_to_snap(ob: OrderBook, timestamp: float) -> dict:
 
     return snapshot
 
+#
+# def l2_snaps_dask(deltas: dd.DataFrame) -> da.Array:
+#     dask.dataframe.append()
+#     dask.dataframe.read_parquet()
+#     snapshots = da.from_array([])
+#     current_timestamp = 0.0
+#     found_first_snapshot = False
+#     ob = OrderBook()
+#
+#     it = deltas.itertuples()
+#
+#     while (row := next(it, None)) is not None:
+#         is_snapshot = row.delta == 'False'  # TODO check dtype of delta
+#
+#         # skip first rows until we find a snapshot # is this needed?
+#         if not found_first_snapshot:
+#             if is_snapshot:
+#                 found_first_snapshot = True
+#                 current_timestamp = row.timestamp
+#                 print("First snapshot row index: " + str(row.Index))
+#             else:
+#                 continue
+#
+#         timestamp = row.timestamp
+#         if current_timestamp != timestamp:
+#             snapshots.append(_ob_to_snap(ob, current_timestamp))
+#             current_timestamp = timestamp
+#         inc = 0
+#         side = row.side
+#         price = row.price  # TODO use Decimals?
+#         size = row.size
+#         if size == 0.0:
+#             if price in ob[side]:
+#                 del ob[side][price]
+#             else:
+#                 # TODO should this happen? Data inconsistent?
+#                 inc += 1
+#         else:
+#             ob[side][price] = size
+#
+#     # Append last
+#     snapshots.append(_ob_to_snap(ob, current_timestamp))
+#
+#     return snapshots, inc
 
-def l2_snaps_dask(deltas: dd.DataFrame) -> da.Array:
-    dask.dataframe.append()
-    dask.dataframe.read_parquet()
-    snapshots = da.from_array([])
-    current_timestamp = 0.0
-    found_first_snapshot = False
-    ob = OrderBook()
 
-    it = deltas.itertuples()
-
-    while (row := next(it, None)) is not None:
-        is_snapshot = row.delta == 'False'  # TODO check dtype of delta
-
-        # skip first rows until we find a snapshot # is this needed?
-        if not found_first_snapshot:
-            if is_snapshot:
-                found_first_snapshot = True
-                current_timestamp = row.timestamp
-                print("First snapshot row index: " + str(row.Index))
-            else:
-                continue
-
-        timestamp = row.timestamp
-        if current_timestamp != timestamp:
-            snapshots.append(_ob_to_snap(ob, current_timestamp))
-            current_timestamp = timestamp
-
-        side = row.side
-        price = row.price  # TODO use Decimals?
-        size = row.size
-        if size == 0.0:
-            if price in ob[side]:
-                del ob[side][price]
-            else:
-                # TODO should this happen? Data inconsistent?
-                print('boink')
-        else:
-            ob[side][price] = size
-
-    # Append last
-    snapshots.append(_ob_to_snap(ob, current_timestamp))
-
-    return snapshots
-
-
-def l2_snaps(deltas: pd.DataFrame) -> list[tuple[float, dict]]:
+def l2_snaps(deltas: pd.DataFrame) -> tuple[list[tuple[float, dict]], int]:
     # for reverse trnasform snap->delta see https://github.com/bmoscon/cryptofeed/blob/master/cryptofeed/util/book.py
     if not _validate_l2_deltas_df(deltas):
         raise Exception('Dataframe is not valid')
@@ -137,8 +137,9 @@ def l2_snaps(deltas: pd.DataFrame) -> list[tuple[float, dict]]:
 
     it = deltas.itertuples() # TODO use list of dict for faster iteration
 
+    inc = 0
     while (row := next(it, None)) is not None:
-        is_snapshot = row.delta == 'False'  # TODO check dtype of delta
+        is_snapshot = row.delta == False  # TODO check dtype of delta
 
         # skip first rows until we find a snapshot # is this needed?
         if not found_first_snapshot:
@@ -153,7 +154,6 @@ def l2_snaps(deltas: pd.DataFrame) -> list[tuple[float, dict]]:
         if current_timestamp != timestamp:
             snapshots.append(_ob_to_snap(ob, current_timestamp))
             current_timestamp = timestamp
-
         side = row.side
         price = row.price  # TODO use Decimals?
         size = row.size
@@ -162,14 +162,14 @@ def l2_snaps(deltas: pd.DataFrame) -> list[tuple[float, dict]]:
                 del ob[side][price]
             else:
                 # TODO should this happen? Data inconsistent?
-                print('boink')
+                inc += 1
         else:
             ob[side][price] = size
 
     # Append last
     snapshots.append(_ob_to_snap(ob, current_timestamp))
 
-    return snapshots
+    return snapshots, inc
 
 
 def l2_is_sorted(snaps: list[tuple[float, dict]]) -> bool:

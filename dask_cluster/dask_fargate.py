@@ -1,6 +1,7 @@
 from dask_cloudprovider.aws import FargateCluster
 
-
+# to get all tasks
+# https://github.com/dask/distributed/issues/3263
 class SvoeDaskCluster(FargateCluster):
     def __init__(self, **kwargs):
         super().__init__(
@@ -18,7 +19,7 @@ class SvoeDaskCluster(FargateCluster):
             find_address_timeout=120,
             environment=
             {
-                'EXTRA_PIP_PACKAGES': 'pyarrow s3fs prefect[aws] fastparquet numpy order-book intervaltree prefect-dask awswrangler boto3 prefect-aws streamz',
+                'EXTRA_PIP_PACKAGES': 'pyarrow s3fs prefect[aws] fastparquet numpy order-book intervaltree prefect-dask awswrangler boto3 prefect-aws streamz frozenlist',
                 # TODO use prebuild docker image to speed up boot time
                 # TODO set AWS credentials env vars
             },
