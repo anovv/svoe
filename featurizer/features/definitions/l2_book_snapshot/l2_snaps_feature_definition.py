@@ -38,17 +38,17 @@ class L2BookSnapshot(TimestampedBase):
 DEFAULT_DEPTH = 20
 
 
-class L2SnapsFeatureDefinition(FeatureDefinition):
+class L2BookSnapshotFeatureDefinition(FeatureDefinition):
 
     @staticmethod
     def l2_deltas_to_snaps(deltas: pd.DataFrame) -> Tuple[List[L2BookSnapshot], Dict[str, Any]]:
         # for reverse trnasform snap->delta see https://github.com/bmoscon/cryptofeed/blob/master/cryptofeed/util/book.py
         events = l2su.parse_l2_book_delta_events(deltas)
 
-        state = L2SnapsFeatureDefinition._build_state()
+        state = L2BookSnapshotFeatureDefinition._build_state()
 
         stream = Stream()
-        ss = L2SnapsFeatureDefinition.stream(stream, state)
+        ss = L2BookSnapshotFeatureDefinition.stream(stream, state)
         snapshots = []
         ss.sink(snapshots.append)
 
@@ -60,8 +60,8 @@ class L2SnapsFeatureDefinition(FeatureDefinition):
     @staticmethod
     def stream(upstream: Stream, state: Optional[_State] = None) -> Stream: # TODO pass depth as param? separate depth from state?
         if state is None:
-            state = L2SnapsFeatureDefinition._build_state()
-        acc = upstream.accumulate(L2SnapsFeatureDefinition._update_state, returns_state=True, start=state)
+            state = L2BookSnapshotFeatureDefinition._build_state()
+        acc = upstream.accumulate(L2BookSnapshotFeatureDefinition._update_state, returns_state=True, start=state)
         return su.filter_none(acc).unique(maxsize=1)
 
 
@@ -102,7 +102,7 @@ class L2SnapsFeatureDefinition(FeatureDefinition):
         state.timestamp = event.timestamp
         state.receipt_timestamp = event.receipt_timestamp
 
-        return state, L2SnapsFeatureDefinition._state_snapshot(state)
+        return state, L2BookSnapshotFeatureDefinition._state_snapshot(state)
 
     @staticmethod
     def _state_snapshot(state: _State) -> L2BookSnapshot:
