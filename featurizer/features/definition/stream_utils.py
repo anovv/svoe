@@ -1,15 +1,12 @@
 from typing import List, Optional, Any
 from streamz import Stream
+from featurizer.features.utils import convert_str_to_seconds
 
 
-def sample(upstream: Stream, window: str = '1s') -> Stream:
-    def _convert_to_seconds(s):
-        seconds_per_unit = {'s': 1, 'm': 60, 'h': 3600, 'd': 86400, 'w': 604800}
-        return int(s[:-1]) * seconds_per_unit[s[-1]]
-
+def throttle(upstream: Stream, window: str = '1s') -> Stream:
     def _pass_if_needed(last_ts: List[Optional[float]], event: Any) -> Optional[Any]:
         ts = event.timestamp
-        if last_ts[0] is None or ts - last_ts[0] > _convert_to_seconds(window):
+        if last_ts[0] is None or ts - last_ts[0] > convert_str_to_seconds(window):
             last_ts[0] = ts
             return last_ts, event
         else:

@@ -5,11 +5,8 @@ from featurizer.features.definition.feature_definition import FeatureDefinition
 
 from dataclasses import dataclass
 
-import talib
-
-
 @dataclass
-class _MidPrice(TimestampedBase):
+class MidPrice(TimestampedBase):
     mid_price: float
 
 
@@ -17,8 +14,7 @@ class MidPriceFeatureDefinition(FeatureDefinition):
 
     @staticmethod
     def stream(upstream: Stream) -> Stream:
-
-        return upstream.map(lambda snap: _MidPrice(
+        return upstream.map(lambda snap: MidPrice(
             timestamp=snap.timestamp,
             receipt_timestamp=snap.receipt_timestamp,
             mid_price=(snap.bids[0][0] + snap.asks[0][0])/2

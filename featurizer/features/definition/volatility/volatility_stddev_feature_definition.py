@@ -2,7 +2,7 @@ from typing import List, Dict, Optional, Any, Tuple
 from streamz import Stream
 from featurizer.features.definition.data_models_utils import TimestampedBase
 from featurizer.features.definition.feature_definition import FeatureDefinition
-from featurizer.features.definition.mid_price.mid_price_feature_definition import _MidPrice
+from featurizer.features.definition.mid_price.mid_price_feature_definition import MidPrice
 
 from dataclasses import dataclass
 
@@ -23,7 +23,7 @@ class VolatilityStddevFeatureDefinition(FeatureDefinition):
             .map(VolatilityStddevFeatureDefinition._prices_to_volatility)
 
     @staticmethod
-    def _prices_to_volatility(prices: Tuple[_MidPrice]) -> _Volatility:
+    def _prices_to_volatility(prices: Tuple[MidPrice]) -> _Volatility:
         last_price = prices[-1]
         p = [price.mid_price for price in prices]
         stddev = float(np.std(p, dtype=np.float32))

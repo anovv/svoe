@@ -1,6 +1,9 @@
 import pandas as pd
 import featurizer.features.loader.df_utils as dfu
 from typing import List, Tuple, Dict, Any
+from featurizer.features.definition.data_models_utils import L2BookDelta
+from collections import OrderedDict
+from tqdm import tqdm
 
 
 def starts_with_snapshot(df: pd.DataFrame) -> bool:
@@ -57,6 +60,31 @@ def get_info(df: pd.DataFrame) -> Dict[str, Any]:
         'has_snapshot': has_snapshot(df),
         'snapshot_ranges': get_snapshots_ranges(df)
     }
+
+
+def parse_l2_book_delta_events(deltas: pd.DataFrame) -> List[L2BookDelta]:
+    # parses dataframe into list of events
+    grouped = deltas.groupby(['timestamp', 'delta'])
+    dfs = [grouped.get_group(x) for x in grouped.groups]
+    dfs = sorted(dfs, key=lambda df: df['timestamp'].iloc[0], reverse=False)
+    events = []
+    for i in tqdm(range(len(dfs))):
+        df = dfs[i]
+        timestamp = df.iloc[0].timestamp
+        receipt_timestamp = df.iloc[0].receipt_timestamp
+        delta = df.iloc[0].delta
+        orders = []
+        df_dict = df.to_dict(into=OrderedDict, orient='index') # TODO use df.values.tolist() instead and check perf?
+        for v in df_dict.values():
+            orders.append((v['side'], v['price'], v['size']))
+        events.append(L2BookDelta(
+            timestamp=timestamp,
+            receipt_timestamp=receipt_timestamp,
+            delta=delta,
+            orders=orders
+        ))
+
+        return events
 
 
 

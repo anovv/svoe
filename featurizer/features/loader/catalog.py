@@ -49,6 +49,10 @@ def get_available_dates(
 
     return sorted(df['date'].to_list())
 
+# TODO fix
+# ValueError: IntervalTree: Null Interval objects not allowed in IntervalTree: Interval(1664780002.707542, 1664780002.707542, 's3://svoe.test.1/data_lake/data_feed_market_data/trades/exchange=BINANCE_FUTURES/instrument_type=perpetual/instrument_extra={}/symbol=BTC-USDT-PERP/base=BTC/quote=USDT/date=2022-10-03/compaction=raw/version=local/BINANCE_FUTURES*trades*BTC-USDT-PERP*1664780002.707542*1664780002.707542*0e33f815fd3d4713ba75a10f8cf0e229.gz.parquet')
+# caused by
+# trades_files_athena, _ = catalog.get_sorted_filenames('trades', 'BINANCE_FUTURES', 'perpetual', 'BTC-USDT-PERP', '2022-10-03', '2022-10-03')
 
 def get_sorted_filenames(
     channel: str,
