@@ -5,6 +5,8 @@ from featurizer.features.definition.feature_definition import FeatureDefinition
 
 from dataclasses import dataclass
 
+import talib
+
 
 @dataclass
 class _MidPrice(TimestampedBase):
