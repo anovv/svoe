@@ -6,10 +6,10 @@ from dataclasses import dataclass, field
 from frozenlist import FrozenList
 from tqdm import tqdm
 import featurizer.features.loader.l2_snapshot_utils as l2su
-from featurizer.features.definition.data_models_utils import TimestampedBase
-from featurizer.features.definition.feature_definition import FeatureDefinition
-import featurizer.features.definition.stream_utils as su
-from featurizer.features.definition.data_models_utils import L2BookDelta
+from featurizer.features.definitions.data_models_utils import TimestampedBase
+from featurizer.features.definitions.feature_definition import FeatureDefinition
+import featurizer.features.definitions.stream_utils as su
+from featurizer.features.definitions.data_models_utils import L2BookDelta
 
 import dask.diagnostics
 import distributed.diagnostics

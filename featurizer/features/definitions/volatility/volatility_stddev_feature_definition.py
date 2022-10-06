@@ -1,8 +1,8 @@
 from typing import List, Dict, Optional, Any, Tuple
 from streamz import Stream
-from featurizer.features.definition.data_models_utils import TimestampedBase
-from featurizer.features.definition.feature_definition import FeatureDefinition
-from featurizer.features.definition.mid_price.mid_price_feature_definition import MidPrice
+from featurizer.features.definitions.data_models_utils import TimestampedBase
+from featurizer.features.definitions.feature_definition import FeatureDefinition
+from featurizer.features.definitions.mid_price.mid_price_feature_definition import MidPrice
 
 from dataclasses import dataclass
 

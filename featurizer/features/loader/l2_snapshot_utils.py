@@ -1,7 +1,7 @@
 import pandas as pd
 import featurizer.features.loader.df_utils as dfu
 from typing import List, Tuple, Dict, Any
-from featurizer.features.definition.data_models_utils import L2BookDelta
+from featurizer.features.definitions.data_models_utils import L2BookDelta
 from collections import OrderedDict
 from tqdm import tqdm
 

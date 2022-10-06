@@ -1,7 +1,7 @@
 from typing import List, Dict, Optional, Any, Tuple
 from streamz import Stream
-from featurizer.features.definition.data_models_utils import TimestampedBase
-from featurizer.features.definition.feature_definition import FeatureDefinition
+from featurizer.features.definitions.data_models_utils import TimestampedBase
+from featurizer.features.definitions.feature_definition import FeatureDefinition
 
 from dataclasses import dataclass
 import math

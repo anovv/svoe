@@ -1,6 +1,6 @@
 import pandas as pd
 from typing import List, Tuple, Dict, Any
-from featurizer.features.definition.data_models_utils import Trade
+from featurizer.features.definitions.data_models_utils import Trade
 from collections import OrderedDict
 
 
