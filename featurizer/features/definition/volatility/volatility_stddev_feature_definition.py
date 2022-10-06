@@ -17,10 +17,10 @@ class _Volatility(TimestampedBase):
 class VolatilityStddevFeatureDefinition(FeatureDefinition):
 
     @staticmethod
-    def stream(upstream: Stream) -> Stream:
-
-        # TODO parametrize window size
-        return upstream.sliding_window(6, return_partial=False).map(VolatilityStddevFeatureDefinition._prices_to_volatility)
+    def stream(upstream: Stream, window_size: int = 1) -> Stream:
+        return upstream\
+            .sliding_window(window_size, return_partial=False)\
+            .map(VolatilityStddevFeatureDefinition._prices_to_volatility)
 
     @staticmethod
     def _prices_to_volatility(prices: Tuple[_MidPrice]) -> _Volatility:
