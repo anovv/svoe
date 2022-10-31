@@ -10,6 +10,7 @@ from featurizer.features.definitions.data_models_utils import TimestampedBase
 from featurizer.features.definitions.feature_definition import FeatureDefinition
 import featurizer.features.definitions.stream_utils as su
 from featurizer.features.definitions.data_models_utils import L2BookDelta
+import functools
 
 import dask.diagnostics
 import distributed.diagnostics
@@ -28,14 +29,13 @@ class _State(TimestampedBase):
 @dataclass(unsafe_hash=True)
 class L2BookSnapshot(TimestampedBase):
     timestamp: float = field(compare=False, hash=False)
-    receipt_timestamp: float = field(compare=False, hash=False)
+    receipt_timestamp: float = field(compare=False, hash=False) # TODO move this properties to superclass
     bids: FrozenList[Tuple[float, float]] = field(hash=True)  # price, size
     asks: FrozenList[Tuple[float, float]] = field(hash=True)
 
 
 # TODO good data 'l2_book', 'BINANCE', 'spot', 'BTC-USDT', '2022-09-29', '2022-09-29'
 # TODO remove malformed files
-DEFAULT_DEPTH = 20
 
 
 class L2BookSnapshotFeatureDefinition(FeatureDefinition):
@@ -58,10 +58,11 @@ class L2BookSnapshotFeatureDefinition(FeatureDefinition):
         return snapshots, state.data_inconsistencies
 
     @staticmethod
-    def stream(upstream: Stream, state: Optional[_State] = None) -> Stream: # TODO pass depth as param? separate depth from state?
+    def stream(upstream: Stream, state: Optional[_State] = None, depth: Optional[int] = 20) -> Stream:
         if state is None:
             state = L2BookSnapshotFeatureDefinition._build_state()
-        acc = upstream.accumulate(L2BookSnapshotFeatureDefinition._update_state, returns_state=True, start=state)
+        update = functools.partial(L2BookSnapshotFeatureDefinition._update_state, depth=depth)
+        acc = upstream.accumulate(update, returns_state=True, start=state)
         return su.filter_none(acc).unique(maxsize=1)
 
 
@@ -76,11 +77,10 @@ class L2BookSnapshotFeatureDefinition(FeatureDefinition):
             receipt_timestamp=-1,
             order_book=OrderBook(),
             data_inconsistencies={},
-            depth=DEFAULT_DEPTH
         )
 
     @staticmethod
-    def _update_state(state: _State, event: L2BookDelta) -> Tuple[_State, Optional[L2BookSnapshot]]:
+    def _update_state(state: _State, event: L2BookDelta, depth: Optional[int]) -> Tuple[_State, Optional[L2BookSnapshot]]:
         if event.delta and not state.inited:
             # skip deltas if no snapshot was inited
             return state, None
@@ -102,16 +102,14 @@ class L2BookSnapshotFeatureDefinition(FeatureDefinition):
         state.timestamp = event.timestamp
         state.receipt_timestamp = event.receipt_timestamp
 
-        return state, L2BookSnapshotFeatureDefinition._state_snapshot(state)
+        return state, L2BookSnapshotFeatureDefinition._state_snapshot(state, depth)
 
     @staticmethod
-    def _state_snapshot(state: _State) -> L2BookSnapshot:
+    def _state_snapshot(state: _State, depth: Optional[int]) -> L2BookSnapshot:
         bids = FrozenList()
         asks = FrozenList()
-        if state.depth is None:
+        if depth is None:
             depth = max(len(state.order_book.bids), len(state.order_book.asks))
-        else:
-            depth = state.depth
 
         for level in range(depth):
             for side in ['bid', 'ask']:
