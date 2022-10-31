@@ -22,3 +22,9 @@ class Trade(TimestampedBase):
     price: float
     id: Optional[str]
     type: Optional[str]
+
+
+@dataclass
+class Ticker(TimestampedBase):
+    bid_price: float
+    ask_price: float

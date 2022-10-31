@@ -5,7 +5,8 @@ from featurizer.features.definitions.feature_definition import FeatureDefinition
 
 from dataclasses import dataclass
 
-@dataclass
+
+@dataclass # TODO this should be in common classes
 class MidPrice(TimestampedBase):
     mid_price: float
 

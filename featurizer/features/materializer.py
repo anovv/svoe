@@ -24,6 +24,6 @@ class Materializer:
         #       }
         #   }
         # }
-        return # should return list of MaterializedFeature objects
+        return  # should return list of MaterializedFeature objects
 
 # https://stackoverflow.com/questions/73358767/partition-timeseries-with-state-using-dask-dataframe-based-on-custom-condition

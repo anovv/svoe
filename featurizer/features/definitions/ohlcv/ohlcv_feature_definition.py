@@ -3,8 +3,12 @@ from streamz import Stream
 from featurizer.features.definitions.data_models_utils import TimestampedBase
 from featurizer.features.definitions.feature_definition import FeatureDefinition
 from featurizer.features.definitions.data_models_utils import Trade
+from featurizer.features.utils import convert_str_to_seconds
 
 from dataclasses import dataclass
+
+import functools
+import featurizer.features.definitions.stream_utils as su
 
 
 @dataclass
@@ -27,14 +31,16 @@ class _State:
 class OHLCVFeatureDefinition(FeatureDefinition):
 
     @staticmethod
-    def stream(upstream: Stream, window='1m') -> Stream:
-
-        # return upstream.map(lambda snap: _MidPrice(
-        #     timestamp=snap.timestamp,
-        #     receipt_timestamp=snap.receipt_timestamp,
-        #     mid_price=(snap.bids[0][0] + snap.asks[0][0])/2
-        # ))
-        return upstream # TODO
+    def stream(upstream: Stream, state: Optional[_State] = None, window='1m') -> Stream:
+        if state is None:
+            state = _State(
+                last_ts=None,
+                ohlcv=None,
+            )
+        window_s = convert_str_to_seconds(window)
+        update = functools.partial(OHLCVFeatureDefinition._update_state, window_s=window_s)
+        acc = upstream.accumulate(update, returns_state=True, start=state)
+        return su.filter_none(acc)
 
     @staticmethod
     def _update_state(state: _State, trade: Trade, window_s: int) -> Tuple[_State, Optional[OHLCV]]:
