@@ -105,6 +105,21 @@ releases:
     namespace: overprovisioner
     values:
       - ../../values/deliveryhero/cluster-overprovisioner/values.yaml.gotmpl
+  - chart: ../../charts/local/ray/kuberay-operator
+    name: kuberay-operator
+    namespace: ray-system
+    values:
+      - ../../values/local/ray/kuberay-operator/values.yaml.gotmpl
+  - chart: ../../charts/local/ray/kuberay-apiserver
+    name: kuberay-apiserver
+    namespace: ray-system
+    values:
+      - ../../values/local/ray/kuberay-apiserver/values.yaml.gotmpl
+  - chart: ../../charts/local/ray/ray-cluster
+    name: ray-cluster
+    namespace: ray-system
+    values:
+      - ../../values/local/ray/ray-cluster/values.yaml.gotmpl
 repositories:
   - name: metrics-server
     url: https://kubernetes-sigs.github.io/metrics-server/
