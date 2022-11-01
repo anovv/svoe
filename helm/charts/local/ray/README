@@ -1,0 +1,5 @@
+charts copied from https://github.com/ray-project/kuberay/tree/master/helm-chart
+CRDs copied from https://github.com/ray-project/kuberay/tree/master/ray-operator/config/crd
+
+to install CRDs run # this should be a helmfile presync hook
+kubectl apply --server-side -k crd
