@@ -15,6 +15,9 @@ class SvoeDatasourceReader(Reader):
     def __init__(self, file_paths: List[str]):
         self._file_paths = file_paths
 
+    def estimate_inmemory_data_size(self) -> Optional[int]:
+        return None
+
     def get_read_tasks(self, parallelism: int) -> List[ReadTask]:
         read_tasks: List[ReadTask] = []
         for file_path in self._file_paths:

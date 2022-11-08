@@ -74,6 +74,9 @@ def parse_l2_book_delta_events(deltas: pd.DataFrame) -> List[L2BookDelta]:
         receipt_timestamp = df.iloc[0].receipt_timestamp
         delta = df.iloc[0].delta
         orders = []
+        #TODO https://stackoverflow.com/questions/7837722/what-is-the-most-efficient-way-to-loop-through-dataframes-with-pandas
+        # regarding iteration speed
+        # TODO use numba's jit
         df_dict = df.to_dict(into=OrderedDict, orient='index') # TODO use df.values.tolist() instead and check perf?
         for v in df_dict.values():
             orders.append((v['side'], v['price'], v['size']))

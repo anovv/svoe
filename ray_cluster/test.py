@@ -8,7 +8,6 @@ import featurizer
 import ray_cluster
 import os
 
-
 @ray.remote
 class Counter:
     def __init__(self):
@@ -57,3 +56,4 @@ for _ in range(10):
 time.sleep(180)
 
 print(ray.get(c.get.remote()))
+
