@@ -1,0 +1,3 @@
+ray-cluster-sample.yaml is combined from
+https://github.com/ray-project/kuberay/blob/master/ray-operator/config/samples/ray-cluster.autoscaler.yaml and
+https://github.com/ray-project/kuberay/blob/master/ray-operator/config/samples/ray-cluster.complete.yaml
