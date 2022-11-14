@@ -5,11 +5,12 @@ from cluster_utils import connect
 
 
 @ray.remote(num_cpus=1)
-def sample_task(task_id: Optional[int] = None):
+def sample_task(payload: int, task_id: Optional[int] = None) -> int:
     prefix = f'[Task {task_id}]' if task_id is not None else ''
     print(f'{prefix} Task started')
-    time.sleep(5)
-    print(f'{prefix} Task finished')
+    time.sleep(payload)
+    print(f'{prefix} Task finished after {payload}s')
+    return 1
 
 
 class SampleActor:
@@ -24,5 +25,7 @@ class SampleActor:
         time.sleep(5)
         print(f'{prefix} Actor finished doing work')
 
-conn = connect()
-print(conn)
+
+connect()
+for task_id in range(0, 10):
+    sample_task.remote(120)

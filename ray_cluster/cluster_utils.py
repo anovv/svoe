@@ -7,6 +7,7 @@ import ray_cluster
 import os
 import ray.util
 from ray.util.client import ray as ray_util_client
+from ray.runtime_env import RuntimeEnv
 
 from typing import Optional, Dict
 from ray._private.worker import BaseContext
@@ -18,9 +19,16 @@ def connect(address: Optional[str] = 'ray://127.0.0.1:10001') -> Optional[BaseCo
         # ray.util.disconnect() # TODO disconnect?
         print('Already connected')
         return None
+    # if ray.is_initialized: # TODO or this?
+    #     ray.shutdown()
     return ray.init(address=address, runtime_env={
+        # sudo apt-get install -y build-essential
         'py_modules': [featurizer, ray_cluster],
         # TODO figure out deps
+        # TODO this fails with error: command 'gcc' failed: No such file or directory: 'gcc'
+        # Failed to build order-book asyncpg
+        # ERROR: Could not build wheels for asyncpg, which is required to install pyproject.toml-based projects
+
         'pip': [
             'pyarrow',
             's3fs',

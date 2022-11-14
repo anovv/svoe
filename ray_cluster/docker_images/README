@@ -1,0 +1,6 @@
+
+To build
+sudo docker build . -f Dockerfile -t ray-with-svoe-deps:latest
+
+To add to minikube
+minikube image load ray-with-svoe-deps:latest -p <cluster-profile>
