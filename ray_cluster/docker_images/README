@@ -4,3 +4,10 @@ sudo docker build . -f Dockerfile -t ray-with-svoe-deps:latest
 
 To add to minikube
 minikube image load ray-with-svoe-deps:latest -p <cluster-profile>
+
+To install 3.7.7 python using pyenv
+ pyenv install 3.7.7 --patch < <(curl -sSL https://github.com/python/cpython/commit/8ea6353.patch)
+
+To switch version
+pyenv global <version>
+eval "$(pyenv init -)"
