@@ -35,6 +35,11 @@ class FeatureDefinition:
                 count_by_type[dep.type()] = 0
         return res
 
+    def group_dep_ranges(self, ranges: List, dep_feature_name: str) -> List: # TODO typehint Block/BlockRange/BlockMeta/BlockRangeMeta
+        # logic to group input data into atomic blocks
+        # for bulk processing
+        raise ValueError('Not Implemented')
+
     # def channels_spec(self):
     #     raise ValueError('Not Implemented')
     #

@@ -7,44 +7,20 @@ from streamz.dataframe import DataFrame
 import dask
 import dask.graph_manipulation
 import pandas as pd
-import functools
+
+Data = FeatureDefinition # indicates this FD is data input # TODO move to FeatureDefinition subclass
 
 
-# feature tree methods
-# class FeatureTreeNode:
-#
-#     def __init__(self):
-#         self.fd = None
-#         self.name = None
-#         self.children = []
+def get_leaves(fd: FeatureDefinition) -> List[str]:
+    res = []
+    root_feature_name = f'{fd.type()}-0'
 
-Data = FeatureDefinition
-# FeatureTree = FeatureTreeNode # TODO represent feature dependencies
-# # FeatureTreeNode = str # TODO represents tree node
-# # FeatureName = str # TODO represents calculatable feature
-# Data = FeatureTreeNode # TODO represent data input, should be a FeatureTree leaf
-#
-# def build_feature_tree(fd: FeatureDefinition) -> FeatureTree:
-#     root = FeatureTreeNode()
-#     root.name = fd.name()
-#
-#     return root
-#
-# def get_leaves(feature_tree: FeatureTree) -> List[Data]:
-#     return []
-#
-# def traverse_feature_tree(feature_tree: FeatureTree) -> Collection[FeatureTreeNode]:
-#     return []
-#
-# def get_feature(node: FeatureTreeNode) -> FeatureDefinition:
-#     return None # TODO
-#
-# def get_children(node: FeatureTreeNode) -> List[FeatureTreeNode]:
-#     return []
+    def callback(fd, name):
+        if isinstance(fd, Data): # TODO define feature tree leaf here
+            res.append(name)
 
-
-def get_leaves(fd: FeatureDefinition) -> List[Data]:
-    return []
+    postorder(fd, callback, root_feature_name)
+    return res
 
 
 def postorder(node: FeatureDefinition, callback: Callable, name: str):
@@ -57,27 +33,88 @@ def postorder(node: FeatureDefinition, callback: Callable, name: str):
 
     callback(node, name)
 
+
 # catalog methods
-BlockMeta = str # TODO represents s3 file metdata: name, time range, size, etc.
-BlockRangeMeta = List[BlockMeta] # represents metadata of consequitive blocks
+BlockMeta = Dict # TODO represents s3 file metadata: name, time range, size, etc.
+BlockRangeMeta = List[BlockMeta] # represents metadata of consecutive blocks
+
+# TODO typdef List[BlockRangeMeta]?
 
 Block = pd.DataFrame
-BlockRange = List[Block]
+BlockRange = List[Block] # represents consecutive blocks
+
+# TODO here we assume data has no 'holes', in real scenario we should use List[BlockRangeMeta]
+BlockRangesMetaDict = Dict[str, BlockRangeMeta]
+
+# TODO make abstraction for users to define data params for each input data channel
+DataParams = Dict[str, Dict]
+
+TimeRange = Tuple[float, float]
+
 
 def get_block_ranges_meta(
-    data: Data,
-    data_params: dict,
+    data_name: str,
+    data_params: DataParams,
     start_date: str = None,
     end_date: str = None
-) -> List[BlockRangeMeta]:
+) -> BlockRangeMeta:
     # TODO call data catalog service
+    # TODO here we assume data has no 'holes', in real scenario we should use List[BlockRangeMeta]
     return []
 
-def build_data_ranges(blocks_meta_map: Dict) -> List[Tuple[float, float]]:
+
+def build_block_ranges_meta_dict(
+    root_fd: FeatureDefinition,
+    data_params: DataParams,
+    start_date: str = None,
+    end_date: str = None
+) -> BlockRangesMetaDict:
+    data_leaves = get_leaves(root_fd)
+    block_ranges_meta_dict = {}
+    for data_name in data_leaves:
+        block_ranges_meta_dict[data_name] = get_block_ranges_meta(data_name, data_params, start_date, end_date)
+
+    return block_ranges_meta_dict
+
+
+def build_data_ranges(block_ranges_meta_dict: BlockRangesMetaDict) -> List[TimeRange]:
+    # TODO add visualization here
+    # this func takes blocks for each data input and finds overlaps
+    # containing data for all input channels
+
+    # TODO this assumes no 'holes' in data
+    def find_next(cur: float):
+        closest = []
+        for _, block_range_meta in block_ranges_meta_dict:
+            # TODO this can be optimized
+            next = None
+            # TODO this assumes no 'holes' in data
+            for block_meta in block_range_meta:
+                start_ts = get_start_ts(block_meta)
+                if start_ts > cur:
+                    next = start_ts
+                    break
+                end_ts = get_end_ts(block_meta)
+                if end_ts > cur:
+                    next = end_ts
+                    break
+            if next is None:
+                return None
+            closest.append(next)
+        return min(closest)
+
+    # TODO indicate holes
     return []
 
-def get_block_chunk(blocks_meta_map: Dict, fd: FeatureDefinition, start: float, end: float) -> List[BlockMeta]:
+
+def get_data_block_range_meta(
+    blocks_meta_dict: BlockRangesMetaDict,
+    data_name: str,
+    start: float,
+    end: float
+) -> BlockRangeMeta:
     return []
+
 
 # feature def aux methods
 # some should be moved to FeatureDefinition class
@@ -85,19 +122,22 @@ def get_block_chunk(blocks_meta_map: Dict, fd: FeatureDefinition, start: float, 
 def is_windowed(fd: FeatureDefinition, dep_feature_name: str):
     return True # TODO
 
+
 def get_window(fd: FeatureDefinition, dep_feature_name: str) -> str:
     return '1m'
 
+# TODO this should be a partition_ranges strategy in FeatureDefinition class
 def get_prev_feature_delayed_funcs(
     from_ts: float,
     features_delayed_by_range: List[Tuple[Dict, float, float]],
     window: str,
     dep_feature_name: str
 ) -> List:
+    # TODO use sampling strategy to load only whats needed
     res = []
     beg, end = from_ts - convert_str_to_seconds(window), from_ts
     for features_delayed_funcs, start_ts, end_ts in features_delayed_by_range:
-        if start_ts >= beg and start_ts <= end:
+        if beg <= start_ts <= end:
             res.append(features_delayed_funcs[dep_feature_name])
 
     return res
@@ -108,84 +148,85 @@ def get_prev_feature_delayed_funcs(
 # ) -> str:
 #     return '1s'
 
+
 # s3/data lake aux methods
 # TODO move to separate class
 @dask.delayed
-def load_block_if_needed(
+def load_if_needed(
     block_meta: BlockMeta,
 ) -> Block:
     # TODO if using Ray's Plasma, check shared obj store first, if empty - load from s3
+    # TODO figure out how to split BlockRange -> Block and cache if needed
     return None
+
 
 @dask.delayed
 def calculate_feature(
     fd: FeatureDefinition,
-    dep_feature_results: Dict[str, Block], # maps dep feature to BlockRange
+    dep_feature_results: Dict[str, BlockRange], # maps dep feature to BlockRange # TODO List[BlockRangeMeta]?
     start_ts: float,
     end_ts: float
 ) -> Block:
     # TODO use FeatureDefinition.stream()
-    return None, None
+    return None
+
+
+# TODO should be FeatureDefinition method
+def calculate_feature_meta(
+    fd: FeatureDefinition,
+    dep_feature_results: Dict[str, BlockRangeMeta], # maps dep feature to BlockRange # TODO List[BlockRangeMeta]?
+    start_ts: float,
+    end_ts: float
+) -> BlockMeta:
+    return None
 
 
 # graph construction
 def build_task_graph(
     fd: FeatureDefinition,
-    data_params: dict,
+    data_params: Dict,
     start_date: str = None,
     end_date: str = None,
 ):
-
     root_feature_name = f'{fd.type()}-0'
-    features_delayed_by_range = [] # tuples of feature_delayed_funcs dict, start_ts, end_ts
-    # feature_tree = build_feature_tree(fd)
-    data_leaves = get_leaves(fd)
-    blocks_meta_map = {}
-    for data in data_leaves:
-        blocks_meta_map[data] = get_block_ranges_meta(data, data_params, start_date, end_date)
 
-    data_ranges = build_data_ranges(blocks_meta_map)
+    feature_ranges = {} # represents result ranges meta by feature
+    load_data_ranges(feature_ranges, data_params, start_date, end_date)
+    feature_delayed_funcs = {} # represents list of delayed functions for each range, partitioned by feature name
 
-    for i in range(0, len(data_ranges)):
-        feature_delayed_funcs = {}
-        data_range = data_ranges[i]
-        start_ts = data_range[0]
-        end_ts = data_range[1]
+    # bottom up/postorder traversal
+    def tree_traversal_callback(fd: FeatureDefinition, feature_name: str):
+        if isinstance(fd, Data):
+            # leaves
+            # block_chunk = get_data_block_range_meta(block_ranges_meta_dict, feature_name, start_ts, end_ts)
+            ranges = feature_ranges[feature_name] # this is already populated for Data in load_data_ranges above
+            for range in ranges:
+                for block_meta in range:
+                    start_ts, end_ts = get_start_ts(block_meta), get_end_ts(block_meta)
+                    if feature_name not in feature_delayed_funcs:
+                        feature_delayed_funcs[feature_name] = []
+                    feature_delayed = load_if_needed(block_meta)
+                    feature_delayed_funcs[feature_name].append(start_ts, end_ts, feature_delayed)
+            return
 
-        # bottom up/postorder traversal
+        grouped_ranges_by_dep_feature = {}
+        for dep_fd, dep_feature_name in fd.dep_upstream_schema_named():
+            dep_ranges = feature_ranges[dep_feature_name]
+            grouped_ranges_by_dep_feature[dep_feature_name] = fd.group_dep_ranges(dep_ranges, dep_feature_name)
 
-        # for feature_tree_node in traverse_feature_tree(fd):
-        def tree_traversal_callback(fd: FeatureDefinition, feature_name: str):
-            # feature_name = get_feature_name(fd)
-            block_chunk = get_block_chunk(blocks_meta_map, fd, start_ts, end_ts)
-            if isinstance(fd, Data):
-                # leaves
-                # TODO is start/end needed here?
-                feature_delayed_funcs[feature_name] = load_block_if_needed(block_chunk[0])
-                return
-            dep_feature_delayed_funcs = {}
-            for dep_fd, dep_feature_name in fd.dep_upstream_schema_named():
-                # [feature_delayed_funcs[dep_feature]
-                # TODO check we have dep_feature_name key
-                if is_windowed(fd, dep_feature_name):
-                    window = get_window(fd, dep_feature_name)
-                    dep_delayed_funcs = get_prev_feature_delayed_funcs(start_ts, features_delayed_by_range, window, dep_feature_name)
-                else:
-                    dep_delayed_funcs = [feature_delayed_funcs[dep_feature_name]]
-                # TODO check we have no circular deps
-                dep_feature_delayed_funcs[dep_feature_name] = dep_delayed_funcs
-            feature_delayed = calculate_feature(
-                fd,
-                dep_feature_delayed_funcs,
-                start_ts,
-                end_ts
-            )
-            # TODO check we have no circular deps
-            feature_delayed_funcs[feature_name] = feature_delayed
+        overlaps = get_ranges_overlaps(grouped_ranges_by_dep_feature)
+        ranges = []
+        for overlap, start_ts, end_ts in overlaps:
+            result_meta = calculate_feature_meta(fd, overlap, start_ts, end_ts) # TODO is this needed? is it for block or range ?
+            ranges.append(result_meta)
+            if feature_name not in feature_delayed_funcs:
+                feature_delayed_funcs[feature_name] = []
+            feature_delayed = calculate_feature(fd, overlap, start_ts, end_ts)
+            feature_delayed_funcs[feature_name].append(start_ts, end_ts, feature_delayed)
 
-        postorder(fd, tree_traversal_callback, root_feature_name)
-        features_delayed_by_range.append((feature_delayed_funcs, start_ts, end_ts))
+        feature_ranges[feature_name] = ranges
 
+    postorder(fd, tree_traversal_callback, root_feature_name)
 
-    res = map(lambda f: f[0][root_feature_name], features_delayed_by_range) # list of feature delayed funcs for all ranges
-    return res
+    # list of root feature delayed funcs for all ranges
+    return list(map(lambda f: f[root_feature_name][0][2], feature_delayed_funcs))
