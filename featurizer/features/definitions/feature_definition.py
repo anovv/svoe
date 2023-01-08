@@ -36,8 +36,7 @@ class FeatureDefinition:
         return res
 
     def group_dep_ranges(self, ranges: List, dep_feature_name: str) -> List: # TODO typehint Block/BlockRange/BlockMeta/BlockRangeMeta
-        # logic to group input data into atomic blocks
-        # for bulk processing
+        # logic to group input data into atomic blocks for bulk processing
         raise ValueError('Not Implemented')
 
     # def channels_spec(self):
