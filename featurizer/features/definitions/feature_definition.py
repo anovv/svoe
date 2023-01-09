@@ -3,6 +3,7 @@ from typing import Dict, List, Tuple
 from ta.utils import dropna
 from ta.volatility import BollingerBands
 from __future__ import annotations
+from portion import IntervalDict
 
 
 # Represent a feature schema to be used with different params (exchanges, symbols, instrument_types, etc)
@@ -35,7 +36,7 @@ class FeatureDefinition:
                 count_by_type[dep.type()] = 0
         return res
 
-    def group_dep_ranges(self, ranges: List, dep_feature_name: str) -> List: # TODO typehint Block/BlockRange/BlockMeta/BlockRangeMeta
+    def group_dep_ranges(self, ranges: List, dep_feature_name: str) -> IntervalDict: # TODO typehint Block/BlockRange/BlockMeta/BlockRangeMeta
         # logic to group input data into atomic blocks for bulk processing
         raise ValueError('Not Implemented')
 

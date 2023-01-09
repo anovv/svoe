@@ -48,17 +48,26 @@ def load_data_ranges(
     return {}
 
 
-def get_ranges_overlaps(grouped_ranges: Dict[str, IntervalDict]) -> List[Tuple[Dict[str, BlockRangeMeta], Interval]]:
+# TODO return type can also be an IntervalDict
+# TODO make IntervalDict support generics to indicate value type hints
+def get_ranges_overlaps(grouped_ranges: Dict[str, IntervalDict]) -> IntervalDict:
     # https://github.com/AlexandreDecan/portion
     # https://stackoverflow.com/questions/40367461/intersection-of-two-lists-of-ranges-in-python
-    res = []
-    d = None
-    # concat = lambda range1, range2: return
-    # for feature_name, ranges in grouped_ranges:
+    d = IntervalDict()
+    first_feature_name = list(grouped_ranges.keys())[0]
+    for interval, ranges in grouped_ranges[first_feature_name]:
+        d[interval] = {first_feature_name: ranges} # named_ranges_dict
 
+    # join ranges_dict for each feature_name with first to find all possible intersecting intervals
+    # and their corresponding BlockRange/BlockRangeMeta objects
+    for feature_name, ranges_dict in grouped_ranges:
+        if feature_name == first_feature_name:
+            continue
+        concat = lambda named_ranges_dict, ranges: dict([named_ranges_dict, {feature_name: ranges}])
+        combined = d.combine(ranges_dict, how=concat) # outer join
+        d = combined[d.domain() & ranges_dict.domain()] # inner join
 
-
-    return []
+    return d
 
 
 # s3/data lake aux methods
@@ -125,7 +134,7 @@ def build_task_graph(
 
         overlaps = get_ranges_overlaps(grouped_ranges_by_dep_feature)
         ranges = []
-        for overlap, interval in overlaps:
+        for interval, overlap in overlaps:
             result_meta = calculate_feature_meta(fd, overlap, interval) # TODO is this needed? is it for block or range ?
             ranges.append(result_meta)
             if feature_name not in feature_delayed_funcs:
