@@ -4,17 +4,18 @@ import ray
 import time
 from typing import Optional
 from cluster_utils import connect
-import ray.autoscaler
-from ray.data.dataset import DatasetPipeline, Dataset
+# import ray.autoscaler
+# from ray.data.dataset import DatasetPipeline, Dataset
 import ray.workflow
-from ray.air.config import ScalingConfig
-from ray.air import session
-from ray.experimental.state.api import summarize_tasks
-from xgboost_ray import RayDMatrix, RayParams, train
-from ray.train.xgboost import XGBoostPredictor
-from ray.train.xgboost import XGBoostTrainer
-from ray.util.dask import ray_dask_get
+# from ray.air.config import ScalingConfig
+# from ray.air import session
+# from ray.experimental.state.api import summarize_tasks
+# from xgboost_ray import RayDMatrix, RayParams, train
+# from ray.train.xgboost import XGBoostPredictor
+# from ray.train.xgboost import XGBoostTrainer
+# from ray.util.dask import ray_dask_get
 import dask
+import portion as P
 
 
 @ray.remote(num_cpus=1)
@@ -40,12 +41,23 @@ class SampleActor:
         print(f'{prefix} Actor finished doing work')
 
 
-connect()
-refs = []
-for task_id in range(0, 10):
-    refs.append(sample_task.remote(120, task_id))
+# connect()
+# refs = []
+# for task_id in range(0, 10):
+#     refs.append(sample_task.remote(120, task_id))
+#
+# for ref in refs:
+#     ray.get(ref)
 
-for ref in refs:
-    ray.get(ref)
+i1 = P.closed(1, 6)
+i2 = P.closed(7, 10)
+i3 = P.closed(5, 9)
+
+r1 = P.Interval(*[i1, i2])
+r2 = P.Interval(*[i3])
+
+inter = r1 & r2
+for p in inter:
+    print(p)
 
 

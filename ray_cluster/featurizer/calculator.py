@@ -7,20 +7,9 @@ from streamz.dataframe import DataFrame
 import dask
 import dask.graph_manipulation
 import pandas as pd
+from portion import Interval, IntervalDict
 
 Data = FeatureDefinition # indicates this FD is data input # TODO move to FeatureDefinition subclass
-
-
-def get_leaves(fd: FeatureDefinition) -> List[str]:
-    res = []
-    root_feature_name = f'{fd.type()}-0'
-
-    def callback(fd, name):
-        if isinstance(fd, Data): # TODO define feature tree leaf here
-            res.append(name)
-
-    postorder(fd, callback, root_feature_name)
-    return res
 
 
 def postorder(node: FeatureDefinition, callback: Callable, name: str):
@@ -49,8 +38,6 @@ BlockRangesMetaDict = Dict[str, BlockRangeMeta]
 # TODO make abstraction for users to define data params for each input data channel
 DataParams = Dict[str, Dict]
 
-TimeRange = Tuple[float, float]
-
 
 def load_data_ranges(
     data_params: DataParams,
@@ -61,42 +48,17 @@ def load_data_ranges(
     return {}
 
 
-def get_ranges_overlaps(grouped_ranges: Dict[str, BlockRangeMeta]) -> List[Tuple[Dict[str, BlockRange], float, float]]:
+def get_ranges_overlaps(grouped_ranges: Dict[str, IntervalDict]) -> List[Tuple[Dict[str, BlockRangeMeta], Interval]]:
+    # https://github.com/AlexandreDecan/portion
+    # https://stackoverflow.com/questions/40367461/intersection-of-two-lists-of-ranges-in-python
+    res = []
+    d = None
+    # concat = lambda range1, range2: return
+    # for feature_name, ranges in grouped_ranges:
+
+
 
     return []
-
-
-# feature def aux methods
-# some should be moved to FeatureDefinition class
-# TODO move to FeatureDefinition class
-def is_windowed(fd: FeatureDefinition, dep_feature_name: str):
-    return True # TODO
-
-
-def get_window(fd: FeatureDefinition, dep_feature_name: str) -> str:
-    return '1m'
-
-# TODO this should be a partition_ranges strategy in FeatureDefinition class
-# def get_prev_feature_delayed_funcs(
-#     from_ts: float,
-#     features_delayed_by_range: List[Tuple[Dict, float, float]],
-#     window: str,
-#     dep_feature_name: str
-# ) -> List:
-#     # TODO use sampling strategy to load only whats needed
-#     res = []
-#     beg, end = from_ts - convert_str_to_seconds(window), from_ts
-#     for features_delayed_funcs, start_ts, end_ts in features_delayed_by_range:
-#         if beg <= start_ts <= end:
-#             res.append(features_delayed_funcs[dep_feature_name])
-#
-#     return res
-
-#
-# def get_fd_sampling_strategy(
-#     fd: FeatureDefinition,
-# ) -> str:
-#     return '1s'
 
 
 # s3/data lake aux methods
@@ -114,8 +76,7 @@ def load_if_needed(
 def calculate_feature(
     fd: FeatureDefinition,
     dep_feature_results: Dict[str, BlockRange], # maps dep feature to BlockRange # TODO List[BlockRangeMeta]?
-    start_ts: float,
-    end_ts: float
+    interval: Interval
 ) -> Block:
     # TODO use FeatureDefinition.stream()
     return None
@@ -125,8 +86,7 @@ def calculate_feature(
 def calculate_feature_meta(
     fd: FeatureDefinition,
     dep_feature_results: Dict[str, BlockRangeMeta], # maps dep feature to BlockRange # TODO List[BlockRangeMeta]?
-    start_ts: float,
-    end_ts: float
+    interval: Interval
 ) -> BlockMeta:
     return None
 
@@ -151,11 +111,11 @@ def build_task_graph(
             ranges = feature_ranges[feature_name] # this is already populated for Data in load_data_ranges above
             for block_range_meta in ranges:
                 for block_meta in block_range_meta:
-                    start_ts, end_ts = get_range(block_meta)
+                    interval = get_interval(block_meta)
                     if feature_name not in feature_delayed_funcs:
-                        feature_delayed_funcs[feature_name] = OrderedDict()
+                        feature_delayed_funcs[feature_name] = IntervalDict()
                     feature_delayed = load_if_needed(block_meta)
-                    feature_delayed_funcs[feature_name][(start_ts, end_ts)] = feature_delayed
+                    feature_delayed_funcs[feature_name][interval] = feature_delayed
             return
 
         grouped_ranges_by_dep_feature = {}
@@ -165,23 +125,23 @@ def build_task_graph(
 
         overlaps = get_ranges_overlaps(grouped_ranges_by_dep_feature)
         ranges = []
-        for overlap, start_ts, end_ts in overlaps:
-            result_meta = calculate_feature_meta(fd, overlap, start_ts, end_ts) # TODO is this needed? is it for block or range ?
+        for overlap, interval in overlaps:
+            result_meta = calculate_feature_meta(fd, overlap, interval) # TODO is this needed? is it for block or range ?
             ranges.append(result_meta)
             if feature_name not in feature_delayed_funcs:
-                feature_delayed_funcs[feature_name] = OrderedDict()
+                feature_delayed_funcs[feature_name] = IntervalDict()
 
             # TODO use overlap to fetch results of dep delayed funcs
             dep_delayed_funcs = {}
             for dep_feature_name in overlap:
                 ds = []
                 for dep_block_meta in overlap[dep_feature_name]:
-                    dep_start_ts, dep_end_ts = get_range(dep_block_meta)
-                    dep_delayed_func = feature_delayed_funcs[dep_feature_name][(dep_start_ts, dep_end_ts)]
+                    dep_interval = get_interval(dep_block_meta)
+                    dep_delayed_func = feature_delayed_funcs[dep_feature_name][dep_interval]
                     ds.append(dep_delayed_func)
                 dep_delayed_funcs[dep_feature_name] = ds
-            feature_delayed = calculate_feature(fd, dep_delayed_funcs, start_ts, end_ts)
-            feature_delayed_funcs[feature_name][(start_ts, end_ts)] = feature_delayed
+            feature_delayed = calculate_feature(fd, dep_delayed_funcs, interval)
+            feature_delayed_funcs[feature_name][interval] = feature_delayed
 
         feature_ranges[feature_name] = ranges
 
