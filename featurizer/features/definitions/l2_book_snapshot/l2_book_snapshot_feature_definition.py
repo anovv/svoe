@@ -1,4 +1,6 @@
 from typing import List, Dict, Optional, Any, Tuple
+
+from portion import IntervalDict, closed
 from streamz import Stream
 from order_book import OrderBook
 import pandas as pd
@@ -135,6 +137,29 @@ class L2BookSnapshotFeatureDefinition(FeatureDefinition):
             bids=bids,
             asks=asks
         )
+
+    def group_dep_ranges(self, ranges: List, dep_feature_name: str) -> IntervalDict:
+        # TODO separate const for this
+        # TODO or separate function for metadata parsing
+        meta_key_1 = 'snapshot_ts'
+        meta_key_2 = 'before_snapshot_ts'
+        res = IntervalDict()
+        # TODO we assume no holes in data here
+        start_ts, end_ts = None, None
+        cur_ranges = []
+        for meta in ranges:
+            cur_ranges.append(meta)
+            if meta_key_1 in meta:
+                if start_ts is None:
+                    start_ts = meta[meta_key_1]
+                else:
+                    end_ts = meta[meta_key_2]
+                    res[closed(start_ts, end_ts)] = cur_ranges
+                    start_ts = meta[meta_key_1]
+                    cur_ranges = [meta]
+
+        return res
+
 
     # @staticmethod
     # def test():

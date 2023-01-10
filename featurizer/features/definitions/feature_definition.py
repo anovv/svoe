@@ -24,7 +24,7 @@ class FeatureDefinition:
         raise ValueError('Not Implemented')
 
     def dep_upstream_schema_named(self) -> List[Tuple[FeatureDefinition, str]]:
-        # takes care of  cases when feature has multiple dependecies of the same type
+        # takes care of cases when feature has multiple dependencies of the same type
         res = []
         count_by_type = {}
         for dep in self.dep_upstreams_schema():
@@ -39,20 +39,6 @@ class FeatureDefinition:
     def group_dep_ranges(self, ranges: List, dep_feature_name: str) -> IntervalDict: # TODO typehint Block/BlockRange/BlockMeta/BlockRangeMeta
         # logic to group input data into atomic blocks for bulk processing
         raise ValueError('Not Implemented')
-
-    # def channels_spec(self):
-    #     raise ValueError('Not Implemented')
-    #
-    # def transform(self, input_dfs):
-    #     raise ValueError('Not Implemented')
-    #
-    # def _transform_dask(self, ranges):
-    #     # This should contain logic of parallelizing transform on a Dask Cluster for given time ranges
-    #     return
-    #
-    # def _materialize(self, ranges):
-    #     # This should contain logic of running dask transform with saving result to Athena and updating feature index
-    #     return
 
 # check https://github.com/bukosabino/ta
 # check https://github.com/matplotlib/mplfinance
