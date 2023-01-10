@@ -3,7 +3,7 @@
 import ray
 import time
 from typing import Optional
-from cluster_utils import connect
+# from cluster_utils import connect
 # import ray.autoscaler
 # from ray.data.dataset import DatasetPipeline, Dataset
 import ray.workflow
@@ -15,7 +15,7 @@ import ray.workflow
 # from ray.train.xgboost import XGBoostTrainer
 # from ray.util.dask import ray_dask_get
 import dask
-import portion as P
+from streamz import Stream
 
 
 @ray.remote(num_cpus=1)
@@ -40,6 +40,19 @@ class SampleActor:
         time.sleep(5)
         print(f'{prefix} Actor finished doing work')
 
+def test_streamz():
+    a = Stream()
+    b = Stream()
+    c = a.combine_latest(b).map(sum).sink(print)
+
+    a.emit(1)
+    a.emit(2)
+    b.emit(10)
+    a.emit(3)
+    a.emit(4)
+    b.emit(20)
+
+test_streamz()
 
 # connect()
 # refs = []
@@ -49,15 +62,6 @@ class SampleActor:
 # for ref in refs:
 #     ray.get(ref)
 
-i1 = P.closed(1, 6)
-i2 = P.closed(7, 10)
-i3 = P.closed(5, 9)
 
-r1 = P.Interval(*[i1, i2])
-r2 = P.Interval(*[i3])
-
-inter = r1 & r2
-for p in inter:
-    print(p)
 
 

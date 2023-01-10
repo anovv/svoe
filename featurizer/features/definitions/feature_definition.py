@@ -1,8 +1,8 @@
+from __future__ import annotations
 from streamz import Stream
 from typing import Dict, List, Tuple
 from ta.utils import dropna
 from ta.volatility import BollingerBands
-from __future__ import annotations
 from portion import IntervalDict
 
 

@@ -7,7 +7,7 @@ from streamz.dataframe import DataFrame
 import dask
 import dask.graph_manipulation
 import pandas as pd
-from portion import Interval, IntervalDict
+from portion import Interval, IntervalDict, closed
 
 Data = FeatureDefinition # indicates this FD is data input # TODO move to FeatureDefinition subclass
 
@@ -25,6 +25,9 @@ def postorder(node: FeatureDefinition, callback: Callable, name: str):
 
 # catalog methods
 BlockMeta = Dict # TODO represents s3 file metadata: name, time range, size, etc.
+def get_interval(meta: BlockMeta) -> Interval:
+    return closed(meta['start_ts'], meta['end_ts'])
+
 BlockRangeMeta = List[BlockMeta] # represents metadata of consecutive blocks
 
 # TODO typdef List[BlockRangeMeta]?
@@ -51,19 +54,25 @@ def load_data_ranges(
 # TODO return type can also be an IntervalDict
 # TODO make IntervalDict support generics to indicate value type hints
 def get_ranges_overlaps(grouped_ranges: Dict[str, IntervalDict]) -> IntervalDict:
+    # TODO add visualization?
     # https://github.com/AlexandreDecan/portion
     # https://stackoverflow.com/questions/40367461/intersection-of-two-lists-of-ranges-in-python
     d = IntervalDict()
     first_feature_name = list(grouped_ranges.keys())[0]
-    for interval, ranges in grouped_ranges[first_feature_name]:
+    for interval, ranges in grouped_ranges[first_feature_name].items():
         d[interval] = {first_feature_name: ranges} # named_ranges_dict
 
     # join ranges_dict for each feature_name with first to find all possible intersecting intervals
     # and their corresponding BlockRange/BlockRangeMeta objects
-    for feature_name, ranges_dict in grouped_ranges:
+    for feature_name, ranges_dict in grouped_ranges.items():
         if feature_name == first_feature_name:
             continue
-        concat = lambda named_ranges_dict, ranges: dict([named_ranges_dict, {feature_name: ranges}])
+
+        def concat(named_ranges_dict, ranges):
+            res = named_ranges_dict.copy()
+            res[feature_name] = ranges
+            return res
+
         combined = d.combine(ranges_dict, how=concat) # outer join
         d = combined[d.domain() & ranges_dict.domain()] # inner join
 
@@ -101,6 +110,7 @@ def calculate_feature_meta(
 
 
 # graph construction
+# TODO make 3d visualization with networkx/graphviz
 def build_task_graph(
     fd: FeatureDefinition,
     data_params: Dict,
