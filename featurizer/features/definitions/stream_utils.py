@@ -16,7 +16,7 @@ def throttle(upstream: Stream, window: str = '1s') -> Stream:
     return filter_none(acc)
 
 
-def filter_none(upstream: Stream):
+def filter_none(upstream: Stream) -> Stream:
     return upstream.filter(lambda x: x is not None)
 
 

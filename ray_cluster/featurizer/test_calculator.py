@@ -36,15 +36,43 @@ class TestFeatureCalculator(unittest.TestCase):
         }
         expected[P.closed(9, 15)] = {
             'feature_a': [{'start_ts': 9, 'end_ts': 15}],
-            'feature_b': [{'start_ts': 9, 'end_ts': 15}, {'start_ts': 15.1, 'end_ts': 18}, {'start_ts': 18.1, 'end_ts': 22}]
+            'feature_b': [{'start_ts': 9, 'end_ts': 15}, {'start_ts': 15.1, 'end_ts': 18},
+                          {'start_ts': 18.1, 'end_ts': 22}]
         }
 
         overlaps = C.get_ranges_overlaps(grouped_range)
         self.assertEqual(overlaps, expected)
 
-    def meta(self, start_ts, end_ts):
+    def meta(self, start_ts, end_ts, extra=None):
         # TODO make mock function
-        return {'start_ts': start_ts, 'end_ts': end_ts}
+        res = {'start_ts': start_ts, 'end_ts': end_ts}
+        if extra:
+            res.update(extra)
+        return res
+
+    def test_build_task_graph(self):
+        return
+
+    def mock_load_data_ranges(self):
+        res = {}
+        data_name = 'l2_book_deltas'
+        cur_ts = 0
+        between_blocks_ms = 100
+        block_len_ms = 30 * 1000
+        num_blocks = 100
+        ranges = []
+        for i in range(0, num_blocks):
+            meta = meta(cur_ts, cur_ts + block_len_ms)
+            if i % 2 == 0:
+                # TODO sync keys with L2BookSnapshotFeatureDefinition.group_dep_ranges
+                meta['snapshot_ts'] = cur_ts + 10 * 1000
+                meta['before_snapshot_ts'] = meta['snapshot_ts'] - 1 * 1000
+            ranges.append(meta)
+            cur_ts += block_len_ms
+            cur_ts += between_blocks_ms
+        res[data_name] = ranges
+        return ranges
+
 
 if __name__ == '__main__':
     unittest.main()

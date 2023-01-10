@@ -38,6 +38,7 @@ class FeatureDefinition:
 
     def group_dep_ranges(self, ranges: List, dep_feature_name: str) -> IntervalDict: # TODO typehint Block/BlockRange/BlockMeta/BlockRangeMeta
         # logic to group input data into atomic blocks for bulk processing
+        # TODO this should be identity mapping by default
         raise ValueError('Not Implemented')
 
 # check https://github.com/bukosabino/ta
