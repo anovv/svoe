@@ -6,6 +6,7 @@ import unittest
 
 
 class TestFeatureCalculator(unittest.TestCase):
+
     def test_get_ranges_overlaps(self):
         grouped_range = {}
         ranges_a = P.IntervalDict()
@@ -39,7 +40,7 @@ class TestFeatureCalculator(unittest.TestCase):
         }
 
         overlaps = C.get_ranges_overlaps(grouped_range)
-        assert overlaps == expected
+        self.assertEqual(overlaps, expected)
 
     def meta(self, start_ts, end_ts):
         # TODO make mock function
