@@ -113,14 +113,9 @@ def calculate_feature_meta(
 # TODO make 3d visualization with networkx/graphviz
 def build_task_graph(
     fd: FeatureDefinition,
-    data_params: Dict,
-    start_date: str = None,
-    end_date: str = None,
+    feature_ranges: Dict # TODO typehint when decide on BlockRangeMeta/BlockMeta
 ):
     root_feature_name = f'{fd.type()}-0'
-
-    feature_ranges = {} # represents result ranges meta by feature
-    feature_ranges = load_data_ranges(data_params, start_date, end_date)
     feature_delayed_funcs = {} # feature delayed functions per range per feature
 
     # bottom up/postorder traversal

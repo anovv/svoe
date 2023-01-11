@@ -51,18 +51,15 @@ class TestFeatureCalculator(unittest.TestCase):
         return res
 
     def test_build_task_graph(self):
-        return
+        feature_ranges = self.mock_l2_book_deltas_data_ranges(30 * 1000, 10)
+        print(feature_ranges)
 
-    def mock_load_data_ranges(self):
+    def mock_l2_book_deltas_data_ranges(self, block_len_ms, num_blocks, between_blocks_ms=100, cur_ts=0):
         res = {}
         data_name = 'l2_book_deltas'
-        cur_ts = 0
-        between_blocks_ms = 100
-        block_len_ms = 30 * 1000
-        num_blocks = 100
         ranges = []
         for i in range(0, num_blocks):
-            meta = meta(cur_ts, cur_ts + block_len_ms)
+            meta = self.meta(cur_ts, cur_ts + block_len_ms)
             if i % 2 == 0:
                 # TODO sync keys with L2BookSnapshotFeatureDefinition.group_dep_ranges
                 meta['snapshot_ts'] = cur_ts + 10 * 1000
@@ -75,4 +72,6 @@ class TestFeatureCalculator(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    unittest.main()
+    # unittest.main()
+    t = TestFeatureCalculator()
+    t.test_build_task_graph()
