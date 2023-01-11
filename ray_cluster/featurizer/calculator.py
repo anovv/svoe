@@ -1,6 +1,7 @@
-from typing import List, Union, Tuple, Dict, Callable
+from typing import List, Union, Tuple, Dict, Callable, Type
 from collections import OrderedDict
 from featurizer.features.definitions.feature_definition import FeatureDefinition
+from featurizer.features.data.data import Data
 from featurizer.features.utils import convert_str_to_seconds
 from streamz import Stream
 from streamz.dataframe import DataFrame
@@ -9,10 +10,8 @@ import dask.graph_manipulation
 import pandas as pd
 from portion import Interval, IntervalDict, closed
 
-Data = FeatureDefinition # indicates this FD is data input # TODO move to FeatureDefinition subclass
 
-
-def postorder(node: FeatureDefinition, callback: Callable, name: str):
+def postorder(node: Type[FeatureDefinition], callback: Callable, name: str):
     named_children = node.dep_upstream_schema_named()
     if len(named_children) == 0:
         callback(node, name)
@@ -43,6 +42,7 @@ DataParams = Dict[str, Dict]
 
 
 def load_data_ranges(
+    fd_type: Type[FeatureDefinition],
     data_params: DataParams,
     start_date: str = None,
     end_date: str = None
@@ -92,7 +92,7 @@ def load_if_needed(
 
 @dask.delayed
 def calculate_feature(
-    fd: FeatureDefinition,
+    fd_type: Type[FeatureDefinition],
     dep_feature_results: Dict[str, BlockRange], # maps dep feature to BlockRange # TODO List[BlockRangeMeta]?
     interval: Interval
 ) -> Block:
@@ -102,7 +102,7 @@ def calculate_feature(
 
 # TODO should be FeatureDefinition method
 def calculate_feature_meta(
-    fd: FeatureDefinition,
+    fd_type: Type[FeatureDefinition],
     dep_feature_results: Dict[str, BlockRangeMeta], # maps dep feature to BlockRange # TODO List[BlockRangeMeta]?
     interval: Interval
 ) -> BlockMeta:
@@ -112,15 +112,15 @@ def calculate_feature_meta(
 # graph construction
 # TODO make 3d visualization with networkx/graphviz
 def build_task_graph(
-    fd: FeatureDefinition,
+    fd_type: Type[FeatureDefinition],
     feature_ranges: Dict # TODO typehint when decide on BlockRangeMeta/BlockMeta
 ):
-    root_feature_name = f'{fd.type()}-0'
+    root_feature_name = f'{fd_type.type_str()}-0'
     feature_delayed_funcs = {} # feature delayed functions per range per feature
 
     # bottom up/postorder traversal
-    def tree_traversal_callback(fd: FeatureDefinition, feature_name: str):
-        if isinstance(fd, Data):
+    def tree_traversal_callback(fd_type: Type[Union[FeatureDefinition, Data]], feature_name: str):
+        if fd_type == Data:
             # leaves
             ranges = feature_ranges[feature_name] # this is already populated for Data in load_data_ranges above
             for block_range_meta in ranges:
@@ -133,14 +133,14 @@ def build_task_graph(
             return
 
         grouped_ranges_by_dep_feature = {}
-        for dep_fd, dep_feature_name in fd.dep_upstream_schema_named():
+        for dep_fd, dep_feature_name in fd_type.dep_upstream_schema_named():
             dep_ranges = feature_ranges[dep_feature_name]
-            grouped_ranges_by_dep_feature[dep_feature_name] = fd.group_dep_ranges(dep_ranges, dep_feature_name)
+            grouped_ranges_by_dep_feature[dep_feature_name] = fd_type.group_dep_ranges(dep_ranges, dep_feature_name)
 
         overlaps = get_ranges_overlaps(grouped_ranges_by_dep_feature)
         ranges = []
         for interval, overlap in overlaps:
-            result_meta = calculate_feature_meta(fd, overlap, interval) # TODO is this needed? is it for block or range ?
+            result_meta = calculate_feature_meta(fd_type, overlap, interval) # TODO is this needed? is it for block or range ?
             ranges.append(result_meta)
             if feature_name not in feature_delayed_funcs:
                 feature_delayed_funcs[feature_name] = IntervalDict()
@@ -154,12 +154,12 @@ def build_task_graph(
                     dep_delayed_func = feature_delayed_funcs[dep_feature_name][dep_interval]
                     ds.append(dep_delayed_func)
                 dep_delayed_funcs[dep_feature_name] = ds
-            feature_delayed = calculate_feature(fd, dep_delayed_funcs, interval)
+            feature_delayed = calculate_feature(fd_type, dep_delayed_funcs, interval)
             feature_delayed_funcs[feature_name][interval] = feature_delayed
 
         feature_ranges[feature_name] = ranges
 
-    postorder(fd, tree_traversal_callback, root_feature_name)
+    postorder(fd_type, tree_traversal_callback, root_feature_name)
 
     # list of root feature delayed funcs for all ranges
     return list(feature_delayed_funcs[root_feature_name].values())

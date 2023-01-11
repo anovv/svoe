@@ -1,5 +1,6 @@
 import calculator as C
-# from portion import Interval, IntervalDict
+from featurizer.features.data.l2_book_delats.l2_book_deltas import L2BookDeltasData
+from featurizer.features.definitions.l2_book_snapshot.l2_book_snapshot_feature_definition import L2BookSnapshotFeatureDefinition
 import portion as P
 import json
 import unittest
@@ -52,11 +53,13 @@ class TestFeatureCalculator(unittest.TestCase):
 
     def test_build_task_graph(self):
         feature_ranges = self.mock_l2_book_deltas_data_ranges(30 * 1000, 10)
-        print(feature_ranges)
+        fd_type = L2BookSnapshotFeatureDefinition
+        graph = C.build_task_graph(fd_type, feature_ranges)
+        print(graph)
 
     def mock_l2_book_deltas_data_ranges(self, block_len_ms, num_blocks, between_blocks_ms=100, cur_ts=0):
         res = {}
-        data_name = 'l2_book_deltas'
+        data_name = f'{L2BookDeltasData.type_str()}-0' # TODO make this Data method
         ranges = []
         for i in range(0, num_blocks):
             meta = self.meta(cur_ts, cur_ts + block_len_ms)
@@ -68,7 +71,7 @@ class TestFeatureCalculator(unittest.TestCase):
             cur_ts += block_len_ms
             cur_ts += between_blocks_ms
         res[data_name] = ranges
-        return ranges
+        return res
 
 
 if __name__ == '__main__':

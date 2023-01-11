@@ -1,4 +1,4 @@
-from typing import List, Dict, Optional, Any, Tuple
+from typing import List, Dict, Optional, Any, Tuple, Union, Type
 
 from portion import IntervalDict, closed
 from streamz import Stream
@@ -11,7 +11,9 @@ import featurizer.features.loader.l2_snapshot_utils as l2su
 from featurizer.features.definitions.data_models_utils import TimestampedBase
 from featurizer.features.definitions.feature_definition import FeatureDefinition
 import featurizer.features.definitions.stream_utils as su
-from featurizer.features.definitions.data_models_utils import L2BookDelta
+from featurizer.features.definitions.data_models_utils import L2BookDelta # TODO rename to event
+from featurizer.features.data.data import Data
+from featurizer.features.data.l2_book_delats.l2_book_deltas import L2BookDeltasData
 import functools
 
 import dask.diagnostics
@@ -59,8 +61,8 @@ class L2BookSnapshotFeatureDefinition(FeatureDefinition):
 
         return snapshots, state.data_inconsistencies
 
-    @staticmethod
-    def stream(upstream: Stream, state: Optional[_State] = None, depth: Optional[int] = 20) -> Stream:
+    @classmethod
+    def stream(cls, upstream: Stream, state: Optional[_State] = None, depth: Optional[int] = 20) -> Stream:
         if state is None:
             state = L2BookSnapshotFeatureDefinition._build_state()
         update = functools.partial(L2BookSnapshotFeatureDefinition._update_state, depth=depth)
@@ -138,7 +140,8 @@ class L2BookSnapshotFeatureDefinition(FeatureDefinition):
             asks=asks
         )
 
-    def group_dep_ranges(self, ranges: List, dep_feature_name: str) -> IntervalDict:
+    @classmethod
+    def group_dep_ranges(cls, ranges: List, dep_feature_name: str) -> IntervalDict:
         # TODO separate const for this
         # TODO or separate function for metadata parsing
         meta_key_1 = 'snapshot_ts'
@@ -159,6 +162,10 @@ class L2BookSnapshotFeatureDefinition(FeatureDefinition):
                     cur_ranges = [meta]
 
         return res
+
+    @classmethod
+    def dep_upstreams_schema(cls) -> List[Type[Union[FeatureDefinition, Data]]]:
+        return [L2BookDeltasData]
 
 
     # @staticmethod
