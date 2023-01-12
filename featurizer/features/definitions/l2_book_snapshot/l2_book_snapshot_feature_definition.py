@@ -34,13 +34,12 @@ class _State(TimestampedBase):
 class L2BookSnapshot(TimestampedBase):
     timestamp: float = field(compare=False, hash=False)
     receipt_timestamp: float = field(compare=False, hash=False) # TODO move this properties to superclass
-    bids: FrozenList[Tuple[float, float]] = field(hash=True)  # price, size
-    asks: FrozenList[Tuple[float, float]] = field(hash=True)
+    bids: FrozenList = field(hash=True)  # FrozenList[Tuple[float, float]] price, size
+    asks: FrozenList = field(hash=True) # FrozenList[Tuple[float, float]]
 
 
 # TODO good data 'l2_book', 'BINANCE', 'spot', 'BTC-USDT', '2022-09-29', '2022-09-29'
 # TODO remove malformed files
-
 
 class L2BookSnapshotFeatureDefinition(FeatureDefinition):
 

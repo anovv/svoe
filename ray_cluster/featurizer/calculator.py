@@ -1,4 +1,4 @@
-from typing import List, Union, Tuple, Dict, Callable, Type
+from typing import List, Union, Tuple, Dict, Callable, Type, Any
 from collections import OrderedDict
 from featurizer.features.definitions.feature_definition import FeatureDefinition
 from featurizer.features.data.data import Data
@@ -8,14 +8,15 @@ from streamz.dataframe import DataFrame
 import dask
 import dask.graph_manipulation
 import pandas as pd
+import inspect
+import sys
 from portion import Interval, IntervalDict, closed
 
-
-def postorder(node: Type[FeatureDefinition], callback: Callable, name: str):
-    named_children = node.dep_upstream_schema_named()
-    if len(named_children) == 0:
+def postorder(node: Type[Union[FeatureDefinition, Data]], callback: Callable, name: str):
+    if node.is_data():
         callback(node, name)
         return
+    named_children = node.dep_upstream_schema_named()
     for dep_fd, dep_name in named_children:
         postorder(dep_fd, callback, dep_name)
 
@@ -120,7 +121,7 @@ def build_task_graph(
 
     # bottom up/postorder traversal
     def tree_traversal_callback(fd_type: Type[Union[FeatureDefinition, Data]], feature_name: str):
-        if fd_type == Data:
+        if fd_type.is_data():
             # leaves
             ranges = feature_ranges[feature_name] # this is already populated for Data in load_data_ranges above
             for block_range_meta in ranges:

@@ -15,6 +15,12 @@ class FeatureDefinition:
     def type_str(cls) -> str:
         return cls.__name__
 
+    # this is a hacky way to discern between types in Union[FeatureDefinition, Data]
+    # without isinstance (due to python bug)
+    @classmethod
+    def is_data(cls) -> bool:
+        return False
+
     @classmethod
     def stream(cls, dep_upstreams: Dict[str, Stream]) -> Stream:
         raise ValueError('Not Implemented')
