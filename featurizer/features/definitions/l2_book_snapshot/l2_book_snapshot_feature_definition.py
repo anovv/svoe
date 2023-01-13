@@ -14,6 +14,7 @@ import featurizer.features.definitions.stream_utils as su
 from featurizer.features.definitions.data_models_utils import L2BookDelta # TODO rename to event
 from featurizer.features.data.data import Data
 from featurizer.features.data.l2_book_delats.l2_book_deltas import L2BookDeltasData
+from featurizer.features.blocks.blocks import BlockMeta
 import functools
 
 import dask.diagnostics
@@ -61,11 +62,12 @@ class L2BookSnapshotFeatureDefinition(FeatureDefinition):
         return snapshots, state.data_inconsistencies
 
     @classmethod
-    def stream(cls, upstream: Stream, state: Optional[_State] = None, depth: Optional[int] = 20) -> Stream:
+    def stream(cls, upstreams: List[Stream], state: Optional[_State] = None, depth: Optional[int] = 20) -> Stream:
+        l2_book_deltas_upstream = upstreams[0]
         if state is None:
             state = L2BookSnapshotFeatureDefinition._build_state()
         update = functools.partial(L2BookSnapshotFeatureDefinition._update_state, depth=depth)
-        acc = upstream.accumulate(update, returns_state=True, start=state)
+        acc = l2_book_deltas_upstream.accumulate(update, returns_state=True, start=state)
         return su.filter_none(acc).unique(maxsize=1)
 
 
@@ -140,7 +142,7 @@ class L2BookSnapshotFeatureDefinition(FeatureDefinition):
         )
 
     @classmethod
-    def group_dep_ranges(cls, ranges: List, dep_feature_name: str) -> IntervalDict:
+    def group_dep_ranges(cls, ranges: List[BlockMeta], dep_feature_name: str) -> IntervalDict:
         # TODO separate const for this
         # TODO or separate function for metadata parsing
         meta_key_1 = 'snapshot_ts'

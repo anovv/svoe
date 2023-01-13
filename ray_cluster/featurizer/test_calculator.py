@@ -1,9 +1,11 @@
 import calculator as C
 from featurizer.features.data.l2_book_delats.l2_book_deltas import L2BookDeltasData
 from featurizer.features.definitions.l2_book_snapshot.l2_book_snapshot_feature_definition import L2BookSnapshotFeatureDefinition
+from featurizer.features.definitions.mid_price.mid_price_feature_definition import MidPriceFeatureDefinition
+from featurizer.features.blocks.utils import identity_grouping
 import portion as P
-import json
 import unittest
+import dask
 
 
 class TestFeatureCalculator(unittest.TestCase):
@@ -44,6 +46,13 @@ class TestFeatureCalculator(unittest.TestCase):
         overlaps = C.get_ranges_overlaps(grouped_range)
         self.assertEqual(overlaps, expected)
 
+
+    def test_identity_mapping(self):
+        ranges = [self.meta(1, 2), self.meta(2.1, 5), self.meta(9, 15)]
+        ig = identity_grouping(ranges)
+        print(ig)
+
+
     def meta(self, start_ts, end_ts, extra=None):
         # TODO make mock function
         res = {'start_ts': start_ts, 'end_ts': end_ts}
@@ -51,11 +60,22 @@ class TestFeatureCalculator(unittest.TestCase):
             res.update(extra)
         return res
 
-    def test_build_task_graph(self):
+    # TODO customize dask graph visualization
+    # https://stackoverflow.com/questions/58394758/adding-labels-to-a-dask-graph
+    # https://stackoverflow.com/questions/67680325/annotations-for-custom-graphs-in-dask
+    def test_build_task_graph_l2_snaps(self):
         feature_ranges = self.mock_l2_book_deltas_data_ranges(30 * 1000, 10)
         fd_type = L2BookSnapshotFeatureDefinition
         graph = C.build_task_graph(fd_type, feature_ranges)
         print(graph)
+        dask.visualize(*graph)
+
+    def test_build_task_graph_mid_price(self):
+        feature_ranges = self.mock_l2_book_deltas_data_ranges(30 * 1000, 10)
+        fd_type = MidPriceFeatureDefinition
+        graph = C.build_task_graph(fd_type, feature_ranges)
+        print(graph)
+        dask.visualize(*graph)
 
     def mock_l2_book_deltas_data_ranges(self, block_len_ms, num_blocks, between_blocks_ms=100, cur_ts=0):
         res = {}
@@ -77,4 +97,4 @@ class TestFeatureCalculator(unittest.TestCase):
 if __name__ == '__main__':
     # unittest.main()
     t = TestFeatureCalculator()
-    t.test_build_task_graph()
+    t.test_build_task_graph_mid_price()

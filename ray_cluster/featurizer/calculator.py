@@ -1,16 +1,10 @@
-from typing import List, Union, Tuple, Dict, Callable, Type, Any
-from collections import OrderedDict
+from typing import Union, Dict, Callable, Type
 from featurizer.features.definitions.feature_definition import FeatureDefinition
 from featurizer.features.data.data import Data
-from featurizer.features.utils import convert_str_to_seconds
-from streamz import Stream
-from streamz.dataframe import DataFrame
-import dask
+from featurizer.features.blocks.blocks import Block, BlockRange, BlockMeta, BlockRangeMeta, get_interval, DataParams
 import dask.graph_manipulation
-import pandas as pd
-import inspect
-import sys
-from portion import Interval, IntervalDict, closed
+from portion import Interval, IntervalDict
+
 
 def postorder(node: Type[Union[FeatureDefinition, Data]], callback: Callable, name: str):
     if node.is_data():
@@ -22,26 +16,6 @@ def postorder(node: Type[Union[FeatureDefinition, Data]], callback: Callable, na
 
     callback(node, name)
 
-
-# catalog methods
-BlockMeta = Dict # TODO represents s3 file metadata: name, time range, size, etc.
-def get_interval(meta: BlockMeta) -> Interval:
-    return closed(meta['start_ts'], meta['end_ts'])
-
-BlockRangeMeta = List[BlockMeta] # represents metadata of consecutive blocks
-
-# TODO typdef List[BlockRangeMeta]?
-
-Block = pd.DataFrame
-BlockRange = List[Block] # represents consecutive blocks
-
-# TODO here we assume data has no 'holes', in real scenario we should use List[BlockRangeMeta]
-BlockRangesMetaDict = Dict[str, BlockRangeMeta]
-
-# TODO make abstraction for users to define data params for each input data channel
-DataParams = Dict[str, Dict]
-
-
 def load_data_ranges(
     fd_type: Type[FeatureDefinition],
     data_params: DataParams,
@@ -52,7 +26,6 @@ def load_data_ranges(
     return {}
 
 
-# TODO return type can also be an IntervalDict
 # TODO make IntervalDict support generics to indicate value type hints
 def get_ranges_overlaps(grouped_ranges: Dict[str, IntervalDict]) -> IntervalDict:
     # TODO add visualization?
@@ -107,7 +80,10 @@ def calculate_feature_meta(
     dep_feature_results: Dict[str, BlockRangeMeta], # maps dep feature to BlockRange # TODO List[BlockRangeMeta]?
     interval: Interval
 ) -> BlockMeta:
-    return None
+    return {
+        'start_ts': interval.upper,
+        'end_ts': interval.lower,
+    }
 
 
 # graph construction
@@ -124,27 +100,30 @@ def build_task_graph(
         if fd_type.is_data():
             # leaves
             ranges = feature_ranges[feature_name] # this is already populated for Data in load_data_ranges above
-            for block_range_meta in ranges:
-                for block_meta in block_range_meta:
-                    interval = get_interval(block_meta)
-                    if feature_name not in feature_delayed_funcs:
-                        feature_delayed_funcs[feature_name] = IntervalDict()
-                    feature_delayed = load_if_needed(block_meta)
-                    feature_delayed_funcs[feature_name][interval] = feature_delayed
+            for block_meta in ranges:
+                # TODO we assume no 'holes' in data here
+                interval = get_interval(block_meta)
+                if feature_name not in feature_delayed_funcs:
+                    feature_delayed_funcs[feature_name] = {}
+                feature_delayed = load_if_needed(block_meta)
+                feature_delayed_funcs[feature_name][interval] = feature_delayed
             return
 
         grouped_ranges_by_dep_feature = {}
         for dep_fd, dep_feature_name in fd_type.dep_upstream_schema_named():
             dep_ranges = feature_ranges[dep_feature_name]
             grouped_ranges_by_dep_feature[dep_feature_name] = fd_type.group_dep_ranges(dep_ranges, dep_feature_name)
+        #TODO debug
+        print(feature_name)
+        print(grouped_ranges_by_dep_feature)
 
         overlaps = get_ranges_overlaps(grouped_ranges_by_dep_feature)
         ranges = []
-        for interval, overlap in overlaps:
+        for interval, overlap in overlaps.items():
             result_meta = calculate_feature_meta(fd_type, overlap, interval) # TODO is this needed? is it for block or range ?
             ranges.append(result_meta)
             if feature_name not in feature_delayed_funcs:
-                feature_delayed_funcs[feature_name] = IntervalDict()
+                feature_delayed_funcs[feature_name] = {}
 
             # TODO use overlap to fetch results of dep delayed funcs
             dep_delayed_funcs = {}
@@ -160,7 +139,8 @@ def build_task_graph(
 
         feature_ranges[feature_name] = ranges
 
-    postorder(fd_type, tree_traversal_callback, root_feature_name)
 
+    postorder(fd_type, tree_traversal_callback, root_feature_name)
+    print(feature_delayed_funcs.keys())
     # list of root feature delayed funcs for all ranges
     return list(feature_delayed_funcs[root_feature_name].values())

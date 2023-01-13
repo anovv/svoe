@@ -5,6 +5,8 @@ from ta.utils import dropna
 from ta.volatility import BollingerBands
 from portion import IntervalDict
 from featurizer.features.data.data import Data
+from featurizer.features.blocks.blocks import BlockMeta
+
 
 
 # Represent a feature schema to be used with different params (exchanges, symbols, instrument_types, etc)
@@ -22,7 +24,7 @@ class FeatureDefinition:
         return False
 
     @classmethod
-    def stream(cls, dep_upstreams: Dict[str, Stream]) -> Stream:
+    def stream(cls, dep_upstreams: List[Stream]) -> Stream:
         raise ValueError('Not Implemented')
 
     @classmethod
@@ -44,10 +46,11 @@ class FeatureDefinition:
                 count_by_type[dep.type_str()] = 0
         return res
 
+    # TODO we assume no 'holes' in data, use ranges: List[BlockRangeMeta] with holes
     @classmethod
-    def group_dep_ranges(cls, ranges: List, dep_feature_name: str) -> IntervalDict: # TODO typehint Block/BlockRange/BlockMeta/BlockRangeMeta
+    def group_dep_ranges(cls, ranges: List[BlockMeta], dep_feature_name: str) -> IntervalDict: # TODO typehint Block/BlockRange/BlockMeta/BlockRangeMeta
         # logic to group input data into atomic blocks for bulk processing
-        # TODO this should be identity mapping by default
+        # TODO this should be identity mapping by default?
         raise ValueError('Not Implemented')
 
 # check https://github.com/bukosabino/ta
