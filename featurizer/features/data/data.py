@@ -2,6 +2,10 @@
 class Data:
 
     @classmethod
+    def named(cls) -> str:
+        return f'{cls.type_str()}-0'
+
+    @classmethod
     def type_str(cls) -> str:
         return cls.__name__
 

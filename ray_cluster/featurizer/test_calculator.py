@@ -72,7 +72,7 @@ class TestFeatureCalculator(unittest.TestCase):
 
     def mock_l2_book_deltas_data_ranges(self, block_len_ms, num_blocks, between_blocks_ms=100, cur_ts=0):
         res = {}
-        data_name = f'{L2BookDeltasData.type_str()}-0' # TODO make this Data method
+        data_name = L2BookDeltasData.named()
         ranges = []
         for i in range(0, num_blocks):
             meta = self.meta(cur_ts, cur_ts + block_len_ms)
