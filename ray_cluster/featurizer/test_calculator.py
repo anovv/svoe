@@ -46,13 +46,6 @@ class TestFeatureCalculator(unittest.TestCase):
         overlaps = C.get_ranges_overlaps(grouped_range)
         self.assertEqual(overlaps, expected)
 
-
-    def test_identity_mapping(self):
-        ranges = [self.meta(1, 2), self.meta(2.1, 5), self.meta(9, 15)]
-        ig = identity_grouping(ranges)
-        print(ig)
-
-
     def meta(self, start_ts, end_ts, extra=None):
         # TODO make mock function
         res = {'start_ts': start_ts, 'end_ts': end_ts}

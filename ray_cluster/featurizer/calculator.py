@@ -1,4 +1,4 @@
-from typing import Union, Dict, Callable, Type
+from typing import Union, Dict, Callable, Type, List
 from featurizer.features.definitions.feature_definition import FeatureDefinition
 from featurizer.features.data.data import Data
 from featurizer.features.blocks.blocks import Block, BlockRange, BlockMeta, BlockRangeMeta, get_interval, DataParams
@@ -81,8 +81,8 @@ def calculate_feature_meta(
     interval: Interval
 ) -> BlockMeta:
     return {
-        'start_ts': interval.upper,
-        'end_ts': interval.lower,
+        'start_ts': interval.lower,
+        'end_ts': interval.upper,
     }
 
 
@@ -90,7 +90,7 @@ def calculate_feature_meta(
 # TODO make 3d visualization with networkx/graphviz
 def build_task_graph(
     fd_type: Type[FeatureDefinition],
-    feature_ranges: Dict # TODO typehint when decide on BlockRangeMeta/BlockMeta
+    feature_ranges: Dict[str, List] # TODO typehint when decide on BlockRangeMeta/BlockMeta
 ):
     root_feature_name = f'{fd_type.type_str()}-0'
     feature_delayed_funcs = {} # feature delayed functions per range per feature
@@ -113,9 +113,6 @@ def build_task_graph(
         for dep_fd, dep_feature_name in fd_type.dep_upstream_schema_named():
             dep_ranges = feature_ranges[dep_feature_name]
             grouped_ranges_by_dep_feature[dep_feature_name] = fd_type.group_dep_ranges(dep_ranges, dep_feature_name)
-        #TODO debug
-        print(feature_name)
-        print(grouped_ranges_by_dep_feature)
 
         overlaps = get_ranges_overlaps(grouped_ranges_by_dep_feature)
         ranges = []
@@ -141,6 +138,5 @@ def build_task_graph(
 
 
     postorder(fd_type, tree_traversal_callback, root_feature_name)
-    print(feature_delayed_funcs.keys())
     # list of root feature delayed funcs for all ranges
     return list(feature_delayed_funcs[root_feature_name].values())
