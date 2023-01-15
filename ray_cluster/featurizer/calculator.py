@@ -1,10 +1,11 @@
-from typing import Union, Dict, Callable, Type, List
+from typing import Union, Dict, Callable, Type, List, OrderedDict, Any
 from featurizer.features.definitions.feature_definition import FeatureDefinition
 from featurizer.features.data.data import Data
 from featurizer.features.blocks.blocks import Block, BlockRange, BlockMeta, BlockRangeMeta, get_interval, DataParams
 import dask.graph_manipulation
 from portion import Interval, IntervalDict
-
+import pandas as pd
+from streamz import Stream
 
 def postorder(node: Type[Union[FeatureDefinition, Data]], callback: Callable, name: str):
     if node.is_data():
@@ -67,11 +68,51 @@ def load_if_needed(
 @dask.delayed
 def calculate_feature(
     fd_type: Type[FeatureDefinition],
-    dep_feature_results: Dict[str, BlockRange], # maps dep feature to BlockRange # TODO List[BlockRangeMeta]?
+    dep_feature_results: Dict[str, BlockRange],# maps dep feature to BlockRange # TODO List[BlockRange] when using 'holes'
     interval: Interval
 ) -> Block:
-    # TODO use FeatureDefinition.stream()
-    return None
+    # TODO we assume no 'hoes' here
+    # merge
+    merged = None
+    dep_feature_names = list(dep_feature_results.keys())
+    for i in range(0, len(dep_feature_names)):
+        dep_feature_name = dep_feature_names[i]
+        block_range = dep_feature_results[dep_feature_name]
+        for block in block_range:
+            # add col name
+            block['feature_name'] = dep_feature_name
+        concated = pd.concat(block_range, ignore_index=True)
+        if i == 0:
+            merged = concated
+        else:
+            merged = pd.merge_asof(merged, concated, on='timestamp', direction='nearest')
+
+    res = []
+
+    # TODO make it a Streamz object?
+    def intervaled_append(elem: Any):
+        # append only if timestamp is within the interval
+        if interval.lower <= elem['timestamp'] <= interval.upper:
+            res.append(elem)
+
+    # construct upstreams
+    upstreams = {dep_feature_name: Stream() for dep_feature_name in dep_feature_names}
+    out_stream = fd_type.stream(upstreams)
+    out_stream.sink(intervaled_append)
+
+    # iterate merged df
+    # TODO # regarding iteration speed
+    # TODO https://stackoverflow.com/questions/7837722/what-is-the-most-efficient-way-to-loop-through-dataframes-with-pandas
+    # TODO use numba's jit ?
+    # TODO OrderedDict/SortedDict/Dict ?
+    # TODO use df.values.tolist() instead and check perf?
+    merged_dict = merged.to_dict(into=OrderedDict, orient='index')
+    # TODO add tqdm
+    # TODO can we do interval based preprocessing for certain FeatureDefinition types to limit iteration span?
+    for v in merged_dict.values():
+        dep_feature_name = v['feature_name']
+        upstreams[dep_feature_name].emit(v)
+    return pd.DataFrame(res, columns=[]) # TODO set column names properly, using FeatureDefinition schema method?
 
 
 # TODO should be FeatureDefinition method

@@ -2,7 +2,6 @@ import calculator as C
 from featurizer.features.data.l2_book_delats.l2_book_deltas import L2BookDeltasData
 from featurizer.features.definitions.l2_book_snapshot.l2_book_snapshot_feature_definition import L2BookSnapshotFeatureDefinition
 from featurizer.features.definitions.mid_price.mid_price_feature_definition import MidPriceFeatureDefinition
-from featurizer.features.blocks.utils import identity_grouping
 import portion as P
 import unittest
 import dask
