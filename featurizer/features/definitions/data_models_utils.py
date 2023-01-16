@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import List, Dict, Optional, Any, Tuple
 
+# TODO deprecate all, use FeatureDefinition event schemas instead
 
 @dataclass
 class TimestampedBase:

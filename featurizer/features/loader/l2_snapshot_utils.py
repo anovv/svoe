@@ -62,6 +62,7 @@ def get_info(df: pd.DataFrame) -> Dict[str, Any]:
     }
 
 
+# TODO deprecate?
 def parse_l2_book_delta_events(deltas: pd.DataFrame) -> List[L2BookDelta]:
     # parses dataframe into list of events
     grouped = deltas.groupby(['timestamp', 'delta'])

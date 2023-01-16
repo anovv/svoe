@@ -3,11 +3,8 @@ from typing import List, Dict, Optional, Any, Tuple, Union, Type
 from portion import IntervalDict, closed
 from streamz import Stream
 from order_book import OrderBook
-import pandas as pd
 from dataclasses import dataclass, field
 from frozenlist import FrozenList
-from tqdm import tqdm
-import featurizer.features.loader.l2_snapshot_utils as l2su
 from featurizer.features.definitions.data_models_utils import TimestampedBase
 from featurizer.features.definitions.feature_definition import FeatureDefinition
 import featurizer.features.definitions.stream_utils as su
@@ -16,10 +13,7 @@ from featurizer.features.data.data import Data
 from featurizer.features.data.l2_book_delats.l2_book_deltas import L2BookDeltasData
 from featurizer.features.blocks.blocks import BlockMeta
 import functools
-
-import dask.diagnostics
-import distributed.diagnostics
-from dask.distributed import progress
+import toolz
 
 
 @dataclass
@@ -44,29 +38,12 @@ class L2BookSnapshot(TimestampedBase):
 
 class L2BookSnapshotFeatureDefinition(FeatureDefinition):
 
-    @staticmethod
-    def l2_deltas_to_snaps(deltas: pd.DataFrame) -> Tuple[List[L2BookSnapshot], Dict[str, Any]]:
-        # for reverse trnasform snap->delta see https://github.com/bmoscon/cryptofeed/blob/master/cryptofeed/util/book.py
-        events = l2su.parse_l2_book_delta_events(deltas)
-
-        state = L2BookSnapshotFeatureDefinition._build_state()
-
-        stream = Stream()
-        ss = L2BookSnapshotFeatureDefinition.stream(stream, state)
-        snapshots = []
-        ss.sink(snapshots.append)
-
-        for i in tqdm(range(len(events))):
-            stream.emit(events[i])
-
-        return snapshots, state.data_inconsistencies
-
     @classmethod
     def stream(cls, upstreams: Dict[str, Stream], state: Optional[_State] = None, depth: Optional[int] = 20) -> Stream:
-        l2_book_deltas_upstream = list(upstreams.values())[0]
+        l2_book_deltas_upstream = toolz.first(upstreams.values())
         if state is None:
-            state = L2BookSnapshotFeatureDefinition._build_state()
-        update = functools.partial(L2BookSnapshotFeatureDefinition._update_state, depth=depth)
+            state = cls._build_state()
+        update = functools.partial(cls._update_state, depth=depth)
         acc = l2_book_deltas_upstream.accumulate(update, returns_state=True, start=state)
         return su.filter_none(acc).unique(maxsize=1)
 
@@ -84,8 +61,8 @@ class L2BookSnapshotFeatureDefinition(FeatureDefinition):
             data_inconsistencies={},
         )
 
-    @staticmethod
-    def _update_state(state: _State, event: L2BookDelta, depth: Optional[int]) -> Tuple[_State, Optional[L2BookSnapshot]]:
+    @classmethod
+    def _update_state(cls, state: _State, event: L2BookDelta, depth: Optional[int]) -> Tuple[_State, Optional[L2BookSnapshot]]:
         if event.delta and not state.inited:
             # skip deltas if no snapshot was inited
             return state, None
@@ -107,10 +84,10 @@ class L2BookSnapshotFeatureDefinition(FeatureDefinition):
         state.timestamp = event.timestamp
         state.receipt_timestamp = event.receipt_timestamp
 
-        return state, L2BookSnapshotFeatureDefinition._state_snapshot(state, depth)
+        return state, cls._state_snapshot(state, depth)
 
-    @staticmethod
-    def _state_snapshot(state: _State, depth: Optional[int]) -> L2BookSnapshot:
+    @classmethod
+    def _state_snapshot(cls, state: _State, depth: Optional[int]) -> L2BookSnapshot:
         bids = FrozenList()
         asks = FrozenList()
         if depth is None:

@@ -10,6 +10,7 @@ from portion import IntervalDict
 
 from dataclasses import dataclass
 
+import toolz
 
 @dataclass # TODO this should be in common classes
 class MidPrice(TimestampedBase):
@@ -20,7 +21,7 @@ class MidPriceFeatureDefinition(FeatureDefinition):
 
     @classmethod
     def stream(cls, upstreams: Dict[str, Stream]) -> Stream:
-        l2_book_snapshots_upstream = list(upstreams.values())[0]
+        l2_book_snapshots_upstream = toolz.first(upstreams.values())
         return l2_book_snapshots_upstream.map(lambda snap: MidPrice(
             timestamp=snap.timestamp,
             receipt_timestamp=snap.receipt_timestamp,

@@ -7,6 +7,7 @@ from featurizer.features.definitions.mid_price.mid_price_feature_definition impo
 from dataclasses import dataclass
 
 import numpy as np
+import toolz
 
 
 @dataclass
@@ -18,7 +19,8 @@ class VolatilityStddevFeatureDefinition(FeatureDefinition):
 
     @classmethod
     def stream(cls, upstreams: Dict[str, Stream], window_size: int = 1) -> Stream:
-        mid_price_upstream = list(upstreams.values())[0]
+        mid_price_upstream = toolz.first(upstreams.values())
+        # TODO implement window_over_time functionality
         return mid_price_upstream\
             .sliding_window(window_size, return_partial=False)\
             .map(VolatilityStddevFeatureDefinition._prices_to_volatility)

@@ -9,6 +9,7 @@ from dataclasses import dataclass
 
 import functools
 import featurizer.features.definitions.stream_utils as su
+import toolz
 
 
 @dataclass
@@ -39,7 +40,7 @@ class OHLCVFeatureDefinition(FeatureDefinition):
             )
         window_s = convert_str_to_seconds(window)
         update = functools.partial(OHLCVFeatureDefinition._update_state, window_s=window_s)
-        trades_upstream = list(upstreams.values())
+        trades_upstream = toolz.first(upstreams.values())
         acc = trades_upstream.accumulate(update, returns_state=True, start=state)
         return su.filter_none(acc)
 

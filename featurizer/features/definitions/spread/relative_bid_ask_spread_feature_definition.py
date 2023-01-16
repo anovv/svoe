@@ -5,6 +5,7 @@ from featurizer.features.definitions.feature_definition import FeatureDefinition
 
 from dataclasses import dataclass
 import math
+import toolz
 
 
 @dataclass
@@ -16,7 +17,7 @@ class RelativeBidAskSpreadFeatureDefinition(FeatureDefinition):
 
     @classmethod
     def stream(cls, upstreams: Dict[str, Stream]) -> Stream:
-        mid_price_upstream = list(upstreams.values())[0]
+        mid_price_upstream = toolz.first(upstreams.values())
         return mid_price_upstream.map(lambda snap: _RelativeSpread(
             timestamp=snap.timestamp,
             receipt_timestamp=snap.receipt_timestamp,
