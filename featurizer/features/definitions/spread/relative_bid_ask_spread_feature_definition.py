@@ -14,10 +14,10 @@ class _RelativeSpread(TimestampedBase):
 
 class RelativeBidAskSpreadFeatureDefinition(FeatureDefinition):
 
-    @staticmethod
-    def stream(upstream: Stream) -> Stream:
-
-        return upstream.map(lambda snap: _RelativeSpread(
+    @classmethod
+    def stream(cls, upstreams: Dict[str, Stream]) -> Stream:
+        mid_price_upstream = list(upstreams.values())[0]
+        return mid_price_upstream.map(lambda snap: _RelativeSpread(
             timestamp=snap.timestamp,
             receipt_timestamp=snap.receipt_timestamp,
             spread=2 * math.fabs((snap.bids[0][0] - snap.asks[0][0]))/(snap.bids[0][0] + snap.asks[0][0])

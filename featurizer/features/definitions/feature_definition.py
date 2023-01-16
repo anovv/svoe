@@ -24,7 +24,7 @@ class FeatureDefinition:
         return False
 
     @classmethod
-    def stream(cls, dep_upstreams: List[Stream]) -> Stream:
+    def stream(cls, dep_upstreams: Dict[str, Stream]) -> Stream:
         raise ValueError('Not Implemented')
 
     @classmethod

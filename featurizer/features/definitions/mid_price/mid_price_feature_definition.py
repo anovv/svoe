@@ -1,4 +1,4 @@
-from typing import List, Type, Union
+from typing import List, Type, Union, Dict
 from streamz import Stream
 from featurizer.features.definitions.data_models_utils import TimestampedBase
 from featurizer.features.definitions.feature_definition import FeatureDefinition
@@ -19,8 +19,8 @@ class MidPrice(TimestampedBase):
 class MidPriceFeatureDefinition(FeatureDefinition):
 
     @classmethod
-    def stream(cls, upstreams: List[Stream]) -> Stream:
-        l2_book_snapshots_upstream = upstreams[0]
+    def stream(cls, upstreams: Dict[str, Stream]) -> Stream:
+        l2_book_snapshots_upstream = list(upstreams.values())[0]
         return l2_book_snapshots_upstream.map(lambda snap: MidPrice(
             timestamp=snap.timestamp,
             receipt_timestamp=snap.receipt_timestamp,

@@ -30,8 +30,8 @@ class _State:
 
 class OHLCVFeatureDefinition(FeatureDefinition):
 
-    @staticmethod
-    def stream(upstream: Stream, state: Optional[_State] = None, window='1m') -> Stream:
+    @classmethod
+    def stream(cls, upstreams: Dict[str, Stream], state: Optional[_State] = None, window='1m') -> Stream:
         if state is None:
             state = _State(
                 last_ts=None,
@@ -39,7 +39,8 @@ class OHLCVFeatureDefinition(FeatureDefinition):
             )
         window_s = convert_str_to_seconds(window)
         update = functools.partial(OHLCVFeatureDefinition._update_state, window_s=window_s)
-        acc = upstream.accumulate(update, returns_state=True, start=state)
+        trades_upstream = list(upstreams.values())
+        acc = trades_upstream.accumulate(update, returns_state=True, start=state)
         return su.filter_none(acc)
 
     @staticmethod

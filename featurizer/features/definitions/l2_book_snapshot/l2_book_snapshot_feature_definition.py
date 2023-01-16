@@ -62,8 +62,8 @@ class L2BookSnapshotFeatureDefinition(FeatureDefinition):
         return snapshots, state.data_inconsistencies
 
     @classmethod
-    def stream(cls, upstreams: List[Stream], state: Optional[_State] = None, depth: Optional[int] = 20) -> Stream:
-        l2_book_deltas_upstream = upstreams[0]
+    def stream(cls, upstreams: Dict[str, Stream], state: Optional[_State] = None, depth: Optional[int] = 20) -> Stream:
+        l2_book_deltas_upstream = list(upstreams.values())[0]
         if state is None:
             state = L2BookSnapshotFeatureDefinition._build_state()
         update = functools.partial(L2BookSnapshotFeatureDefinition._update_state, depth=depth)
