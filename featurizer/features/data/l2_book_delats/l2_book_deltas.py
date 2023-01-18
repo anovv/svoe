@@ -36,4 +36,4 @@ class L2BookDeltasData(Data):
                 'orders': list(df_dict.values())# {'side': side, 'price': price, 'size': size}
             })
 
-            return events
+        return events

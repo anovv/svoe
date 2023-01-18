@@ -53,8 +53,13 @@ class FeatureDefinition:
         # TODO this should be identity mapping by default?
         raise NotImplemented
 
+    @classmethod
+    def parse_events(cls, df: DataFrame) -> List: # TODO typehint
+        # TODO implement default behavior
+        raise NotImplemented
 
-# represent FeatureDefinition with name (in context of multiple features with same FeatureDefinition type)
+
+# represents FeatureDefinition with name (in context of multiple features with same FeatureDefinition type)
 NamedFeature = Tuple[str, Type[Union[FeatureDefinition, Data]]]
 
 # check https://github.com/bukosabino/ta

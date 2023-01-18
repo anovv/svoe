@@ -62,34 +62,6 @@ def get_info(df: pd.DataFrame) -> Dict[str, Any]:
     }
 
 
-# TODO deprecate?
-def parse_l2_book_delta_events(deltas: pd.DataFrame) -> List[L2BookDelta]:
-    # parses dataframe into list of events
-    grouped = deltas.groupby(['timestamp', 'delta'])
-    dfs = [grouped.get_group(x) for x in grouped.groups]
-    dfs = sorted(dfs, key=lambda df: df['timestamp'].iloc[0], reverse=False)
-    events = []
-    for i in tqdm(range(len(dfs))):
-        df = dfs[i]
-        timestamp = df.iloc[0].timestamp
-        receipt_timestamp = df.iloc[0].receipt_timestamp
-        delta = df.iloc[0].delta
-        orders = []
-        #TODO https://stackoverflow.com/questions/7837722/what-is-the-most-efficient-way-to-loop-through-dataframes-with-pandas
-        # regarding iteration speed
-        # TODO use numba's jit
-        df_dict = df.to_dict(into=OrderedDict, orient='index') # TODO use df.values.tolist() instead and check perf?
-        for v in df_dict.values():
-            orders.append((v['side'], v['price'], v['size']))
-        events.append(L2BookDelta(
-            timestamp=timestamp,
-            receipt_timestamp=receipt_timestamp,
-            delta=delta,
-            orders=orders
-        ))
-
-        return events
-
 
 
 
