@@ -20,7 +20,8 @@ class VolatilityStddevFeatureDefinition(FeatureDefinition):
     @classmethod
     def stream(cls, upstreams: Dict[str, Stream], window_size: int = 1) -> Stream:
         mid_price_upstream = toolz.first(upstreams.values())
-        # TODO implement window_over_time functionality
+        # TODO implement window_over_time or (lookback_window) functionality
+        # TODO use rolling()?
         return mid_price_upstream\
             .sliding_window(window_size, return_partial=False)\
             .map(VolatilityStddevFeatureDefinition._prices_to_volatility)

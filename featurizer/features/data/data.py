@@ -1,3 +1,7 @@
+from typing import List
+from pandas import DataFrame
+
+
 # a placeholder class to indicte that all subclasses are raw data channels
 class Data:
 
@@ -17,5 +21,10 @@ class Data:
 
     @classmethod
     def params(cls):
+        raise NotImplemented
+
+    @classmethod
+    def parse_events(cls, df: DataFrame) -> List: # TODO typehint
+        # TODO implement default behavior
         raise NotImplemented
 

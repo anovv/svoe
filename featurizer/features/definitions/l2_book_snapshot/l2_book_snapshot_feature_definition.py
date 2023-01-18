@@ -6,7 +6,7 @@ from order_book import OrderBook
 from dataclasses import dataclass, field
 from frozenlist import FrozenList
 from featurizer.features.definitions.data_models_utils import TimestampedBase
-from featurizer.features.definitions.feature_definition import FeatureDefinition
+from featurizer.features.definitions.feature_definition import FeatureDefinition, NamedFeature
 import featurizer.features.definitions.stream_utils as su
 from featurizer.features.definitions.data_models_utils import L2BookDelta # TODO rename to event
 from featurizer.features.data.data import Data
@@ -119,7 +119,7 @@ class L2BookSnapshotFeatureDefinition(FeatureDefinition):
         )
 
     @classmethod
-    def group_dep_ranges(cls, ranges: List[BlockMeta], dep_feature_name: str) -> IntervalDict:
+    def group_dep_ranges(cls, ranges: List[BlockMeta], dep_named_feature: NamedFeature) -> IntervalDict:
         # TODO separate const for this
         # TODO or separate function for metadata parsing
         meta_key_1 = 'snapshot_ts'
@@ -142,7 +142,7 @@ class L2BookSnapshotFeatureDefinition(FeatureDefinition):
         return res
 
     @classmethod
-    def dep_upstreams_schema(cls) -> List[Type[Union[FeatureDefinition, Data]]]:
+    def dep_upstream_schema(cls) -> List[Type[Union[FeatureDefinition, Data]]]:
         return [L2BookDeltasData]
 
 
