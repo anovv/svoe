@@ -9,7 +9,7 @@ from featurizer.features.blocks.blocks import BlockMeta
 from pandas import DataFrame
 
 
-# Represent a feature schema to be used with different params (exchanges, symbols, instrument_types, etc)
+# Represents a feature schema to be used with different params (exchanges, symbols, instrument_types, etc)
 # each set of params producing materialized feature
 class FeatureDefinition:
 
@@ -23,6 +23,7 @@ class FeatureDefinition:
     def is_data(cls) -> bool:
         return False
 
+    # TODO make dep_upstreams: Dict[NamedFeature, Stream]
     @classmethod
     def stream(cls, dep_upstreams: Dict[str, Stream]) -> Stream:
         raise NotImplemented

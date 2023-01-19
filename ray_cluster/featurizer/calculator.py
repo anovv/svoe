@@ -8,6 +8,7 @@ import pandas as pd
 from streamz import Stream
 import heapq
 
+# TODO util this
 def postorder(named_feature_node: NamedFeature, callback: Callable):
     fd_type = named_feature_node[1]
     if fd_type.is_data():
@@ -18,6 +19,26 @@ def postorder(named_feature_node: NamedFeature, callback: Callable):
         postorder(dep_named_feature, callback)
 
     callback(named_feature_node)
+
+
+# TODO move this to FeatureDefinition package
+def build_stream_graph(named_feature: NamedFeature) -> Dict[NamedFeature, Stream]:
+    stream_graph = {}
+
+    def callback(named_feature: NamedFeature):
+        fd_type = named_feature[1]
+        if fd_type.is_data():
+            stream_graph[named_feature] = Stream()
+            return
+        dep_upstreams = {}
+        named_children = fd_type.dep_upstream_schema_named()
+        for dep_named_feature in named_children:
+            dep_upstreams[dep_named_feature[0]] = stream_graph[dep_named_feature]
+        stream = fd_type.stream(dep_upstreams)
+        stream_graph[named_feature] = stream
+
+    postorder(named_feature, callback)
+    return stream_graph
 
 
 def load_data_ranges(
