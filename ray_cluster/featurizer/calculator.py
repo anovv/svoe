@@ -21,10 +21,10 @@ def postorder(named_feature_node: NamedFeature, callback: Callable):
 
 
 def load_data_ranges(
-        fd_type: Type[FeatureDefinition],
-        data_params: DataParams,
-        start_date: str = None,
-        end_date: str = None
+    fd_type: Type[FeatureDefinition],
+    data_params: DataParams,
+    start_date: str = None,
+    end_date: str = None
 ) -> Dict:
     # TODO call data catalog service
     return {}
@@ -84,9 +84,9 @@ def load_if_needed(
 # https://docs.python.org/3/library/tkinter.html
 @dask.delayed
 def calculate_feature(
-        fd_type: Type[FeatureDefinition],
-        dep_feature_results: Dict[NamedFeature, BlockRange], # maps dep feature to BlockRange # TODO List[BlockRange] when using 'holes'
-        interval: Interval
+    fd_type: Type[FeatureDefinition],
+    dep_feature_results: Dict[NamedFeature, BlockRange], # maps dep feature to BlockRange # TODO List[BlockRange] when using 'holes'
+    interval: Interval
 ) -> Block:
     # TODO we assume no 'hoes' here
     # merge
@@ -105,7 +105,7 @@ def calculate_feature(
         if i == 0:
             merged = events
         else:
-            merged = heapq.merge(merged, events, key=(lambda e: e['timestamp'])
+            merged = heapq.merge(merged, events, key=lambda e: e['timestamp'])
 
     res = []
     # TODO make it a Streamz object?
@@ -128,10 +128,10 @@ def calculate_feature(
 
 # TODO should be FeatureDefinition method
 def calculate_feature_meta(
-        fd_type: Type[FeatureDefinition],
-        dep_feature_results: Dict[NamedFeature, BlockRangeMeta],
-        # maps dep feature to BlockRange # TODO List[BlockRangeMeta]?
-        interval: Interval
+    fd_type: Type[FeatureDefinition],
+    dep_feature_results: Dict[NamedFeature, BlockRangeMeta],
+    # maps dep feature to BlockRange # TODO List[BlockRangeMeta]?
+    interval: Interval
 ) -> BlockMeta:
     return {
         'start_ts': interval.lower,
@@ -142,8 +142,8 @@ def calculate_feature_meta(
 # graph construction
 # TODO make 3d visualization with networkx/graphviz
 def build_task_graph(
-        fd_type: Type[FeatureDefinition],
-        feature_ranges: Dict[NamedFeature, List]  # TODO typehint when decide on BlockRangeMeta/BlockMeta
+    fd_type: Type[FeatureDefinition],
+    feature_ranges: Dict[NamedFeature, List]  # TODO typehint when decide on BlockRangeMeta/BlockMeta
 ):
     named_root_feature = (f'{fd_type.type_str()}-0', fd_type)
     feature_delayed_funcs = {}  # feature delayed functions per range per feature

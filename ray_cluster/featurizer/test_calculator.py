@@ -5,6 +5,7 @@ from featurizer.features.definitions.mid_price.mid_price_feature_definition impo
 import portion as P
 import unittest
 import dask
+import pandas as pd
 
 
 class TestFeatureCalculator(unittest.TestCase):
@@ -71,7 +72,7 @@ class TestFeatureCalculator(unittest.TestCase):
 
     def mock_l2_book_deltas_data_ranges(self, block_len_ms, num_blocks, between_blocks_ms=100, cur_ts=0):
         res = {}
-        data_name = L2BookDeltasData.named()
+        named_data = L2BookDeltasData.named()
         ranges = []
         for i in range(0, num_blocks):
             meta = self.meta(cur_ts, cur_ts + block_len_ms)
@@ -82,8 +83,28 @@ class TestFeatureCalculator(unittest.TestCase):
             ranges.append(meta)
             cur_ts += block_len_ms
             cur_ts += between_blocks_ms
-        res[data_name] = ranges
+        res[named_data] = ranges
         return res
+
+    def load_l2_book_deltas_data_ranges(self):
+        # TODO mock catalog service calls
+        return {}
+
+    def test_featurization_e2e(self):
+        # calculate in offline/distributed way
+        fd_type = L2BookSnapshotFeatureDefinition
+        feature_ranges = self.load_l2_book_deltas_data_ranges()
+        graph = C.build_task_graph(fd_type, feature_ranges)
+        res_blocks = dask.compute(graph)
+        offline_res = pd.concat(res_blocks)
+
+        # calculate online
+        # TODO
+        #  1. build streamz object from feature tree
+        #  2. merge feature_ranges into one range representing continuous data stream
+        #  3. pipe events through stream into output dataframe (online_res)
+        #  4. assert offline_res == online_res
+
 
 
 if __name__ == '__main__':

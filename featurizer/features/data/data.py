@@ -1,13 +1,15 @@
 from typing import List
 from pandas import DataFrame
 
+from featurizer.features.definitions.feature_definition import NamedFeature
+
 
 # a placeholder class to indicte that all subclasses are raw data channels
 class Data:
 
     @classmethod
-    def named(cls) -> str:
-        return f'{cls.type_str()}-0'
+    def named(cls) -> NamedFeature:
+        return f'{cls.type_str()}-0', cls
 
     @classmethod
     def type_str(cls) -> str:
