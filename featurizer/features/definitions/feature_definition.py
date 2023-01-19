@@ -14,6 +14,10 @@ from pandas import DataFrame
 class FeatureDefinition:
 
     @classmethod
+    def named(cls) -> NamedFeature:
+        return f'{cls.type_str()}-0', cls
+
+    @classmethod
     def type_str(cls) -> str:
         return cls.__name__
 

@@ -1,4 +1,4 @@
-from typing import Union, Dict, Callable, Type, List, OrderedDict, Any, Tuple
+from typing import Union, Dict, Callable, Type, List, OrderedDict, Any, Tuple, Optional
 from featurizer.features.definitions.feature_definition import FeatureDefinition, NamedFeature
 from featurizer.features.data.data import Data
 from featurizer.features.blocks.blocks import Block, BlockRange, BlockMeta, BlockRangeMeta, get_interval, DataParams
@@ -109,18 +109,31 @@ def calculate_feature(
     dep_feature_results: Dict[NamedFeature, BlockRange], # maps dep feature to BlockRange # TODO List[BlockRange] when using 'holes'
     interval: Interval
 ) -> Block:
+    merged = merge_feature_blocks(dep_feature_results)
+    # construct upstreams
+    upstreams = {dep_named_feature[0]: Stream() for dep_named_feature in dep_feature_results.keys()}
+    out_stream = fd_type.stream(upstreams)
+    return run_stream(merged, upstreams, out_stream, interval)
+
+
+# TODO util this
+# TODO we assume no 'holes' here
+# TODO typehint Event = Dict[str, Any] ? note that this corresponds to grouped events by timestamp
+def merge_feature_blocks(
+    feature_blocks: Dict[NamedFeature, BlockRange]
+) -> List[Dict[str, Any]]:
     # TODO we assume no 'hoes' here
     # merge
     merged = None
-    dep_named_features = list(dep_feature_results.keys())
-    for i in range(0, len(dep_named_features)):
-        dep_named_feature = dep_named_features[i]
-        block_range = dep_feature_results[dep_named_feature]
+    named_features = list(feature_blocks.keys())
+    for i in range(0, len(named_features)):
+        named_feature = named_features[i]
+        block_range = feature_blocks[named_feature]
         events = []
         for block in block_range:
             # add col name
-            block['feature_name'] = dep_named_feature[0]
-            parsed = dep_named_feature[1].parse_events(block)
+            block['feature_name'] = named_feature[0]
+            parsed = named_feature[1].parse_events(block)
             events.extend(parsed)
         # TODO check if events are timestamp sorted?
         if i == 0:
@@ -128,21 +141,35 @@ def calculate_feature(
         else:
             merged = heapq.merge(merged, events, key=lambda e: e['timestamp'])
 
+    return merged
+
+
+# TODO util this
+def run_stream(
+    events: List[Dict[str, Any]],
+    sources: Dict[str, Stream],
+    out: Stream,
+    interval: Optional[Interval]=None
+) -> pd.DataFrame: # TODO Block?
     res = []
+
     # TODO make it a Streamz object?
-    def intervaled_append(elem: Any):
-        # append only if timestamp is within the interval
+    def append(elem: Any):
+        # if interval is not specified, append everything
+        if interval is None:
+            res.append(elem)
+            return
+
+        # if interval is specified, append only if timestamp is within the interval
         if interval.lower <= elem['timestamp'] <= interval.upper:
             res.append(elem)
 
-    # construct upstreams
-    upstreams = {dep_named_feature[0]: Stream() for dep_named_feature in dep_named_features}
-    out_stream = fd_type.stream(upstreams)
-    out_stream.sink(intervaled_append)
+    out.sink(append)
 
-    for event in merged:
+    # TODO time this
+    for event in events:
         dep_feature_name = event['feature_name']
-        upstreams[dep_feature_name].emit(event)
+        sources[dep_feature_name].emit(event)
 
     return pd.DataFrame(res, columns=[])  # TODO set column names properly, using FeatureDefinition schema method?
 
@@ -163,10 +190,10 @@ def calculate_feature_meta(
 # graph construction
 # TODO make 3d visualization with networkx/graphviz
 def build_task_graph(
-    fd_type: Type[FeatureDefinition],
+    named_root_feature: NamedFeature,
     feature_ranges: Dict[NamedFeature, List]  # TODO typehint when decide on BlockRangeMeta/BlockMeta
 ):
-    named_root_feature = (f'{fd_type.type_str()}-0', fd_type)
+    fd_type = named_root_feature[1]
     feature_delayed_funcs = {}  # feature delayed functions per range per feature
 
     # bottom up/postorder traversal
