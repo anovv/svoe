@@ -1,14 +1,9 @@
-from featurizer.features.data.data import Data
+from featurizer.features.data.data_source_definition import DataSourceDefinition
 from typing import List, OrderedDict
 from pandas import DataFrame
 
-class L2BookDeltasData(Data):
 
-    # TODO define event schema
-
-    @classmethod
-    def params(cls):
-        return {} # TODO
+class L2BookDeltasData(DataSourceDefinition):
 
     @classmethod
     def parse_events(cls, df: DataFrame) -> List: # TODO typehint

@@ -1,6 +1,6 @@
 from typing import Union, Dict, Callable, Type, List, OrderedDict, Any, Tuple, Optional
-from featurizer.features.definitions.feature_definition import FeatureDefinition, NamedFeature
-from featurizer.features.data.data import Data
+from featurizer.features.definitions.feature_definition import FeatureDefinition
+from featurizer.features.data.data_definition import NamedFeature, DataDefinition
 from featurizer.features.blocks.blocks import Block, BlockRange, BlockMeta, BlockRangeMeta, get_interval, DataParams
 import dask.graph_manipulation
 from portion import Interval, IntervalDict

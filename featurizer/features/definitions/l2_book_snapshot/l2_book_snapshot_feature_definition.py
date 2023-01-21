@@ -6,10 +6,10 @@ from order_book import OrderBook
 from dataclasses import dataclass, field
 from frozenlist import FrozenList
 from featurizer.features.definitions.data_models_utils import TimestampedBase
-from featurizer.features.definitions.feature_definition import FeatureDefinition, NamedFeature
+from featurizer.features.data.data_definition import NamedFeature, DataDefinition
+from featurizer.features.definitions.feature_definition import FeatureDefinition
 import featurizer.features.definitions.stream_utils as su
 from featurizer.features.definitions.data_models_utils import L2BookDelta # TODO rename to event
-from featurizer.features.data.data import Data
 from featurizer.features.data.l2_book_delats.l2_book_deltas import L2BookDeltasData
 from featurizer.features.blocks.blocks import BlockMeta
 import functools
@@ -142,7 +142,7 @@ class L2BookSnapshotFeatureDefinition(FeatureDefinition):
         return res
 
     @classmethod
-    def dep_upstream_schema(cls) -> List[Type[Union[FeatureDefinition, Data]]]:
+    def dep_upstream_schema(cls) -> List[Type[DataDefinition]]:
         return [L2BookDeltasData]
 
 

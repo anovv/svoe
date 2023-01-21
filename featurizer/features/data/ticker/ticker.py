@@ -1,7 +1,7 @@
-from featurizer.features.data.data import Data
+from featurizer.features.data.data_source_definition import DataSourceDefinition
 
 
-class TickerData(Data):
+class TickerData(DataSourceDefinition):
 
     @classmethod
     def params(cls):
