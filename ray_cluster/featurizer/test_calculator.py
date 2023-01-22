@@ -9,7 +9,9 @@ import portion as P
 import unittest
 import dask
 import pandas as pd
-from typing import Dict, Type
+from typing import Dict, Type, Tuple
+from featurizer.features.loader.l2_snapshot_utils import get_info
+from featurizer.features.loader.df_utils import load_files
 
 
 class TestFeatureCalculator(unittest.TestCase):
@@ -88,35 +90,52 @@ class TestFeatureCalculator(unittest.TestCase):
             if i % 2 == 0:
                 # TODO sync keys with L2BookSnapshotFeatureDefinition.group_dep_ranges
                 meta['snapshot_ts'] = cur_ts + 10 * 1000
-                meta['before_snapshot_ts'] = meta['snapshot_ts'] - 1 * 1000
             ranges.append(meta)
             cur_ts += block_len_ms
             cur_ts += between_blocks_ms
         res[named_data] = ranges
         return res
 
-    def load_l2_book_deltas_data_ranges_meta(self) -> Dict[NamedFeature, BlockRangeMeta]:
-        # TODO mock catalog service calls
-        return {}
+    def mock_l2_book_delta_data_and_meta(self) -> Tuple[Dict[NamedFeature, BlockRange], Dict[NamedFeature, BlockRangeMeta]]:
+        consec_athena_files_BINANCE_FUTURES_BTC_USD_PERP = [
+            's3://svoe.test.1/data_lake/data_feed_market_data/l2_book/exchange=BINANCE_FUTURES/instrument_type=perpetual/instrument_extra={}/symbol=BTC-USDT-PERP/base=BTC/quote=USDT/date=2022-10-03/compaction=raw/version=local/BINANCE_FUTURES*l2_book*BTC-USDT-PERP*1664778796.722228*1664778826.607931*2e74bf76915c4b168248b18d059773b1.gz.parquet',
+            's3://svoe.test.1/data_lake/data_feed_market_data/l2_book/exchange=BINANCE_FUTURES/instrument_type=perpetual/instrument_extra={}/symbol=BTC-USDT-PERP/base=BTC/quote=USDT/date=2022-10-03/compaction=raw/version=local/BINANCE_FUTURES*l2_book*BTC-USDT-PERP*1664778826.710401*1664778856.692907*4ffb70c161f4429d81663ca70d070ccc.gz.parquet',
+            's3://svoe.test.1/data_lake/data_feed_market_data/l2_book/exchange=BINANCE_FUTURES/instrument_type=perpetual/instrument_extra={}/symbol=BTC-USDT-PERP/base=BTC/quote=USDT/date=2022-10-03/compaction=raw/version=local/BINANCE_FUTURES*l2_book*BTC-USDT-PERP*1664778856.819425*1664778887.340147*9b0e6bf57fc34074a662e3db00aebfae.gz.parquet',
+            's3://svoe.test.1/data_lake/data_feed_market_data/l2_book/exchange=BINANCE_FUTURES/instrument_type=perpetual/instrument_extra={}/symbol=BTC-USDT-PERP/base=BTC/quote=USDT/date=2022-10-03/compaction=raw/version=local/BINANCE_FUTURES*l2_book*BTC-USDT-PERP*1664778887.442283*1664778919.106682*49d157f8d4134b409ba0126b008250b3.gz.parquet',
+            's3://svoe.test.1/data_lake/data_feed_market_data/l2_book/exchange=BINANCE_FUTURES/instrument_type=perpetual/instrument_extra={}/symbol=BTC-USDT-PERP/base=BTC/quote=USDT/date=2022-10-03/compaction=raw/version=local/BINANCE_FUTURES*l2_book*BTC-USDT-PERP*1664778919.204879*1664778949.1246562*c04cc54b0c094afd922c53ccf6344651.gz.parquet',
+            's3://svoe.test.1/data_lake/data_feed_market_data/l2_book/exchange=BINANCE_FUTURES/instrument_type=perpetual/instrument_extra={}/symbol=BTC-USDT-PERP/base=BTC/quote=USDT/date=2022-10-03/compaction=raw/version=local/BINANCE_FUTURES*l2_book*BTC-USDT-PERP*1664778949.313781*1664778979.103868*f3605c1202f64eb3bca1960eb5b9b241.gz.parquet',
+            's3://svoe.test.1/data_lake/data_feed_market_data/l2_book/exchange=BINANCE_FUTURES/instrument_type=perpetual/instrument_extra={}/symbol=BTC-USDT-PERP/base=BTC/quote=USDT/date=2022-10-03/compaction=raw/version=local/BINANCE_FUTURES*l2_book*BTC-USDT-PERP*1664778979.1611981*1664779009.082793*71c48c0b589d4c0b9ee2961dde59d9a1.gz.parquet'
+        ]
 
-    def load_data(self, meta: Dict[NamedFeature, BlockRangeMeta]) -> Dict[NamedFeature, BlockRange]:
-        # TODO mock data loader
-        return {}
+        block_range = load_files(consec_athena_files_BINANCE_FUTURES_BTC_USD_PERP)
+        infos = [get_info(block) for block in block_range]
+        block_range_meta = []
+        for i in range(len(consec_athena_files_BINANCE_FUTURES_BTC_USD_PERP)):
+            block_meta = {
+                'path': consec_athena_files_BINANCE_FUTURES_BTC_USD_PERP[i]
+            }
+            if 'snapshot_ts' in infos[i]:
+                block_meta['snapshot_ts'] = infos[i]['snapshot_ts']
+            block_range_meta.append(block_meta)
+
+        named_data = L2BookDeltasData.named()
+        return {named_data: block_range}, {named_data: block_range_meta}
 
     def test_featurization_e2e(self):
+        # mock consecuitive l2 delta blocks
+        block_range, block_range_meta = self.mock_l2_book_delta_data_and_meta()
+
         # calculate in offline/distributed way
         named_feature = L2BookSnapshotFeatureDefinition.named()
-        input_ranges_meta = self.load_l2_book_deltas_data_ranges_meta()
-        task_graph = C.build_task_graph(named_feature, input_ranges_meta)
+        task_graph = C.build_task_graph(named_feature, block_range_meta)
         res_blocks = dask.compute(task_graph)
         offline_res = pd.concat(res_blocks)
 
         # calculate online
         stream_graph = C.build_stream_graph(named_feature)
         stream = stream_graph[named_feature]
-        sources = {input_data_name: stream_graph[input_data_name] for input_data_name in input_ranges_meta.keys()}
-        input_ranges = self.load_data(input_ranges_meta)
-        merged_events = C.merge_feature_blocks(input_ranges)
+        sources = {input_data_name: stream_graph[input_data_name] for input_data_name in block_range_meta.keys()}
+        merged_events = C.merge_feature_blocks(block_range)
         online_res = C.run_stream(merged_events, sources, stream)
 
         assert offline_res == online_res
