@@ -81,7 +81,7 @@ class TestFeatureCalculator(unittest.TestCase):
             self, block_len_ms, num_blocks, between_blocks_ms=100, cur_ts=0
     ) -> Dict[NamedFeature, BlockRangeMeta]:
         res = {}
-        data_name = L2BookDeltasData.name()
+        named_data = L2BookDeltasData.named()
         ranges = []
         for i in range(0, num_blocks):
             meta = self.meta(cur_ts, cur_ts + block_len_ms)
@@ -92,7 +92,7 @@ class TestFeatureCalculator(unittest.TestCase):
             ranges.append(meta)
             cur_ts += block_len_ms
             cur_ts += between_blocks_ms
-        res[data_name] = ranges
+        res[named_data] = ranges
         return res
 
     def load_l2_book_deltas_data_ranges_meta(self) -> Dict[NamedFeature, BlockRangeMeta]:

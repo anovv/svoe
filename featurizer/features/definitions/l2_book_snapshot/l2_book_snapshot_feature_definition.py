@@ -122,21 +122,22 @@ class L2BookSnapshotFeatureDefinition(FeatureDefinition):
     def group_dep_ranges(cls, ranges: List[BlockMeta], dep_named_feature: NamedFeature) -> IntervalDict:
         # TODO separate const for this
         # TODO or separate function for metadata parsing
-        meta_key_1 = 'snapshot_ts'
-        meta_key_2 = 'before_snapshot_ts'
+        meta_key = 'snapshot_ts'
         res = IntervalDict()
         # TODO we assume no holes in data here
         start_ts, end_ts = None, None
         cur_ranges = []
         for meta in ranges:
             cur_ranges.append(meta)
-            if meta_key_1 in meta:
+            if meta_key in meta:
                 if start_ts is None:
-                    start_ts = meta[meta_key_1]
+                    start_ts = meta[meta_key]
                 else:
-                    end_ts = meta[meta_key_2]
+                    # TODO there will be a 1ts overlap between partitioned groups
+                    #  do we need to handle this?
+                    end_ts = meta[meta_key]
                     res[closed(start_ts, end_ts)] = cur_ranges
-                    start_ts = meta[meta_key_1]
+                    start_ts = meta[meta_key]
                     cur_ranges = [meta]
 
         return res
