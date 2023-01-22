@@ -14,9 +14,16 @@ def load_single_file(path: str, credentials: AwsCredentials = None) -> pd.DataFr
     # split path into prefix and suffix
     # this is needed because if dataset=True data wrangler handles input path as a glob pattern,
     # hence messing up special characters
+
+    # for Python < 3.9
+    def remove_suffix(input_string, suffix):
+        if suffix and input_string.endswith(suffix):
+            return input_string[:-len(suffix)]
+        return input_string
+
     split = path.split('/')
     suffix = split[len(split) - 1]
-    prefix = path.removesuffix(suffix)
+    prefix = remove_suffix(path, suffix)
     if credentials is not None:
         session = credentials.get_boto3_session()
     else:

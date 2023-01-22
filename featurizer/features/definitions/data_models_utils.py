@@ -12,7 +12,9 @@ class TimestampedBase:
 # common data source events
 @dataclass
 class L2BookDelta(TimestampedBase):
+    feature_name: str
     delta: bool  # indicates whether this is delta or full snapshot
+    # TODO make it list of dicts and sync with L2BookDeltasData.parse_events()
     orders: List[Tuple[str, float, float]]  # side, price, size
 
 

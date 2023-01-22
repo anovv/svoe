@@ -18,7 +18,7 @@ class FeatureDefinition(DataDefinition):
         return super(FeatureDefinition, cls).named()
 
     @classmethod
-    def is_data(cls) -> bool:
+    def is_data_source(cls) -> bool:
         return False
 
     # TODO make dep_upstreams: Dict[NamedFeature, Stream]
