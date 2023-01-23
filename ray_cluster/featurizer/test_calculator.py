@@ -2,6 +2,7 @@ from collections import OrderedDict
 from cache_df import CacheDF
 from joblib import hash
 from pathlib import Path
+import toolz
 
 import calculator as C
 from featurizer.features.data.l2_book_delats.l2_book_deltas import L2BookDeltasData
@@ -116,11 +117,12 @@ class TestFeatureCalculator(unittest.TestCase):
         # check cache first
         cache_location = './cached_dfs'
         Path(cache_location).mkdir(parents=True, exist_ok=True)
+        # TODO use joblib.Memory instead
         cache = CacheDF(cache_dir=cache_location)
         block_range = []
         cached_paths = []
         for path in consec_athena_files_BINANCE_FUTURES_BTC_USD_PERP:
-            hashed_path = hash(path) # can't use s3:// strings as keys, cache_df lib flips out
+            hashed_path = hash(path)# can't use s3:// strings as keys, cache_df lib flips out
             if cache.is_cached(hashed_path):
                 block_range.append(cache.read(hashed_path))
                 cached_paths.append(path)
@@ -149,23 +151,15 @@ class TestFeatureCalculator(unittest.TestCase):
         named_data = L2BookDeltasData.named()
         return {named_data: block_range}, {named_data: block_range_meta}
 
-    # TODO this should be in another test class
-    # def test_l2_book_delta_data_source_parse_events(self):
-    #     path = 's3://svoe.test.1/data_lake/data_feed_market_data/l2_book/exchange=BINANCE_FUTURES/instrument_type=perpetual/instrument_extra={}/symbol=BTC-USDT-PERP/base=BTC/quote=USDT/date=2022-10-03/compaction=raw/version=local/BINANCE_FUTURES*l2_book*BTC-USDT-PERP*1664778796.722228*1664778826.607931*2e74bf76915c4b168248b18d059773b1.gz.parquet'
-    #     df = load_single_file(path)
-    #     events = L2BookDeltasData.parse_events(df)
-    #     print(events)
-    #     # df = pd.DataFrame({'col1': [1, 2],'col2': [0.5, 0.75]})
-    #     # d = df.to_dict(orient='index', into=OrderedDict)
-    #     # print(d)
-
     def test_featurization_e2e(self):
-        # mock consecuitive l2 delta blocks
+        # mock consecutive l2 delta blocks
         block_range, block_range_meta = self.mock_l2_book_delta_data_and_meta()
+        # grouped_ranges = L2BookSnapshotFeatureDefinition.group_dep_ranges(toolz.first(block_range_meta.values()), None)
+        # print(grouped_ranges)
         named_feature = L2BookSnapshotFeatureDefinition.named()
-
         # calculate in offline/distributed way
         task_graph = C.build_task_graph(named_feature, block_range_meta)
+        # dask.visualize(*task_graph)
         res_blocks = dask.compute(task_graph)
         print(len(res_blocks))
         offline_res = pd.concat(*res_blocks)

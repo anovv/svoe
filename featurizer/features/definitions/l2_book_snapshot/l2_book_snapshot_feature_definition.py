@@ -118,6 +118,7 @@ class L2BookSnapshotFeatureDefinition(FeatureDefinition):
             asks=asks
         )
 
+    # TODO test this
     @classmethod
     def group_dep_ranges(cls, ranges: List[BlockMeta], dep_named_feature: NamedFeature) -> IntervalDict:
         # TODO separate const for this
@@ -126,9 +127,13 @@ class L2BookSnapshotFeatureDefinition(FeatureDefinition):
         res = IntervalDict()
         # TODO we assume no holes in data here
         start_ts, end_ts = None, None
+        found_snapshot = False
         cur_ranges = []
         for meta in ranges:
-            cur_ranges.append(meta)
+            if meta_key in meta:
+                found_snapshot = True
+            if found_snapshot:
+                cur_ranges.append(meta)
             if meta_key in meta:
                 if start_ts is None:
                     start_ts = meta[meta_key]
@@ -139,6 +144,16 @@ class L2BookSnapshotFeatureDefinition(FeatureDefinition):
                     res[closed(start_ts, end_ts)] = cur_ranges
                     start_ts = meta[meta_key]
                     cur_ranges = [meta]
+
+        if not found_snapshot:
+            # no snapshots, return empty
+            return res
+
+        # append trailing deltas, last block
+        end_ts = ranges[-1]['end_ts']
+        interval = closed(start_ts, end_ts)
+        if len(cur_ranges) != 0 and interval not in res:
+            res[interval] = cur_ranges
 
         return res
 
