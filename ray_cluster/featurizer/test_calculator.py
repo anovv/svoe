@@ -1,4 +1,7 @@
 from collections import OrderedDict
+from cache_df import CacheDF
+from joblib import hash
+from pathlib import Path
 
 import calculator as C
 from featurizer.features.data.l2_book_delats.l2_book_deltas import L2BookDeltasData
@@ -109,9 +112,28 @@ class TestFeatureCalculator(unittest.TestCase):
             's3://svoe.test.1/data_lake/data_feed_market_data/l2_book/exchange=BINANCE_FUTURES/instrument_type=perpetual/instrument_extra={}/symbol=BTC-USDT-PERP/base=BTC/quote=USDT/date=2022-10-03/compaction=raw/version=local/BINANCE_FUTURES*l2_book*BTC-USDT-PERP*1664778949.313781*1664778979.103868*f3605c1202f64eb3bca1960eb5b9b241.gz.parquet',
             's3://svoe.test.1/data_lake/data_feed_market_data/l2_book/exchange=BINANCE_FUTURES/instrument_type=perpetual/instrument_extra={}/symbol=BTC-USDT-PERP/base=BTC/quote=USDT/date=2022-10-03/compaction=raw/version=local/BINANCE_FUTURES*l2_book*BTC-USDT-PERP*1664778979.1611981*1664779009.082793*71c48c0b589d4c0b9ee2961dde59d9a1.gz.parquet'
         ]
+        print(f'Loading {len(consec_athena_files_BINANCE_FUTURES_BTC_USD_PERP)} blocks for testing...')
+        # check cache first
+        cache_location = './cached_dfs'
+        Path(cache_location).mkdir(parents=True, exist_ok=True)
+        cache = CacheDF(cache_dir=cache_location)
+        block_range = []
+        cached_paths = []
+        for path in consec_athena_files_BINANCE_FUTURES_BTC_USD_PERP:
+            hashed_path = hash(path) # can't use s3:// strings as keys, cache_df lib flips out
+            if cache.is_cached(hashed_path):
+                block_range.append(cache.read(hashed_path))
+                cached_paths.append(path)
+        print(f'Loaded {len(cached_paths)} cached dataframes')
+        if len(cached_paths) != len(consec_athena_files_BINANCE_FUTURES_BTC_USD_PERP):
+            to_load_paths = list(set(consec_athena_files_BINANCE_FUTURES_BTC_USD_PERP) - set(cached_paths))
+            loaded = load_files(to_load_paths)
+            # cache loaded dfs
+            for i in range(len(to_load_paths)):
+                cache.cache(loaded[i], hash(to_load_paths[i]))
+            block_range.extend(loaded)
+            print(f'Loaded and cached {len(loaded)} dataframes')
 
-        # TODO use joblib to cache data frames based on path
-        block_range = load_files(consec_athena_files_BINANCE_FUTURES_BTC_USD_PERP)
         infos = [get_info(block) for block in block_range]
         block_range_meta = []
         for i in range(len(consec_athena_files_BINANCE_FUTURES_BTC_USD_PERP)):
