@@ -20,7 +20,7 @@ class MidPrice(TimestampedBase):
 class MidPriceFeatureDefinition(FeatureDefinition):
 
     @classmethod
-    def stream(cls, upstreams: Dict[str, Stream]) -> Stream:
+    def stream(cls, upstreams: Dict[NamedFeature, Stream]) -> Stream:
         l2_book_snapshots_upstream = toolz.first(upstreams.values())
         return l2_book_snapshots_upstream.map(lambda snap: MidPrice(
             timestamp=snap.timestamp,

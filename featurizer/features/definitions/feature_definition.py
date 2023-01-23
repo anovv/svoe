@@ -23,11 +23,11 @@ class FeatureDefinition(DataDefinition):
 
     # TODO make dep_upstreams: Dict[NamedFeature, Stream]
     @classmethod
-    def stream(cls, dep_upstreams: Dict[str, Stream]) -> Stream:
+    def stream(cls, dep_upstreams: Dict[NamedFeature, Stream]) -> Stream:
         raise NotImplemented
 
     @classmethod
-    def dep_upstream_schema(cls) -> List[Type[Union[FeatureDefinition, Data]]]:
+    def dep_upstream_schema(cls) -> List[Type[DataDefinition]]:
         # upstream dependencies
         raise NotImplemented
 

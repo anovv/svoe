@@ -2,6 +2,7 @@ from typing import List, Dict, Optional, Any, Tuple
 from streamz import Stream
 from featurizer.features.definitions.data_models_utils import TimestampedBase
 from featurizer.features.definitions.feature_definition import FeatureDefinition
+from featurizer.features.data.data_definition import NamedFeature, DataDefinition
 from featurizer.features.definitions.data_models_utils import Trade
 from featurizer.features.utils import convert_str_to_seconds
 
@@ -32,7 +33,7 @@ class _State:
 class OHLCVFeatureDefinition(FeatureDefinition):
 
     @classmethod
-    def stream(cls, upstreams: Dict[str, Stream], state: Optional[_State] = None, window='1m') -> Stream:
+    def stream(cls, upstreams: Dict[NamedFeature, Stream], state: Optional[_State] = None, window='1m') -> Stream:
         if state is None:
             state = _State(
                 last_ts=None,

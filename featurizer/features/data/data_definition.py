@@ -27,7 +27,7 @@ class DataDefinition:
         raise NotImplemented
 
     @classmethod
-    def parse_events(cls, df: DataFrame, feature_name: str) -> List: # TODO typehint
+    def parse_events(cls, df: DataFrame, named_feature: 'NamedFeature') -> List: # TODO typehint
         # TODO implement default behavior
         # TODO should feature_name be set somewhere else? or can it be set automatically as a part of context
         raise NotImplemented
@@ -36,4 +36,5 @@ class DataDefinition:
 # TODO come up with a proper base type
 # types to represent 'materialized' DataDef/FeatureDef
 NamedData = NamedFeature = Tuple[str, Type[DataDefinition]]
+
 

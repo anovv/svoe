@@ -140,20 +140,22 @@ class TestFeatureCalculator(unittest.TestCase):
     def test_featurization_e2e(self):
         # mock consecuitive l2 delta blocks
         block_range, block_range_meta = self.mock_l2_book_delta_data_and_meta()
+        named_feature = L2BookSnapshotFeatureDefinition.named()
 
         # calculate in offline/distributed way
-        named_feature = L2BookSnapshotFeatureDefinition.named()
         task_graph = C.build_task_graph(named_feature, block_range_meta)
         res_blocks = dask.compute(task_graph)
-        print(res_blocks)
-        # offline_res = pd.concat(res_blocks)
+        print(len(res_blocks))
+        offline_res = pd.concat(*res_blocks)
+        print(offline_res)
 
         # calculate online
-        # stream_graph = C.build_stream_graph(named_feature)
-        # stream = stream_graph[named_feature]
-        # sources = {input_data_name: stream_graph[input_data_name] for input_data_name in block_range_meta.keys()}
-        # merged_events = C.merge_feature_blocks(block_range)
-        # online_res = C.run_stream(merged_events, sources, stream)
+        stream_graph = C.build_stream_graph(named_feature)
+        stream = stream_graph[named_feature]
+        sources = {named_data: stream_graph[named_data] for named_data in block_range_meta.keys()}
+        merged_events = C.merge_feature_blocks(block_range)
+        online_res = C.run_stream(merged_events, sources, stream)
+        print(online_res)
 
         # TODO we may have 1ts duplicate entry (due to snapshot_ts based block partition of l2_delta data source)
         # assert_frame_equal(offline_res, online_res)

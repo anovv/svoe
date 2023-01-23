@@ -2,6 +2,7 @@ from typing import List, Dict, Optional, Any, Tuple
 from streamz import Stream
 from featurizer.features.definitions.data_models_utils import TimestampedBase
 from featurizer.features.definitions.feature_definition import FeatureDefinition
+from featurizer.features.data.data_definition import NamedFeature, DataDefinition
 from featurizer.features.definitions.mid_price.mid_price_feature_definition import MidPrice
 
 from dataclasses import dataclass
@@ -18,7 +19,7 @@ class _Volatility(TimestampedBase):
 class VolatilityStddevFeatureDefinition(FeatureDefinition):
 
     @classmethod
-    def stream(cls, upstreams: Dict[str, Stream], window_size: int = 1) -> Stream:
+    def stream(cls, upstreams: Dict[NamedFeature, Stream], window_size: int = 1) -> Stream:
         mid_price_upstream = toolz.first(upstreams.values())
         # TODO implement window_over_time or (lookback_window) functionality
         # TODO use rolling()?

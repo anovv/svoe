@@ -1,5 +1,6 @@
 from featurizer.features.data.data_source_definition import DataSourceDefinition
 from featurizer.features.definitions.data_models_utils import L2BookDelta
+from featurizer.features.data.data_definition import NamedFeature, DataDefinition
 from collections import OrderedDict
 from typing import List
 from pandas import DataFrame
@@ -8,7 +9,7 @@ from pandas import DataFrame
 class L2BookDeltasData(DataSourceDefinition):
 
     @classmethod
-    def parse_events(cls, df: DataFrame, feature_name: str) -> List: # TODO typehint
+    def parse_events(cls, df: DataFrame, named_feature: NamedFeature) -> List: # TODO typehint
         grouped = df.groupby(['timestamp', 'delta'])
         dfs = [grouped.get_group(x) for x in grouped.groups]
         dfs = sorted(dfs, key=lambda df: df['timestamp'].iloc[0], reverse=False)
@@ -31,7 +32,7 @@ class L2BookDeltasData(DataSourceDefinition):
             # TODO dictify events
             events.append(L2BookDelta(
                 # TODO feature_name should be set somewhere upstream automatically
-                feature_name=feature_name,
+                named_feature=named_feature,
                 timestamp=timestamp,
                 receipt_timestamp=receipt_timestamp,
                 delta=delta,

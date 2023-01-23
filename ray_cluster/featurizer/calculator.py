@@ -115,7 +115,7 @@ def calculate_feature(
 ) -> Block:
     merged = merge_feature_blocks(dep_feature_results)
     # construct upstreams
-    upstreams = {dep_named_feature[0]: Stream() for dep_named_feature in dep_feature_results.keys()}
+    upstreams = {dep_named_feature: Stream() for dep_named_feature in dep_feature_results.keys()}
     out_stream = fd_type.stream(upstreams)
     return run_stream(merged, upstreams, out_stream, interval)
 
@@ -135,7 +135,7 @@ def merge_feature_blocks(
         block_range = feature_blocks[named_feature]
         events = []
         for block in block_range:
-            parsed = named_feature[1].parse_events(block, named_feature[0])
+            parsed = named_feature[1].parse_events(block, named_feature)
             events.extend(parsed)
         # TODO check if events are timestamp sorted?
         if i == 0:
@@ -150,7 +150,7 @@ def merge_feature_blocks(
 def run_stream(
     events: List[Any],
     # events: List[Dict[str, Any]],
-    sources: Dict[str, Stream],
+    sources: Dict[NamedFeature, Stream],
     out: Stream,
     interval: Optional[Interval]=None
 ) -> pd.DataFrame: # TODO Block?
@@ -171,8 +171,8 @@ def run_stream(
 
     # TODO time this
     for event in events:
-        dep_feature_name = event.feature_name
-        sources[dep_feature_name].emit(event)
+        named_feature = event.named_feature
+        sources[named_feature].emit(event)
 
     return pd.DataFrame(res)  # TODO set column names properly, using FeatureDefinition schema method?
 

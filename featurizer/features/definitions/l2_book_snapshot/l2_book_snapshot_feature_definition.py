@@ -39,7 +39,7 @@ class L2BookSnapshot(TimestampedBase):
 class L2BookSnapshotFeatureDefinition(FeatureDefinition):
 
     @classmethod
-    def stream(cls, upstreams: Dict[str, Stream], state: Optional[_State] = None, depth: Optional[int] = 20) -> Stream:
+    def stream(cls, upstreams: Dict[NamedFeature, Stream], state: Optional[_State] = None, depth: Optional[int] = 20) -> Stream:
         l2_book_deltas_upstream = toolz.first(upstreams.values())
         if state is None:
             state = cls._build_state()
