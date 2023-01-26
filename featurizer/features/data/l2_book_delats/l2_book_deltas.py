@@ -1,15 +1,23 @@
 from featurizer.features.data.data_source_definition import DataSourceDefinition
-from featurizer.features.definitions.data_models_utils import L2BookDelta
-from featurizer.features.data.data_definition import NamedFeature, DataDefinition
+from featurizer.features.data.data_definition import NamedFeature, DataDefinition, EventSchema, Event
 from collections import OrderedDict
-from typing import List
+from typing import List, Dict, Tuple, Type
 from pandas import DataFrame
 
 
 class L2BookDeltasData(DataSourceDefinition):
 
     @classmethod
-    def parse_events(cls, df: DataFrame, named_feature: NamedFeature) -> List: # TODO typehint
+    def event_schema(cls) -> EventSchema:
+        return {
+            'timestamp': float,
+            'receipt_timestamp': float,
+            'delta': bool,
+            'orders': List[Tuple[float, float, float]]# side, price, size
+        }
+
+    @classmethod
+    def parse_events(cls, df: DataFrame) -> List[Event]:
         grouped = df.groupby(['timestamp', 'delta'])
         dfs = [grouped.get_group(x) for x in grouped.groups]
         dfs = sorted(dfs, key=lambda df: df['timestamp'].iloc[0], reverse=False)
@@ -24,19 +32,9 @@ class L2BookDeltasData(DataSourceDefinition):
             # TODO use numba's jit
             # TODO OrderedDict or SortedDict or Dict?
             df_dict = df.to_dict(orient='index', into=OrderedDict)  # TODO use df.values.tolist() instead and check perf?
-            # TODO define event schema
             orders = []
             for v in df_dict.values():
-                # TODO make it a dict and sync with L2BookDelta dataclass
                 orders.append((v['side'], v['price'], v['size']))
-            # TODO dictify events
-            events.append(L2BookDelta(
-                # TODO feature_name should be set somewhere upstream automatically
-                named_feature=named_feature,
-                timestamp=timestamp,
-                receipt_timestamp=receipt_timestamp,
-                delta=delta,
-                orders=orders
-            ))
+            events.append(cls.construct_event(timestamp, receipt_timestamp, delta, orders))
 
         return events

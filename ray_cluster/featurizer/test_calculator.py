@@ -151,7 +151,10 @@ class TestFeatureCalculator(unittest.TestCase):
         named_data = L2BookDeltasData.named()
         return {named_data: block_range}, {named_data: block_range_meta}
 
-    def test_featurization_e2e(self):
+    def test_featurization_mid_price(self):
+        return # TODO
+
+    def test_featurization_l2_snap(self):
         # mock consecutive l2 delta blocks
         block_range, block_range_meta = self.mock_l2_book_delta_data_and_meta()
         # grouped_ranges = L2BookSnapshotFeatureDefinition.group_dep_ranges(toolz.first(block_range_meta.values()), None)
@@ -180,4 +183,4 @@ class TestFeatureCalculator(unittest.TestCase):
 if __name__ == '__main__':
     # unittest.main()
     t = TestFeatureCalculator()
-    t.test_featurization_e2e()
+    t.test_featurization_l2_snap()

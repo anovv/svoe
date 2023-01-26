@@ -6,14 +6,14 @@ from order_book import OrderBook
 from dataclasses import dataclass, field
 from frozenlist import FrozenList
 from featurizer.features.definitions.data_models_utils import TimestampedBase
-from featurizer.features.data.data_definition import NamedFeature, DataDefinition
+from featurizer.features.data.data_definition import NamedFeature, DataDefinition, Event, EventSchema
 from featurizer.features.definitions.feature_definition import FeatureDefinition
 import featurizer.features.definitions.stream_utils as su
-from featurizer.features.definitions.data_models_utils import L2BookDelta # TODO rename to event
 from featurizer.features.data.l2_book_delats.l2_book_deltas import L2BookDeltasData
 from featurizer.features.blocks.blocks import BlockMeta
 import functools
 import toolz
+from pandas import DataFrame
 
 
 @dataclass
@@ -25,18 +25,27 @@ class _State(TimestampedBase):
     ob_count: int = 0
 
 
-@dataclass(unsafe_hash=True)
-class L2BookSnapshot(TimestampedBase):
-    timestamp: float = field(compare=False, hash=False)
-    receipt_timestamp: float = field(compare=False, hash=False) # TODO move this properties to superclass
-    bids: FrozenList = field(hash=True)  # FrozenList[Tuple[float, float]] price, size
-    asks: FrozenList = field(hash=True) # FrozenList[Tuple[float, float]]
+# @dataclass(unsafe_hash=True)
+# class L2BookSnapshot(TimestampedBase):
+#     timestamp: float = field(compare=False, hash=False)
+#     receipt_timestamp: float = field(compare=False, hash=False) # TODO move this properties to superclass
+#     bids: FrozenList = field(hash=True)  # FrozenList[Tuple[float, float]] price, size
+#     asks: FrozenList = field(hash=True) # FrozenList[Tuple[float, float]]
 
 
 # TODO good data 'l2_book', 'BINANCE', 'spot', 'BTC-USDT', '2022-09-29', '2022-09-29'
 # TODO remove malformed files
 
 class L2BookSnapshotFeatureDefinition(FeatureDefinition):
+
+    @classmethod
+    def event_schema(cls) -> EventSchema:
+        return {
+            'timestamp': float,
+            'receipt_timestamp': float,
+            'bids': List[Tuple[float, float]], # price, size
+            'asks': List[Tuple[float, float]] # price, size
+        }
 
     @classmethod
     def stream(cls, upstreams: Dict[NamedFeature, Stream], state: Optional[_State] = None, depth: Optional[int] = 20) -> Stream:
@@ -62,16 +71,16 @@ class L2BookSnapshotFeatureDefinition(FeatureDefinition):
         )
 
     @classmethod
-    def _update_state(cls, state: _State, event: L2BookDelta, depth: Optional[int]) -> Tuple[_State, Optional[L2BookSnapshot]]:
-        if event.delta and not state.inited:
+    def _update_state(cls, state: _State, event: Event, depth: Optional[int]) -> Tuple[_State, Optional[Event]]:
+        if event['delta'] and not state.inited:
             # skip deltas if no snapshot was inited
             return state, None
-        if not event.delta:
+        if not event['delta']:
             # reset order book
             state.inited = True
             state.order_book = OrderBook()
             state.ob_count += 1
-        for side, price, size in event.orders:
+        for side, price, size in event['orders']:
             if size == 0.0:
                 if price in state.order_book[side]:
                     del state.order_book[side][price]
@@ -81,13 +90,13 @@ class L2BookSnapshotFeatureDefinition(FeatureDefinition):
             else:
                 state.order_book[side][price] = size
 
-        state.timestamp = event.timestamp
-        state.receipt_timestamp = event.receipt_timestamp
+        state.timestamp = event['timestamp']
+        state.receipt_timestamp = event['receipt_timestamp']
 
         return state, cls._state_snapshot(state, depth)
 
     @classmethod
-    def _state_snapshot(cls, state: _State, depth: Optional[int]) -> L2BookSnapshot:
+    def _state_snapshot(cls, state: _State, depth: Optional[int]) -> Event:
         bids = FrozenList()
         asks = FrozenList()
         if depth is None:
@@ -111,12 +120,7 @@ class L2BookSnapshotFeatureDefinition(FeatureDefinition):
         bids.freeze()
         asks.freeze()
 
-        return L2BookSnapshot(
-            timestamp=state.timestamp,
-            receipt_timestamp=state.receipt_timestamp,
-            bids=bids,
-            asks=asks
-        )
+        return cls.construct_event(state.timestamp, state.receipt_timestamp, bids, asks)
 
     # TODO test this
     @classmethod
@@ -160,7 +164,6 @@ class L2BookSnapshotFeatureDefinition(FeatureDefinition):
     @classmethod
     def dep_upstream_schema(cls) -> List[Type[DataDefinition]]:
         return [L2BookDeltasData]
-
 
     # @staticmethod
     # def test():

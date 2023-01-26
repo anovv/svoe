@@ -1,12 +1,15 @@
-from typing import Tuple, Type, List
+from typing import Tuple, Type, List, Dict, Any
+from types import MappingProxyType
 from pandas import DataFrame
+from frozendict import frozendict
+
+Event = Dict[str, Any] # note that this corresponds to raw grouped events by timestamp
+EventSchema = Dict[str, Type]
 
 
 # TODO move this to a separate package
 # a base class for raw data sources and derived features
 class DataDefinition:
-
-    # TODO define event schema
 
     @classmethod
     def named(cls) -> Tuple[str, Type]:
@@ -23,18 +26,24 @@ class DataDefinition:
         raise NotImplemented
 
     @classmethod
+    def event_schema(cls) -> EventSchema:
+        raise NotImplemented
+
+    @classmethod
     def params(cls):
         raise NotImplemented
 
     @classmethod
-    def parse_events(cls, df: DataFrame, named_feature: 'NamedFeature') -> List: # TODO typehint
-        # TODO implement default behavior
-        # TODO should feature_name be set somewhere else? or can it be set automatically as a part of context
-        raise NotImplemented
+    def parse_events(cls, df: DataFrame) -> List[Event]:
+        # TODO validate schema here?
+        return df.to_dict('records')
+
+    @classmethod
+    def construct_event(cls, *args) -> Event:
+        # TODO validate schema here?
+        return frozendict(dict(zip(list(cls.event_schema().keys()), list(args))))
 
 
 # TODO come up with a proper base type
 # types to represent 'materialized' DataDef/FeatureDef
 NamedData = NamedFeature = Tuple[str, Type[DataDefinition]]
-
-

@@ -1,6 +1,6 @@
 from __future__ import annotations
 from streamz import Stream
-from typing import Dict, List, Tuple, Union, Type
+from typing import Dict, List, Tuple, Union, Type, Any
 from ta.utils import dropna
 from ta.volatility import BollingerBands
 from portion import IntervalDict
@@ -21,7 +21,6 @@ class FeatureDefinition(DataDefinition):
     def is_data_source(cls) -> bool:
         return False
 
-    # TODO make dep_upstreams: Dict[NamedFeature, Stream]
     @classmethod
     def stream(cls, dep_upstreams: Dict[NamedFeature, Stream]) -> Stream:
         raise NotImplemented

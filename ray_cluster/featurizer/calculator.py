@@ -1,6 +1,6 @@
 from typing import Union, Dict, Callable, Type, List, OrderedDict, Any, Tuple, Optional
 from featurizer.features.definitions.feature_definition import FeatureDefinition
-from featurizer.features.data.data_definition import NamedFeature, DataDefinition
+from featurizer.features.data.data_definition import NamedFeature, DataDefinition, Event
 from featurizer.features.blocks.blocks import Block, BlockRange, BlockMeta, BlockRangeMeta, get_interval, DataParams
 import dask.graph_manipulation
 from portion import Interval, IntervalDict
@@ -122,10 +122,9 @@ def calculate_feature(
 
 # TODO util this
 # TODO we assume no 'holes' here
-# TODO typehint Event = Dict[str, Any] ? note that this corresponds to grouped events by timestamp
 def merge_feature_blocks(
     feature_blocks: Dict[NamedFeature, BlockRange]
-) -> List[Dict[str, Any]]:
+) -> List[Tuple[NamedFeature, Event]]:
     # TODO we assume no 'hoes' here
     # merge
     merged = None
@@ -133,23 +132,25 @@ def merge_feature_blocks(
     for i in range(0, len(named_features)):
         named_feature = named_features[i]
         block_range = feature_blocks[named_feature]
-        events = []
+        named_events = []
         for block in block_range:
-            parsed = named_feature[1].parse_events(block, named_feature)
-            events.extend(parsed)
+            parsed = named_feature[1].parse_events(block)
+            named = []
+            for e in parsed:
+                named.append((named_feature, e))
+            named_events.extend(named)
         # TODO check if events are timestamp sorted?
         if i == 0:
-            merged = events
+            merged = named_events
         else:
-            merged = heapq.merge(merged, events, key=lambda e: e['timestamp'])
+            merged = heapq.merge(merged, named_events, key=lambda named_event: named_event[1]['timestamp'])
 
     return merged
 
 
 # TODO util this
 def run_stream(
-    events: List[Any],
-    # events: List[Dict[str, Any]],
+    named_events: List[Tuple[NamedFeature, Event]],
     sources: Dict[NamedFeature, Stream],
     out: Stream,
     interval: Optional[Interval]=None
@@ -164,15 +165,15 @@ def run_stream(
             return
 
         # if interval is specified, append only if timestamp is within the interval
-        if interval.lower <= elem.timestamp <= interval.upper:
+        if interval.lower <= elem['timestamp'] <= interval.upper:
             res.append(elem)
 
     out.sink(append)
 
     # TODO time this
-    for event in events:
-        named_feature = event.named_feature
-        sources[named_feature].emit(event)
+    for named_event in named_events:
+        named_feature = named_event[0]
+        sources[named_feature].emit(named_event[1])
 
     return pd.DataFrame(res)  # TODO set column names properly, using FeatureDefinition schema method?
 

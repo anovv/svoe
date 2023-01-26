@@ -2,7 +2,7 @@ from typing import List, Type, Union, Dict
 from streamz import Stream
 from featurizer.features.definitions.data_models_utils import TimestampedBase
 from featurizer.features.definitions.feature_definition import FeatureDefinition
-from featurizer.features.data.data_definition import NamedFeature, DataDefinition
+from featurizer.features.data.data_definition import NamedFeature, DataDefinition, Event, EventSchema
 from featurizer.features.definitions.l2_book_snapshot.l2_book_snapshot_feature_definition import L2BookSnapshotFeatureDefinition
 from featurizer.features.blocks.blocks import BlockMeta
 from featurizer.features.blocks.utils import identity_grouping
@@ -12,21 +12,31 @@ from dataclasses import dataclass
 
 import toolz
 
-@dataclass # TODO this should be in common classes
-class MidPrice(TimestampedBase):
-    mid_price: float
+# @dataclass # TODO this should be in common classes
+# class MidPrice(TimestampedBase):
+#     mid_price: float
 
 
 class MidPriceFeatureDefinition(FeatureDefinition):
 
     @classmethod
+    def event_schema(cls) -> EventSchema:
+        return {
+            'timestamp': float,
+            'receipt_timestamp': float,
+            'mid_price': float
+        }
+
+    @classmethod
     def stream(cls, upstreams: Dict[NamedFeature, Stream]) -> Stream:
         l2_book_snapshots_upstream = toolz.first(upstreams.values())
-        return l2_book_snapshots_upstream.map(lambda snap: MidPrice(
-            timestamp=snap.timestamp,
-            receipt_timestamp=snap.receipt_timestamp,
-            mid_price=(snap.bids[0][0] + snap.asks[0][0])/2
-        ))
+        return l2_book_snapshots_upstream.map(
+            lambda snap: cls.construct_event(
+                snap['timestamp'],
+                snap['receipt_timestamp'],
+                (snap['bids'][0][0] + snap['asks'][0][0]) / 2,
+            )
+        )
 
     @classmethod
     def dep_upstream_schema(cls) -> List[Type[DataDefinition]]:
