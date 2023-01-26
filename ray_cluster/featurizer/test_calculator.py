@@ -151,15 +151,12 @@ class TestFeatureCalculator(unittest.TestCase):
         named_data = L2BookDeltasData.named()
         return {named_data: block_range}, {named_data: block_range_meta}
 
-    def test_featurization_mid_price(self):
-        return # TODO
-
-    def test_featurization_l2_snap(self):
+    def test_featurization(self, fd_type: Type[FeatureDefinition]):
         # mock consecutive l2 delta blocks
         block_range, block_range_meta = self.mock_l2_book_delta_data_and_meta()
         # grouped_ranges = L2BookSnapshotFeatureDefinition.group_dep_ranges(toolz.first(block_range_meta.values()), None)
         # print(grouped_ranges)
-        named_feature = L2BookSnapshotFeatureDefinition.named()
+        named_feature = fd_type.named()
         # calculate in offline/distributed way
         task_graph = C.build_task_graph(named_feature, block_range_meta)
         # dask.visualize(*task_graph)
@@ -183,4 +180,4 @@ class TestFeatureCalculator(unittest.TestCase):
 if __name__ == '__main__':
     # unittest.main()
     t = TestFeatureCalculator()
-    t.test_featurization_l2_snap()
+    t.test_featurization(L2BookSnapshotFeatureDefinition)
