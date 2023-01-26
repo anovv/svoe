@@ -3,7 +3,6 @@ from streamz import Stream
 from featurizer.features.definitions.data_models_utils import TimestampedBase
 from featurizer.features.definitions.feature_definition import FeatureDefinition
 from featurizer.features.data.data_definition import NamedFeature, DataDefinition
-from featurizer.features.definitions.mid_price.mid_price_feature_definition import MidPrice
 
 from dataclasses import dataclass
 
