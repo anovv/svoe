@@ -35,5 +35,5 @@ class MidPriceFeatureDefinition(FeatureDefinition):
         return [L2BookSnapshotFeatureDefinition]
 
     @classmethod
-    def group_dep_ranges(cls, ranges: List[BlockMeta], dep_named_feature: NamedFeature) -> IntervalDict:  # TODO typehint Block/BlockRange/BlockMeta/BlockRangeMeta
+    def group_dep_ranges(cls, ranges: List[BlockMeta], dep_named_feature: NamedFeature) -> Dict:  # TODO typehint Block/BlockRange/BlockMeta/BlockRangeMeta
         return identity_grouping(ranges)

@@ -3,7 +3,7 @@ from featurizer.features.definitions.feature_definition import FeatureDefinition
 from featurizer.features.data.data_definition import NamedFeature, DataDefinition, Event
 from featurizer.features.blocks.blocks import Block, BlockRange, BlockMeta, BlockRangeMeta, get_interval, DataParams
 import dask.graph_manipulation
-from portion import Interval, IntervalDict
+from portion import Interval, IntervalDict, closed
 import pandas as pd
 from streamz import Stream
 import heapq
@@ -53,8 +53,8 @@ def load_data_ranges(
     return {}
 
 
-# TODO make IntervalDict support generics to indicate value type hints
-def get_ranges_overlaps(grouped_ranges: Dict[NamedFeature, IntervalDict]) -> IntervalDict:
+# TODO type hint
+def get_ranges_overlaps(grouped_ranges: Dict[NamedFeature, IntervalDict]) -> Dict:
     # TODO add visualization?
     # https://github.com/AlexandreDecan/portion
     # https://stackoverflow.com/questions/40367461/intersection-of-two-lists-of-ranges-in-python
@@ -78,7 +78,11 @@ def get_ranges_overlaps(grouped_ranges: Dict[NamedFeature, IntervalDict]) -> Int
         combined = d.combine(ranges_dict, how=concat)  # outer join
         d = combined[d.domain() & ranges_dict.domain()]  # inner join
 
-    return d
+    # make sure all intervals are closed
+    res = {}
+    for interval, value in d.items():
+        res[closed(interval.lower, interval.upper)] = value
+    return res
 
 
 # s3/data lake aux methods
@@ -153,8 +157,8 @@ def run_stream(
     named_events: List[Tuple[NamedFeature, Event]],
     sources: Dict[NamedFeature, Stream],
     out: Stream,
-    interval: Optional[Interval]=None
-) -> pd.DataFrame: # TODO Block?
+    interval: Optional[Interval] = None
+) -> Block:
     res = []
 
     # TODO make it a Streamz object?

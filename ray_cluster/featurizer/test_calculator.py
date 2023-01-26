@@ -180,4 +180,4 @@ class TestFeatureCalculator(unittest.TestCase):
 if __name__ == '__main__':
     # unittest.main()
     t = TestFeatureCalculator()
-    t.test_featurization(L2BookSnapshotFeatureDefinition)
+    t.test_featurization(MidPriceFeatureDefinition)

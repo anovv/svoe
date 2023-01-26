@@ -124,11 +124,11 @@ class L2BookSnapshotFeatureDefinition(FeatureDefinition):
 
     # TODO test this
     @classmethod
-    def group_dep_ranges(cls, ranges: List[BlockMeta], dep_named_feature: NamedFeature) -> IntervalDict:
+    def group_dep_ranges(cls, ranges: List[BlockMeta], dep_named_feature: NamedFeature) -> Dict:
         # TODO separate const for this
         # TODO or separate function for metadata parsing
         meta_key = 'snapshot_ts'
-        res = IntervalDict()
+        res = {}
         # TODO we assume no holes in data here
         start_ts, end_ts = None, None
         found_snapshot = False
