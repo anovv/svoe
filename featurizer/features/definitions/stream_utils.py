@@ -1,4 +1,4 @@
-from typing import List, Optional, Any, Callable
+from typing import List, Optional, Any, Callable, Deque
 from streamz import Stream
 from featurizer.features.utils import convert_str_to_seconds
 from collections import deque
@@ -25,12 +25,12 @@ def filter_none(upstream: Stream) -> Stream:
 
 def lookback_apply(upstream: Stream, window: str, apply: Callable) -> Stream:
 
-    def _deque_and_apply(events_deque, event) -> Any:
+    def _deque_and_apply(events_deque: Deque, event: Any) -> Any:
         ts = event['timestamp']
         events_deque.append(event)
         first_ts = events_deque[0]['timestamp']
         if ts - first_ts > convert_str_to_seconds(window):
-            events_deque.pop_left()
+            events_deque.popleft()
         return events_deque, apply(events_deque)
 
     return upstream.accumulate(_deque_and_apply, returns_state=True, start=deque())
