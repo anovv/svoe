@@ -12,10 +12,6 @@ EventSchema = Dict[str, Type]
 class DataDefinition:
 
     @classmethod
-    def named(cls) -> Tuple[str, Type]:
-        return f'{cls.type_str()}-0', cls
-
-    @classmethod
     def type_str(cls) -> str:
         return cls.__name__
 
@@ -46,4 +42,4 @@ class DataDefinition:
 
 # TODO come up with a proper base type
 # types to represent 'materialized' DataDef/FeatureDef
-NamedData = NamedFeature = Tuple[str, Type[DataDefinition]]
+# NamedData = NamedFeature = Tuple[str, Type[DataDefinition]]

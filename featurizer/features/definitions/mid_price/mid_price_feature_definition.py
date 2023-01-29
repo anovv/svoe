@@ -1,7 +1,8 @@
 from typing import List, Type, Union, Dict
 from streamz import Stream
 from featurizer.features.definitions.feature_definition import FeatureDefinition
-from featurizer.features.data.data_definition import NamedFeature, DataDefinition, Event, EventSchema
+from featurizer.features.data.data_definition import DataDefinition, Event, EventSchema
+from featurizer.features.feature_tree.feature_tree import FeatureTreeNode
 from featurizer.features.definitions.l2_book_snapshot.l2_book_snapshot_feature_definition import L2BookSnapshotFeatureDefinition
 from featurizer.features.blocks.blocks import BlockMeta
 from featurizer.features.blocks.utils import identity_grouping
@@ -35,5 +36,5 @@ class MidPriceFeatureDefinition(FeatureDefinition):
         return [L2BookSnapshotFeatureDefinition]
 
     @classmethod
-    def group_dep_ranges(cls, ranges: List[BlockMeta], dep_named_feature: NamedFeature) -> Dict:  # TODO typehint Block/BlockRange/BlockMeta/BlockRangeMeta
+    def group_dep_ranges(cls, ranges: List[BlockMeta], dep_feature: FeatureTreeNode) -> Dict:  # TODO typehint Block/BlockRange/BlockMeta/BlockRangeMeta
         return identity_grouping(ranges)

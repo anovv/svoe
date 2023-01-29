@@ -1,6 +1,7 @@
 from typing import Union, Dict, Callable, Type, List, OrderedDict, Any, Tuple, Optional
 from featurizer.features.definitions.feature_definition import FeatureDefinition
-from featurizer.features.data.data_definition import NamedFeature, DataDefinition, Event
+from featurizer.features.data.data_definition import DataDefinition, Event
+from featurizer.features.feature_tree.feature_tree import FeatureTreeNode, postorder, construct_feature_tree
 from featurizer.features.blocks.blocks import Block, BlockRange, BlockMeta, BlockRangeMeta, get_interval, DataParams
 import dask.graph_manipulation
 from portion import Interval, IntervalDict, closed
@@ -10,36 +11,21 @@ import heapq
 from featurizer.features.loader.df_utils import load_single_file
 
 
-# TODO util this
-def postorder(named_feature_node: NamedFeature, callback: Callable):
-    fd_type = named_feature_node[1]
-    if fd_type.is_data_source():
-        callback(named_feature_node)
-        return
-    named_children = fd_type.dep_upstream_schema_named()
-    for dep_named_feature in named_children:
-        postorder(dep_named_feature, callback)
-
-    callback(named_feature_node)
-
-
 # TODO move this to FeatureDefinition package
-def build_stream_graph(named_feature: NamedFeature) -> Dict[NamedFeature, Stream]:
+def build_stream_graph(feature: FeatureTreeNode) -> Dict[FeatureTreeNode, Stream]:
     stream_graph = {}
 
-    def callback(named_feature: NamedFeature):
-        fd_type = named_feature[1]
-        if fd_type.is_data_source():
-            stream_graph[named_feature] = Stream()
+    def callback(feature: FeatureTreeNode):
+        if feature.fd.is_data_source():
+            stream_graph[feature] = Stream()
             return
         dep_upstreams = {}
-        named_children = fd_type.dep_upstream_schema_named()
-        for dep_named_feature in named_children:
-            dep_upstreams[dep_named_feature[0]] = stream_graph[dep_named_feature]
-        stream = fd_type.stream(dep_upstreams)
-        stream_graph[named_feature] = stream
+        for child in feature.children:
+            dep_upstreams[child] = stream_graph[child]
+        stream = feature.fd.stream(dep_upstreams)
+        stream_graph[feature] = stream
 
-    postorder(named_feature, callback)
+    postorder(feature, callback)
     return stream_graph
 
 
@@ -54,25 +40,25 @@ def load_data_ranges(
 
 
 # TODO type hint
-def get_ranges_overlaps(grouped_ranges: Dict[NamedFeature, IntervalDict]) -> Dict:
+def get_ranges_overlaps(grouped_ranges: Dict[FeatureTreeNode, IntervalDict]) -> Dict:
     # TODO add visualization?
     # https://github.com/AlexandreDecan/portion
     # https://stackoverflow.com/questions/40367461/intersection-of-two-lists-of-ranges-in-python
     d = IntervalDict()
-    first_named_feature = list(grouped_ranges.keys())[0]
-    for interval, ranges in grouped_ranges[first_named_feature].items():
-        d[interval] = {first_named_feature: ranges}  # named_ranges_dict
+    first_feature = list(grouped_ranges.keys())[0]
+    for interval, ranges in grouped_ranges[first_feature].items():
+        d[interval] = {first_feature: ranges}  # named_ranges_dict
 
     # join ranges_dict for each feature_name with first to find all possible intersecting intervals
     # and their corresponding BlockRange/BlockRangeMeta objects
-    for named_feature, ranges_dict in grouped_ranges.items():
+    for feature, ranges_dict in grouped_ranges.items():
         # compare by names
-        if named_feature[0] == first_named_feature[0]:
+        if feature.node_id == first_feature.node_id:
             continue
 
         def concat(named_ranges_dict, ranges):
             res = named_ranges_dict.copy()
-            res[named_feature] = ranges
+            res[feature] = ranges
             return res
 
         combined = d.combine(ranges_dict, how=concat)  # outer join
@@ -114,7 +100,7 @@ def load_if_needed(
 @dask.delayed
 def calculate_feature(
     fd_type: Type[FeatureDefinition],
-    dep_feature_results: Dict[NamedFeature, BlockRange], # maps dep feature to BlockRange # TODO List[BlockRange] when using 'holes'
+    dep_feature_results: Dict[FeatureTreeNode, BlockRange], # maps dep feature to BlockRange # TODO List[BlockRange] when using 'holes'
     interval: Interval
 ) -> Block:
     merged = merge_feature_blocks(dep_feature_results)
@@ -127,21 +113,21 @@ def calculate_feature(
 # TODO util this
 # TODO we assume no 'holes' here
 def merge_feature_blocks(
-    feature_blocks: Dict[NamedFeature, BlockRange]
-) -> List[Tuple[NamedFeature, Event]]:
+    feature_blocks: Dict[FeatureTreeNode, BlockRange]
+) -> List[Tuple[FeatureTreeNode, Event]]:
     # TODO we assume no 'hoes' here
     # merge
     merged = None
-    named_features = list(feature_blocks.keys())
-    for i in range(0, len(named_features)):
-        named_feature = named_features[i]
-        block_range = feature_blocks[named_feature]
+    features = list(feature_blocks.keys())
+    for i in range(0, len(features)):
+        feature = features[i]
+        block_range = feature_blocks[feature]
         named_events = []
         for block in block_range:
-            parsed = named_feature[1].parse_events(block)
+            parsed = feature.fd.parse_events(block)
             named = []
             for e in parsed:
-                named.append((named_feature, e))
+                named.append((feature, e))
             named_events.extend(named)
         # TODO check if events are timestamp sorted?
         if i == 0:
@@ -154,8 +140,8 @@ def merge_feature_blocks(
 
 # TODO util this
 def run_stream(
-    named_events: List[Tuple[NamedFeature, Event]],
-    sources: Dict[NamedFeature, Stream],
+    named_events: List[Tuple[FeatureTreeNode, Event]],
+    sources: Dict[FeatureTreeNode, Stream],
     out: Stream,
     interval: Optional[Interval] = None
 ) -> Block:
@@ -176,8 +162,8 @@ def run_stream(
 
     # TODO time this
     for named_event in named_events:
-        named_feature = named_event[0]
-        sources[named_feature].emit(named_event[1])
+        feature = named_event[0]
+        sources[feature].emit(named_event[1])
 
     return pd.DataFrame(res)  # TODO set column names properly, using FeatureDefinition schema method?
 
@@ -185,7 +171,7 @@ def run_stream(
 # TODO should be FeatureDefinition method
 def calculate_feature_meta(
     fd_type: Type[FeatureDefinition],
-    dep_feature_results: Dict[NamedFeature, BlockRangeMeta],
+    dep_feature_results: Dict[FeatureTreeNode, BlockRangeMeta],
     # maps dep feature to BlockRange # TODO List[BlockRangeMeta]?
     interval: Interval
 ) -> BlockMeta:
@@ -198,39 +184,38 @@ def calculate_feature_meta(
 # graph construction
 # TODO make 3d visualization with networkx/graphviz
 def build_task_graph(
-    named_root_feature: NamedFeature,
-    feature_ranges_meta: Dict[NamedFeature, List]  # TODO typehint when decide on BlockRangeMeta/BlockMeta
+    feature: FeatureTreeNode,
+    feature_ranges_meta: Dict[FeatureTreeNode, List]  # TODO typehint when decide on BlockRangeMeta/BlockMeta
 ):
     feature_delayed_funcs = {}  # feature delayed functions per range per feature
 
     # bottom up/postorder traversal
-    def tree_traversal_callback(named_feature: NamedFeature):
-        fd_type = named_feature[1]
-        if fd_type.is_data_source():
+    def tree_traversal_callback(feature: FeatureTreeNode):
+        if feature.fd.is_data_source():
             # leaves
-            ranges = feature_ranges_meta[named_feature]  # this is already populated for Data in load_data_ranges above
+            ranges = feature_ranges_meta[feature]  # this is already populated for Data in load_data_ranges above
             for block_meta in ranges:
                 # TODO we assume no 'holes' in data here
                 interval = get_interval(block_meta)
-                if named_feature not in feature_delayed_funcs:
-                    feature_delayed_funcs[named_feature] = {}
+                if feature not in feature_delayed_funcs:
+                    feature_delayed_funcs[feature] = {}
                 feature_delayed = load_if_needed(block_meta)
-                feature_delayed_funcs[named_feature][interval] = feature_delayed
+                feature_delayed_funcs[feature][interval] = feature_delayed
             return
 
         grouped_ranges_by_dep_feature = {}
-        for dep_named_feature in fd_type.dep_upstream_schema_named():
-            dep_ranges = feature_ranges_meta[dep_named_feature]
-            grouped_ranges_by_dep_feature[dep_named_feature] = fd_type.group_dep_ranges(dep_ranges, dep_named_feature)
+        for dep_feature in feature.children:
+            dep_ranges = feature_ranges_meta[dep_feature]
+            grouped_ranges_by_dep_feature[dep_feature] = feature.fd.group_dep_ranges(dep_ranges, dep_feature)
 
         overlaps = get_ranges_overlaps(grouped_ranges_by_dep_feature)
         ranges = []
         for interval, overlap in overlaps.items():
-            result_meta = calculate_feature_meta(fd_type, overlap,
-                                                 interval)  # TODO is this needed? is it for block or range ?
+            # TODO is this needed? is it for block or range ?
+            result_meta = calculate_feature_meta(feature.fd, overlap, interval)
             ranges.append(result_meta)
-            if named_feature not in feature_delayed_funcs:
-                feature_delayed_funcs[named_feature] = {}
+            if feature not in feature_delayed_funcs:
+                feature_delayed_funcs[feature] = {}
 
             # TODO use overlap to fetch results of dep delayed funcs
             dep_delayed_funcs = {}
@@ -241,11 +226,11 @@ def build_task_graph(
                     dep_delayed_func = feature_delayed_funcs[dep_named_feature][dep_interval]
                     ds.append(dep_delayed_func)
                 dep_delayed_funcs[dep_named_feature] = ds
-            feature_delayed = calculate_feature(fd_type, dep_delayed_funcs, interval)
-            feature_delayed_funcs[named_feature][interval] = feature_delayed
+            feature_delayed = calculate_feature(feature.fd, dep_delayed_funcs, interval)
+            feature_delayed_funcs[feature][interval] = feature_delayed
 
-        feature_ranges_meta[named_feature] = ranges
+        feature_ranges_meta[feature] = ranges
 
-    postorder(named_root_feature, tree_traversal_callback)
+    postorder(feature, tree_traversal_callback)
     # list of root feature delayed funcs for all ranges
-    return list(feature_delayed_funcs[named_root_feature].values())
+    return list(feature_delayed_funcs[feature].values())

@@ -2,7 +2,8 @@ from typing import List, Dict, Optional, Any, Tuple, Type, Deque
 from streamz import Stream
 from featurizer.features.definitions.feature_definition import FeatureDefinition
 from featurizer.features.definitions.mid_price.mid_price_feature_definition import MidPriceFeatureDefinition
-from featurizer.features.data.data_definition import NamedFeature, DataDefinition, Event, EventSchema
+from featurizer.features.data.data_definition import DataDefinition, Event, EventSchema
+from featurizer.features.feature_tree.feature_tree import FeatureTreeNode
 from featurizer.features.blocks.blocks import BlockMeta, get_interval
 from featurizer.features.definitions.stream_utils import lookback_apply
 from featurizer.features.utils import convert_str_to_seconds
@@ -26,12 +27,12 @@ class VolatilityStddevFeatureDefinition(FeatureDefinition):
         return [MidPriceFeatureDefinition]
 
     @classmethod
-    def stream(cls, upstreams: Dict[NamedFeature, Stream], window: Optional[str] = '1m') -> Stream:
+    def stream(cls, upstreams: Dict[FeatureTreeNode, Stream], window: Optional[str] = '1m') -> Stream:
         mid_price_upstream = toolz.first(upstreams.values())
         return lookback_apply(mid_price_upstream, window, cls._prices_to_volatility)
 
     @classmethod
-    def group_dep_ranges(cls, ranges: List[BlockMeta], dep_named_feature: NamedFeature) -> Dict:
+    def group_dep_ranges(cls, ranges: List[BlockMeta], dep_feature: FeatureTreeNode) -> Dict:
         # TODO util this
         res = {}
         # TODO assuming no 'holes' in data

@@ -24,7 +24,6 @@ def filter_none(upstream: Stream) -> Stream:
 
 
 def lookback_apply(upstream: Stream, window: str, apply: Callable) -> Stream:
-
     def _deque_and_apply(events_deque: Deque, event: Any) -> Any:
         ts = event['timestamp']
         events_deque.append(event)

@@ -9,7 +9,8 @@ from featurizer.features.data.l2_book_delats.l2_book_deltas import L2BookDeltasD
 from featurizer.features.definitions.l2_book_snapshot.l2_book_snapshot_feature_definition import \
     L2BookSnapshotFeatureDefinition
 from featurizer.features.definitions.mid_price.mid_price_feature_definition import MidPriceFeatureDefinition
-from featurizer.features.definitions.feature_definition import NamedFeature, FeatureDefinition
+from featurizer.features.definitions.feature_definition import FeatureDefinition
+from featurizer.features.feature_tree.feature_tree import FeatureTreeNode
 from featurizer.features.blocks.blocks import BlockMeta, BlockRange, Block, BlockRangeMeta
 import portion as P
 import unittest
@@ -74,23 +75,32 @@ class TestFeatureCalculator(unittest.TestCase):
     # https://stackoverflow.com/questions/67680325/annotations-for-custom-graphs-in-dask
     def test_build_task_graph_l2_snaps(self):
         feature_ranges = self.mock_l2_book_deltas_data_ranges_meta(30 * 1000, 10)
-        named_feature = L2BookSnapshotFeatureDefinition.named()
-        graph = C.build_task_graph(named_feature, feature_ranges)
+
+        # TODO populate these
+        data_params = {}
+        feature_params = {}
+        feature = C.construct_feature_tree(L2BookSnapshotFeatureDefinition, [0], data_params, feature_params)
+
+        graph = C.build_task_graph(feature, feature_ranges)
         print(graph)
         dask.visualize(*graph)
 
     def test_build_task_graph_mid_price(self):
         feature_ranges = self.mock_l2_book_deltas_data_ranges_meta(30 * 1000, 10)
-        named_feature = MidPriceFeatureDefinition.named()
-        graph = C.build_task_graph(named_feature, feature_ranges)
+
+        # TODO populate these
+        data_params = {}
+        feature_params = {}
+        feature = C.construct_feature_tree(MidPriceFeatureDefinition, [0], data_params, feature_params)
+
+        graph = C.build_task_graph(feature, feature_ranges)
         print(graph)
         dask.visualize(*graph)
 
     def mock_l2_book_deltas_data_ranges_meta(
-            self, block_len_ms, num_blocks, between_blocks_ms=100, cur_ts=0
-    ) -> Dict[NamedFeature, BlockRangeMeta]:
+        self, block_len_ms, num_blocks, between_blocks_ms=100, cur_ts=0
+    ) -> Dict[FeatureTreeNode, BlockRangeMeta]:
         res = {}
-        named_data = L2BookDeltasData.named()
         ranges = []
         for i in range(0, num_blocks):
             meta = self.meta(cur_ts, cur_ts + block_len_ms)
@@ -100,10 +110,14 @@ class TestFeatureCalculator(unittest.TestCase):
             ranges.append(meta)
             cur_ts += block_len_ms
             cur_ts += between_blocks_ms
-        res[named_data] = ranges
+
+        data_params = {} # TODO mock
+        sample_node_id = 0
+        data = FeatureTreeNode([], sample_node_id, L2BookDeltasData, data_params)
+        res[data] = ranges
         return res
 
-    def mock_l2_book_delta_data_and_meta(self) -> Tuple[Dict[NamedFeature, BlockRange], Dict[NamedFeature, BlockRangeMeta]]:
+    def mock_l2_book_delta_data_and_meta(self) -> Tuple[Dict[FeatureTreeNode, BlockRange], Dict[FeatureTreeNode, BlockRangeMeta]]:
         consec_athena_files_BINANCE_FUTURES_BTC_USD_PERP = [
             's3://svoe.test.1/data_lake/data_feed_market_data/l2_book/exchange=BINANCE_FUTURES/instrument_type=perpetual/instrument_extra={}/symbol=BTC-USDT-PERP/base=BTC/quote=USDT/date=2022-10-03/compaction=raw/version=local/BINANCE_FUTURES*l2_book*BTC-USDT-PERP*1664778796.722228*1664778826.607931*2e74bf76915c4b168248b18d059773b1.gz.parquet',
             's3://svoe.test.1/data_lake/data_feed_market_data/l2_book/exchange=BINANCE_FUTURES/instrument_type=perpetual/instrument_extra={}/symbol=BTC-USDT-PERP/base=BTC/quote=USDT/date=2022-10-03/compaction=raw/version=local/BINANCE_FUTURES*l2_book*BTC-USDT-PERP*1664778826.710401*1664778856.692907*4ffb70c161f4429d81663ca70d070ccc.gz.parquet',
@@ -148,17 +162,23 @@ class TestFeatureCalculator(unittest.TestCase):
                 block_meta['snapshot_ts'] = infos[i]['snapshot_ts']
             block_range_meta.append(block_meta)
 
-        named_data = L2BookDeltasData.named()
-        return {named_data: block_range}, {named_data: block_range_meta}
+        data_params = {} # TODO mock
+        sample_node_id = 0
+        data = FeatureTreeNode([], sample_node_id, L2BookDeltasData, data_params)
+        return {data: block_range}, {data: block_range_meta}
 
-    def test_featurization(self, fd_type: Type[FeatureDefinition]):
+    def test_featurization(self, fd: Type[FeatureDefinition]):
         # mock consecutive l2 delta blocks
         block_range, block_range_meta = self.mock_l2_book_delta_data_and_meta()
-        # grouped_ranges = L2BookSnapshotFeatureDefinition.group_dep_ranges(toolz.first(block_range_meta.values()), None)
-        # print(grouped_ranges)
-        named_feature = fd_type.named()
+
+        # build feature tree
+        # TODO populate these
+        data_params = {}
+        feature_params = {}
+        feature = C.construct_feature_tree(fd, [0], data_params, feature_params)
+
         # calculate in offline/distributed way
-        task_graph = C.build_task_graph(named_feature, block_range_meta)
+        task_graph = C.build_task_graph(feature, block_range_meta)
         # dask.visualize(*task_graph)
         res_blocks = dask.compute(task_graph)
         print(len(res_blocks))
@@ -166,9 +186,9 @@ class TestFeatureCalculator(unittest.TestCase):
         print(offline_res)
 
         # calculate online
-        stream_graph = C.build_stream_graph(named_feature)
-        stream = stream_graph[named_feature]
-        sources = {named_data: stream_graph[named_data] for named_data in block_range_meta.keys()}
+        stream_graph = C.build_stream_graph(feature)
+        stream = stream_graph[feature]
+        sources = {data: stream_graph[data] for data in block_range_meta.keys()}
         merged_events = C.merge_feature_blocks(block_range)
         online_res = C.run_stream(merged_events, sources, stream)
         print(online_res)
