@@ -7,7 +7,7 @@ from dataclasses import dataclass, field
 from frozenlist import FrozenList
 from featurizer.features.definitions.data_models_utils import TimestampedBase
 from featurizer.features.data.data_definition import DataDefinition, Event, EventSchema
-from featurizer.features.feature_tree.feature_tree import FeatureTreeNode
+from featurizer.features.feature_tree.feature_tree import Feature
 from featurizer.features.definitions.feature_definition import FeatureDefinition
 import featurizer.features.definitions.stream_utils as su
 from featurizer.features.data.l2_book_delats.l2_book_deltas import L2BookDeltasData
@@ -49,7 +49,7 @@ class L2BookSnapshotFeatureDefinition(FeatureDefinition):
         }
 
     @classmethod
-    def stream(cls, upstreams: Dict[FeatureTreeNode, Stream], feature_params: Dict) -> Stream:
+    def stream(cls, upstreams: Dict[Feature, Stream], feature_params: Dict) -> Stream:
         l2_book_deltas_upstream = toolz.first(upstreams.values())
         state = cls._build_state()
         depth = 20 # TODO figure out how to set default values
@@ -127,7 +127,7 @@ class L2BookSnapshotFeatureDefinition(FeatureDefinition):
 
     # TODO test this
     @classmethod
-    def group_dep_ranges(cls, ranges: List[BlockMeta], feature: FeatureTreeNode, dep_feature: FeatureTreeNode) -> IntervalDict:
+    def group_dep_ranges(cls, ranges: List[BlockMeta], feature: Feature, dep_feature: Feature) -> IntervalDict:
         # TODO separate const for this
         # TODO or separate function for metadata parsing
         meta_key = 'snapshot_ts'

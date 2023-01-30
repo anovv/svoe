@@ -10,7 +10,7 @@ from featurizer.features.definitions.l2_book_snapshot.l2_book_snapshot_feature_d
     L2BookSnapshotFeatureDefinition
 from featurizer.features.definitions.mid_price.mid_price_feature_definition import MidPriceFeatureDefinition
 from featurizer.features.definitions.feature_definition import FeatureDefinition
-from featurizer.features.feature_tree.feature_tree import FeatureTreeNode, construct_feature_tree, _feature_id
+from featurizer.features.feature_tree.feature_tree import Feature, construct_feature_tree, _feature_id
 from featurizer.features.blocks.blocks import BlockMeta, BlockRange, Block, BlockRangeMeta
 import portion as P
 import unittest
@@ -61,7 +61,7 @@ class TestFeatureCalculator(unittest.TestCase):
         self.assertEqual(overlaps, expected)
 
     def mock_feature(self, feature_id: str):
-        return FeatureTreeNode(
+        return Feature(
             [],
             feature_id,
             FeatureDefinition,
@@ -104,7 +104,7 @@ class TestFeatureCalculator(unittest.TestCase):
 
     def mock_l2_book_deltas_data_ranges_meta(
         self, block_len_ms, num_blocks, between_blocks_ms=100, cur_ts=0
-    ) -> Dict[FeatureTreeNode, BlockRangeMeta]:
+    ) -> Dict[Feature, BlockRangeMeta]:
         res = {}
         ranges = []
         for i in range(0, num_blocks):
@@ -118,11 +118,11 @@ class TestFeatureCalculator(unittest.TestCase):
 
         data_params = {} # TODO mock
         feature_id = _feature_id(0, True)
-        data = FeatureTreeNode([], feature_id, L2BookDeltasData, data_params)
+        data = Feature([], feature_id, L2BookDeltasData, data_params)
         res[data] = ranges
         return res
 
-    def mock_l2_book_delta_data_and_meta(self) -> Tuple[Dict[FeatureTreeNode, BlockRange], Dict[FeatureTreeNode, BlockRangeMeta]]:
+    def mock_l2_book_delta_data_and_meta(self) -> Tuple[Dict[Feature, BlockRange], Dict[Feature, BlockRangeMeta]]:
         consec_athena_files_BINANCE_FUTURES_BTC_USD_PERP = [
             's3://svoe.test.1/data_lake/data_feed_market_data/l2_book/exchange=BINANCE_FUTURES/instrument_type=perpetual/instrument_extra={}/symbol=BTC-USDT-PERP/base=BTC/quote=USDT/date=2022-10-03/compaction=raw/version=local/BINANCE_FUTURES*l2_book*BTC-USDT-PERP*1664778796.722228*1664778826.607931*2e74bf76915c4b168248b18d059773b1.gz.parquet',
             's3://svoe.test.1/data_lake/data_feed_market_data/l2_book/exchange=BINANCE_FUTURES/instrument_type=perpetual/instrument_extra={}/symbol=BTC-USDT-PERP/base=BTC/quote=USDT/date=2022-10-03/compaction=raw/version=local/BINANCE_FUTURES*l2_book*BTC-USDT-PERP*1664778826.710401*1664778856.692907*4ffb70c161f4429d81663ca70d070ccc.gz.parquet',
@@ -169,7 +169,7 @@ class TestFeatureCalculator(unittest.TestCase):
 
         data_params = {} # TODO mock
         feature_id = _feature_id(0, True)
-        data = FeatureTreeNode([], feature_id, L2BookDeltasData, data_params)
+        data = Feature([], feature_id, L2BookDeltasData, data_params)
         return {data: block_range}, {data: block_range_meta}
 
     def test_featurization(self, fd: Type[FeatureDefinition]):

@@ -2,7 +2,7 @@ from typing import List, Dict, Optional, Any, Tuple
 from streamz import Stream
 from featurizer.features.definitions.data_models_utils import TimestampedBase
 from featurizer.features.definitions.feature_definition import FeatureDefinition
-from featurizer.features.feature_tree.feature_tree import FeatureTreeNode
+from featurizer.features.feature_tree.feature_tree import Feature
 
 from featurizer.features.definitions.data_models_utils import Trade
 from featurizer.features.utils import convert_str_to_seconds
@@ -34,7 +34,7 @@ class _State:
 class OHLCVFeatureDefinition(FeatureDefinition):
 
     @classmethod
-    def stream(cls, upstreams: Dict[FeatureTreeNode, Stream], feature_params: Dict) -> Stream:
+    def stream(cls, upstreams: Dict[Feature, Stream], feature_params: Dict) -> Stream:
         state = _State(last_ts=None, ohlcv=None)
         window = '1m' # TODO figure out default setting
         if feature_params is not None and 'window' in feature_params:

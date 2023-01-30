@@ -5,8 +5,8 @@ from featurizer.features.definitions.feature_definition import FeatureDefinition
 from typing import Type, Dict, List, Callable, Union
 
 
-class FeatureTreeNode:
-    def __init__(self, children: List['FeatureTreeNode'], feature_id: str, feature_definition: Type[Union[DataSourceDefinition, FeatureDefinition]], params: Dict):
+class Feature:
+    def __init__(self, children: List['Feature'], feature_id: str, feature_definition: Type[Union[DataSourceDefinition, FeatureDefinition]], params: Dict):
         self.children = children
         self.feature_id = feature_id
         self.feature_definition = feature_definition
@@ -31,7 +31,7 @@ def construct_feature_tree(
     root_def: Type[Union[DataSourceDefinition, FeatureDefinition]],
     data_params: Union[Dict, List],
     feature_params: Union[Dict, List]
-) -> FeatureTreeNode:
+) -> Feature:
     return _construct_feature_tree(root_def, [0], [0], data_params, feature_params)
 
 
@@ -42,7 +42,7 @@ def _construct_feature_tree(
     data_position_ref: List[int],
     data_params: Union[Dict, List],
     feature_params: Union[Dict, List]
-) -> FeatureTreeNode:
+) -> Feature:
     if root_def.is_data_source():
         params = None
         position = data_position_ref[0]
@@ -53,7 +53,7 @@ def _construct_feature_tree(
         else:
             params = data_params[position]
         data_position_ref[0] += 1
-        return FeatureTreeNode(
+        return Feature(
             children=[],
             feature_id=_feature_id(position, True),
             feature_definition=root_def,
@@ -76,7 +76,7 @@ def _construct_feature_tree(
     else:
         params = feature_params[position]
 
-    return FeatureTreeNode(
+    return Feature(
         children=children,
         feature_id=_feature_id(position, False),
         feature_definition=root_def,
@@ -84,7 +84,7 @@ def _construct_feature_tree(
     )
 
 
-def postorder(node: FeatureTreeNode, callback: Callable):
+def postorder(node: Feature, callback: Callable):
     if node.children is None or len(node.children) == 0:
         callback(node)
         return

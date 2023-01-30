@@ -1,7 +1,7 @@
 from typing import Union, Dict, Callable, Type, List, OrderedDict, Any, Tuple, Optional
 from featurizer.features.definitions.feature_definition import FeatureDefinition
 from featurizer.features.data.data_definition import DataDefinition, Event
-from featurizer.features.feature_tree.feature_tree import FeatureTreeNode, postorder
+from featurizer.features.feature_tree.feature_tree import Feature, postorder
 from featurizer.features.blocks.blocks import Block, BlockRange, BlockMeta, BlockRangeMeta, get_interval, DataParams
 import dask.graph_manipulation
 from portion import Interval, IntervalDict, closed
@@ -12,10 +12,10 @@ from featurizer.features.loader.df_utils import load_single_file
 
 
 # TODO move this to FeatureDefinition package
-def build_stream_graph(feature: FeatureTreeNode) -> Dict[FeatureTreeNode, Stream]:
+def build_stream_graph(feature: Feature) -> Dict[Feature, Stream]:
     stream_graph = {}
 
-    def callback(feature: FeatureTreeNode):
+    def callback(feature: Feature):
         if feature.feature_definition.is_data_source():
             stream_graph[feature] = Stream()
             return
@@ -41,7 +41,7 @@ def load_data_ranges(
 
 
 # TODO type hint
-def get_ranges_overlaps(grouped_ranges: Dict[FeatureTreeNode, IntervalDict]) -> Dict:
+def get_ranges_overlaps(grouped_ranges: Dict[Feature, IntervalDict]) -> Dict:
     # TODO add visualization?
     # https://github.com/AlexandreDecan/portion
     # https://stackoverflow.com/questions/40367461/intersection-of-two-lists-of-ranges-in-python
@@ -100,8 +100,8 @@ def load_if_needed(
 # TODO this should be in Feature class
 @dask.delayed
 def calculate_feature(
-    feature: FeatureTreeNode,
-    dep_feature_results: Dict[FeatureTreeNode, BlockRange], # maps dep feature to BlockRange # TODO List[BlockRange] when using 'holes'
+    feature: Feature,
+    dep_feature_results: Dict[Feature, BlockRange], # maps dep feature to BlockRange # TODO List[BlockRange] when using 'holes'
     interval: Interval
 ) -> Block:
     merged = merge_feature_blocks(dep_feature_results)
@@ -114,8 +114,8 @@ def calculate_feature(
 # TODO util this
 # TODO we assume no 'holes' here
 def merge_feature_blocks(
-    feature_blocks: Dict[FeatureTreeNode, BlockRange]
-) -> List[Tuple[FeatureTreeNode, Event]]:
+    feature_blocks: Dict[Feature, BlockRange]
+) -> List[Tuple[Feature, Event]]:
     # TODO we assume no 'hoes' here
     # merge
     merged = None
@@ -141,8 +141,8 @@ def merge_feature_blocks(
 
 # TODO util this
 def run_stream(
-    named_events: List[Tuple[FeatureTreeNode, Event]],
-    sources: Dict[FeatureTreeNode, Stream],
+    named_events: List[Tuple[Feature, Event]],
+    sources: Dict[Feature, Stream],
     out: Stream,
     interval: Optional[Interval] = None
 ) -> Block:
@@ -171,8 +171,8 @@ def run_stream(
 
 # TODO should be FeatureDefinition/Feature method
 def calculate_feature_meta(
-    feature: FeatureTreeNode,
-    dep_feature_results: Dict[FeatureTreeNode, BlockRangeMeta],
+    feature: Feature,
+    dep_feature_results: Dict[Feature, BlockRangeMeta],
     # maps dep feature to BlockRange # TODO List[BlockRangeMeta]?
     interval: Interval
 ) -> BlockMeta:
@@ -185,14 +185,14 @@ def calculate_feature_meta(
 # graph construction
 # TODO make 3d visualization with networkx/graphviz
 def build_task_graph(
-    feature: FeatureTreeNode,
+    feature: Feature,
     # TODO decouple derived feature_ranges_meta and input data ranges meta
-    feature_ranges_meta: Dict[FeatureTreeNode, List]  # TODO typehint when decide on BlockRangeMeta/BlockMeta
+    feature_ranges_meta: Dict[Feature, List]  # TODO typehint when decide on BlockRangeMeta/BlockMeta
 ):
     feature_delayed_funcs = {}  # feature delayed functions per range per feature
 
     # bottom up/postorder traversal
-    def tree_traversal_callback(feature: FeatureTreeNode):
+    def tree_traversal_callback(feature: Feature):
         if feature.feature_definition.is_data_source():
             # leaves
             # TODO decouple derived feature_ranges_meta and input data ranges meta

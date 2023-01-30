@@ -3,7 +3,7 @@ from streamz import Stream
 from featurizer.features.definitions.data_models_utils import TimestampedBase
 from featurizer.features.definitions.feature_definition import FeatureDefinition
 from featurizer.features.data.data_definition import DataDefinition
-from featurizer.features.feature_tree.feature_tree import FeatureTreeNode
+from featurizer.features.feature_tree.feature_tree import Feature
 
 from dataclasses import dataclass
 import math
@@ -18,7 +18,7 @@ class _RelativeSpread(TimestampedBase):
 class RelativeBidAskSpreadFeatureDefinition(FeatureDefinition):
 
     @classmethod
-    def stream(cls, upstreams: Dict[FeatureTreeNode, Stream], feature_params: Dict) -> Stream:
+    def stream(cls, upstreams: Dict[Feature, Stream], feature_params: Dict) -> Stream:
         mid_price_upstream = toolz.first(upstreams.values())
         return mid_price_upstream.map(lambda snap: _RelativeSpread(
             timestamp=snap.timestamp,
