@@ -49,10 +49,12 @@ class L2BookSnapshotFeatureDefinition(FeatureDefinition):
         }
 
     @classmethod
-    def stream(cls, upstreams: Dict[FeatureTreeNode, Stream], state: Optional[_State] = None, depth: Optional[int] = 20) -> Stream:
+    def stream(cls, upstreams: Dict[FeatureTreeNode, Stream], feature_params: Dict) -> Stream:
         l2_book_deltas_upstream = toolz.first(upstreams.values())
-        if state is None:
-            state = cls._build_state()
+        state = cls._build_state()
+        depth = 20 # TODO figure out how to set default values
+        if feature_params is not None and 'depth' in feature_params:
+            depth = feature_params['depth']
         update = functools.partial(cls._update_state, depth=depth)
         acc = l2_book_deltas_upstream.accumulate(update, returns_state=True, start=state)
         return su.filter_none(acc).unique(maxsize=1)
@@ -125,7 +127,7 @@ class L2BookSnapshotFeatureDefinition(FeatureDefinition):
 
     # TODO test this
     @classmethod
-    def group_dep_ranges(cls, ranges: List[BlockMeta], dep_feature: FeatureTreeNode) -> IntervalDict:
+    def group_dep_ranges(cls, ranges: List[BlockMeta], feature: FeatureTreeNode, dep_feature: FeatureTreeNode) -> IntervalDict:
         # TODO separate const for this
         # TODO or separate function for metadata parsing
         meta_key = 'snapshot_ts'

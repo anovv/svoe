@@ -7,6 +7,7 @@ from featurizer.features.feature_tree.feature_tree import FeatureTreeNode
 from featurizer.features.blocks.blocks import BlockMeta, get_interval
 from featurizer.features.definitions.stream_utils import lookback_apply
 from featurizer.features.utils import convert_str_to_seconds
+from portion import IntervalDict
 
 import numpy as np
 import toolz
@@ -27,24 +28,30 @@ class VolatilityStddevFeatureDefinition(FeatureDefinition):
         return [MidPriceFeatureDefinition]
 
     @classmethod
-    def stream(cls, upstreams: Dict[FeatureTreeNode, Stream], window: Optional[str] = '1m') -> Stream:
+    def stream(cls, upstreams: Dict[FeatureTreeNode, Stream], feature_params: Dict) -> Stream:
         mid_price_upstream = toolz.first(upstreams.values())
+        window = '1m' # TODO figure out default setting
+        if feature_params is not None and 'window' in feature_params:
+            window = feature_params['window']
         return lookback_apply(mid_price_upstream, window, cls._prices_to_volatility)
 
     @classmethod
-    def group_dep_ranges(cls, ranges: List[BlockMeta], dep_feature: FeatureTreeNode) -> IntervalDict:
+    def group_dep_ranges(cls, ranges: List[BlockMeta], feature: FeatureTreeNode, dep_feature: FeatureTreeNode) -> IntervalDict:
         # TODO util this
-        res = {}
+        res = IntervalDict()
         # TODO assuming no 'holes' in data
+        window = '1m'  # TODO figure out default setting
+        if feature.params is not None and 'window' in feature.params:
+            window = feature.params['window']
         for i in range(len(ranges)):
-            window = [ranges[i]]
+            windowed_blocks = [ranges[i]]
             # look back until window limit is reached
             j = i - 1
             # TODO pass param
-            while j >= 0 and ranges[i]['start_ts'] - ranges[j]['end_ts'] <= convert_str_to_seconds('1m'):
-                window.append(ranges[j])
+            while j >= 0 and ranges[i]['start_ts'] - ranges[j]['end_ts'] <= convert_str_to_seconds(window):
+                windowed_blocks.append(ranges[j])
                 j -= 1
-            res[get_interval(ranges[i])] = window
+            res[get_interval(ranges[i])] = windowed_blocks
 
         return res
 

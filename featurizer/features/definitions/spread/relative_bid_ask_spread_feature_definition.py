@@ -18,7 +18,7 @@ class _RelativeSpread(TimestampedBase):
 class RelativeBidAskSpreadFeatureDefinition(FeatureDefinition):
 
     @classmethod
-    def stream(cls, upstreams: Dict[FeatureTreeNode, Stream]) -> Stream:
+    def stream(cls, upstreams: Dict[FeatureTreeNode, Stream], feature_params: Dict) -> Stream:
         mid_price_upstream = toolz.first(upstreams.values())
         return mid_price_upstream.map(lambda snap: _RelativeSpread(
             timestamp=snap.timestamp,

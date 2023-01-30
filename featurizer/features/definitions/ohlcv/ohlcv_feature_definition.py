@@ -34,12 +34,11 @@ class _State:
 class OHLCVFeatureDefinition(FeatureDefinition):
 
     @classmethod
-    def stream(cls, upstreams: Dict[FeatureTreeNode, Stream], state: Optional[_State] = None, window='1m') -> Stream:
-        if state is None:
-            state = _State(
-                last_ts=None,
-                ohlcv=None,
-            )
+    def stream(cls, upstreams: Dict[FeatureTreeNode, Stream], feature_params: Dict) -> Stream:
+        state = _State(last_ts=None, ohlcv=None)
+        window = '1m' # TODO figure out default setting
+        if feature_params is not None and 'window' in feature_params:
+            window = feature_params['window']
         window_s = convert_str_to_seconds(window)
         update = functools.partial(OHLCVFeatureDefinition._update_state, window_s=window_s)
         trades_upstream = toolz.first(upstreams.values())

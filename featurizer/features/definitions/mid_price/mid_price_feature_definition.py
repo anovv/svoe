@@ -21,7 +21,7 @@ class MidPriceFeatureDefinition(FeatureDefinition):
         }
 
     @classmethod
-    def stream(cls, upstreams: Dict[FeatureTreeNode, Stream]) -> Stream:
+    def stream(cls, upstreams: Dict[FeatureTreeNode, Stream], feature_params: Dict) -> Stream:
         l2_book_snapshots_upstream = toolz.first(upstreams.values())
         return l2_book_snapshots_upstream.map(
             lambda snap: cls.construct_event(
@@ -36,5 +36,5 @@ class MidPriceFeatureDefinition(FeatureDefinition):
         return [L2BookSnapshotFeatureDefinition]
 
     @classmethod
-    def group_dep_ranges(cls, ranges: List[BlockMeta], dep_feature: FeatureTreeNode) -> Dict:  # TODO typehint Block/BlockRange/BlockMeta/BlockRangeMeta
+    def group_dep_ranges(cls, ranges: List[BlockMeta], feature: FeatureTreeNode, dep_feature: FeatureTreeNode) -> IntervalDict:  # TODO typehint Block/BlockRange/BlockMeta/BlockRangeMeta
         return identity_grouping(ranges)

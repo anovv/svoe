@@ -11,9 +11,7 @@ EventSchema = Dict[str, Type]
 # a base class for raw data sources and derived features
 class DataDefinition:
 
-    @classmethod
-    def type_str(cls) -> str:
-        return cls.__name__
+    # TODO params schema
 
     # this is a hacky way to discern between types in Union[FeatureDefinition, DataSource]
     # without isinstance (due to python bug)

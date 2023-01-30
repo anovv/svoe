@@ -22,7 +22,8 @@ def build_stream_graph(feature: FeatureTreeNode) -> Dict[FeatureTreeNode, Stream
         dep_upstreams = {}
         for dep_feature in feature.children:
             dep_upstreams[dep_feature] = stream_graph[dep_feature]
-        stream = feature.feature_definition.stream(dep_upstreams)
+        # TODO this should be part of Feature class
+        stream = feature.feature_definition.stream(dep_upstreams, feature.params)
         stream_graph[feature] = stream
 
     postorder(feature, callback)
@@ -96,16 +97,17 @@ def load_if_needed(
 # https://github.com/FuchsTom/ProdSim
 # https://github.com/topics/discrete-event-simulation?l=python&o=desc&s=forks
 # https://docs.python.org/3/library/tkinter.html
+# TODO this should be in Feature class
 @dask.delayed
 def calculate_feature(
-    feature_definition: Type[FeatureDefinition],
+    feature: FeatureTreeNode,
     dep_feature_results: Dict[FeatureTreeNode, BlockRange], # maps dep feature to BlockRange # TODO List[BlockRange] when using 'holes'
     interval: Interval
 ) -> Block:
     merged = merge_feature_blocks(dep_feature_results)
     # construct upstreams
     upstreams = {dep_named_feature: Stream() for dep_named_feature in dep_feature_results.keys()}
-    out_stream = feature_definition.stream(upstreams)
+    out_stream = feature.feature_definition.stream(upstreams, feature.params)
     return run_stream(merged, upstreams, out_stream, interval)
 
 
@@ -167,9 +169,9 @@ def run_stream(
     return pd.DataFrame(res)  # TODO set column names properly, using FeatureDefinition schema method?
 
 
-# TODO should be FeatureDefinition method
+# TODO should be FeatureDefinition/Feature method
 def calculate_feature_meta(
-    feature_definition: Type[FeatureDefinition],
+    feature: FeatureTreeNode,
     dep_feature_results: Dict[FeatureTreeNode, BlockRangeMeta],
     # maps dep feature to BlockRange # TODO List[BlockRangeMeta]?
     interval: Interval
@@ -207,13 +209,14 @@ def build_task_graph(
         grouped_ranges_by_dep_feature = {}
         for dep_feature in feature.children:
             dep_ranges = feature_ranges_meta[dep_feature]
-            grouped_ranges_by_dep_feature[dep_feature] = feature.feature_definition.group_dep_ranges(dep_ranges, dep_feature)
+            # TODO this should be in Feature class
+            grouped_ranges_by_dep_feature[dep_feature] = feature.feature_definition.group_dep_ranges(dep_ranges, feature, dep_feature)
 
         overlaps = get_ranges_overlaps(grouped_ranges_by_dep_feature)
         ranges = []
         for interval, overlap in overlaps.items():
             # TODO is this needed? is it for block or range ?
-            result_meta = calculate_feature_meta(feature.feature_definition, overlap, interval)
+            result_meta = calculate_feature_meta(feature, overlap, interval)
             ranges.append(result_meta)
             if feature not in feature_delayed_funcs:
                 feature_delayed_funcs[feature] = {}
@@ -227,7 +230,7 @@ def build_task_graph(
                     dep_delayed_func = feature_delayed_funcs[dep_named_feature][dep_interval]
                     ds.append(dep_delayed_func)
                 dep_delayed_funcs[dep_named_feature] = ds
-            feature_delayed = calculate_feature(feature.feature_definition, dep_delayed_funcs, interval)
+            feature_delayed = calculate_feature(feature, dep_delayed_funcs, interval)
             feature_delayed_funcs[feature][interval] = feature_delayed
 
         feature_ranges_meta[feature] = ranges
