@@ -32,7 +32,7 @@ class VolatilityStddevFeatureDefinition(FeatureDefinition):
         return lookback_apply(mid_price_upstream, window, cls._prices_to_volatility)
 
     @classmethod
-    def group_dep_ranges(cls, ranges: List[BlockMeta], dep_feature: FeatureTreeNode) -> Dict:
+    def group_dep_ranges(cls, ranges: List[BlockMeta], dep_feature: FeatureTreeNode) -> IntervalDict:
         # TODO util this
         res = {}
         # TODO assuming no 'holes' in data

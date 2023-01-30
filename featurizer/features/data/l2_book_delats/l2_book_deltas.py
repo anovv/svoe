@@ -1,5 +1,5 @@
 from featurizer.features.data.data_source_definition import DataSourceDefinition
-from featurizer.features.data.data_definition import NamedFeature, DataDefinition, EventSchema, Event
+from featurizer.features.data.data_definition import DataDefinition, EventSchema, Event
 from collections import OrderedDict
 from typing import List, Dict, Tuple, Type
 from pandas import DataFrame

@@ -5,7 +5,7 @@ from ta.utils import dropna
 from ta.volatility import BollingerBands
 from portion import IntervalDict
 from featurizer.features.data.data_definition import DataDefinition
-from featurizer.features.feature_tree.feature_tree import FeatureTreeNode
+# from featurizer.features.feature_tree.feature_tree import FeatureTreeNode
 from featurizer.features.blocks.blocks import BlockMeta
 from pandas import DataFrame
 
@@ -19,7 +19,7 @@ class FeatureDefinition(DataDefinition):
         return False
 
     @classmethod
-    def stream(cls, dep_upstreams: Dict[FeatureTreeNode, Stream]) -> Stream:
+    def stream(cls, dep_upstreams: Dict['FeatureTreeNode', Stream]) -> Stream:
         raise NotImplemented
 
     @classmethod
@@ -29,7 +29,7 @@ class FeatureDefinition(DataDefinition):
 
     # TODO we assume no 'holes' in data, use ranges: List[BlockRangeMeta] with holes
     @classmethod
-    def group_dep_ranges(cls, ranges: List[BlockMeta], dep_feature: FeatureTreeNode) -> Dict: # TODO typehint Block/BlockRange/BlockMeta/BlockRangeMeta
+    def group_dep_ranges(cls, ranges: List[BlockMeta], dep_feature: 'FeatureTreeNode') -> IntervalDict: # TODO typehint Block/BlockRange/BlockMeta/BlockRangeMeta
         # logic to group input data into atomic blocks for bulk processing
         # TODO this should be identity mapping by default?
         raise NotImplemented

@@ -2,7 +2,7 @@ from typing import List
 from pandas import DataFrame
 from featurizer.features.data.data_definition import DataDefinition
 
-
+# TODO remove this and DataDefinition, keep only FeatureDefinition?
 # represents raw datasource
 class DataSourceDefinition(DataDefinition):
 

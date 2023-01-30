@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from typing import List, Dict, Optional, Any, Tuple
-from featurizer.features.data.data_definition import NamedFeature, DataDefinition
+from featurizer.features.data.data_definition import DataDefinition
 
 # TODO deprecate all, use FeatureDefinition event schemas instead
 

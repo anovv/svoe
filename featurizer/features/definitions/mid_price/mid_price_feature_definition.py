@@ -21,7 +21,7 @@ class MidPriceFeatureDefinition(FeatureDefinition):
         }
 
     @classmethod
-    def stream(cls, upstreams: Dict[NamedFeature, Stream]) -> Stream:
+    def stream(cls, upstreams: Dict[FeatureTreeNode, Stream]) -> Stream:
         l2_book_snapshots_upstream = toolz.first(upstreams.values())
         return l2_book_snapshots_upstream.map(
             lambda snap: cls.construct_event(

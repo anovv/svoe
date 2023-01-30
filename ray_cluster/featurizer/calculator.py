@@ -1,7 +1,7 @@
 from typing import Union, Dict, Callable, Type, List, OrderedDict, Any, Tuple, Optional
 from featurizer.features.definitions.feature_definition import FeatureDefinition
 from featurizer.features.data.data_definition import DataDefinition, Event
-from featurizer.features.feature_tree.feature_tree import FeatureTreeNode, postorder, construct_feature_tree
+from featurizer.features.feature_tree.feature_tree import FeatureTreeNode, postorder
 from featurizer.features.blocks.blocks import Block, BlockRange, BlockMeta, BlockRangeMeta, get_interval, DataParams
 import dask.graph_manipulation
 from portion import Interval, IntervalDict, closed
@@ -16,13 +16,13 @@ def build_stream_graph(feature: FeatureTreeNode) -> Dict[FeatureTreeNode, Stream
     stream_graph = {}
 
     def callback(feature: FeatureTreeNode):
-        if feature.fd.is_data_source():
+        if feature.feature_definition.is_data_source():
             stream_graph[feature] = Stream()
             return
         dep_upstreams = {}
-        for child in feature.children:
-            dep_upstreams[child] = stream_graph[child]
-        stream = feature.fd.stream(dep_upstreams)
+        for dep_feature in feature.children:
+            dep_upstreams[dep_feature] = stream_graph[dep_feature]
+        stream = feature.feature_definition.stream(dep_upstreams)
         stream_graph[feature] = stream
 
     postorder(feature, callback)
@@ -30,7 +30,7 @@ def build_stream_graph(feature: FeatureTreeNode) -> Dict[FeatureTreeNode, Stream
 
 
 def load_data_ranges(
-    fd_type: Type[FeatureDefinition],
+    feature_definition: Type[FeatureDefinition],
     data_params: DataParams,
     start_date: str = None,
     end_date: str = None
@@ -52,8 +52,7 @@ def get_ranges_overlaps(grouped_ranges: Dict[FeatureTreeNode, IntervalDict]) -> 
     # join ranges_dict for each feature_name with first to find all possible intersecting intervals
     # and their corresponding BlockRange/BlockRangeMeta objects
     for feature, ranges_dict in grouped_ranges.items():
-        # compare by names
-        if feature.node_id == first_feature.node_id:
+        if feature == first_feature:
             continue
 
         def concat(named_ranges_dict, ranges):
@@ -99,14 +98,14 @@ def load_if_needed(
 # https://docs.python.org/3/library/tkinter.html
 @dask.delayed
 def calculate_feature(
-    fd_type: Type[FeatureDefinition],
+    feature_definition: Type[FeatureDefinition],
     dep_feature_results: Dict[FeatureTreeNode, BlockRange], # maps dep feature to BlockRange # TODO List[BlockRange] when using 'holes'
     interval: Interval
 ) -> Block:
     merged = merge_feature_blocks(dep_feature_results)
     # construct upstreams
     upstreams = {dep_named_feature: Stream() for dep_named_feature in dep_feature_results.keys()}
-    out_stream = fd_type.stream(upstreams)
+    out_stream = feature_definition.stream(upstreams)
     return run_stream(merged, upstreams, out_stream, interval)
 
 
@@ -124,7 +123,7 @@ def merge_feature_blocks(
         block_range = feature_blocks[feature]
         named_events = []
         for block in block_range:
-            parsed = feature.fd.parse_events(block)
+            parsed = feature.feature_definition.parse_events(block)
             named = []
             for e in parsed:
                 named.append((feature, e))
@@ -170,7 +169,7 @@ def run_stream(
 
 # TODO should be FeatureDefinition method
 def calculate_feature_meta(
-    fd_type: Type[FeatureDefinition],
+    feature_definition: Type[FeatureDefinition],
     dep_feature_results: Dict[FeatureTreeNode, BlockRangeMeta],
     # maps dep feature to BlockRange # TODO List[BlockRangeMeta]?
     interval: Interval
@@ -185,14 +184,16 @@ def calculate_feature_meta(
 # TODO make 3d visualization with networkx/graphviz
 def build_task_graph(
     feature: FeatureTreeNode,
+    # TODO decouple derived feature_ranges_meta and input data ranges meta
     feature_ranges_meta: Dict[FeatureTreeNode, List]  # TODO typehint when decide on BlockRangeMeta/BlockMeta
 ):
     feature_delayed_funcs = {}  # feature delayed functions per range per feature
 
     # bottom up/postorder traversal
     def tree_traversal_callback(feature: FeatureTreeNode):
-        if feature.fd.is_data_source():
+        if feature.feature_definition.is_data_source():
             # leaves
+            # TODO decouple derived feature_ranges_meta and input data ranges meta
             ranges = feature_ranges_meta[feature]  # this is already populated for Data in load_data_ranges above
             for block_meta in ranges:
                 # TODO we assume no 'holes' in data here
@@ -206,13 +207,13 @@ def build_task_graph(
         grouped_ranges_by_dep_feature = {}
         for dep_feature in feature.children:
             dep_ranges = feature_ranges_meta[dep_feature]
-            grouped_ranges_by_dep_feature[dep_feature] = feature.fd.group_dep_ranges(dep_ranges, dep_feature)
+            grouped_ranges_by_dep_feature[dep_feature] = feature.feature_definition.group_dep_ranges(dep_ranges, dep_feature)
 
         overlaps = get_ranges_overlaps(grouped_ranges_by_dep_feature)
         ranges = []
         for interval, overlap in overlaps.items():
             # TODO is this needed? is it for block or range ?
-            result_meta = calculate_feature_meta(feature.fd, overlap, interval)
+            result_meta = calculate_feature_meta(feature.feature_definition, overlap, interval)
             ranges.append(result_meta)
             if feature not in feature_delayed_funcs:
                 feature_delayed_funcs[feature] = {}
@@ -226,7 +227,7 @@ def build_task_graph(
                     dep_delayed_func = feature_delayed_funcs[dep_named_feature][dep_interval]
                     ds.append(dep_delayed_func)
                 dep_delayed_funcs[dep_named_feature] = ds
-            feature_delayed = calculate_feature(feature.fd, dep_delayed_funcs, interval)
+            feature_delayed = calculate_feature(feature.feature_definition, dep_delayed_funcs, interval)
             feature_delayed_funcs[feature][interval] = feature_delayed
 
         feature_ranges_meta[feature] = ranges

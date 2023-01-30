@@ -10,7 +10,7 @@ from featurizer.features.definitions.l2_book_snapshot.l2_book_snapshot_feature_d
     L2BookSnapshotFeatureDefinition
 from featurizer.features.definitions.mid_price.mid_price_feature_definition import MidPriceFeatureDefinition
 from featurizer.features.definitions.feature_definition import FeatureDefinition
-from featurizer.features.feature_tree.feature_tree import FeatureTreeNode
+from featurizer.features.feature_tree.feature_tree import FeatureTreeNode, construct_feature_tree, _feature_id
 from featurizer.features.blocks.blocks import BlockMeta, BlockRange, Block, BlockRangeMeta
 import portion as P
 import unittest
@@ -30,38 +30,43 @@ class TestFeatureCalculator(unittest.TestCase):
         ranges_a[P.closed(1, 4)] = [self.meta(1, 2), self.meta(2.1, 5)]
         ranges_a[P.closed(4.1, 8)] = [self.meta(5, 5.5), self.meta(6, 7)]
         ranges_a[P.closed(9, 15)] = [self.meta(9, 15)]
-        grouped_range[self.mock_named_feature('feature_a')] = ranges_a
+        grouped_range[self.mock_feature('feature_a')] = ranges_a
 
         ranges_b = P.IntervalDict()
         ranges_b[P.closed(2, 5)] = [self.meta(2, 3), self.meta(3.1, 6)]
         ranges_b[P.closed(6, 7)] = [self.meta(6, 7)]
         ranges_b[P.closed(9, 20)] = [self.meta(9, 15), self.meta(15.1, 18), self.meta(18.1, 22)]
-        grouped_range[self.mock_named_feature('feature_b')] = ranges_b
+        grouped_range[self.mock_feature('feature_b')] = ranges_b
 
         expected = P.IntervalDict()
         expected[P.closed(2, 4)] = {
-            self.mock_named_feature('feature_a'): [{'start_ts': 1, 'end_ts': 2}, {'start_ts': 2.1, 'end_ts': 5}],
-            self.mock_named_feature('feature_b'): [{'start_ts': 2, 'end_ts': 3}, {'start_ts': 3.1, 'end_ts': 6}]
+            self.mock_feature('feature_a'): [{'start_ts': 1, 'end_ts': 2}, {'start_ts': 2.1, 'end_ts': 5}],
+            self.mock_feature('feature_b'): [{'start_ts': 2, 'end_ts': 3}, {'start_ts': 3.1, 'end_ts': 6}]
         }
         expected[P.closed(4.1, 5)] = {
-            self.mock_named_feature('feature_a'): [{'start_ts': 5, 'end_ts': 5.5}, {'start_ts': 6, 'end_ts': 7}],
-            self.mock_named_feature('feature_b'): [{'start_ts': 2, 'end_ts': 3}, {'start_ts': 3.1, 'end_ts': 6}]
+            self.mock_feature('feature_a'): [{'start_ts': 5, 'end_ts': 5.5}, {'start_ts': 6, 'end_ts': 7}],
+            self.mock_feature('feature_b'): [{'start_ts': 2, 'end_ts': 3}, {'start_ts': 3.1, 'end_ts': 6}]
         }
         expected[P.closed(6, 7)] = {
-            self.mock_named_feature('feature_a'): [{'start_ts': 5, 'end_ts': 5.5}, {'start_ts': 6, 'end_ts': 7}],
-            self.mock_named_feature('feature_b'): [{'start_ts': 6, 'end_ts': 7}]
+            self.mock_feature('feature_a'): [{'start_ts': 5, 'end_ts': 5.5}, {'start_ts': 6, 'end_ts': 7}],
+            self.mock_feature('feature_b'): [{'start_ts': 6, 'end_ts': 7}]
         }
         expected[P.closed(9, 15)] = {
-            self.mock_named_feature('feature_a'): [{'start_ts': 9, 'end_ts': 15}],
-            self.mock_named_feature('feature_b'): [{'start_ts': 9, 'end_ts': 15}, {'start_ts': 15.1, 'end_ts': 18},
-                          {'start_ts': 18.1, 'end_ts': 22}]
+            self.mock_feature('feature_a'): [{'start_ts': 9, 'end_ts': 15}],
+            self.mock_feature('feature_b'): [{'start_ts': 9, 'end_ts': 15}, {'start_ts': 15.1, 'end_ts': 18},
+                                             {'start_ts': 18.1, 'end_ts': 22}]
         }
 
         overlaps = C.get_ranges_overlaps(grouped_range)
         self.assertEqual(overlaps, expected)
 
-    def mock_named_feature(self, feature_name: str):
-        return feature_name, Type[FeatureDefinition]
+    def mock_feature(self, feature_id: str):
+        return FeatureTreeNode(
+            [],
+            feature_id,
+            FeatureDefinition,
+            {}
+        )
 
     def meta(self, start_ts, end_ts, extra=None):
         # TODO make mock function
@@ -79,7 +84,7 @@ class TestFeatureCalculator(unittest.TestCase):
         # TODO populate these
         data_params = {}
         feature_params = {}
-        feature = C.construct_feature_tree(L2BookSnapshotFeatureDefinition, [0], data_params, feature_params)
+        feature = construct_feature_tree(L2BookSnapshotFeatureDefinition, data_params, feature_params)
 
         graph = C.build_task_graph(feature, feature_ranges)
         print(graph)
@@ -91,7 +96,7 @@ class TestFeatureCalculator(unittest.TestCase):
         # TODO populate these
         data_params = {}
         feature_params = {}
-        feature = C.construct_feature_tree(MidPriceFeatureDefinition, [0], data_params, feature_params)
+        feature = construct_feature_tree(MidPriceFeatureDefinition, data_params, feature_params)
 
         graph = C.build_task_graph(feature, feature_ranges)
         print(graph)
@@ -112,8 +117,8 @@ class TestFeatureCalculator(unittest.TestCase):
             cur_ts += between_blocks_ms
 
         data_params = {} # TODO mock
-        sample_node_id = 0
-        data = FeatureTreeNode([], sample_node_id, L2BookDeltasData, data_params)
+        feature_id = _feature_id(0, True)
+        data = FeatureTreeNode([], feature_id, L2BookDeltasData, data_params)
         res[data] = ranges
         return res
 
@@ -163,8 +168,8 @@ class TestFeatureCalculator(unittest.TestCase):
             block_range_meta.append(block_meta)
 
         data_params = {} # TODO mock
-        sample_node_id = 0
-        data = FeatureTreeNode([], sample_node_id, L2BookDeltasData, data_params)
+        feature_id = _feature_id(0, True)
+        data = FeatureTreeNode([], feature_id, L2BookDeltasData, data_params)
         return {data: block_range}, {data: block_range_meta}
 
     def test_featurization(self, fd: Type[FeatureDefinition]):
@@ -175,13 +180,11 @@ class TestFeatureCalculator(unittest.TestCase):
         # TODO populate these
         data_params = {}
         feature_params = {}
-        feature = C.construct_feature_tree(fd, [0], data_params, feature_params)
-
+        feature = construct_feature_tree(fd, data_params, feature_params)
         # calculate in offline/distributed way
         task_graph = C.build_task_graph(feature, block_range_meta)
         # dask.visualize(*task_graph)
         res_blocks = dask.compute(task_graph)
-        print(len(res_blocks))
         offline_res = pd.concat(*res_blocks)
         print(offline_res)
 
