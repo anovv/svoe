@@ -33,7 +33,14 @@ class VolatilityStddevFeatureDefinition(FeatureDefinition):
         window = '1m' # TODO figure out default setting
         if feature_params is not None and 'window' in feature_params:
             window = feature_params['window']
-        return lookback_apply(mid_price_upstream, window, cls._prices_to_volatility)
+        # return lookback_apply(mid_price_upstream, window, cls._prices_to_volatility)
+        return mid_price_upstream.map(
+            lambda mid_price: cls.construct_event(
+                mid_price['timestamp'],
+                mid_price['receipt_timestamp'],
+                mid_price['mid_price']
+            )
+        )
 
     @classmethod
     def group_dep_ranges(cls, ranges: List[BlockMeta], feature: Feature, dep_feature: Feature) -> IntervalDict:
@@ -47,7 +54,6 @@ class VolatilityStddevFeatureDefinition(FeatureDefinition):
             windowed_blocks = [ranges[i]]
             # look back until window limit is reached
             j = i - 1
-            # TODO pass param
             while j >= 0 and ranges[i]['start_ts'] - ranges[j]['end_ts'] <= convert_str_to_seconds(window):
                 windowed_blocks.append(ranges[j])
                 j -= 1
@@ -58,6 +64,12 @@ class VolatilityStddevFeatureDefinition(FeatureDefinition):
     @classmethod
     def _prices_to_volatility(cls, prices: Deque) -> Event:
         last_price = prices[-1]
+        # for i in range(len(prices)):
+        #     if 'mid_price' not in prices[i]:
+        #         print(type(prices[i]), prices[i])
+                # print(prices[i - 1])
+                # print(prices[i + 1])
+                # raise
         p = [price['mid_price'] for price in prices]
         stddev = float(np.std(p, dtype=np.float32))
         return cls.construct_event(last_price['timestamp'], last_price['receipt_timestamp'], stddev)

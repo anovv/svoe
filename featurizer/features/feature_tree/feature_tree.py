@@ -3,14 +3,16 @@ from featurizer.features.data.data_definition import DataDefinition
 from featurizer.features.data.data_source_definition import DataSourceDefinition
 from featurizer.features.definitions.feature_definition import FeatureDefinition
 from typing import Type, Dict, List, Callable, Union
+from anytree import NodeMixin
 
 
-class Feature:
-    def __init__(self, children: List['Feature'], feature_id: str, feature_definition: Type[Union[DataSourceDefinition, FeatureDefinition]], params: Dict):
+class Feature(NodeMixin):
+    def __init__(self, children: List['Feature'], position: int, feature_definition: Type[Union[DataSourceDefinition, FeatureDefinition]], params: Dict):
         self.children = children
-        self.feature_id = feature_id
+        self.position = position
         self.feature_definition = feature_definition
         self.params = params
+        self.feature_id = self._feature_id()
 
     def __hash__(self):
         # TODO unique feature identifier
@@ -19,12 +21,15 @@ class Feature:
     def __eq__(self, other):
         return self.feature_id == other.feature_id
 
+    def __repr__(self):
+        return self.feature_id
 
-# TODO is_data needed?
-# TODO make this logic part of the class above
-def _feature_id(position: int, is_data_source: bool) -> str:
-    # TODO figure out how to pass data_params dependencies to features to get unique id
-    return f'data-source-{position}' if is_data_source else f'feature-{position}'
+    def _feature_id(self) -> str:
+        # TODO figure out how to pass data_params dependencies to features to get unique id
+        if self.feature_definition.is_data_source():
+            return f'data-source-{self.feature_definition.__name__}-{self.position}'
+        else:
+            return f'feature-{self.feature_definition.__name__}-{self.position}'
 
 
 def construct_feature_tree(
@@ -55,7 +60,7 @@ def _construct_feature_tree(
         data_position_ref[0] += 1
         return Feature(
             children=[],
-            feature_id=_feature_id(position, True),
+            position=position,
             feature_definition=root_def,
             params=params
         )
@@ -78,17 +83,16 @@ def _construct_feature_tree(
 
     return Feature(
         children=children,
-        feature_id=_feature_id(position, False),
+        position=position,
         feature_definition=root_def,
         params=params
     )
 
-
+# TODO use anytree api
 def postorder(node: Feature, callback: Callable):
     if node.children is None or len(node.children) == 0:
         callback(node)
         return
     for child in node.children:
         postorder(child, callback)
-
     callback(node)

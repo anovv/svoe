@@ -1,5 +1,10 @@
 from typing import Union, Dict, Callable, Type, List, OrderedDict, Any, Tuple, Optional
+
+import toolz
+
 from featurizer.features.definitions.feature_definition import FeatureDefinition
+from featurizer.features.definitions.volatility.volatility_stddev_feature_definition import VolatilityStddevFeatureDefinition
+from featurizer.features.definitions.mid_price.mid_price_feature_definition import MidPriceFeatureDefinition
 from featurizer.features.data.data_definition import DataDefinition, Event
 from featurizer.features.feature_tree.feature_tree import Feature, postorder
 from featurizer.features.blocks.blocks import Block, BlockRange, BlockMeta, BlockRangeMeta, get_interval, DataParams
@@ -9,6 +14,7 @@ import pandas as pd
 from streamz import Stream
 import heapq
 from featurizer.features.loader.df_utils import load_single_file
+from dask.delayed import Delayed
 
 
 # TODO move this to FeatureDefinition package
@@ -104,6 +110,21 @@ def calculate_feature(
     dep_feature_results: Dict[Feature, BlockRange], # maps dep feature to BlockRange # TODO List[BlockRange] when using 'holes'
     interval: Interval
 ) -> Block:
+    if feature.feature_definition == VolatilityStddevFeatureDefinition:
+        print(len(dep_feature_results))
+        first = toolz.first(dep_feature_results.keys())
+        print(first.feature_definition)
+        if first.feature_definition == MidPriceFeatureDefinition:
+            print('b')
+            s = []
+            print(len(dep_feature_results[first]))
+            for i in range(len(dep_feature_results[first])):
+                if 'volatility' in dep_feature_results[first][i]:
+                    s.append(i)
+            if len(s) != 0:
+                print(s)
+                raise
+
     merged = merge_feature_blocks(dep_feature_results)
     # construct upstreams
     upstreams = {dep_named_feature: Stream() for dep_named_feature in dep_feature_results.keys()}
@@ -212,6 +233,13 @@ def build_task_graph(
             # TODO this should be in Feature class
             grouped_ranges_by_dep_feature[dep_feature] = feature.feature_definition.group_dep_ranges(dep_ranges, feature, dep_feature)
 
+
+        if feature.feature_definition == VolatilityStddevFeatureDefinition:
+            print(feature.feature_id)
+            print(list(grouped_ranges_by_dep_feature.keys())[0].feature_id)
+            print(grouped_ranges_by_dep_feature[feature])
+            raise
+
         overlaps = get_ranges_overlaps(grouped_ranges_by_dep_feature)
         ranges = []
         for interval, overlap in overlaps.items():
@@ -223,13 +251,13 @@ def build_task_graph(
 
             # TODO use overlap to fetch results of dep delayed funcs
             dep_delayed_funcs = {}
-            for dep_named_feature in overlap:
+            for dep_feature in overlap:
                 ds = []
-                for dep_block_meta in overlap[dep_named_feature]:
+                for dep_block_meta in overlap[dep_feature]:
                     dep_interval = get_interval(dep_block_meta)
-                    dep_delayed_func = feature_delayed_funcs[dep_named_feature][dep_interval]
+                    dep_delayed_func = feature_delayed_funcs[dep_feature][dep_interval]
                     ds.append(dep_delayed_func)
-                dep_delayed_funcs[dep_named_feature] = ds
+                dep_delayed_funcs[dep_feature] = ds
             feature_delayed = calculate_feature(feature, dep_delayed_funcs, interval)
             feature_delayed_funcs[feature][interval] = feature_delayed
 
