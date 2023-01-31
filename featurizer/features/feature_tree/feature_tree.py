@@ -1,5 +1,4 @@
 
-from featurizer.features.data.data_definition import DataDefinition
 from featurizer.features.data.data_source_definition import DataSourceDefinition
 from featurizer.features.definitions.feature_definition import FeatureDefinition
 from typing import Type, Dict, List, Callable, Union
@@ -15,7 +14,6 @@ class Feature(NodeMixin):
         self.feature_id = self._feature_id()
 
     def __hash__(self):
-        # TODO unique feature identifier
         return hash(self.feature_id)
 
     def __eq__(self, other):
@@ -81,12 +79,14 @@ def _construct_feature_tree(
     else:
         params = feature_params[position]
 
-    return Feature(
+    feature = Feature(
         children=children,
         position=position,
         feature_definition=root_def,
         params=params
     )
+    feature_position_ref[0] -= 1
+    return feature
 
 # TODO use anytree api
 def postorder(node: Feature, callback: Callable):

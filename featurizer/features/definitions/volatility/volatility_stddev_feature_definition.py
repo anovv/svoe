@@ -33,14 +33,7 @@ class VolatilityStddevFeatureDefinition(FeatureDefinition):
         window = '1m' # TODO figure out default setting
         if feature_params is not None and 'window' in feature_params:
             window = feature_params['window']
-        # return lookback_apply(mid_price_upstream, window, cls._prices_to_volatility)
-        return mid_price_upstream.map(
-            lambda mid_price: cls.construct_event(
-                mid_price['timestamp'],
-                mid_price['receipt_timestamp'],
-                mid_price['mid_price']
-            )
-        )
+        return lookback_apply(mid_price_upstream, window, cls._prices_to_volatility)
 
     @classmethod
     def group_dep_ranges(cls, ranges: List[BlockMeta], feature: Feature, dep_feature: Feature) -> IntervalDict:
@@ -64,12 +57,6 @@ class VolatilityStddevFeatureDefinition(FeatureDefinition):
     @classmethod
     def _prices_to_volatility(cls, prices: Deque) -> Event:
         last_price = prices[-1]
-        # for i in range(len(prices)):
-        #     if 'mid_price' not in prices[i]:
-        #         print(type(prices[i]), prices[i])
-                # print(prices[i - 1])
-                # print(prices[i + 1])
-                # raise
         p = [price['mid_price'] for price in prices]
         stddev = float(np.std(p, dtype=np.float32))
         return cls.construct_event(last_price['timestamp'], last_price['receipt_timestamp'], stddev)

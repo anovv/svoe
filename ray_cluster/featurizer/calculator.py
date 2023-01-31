@@ -110,21 +110,6 @@ def calculate_feature(
     dep_feature_results: Dict[Feature, BlockRange], # maps dep feature to BlockRange # TODO List[BlockRange] when using 'holes'
     interval: Interval
 ) -> Block:
-    if feature.feature_definition == VolatilityStddevFeatureDefinition:
-        print(len(dep_feature_results))
-        first = toolz.first(dep_feature_results.keys())
-        print(first.feature_definition)
-        if first.feature_definition == MidPriceFeatureDefinition:
-            print('b')
-            s = []
-            print(len(dep_feature_results[first]))
-            for i in range(len(dep_feature_results[first])):
-                if 'volatility' in dep_feature_results[first][i]:
-                    s.append(i)
-            if len(s) != 0:
-                print(s)
-                raise
-
     merged = merge_feature_blocks(dep_feature_results)
     # construct upstreams
     upstreams = {dep_named_feature: Stream() for dep_named_feature in dep_feature_results.keys()}
@@ -232,13 +217,6 @@ def build_task_graph(
             dep_ranges = feature_ranges_meta[dep_feature]
             # TODO this should be in Feature class
             grouped_ranges_by_dep_feature[dep_feature] = feature.feature_definition.group_dep_ranges(dep_ranges, feature, dep_feature)
-
-
-        if feature.feature_definition == VolatilityStddevFeatureDefinition:
-            print(feature.feature_id)
-            print(list(grouped_ranges_by_dep_feature.keys())[0].feature_id)
-            print(grouped_ranges_by_dep_feature[feature])
-            raise
 
         overlaps = get_ranges_overlaps(grouped_ranges_by_dep_feature)
         ranges = []
