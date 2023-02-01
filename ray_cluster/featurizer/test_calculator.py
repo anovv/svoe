@@ -168,7 +168,7 @@ class TestFeatureCalculator(unittest.TestCase):
                 block_meta['snapshot_ts'] = infos[i]['snapshot_ts']
             block_range_meta.append(block_meta)
 
-        data_params = {} # TODO mock
+        data_params = {}# TODO mock
         data = Feature([], 0, L2BookDeltasData, data_params)
         return {data: block_range}, {data: block_range_meta}
 

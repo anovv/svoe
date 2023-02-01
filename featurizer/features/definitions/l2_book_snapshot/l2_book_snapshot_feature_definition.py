@@ -3,9 +3,8 @@ from typing import List, Dict, Optional, Any, Tuple, Union, Type
 from portion import IntervalDict, closed
 from streamz import Stream
 from order_book import OrderBook
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from frozenlist import FrozenList
-from featurizer.features.definitions.data_models_utils import TimestampedBase
 from featurizer.features.data.data_definition import DataDefinition, Event, EventSchema
 from featurizer.features.feature_tree.feature_tree import Feature
 from featurizer.features.definitions.feature_definition import FeatureDefinition
@@ -18,25 +17,17 @@ from pandas import DataFrame
 
 
 @dataclass
-class _State(TimestampedBase):
+class _State:
+    timestamp: float
+    receipt_timestamp: float
     order_book: OrderBook
     data_inconsistencies: Dict
     depth: Optional[int] = None
     inited: bool = False
     ob_count: int = 0
 
-
-# @dataclass(unsafe_hash=True)
-# class L2BookSnapshot(TimestampedBase):
-#     timestamp: float = field(compare=False, hash=False)
-#     receipt_timestamp: float = field(compare=False, hash=False) # TODO move this properties to superclass
-#     bids: FrozenList = field(hash=True)  # FrozenList[Tuple[float, float]] price, size
-#     asks: FrozenList = field(hash=True) # FrozenList[Tuple[float, float]]
-
-
 # TODO good data 'l2_book', 'BINANCE', 'spot', 'BTC-USDT', '2022-09-29', '2022-09-29'
 # TODO remove malformed files
-
 class L2BookSnapshotFeatureDefinition(FeatureDefinition):
 
     @classmethod

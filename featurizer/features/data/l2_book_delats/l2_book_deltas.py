@@ -13,11 +13,13 @@ class L2BookDeltasData(DataSourceDefinition):
             'timestamp': float,
             'receipt_timestamp': float,
             'delta': bool,
+            # TODO make it a list of dicts
             'orders': List[Tuple[float, float, float]]# side, price, size
         }
 
     @classmethod
     def parse_events(cls, df: DataFrame) -> List[Event]:
+        # TODO merge this logic with TradesData parse_events
         grouped = df.groupby(['timestamp', 'delta'])
         dfs = [grouped.get_group(x) for x in grouped.groups]
         dfs = sorted(dfs, key=lambda df: df['timestamp'].iloc[0], reverse=False)

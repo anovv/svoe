@@ -1,10 +1,13 @@
-from typing import List, Dict, Optional, Any, Tuple
+from typing import List, Dict, Optional, Any, Tuple, Type
+
+from portion import IntervalDict
 from streamz import Stream
-from featurizer.features.definitions.data_models_utils import TimestampedBase
+
+from featurizer.features.blocks.blocks import BlockMeta
+from featurizer.features.data.data_definition import EventSchema, DataDefinition, Event
+from featurizer.features.data.trades.trades import TradesData
 from featurizer.features.definitions.feature_definition import FeatureDefinition
 from featurizer.features.feature_tree.feature_tree import Feature
-
-from featurizer.features.definitions.data_models_utils import Trade
 from featurizer.features.utils import convert_str_to_seconds
 
 from dataclasses import dataclass
@@ -15,23 +18,30 @@ import toolz
 
 
 @dataclass
-class OHLCV(TimestampedBase):
-    open: float
-    high: float
-    low: float
-    close: float
-    volume: float
-    vwap: float
-    num_trades: int
-
-
-@dataclass
 class _State:
     last_ts: Optional[float] = None
-    ohlcv: Optional[OHLCV] = None
+    ohlcv: Optional[Event] = None
 
 
 class OHLCVFeatureDefinition(FeatureDefinition):
+
+    @classmethod
+    def event_schema(cls) -> EventSchema:
+        return {
+            'timestamp': float,
+            'receipt_timestamp': float,
+            'open': float,
+            'high': float,
+            'low': float,
+            'close': float,
+            'volume': float,
+            'vwap': float,
+            'num_trades': int
+        }
+
+    @classmethod
+    def dep_upstream_schema(cls) -> List[Type[DataDefinition]]:
+        return [TradesData]
 
     @classmethod
     def stream(cls, upstreams: Dict[Feature, Stream], feature_params: Dict) -> Stream:
@@ -40,44 +50,45 @@ class OHLCVFeatureDefinition(FeatureDefinition):
         if feature_params is not None and 'window' in feature_params:
             window = feature_params['window']
         window_s = convert_str_to_seconds(window)
-        update = functools.partial(OHLCVFeatureDefinition._update_state, window_s=window_s)
+        update = functools.partial(cls._update_state, window_s=window_s)
         trades_upstream = toolz.first(upstreams.values())
         acc = trades_upstream.accumulate(update, returns_state=True, start=state)
         return su.filter_none(acc)
 
-    @staticmethod
-    def _update_state(state: _State, trade: Trade, window_s: int) -> Tuple[_State, Optional[OHLCV]]:
-        if state.ohlcv is None:
-            state.ohlcv = OHLCV(
-                timestamp=trade.timestamp,
-                receipt_timestamp=trade.receipt_timestamp,
-                open=trade.price,
-                high=trade.price,
-                low=trade.price,
-                close=trade.price,
-                volume=0,
-                vwap=0,
-                num_trades=0,
-            )
-        if state.last_ts is None:
-            state.last_ts = trade.timestamp
+    @classmethod
+    def _update_state(cls, state: _State, event: Event, window_s: int) -> Tuple[_State, Optional[Event]]:
+        timestamp = event['timestamp']
+        receipt_timestamp = event['receipt_timestamp']
+        for trade in event['trades']:
+            # TODO make trade a dict
+            side, amount, price, order_type, trade_id = trade
+            # TODO can we make use of order_type and trade_id in OHLCV?
+            if state.ohlcv is None:
+                state.ohlcv = cls.construct_event(timestamp, receipt_timestamp, price, price, price, price, 0, 0, 0)
+            if state.last_ts is None:
+                state.last_ts = timestamp
 
-        state.ohlcv.close = trade.price
-        state.ohlcv.volume += trade.amount
-        if trade.price > state.ohlcv.high:
-            state.ohlcv.high = trade.price
-        if trade.price < state.ohlcv.low:
-            state.ohlcv.low = trade.price
-        state.ohlcv.vwap += trade.price * trade.amount
-        state.ohlcv.num_trades += 1
+            state.ohlcv['close'] = price
+            state.ohlcv['volume'] += amount
+            if price > state.ohlcv['high']:
+                state.ohlcv['high'] = price
+            if price < state.ohlcv['low']:
+                state.ohlcv['low'] = price
+            state.ohlcv['vwap'] += price * amount
 
-        if trade.timestamp - state.last_ts > window_s:
-            state.last_ts = trade.timestamp
-            state.ohlcv.vwap /= state.ohlcv.volume
+        state.ohlcv['num_trades'] += len(event['trades'])
+
+        if timestamp - state.last_ts > window_s:
+            state.last_ts = timestamp
+            state.ohlcv['vwap'] /= state.ohlcv['volume']
             ohlcv = state.ohlcv.copy()
             state.ohlcv = None
             return state, ohlcv
         else:
             return state, None
 
-
+    @classmethod
+    def group_dep_ranges(cls, ranges: List[BlockMeta], feature: 'Feature', dep_feature: 'Feature') -> IntervalDict:
+        # TODO we assume no holes here
+        res = IntervalDict()
+        return res
