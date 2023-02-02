@@ -6,6 +6,7 @@ import toolz
 
 import calculator as C
 from featurizer.features.data.l2_book_delats.l2_book_deltas import L2BookDeltasData
+from featurizer.features.data.trades.trades import TradesData
 from featurizer.features.definitions.l2_book_snapshot.l2_book_snapshot_feature_definition import \
     L2BookSnapshotFeatureDefinition
 from featurizer.features.definitions.mid_price.mid_price_feature_definition import MidPriceFeatureDefinition
@@ -20,7 +21,7 @@ import pandas as pd
 from pandas.testing import assert_frame_equal
 from typing import Dict, Type, Tuple, List
 from featurizer.features.loader.l2_snapshot_utils import get_info
-from featurizer.features.loader.df_utils import load_files, load_single_file
+from featurizer.features.loader.df_utils import load_files, load_single_file, time_range, get_size_kb, get_len
 from anytree import RenderTree
 
 
@@ -150,10 +151,40 @@ class TestFeatureCalculator(unittest.TestCase):
         return block_range
 
     def mock_trades_data_and_meta(self) -> Tuple[Dict[Feature, BlockRange], Dict[Feature, BlockRangeMeta]]:
-        consec_athena_files_BINANCE_FUTURES_BTC_USD_PERP = [
-
+        consec_athena_files_BINANCE_FUTURES_ETH_USD_PERP = [
+            's3://svoe.test.1/parquet/BINANCE_FUTURES/trades/ETH-USDT/BINANCE_FUTURES-trades-ETH-USDT-1622120235.parquet',
+            's3://svoe.test.1/parquet/BINANCE_FUTURES/trades/ETH-USDT/BINANCE_FUTURES-trades-ETH-USDT-1622120264.parquet',
+            's3://svoe.test.1/parquet/BINANCE_FUTURES/trades/ETH-USDT/BINANCE_FUTURES-trades-ETH-USDT-1622120294.parquet',
+            's3://svoe.test.1/parquet/BINANCE_FUTURES/trades/ETH-USDT/BINANCE_FUTURES-trades-ETH-USDT-1622120324.parquet',
+            's3://svoe.test.1/parquet/BINANCE_FUTURES/trades/ETH-USDT/BINANCE_FUTURES-trades-ETH-USDT-1622120354.parquet',
+            's3://svoe.test.1/parquet/BINANCE_FUTURES/trades/ETH-USDT/BINANCE_FUTURES-trades-ETH-USDT-1622120384.parquet',
+            's3://svoe.test.1/parquet/BINANCE_FUTURES/trades/ETH-USDT/BINANCE_FUTURES-trades-ETH-USDT-1622120415.parquet',
+            's3://svoe.test.1/parquet/BINANCE_FUTURES/trades/ETH-USDT/BINANCE_FUTURES-trades-ETH-USDT-1622120444.parquet',
+            's3://svoe.test.1/parquet/BINANCE_FUTURES/trades/ETH-USDT/BINANCE_FUTURES-trades-ETH-USDT-1622120474.parquet',
+            's3://svoe.test.1/parquet/BINANCE_FUTURES/trades/ETH-USDT/BINANCE_FUTURES-trades-ETH-USDT-1622120504.parquet',
+            's3://svoe.test.1/parquet/BINANCE_FUTURES/trades/ETH-USDT/BINANCE_FUTURES-trades-ETH-USDT-1622120534.parquet',
+            's3://svoe.test.1/parquet/BINANCE_FUTURES/trades/ETH-USDT/BINANCE_FUTURES-trades-ETH-USDT-1622120564.parquet',
+            's3://svoe.test.1/parquet/BINANCE_FUTURES/trades/ETH-USDT/BINANCE_FUTURES-trades-ETH-USDT-1622120594.parquet',
+            's3://svoe.test.1/parquet/BINANCE_FUTURES/trades/ETH-USDT/BINANCE_FUTURES-trades-ETH-USDT-1622120624.parquet'
         ]
-        block_range = self._load_and_cache(consec_athena_files_BINANCE_FUTURES_BTC_USD_PERP)
+        block_range = self._load_and_cache(consec_athena_files_BINANCE_FUTURES_ETH_USD_PERP)
+        block_range_meta = []
+        for i in range(len(consec_athena_files_BINANCE_FUTURES_ETH_USD_PERP)):
+            # TODO util this
+            block = block_range[i]
+            _time_range = time_range(block)
+            block_range_meta.append({
+                'len_s': _time_range[0],
+                'start_ts': _time_range[1],
+                'end_ts': _time_range[2],
+                'size_kb': get_size_kb(block),
+                'len': get_len(block),
+                'path': consec_athena_files_BINANCE_FUTURES_ETH_USD_PERP[i],
+            })
+
+        data_params = {}# TODO mock
+        data = Feature([], 0, TradesData, data_params)
+        return {data: block_range}, {data: block_range_meta}
 
     def mock_l2_book_delta_data_and_meta(self) -> Tuple[Dict[Feature, BlockRange], Dict[Feature, BlockRangeMeta]]:
         consec_athena_files_BINANCE_FUTURES_BTC_USD_PERP = [
@@ -215,4 +246,8 @@ class TestFeatureCalculator(unittest.TestCase):
 if __name__ == '__main__':
     # unittest.main()
     t = TestFeatureCalculator()
-    t.test_featurization(VolatilityStddevFeatureDefinition)
+    # t.test_featurization(VolatilityStddevFeatureDefinition)
+    br, br_meta = t.mock_trades_data_and_meta()
+    print(len(toolz.first(br.values())))
+    print(toolz.first(br.values())[0])
+    print([b['len_s'] for b in toolz.first(br_meta.values())])
