@@ -39,3 +39,12 @@ class FeatureDefinition(DataDefinition):
 
 # check https://github.com/bukosabino/ta
 # check https://github.com/matplotlib/mplfinance
+# check https://github.com/twopirllc/pandas-ta
+# check https://vectorbt.dev/getting-started/features/#data
+# check https://github.com/Kismuz/btgym
+# check https://github.com/mementum/backtrader
+# check https://github.com/quantopian/zipline
+# check https://github.com/mhallsmoore/qstrader
+# check https://github.com/saeed349/Microservices-Based-Algorithmic-Trading-System
+# check https://nestedsoftware.com/2019/09/26/incremental-average-and-standard-deviation-with-sliding-window-470k.176143.html
+# check https://github.com/freqtrade/freqtrade

@@ -26,3 +26,5 @@ class RelativeBidAskSpreadFeatureDefinition(FeatureDefinition):
             snap['receipt_timestamp'],
             2 * math.fabs((snap['bids'][0][0] - snap['asks'][0][0]))/(snap['bids'][0][0] + snap['asks'][0][0])
         ))
+
+    # TODO grouping

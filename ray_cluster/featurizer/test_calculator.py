@@ -18,7 +18,7 @@ import unittest
 import dask
 import pandas as pd
 from pandas.testing import assert_frame_equal
-from typing import Dict, Type, Tuple
+from typing import Dict, Type, Tuple, List
 from featurizer.features.loader.l2_snapshot_utils import get_info
 from featurizer.features.loader.df_utils import load_files, load_single_file
 from anytree import RenderTree
@@ -123,6 +123,38 @@ class TestFeatureCalculator(unittest.TestCase):
         res[data] = ranges
         return res
 
+    def _load_and_cache(self, files: List[str]) -> BlockRange:
+        print(f'Loading {len(files)} blocks for testing...')
+        # check cache first
+        cache_location = './cached_dfs'
+        Path(cache_location).mkdir(parents=True, exist_ok=True)
+        # TODO use joblib.Memory instead
+        cache = CacheDF(cache_dir=cache_location)
+        block_range = []
+        cached_paths = []
+        for path in files:
+            hashed_path = hash(path)  # can't use s3:// strings as keys, cache_df lib flips out
+            if cache.is_cached(hashed_path):
+                block_range.append(cache.read(hashed_path))
+                cached_paths.append(path)
+        print(f'Loaded {len(cached_paths)} cached dataframes')
+        if len(cached_paths) != len(files):
+            to_load_paths = list(set(files) - set(cached_paths))
+            loaded = load_files(to_load_paths)
+            # cache loaded dfs
+            for i in range(len(to_load_paths)):
+                cache.cache(loaded[i], hash(to_load_paths[i]))
+            block_range.extend(loaded)
+            print(f'Loaded and cached {len(loaded)} dataframes')
+
+        return block_range
+
+    def mock_trades_data_and_meta(self) -> Tuple[Dict[Feature, BlockRange], Dict[Feature, BlockRangeMeta]]:
+        consec_athena_files_BINANCE_FUTURES_BTC_USD_PERP = [
+
+        ]
+        block_range = self._load_and_cache(consec_athena_files_BINANCE_FUTURES_BTC_USD_PERP)
+
     def mock_l2_book_delta_data_and_meta(self) -> Tuple[Dict[Feature, BlockRange], Dict[Feature, BlockRangeMeta]]:
         consec_athena_files_BINANCE_FUTURES_BTC_USD_PERP = [
             's3://svoe.test.1/data_lake/data_feed_market_data/l2_book/exchange=BINANCE_FUTURES/instrument_type=perpetual/instrument_extra={}/symbol=BTC-USDT-PERP/base=BTC/quote=USDT/date=2022-10-03/compaction=raw/version=local/BINANCE_FUTURES*l2_book*BTC-USDT-PERP*1664778796.722228*1664778826.607931*2e74bf76915c4b168248b18d059773b1.gz.parquet',
@@ -133,28 +165,7 @@ class TestFeatureCalculator(unittest.TestCase):
             's3://svoe.test.1/data_lake/data_feed_market_data/l2_book/exchange=BINANCE_FUTURES/instrument_type=perpetual/instrument_extra={}/symbol=BTC-USDT-PERP/base=BTC/quote=USDT/date=2022-10-03/compaction=raw/version=local/BINANCE_FUTURES*l2_book*BTC-USDT-PERP*1664778949.313781*1664778979.103868*f3605c1202f64eb3bca1960eb5b9b241.gz.parquet',
             's3://svoe.test.1/data_lake/data_feed_market_data/l2_book/exchange=BINANCE_FUTURES/instrument_type=perpetual/instrument_extra={}/symbol=BTC-USDT-PERP/base=BTC/quote=USDT/date=2022-10-03/compaction=raw/version=local/BINANCE_FUTURES*l2_book*BTC-USDT-PERP*1664778979.1611981*1664779009.082793*71c48c0b589d4c0b9ee2961dde59d9a1.gz.parquet'
         ]
-        print(f'Loading {len(consec_athena_files_BINANCE_FUTURES_BTC_USD_PERP)} blocks for testing...')
-        # check cache first
-        cache_location = './cached_dfs'
-        Path(cache_location).mkdir(parents=True, exist_ok=True)
-        # TODO use joblib.Memory instead
-        cache = CacheDF(cache_dir=cache_location)
-        block_range = []
-        cached_paths = []
-        for path in consec_athena_files_BINANCE_FUTURES_BTC_USD_PERP:
-            hashed_path = hash(path)# can't use s3:// strings as keys, cache_df lib flips out
-            if cache.is_cached(hashed_path):
-                block_range.append(cache.read(hashed_path))
-                cached_paths.append(path)
-        print(f'Loaded {len(cached_paths)} cached dataframes')
-        if len(cached_paths) != len(consec_athena_files_BINANCE_FUTURES_BTC_USD_PERP):
-            to_load_paths = list(set(consec_athena_files_BINANCE_FUTURES_BTC_USD_PERP) - set(cached_paths))
-            loaded = load_files(to_load_paths)
-            # cache loaded dfs
-            for i in range(len(to_load_paths)):
-                cache.cache(loaded[i], hash(to_load_paths[i]))
-            block_range.extend(loaded)
-            print(f'Loaded and cached {len(loaded)} dataframes')
+        block_range = self._load_and_cache(consec_athena_files_BINANCE_FUTURES_BTC_USD_PERP)
 
         infos = [get_info(block) for block in block_range]
         block_range_meta = []
