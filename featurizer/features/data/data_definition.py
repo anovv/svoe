@@ -1,5 +1,4 @@
 from typing import Tuple, Type, List, Dict, Any
-from types import MappingProxyType
 from pandas import DataFrame
 from frozendict import frozendict
 

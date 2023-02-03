@@ -47,7 +47,7 @@ def _construct_feature_tree(
     feature_params: Union[Dict, List]
 ) -> Feature:
     if root_def.is_data_source():
-        params = None
+        params = {}
         position = data_position_ref[0]
         if position not in data_params:
             # TODO raise
@@ -70,7 +70,7 @@ def _construct_feature_tree(
             feature_position_ref[0] += 1
         children.append(_construct_feature_tree(dep_fd, feature_position_ref, data_position_ref, data_params, feature_params))
 
-    params = None
+    params = {}
     position = feature_position_ref[0]
     if position not in feature_params:
         # TODO raise
@@ -87,6 +87,7 @@ def _construct_feature_tree(
     )
     feature_position_ref[0] -= 1
     return feature
+
 
 # TODO use anytree api
 def postorder(node: Feature, callback: Callable):

@@ -5,11 +5,13 @@ from pathlib import Path
 import toolz
 
 import calculator as C
+from featurizer.features.data.data_source_definition import DataSourceDefinition
 from featurizer.features.data.l2_book_delats.l2_book_deltas import L2BookDeltasData
 from featurizer.features.data.trades.trades import TradesData
 from featurizer.features.definitions.l2_book_snapshot.l2_book_snapshot_feature_definition import \
     L2BookSnapshotFeatureDefinition
 from featurizer.features.definitions.mid_price.mid_price_feature_definition import MidPriceFeatureDefinition
+from featurizer.features.definitions.ohlcv.ohlcv_feature_definition import OHLCVFeatureDefinition
 from featurizer.features.definitions.volatility.volatility_stddev_feature_definition import VolatilityStddevFeatureDefinition
 from featurizer.features.definitions.feature_definition import FeatureDefinition
 from featurizer.features.feature_tree.feature_tree import Feature, construct_feature_tree
@@ -155,17 +157,17 @@ class TestFeatureCalculator(unittest.TestCase):
             's3://svoe.test.1/parquet/BINANCE_FUTURES/trades/ETH-USDT/BINANCE_FUTURES-trades-ETH-USDT-1622120235.parquet',
             's3://svoe.test.1/parquet/BINANCE_FUTURES/trades/ETH-USDT/BINANCE_FUTURES-trades-ETH-USDT-1622120264.parquet',
             's3://svoe.test.1/parquet/BINANCE_FUTURES/trades/ETH-USDT/BINANCE_FUTURES-trades-ETH-USDT-1622120294.parquet',
-            's3://svoe.test.1/parquet/BINANCE_FUTURES/trades/ETH-USDT/BINANCE_FUTURES-trades-ETH-USDT-1622120324.parquet',
-            's3://svoe.test.1/parquet/BINANCE_FUTURES/trades/ETH-USDT/BINANCE_FUTURES-trades-ETH-USDT-1622120354.parquet',
-            's3://svoe.test.1/parquet/BINANCE_FUTURES/trades/ETH-USDT/BINANCE_FUTURES-trades-ETH-USDT-1622120384.parquet',
-            's3://svoe.test.1/parquet/BINANCE_FUTURES/trades/ETH-USDT/BINANCE_FUTURES-trades-ETH-USDT-1622120415.parquet',
-            's3://svoe.test.1/parquet/BINANCE_FUTURES/trades/ETH-USDT/BINANCE_FUTURES-trades-ETH-USDT-1622120444.parquet',
-            's3://svoe.test.1/parquet/BINANCE_FUTURES/trades/ETH-USDT/BINANCE_FUTURES-trades-ETH-USDT-1622120474.parquet',
-            's3://svoe.test.1/parquet/BINANCE_FUTURES/trades/ETH-USDT/BINANCE_FUTURES-trades-ETH-USDT-1622120504.parquet',
-            's3://svoe.test.1/parquet/BINANCE_FUTURES/trades/ETH-USDT/BINANCE_FUTURES-trades-ETH-USDT-1622120534.parquet',
-            's3://svoe.test.1/parquet/BINANCE_FUTURES/trades/ETH-USDT/BINANCE_FUTURES-trades-ETH-USDT-1622120564.parquet',
-            's3://svoe.test.1/parquet/BINANCE_FUTURES/trades/ETH-USDT/BINANCE_FUTURES-trades-ETH-USDT-1622120594.parquet',
-            's3://svoe.test.1/parquet/BINANCE_FUTURES/trades/ETH-USDT/BINANCE_FUTURES-trades-ETH-USDT-1622120624.parquet'
+            # 's3://svoe.test.1/parquet/BINANCE_FUTURES/trades/ETH-USDT/BINANCE_FUTURES-trades-ETH-USDT-1622120324.parquet',
+            # 's3://svoe.test.1/parquet/BINANCE_FUTURES/trades/ETH-USDT/BINANCE_FUTURES-trades-ETH-USDT-1622120354.parquet',
+            # 's3://svoe.test.1/parquet/BINANCE_FUTURES/trades/ETH-USDT/BINANCE_FUTURES-trades-ETH-USDT-1622120384.parquet',
+            # 's3://svoe.test.1/parquet/BINANCE_FUTURES/trades/ETH-USDT/BINANCE_FUTURES-trades-ETH-USDT-1622120415.parquet',
+            # 's3://svoe.test.1/parquet/BINANCE_FUTURES/trades/ETH-USDT/BINANCE_FUTURES-trades-ETH-USDT-1622120444.parquet',
+            # 's3://svoe.test.1/parquet/BINANCE_FUTURES/trades/ETH-USDT/BINANCE_FUTURES-trades-ETH-USDT-1622120474.parquet',
+            # 's3://svoe.test.1/parquet/BINANCE_FUTURES/trades/ETH-USDT/BINANCE_FUTURES-trades-ETH-USDT-1622120504.parquet',
+            # 's3://svoe.test.1/parquet/BINANCE_FUTURES/trades/ETH-USDT/BINANCE_FUTURES-trades-ETH-USDT-1622120534.parquet',
+            # 's3://svoe.test.1/parquet/BINANCE_FUTURES/trades/ETH-USDT/BINANCE_FUTURES-trades-ETH-USDT-1622120564.parquet',
+            # 's3://svoe.test.1/parquet/BINANCE_FUTURES/trades/ETH-USDT/BINANCE_FUTURES-trades-ETH-USDT-1622120594.parquet',
+            # 's3://svoe.test.1/parquet/BINANCE_FUTURES/trades/ETH-USDT/BINANCE_FUTURES-trades-ETH-USDT-1622120624.parquet'
         ]
         block_range = self._load_and_cache(consec_athena_files_BINANCE_FUTURES_ETH_USD_PERP)
         block_range_meta = []
@@ -214,15 +216,20 @@ class TestFeatureCalculator(unittest.TestCase):
         data = Feature([], 0, L2BookDeltasData, data_params)
         return {data: block_range}, {data: block_range_meta}
 
-    def test_featurization(self, fd: Type[FeatureDefinition]):
+    def test_featurization(self, feature_def: Type[FeatureDefinition], data_def: Type[DataSourceDefinition]):
         # mock consecutive l2 delta blocks
-        block_range, block_range_meta = self.mock_l2_book_delta_data_and_meta()
+        if data_def == L2BookDeltasData:
+            block_range, block_range_meta = self.mock_l2_book_delta_data_and_meta()
+        elif data_def == TradesData:
+            block_range, block_range_meta = self.mock_trades_data_and_meta()
+        else:
+            raise ValueError(f'Unsupported data_def for mocking: {data_def}')
 
         # build feature tree
         # TODO populate these
         data_params = {}
         feature_params = {}
-        feature = construct_feature_tree(fd, data_params, feature_params)
+        feature = construct_feature_tree(feature_def, data_params, feature_params)
         print(RenderTree(feature))
         # calculate in offline/distributed way
         task_graph = C.build_task_graph(feature, block_range_meta)
@@ -246,8 +253,12 @@ class TestFeatureCalculator(unittest.TestCase):
 if __name__ == '__main__':
     # unittest.main()
     t = TestFeatureCalculator()
-    # t.test_featurization(VolatilityStddevFeatureDefinition)
-    br, br_meta = t.mock_trades_data_and_meta()
-    print(len(toolz.first(br.values())))
-    print(toolz.first(br.values())[0])
-    print([b['len_s'] for b in toolz.first(br_meta.values())])
+    t.test_featurization(OHLCVFeatureDefinition, TradesData)
+    # br, br_meta = t.mock_trades_data_and_meta()
+    # feature = construct_feature_tree(OHLCVFeatureDefinition, {}, {})
+    # groups = OHLCVFeatureDefinition.group_dep_ranges(toolz.first(br_meta.values()), feature, None)
+    # print(groups)
+    # OHLCVFeatureDefinition._test_grouping()
+    # print(len(toolz.first(br.values())))
+    # print(toolz.first(br.values())[0])
+    # print([b['len_s'] for b in toolz.first(br_meta.values())])

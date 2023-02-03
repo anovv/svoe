@@ -22,7 +22,7 @@ from datetime import datetime
 class _State:
     # TODO do we need both start_ts and last_ts?
     last_ts: Optional[float] = None
-    ohlcv: Optional[Event] = None
+    ohlcv: Optional[Dict] = None
     start_ts: Optional[float] = None
 
 
@@ -75,7 +75,7 @@ class OHLCVFeatureDefinition(FeatureDefinition):
             side, amount, price, order_type, trade_id = trade
             # TODO can we make use of order_type and trade_id in OHLCV?
             if state.ohlcv is None:
-                state.ohlcv = cls.construct_event(timestamp, receipt_timestamp, price, price, price, price, 0, 0, 0)
+                state.ohlcv = dict(zip(cls.event_schema().keys(), [timestamp, receipt_timestamp, price, price, price, price, 0, 0, 0]))
             if state.last_ts is None:
                 state.last_ts = timestamp
 
@@ -93,37 +93,53 @@ class OHLCVFeatureDefinition(FeatureDefinition):
         if timestamp - state.last_ts > convert_str_to_seconds(window):
             state.last_ts = timestamp
             state.ohlcv['vwap'] /= state.ohlcv['volume']
-            ohlcv = state.ohlcv.copy()
-            state.ohlcv = None
+            # TODO use start_ts?
+            # TODO easier way to state.ohlcv -> frozen_dict: Event ?
+            ohlcv = cls.construct_event(timestamp, receipt_timestamp,
+                state.ohlcv['open'], state.ohlcv['high'], state.ohlcv['low'], state.ohlcv['close'], state.ohlcv['volume'],
+                state.ohlcv['vwap'], state.ohlcv['num_trades']
+            )
+            state.ohlcv = None # TODO init a new one
             return state, ohlcv
         else:
             return state, None
 
-    # TODO write tests
+    # TODO write tests and fix this, this is wrong
     @classmethod
     def group_dep_ranges(cls, ranges: List[BlockMeta], feature: 'Feature', dep_feature: 'Feature') -> IntervalDict:
         # TODO we assume no holes here
         # TODO figure out default settings
         window = feature.params.get('window', '1m')
-        num_grouped_windows = feature.params.get('num_grouped_windows', 1)  # defines size of a group
+        num_grouped_windows = feature.params.get('num_grouped_windows', 1) # defines group size
+        res = cls._group_by_fixed_window(ranges, window, num_grouped_windows)
+        print(res)
+        return res
+
+    # TODO util this
+    @classmethod
+    def _group_by_fixed_window(cls, ranges: List[BlockMeta], window: str, num_grouped_windows: int) -> IntervalDict:
         res = IntervalDict()
         first_block_start_ts = ranges[0]['start_ts']
+        last_block_end_ts = ranges[-1]['end_ts']
         group_start_ts = cls._get_closest_start_ts(first_block_start_ts, window, before=True)
-        group_end_ts = group_start_ts + num_grouped_windows * convert_str_to_seconds(window)
-        i = 0
-        group = []
-        # TODO what if block size larger than window size?
-        for block_meta in ranges:
-            if block_meta['end_ts'] > group_end_ts:
+        # TODO we assume block_size is smaller than window, what if otherwise?
+        while group_start_ts <= last_block_end_ts:
+            group_end_ts = group_start_ts + num_grouped_windows * convert_str_to_seconds(window)
+            group = []
+            # TODO this is O(n^2) complexity
+            for block_meta in ranges:
+                if (group_start_ts <= block_meta['start_ts'] <= group_end_ts and group_start_ts <= block_meta[
+                    'end_ts'] <= group_end_ts) \
+                        or block_meta['start_ts'] <= group_start_ts <= block_meta['end_ts'] \
+                        or block_meta['start_ts'] <= group_end_ts <= block_meta['end_ts']:
+                    group.append(block_meta)
+
+            # make sure group is fully covered
+            if len(group) != 0 and group[0]['start_ts'] <= group_start_ts and group[-1]['end_ts'] >= group_end_ts:
                 res[closed(group_start_ts, group_end_ts)] = group
                 group_start_ts = group_end_ts
-                group_end_ts = group_start_ts + num_grouped_windows * convert_str_to_seconds(window)
-                group = []
-            group.append(block_meta)
-
-        # append leftover
-        if len(group) != 0:
-            res[closed(group_start_ts, group_end_ts)] = group
+            else:
+                group_start_ts += convert_str_to_seconds(window)
 
         return res
 
@@ -139,3 +155,26 @@ class OHLCVFeatureDefinition(FeatureDefinition):
             start_ts += window_s
         return start_ts if before else start_ts + window_s
 
+    # TODO move this to separate class
+    @classmethod
+    def _test_grouping(cls):
+        ranges = [
+            {'start_ts': 2, 'end_ts': 5},
+            {'start_ts': 6, 'end_ts': 9},
+            {'start_ts': 10, 'end_ts': 13},
+            {'start_ts': 14, 'end_ts': 17},
+            {'start_ts': 18, 'end_ts': 21},
+            {'start_ts': 22, 'end_ts': 25},
+            {'start_ts': 26, 'end_ts': 29},
+        ]
+        window='8s'
+        num_grouped_windows = 1
+
+        first_block_start_ts = ranges[0]['start_ts']
+        group_start_ts = cls._get_closest_start_ts(first_block_start_ts, window, before=False)
+        grouped = cls._group_by_fixed_window(ranges, window, num_grouped_windows)
+        assert group_start_ts == 8.0
+        assert grouped == IntervalDict({
+            closed(8.0, 16.0): [{'start_ts': 6, 'end_ts': 9}, {'start_ts': 10, 'end_ts': 13}, {'start_ts': 14, 'end_ts': 17}],
+            closed(16.0, 24.0): [{'start_ts': 14, 'end_ts': 17}, {'start_ts': 18, 'end_ts': 21}, {'start_ts': 22, 'end_ts': 25}]
+        })
