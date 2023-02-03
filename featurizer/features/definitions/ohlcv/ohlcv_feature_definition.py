@@ -95,11 +95,11 @@ class OHLCVFeatureDefinition(FeatureDefinition):
             state.ohlcv['vwap'] /= state.ohlcv['volume']
             # TODO use start_ts?
             # TODO easier way to state.ohlcv -> frozen_dict: Event ?
-            ohlcv = cls.construct_event(timestamp, receipt_timestamp,
+            ohlcv = cls.construct_event(state.ohlcv['timestamp'], state.ohlcv['receipt_timestamp'],
                 state.ohlcv['open'], state.ohlcv['high'], state.ohlcv['low'], state.ohlcv['close'], state.ohlcv['volume'],
                 state.ohlcv['vwap'], state.ohlcv['num_trades']
             )
-            state.ohlcv = None # TODO init a new one
+            state.ohlcv = None
             return state, ohlcv
         else:
             return state, None
@@ -111,9 +111,7 @@ class OHLCVFeatureDefinition(FeatureDefinition):
         # TODO figure out default settings
         window = feature.params.get('window', '1m')
         num_grouped_windows = feature.params.get('num_grouped_windows', 1) # defines group size
-        res = cls._group_by_fixed_window(ranges, window, num_grouped_windows)
-        print(res)
-        return res
+        return cls._group_by_fixed_window(ranges, window, num_grouped_windows)
 
     # TODO util this
     @classmethod
