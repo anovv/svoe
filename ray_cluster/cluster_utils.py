@@ -20,7 +20,7 @@ def connect(address: Optional[str] = 'ray://127.0.0.1:10001') -> Optional[BaseCo
     if ray_util_client.is_connected():
         # ray.util.disconnect() # TODO disconnect?
         print('Already connected')
-        return None
+        return None # TODO return exisitng context ?
     # if ray.is_initialized: # TODO or this?
     #     ray.shutdown()
     return ray.init(address=address, runtime_env={

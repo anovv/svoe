@@ -190,7 +190,7 @@ def calculate_feature_meta(
 
 # graph construction
 # TODO make 3d visualization with networkx/graphviz
-def build_task_graph(
+def build_feature_task_graph(
     feature: Feature,
     # TODO decouple derived feature_ranges_meta and input data ranges meta
     feature_ranges_meta: Dict[Feature, List]  # TODO typehint when decide on BlockRangeMeta/BlockMeta
@@ -244,3 +244,8 @@ def build_task_graph(
     postorder(feature, tree_traversal_callback)
     # list of root feature delayed funcs for all ranges
     return list(feature_delayed_funcs[feature].values())
+
+def build_feature_set_task_graph(
+    feature_set: List[Feature]
+):
+    return
