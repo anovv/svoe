@@ -1,7 +1,7 @@
-import featurizer.features.loader.df_utils as dfu
+import utils.pandas.df_utils as dfu
 import featurizer.features.loader.l2_snapshot_utils as l2u
 import featurizer.features.loader.catalog as catalog
-import featurizer.features.loader.concurrency_utils as cu
+import utils.concurrency.concurrency_utils as cu
 import featurizer.features.loader.loader as loader
 import functools
 import pandas as pd

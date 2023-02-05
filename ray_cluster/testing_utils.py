@@ -8,7 +8,7 @@ from featurizer.features.data.l2_book_delats.l2_book_deltas import L2BookDeltasD
 from featurizer.features.data.trades.trades import TradesData
 from featurizer.features.definitions.feature_definition import FeatureDefinition
 from featurizer.features.feature_tree.feature_tree import Feature
-from featurizer.features.loader.df_utils import load_files, time_range, get_size_kb, get_len
+from utils.pandas.df_utils import load_files, time_range, get_size_kb, get_len
 from featurizer.features.loader.l2_snapshot_utils import get_info
 
 

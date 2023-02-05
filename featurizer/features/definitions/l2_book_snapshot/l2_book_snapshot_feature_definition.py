@@ -1,4 +1,4 @@
-from typing import List, Dict, Optional, Any, Tuple, Union, Type
+from typing import List, Dict, Optional, Tuple, Type
 
 from portion import IntervalDict, closed
 from streamz import Stream
@@ -8,12 +8,11 @@ from frozenlist import FrozenList
 from featurizer.features.data.data_definition import DataDefinition, Event, EventSchema
 from featurizer.features.feature_tree.feature_tree import Feature
 from featurizer.features.definitions.feature_definition import FeatureDefinition
-import featurizer.features.definitions.stream_utils as su
+import utils.streamz.stream_utils as su
 from featurizer.features.data.l2_book_delats.l2_book_deltas import L2BookDeltasData
 from featurizer.features.blocks.blocks import BlockMeta
 import functools
 import toolz
-from pandas import DataFrame
 
 
 @dataclass

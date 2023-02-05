@@ -1,5 +1,5 @@
 import pandas as pd
-import featurizer.features.loader.df_utils as dfu
+import utils.pandas.df_utils as dfu
 from typing import List, Tuple, Dict, Any
 
 

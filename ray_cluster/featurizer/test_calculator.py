@@ -1,25 +1,18 @@
-
 import calculator as C
 from featurizer.features.data.data_source_definition import DataSourceDefinition
 from featurizer.features.data.l2_book_delats.l2_book_deltas import L2BookDeltasData
 from featurizer.features.data.trades.trades import TradesData
-from featurizer.features.definitions.l2_book_snapshot.l2_book_snapshot_feature_definition import \
-    L2BookSnapshotFeatureDefinition
-from featurizer.features.definitions.mid_price.mid_price_feature_definition import MidPriceFeatureDefinition
 from featurizer.features.definitions.ohlcv.ohlcv_feature_definition import OHLCVFeatureDefinition
-from featurizer.features.definitions.volatility.volatility_stddev_feature_definition import VolatilityStddevFeatureDefinition
 from featurizer.features.definitions.feature_definition import FeatureDefinition
-from featurizer.features.feature_tree.feature_tree import Feature, construct_feature_tree
-from featurizer.features.blocks.blocks import BlockMeta, BlockRange, Block, BlockRangeMeta
+from featurizer.features.feature_tree.feature_tree import construct_feature_tree
 
 import portion as P
 import unittest
 import dask
 import pandas as pd
-from pandas.testing import assert_frame_equal
-from typing import Dict, Type, Tuple, List
+from typing import Type
 from anytree import RenderTree
-from ray_cluster.testing_utils import mock_meta, mock_feature, mock_trades_data_and_meta, mock_l2_book_deltas_data_ranges_meta, mock_l2_book_delta_data_and_meta
+from ray_cluster.testing_utils import mock_meta, mock_feature, mock_trades_data_and_meta, mock_l2_book_delta_data_and_meta
 
 
 class TestFeatureCalculator(unittest.TestCase):
@@ -63,30 +56,6 @@ class TestFeatureCalculator(unittest.TestCase):
     # TODO customize dask graph visualization
     # https://stackoverflow.com/questions/58394758/adding-labels-to-a-dask-graph
     # https://stackoverflow.com/questions/67680325/annotations-for-custom-graphs-in-dask
-    def test_build_task_graph_l2_snaps(self):
-        feature_ranges = mock_l2_book_deltas_data_ranges_meta(30 * 1000, 10)
-
-        # TODO populate these
-        data_params = {}
-        feature_params = {}
-        feature = construct_feature_tree(L2BookSnapshotFeatureDefinition, data_params, feature_params)
-
-        graph = C.build_feature_task_graph(feature, feature_ranges)
-        print(graph)
-        dask.visualize(*graph)
-
-    def test_build_task_graph_mid_price(self):
-        feature_ranges = mock_l2_book_deltas_data_ranges_meta(30 * 1000, 10)
-
-        # TODO populate these
-        data_params = {}
-        feature_params = {}
-        feature = construct_feature_tree(MidPriceFeatureDefinition, data_params, feature_params)
-
-        graph = C.build_feature_task_graph(feature, feature_ranges)
-        print(graph)
-        dask.visualize(*graph)
-
     def test_featurization(self, feature_def: Type[FeatureDefinition], data_def: Type[DataSourceDefinition]):
         # mock consecutive l2 delta blocks
         if data_def == L2BookDeltasData:

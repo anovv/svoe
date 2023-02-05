@@ -1,4 +1,4 @@
-import featurizer.features.loader.df_utils as dfu
+import utils.pandas.df_utils as dfu
 import featurizer.features.loader.l2_snapshot_utils as l2u
 import featurizer.features.loader.catalog as catalog
 import pandas as pd

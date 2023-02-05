@@ -2,12 +2,9 @@ import awswrangler as wr
 import pandas as pd
 import boto3
 from prefect_aws.credentials import AwsCredentials
-import concurrent.futures
-import asyncio
 import functools
 from typing import List, Tuple
-import featurizer.features.loader.concurrency_utils as cu
-import featurizer.features.loader.s3_utils as s3u
+import utils.concurrency.concurrency_utils as cu
 
 
 def load_single_file(path: str, credentials: AwsCredentials = None) -> pd.DataFrame:

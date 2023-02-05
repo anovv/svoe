@@ -1,9 +1,7 @@
 
-import featurizer.features.loader.concurrency_utils as cu
+import utils.concurrency.concurrency_utils as cu
 import boto3
 import functools
-import threading
-import os
 from typing import Tuple, List
 from prefect_aws.credentials import AwsCredentials
 

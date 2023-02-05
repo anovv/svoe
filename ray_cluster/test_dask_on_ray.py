@@ -3,7 +3,6 @@ import unittest
 import dask
 import ray
 
-from featurizer.features.definitions.ohlcv.ohlcv_feature_definition import OHLCVFeatureDefinition
 from ray_cluster.featurizer import calculator as C
 from ray.util.dask import ray_dask_get
 
@@ -14,7 +13,6 @@ from ray_cluster.testing_utils import mock_l2_book_delta_data_and_meta
 
 
 class TestDaskOnRay(unittest.TestCase):
-
 
     def test_featurization(self):
         block_range, block_range_meta = mock_l2_book_delta_data_and_meta()
@@ -27,7 +25,7 @@ class TestDaskOnRay(unittest.TestCase):
         ray.shutdown()
         print(res)
 
+
 if __name__ == '__main__':
-    # unittest.main()
     t = TestDaskOnRay()
     t.test_featurization()

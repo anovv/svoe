@@ -1,4 +1,4 @@
-from typing import List, Dict, Optional, Any, Tuple, Type
+from typing import List, Dict, Optional, Tuple, Type
 
 from portion import IntervalDict, closed
 from streamz import Stream
@@ -8,12 +8,12 @@ from featurizer.features.data.data_definition import EventSchema, DataDefinition
 from featurizer.features.data.trades.trades import TradesData
 from featurizer.features.definitions.feature_definition import FeatureDefinition
 from featurizer.features.feature_tree.feature_tree import Feature
-from featurizer.features.utils import convert_str_to_seconds
+from utils.time.utils import convert_str_to_seconds
 
 from dataclasses import dataclass
 
 import functools
-import featurizer.features.definitions.stream_utils as su
+import utils.streamz.stream_utils as su
 import toolz
 from datetime import datetime
 

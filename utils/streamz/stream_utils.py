@@ -1,6 +1,6 @@
 from typing import List, Optional, Any, Callable, Deque
 from streamz import Stream
-from featurizer.features.utils import convert_str_to_seconds
+from utils.time.utils import convert_str_to_seconds
 from collections import deque
 
 
