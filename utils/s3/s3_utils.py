@@ -2,8 +2,9 @@
 import utils.concurrency.concurrency_utils as cu
 import boto3
 import functools
-from typing import Tuple, List, Any
-from prefect_aws.credentials import AwsCredentials
+from typing import Tuple, List, Any, Optional
+from utils.pandas.df_utils import load_and_cache
+import pandas as pd
 
 # _sessions_per_process = {}
 # _lock = threading.Lock()
@@ -22,7 +23,7 @@ from prefect_aws.credentials import AwsCredentials
 # TODO set up via env vars
 # TODO improve perf, make thread-safe
 # https://emasquil.github.io/posts/multithreading-boto3/
-def _get_session() -> boto3.Session:
+def get_session() -> boto3.Session:
     return boto3.session.Session()
 
 def get_file_size_kb(path: str) -> int:
@@ -50,6 +51,7 @@ def _parse_path(path: str) -> Tuple[str, str]:
     key = path.removeprefix(bucket_name + '/')
     return bucket_name, key
 
+
 # TODO asyncify paginator https://gist.github.com/gudgud96/bdde37c9cc6b56a88ae3a7a0a217a723
 # TODO multithreaded version https://gist.github.com/sjakthol/19367500519a8828ec77ef5d34b1b0b9
 # TODO for threaded delete https://gist.github.com/angrychimp/76b8fe9f15c88d7f121db1cc5d2c215d
@@ -61,20 +63,37 @@ def _parse_path(path: str) -> Tuple[str, str]:
 # for s3 inventory
 # https://gist.github.com/alukach/1a2b8b6366410fb94fa5cee7f72ee304
 # https://alukach.com/posts/parsing-s3-inventory-output/
-def list_files(bucket_name: str) -> List[Any]:
+def list_files(bucket_name: str, prefix: str = '', page_size: int = 1000, max_items: Optional[int] = None) -> List[Any]:
     session = _get_session()
     client = session.client('s3')
-    paginator = client.get_paginator('list_objects')
+    paginator = client.get_paginator('list_objects') # TODO use list_objects_v2
+    pagination_config = {'PageSize': page_size}
+    if max_items:
+        pagination_config['MaxItems'] = max_items
     iterator = paginator.paginate(
         Bucket=bucket_name,
-        PaginationConfig={'MaxItems': 10, 'PageSize': 5}
-    ) # TODO set Delimiter?
+        PaginationConfig=pagination_config,
+        Prefix=prefix
+    ) # TODO figure out Delimiter?
 
-    # res = []
-    # for obj in iterator:
-    #     res.append(obj)
-    # return res
-    print(next(iter(iterator)))
+    res = []
+    for obj in iterator:
+        fetched = obj['Contents']
+        keys = [f['Key'] for f in fetched]
+        # filter names that match prefix
+        res.extend(list(filter(lambda e: e != prefix, keys)))
+    return res
+
+
+def inventory() -> List[pd.DataFrame]:
+    INVENTORY_BUCKET = 'inventory-reports-1'
+    INVENTORY_PREFIX = 'svoe.test.1/test_inventory_config_1/data/'
+    files = list_files(INVENTORY_BUCKET, INVENTORY_PREFIX)
+    # append s3://bucket_name
+    files = [f's3://{INVENTORY_BUCKET}/{f}' for f in files]
+    print(files)
+    return load_and_cache(files, './cached_dfs')
+
 
 
 
