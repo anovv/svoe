@@ -1,10 +1,11 @@
+import awswrangler as wr
 
 import utils.concurrency.concurrency_utils as cu
 import boto3
 import functools
 from typing import Tuple, List, Any, Optional
-from utils.pandas.df_utils import load_and_cache
 import pandas as pd
+import os
 
 # _sessions_per_process = {}
 # _lock = threading.Lock()
@@ -26,10 +27,12 @@ import pandas as pd
 def get_session() -> boto3.Session:
     return boto3.session.Session()
 
+
 def get_file_size_kb(path: str) -> int:
-    bucket_name, key = _parse_path(path)
-    session = _get_session()
+    bucket_name, key = to_bucket_and_key(path)
+    session = get_session()
     s3_resource = session.resource('s3')
+    # TODO use client.head_object
     obj = s3_resource.Object(bucket_name, key)
     # obj = client.get_object(Bucket=bucket_name, Key=key)
     # more metadata is stored in object
@@ -43,7 +46,7 @@ def get_file_sizes_kb(paths: List[str]) -> List[int]:
     return cu.run_concurrently(callables)
 
 
-def _parse_path(path: str) -> Tuple[str, str]:
+def to_bucket_and_key(path: str) -> Tuple[str, str]:
     # 's3://svoe.test.1/data_lake/data_feed_market_data/l2_book/exchange=BINANCE/instrument_type=spot/instrument_extra={}/symbol=BTC-USDT/base=BTC/quote=USDT/date=2022-06-11/compaction=raw/version=testing /file.gz.parquet'
     path = path.removeprefix('s3://')
     split = path.split('/')
@@ -64,7 +67,7 @@ def _parse_path(path: str) -> Tuple[str, str]:
 # https://gist.github.com/alukach/1a2b8b6366410fb94fa5cee7f72ee304
 # https://alukach.com/posts/parsing-s3-inventory-output/
 def list_files(bucket_name: str, prefix: str = '', page_size: int = 1000, max_items: Optional[int] = None) -> List[Any]:
-    session = _get_session()
+    session = get_session()
     client = session.client('s3')
     paginator = client.get_paginator('list_objects') # TODO use list_objects_v2
     pagination_config = {'PageSize': page_size}
@@ -86,14 +89,28 @@ def list_files(bucket_name: str, prefix: str = '', page_size: int = 1000, max_it
 
 
 def inventory() -> List[pd.DataFrame]:
-    INVENTORY_BUCKET = 'inventory-reports-1'
-    INVENTORY_PREFIX = 'svoe.test.1/test_inventory_config_1/data/'
-    files = list_files(INVENTORY_BUCKET, INVENTORY_PREFIX)
-    # append s3://bucket_name
-    files = [f's3://{INVENTORY_BUCKET}/{f}' for f in files]
-    print(files)
-    return load_and_cache(files, './cached_dfs')
+    # TODO implement large files download with progress callback and fetch directly from s3
+    inventory_files_folder = '/Users/anov/IdeaProjects/svoe/utils/s3/s3_svoe.test.1_inventory'
+    files = os.listdir(inventory_files_folder)
+    return [pd.read_parquet(f'{inventory_files_folder}/{f}') for f in files]
+
+# for progress https://github.com/alphatwirl/atpbar
+# https://leimao.github.io/blog/Python-tqdm-Multiprocessing/
 
 
+def load_df(path: str) -> pd.DataFrame:
+    # split path into prefix and suffix
+    # this is needed because if dataset=True data wrangler handles input path as a glob pattern,
+    # hence messing up special characters
 
+    # for Python < 3.9
+    def remove_suffix(input_string, suffix):
+        if suffix and input_string.endswith(suffix):
+            return input_string[:-len(suffix)]
+        return input_string
 
+    split = path.split('/')
+    suffix = split[len(split) - 1]
+    prefix = remove_suffix(path, suffix)
+    session = get_session()
+    return wr.s3.read_parquet(path=prefix, path_suffix=suffix, dataset=True, boto3_session=session)
