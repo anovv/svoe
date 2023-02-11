@@ -11,25 +11,31 @@ from data_catalog.indexer.sql.client import MysqlClient
 # fro mem usage https://docs.ray.io/en/releases-1.12.0/ray-core/objects/memory-management.html
 # memory monitor https://docs.ray.io/en/latest/ray-core/scheduling/ray-oom-prevention.html
 
+# TODO this should be in separate class to avoid circular deps
+InputItem = Dict
+InputItemBatch = List[InputItem]
+IndexItem = Dict
+IndexItemBatch = List[IndexItem]
 
 @ray.remote
 class Coordinator:
     WRITE_BATCH_SIZE = 1000
 
-    def __init__(self):
-        self.input_queue = []
-        self.indexable_input_queue = []
-        self.to_index_queue = []
-        self.to_write_index_queue = []
+    input_queue: List[InputItemBatch] = [] # batches of input items, should be checked for existence in Db
+    indexable_input_queue: List[InputItem] = [] # non existent input items which should be indexed and ready to download
+    to_index_queue: List[pd.DataFrame] = [] # downloaded object refs # TODO or ObjectRefs?
+    to_write_index_queue: List[IndexItem] = [] # index items ready wo be written to Db
 
-    def get_input_batch(self):
-        # TODO check size
-        return self.input_queue.pop(0)
+    def get_input_batch(self) -> Optional[List[InputItem]]:
+        if len(self.input_queue) != 0:
+            return self.input_queue.pop(0)
+        else:
+            return None
 
-    def put_indexable_items(self, batch: List[Dict]):
+    def put_indexable_items(self, batch: InputItemBatch):
         self.indexable_input_queue.extend(batch)
 
-    def get_to_write_batch(self) -> Optional[List[Dict]]:
+    def get_to_write_batch(self) -> Optional[IndexItemBatch]:
         # TODO check if this is the last batch
         if len(self.to_write_index_queue) < self.WRITE_BATCH_SIZE:
             return None
@@ -44,7 +50,7 @@ class Coordinator:
     def run(self):
         # TODO add backpressure to Driver program, stop when driver queue is empty
         while True:
-            # TODO if remote() call blocks everything below should be separated
+            # TODO if remote() call blocks, everything below should be separated
             if len(self.indexable_input_queue) != 0:
                 to_download = self.indexable_input_queue.pop(0)
                 load_and_queue_df.remote(to_download, self.to_index_queue)
@@ -53,6 +59,8 @@ class Coordinator:
                 to_index = self.to_index_queue.pop(0)
                 index_and_queue_df.remote(to_index, self.to_write_index_queue)
 
+            # TODO add queues status report here to show on a dashboard (Streamlit?)
+
 
 @ray.remote
 class DbReader:
@@ -60,7 +68,7 @@ class DbReader:
         self.coordinator = coordinator
         self.client = MysqlClient()
 
-    def check_exists(self, batch: List[Dict]) -> List[Dict]:
+    def check_exists(self, batch: List[InputItem]) -> List[InputItem]:
         # TODO
         return []
 
@@ -69,7 +77,8 @@ class DbReader:
         while True:
             work_item = ray.get(self.work_item_ref)
             if work_item is None:
-                break
+                # TODO add sleep so we don't waste CPU cycles
+                continue
 
             # schedule async fetching of next work item to enable compute pipelining
             self.work_item_ref = self.coordinator.get_input_batch.remote()
@@ -85,7 +94,7 @@ class DbWriter:
         self.coordinator = coordinator
         self.client = MysqlClient()
 
-    def write_batch(self, batch: List[Dict]) -> Dict:
+    def write_batch(self, batch: List[IndexItem]) -> Dict:
         self.client.create_tables()
         self.client.write_index_items(batch)
         return {}
@@ -120,7 +129,7 @@ def load_and_queue_df(path: str, queue: List):
 
 
 @ray.remote
-def calculate_meta(df: pd.DataFrame) -> Dict:
+def calculate_meta(df: pd.DataFrame) -> IndexItem:
     # TODO
     return {}
 
@@ -130,4 +139,10 @@ def calculate_meta(df: pd.DataFrame) -> Dict:
 def index_and_queue_df(df: pd.DataFrame, queue: List):
     index_item = ray.get(calculate_meta.remote(df))
     queue.append(index_item)
+
+
+def generate_input_items() -> List[InputItemBatch]:
+    inv = s3_utils.inventory()
+    return []
+
 

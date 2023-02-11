@@ -1,5 +1,6 @@
 from sqlalchemy import Column, String, JSON, DateTime, func, Float, Integer
 from sqlalchemy.orm import declarative_base, sessionmaker
+from data_catalog.indexer.indexer import InputItem
 
 Base = declarative_base()
 
@@ -34,3 +35,8 @@ class DataCatalog(Base):
     extras = Column(JSON)
 
     # TODO owner_id?
+
+
+def add_defaults(item: InputItem) -> InputItem:
+    # TODO add hash and missing keys
+    return item

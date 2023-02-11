@@ -2,7 +2,8 @@ from typing import Optional, Dict, List
 
 from sqlalchemy import create_engine, Column, String, JSON, DateTime, func
 from sqlalchemy.orm import declarative_base, sessionmaker
-from data_catalog.indexer.sql.models import DataCatalog
+from data_catalog.indexer.sql.models import DataCatalog, add_defaults
+from data_catalog.indexer.indexer import IndexItemBatch, InputItemBatch
 
 import os
 
@@ -32,11 +33,20 @@ class MysqlClient:
         # creates if not exists
         Base.metadata.create_all(self.engine)
 
-    def write_index_items(self, items: List[Dict]):
+    def write_index_items_batch(self, batch: IndexItemBatch):
+        # TODO figure out insert_or_update logic
         # use dict unpacking
         # https://stackoverflow.com/questions/31750441/generalised-insert-into-sqlalchemy-using-dictionary
-        return
+        objects = []
+        for index_item in batch:
+            index_item = add_defaults(index_item)
+            # TODO handle failed unpacking (e.g. missing keys)
+            objects.append(DataCatalog(**index_item))
+        session = Session()
+        session.bulk_save_objects(objects)
+        session.commit()
+        return # TODO return result?
 
-    def check_exists(self, items: List[Dict]) -> List[Dict]:
+    def check_exists(self, batch: InputItemBatch) -> InputItemBatch:
         return []
 
