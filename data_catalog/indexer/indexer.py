@@ -4,6 +4,7 @@ import pandas as pd
 import ray
 
 import utils.s3.s3_utils as s3_utils
+from data_catalog.indexer.sql.client import MysqlClient
 
 # for pipelined queue https://docs.ray.io/en/latest/ray-core/patterns/pipelining.html
 # for backpressure https://docs.ray.io/en/latest/ray-core/patterns/limit-pending-tasks.html
@@ -22,6 +23,7 @@ class Coordinator:
         self.to_write_index_queue = []
 
     def get_input_batch(self):
+        # TODO check size
         return self.input_queue.pop(0)
 
     def put_indexable_items(self, batch: List[Dict]):
@@ -56,7 +58,7 @@ class Coordinator:
 class DbReader:
     def __init__(self, coordinator: Coordinator):
         self.coordinator = coordinator
-        # TODO instantiate session here
+        self.client = MysqlClient()
 
     def check_exists(self, batch: List[Dict]) -> List[Dict]:
         # TODO
@@ -81,10 +83,11 @@ class DbReader:
 class DbWriter:
     def __init__(self, coordinator: Coordinator):
         self.coordinator = coordinator
-        # TODO instantiate session here
+        self.client = MysqlClient()
 
     def write_batch(self, batch: List[Dict]) -> Dict:
-        # TODO
+        self.client.create_tables()
+        self.client.write_index_items(batch)
         return {}
 
     def run(self):
