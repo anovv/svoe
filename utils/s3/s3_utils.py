@@ -3,7 +3,7 @@ import awswrangler as wr
 import utils.concurrency.concurrency_utils as cu
 import boto3
 import functools
-from typing import Tuple, List, Any, Optional
+from typing import Tuple, List, Any, Optional, Generator
 import pandas as pd
 import os
 
@@ -88,11 +88,12 @@ def list_files(bucket_name: str, prefix: str = '', page_size: int = 1000, max_it
     return res
 
 
-def inventory() -> List[pd.DataFrame]:
+def inventory() -> Generator[pd.DataFrame]:
     # TODO implement large files download with progress callback and fetch directly from s3
     inventory_files_folder = '/Users/anov/IdeaProjects/svoe/utils/s3/s3_svoe.test.1_inventory'
     files = os.listdir(inventory_files_folder)
-    return [pd.read_parquet(f'{inventory_files_folder}/{f}') for f in files]
+    for f in files:
+        yield pd.read_parquet(f'{inventory_files_folder}/{f}')
 
 # for progress https://github.com/alphatwirl/atpbar
 # https://leimao.github.io/blog/Python-tqdm-Multiprocessing/

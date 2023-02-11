@@ -1,4 +1,4 @@
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Generator
 
 import pandas as pd
 import ray
@@ -134,8 +134,26 @@ def index_and_queue_df(df: pd.DataFrame, queue: List):
     queue.append(index_item)
 
 
-def generate_input_items() -> List[InputItemBatch]:
-    inv = s3_utils.inventory()
-    return []
+def generate_input_items() -> Generator[InputItemBatch]:
+    batch = []
+    for inv_df in s3_utils.inventory():
+        for row in inv_df.itertuples():
+            d_row = row._asdict()
+
+            # TODO add size to input item
+            size = d_row['size']
+            input_item = parse_path(d_row['key'])
+            batch.append(input_item)
+            if len(batch) == INPUT_ITEM_BATCH_SIZE:
+                yield batch
+                batch = []
+
+    if len(batch) != 0:
+        # TODO indicate last batch
+        yield batch
+
+# TODO typing
+def parse_path(path: str) -> Dict:
+    return {}
 
 
