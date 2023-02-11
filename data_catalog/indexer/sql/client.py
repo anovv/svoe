@@ -3,7 +3,7 @@ from typing import Optional, Dict, List
 from sqlalchemy import create_engine, Column, String, JSON, DateTime, func
 from sqlalchemy.orm import declarative_base, sessionmaker
 from data_catalog.indexer.sql.models import DataCatalog, add_defaults
-from data_catalog.indexer.indexer import IndexItemBatch, InputItemBatch
+from data_catalog.indexer.indexer import IndexItemBatch, InputItemBatch, InputItem
 
 import os
 
@@ -33,7 +33,9 @@ class MysqlClient:
         # creates if not exists
         Base.metadata.create_all(self.engine)
 
-    def write_index_items_batch(self, batch: IndexItemBatch):
+    # see 2nd comment in https://stackoverflow.com/questions/3659142/bulk-insert-with-sqlalchemy-orm
+    # RE: bulk insert perf
+    def write_index_item_batch(self, batch: IndexItemBatch):
         # TODO figure out insert_or_update logic
         # use dict unpacking
         # https://stackoverflow.com/questions/31750441/generalised-insert-into-sqlalchemy-using-dictionary
@@ -47,6 +49,13 @@ class MysqlClient:
         session.commit()
         return # TODO return result?
 
-    def check_exists(self, batch: InputItemBatch) -> InputItemBatch:
-        return []
+    def check_exists(self, batch: InputItemBatch) -> List[InputItem]:
+        # use path as a unique id per block
+        paths = [item['path'] for item in batch]
+        query_in = DataCatalog.path.in_(paths)
+        session = Session()
+        select_in_db = session.query(DataCatalog.path).filter(query_in)
+        in_db = list(zip(*select_in_db.all()))[0]
+        non_exist = list(filter(lambda item: item['path'] not in in_db, batch))
+        return non_exist
 

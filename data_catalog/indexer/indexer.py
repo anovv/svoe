@@ -5,22 +5,18 @@ import ray
 
 import utils.s3.s3_utils as s3_utils
 from data_catalog.indexer.sql.client import MysqlClient
+from data_catalog.indexer.models import InputItem, IndexItem, IndexItemBatch, InputItemBatch
 
 # for pipelined queue https://docs.ray.io/en/latest/ray-core/patterns/pipelining.html
 # for backpressure https://docs.ray.io/en/latest/ray-core/patterns/limit-pending-tasks.html
 # fro mem usage https://docs.ray.io/en/releases-1.12.0/ray-core/objects/memory-management.html
 # memory monitor https://docs.ray.io/en/latest/ray-core/scheduling/ray-oom-prevention.html
 
-# TODO this should be in separate class to avoid circular deps
-InputItem = Dict
-InputItemBatch = List[InputItem]
-IndexItem = Dict
-IndexItemBatch = List[IndexItem]
+INPUT_ITEM_BATCH_SIZE = 1000
+WRITE_INDEX_ITEM_BATCH_SIZE = 1000
 
 @ray.remote
 class Coordinator:
-    WRITE_BATCH_SIZE = 1000
-
     input_queue: List[InputItemBatch] = [] # batches of input items, should be checked for existence in Db
     indexable_input_queue: List[InputItem] = [] # non existent input items which should be indexed and ready to download
     to_index_queue: List[pd.DataFrame] = [] # downloaded object refs # TODO or ObjectRefs?
@@ -37,10 +33,10 @@ class Coordinator:
 
     def get_to_write_batch(self) -> Optional[IndexItemBatch]:
         # TODO check if this is the last batch
-        if len(self.to_write_index_queue) < self.WRITE_BATCH_SIZE:
+        if len(self.to_write_index_queue) < WRITE_INDEX_ITEM_BATCH_SIZE:
             return None
         else:
-            return self.to_write_index_queue[-self.WRITE_BATCH_SIZE:]
+            return self.to_write_index_queue[-WRITE_INDEX_ITEM_BATCH_SIZE:]
 
     def update_progress(self, info: Dict):
         # TODO
@@ -68,22 +64,18 @@ class DbReader:
         self.coordinator = coordinator
         self.client = MysqlClient()
 
-    def check_exists(self, batch: List[InputItem]) -> List[InputItem]:
-        # TODO
-        return []
-
     def run(self):
-        self.work_item_ref = self.coordinator.get_input_batch.remote()
+        self.input_item_batch_ref = self.coordinator.get_input_batch.remote()
         while True:
-            work_item = ray.get(self.work_item_ref)
-            if work_item is None:
+            input_item_batch = ray.get(self.work_item_ref)
+            if input_item_batch is None:
                 # TODO add sleep so we don't waste CPU cycles
                 continue
 
             # schedule async fetching of next work item to enable compute pipelining
-            self.work_item_ref = self.coordinator.get_input_batch.remote()
+            self.input_item_batch_ref = self.coordinator.get_input_batch.remote()
             # work item is a batch of input items to check if they are already indexed
-            non_existent = self.check_exists(work_item)
+            non_existent = self.client.check_exists(input_item_batch)
             # TODO do we call ray.get here?
             self.coordinator.put_indexable_items(non_existent).remote()
 
@@ -96,21 +88,22 @@ class DbWriter:
 
     def write_batch(self, batch: List[IndexItem]) -> Dict:
         self.client.create_tables()
-        self.client.write_index_items(batch)
+        self.client.write_index_item_batch(batch)
+        # TODO return status to pass to update_progress on coordinator
         return {}
 
     def run(self):
-        self.work_item_ref = self.coordinator.get_to_write_batch.remote()
+        self.index_item_batch_ref = self.coordinator.get_to_write_batch.remote()
         while True:
-            work_item = ray.get(self.work_item_ref)
-            if work_item is None:
+            index_item_batch = ray.get(self.work_item_ref)
+            if index_item_batch is None:
                 # TODO sleep here for some time to avoid waisting CPU cycles?
                 continue
 
             # schedule async fetching of next work item to enable compute pipelining
-            self.work_item_ref = self.coordinator.get_to_write_batch.remote()
+            self.index_item_batch_ref = self.coordinator.get_to_write_batch.remote()
             # work item is a batch of index items to write to DB
-            write_status = self.write_batch(work_item)
+            write_status = self.write_batch(index_item_batch)
             # TODO do we call ray.get here?
             self.coordinator.update_progress(write_status).remote()
 
