@@ -1,4 +1,4 @@
-from typing import List, Dict, Optional, Generator
+from typing import List, Dict, Optional, Generator, Tuple
 
 import pandas as pd
 import ray
@@ -49,10 +49,12 @@ class Coordinator:
             # TODO if remote() call blocks, everything below should be separated
             if len(self.indexable_input_queue) != 0:
                 to_download = self.indexable_input_queue.pop(0)
+                # TODO set resources
                 load_and_queue_df.remote(to_download, self.to_index_queue)
             if len(self.to_index_queue) != 0:
                 # TODO batch this?
                 to_index = self.to_index_queue.pop(0)
+                # TODO set resources
                 index_and_queue_df.remote(to_index, self.to_write_index_queue)
 
             # TODO add queues status report here to show on a dashboard (Streamlit?)
@@ -108,19 +110,20 @@ class DbWriter:
             self.coordinator.update_progress(write_status).remote()
 
 
-# TODO set CPU=0, or add parallelism resource
+# TODO set CPU=0, or add parallelism resource, set memory and object_store_memory
 @ray.remote
 def load_df(path: str) -> pd.DataFrame:
     return s3_utils.load_df(path)
 
 
-# TODO set CPU=0, or add parallelism resource
+# TODO set CPU=0, or add parallelism resource, set memory and object_store_memory
 @ray.remote
 def load_and_queue_df(path: str, queue: List):
     df = ray.get(load_df.remote(path))
     queue.append(df)
 
 
+# TODO set CPU=0, set memory and object_store_memory
 @ray.remote
 def calculate_meta(df: pd.DataFrame) -> IndexItem:
     # TODO
@@ -128,21 +131,23 @@ def calculate_meta(df: pd.DataFrame) -> IndexItem:
 
 
 # TODO add batching?
+# TODO set CPU=0, set memory and object_store_memory
 @ray.remote
 def index_and_queue_df(df: pd.DataFrame, queue: List):
     index_item = ray.get(calculate_meta.remote(df))
     queue.append(index_item)
 
 
-def generate_input_items() -> Generator[InputItemBatch]:
+def generate_input_items() -> Generator[InputItemBatch, None, None]:
     batch = []
     for inv_df in s3_utils.inventory():
         for row in inv_df.itertuples():
             d_row = row._asdict()
 
             # TODO add size to input item
-            size = d_row['size']
-            input_item = parse_path(d_row['key'])
+            size_kb = d_row['size']/1024.0
+            input_item = parse_s3_key(d_row['key'])
+            input_item['size_kb'] = size_kb
             batch.append(input_item)
             if len(batch) == INPUT_ITEM_BATCH_SIZE:
                 yield batch
@@ -152,8 +157,61 @@ def generate_input_items() -> Generator[InputItemBatch]:
         # TODO indicate last batch
         yield batch
 
-# TODO typing
-def parse_path(path: str) -> Dict:
-    return {}
 
+# TODO typing
+# TODO util this
+def parse_s3_key(key: str) -> Optional[Dict]:
+
+    def _parse_symbol(symbol_raw: str, exchange: Optional[str] = None) -> Tuple[str, str, str, str]:
+        spl = symbol_raw.split('-')
+        base = spl[0]
+        quote = spl[1]
+        instrument_type = 'spot'
+        symbol = symbol_raw
+        if len(spl) > 2:
+            instrument_type = 'perpetual'
+
+        # FTX special case:
+        if exchange == 'FTX' and spl[1] == 'PERP':
+            quote = 'USDT'
+            instrument_type = 'perpetual'
+            symbol = f'{base}-USDT-PERP'
+        return symbol, base, quote, instrument_type
+
+    spl = key.split('/')
+    exchange = None
+    instrument_type = None
+    symbol = None
+    quote = None
+    base = None
+    data_type = None
+    if len(spl) < 3:
+        return None
+    if spl[0] == 'data_lake' and spl[1] == 'data_feed_market_data':
+        # case 1
+        #  starts with 'data_lake/data_feed_market_data/funding/exchange=BINANCE_FUTURES/instrument_type=perpetual/instrument_extra={}/symbol=ADA-USDT-PERP/base=ADA/quote=USDT/...'
+        data_type = spl[2]
+        exchange = spl[3].split('=')[1]
+        symbol_raw = spl[6].split('=')[1]
+        symbol, base, quote, instrument_type = _parse_symbol(symbol_raw, exchange)
+    elif spl[0] == 'data_lake' or spl[0] == 'parquet':
+        # case 2
+        # starts with 'data_lake/BINANCE/l2_book/BTC-USDT/...'
+        # starts with 'parquet/BINANCE/l2_book/AAVE-USDT/...'
+        exchange = spl[1]
+        data_type = spl[2]
+        symbol_raw = spl[3]
+        symbol, base, quote, instrument_type = _parse_symbol(symbol_raw, exchange)
+    else:
+        # unparsable
+        return None
+
+    return {
+        'data_type': data_type,
+        'exchange': exchange,
+        'symbol': symbol,
+        'instrument_type': instrument_type,
+        'quote': quote,
+        'base': base
+    }
 

@@ -3,7 +3,7 @@ from typing import Optional, Dict, List
 from sqlalchemy import create_engine, Column, String, JSON, DateTime, func
 from sqlalchemy.orm import declarative_base, sessionmaker
 from data_catalog.indexer.sql.models import DataCatalog, add_defaults
-from data_catalog.indexer.indexer import IndexItemBatch, InputItemBatch, InputItem
+from data_catalog.indexer.models import IndexItemBatch, InputItemBatch, InputItem
 
 import os
 

@@ -42,3 +42,4 @@ data_feed/perf/resources-estimation-out/*
 !data_feed/perf/resources-estimation-out/result_analyzer.py
 
 featurizer/notebooks
+utils/s3/s3_svoe.test.1_inventory
