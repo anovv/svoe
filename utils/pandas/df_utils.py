@@ -11,10 +11,6 @@ from utils.s3.s3_utils import get_session
 
 
 def load_df(path: str) -> pd.DataFrame:
-
-
-
-def load_df_DATA_WRANGLER(path: str) -> pd.DataFrame:
     # split path into prefix and suffix
     # this is needed because if dataset=True data wrangler handles input path as a glob pattern,
     # hence messing up special characters
