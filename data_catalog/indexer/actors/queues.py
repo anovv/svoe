@@ -34,6 +34,8 @@ class InputQueue:
     def put(self, item: InputItemBatch):
         self.q.append(item)
 
+    def size(self):
+        return len(self.q)
 
 @ray.remote
 class DownloadQueue:
