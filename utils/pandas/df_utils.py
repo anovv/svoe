@@ -77,7 +77,7 @@ def time_range(df: pd.DataFrame) -> Tuple[float, int, int]:
     return end - start, start, end
 
 
-def get_len(df: pd.DataFrame) -> int:
+def get_num_rows(df: pd.DataFrame) -> int:
     return len(df.index)
 
 

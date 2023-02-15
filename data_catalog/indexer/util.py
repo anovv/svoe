@@ -1,19 +1,22 @@
+import json
 from typing import Generator, Optional, Tuple, Dict
 
 from data_catalog.indexer.models import InputItemBatch
-from utils.s3 import s3_utils
+from utils.s3.s3_utils import inventory
 
 S3_BUCKET = 'svoe.test.1'
 
 
 def generate_input_items(batch_size: int) -> Generator[InputItemBatch, None, None]:
     batch = []
-    for inv_df in s3_utils.inventory():
+    for inv_df in inventory():
         for row in inv_df.itertuples():
             d_row = row._asdict()
 
             size_kb = d_row['size']/1024.0
             input_item = parse_s3_key(d_row['key'])
+
+            # TODO sync keys with DataCatalog sql model
             input_item['size_kb'] = size_kb
             batch.append(input_item)
             if len(batch) == batch_size:
@@ -65,11 +68,16 @@ def parse_s3_key(key: str) -> Optional[Dict]:
         # unparsable
         return None
 
+    # TODO since we only have spot and perp
+    instrument_extra = json.dumps({})
+
+    # TODO sync keys with DataCatalog sql model
     return {
         'data_type': data_type,
         'exchange': exchange,
         'symbol': symbol,
         'instrument_type': instrument_type,
+        'instrument_extra': instrument_extra,
         'quote': quote,
         'base': base,
         'path': f's3://{S3_BUCKET}/{key}'

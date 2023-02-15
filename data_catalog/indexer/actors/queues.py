@@ -4,37 +4,54 @@ from ray.util.client import ray
 
 from data_catalog.indexer.models import InputItemBatch, InputItem, IndexItem, IndexItemBatch
 
-T = TypeVar('T')
+# T = TypeVar('T')
+
+
+# @ray.remote
+# class Queue(Generic[T]):
+#     q: List[T] = []
+#
+#     def pop(self) -> Optional[T]:
+#         if len(self.q) != 0:
+#             return self.q.pop(0)
+#         else:
+#             return None
+#
+#     def put(self, item: T):
+#         self.q.append(item)
 
 
 @ray.remote
-class Queue(Generic[T]):
-    q: List[T] = []
+class InputQueue:
+    q: List[InputItemBatch] = []
 
-    def pop(self) -> Optional[T]:
+    def pop(self) -> Optional[InputItemBatch]:
         if len(self.q) != 0:
             return self.q.pop(0)
         else:
             return None
 
-    def put(self, item: T):
+    def put(self, item: InputItemBatch):
         self.q.append(item)
 
 
 @ray.remote
-class InputQueue(Queue[InputItemBatch]):
-    pass
+class DownloadQueue:
+    q: List[InputItem] = []
 
-
-@ray.remote
-class DownloadQueue(Queue[InputItem]):
+    def pop(self) -> Optional[InputItem]:
+        if len(self.q) != 0:
+            return self.q.pop(0)
+        else:
+            return None
 
     def put(self, batch: InputItemBatch):
         self.q.extend(batch)
 
 
 @ray.remote
-class StoreQueue(Queue[IndexItem]):
+class StoreQueue:
+    q: List[IndexItem] = []
 
     def __init__(self, batch_size: int):
         self.batch_size = batch_size
@@ -45,3 +62,6 @@ class StoreQueue(Queue[IndexItem]):
             return None
         else:
             return self.q[-self.batch_size:]
+
+    def put(self, item: IndexItem):
+        self.q.append(item)

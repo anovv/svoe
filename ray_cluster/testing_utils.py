@@ -4,7 +4,7 @@ from featurizer.features.data.l2_book_delats.l2_book_deltas import L2BookDeltasD
 from featurizer.features.data.trades.trades import TradesData
 from featurizer.features.definitions.feature_definition import FeatureDefinition
 from featurizer.features.feature_tree.feature_tree import Feature
-from utils.pandas.df_utils import load_and_cache, time_range, get_size_kb, get_len
+from utils.pandas.df_utils import load_and_cache, time_range, get_size_kb, get_num_rows
 from featurizer.features.loader.l2_snapshot_utils import get_info
 
 # TODO make default global cache dir
@@ -75,7 +75,7 @@ def mock_trades_data_and_meta() -> Tuple[Dict[Feature, BlockRange], Dict[Feature
             'start_ts': _time_range[1],
             'end_ts': _time_range[2],
             'size_kb': get_size_kb(block),
-            'len': get_len(block),
+            'len': get_num_rows(block),
             'path': consec_athena_files_BINANCE_FUTURES_ETH_USD_PERP[i],
         })
 

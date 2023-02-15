@@ -1,21 +1,29 @@
 from typing import Optional, Dict, List
 
 from sqlalchemy import create_engine, Column, String, JSON, DateTime, func
-from sqlalchemy.orm import declarative_base, sessionmaker
-from data_catalog.indexer.sql.models import DataCatalog, add_defaults
+from sqlalchemy.orm import sessionmaker
+from data_catalog.indexer.sql.models import DataCatalog, add_defaults, Base
 from data_catalog.indexer.models import IndexItemBatch, InputItemBatch, InputItem
 
 import os
 
-Base = declarative_base()
 Session = sessionmaker()
+
+
+DEFAULT_CONFIG = {
+    'mysql_user': 'root',
+    'mysql_password': '',
+    'mysql_host': '127.0.0.1',
+    'mysql_port': '3306',
+    'mysql_database': 'svoe_db',
+}
 
 
 class MysqlClient:
     def __init__(self, config: Optional[Dict] = None):
         self.config = config
         if self.config is None:
-            self.config = {}
+            self.config = DEFAULT_CONFIG
         self.engine = self._init_engine()
 
     def _init_engine(self):
@@ -46,6 +54,10 @@ class MysqlClient:
             objects.append(DataCatalog(**index_item))
         session = Session()
         session.bulk_save_objects(objects)
+
+        # TODO try catch and handle
+        # 1) connection issues
+        # 2) duplicate entries
         session.commit()
         return # TODO return result?
 
@@ -55,7 +67,7 @@ class MysqlClient:
         query_in = DataCatalog.path.in_(paths)
         session = Session()
         select_in_db = session.query(DataCatalog.path).filter(query_in)
-        in_db = list(zip(*select_in_db.all()))[0]
-        non_exist = list(filter(lambda item: item['path'] not in in_db, batch))
+        res = [r[0] for r in select_in_db.all()]
+        non_exist = list(filter(lambda item: item['path'] not in res, batch))
         return non_exist
 

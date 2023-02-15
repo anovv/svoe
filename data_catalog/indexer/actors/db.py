@@ -57,4 +57,5 @@ class DbWriter:
             # work item is a batch of index items to write to DB
             write_status = self.write_batch(index_item_batch)
             # fire and forget put, don't call ray.get
+            # TODO if write failed, put corresponding input items back in input queue?
             self.coordinator.update_progress(write_status).remote()

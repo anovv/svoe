@@ -56,7 +56,7 @@ def get_info(df: pd.DataFrame) -> Dict[str, Any]:
     _has_snapshot = has_snapshot(df)
     res = {
         'df_size_kb': dfu.get_size_kb(df),
-        'length': dfu.get_len(df),
+        'length': dfu.get_num_rows(df),
         'has_snapshot': _has_snapshot,
         'time_range': dfu.time_range(df)
     }
