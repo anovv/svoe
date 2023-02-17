@@ -15,15 +15,16 @@ class DbReader:
         self.client = MysqlClient(db_config)
 
     def run(self):
+        # TODO abstract pipelined loop to util methos/class
         self.input_batch_ref = self.input_queue.pop.remote()
         while True:
             input_batch = ray.get(self.input_batch_ref)
+            # schedule async fetching of next work item to enable compute pipelining
+            self.input_batch_ref = self.input_queue.pop.remote()
             if input_batch is None:
                 # TODO add sleep so we don't waste CPU cycles
                 continue
 
-            # schedule async fetching of next work item to enable compute pipelining
-            self.input_batch_ref = self.input_queue.pop.remote()
             # work item is a batch of input items to check if they are already indexed
             to_download_batch = self.client.check_exists(input_batch)
             # fire and forget put, don't call ray.get
@@ -43,15 +44,16 @@ class DbWriter:
         return {}
 
     def run(self):
+        # TODO abstract pipelined loop to util methos/class
         self.index_item_batch_ref = self.store_queue.pop_with_wait_if_last.remote()
         while True:
             index_item_batch = ray.get(self.index_item_batch_ref)
+            # schedule async fetching of next work item to enable compute pipelining
+            self.index_item_batch_ref = self.store_queue.pop_with_wait_if_last.remote()
             if index_item_batch is None:
                 # TODO sleep here for some time to avoid waisting CPU cycles?
                 continue
 
-            # schedule async fetching of next work item to enable compute pipelining
-            self.index_item_batch_ref = self.store_queue.pop_with_wait_if_last.remote()
             # work item is a batch of index items to write to DB
             write_status = self.write_batch(index_item_batch)
             # fire and forget put, don't call ray.get

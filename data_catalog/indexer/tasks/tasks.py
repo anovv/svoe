@@ -14,8 +14,10 @@ from utils.s3 import s3_utils
 
 # TODO set CPU=0, or add parallelism resource, set memory and object_store_memory
 @ray.remote
-def load_and_queue_df(input: InputItem, index_queue: List):
-    df = ray.get(_load_df.remote(input['path']))
+def load_and_queue_df(input_item: InputItem, index_queue: List):
+    df = ray.get(_load_df.remote(input_item['path']))
+    path = input_item['path']
+    print(f'Loaded {path}')
     index_queue.append((df, input))
 
 
@@ -32,6 +34,8 @@ def index_and_queue_df(df: pd.DataFrame, input_item: InputItem, store_queue: Sto
     # index_item = ray.get(_index_df.remote(df, input_item))
     # fire and forget
     index_item = _index_df(df, input_item)
+    path = input_item['path']
+    print(f'Indexed {path}')
     store_queue.put.remote(index_item)
 
 

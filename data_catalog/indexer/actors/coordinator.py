@@ -11,6 +11,7 @@ from data_catalog.indexer.tasks.tasks import load_and_queue_df, index_and_queue_
 
 @ray.remote
 class Coordinator:
+    # TODO figure out if its ok to use list here (regarding concurrency/race conditions)
     index_queue: List[Tuple[pd.DataFrame, InputItem]] = []
 
     def __init__(self, download_queue: DownloadQueue, store_queue: StoreQueue):
@@ -23,22 +24,36 @@ class Coordinator:
 
     def _schedule_downloads(self):
         # TODO add backpressure to Driver program, stop when driver queue is empty
+        # TODO abstract pipelined loop to util methos/class
         def _run_loop():
-            to_download = self.download_queue.pop()
-            # TODO set resources
-            # fire and forget
-            load_and_queue_df.remote(to_download, self.index_queue)
+            self.to_download_ref = self.download_queue.pop.remote()
+            while True:
+                to_download = ray.get(self.to_download_ref)
+                # schedule async fetching of next work item to enable compute pipelining
+                self.to_download_ref = self.download_queue.pop.remote()
+                if to_download is None:
+                    # TODO sleep here for some time to avoid waisting CPU cycles?
+                    continue
+                # fire and forget
+                # TODO set resources
+                load_and_queue_df.remote(to_download, self.index_queue)
 
         self.d_thread = Thread(target=_run_loop)
         self.d_thread.start()
 
     def _schedule_indexing(self):
         def _run_loop():
-            # TODO batch this?
-            df_to_index, input_item = self.index_queue.pop(0)
-            # TODO set resources
-            # fire and forget
-            index_and_queue_df.remote(df_to_index, input_item, self.store_queue)
+            while True:
+                if len(self.index_queue) == 0:
+                    # TODO sleep to save cpu cycles
+                    continue
+
+                # TODO batch multiple dfs?
+                df_to_index, input_item = self.index_queue.pop(0)
+                print('Bam')
+                # fire and forget
+                # TODO set resources
+                index_and_queue_df.remote(df_to_index, input_item, self.store_queue)
 
         self.i_thread = Thread(target=_run_loop)
         self.i_thread.start()

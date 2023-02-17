@@ -1,3 +1,4 @@
+import itertools
 import os
 import time
 import unittest
@@ -41,7 +42,7 @@ class TestDataCatalogIndexer(unittest.TestCase):
         not_exist = client.check_exists(batch)
         print(f'Found {batch_size - len(not_exist)} existing records in db')
 
-    def test_db_actors(self):
+    def test_db_reader(self):
         with ray.init(address='auto'):
             batch_size = 10
             num_batches = 2
@@ -66,13 +67,32 @@ class TestDataCatalogIndexer(unittest.TestCase):
             print(f'Input queue size: {input_queue_size}, Download queue size: {download_queue_size}')
             print('Done')
 
-
     def test_indexer(self):
-        # TODO start ray cluster
-        indexer = Indexer()
-        indexer.run()
-        # TODO stop ray cluster
+        with ray.init(address='auto'):
+            batch_size = 1
+            num_batches = 2
+            indexer = Indexer()
+            indexer.run()
+            print('Inited indexer')
+            print('Queueing batch...')
+            inputs = []
+            for i in range(num_batches):
+                input_batch = next(generate_input_items(batch_size))
+                inputs.append(input_batch)
+                indexer.pipe_input(input_batch)
+                print(f'Queued {i + 1} batches')
+            print('Done queueing')
+            # wait for everything to process
+            time.sleep(240)
+
+            # check if index was written to db
+            client = MysqlClient()
+            not_exist = client.check_exists(list(itertools.chain(*inputs)))
+            # should be 0
+            print(len(not_exist))
+
+
 
 if __name__ == '__main__':
     t = TestDataCatalogIndexer()
-    t.test_db_actors()
+    t.test_indexer()
