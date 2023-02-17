@@ -3,7 +3,6 @@ from typing import Optional, Dict
 from ray.util.client import ray
 
 from data_catalog.indexer.actors.queues import InputQueue, DownloadQueue, StoreQueue
-from data_catalog.indexer.indexer import Coordinator
 from data_catalog.indexer.models import IndexItemBatch
 from data_catalog.indexer.sql.client import MysqlClient
 
@@ -16,7 +15,7 @@ class DbReader:
         self.client = MysqlClient(db_config)
 
     def run(self):
-        self.input_batch_ref = self.input_queue.pop()
+        self.input_batch_ref = self.input_queue.pop.remote()
         while True:
             input_batch = ray.get(self.input_batch_ref)
             if input_batch is None:
@@ -24,28 +23,27 @@ class DbReader:
                 continue
 
             # schedule async fetching of next work item to enable compute pipelining
-            self.input_batch_ref = self.input_queue.pop()
+            self.input_batch_ref = self.input_queue.pop.remote()
             # work item is a batch of input items to check if they are already indexed
             to_download_batch = self.client.check_exists(input_batch)
             # fire and forget put, don't call ray.get
-            self.download_queue.put(to_download_batch)
+            self.download_queue.put.remote(to_download_batch)
 
 
 @ray.remote
 class DbWriter:
-    def __init__(self, coordinator: Coordinator, store_queue: StoreQueue, db_config: Optional[Dict] = None):
-        self.coordinator = coordinator
+    def __init__(self, store_queue: StoreQueue, db_config: Optional[Dict] = None):
         self.store_queue = store_queue
         self.client = MysqlClient(db_config)
 
     def write_batch(self, batch: IndexItemBatch) -> Dict:
         self.client.create_tables()
         self.client.write_index_item_batch(batch)
-        # TODO return status to pass to update_progress on coordinator
+        # TODO return status to pass to update_progress
         return {}
 
     def run(self):
-        self.index_item_batch_ref = self.coordinator.get_to_write_batch.remote()
+        self.index_item_batch_ref = self.store_queue.pop_with_wait_if_last.remote()
         while True:
             index_item_batch = ray.get(self.index_item_batch_ref)
             if index_item_batch is None:
@@ -58,4 +56,5 @@ class DbWriter:
             write_status = self.write_batch(index_item_batch)
             # fire and forget put, don't call ray.get
             # TODO if write failed, put corresponding input items back in input queue?
-            self.coordinator.update_progress(write_status).remote()
+            # TODO create separate actor to track stats to avoid circular deps
+            # self.coordinator.update_progress(write_status).remote()

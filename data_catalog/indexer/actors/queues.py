@@ -20,7 +20,7 @@ from data_catalog.indexer.models import InputItemBatch, InputItem, IndexItem, In
 #     def put(self, item: T):
 #         self.q.append(item)
 
-
+# TODO create mixin for common methods size, put, pop, figure out generics
 @ray.remote
 class InputQueue:
     q: List[InputItemBatch] = []
@@ -37,6 +37,7 @@ class InputQueue:
     def size(self):
         return len(self.q)
 
+
 @ray.remote
 class DownloadQueue:
     q: List[InputItem] = []
@@ -49,6 +50,9 @@ class DownloadQueue:
 
     def put(self, batch: InputItemBatch):
         self.q.extend(batch)
+
+    def size(self):
+        return len(self.q)
 
 
 @ray.remote
@@ -67,3 +71,6 @@ class StoreQueue:
 
     def put(self, item: IndexItem):
         self.q.append(item)
+
+    def size(self):
+        return len(self.q)

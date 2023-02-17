@@ -33,7 +33,7 @@ class MysqlClient:
         port = self.config.get('mysql_port', os.getenv('MYSQL_PORT'))
         db = self.config.get('mysql_database', os.getenv('MYSQL_DATABASE'))
         url = f'mysql+pymysql://{user}:{password}@{host}:{port}/{db}'
-        engine = create_engine(url, echo=True)
+        engine = create_engine(url, echo=False)
         Session.configure(bind=engine)
         return engine
 
