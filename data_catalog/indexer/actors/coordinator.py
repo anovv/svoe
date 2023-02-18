@@ -1,3 +1,4 @@
+import time
 from threading import Thread
 from typing import List, Tuple, Dict
 
@@ -45,7 +46,8 @@ class Coordinator:
         def _run_loop():
             while True:
                 if len(self.index_queue) == 0:
-                    # TODO sleep to save cpu cycles
+                    # sleep to save cpu cycles
+                    time.sleep(0.1)
                     continue
 
                 # TODO batch multiple dfs?

@@ -67,7 +67,9 @@ class StoreQueue:
             # TODO check if queue contains last item, if so, wait until notified from outside and pop all
             return None
         else:
-            return self.q[-self.batch_size:]
+            res = self.q[0:self.batch_size]
+            self.q = self.q[self.batch_size:]
+            return res
 
     def put(self, item: IndexItem):
         self.q.append(item)
