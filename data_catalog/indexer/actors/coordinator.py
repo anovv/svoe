@@ -40,7 +40,6 @@ class Coordinator:
                 # fire and forget
                 # TODO set resources for load_df remote call
                 self.index_queue.append((load_df.remote(to_download), to_download))
-                print(len(self.index_queue))
 
         self.d_thread = Thread(target=_run_loop)
         self.d_thread.start()

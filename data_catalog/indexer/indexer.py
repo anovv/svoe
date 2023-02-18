@@ -11,10 +11,13 @@ from data_catalog.indexer.actors.queues import DownloadQueue, StoreQueue, InputQ
 
 # for memory profiling https://discuss.ray.io/t/unexplained-memory-usage-with-cloudpickle-obj-store/6877
 # and https://github.com/cadedaniel/cadelabs/blob/master/stackoverflow/72970940/script.py
+
+# implement workflows (for checkpointing/persistence):
+# https://docs.ray.io/en/latest/workflows/key-concepts.html
 from data_catalog.indexer.models import InputItemBatch
 
 INPUT_ITEM_BATCH_SIZE = 2
-WRITE_INDEX_ITEM_BATCH_SIZE = 1
+WRITE_INDEX_ITEM_BATCH_SIZE = 20
 
 
 class Indexer:

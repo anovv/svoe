@@ -26,7 +26,8 @@ def load_df(input_item: InputItem) -> pd.DataFrame:
 def index_df(df: pd.DataFrame, input_item: InputItem) -> IndexItem:
     return _index_df(df, input_item)
 
-
+# TODO s3://svoe.test.1/data_lake/BINANCE/l2_book/BTC-USDT/date=2021-12-22/version=local/BINANCE-l2_book-BTC-USDT-1640194760.230347-34631b91ea284ca2857f9b3938101121.gz.parquet
+# debug IndexError: single positional indexer is out-of-bounds in l2_utils.get_snapshot_ts(df)
 def _index_df(df: pd.DataFrame, input_item: InputItem) -> IndexItem:
     path = input_item['path']
     print(f'Indexing {path}...')
@@ -41,10 +42,12 @@ def _index_df(df: pd.DataFrame, input_item: InputItem) -> IndexItem:
         'num_rows': df_utils.get_num_rows(df),
     })
     if index_item['data_type'] == 'l2_book':
-        meta = {
-            'snapshot_ts': l2_utils.get_snapshot_ts(df)
-        }
-        index_item['meta'] = json.dumps(meta)
+        snapshot_ts = l2_utils.get_snapshot_ts(df)
+        if snapshot_ts is not None:
+            meta = {
+                'snapshot_ts': l2_utils.get_snapshot_ts(df)
+            }
+            index_item['meta'] = json.dumps(meta)
 
     print(f'Indexed {path}...')
 

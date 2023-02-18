@@ -7,12 +7,14 @@ from ray.util.client import ray
 
 from data_catalog.indexer.actors.db import DbReader
 from data_catalog.indexer.actors.queues import InputQueue, DownloadQueue
-from data_catalog.indexer.indexer import Indexer
+from data_catalog.indexer.indexer import Indexer, WRITE_INDEX_ITEM_BATCH_SIZE
 from data_catalog.indexer.sql.client import MysqlClient
 from data_catalog.indexer.sql.models import add_defaults
 from data_catalog.indexer.tasks.tasks import _index_df
 from data_catalog.indexer.util import generate_input_items
+from featurizer.features.loader.l2_snapshot_utils import get_snapshot_ts
 from utils.pandas.df_utils import load_dfs
+from utils.s3.s3_utils import load_df
 
 
 class TestDataCatalogIndexer(unittest.TestCase):
@@ -78,7 +80,7 @@ class TestDataCatalogIndexer(unittest.TestCase):
 
     def test_indexer(self):
         with ray.init(address='auto'):
-            batch_size = 1
+            batch_size = WRITE_INDEX_ITEM_BATCH_SIZE
             num_batches = 2
             indexer = Indexer()
             indexer.run()
@@ -102,7 +104,6 @@ class TestDataCatalogIndexer(unittest.TestCase):
             not_exist = client.check_exists(list(itertools.chain(*inputs)))
             # should be 0
             print(len(not_exist))
-
 
 
 if __name__ == '__main__':
