@@ -15,7 +15,7 @@ class DbReader:
         self.client = MysqlClient(db_config)
 
     def run(self):
-        # TODO abstract pipelined loop to util methos/class
+        # TODO abstract pipelined loop to util methods/class
         self.input_batch_ref = self.input_queue.pop.remote()
         while True:
             input_batch = ray.get(self.input_batch_ref)
@@ -26,6 +26,8 @@ class DbReader:
                 continue
 
             # work item is a batch of input items to check if they are already indexed
+            # TODO create once and set global flag instead of calling query on each read
+            self.client.create_tables()
             to_download_batch = self.client.check_exists(input_batch)
             # fire and forget put, don't call ray.get
             self.download_queue.put.remote(to_download_batch)

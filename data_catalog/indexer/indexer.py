@@ -8,11 +8,13 @@ from data_catalog.indexer.actors.queues import DownloadQueue, StoreQueue, InputQ
 # for backpressure https://docs.ray.io/en/latest/ray-core/patterns/limit-pending-tasks.html
 # fro mem usage https://docs.ray.io/en/releases-1.12.0/ray-core/objects/memory-management.html
 # memory monitor https://docs.ray.io/en/latest/ray-core/scheduling/ray-oom-prevention.html
+
+# for memory profiling https://discuss.ray.io/t/unexplained-memory-usage-with-cloudpickle-obj-store/6877
+# and https://github.com/cadedaniel/cadelabs/blob/master/stackoverflow/72970940/script.py
 from data_catalog.indexer.models import InputItemBatch
-from data_catalog.indexer.util import generate_input_items
 
 INPUT_ITEM_BATCH_SIZE = 2
-WRITE_INDEX_ITEM_BATCH_SIZE = 1000
+WRITE_INDEX_ITEM_BATCH_SIZE = 1
 
 
 class Indexer:
@@ -41,6 +43,7 @@ class Indexer:
         self.coordintator.run.remote()
 
     def pipe_input(self, input_batch: InputItemBatch):
+        # TODO do we need ray.get here?
         ray.get(self.input_queue.put.remote(input_batch))
 
     # TODO add throughput limit, backpressure

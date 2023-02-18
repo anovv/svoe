@@ -59,6 +59,7 @@ class MysqlClient:
         # 1) connection issues
         # 2) duplicate entries
         session.commit()
+        print(f'Written {len(batch)} index items to Db')
         return # TODO return result?
 
     def check_exists(self, batch: InputItemBatch) -> List[InputItem]:
@@ -69,5 +70,6 @@ class MysqlClient:
         select_in_db = session.query(DataCatalog.path).filter(query_in)
         res = [r[0] for r in select_in_db.all()]
         non_exist = list(filter(lambda item: item['path'] not in res, batch))
+        print(f'Checked db for items: {len(non_exist)} not in DB')
         return non_exist
 

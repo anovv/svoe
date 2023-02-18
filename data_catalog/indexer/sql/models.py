@@ -28,7 +28,7 @@ class DataCatalog(Base):
     start_ts = Column(Float, primary_key=True)
     end_ts = Column(Float, primary_key=True)
 
-    # TODO this should be secondary key
+    # TODO this should be a secondary key
     path = Column(String(512), unique=True)
 
     num_rows = Column(Integer)
@@ -39,7 +39,7 @@ class DataCatalog(Base):
     # defaultable
     source = Column(String(32), primary_key=True)
     compaction = Column(String(32), primary_key=True)
-    version = Column(String(256), primary_key=True, unique=True)
+    version = Column(String(256), primary_key=True)
     extras = Column(JSON)
 
 

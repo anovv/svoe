@@ -25,12 +25,14 @@ from data_catalog.indexer.models import InputItemBatch, InputItem, IndexItem, In
 class InputQueue:
     q: List[InputItemBatch] = []
 
+    # TODO rename to pop_batch?
     def pop(self) -> Optional[InputItemBatch]:
         if len(self.q) != 0:
             return self.q.pop(0)
         else:
             return None
 
+    # TODO rename to put_batch?
     def put(self, item: InputItemBatch):
         self.q.append(item)
 
@@ -42,6 +44,7 @@ class InputQueue:
 class DownloadQueue:
     q: List[InputItem] = []
 
+    # TODO implement batching pop?
     def pop(self) -> Optional[InputItem]:
         if len(self.q) != 0:
             return self.q.pop(0)

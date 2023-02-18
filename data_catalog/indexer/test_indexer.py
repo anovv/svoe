@@ -94,15 +94,14 @@ class TestDataCatalogIndexer(unittest.TestCase):
                 indexer.pipe_input(input_batch)
                 print(f'Queued {i + 1} batches')
             print('Done queueing')
-            print(inputs)
             # wait for everything to process
-            # time.sleep(240)
-            #
-            # # check if index was written to db
-            # client = MysqlClient()
-            # not_exist = client.check_exists(list(itertools.chain(*inputs)))
-            # # should be 0
-            # print(len(not_exist))
+            time.sleep(240)
+
+            # check if index was written to db
+            client = MysqlClient()
+            not_exist = client.check_exists(list(itertools.chain(*inputs)))
+            # should be 0
+            print(len(not_exist))
 
 
 
