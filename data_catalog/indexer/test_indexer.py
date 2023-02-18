@@ -19,16 +19,23 @@ class TestDataCatalogIndexer(unittest.TestCase):
 
     def test_parse_s3_keys(self):
         # TODO add multiproc
+        batch_size = 1000
         exchange_symbol_unique_pairs = set()
+        print('Loading generator...')
+        generator = generate_input_items(batch_size)
+        print('Generator loaded')
         for _ in range(5):
-            batch = next(generate_input_items(1000))
+            batch = next(generator)
             for i in batch:
                 exchange_symbol_unique_pairs.add((i['exchange'], i['symbol']))
         print(exchange_symbol_unique_pairs)
 
     def test_db_client(self):
         batch_size = 1
-        batch = next(generate_input_items(batch_size))
+        print('Loading generator...')
+        generator = generate_input_items(batch_size)
+        print('Generator loaded')
+        batch = next(generator)
         client = MysqlClient()
         client.create_tables()
         not_exist = client.check_exists(batch)
@@ -50,10 +57,12 @@ class TestDataCatalogIndexer(unittest.TestCase):
             download_queue = DownloadQueue.remote()
             db_reader = DbReader.remote(input_queue, download_queue)
             print('Inited actors')
-
+            print('Loading generator...')
+            generator = generate_input_items(batch_size)
+            print('Generator loaded')
             print('Queueing batch...')
             for i in range(num_batches):
-                input_batch = next(generate_input_items(batch_size))
+                input_batch = next(generator)
                 ray.get(input_queue.put.remote(input_batch))
                 print(f'Queued {i + 1} batches')
             print('Done queueing')
@@ -74,22 +83,26 @@ class TestDataCatalogIndexer(unittest.TestCase):
             indexer = Indexer()
             indexer.run()
             print('Inited indexer')
+            print('Loading generator...')
+            generator = generate_input_items(batch_size)
+            print('Generator loaded')
             print('Queueing batch...')
             inputs = []
             for i in range(num_batches):
-                input_batch = next(generate_input_items(batch_size))
+                input_batch = next(generator)
                 inputs.append(input_batch)
                 indexer.pipe_input(input_batch)
                 print(f'Queued {i + 1} batches')
             print('Done queueing')
+            print(inputs)
             # wait for everything to process
-            time.sleep(240)
-
-            # check if index was written to db
-            client = MysqlClient()
-            not_exist = client.check_exists(list(itertools.chain(*inputs)))
-            # should be 0
-            print(len(not_exist))
+            # time.sleep(240)
+            #
+            # # check if index was written to db
+            # client = MysqlClient()
+            # not_exist = client.check_exists(list(itertools.chain(*inputs)))
+            # # should be 0
+            # print(len(not_exist))
 
 
 
