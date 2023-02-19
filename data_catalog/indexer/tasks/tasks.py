@@ -6,10 +6,10 @@ from typing import List
 import pandas as pd
 from ray.util.client import ray
 
-from data_catalog.indexer.actors.queues import StoreQueue
 from data_catalog.indexer.models import InputItem, IndexItem
 from utils.pandas import df_utils
 from utils.s3 import s3_utils
+
 
 # TODO set CPU=0, or add parallelism resource, set memory and object_store_memory
 @ray.remote

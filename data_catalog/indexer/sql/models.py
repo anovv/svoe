@@ -1,12 +1,13 @@
 import json
 
-from sqlalchemy import Column, String, JSON, DateTime, func, Float, Integer
+from sqlalchemy import Column, String, JSON, DateTime, func, Integer, Float
+from sqlalchemy.dialects.mysql import FLOAT
 from sqlalchemy.orm import declarative_base
 from data_catalog.indexer.models import InputItem
 
 Base = declarative_base()
 
-
+# TODO figure out float precision issues
 class DataCatalog(Base):
     __tablename__ = 'data_catalog'
     created_at = Column(DateTime(timezone=True), server_default=func.now())
@@ -25,15 +26,19 @@ class DataCatalog(Base):
     symbol = Column(String(32), primary_key=True)
     base = Column(String(32), primary_key=True)
     quote = Column(String(32), primary_key=True)
-    start_ts = Column(Float, primary_key=True)
-    end_ts = Column(Float, primary_key=True)
+    # start_ts = Column(Float(precision='16,6'), primary_key=True)
+    start_ts = Column(String(32), primary_key=True)
+    # end_ts = Column(Float(precision='16,6'), primary_key=True)
+    end_ts = Column(String(32), primary_key=True)
 
     # TODO this should be a secondary key
     path = Column(String(512), unique=True)
 
     num_rows = Column(Integer)
-    size_kb = Column(Float)
-    size_in_memory_kb = Column(Float)
+    # size_kb = Column(Float(precision='16,6'))
+    size_kb = Column(String(32))
+    # size_in_memory_kb = Column(Float(precision='16,6'))
+    size_in_memory_kb = Column(String(32))
     meta = Column(JSON)
 
     # defaultable

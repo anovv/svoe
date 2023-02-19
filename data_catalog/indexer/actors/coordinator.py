@@ -2,7 +2,6 @@ import time
 from threading import Thread
 from typing import List, Tuple, Dict
 
-import pandas as pd
 from ray.types import ObjectRef
 from ray.util.client import ray
 
@@ -38,8 +37,11 @@ class Coordinator:
                     # TODO sleep here for some time to avoid waisting CPU cycles?
                     continue
                 # fire and forget
-                # TODO set resources for load_df remote call
-                self.index_queue.append((load_df.remote(to_download), to_download))
+                # TODO verify resources are optimal
+                # TODO use custom download_throughput resource instead on num_cpus (since num_cpus are shared)
+                num_cpus = 0.01
+                memory_b = to_download['size_kb'] * 20 * 1024 # estimate as x20 of s3 size
+                self.index_queue.append((load_df.options(num_cpus=num_cpus, memory=memory_b).remote(to_download), to_download))
 
         self.d_thread = Thread(target=_run_loop)
         self.d_thread.start()
@@ -55,8 +57,10 @@ class Coordinator:
                 # TODO batch multiple dfs?
                 df_to_index_ref, input_item = self.index_queue.pop(0)
                 # fire and forget
-                # TODO set resources
-                self.store_queue.put.remote(index_df.remote(df_to_index_ref, input_item))
+                # TODO verify resources are optimal
+                num_cpus = 0.9 # leave 0.1 for scheduling I/O tasks
+                memory_b = input_item['size_kb'] * 20 * 1024 # estimate as x20 of s3 size
+                self.store_queue.put.remote(index_df.options(num_cpus=num_cpus, memory=memory_b).remote(df_to_index_ref, input_item))
 
         self.i_thread = Thread(target=_run_loop)
         self.i_thread.start()

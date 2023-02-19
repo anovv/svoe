@@ -13,7 +13,7 @@ from data_catalog.indexer.sql.models import add_defaults
 from data_catalog.indexer.tasks.tasks import _index_df
 from data_catalog.indexer.util import generate_input_items
 from featurizer.features.loader.l2_snapshot_utils import get_snapshot_ts
-from utils.pandas.df_utils import load_dfs
+from utils.pandas.df_utils import load_dfs, time_range
 from utils.s3.s3_utils import load_df
 
 
@@ -33,7 +33,7 @@ class TestDataCatalogIndexer(unittest.TestCase):
         print(exchange_symbol_unique_pairs)
 
     def test_db_client(self):
-        batch_size = 1
+        batch_size = 2
         print('Loading generator...')
         generator = generate_input_items(batch_size)
         print('Generator loaded')
@@ -97,7 +97,7 @@ class TestDataCatalogIndexer(unittest.TestCase):
                 print(f'Queued {i + 1} batches')
             print('Done queueing')
             # wait for everything to process
-            time.sleep(240)
+            time.sleep(360)
 
             # check if index was written to db
             client = MysqlClient()
