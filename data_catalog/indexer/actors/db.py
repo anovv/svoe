@@ -3,7 +3,7 @@ from typing import Optional, Dict
 from ray.util.client import ray
 
 from data_catalog.indexer.actors.queues import InputQueue, DownloadQueue, StoreQueue
-from data_catalog.indexer.actors.stats import Stats
+from data_catalog.indexer.actors.stats import Stats, DB_WRITES, DB_READS
 from data_catalog.indexer.models import IndexItemBatch
 from data_catalog.indexer.sql.client import MysqlClient
 
@@ -33,6 +33,7 @@ class DbReader:
             to_download_batch = self.client.check_exists(input_batch)
             # fire and forget put, don't call ray.get
             self.download_queue.put.remote(to_download_batch)
+            self.stats.inc_counter.remote(DB_READS)
 
 
 @ray.remote
@@ -63,4 +64,4 @@ class DbWriter:
             write_status = self.write_batch(index_item_batch)
             # TODO if write failed, put corresponding input items back in input queue?
             # fire and forget put, don't call ray.get
-            self.stats.update_processed(write_status).remote()
+            self.stats.inc_counter.remote(DB_WRITES)

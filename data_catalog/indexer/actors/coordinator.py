@@ -39,7 +39,7 @@ class Coordinator:
                 # TODO use custom download_throughput resource instead on num_cpus (since num_cpus are shared)
                 num_cpus = 0.01
                 memory_b = to_download['size_kb'] * 20 * 1024 # estimate as x20 of s3 size
-                self.index_queue.append((load_df.options(num_cpus=num_cpus, memory=memory_b).remote(to_download), to_download))
+                self.index_queue.append((load_df.options(num_cpus=num_cpus, memory=memory_b).remote(to_download, self.stats), to_download))
 
         self.d_thread = Thread(target=_run_loop)
         self.d_thread.start()
@@ -58,7 +58,7 @@ class Coordinator:
                 num_cpus = 0.9 # leave 0.1 for scheduling I/O tasks
                 memory_b = input_item['size_kb'] * 20 * 1024 # estimate as x20 of s3 size
                 # fire and forget
-                self.store_queue.put.remote(index_df.options(num_cpus=num_cpus, memory=memory_b).remote(df_to_index_ref, input_item))
+                self.store_queue.put.remote(index_df.options(num_cpus=num_cpus, memory=memory_b).remote(df_to_index_ref, input_item, self.stats))
 
         self.i_thread = Thread(target=_run_loop)
         self.i_thread.start()

@@ -1,4 +1,4 @@
-from pstats import Stats
+import time
 
 import ray
 
@@ -16,6 +16,7 @@ from data_catalog.indexer.actors.queues import DownloadQueue, StoreQueue, InputQ
 
 # implement workflows (for checkpointing/persistence):
 # https://docs.ray.io/en/latest/workflows/key-concepts.html
+from data_catalog.indexer.actors.stats import Stats
 from data_catalog.indexer.models import InputItemBatch
 
 INPUT_ITEM_BATCH_SIZE = 2
@@ -33,6 +34,9 @@ class Indexer:
 
         # init stats
         self.stats = Stats.remote()
+        self.stats.run.remote()
+
+        # time.sleep(120)
 
         # init queue actors
         self.input_queue = InputQueue.remote()

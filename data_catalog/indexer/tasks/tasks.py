@@ -6,6 +6,7 @@ from typing import List
 import pandas as pd
 from ray.util.client import ray
 
+from data_catalog.indexer.actors.stats import Stats, DOWNLOAD_TASKS, INDEX_TASKS
 from data_catalog.indexer.models import InputItem, IndexItem
 from utils.pandas import df_utils
 from utils.s3 import s3_utils
@@ -13,18 +14,21 @@ from utils.s3 import s3_utils
 
 # TODO set CPU=0, or add parallelism resource, set memory and object_store_memory
 @ray.remote
-def load_df(input_item: InputItem) -> pd.DataFrame:
+def load_df(input_item: InputItem, stats: Stats) -> pd.DataFrame:
     path = input_item['path']
     print(f'Loading {path}...')
     df = s3_utils.load_df(path)
     print(f'Loaded {path}')
+    stats.inc_counter.remote(DOWNLOAD_TASKS)
     return df
 
 
 # TODO set CPU=0, set memory and object_store_memory
 @ray.remote
-def index_df(df: pd.DataFrame, input_item: InputItem) -> IndexItem:
-    return _index_df(df, input_item)
+def index_df(df: pd.DataFrame, input_item: InputItem, stats: Stats) -> IndexItem:
+    res = _index_df(df, input_item)
+    stats.inc_counter.remote(INDEX_TASKS)
+    return res
 
 # TODO s3://svoe.test.1/data_lake/BINANCE/l2_book/BTC-USDT/date=2021-12-22/version=local/BINANCE-l2_book-BTC-USDT-1640194760.230347-34631b91ea284ca2857f9b3938101121.gz.parquet
 # debug IndexError: single positional indexer is out-of-bounds in l2_utils.get_snapshot_ts(df)

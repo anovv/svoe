@@ -1,5 +1,11 @@
+import functools
 from time import time
 from typing import Dict, List, Callable
+
+import tornado
+from bokeh.application import Application
+from bokeh.application.handlers import FunctionHandler
+from bokeh.server.server import Server
 from bokeh.models import ColumnDataSource, DataRange1d
 from bokeh.plotting import figure
 from ray.types import ObjectRef
@@ -10,6 +16,8 @@ import ray
 
 # counter names
 # TODO enum
+from tornado.ioloop import IOLoop
+
 DOWNLOAD_TASKS = 'download_tasks'
 INDEX_TASKS = 'index_tasks'
 DB_READS = 'db_reads'
@@ -31,32 +39,46 @@ class Stats:
             DB_READS: 0,
             DB_WRITES: 0
         }
-        self.data_source = ColumnDataSource(dict(zip(self.state.keys(), [[0] for _ in range(len(self.state.values()))])))
+        data_source_params = dict(zip(self.state.keys(), [[0] for _ in range(len(self.state.values()))]))
+        data_source_params[TIME] = [time()]
+        self.data_source = ColumnDataSource(data_source_params)
 
     # def wait_and_update_counter(self, ref: ObjectRef, counter_name: str):
     #     ray.wait([ref])
     #     self.update_counter(counter_name)
 
-    def update_counter(self, counter_name: str):
+    def inc_counter(self, counter_name: str):
         self.state[counter_name] += 1
         data = self.state.copy()
         data[TIME] = time()
-
-        # TODO make it a dict of lists
+        for k in data:
+            data[k] = [data[k]]
         self.data_source.stream(data)
 
-    def poll_queues_state(self):
+    def poll_queues_states(self):
         pass
 
     def poll_cluster_state(self):
         pass
 
+    # TODO this should be on a separate thread
     def run(self):
         # start bokeh server
-        pass
+        apps = {'/': Application(FunctionHandler(functools.partial(_make_bokeh_doc, source=self.data_source)))}
+        # apps = {'/': Application(FunctionHandler(make_test_document))}
+        server = Server(apps, port=5001)
+        server.start()
+        IOLoop.current().start()
 
-def _make_bokeh_doc(doc, source, update: Callable):
-    doc.add_periodic_callback(update, 100)
+
+def make_test_document(doc):
+    fig = figure(title='Line plot!', sizing_mode='scale_width')
+    fig.line(x=[1, 2, 3], y=[1, 4, 9])
+    doc.title = "Hello, world!"
+    doc.add_root(fig)
+
+
+def _make_bokeh_doc(doc, source):
     x_range = DataRange1d(follow='end', follow_interval=20000, range_padding=0)
     fig = figure(title="Data",
                  x_axis_type='datetime', y_range=[-0.1, 100 + 0.1], # TODO 100

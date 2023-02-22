@@ -3,10 +3,13 @@ import os
 import time
 import unittest
 
+import tornado
 from ray.util.client import ray
+from tornado.ioloop import IOLoop
 
 from data_catalog.indexer.actors.db import DbReader
 from data_catalog.indexer.actors.queues import InputQueue, DownloadQueue
+from data_catalog.indexer.actors.stats import Stats
 from data_catalog.indexer.indexer import Indexer, WRITE_INDEX_ITEM_BATCH_SIZE
 from data_catalog.indexer.sql.client import MysqlClient
 from data_catalog.indexer.sql.models import add_defaults
@@ -106,6 +109,12 @@ class TestDataCatalogIndexer(unittest.TestCase):
             print(len(not_exist))
 
 
+    def test_bokeh_dashboard(self):
+        with ray.init(address='auto'):
+            stats = Stats.remote()
+            ray.get(stats.run.remote())
+
+
 if __name__ == '__main__':
     t = TestDataCatalogIndexer()
-    t.test_indexer()
+    t.test_bokeh_dashboard()
