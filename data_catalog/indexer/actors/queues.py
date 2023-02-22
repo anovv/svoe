@@ -66,10 +66,12 @@ class StoreQueue:
         self.batch_size = batch_size
 
     def pop_with_wait_if_last(self) -> Optional[IndexItemBatch]:
+        # TODO make eager pop
         if len(self.q) < self.batch_size:
             # TODO check if queue contains last item, if so, wait until notified from outside and pop all
             return None
         else:
+            # TODO do not wait for batch_size to fill
             res = self.q[0:self.batch_size]
             self.q = self.q[self.batch_size:]
             return res

@@ -3,13 +3,15 @@ from typing import Optional, Dict
 from ray.util.client import ray
 
 from data_catalog.indexer.actors.queues import InputQueue, DownloadQueue, StoreQueue
+from data_catalog.indexer.actors.stats import Stats
 from data_catalog.indexer.models import IndexItemBatch
 from data_catalog.indexer.sql.client import MysqlClient
 
 
 @ray.remote
 class DbReader:
-    def __init__(self, input_queue: InputQueue, download_queue: DownloadQueue, db_config: Optional[Dict] = None):
+    def __init__(self, stats: Stats, input_queue: InputQueue, download_queue: DownloadQueue, db_config: Optional[Dict] = None):
+        self.stats = stats
         self.input_queue = input_queue
         self.download_queue = download_queue
         self.client = MysqlClient(db_config)
@@ -35,7 +37,8 @@ class DbReader:
 
 @ray.remote
 class DbWriter:
-    def __init__(self, store_queue: StoreQueue, db_config: Optional[Dict] = None):
+    def __init__(self, stats: Stats, store_queue: StoreQueue, db_config: Optional[Dict] = None):
+        self.stats = stats
         self.store_queue = store_queue
         self.client = MysqlClient(db_config)
 
@@ -58,7 +61,6 @@ class DbWriter:
 
             # work item is a batch of index items to write to DB
             write_status = self.write_batch(index_item_batch)
-            # fire and forget put, don't call ray.get
             # TODO if write failed, put corresponding input items back in input queue?
-            # TODO create separate actor to track stats to avoid circular deps
-            # self.coordinator.update_progress(write_status).remote()
+            # fire and forget put, don't call ray.get
+            self.stats.update_processed(write_status).remote()

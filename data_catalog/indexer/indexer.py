@@ -1,3 +1,5 @@
+from pstats import Stats
+
 import ray
 
 from data_catalog.indexer.actors.coordinator import Coordinator
@@ -25,8 +27,12 @@ class Indexer:
     download_queue: DownloadQueue
     store_queue: StoreQueue
     coordintator: Coordinator
+    stats: Stats
 
     def run(self, num_db_readers: int = 1, num_db_writers: int = 1):
+
+        # init stats
+        self.stats = Stats.remote()
 
         # init queue actors
         self.input_queue = InputQueue.remote()
@@ -34,13 +40,13 @@ class Indexer:
         self.store_queue = StoreQueue.remote(WRITE_INDEX_ITEM_BATCH_SIZE)
 
         # init coordinator
-        self.coordintator = Coordinator.remote(self.download_queue, self.store_queue)
+        self.coordintator = Coordinator.remote(self.stats, self.download_queue, self.store_queue)
 
         # init db actors
-        db_readers = [DbReader.remote(self.input_queue, self.download_queue) for _ in range(num_db_readers)]
+        db_readers = [DbReader.remote(self.stats, self.input_queue, self.download_queue) for _ in range(num_db_readers)]
         for r in db_readers:
             r.run.remote()
-        db_writers = [DbWriter.remote(self.store_queue) for _ in range(num_db_writers)]
+        db_writers = [DbWriter.remote(self.stats, self.store_queue) for _ in range(num_db_writers)]
         for w in db_writers:
             w.run.remote()
         self.coordintator.run.remote()

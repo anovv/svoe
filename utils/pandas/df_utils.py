@@ -69,7 +69,7 @@ def concat(dfs: List[pd.DataFrame]) -> pd.DataFrame:
     return pd.concat(dfs, ignore_index=True)
 
 
-def time_range(df: pd.DataFrame) -> Tuple[float, int, int]:
+def time_range(df: pd.DataFrame) -> Tuple[float, float, float]:
     # time between start and finish
     start = df.iloc[0].timestamp
     end = df.iloc[-1].timestamp
@@ -82,7 +82,7 @@ def get_num_rows(df: pd.DataFrame) -> int:
 
 
 def get_size_kb(df: pd.DataFrame) -> int:
-    return int(df.memory_usage(index=True, deep=True).sum()/1000.0)
+    return int(df.memory_usage(index=True, deep=True).sum()/1024.0)
 
 
 def get_time_diff(df1: pd.DataFrame, df2: pd.DataFrame) -> float:

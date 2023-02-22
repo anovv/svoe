@@ -1,6 +1,6 @@
 import pandas as pd
 import utils.pandas.df_utils as dfu
-from typing import List, Tuple, Dict, Any
+from typing import List, Tuple, Dict, Any, Optional
 
 
 def starts_with_snapshot(df: pd.DataFrame) -> bool:
@@ -48,8 +48,11 @@ def get_snapshots_ranges(df: pd.DataFrame) -> List[Tuple[int, int]]:
     return list(snapshot_ranges_df.itertuples(index=False, name=None))
 
 
-def get_snapshot_ts(df: pd.DataFrame) -> float:
-    return df[df.delta == False].iloc[0].timestamp
+def get_snapshot_ts(df: pd.DataFrame) -> Optional[float]:
+    snaps = df[df.delta==False]
+    if len(snaps) == 0:
+        return None
+    return snaps.iloc[0].timestamp
 
 
 def get_info(df: pd.DataFrame) -> Dict[str, Any]:

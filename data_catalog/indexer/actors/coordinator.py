@@ -6,6 +6,7 @@ from ray.types import ObjectRef
 from ray.util.client import ray
 
 from data_catalog.indexer.actors.queues import DownloadQueue, StoreQueue
+from data_catalog.indexer.actors.stats import Stats
 from data_catalog.indexer.models import InputItem
 from data_catalog.indexer.tasks.tasks import load_df, index_df
 
@@ -15,13 +16,10 @@ class Coordinator:
     # TODO figure out if its ok to use list here (regarding concurrency/race conditions)
     index_queue: List[Tuple[ObjectRef, InputItem]] = []
 
-    def __init__(self, download_queue: DownloadQueue, store_queue: StoreQueue):
+    def __init__(self, stats: Stats, download_queue: DownloadQueue, store_queue: StoreQueue):
+        self.stats = stats
         self.download_queue = download_queue
         self.store_queue = store_queue
-
-    def update_progress(self, info: Dict):
-        # TODO
-        return
 
     def _schedule_downloads(self):
         # TODO add backpressure to Driver program, stop when driver queue is empty
@@ -56,10 +54,10 @@ class Coordinator:
 
                 # TODO batch multiple dfs?
                 df_to_index_ref, input_item = self.index_queue.pop(0)
-                # fire and forget
                 # TODO verify resources are optimal
                 num_cpus = 0.9 # leave 0.1 for scheduling I/O tasks
                 memory_b = input_item['size_kb'] * 20 * 1024 # estimate as x20 of s3 size
+                # fire and forget
                 self.store_queue.put.remote(index_df.options(num_cpus=num_cpus, memory=memory_b).remote(df_to_index_ref, input_item))
 
         self.i_thread = Thread(target=_run_loop)
