@@ -9,7 +9,7 @@ from tornado.ioloop import IOLoop
 
 from data_catalog.indexer.actors.db import DbReader
 from data_catalog.indexer.actors.queues import InputQueue, DownloadQueue
-from data_catalog.indexer.actors.stats import Stats
+from data_catalog.indexer.actors.stats import Stats, DB_READS
 from data_catalog.indexer.indexer import Indexer, WRITE_INDEX_ITEM_BATCH_SIZE
 from data_catalog.indexer.sql.client import MysqlClient
 from data_catalog.indexer.sql.models import add_defaults
@@ -108,11 +108,15 @@ class TestDataCatalogIndexer(unittest.TestCase):
             # should be 0
             print(len(not_exist))
 
-
     def test_bokeh_dashboard(self):
         with ray.init(address='auto'):
             stats = Stats.remote()
-            ray.get(stats.run.remote())
+            stats.run.remote()
+            time.sleep(2)
+            for _ in range(10):
+                ray.get(stats.inc_counter.remote(DB_READS))
+                time.sleep(5)
+            time.sleep(20)
 
 
 if __name__ == '__main__':
