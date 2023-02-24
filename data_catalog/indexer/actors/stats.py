@@ -14,6 +14,8 @@ from ray.types import ObjectRef
 import ray
 
 # for async wait/signaling see last comment https://github.com/ray-project/ray/issues/7229
+# for streaming to Bokeh https://matthewrocklin.com/blog/work/2017/06/28/simple-bokeh-server
+# for threaded updates https://stackoverflow.com/questions/55176868/asynchronous-streaming-to-embedded-bokeh-server
 
 # counter names
 # TODO enum
@@ -31,7 +33,7 @@ TIME = 'time'
 @ray.remote
 class Stats:
     def __init__(self,):
-        self.state = {
+        self.plot_data = [{
             TIME: [time() * 1000],
             DOWNLOAD_TASKS: [1],
             INDEX_TASKS: [2],
@@ -40,20 +42,20 @@ class Stats:
             'store_queue_size': [5],
             DB_READS: [6],
             DB_WRITES: [7]
-        }
-
-    # def wait_and_update_counter(self, ref: ObjectRef, counter_name: str):
-    #     ray.wait([ref])
-    #     self.update_counter(counter_name)
+        }]
+        self.last_data_length = None
 
     def inc_counter(self, counter_name: str):
-        for _counter_name in self.state:
+        new_event = {}
+        last_event = self.plot_data[-1]
+        for _counter_name in last_event:
             if _counter_name == TIME:
-                self.state[TIME].append(time() * 1000)
+                new_event[TIME] = [time() * 1000]
             elif _counter_name == counter_name:
-                self.state[_counter_name].append(self.state[_counter_name][-1] + 1)
+                new_event[_counter_name] = [last_event[_counter_name][0] + 1]
             else:
-                self.state[_counter_name].append(self.state[_counter_name][-1])
+                new_event[_counter_name] = [last_event[_counter_name][0]]
+        self.plot_data.append(new_event)
 
 
     def poll_queues_states(self):
@@ -62,17 +64,10 @@ class Stats:
     def poll_cluster_state(self):
         pass
 
-    # def _update_bokeh(self, source):
-    #     # TODO lock on state ?
-    #     # keep
-    #     data = self.state.copy()
-
-    # TODO this should be on a separate thread
     def run(self):
         def _run_loop():
             # start bokeh server
             apps = {'/': Application(FunctionHandler(functools.partial(self._make_bokeh_doc, update=self._update)))}
-            # apps = {'/': Application(FunctionHandler(make_test_document))}
             loop = tornado.ioloop.IOLoop()
             server = Server(apps, io_loop=loop, port=5001)
             server.start()
@@ -81,31 +76,22 @@ class Stats:
         self.server_thread = Thread(target=_run_loop)
         self.server_thread.start()
 
-    # TODO this is buggy, fix this
-    def _update(self, source, last_update_index_state):
-        last_index = len(self.state[TIME]) - 1
-        if last_index > last_update_index_state[0]:
-            # stream diff
-            diff = {k: v[last_update_index_state[0]:last_index] for k, v in self.state.items()}
-            source.stream(diff)
-            last_update_index_state[0] = last_index
-            print(f'Diff len: {len(diff[TIME])}')
+    # https://blog.bokeh.org/programmatic-bokeh-servers-9c8b0ea5d790
+    def _update(self, source):
+        if self.last_data_length is not None and self.last_data_length != len(self.plot_data):
+            diff = len(self.plot_data) - self.last_data_length
+            for i in range(diff):
+                source.stream(self.plot_data[-(diff - i)])
+        self.last_data_length = len(self.plot_data)
 
     def _make_bokeh_doc(self, doc, update):
-        source = ColumnDataSource(self.state)
+        source = ColumnDataSource(self.plot_data[0])
         x_range = DataRange1d(follow='end', follow_interval=20000, range_padding=0)
         fig = figure(
             title="Data",
             x_axis_type='datetime',
             tools='',
-            # height=150,
-            x_range=x_range,
-            y_range=[-0.1, 20 + 0.1]) # TODO 100
-
-        # indicates last pushed data, with each sequent update we only stream new data
-        last_update_index_state = [len(self.state[TIME]) - 1]
-
-        doc.add_periodic_callback(functools.partial(update, source=source, last_update_index_state=last_update_index_state), 100)
+            x_range=x_range)
 
         fig.line(source=source, x=TIME, y=DOWNLOAD_TASKS, color='red')
         fig.line(source=source, x=TIME, y=INDEX_TASKS, color='green')
@@ -120,4 +106,5 @@ class Stats:
         )
         doc.title = "Indexer State"
         doc.add_root(fig)
+        doc.add_periodic_callback(functools.partial(update, source=source), 100)
 

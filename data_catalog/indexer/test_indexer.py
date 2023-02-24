@@ -113,9 +113,9 @@ class TestDataCatalogIndexer(unittest.TestCase):
             stats = Stats.remote()
             stats.run.remote()
             time.sleep(2)
-            for _ in range(10):
+            for _ in range(500):
                 ray.get(stats.inc_counter.remote(DB_READS))
-                time.sleep(5)
+                time.sleep(0.1)
             time.sleep(20)
 
 
