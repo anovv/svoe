@@ -32,16 +32,16 @@ TIME = 'time'
 
 @ray.remote
 class Stats:
-    def __init__(self,):
+    def __init__(self):
         self.plot_data = [{
             TIME: [time() * 1000],
-            DOWNLOAD_TASKS: [1],
-            INDEX_TASKS: [2],
-            'download_queue_size': [3],
-            'index_queue_size': [4],
-            'store_queue_size': [5],
-            DB_READS: [6],
-            DB_WRITES: [7]
+            DOWNLOAD_TASKS: [0],
+            INDEX_TASKS: [0],
+            'download_queue_size': [0],
+            'index_queue_size': [0],
+            'store_queue_size': [0],
+            DB_READS: [0],
+            DB_WRITES: [0]
         }]
         self.last_data_length = None
 

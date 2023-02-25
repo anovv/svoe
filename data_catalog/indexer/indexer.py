@@ -2,9 +2,10 @@ import time
 
 import ray
 
-from data_catalog.indexer.actors.coordinator import Coordinator
-from data_catalog.indexer.actors.db import DbReader, DbWriter
-from data_catalog.indexer.actors.queues import DownloadQueue, StoreQueue, InputQueue
+# from data_catalog.indexer.actors.coordinator import Coordinator
+# from data_catalog.indexer.actors.db import DbReader, DbWriter, DbActor
+# from data_catalog.indexer.actors.queues import DownloadQueue, StoreQueue, InputQueue
+from data_catalog.indexer.actors.db import DbActor
 
 # for pipelined queue https://docs.ray.io/en/latest/ray-core/patterns/pipelining.html
 # for backpressure https://docs.ray.io/en/latest/ray-core/patterns/limit-pending-tasks.html
@@ -16,6 +17,7 @@ from data_catalog.indexer.actors.queues import DownloadQueue, StoreQueue, InputQ
 
 # implement workflows (for checkpointing/persistence):
 # https://docs.ray.io/en/latest/workflows/key-concepts.html
+from data_catalog.indexer.actors.scheduler import Scheduler
 from data_catalog.indexer.actors.stats import Stats
 from data_catalog.indexer.models import InputItemBatch
 
@@ -24,40 +26,46 @@ WRITE_INDEX_ITEM_BATCH_SIZE = 20
 
 
 class Indexer:
-    input_queue: InputQueue
-    download_queue: DownloadQueue
-    store_queue: StoreQueue
-    coordintator: Coordinator
+    # input_queue: InputQueue
+    # download_queue: DownloadQueue
+    # store_queue: StoreQueue
+    # coordintator: Coordinator
     stats: Stats
+    db_actor: DbActor
+    scheduler: Scheduler
 
-    def run(self, num_db_readers: int = 1, num_db_writers: int = 1):
-
-        # init stats
+    def run(self):
+        # run stats
         self.stats = Stats.remote()
         self.stats.run.remote()
 
-        # time.sleep(120)
+        # db actor
+        self.db_actor = DbActor.remote()
 
-        # init queue actors
-        self.input_queue = InputQueue.remote()
-        self.download_queue = DownloadQueue.remote()
-        self.store_queue = StoreQueue.remote(WRITE_INDEX_ITEM_BATCH_SIZE)
+        # run scheduler
+        self.scheduler = Scheduler.remote(self.stats, self.db_actor)
+        self.scheduler.run.remote()
 
-        # init coordinator
-        self.coordintator = Coordinator.remote(self.stats, self.download_queue, self.store_queue)
-
-        # init db actors
-        db_readers = [DbReader.remote(self.stats, self.input_queue, self.download_queue) for _ in range(num_db_readers)]
-        for r in db_readers:
-            r.run.remote()
-        db_writers = [DbWriter.remote(self.stats, self.store_queue) for _ in range(num_db_writers)]
-        for w in db_writers:
-            w.run.remote()
-        self.coordintator.run.remote()
+        # # init queue actors
+        # self.input_queue = InputQueue.remote()
+        # self.download_queue = DownloadQueue.remote()
+        # self.store_queue = StoreQueue.remote(WRITE_INDEX_ITEM_BATCH_SIZE)
+        #
+        # # init coordinator
+        # self.coordintator = Coordinator.remote(self.stats, self.download_queue, self.store_queue)
+        #
+        # # init db actors
+        # db_readers = [DbReader.remote(self.stats, self.input_queue, self.download_queue) for _ in range(num_db_readers)]
+        # for r in db_readers:
+        #     r.run.remote()
+        # db_writers = [DbWriter.remote(self.stats, self.store_queue) for _ in range(num_db_writers)]
+        # for w in db_writers:
+        #     w.run.remote()
+        # self.coordintator.run.remote()
 
     def pipe_input(self, input_batch: InputItemBatch):
         # TODO do we need ray.get here?
-        ray.get(self.input_queue.put.remote(input_batch))
+        ray.get(self.scheduler.pipe_input.remote(input_batch))
 
     # TODO add throughput limit, backpressure
     # for input_batch in generate_input_items(INPUT_ITEM_BATCH_SIZE):
