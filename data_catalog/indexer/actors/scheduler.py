@@ -7,7 +7,7 @@ from ray.util.client import ray
 from data_catalog.indexer.actors.db import DbActor, check_exists, write_batch
 from data_catalog.indexer.actors.stats import Stats
 from data_catalog.indexer.models import InputItemBatch
-from data_catalog.indexer.tasks.tasks import load_df, index_df, gather
+from data_catalog.indexer.tasks.tasks import load_df, index_df, gather_and_wait
 
 # how many input batches one db actor can read in one db connection
 DB_READ_BATCH_SIZE_IN_INPUT = 2
@@ -64,7 +64,7 @@ class Scheduler:
             for download_task, input_item in download_tasks:
                 index_tasks.append(index_df.bind(download_task, input_item, self.stats))
 
-            gathered = gather.bind(index_tasks)
+            gathered = gather_and_wait.bind(index_tasks)
             dag = write_batch.bind(self.db_actor, gathered)
 
             # schedule execution

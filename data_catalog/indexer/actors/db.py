@@ -34,6 +34,7 @@ def check_exists(db_actor: DbActor, input_batch) -> List[InputItem]:
 @ray.remote
 def write_batch(db_actor: DbActor, batch: IndexItemBatch) -> Dict:
     print('Writing batch...')
+    print(batch)
     res = ray.get(db_actor._write_batch.remote(batch))
     print('Written batch to DB')
     return res

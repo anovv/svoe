@@ -13,8 +13,9 @@ from utils.s3 import s3_utils
 
 
 @ray.remote
-def gather(*args):
-    return args
+def gather_and_wait(args):
+    return ray.get(args)
+
 
 # TODO set CPU=0, or add parallelism resource, set memory and object_store_memory
 @ray.remote

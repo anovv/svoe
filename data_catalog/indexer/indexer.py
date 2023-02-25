@@ -26,10 +26,6 @@ WRITE_INDEX_ITEM_BATCH_SIZE = 20
 
 
 class Indexer:
-    # input_queue: InputQueue
-    # download_queue: DownloadQueue
-    # store_queue: StoreQueue
-    # coordintator: Coordinator
     stats: Stats
     db_actor: DbActor
     scheduler: Scheduler
@@ -39,6 +35,7 @@ class Indexer:
         self.stats = Stats.remote()
         self.stats.run.remote()
 
+        # TODO make this an actor pool
         # db actor
         self.db_actor = DbActor.remote()
 
@@ -46,29 +43,8 @@ class Indexer:
         self.scheduler = Scheduler.remote(self.stats, self.db_actor)
         self.scheduler.run.remote()
 
-        # # init queue actors
-        # self.input_queue = InputQueue.remote()
-        # self.download_queue = DownloadQueue.remote()
-        # self.store_queue = StoreQueue.remote(WRITE_INDEX_ITEM_BATCH_SIZE)
-        #
-        # # init coordinator
-        # self.coordintator = Coordinator.remote(self.stats, self.download_queue, self.store_queue)
-        #
-        # # init db actors
-        # db_readers = [DbReader.remote(self.stats, self.input_queue, self.download_queue) for _ in range(num_db_readers)]
-        # for r in db_readers:
-        #     r.run.remote()
-        # db_writers = [DbWriter.remote(self.stats, self.store_queue) for _ in range(num_db_writers)]
-        # for w in db_writers:
-        #     w.run.remote()
-        # self.coordintator.run.remote()
-
     def pipe_input(self, input_batch: InputItemBatch):
         # TODO do we need ray.get here?
         ray.get(self.scheduler.pipe_input.remote(input_batch))
 
-    # TODO add throughput limit, backpressure
-    # for input_batch in generate_input_items(INPUT_ITEM_BATCH_SIZE):
-    # for _ in range(2):
-    #     input_batch = next(generate_input_items(INPUT_ITEM_BATCH_SIZE))
 
