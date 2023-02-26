@@ -1,6 +1,6 @@
-from typing import Dict, List
+from typing import Dict, List, Tuple
 
 InputItem = Dict
-InputItemBatch = List[InputItem]
+InputItemBatch = Tuple[Dict, List[InputItem]] # metadata dict + items
 IndexItem = Dict
-IndexItemBatch = List[IndexItem]
+IndexItemBatch = Tuple[Dict, List[IndexItem]]

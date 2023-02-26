@@ -12,6 +12,7 @@ from utils.pandas import df_utils
 from utils.s3 import s3_utils
 
 
+# TODO set resources
 @ray.remote
 def gather_and_wait(args):
     return ray.get(args)
@@ -20,6 +21,7 @@ def gather_and_wait(args):
 # TODO set CPU=0, or add parallelism resource, set memory and object_store_memory
 @ray.remote
 def load_df(input_item: InputItem, stats: Stats) -> pd.DataFrame:
+    print(input_item)
     path = input_item['path']
     print(f'Loading {path}...')
     df = s3_utils.load_df(path)

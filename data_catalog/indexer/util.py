@@ -8,7 +8,8 @@ S3_BUCKET = 'svoe.test.1'
 
 
 def generate_input_items(batch_size: int) -> Generator[InputItemBatch, None, None]:
-    batch = []
+    meta = {'batch_id': 0}
+    items = []
     for inv_df in inventory():
         for row in inv_df.itertuples():
             d_row = row._asdict()
@@ -18,14 +19,16 @@ def generate_input_items(batch_size: int) -> Generator[InputItemBatch, None, Non
 
             # TODO sync keys with DataCatalog sql model
             input_item['size_kb'] = size_kb
-            batch.append(input_item)
-            if len(batch) == batch_size:
-                yield batch
-                batch = []
+            items.append(input_item)
+            if len(items) == batch_size:
+                yield meta, items
+                items = []
+                meta['batch_id'] += 1
 
-    if len(batch) != 0:
+    if len(items) != 0:
         # TODO indicate last batch
-        yield batch
+        meta['is_last'] = True
+        yield meta, items
 
 
 def parse_s3_key(key: str) -> Optional[Dict]:

@@ -62,14 +62,16 @@ class MysqlClient:
         print(f'Written {len(batch)} index items to Db')
         return # TODO return result?
 
-    def check_exists(self, batch: InputItemBatch) -> List[InputItem]:
+    def filter_batch(self, batch: InputItemBatch) -> InputItemBatch:
         # use path as a unique id per block
-        paths = [item['path'] for item in batch]
+        items = batch[1]
+        meta = batch[0]
+        paths = [item['path'] for item in items]
         query_in = DataCatalog.path.in_(paths)
         session = Session()
         select_in_db = session.query(DataCatalog.path).filter(query_in)
         res = [r[0] for r in select_in_db.all()]
-        non_exist = list(filter(lambda item: item['path'] not in res, batch))
+        non_exist = list(filter(lambda item: item['path'] not in res, items))
         print(f'Checked db for items: {len(non_exist)} not in DB')
-        return non_exist
+        return meta, non_exist
 

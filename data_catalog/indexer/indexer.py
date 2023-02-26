@@ -1,5 +1,3 @@
-import time
-
 import ray
 
 # from data_catalog.indexer.actors.coordinator import Coordinator
@@ -21,9 +19,6 @@ from data_catalog.indexer.actors.scheduler import Scheduler
 from data_catalog.indexer.actors.stats import Stats
 from data_catalog.indexer.models import InputItemBatch
 
-INPUT_ITEM_BATCH_SIZE = 2
-WRITE_INDEX_ITEM_BATCH_SIZE = 20
-
 
 class Indexer:
     stats: Stats
@@ -31,6 +26,12 @@ class Indexer:
     scheduler: Scheduler
 
     def run(self):
+        # TODO init throughput
+        #  workflow.init(max_running_workflows=10, max_pending_workflows=50)
+
+        # TODO for workflow stats (per task) - workflow metadata
+        # https://docs.ray.io/en/latest/workflows/metadata.html
+
         # run stats
         self.stats = Stats.remote()
         self.stats.run.remote()
