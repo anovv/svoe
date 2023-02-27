@@ -7,7 +7,7 @@ from ray.util.client import ray
 from ray.workflow import WorkflowStatus
 
 from data_catalog.indexer.actors.db import DbActor, filter_existing, write_batch
-from data_catalog.indexer.actors.stats import Stats
+from data_catalog.indexer.actors.stats import Stats, DOWNLOAD_TASKS_SCHEDULED, INDEX_TASKS_SCHEDULED
 from data_catalog.indexer.models import InputItemBatch
 from data_catalog.indexer.tasks.tasks import load_df, index_df, gather_and_wait
 
@@ -89,6 +89,8 @@ class Scheduler:
             # schedule execution
             # TODO figure out what to do with write_status
             write_status = await workflow.run_async(dag, workflow_id=workflow_id)
+            self.stats.inc_counter.remote(DOWNLOAD_TASKS_SCHEDULED, len(download_task_ids))
+            self.stats.inc_counter.remote(INDEX_TASKS_SCHEDULED, len(index_task_ids))
             # TODO add cleanup coroutine for self.workflow_task_ids when finished
 
     async def stop(self):

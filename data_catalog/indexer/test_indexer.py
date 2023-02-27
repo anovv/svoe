@@ -1,19 +1,16 @@
 import itertools
-import os
 import time
 import unittest
 
-import tornado
 from ray.util.client import ray
-from tornado.ioloop import IOLoop
 
-from data_catalog.indexer.actors.stats import Stats, DB_READS
+from data_catalog.indexer.actors.stats import Stats
 from data_catalog.indexer.indexer import Indexer
 from data_catalog.indexer.sql.client import MysqlClient
 from data_catalog.indexer.sql.models import add_defaults
 from data_catalog.indexer.tasks.tasks import _index_df
 from data_catalog.indexer.util import generate_input_items
-from utils.pandas.df_utils import load_dfs, time_range
+from utils.pandas.df_utils import load_dfs
 
 
 class TestDataCatalogIndexer(unittest.TestCase):
@@ -84,7 +81,7 @@ class TestDataCatalogIndexer(unittest.TestCase):
             stats.run.remote()
             time.sleep(2)
             for _ in range(500):
-                ray.get(stats.inc_counter.remote(DB_READS))
+                ray.get(stats.inc_counter.remote(FILTER_BATCH))
                 time.sleep(0.1)
             time.sleep(20)
 

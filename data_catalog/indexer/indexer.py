@@ -19,6 +19,9 @@ from data_catalog.indexer.actors.scheduler import Scheduler
 from data_catalog.indexer.actors.stats import Stats
 from data_catalog.indexer.models import InputItemBatch
 
+# TODO workflow exception handling
+#  example exceptions
+#  download_task: botocore.exceptions.ReadTimeoutError: Read timeout on endpoint URL: "None"
 
 class Indexer:
     stats: Stats
@@ -45,7 +48,7 @@ class Indexer:
         self.scheduler.run.remote()
 
     def pipe_input(self, input_batch: InputItemBatch):
-        # TODO do we need ray.get here?
+        # TODO make it async? do we need ray.get here?
         ray.get(self.scheduler.pipe_input.remote(input_batch))
 
 

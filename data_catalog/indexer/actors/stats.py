@@ -9,6 +9,7 @@ from bokeh.application.handlers import FunctionHandler
 from bokeh.server.server import Server
 from bokeh.models import ColumnDataSource, DataRange1d, ResetTool, PanTool, WheelZoomTool
 from bokeh.plotting import figure
+from bokeh.layouts import row
 from ray.types import ObjectRef
 
 import ray
@@ -21,45 +22,48 @@ import ray
 # TODO enum
 from tornado.ioloop import IOLoop
 
-DOWNLOAD_TASKS = 'download_tasks'
-INDEX_TASKS = 'index_tasks'
-DB_READS = 'db_reads'
-DB_WRITES = 'db_writes'
 
-# consts
 TIME = 'time'
+
+DOWNLOAD_TASKS_SCHEDULED = 'download_tasks_scheduled'
+DOWNLOAD_TASKS_STARTED = 'download_tasks_finished'
+DOWNLOAD_TASKS_FINISHED = 'download_tasks_finished'
+INDEX_TASKS_SCHEDULED = 'index_tasks_scheduled'
+INDEX_TASKS_STARTED = 'index_tasks_started'
+INDEX_TASKS_FINISHED = 'index_tasks_finished'
+
+FILTER_BATCH = 'db_reads'
+WRITE_DB = 'db_writes'
 
 
 @ray.remote
 class Stats:
     def __init__(self):
-        self.plot_data = [{
+        self.tasks_plot_data = [{
             TIME: [time() * 1000],
-            DOWNLOAD_TASKS: [0],
-            INDEX_TASKS: [0],
-            'download_queue_size': [0],
-            'index_queue_size': [0],
-            'store_queue_size': [0],
-            DB_READS: [0],
-            DB_WRITES: [0]
+            DOWNLOAD_TASKS_SCHEDULED: [0],
+            DOWNLOAD_TASKS_STARTED: [0],
+            DOWNLOAD_TASKS_FINISHED: [0],
+            INDEX_TASKS_SCHEDULED: [0],
+            INDEX_TASKS_STARTED: [0],
+            INDEX_TASKS_FINISHED: [0],
+            FILTER_BATCH: [0],
+            WRITE_DB: [0]
         }]
         self.last_data_length = None
 
-    def inc_counter(self, counter_name: str):
+    def inc_counter(self, counter_name: str, increment: int = 1):
         new_event = {}
-        last_event = self.plot_data[-1]
+        last_event = self.tasks_plot_data[-1]
         for _counter_name in last_event:
             if _counter_name == TIME:
                 new_event[TIME] = [time() * 1000]
             elif _counter_name == counter_name:
-                new_event[_counter_name] = [last_event[_counter_name][0] + 1]
+                new_event[_counter_name] = [last_event[_counter_name][0] + increment]
             else:
                 new_event[_counter_name] = [last_event[_counter_name][0]]
-        self.plot_data.append(new_event)
+        self.tasks_plot_data.append(new_event)
 
-
-    def poll_queues_states(self):
-        pass
 
     def poll_cluster_state(self):
         pass
@@ -78,25 +82,27 @@ class Stats:
 
     # https://blog.bokeh.org/programmatic-bokeh-servers-9c8b0ea5d790
     def _update(self, source):
-        if self.last_data_length is not None and self.last_data_length != len(self.plot_data):
-            diff = len(self.plot_data) - self.last_data_length
+        if self.last_data_length is not None and self.last_data_length != len(self.tasks_plot_data):
+            diff = len(self.tasks_plot_data) - self.last_data_length
             for i in range(diff):
-                source.stream(self.plot_data[-(diff - i)])
-        self.last_data_length = len(self.plot_data)
+                source.stream(self.tasks_plot_data[-(diff - i)])
+        self.last_data_length = len(self.tasks_plot_data)
 
     def _make_bokeh_doc(self, doc, update):
-        source = ColumnDataSource(self.plot_data[0])
-        x_range = DataRange1d(follow='end', follow_interval=20000, range_padding=0)
-        fig = figure(
-            title="Data",
-            x_axis_type='datetime',
-            tools='',
-            x_range=x_range)
+        source = ColumnDataSource(self.tasks_plot_data[0])
+        # x_range = DataRange1d(follow='end', follow_interval=20000, range_padding=0)
+        fig = figure(title="Tasks", x_axis_type='datetime', tools='')
 
-        fig.line(source=source, x=TIME, y=DOWNLOAD_TASKS, color='red')
-        fig.line(source=source, x=TIME, y=INDEX_TASKS, color='green')
-        fig.line(source=source, x=TIME, y=DB_READS, color='blue')
-        fig.line(source=source, x=TIME, y=DB_WRITES, color='yellow')
+        fig.line(source=source, x=TIME, y=DOWNLOAD_TASKS_SCHEDULED, color='red', legend_label='Download Tasks Scheduled', line_dash='dotted')
+        fig.line(source=source, x=TIME, y=DOWNLOAD_TASKS_STARTED, color='red', legend_label='Download Tasks Started', line_dash='dashed')
+        fig.line(source=source, x=TIME, y=DOWNLOAD_TASKS_FINISHED, color='red', legend_label='Download Tasks Finished', line_dash='solid')
+
+        fig.line(source=source, x=TIME, y=INDEX_TASKS_SCHEDULED, color='green', legend_label='Index Tasks Scheduled', line_dash='dotted')
+        fig.line(source=source, x=TIME, y=INDEX_TASKS_STARTED, color='green', legend_label='Index Tasks Started', line_dash='dashed')
+        fig.line(source=source, x=TIME, y=INDEX_TASKS_FINISHED, color='green', legend_label='Index Tasks Finished', line_dash='solid')
+
+        fig.line(source=source, x=TIME, y=FILTER_BATCH, color='blue', legend_label='Filter Batch Tasks')
+        fig.line(source=source, x=TIME, y=WRITE_DB, color='yellow', legend_label='Write DB Tasks')
         fig.yaxis.minor_tick_line_color = None
 
         fig.add_tools(
@@ -104,6 +110,9 @@ class Stats:
             PanTool(dimensions="width"),
             WheelZoomTool(dimensions="width")
         )
+
+        # p = row([fig])
+
         doc.title = "Indexer State"
         doc.add_root(fig)
         doc.add_periodic_callback(functools.partial(update, source=source), 100)
