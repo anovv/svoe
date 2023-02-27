@@ -59,7 +59,7 @@ class Scheduler:
             self.workflow_task_ids[workflow_id]['filter_task_id'] = filter_task_id
 
             # construct DAG
-            _, filtered_items = workflow.continuation(filter_existing.options(**workflow.options(task_id=filter_task_id)).bind(self.db_actor, input_batch))
+            _, filtered_items = workflow.continuation(filter_existing.options(**workflow.options(task_id=filter_task_id), num_cpus=0.01).bind(self.db_actor, input_batch, self.stats))
 
             download_task_ids = []
             index_task_ids = []
@@ -73,8 +73,8 @@ class Scheduler:
                 index_task_id = f'{workflow_id}_index_task_{i}'
                 index_task_ids.append(index_task_id)
 
-                download_task = load_df.options(**workflow.options(task_id=download_task_id)).bind(item, self.stats)
-                index_task = index_df.options(**workflow.options(task_id=index_task_id)).bind(download_task, item, self.stats)
+                download_task = load_df.options(**workflow.options(task_id=download_task_id), num_cpus=0.001).bind(item, self.stats)
+                index_task = index_df.options(**workflow.options(task_id=index_task_id), num_cpus=0.01).bind(download_task, item, self.stats)
                 index_tasks.append(index_task)
 
             self.workflow_task_ids[workflow_id]['download_task_ids'] = download_task_ids
@@ -84,13 +84,14 @@ class Scheduler:
 
             write_task_id = f'{workflow_id}_write_batch_task'
 
-            dag = write_batch.options(**workflow.options(task_id=write_task_id)).bind(self.db_actor, gathered_index_items)
+            dag = write_batch.options(**workflow.options(task_id=write_task_id), num_cpus=0.01).bind(self.db_actor, gathered_index_items, self.stats)
 
             # schedule execution
-            # TODO figure out what to do with write_status
-            write_status = await workflow.run_async(dag, workflow_id=workflow_id)
+            # TODO is there a workflow callback for scheduled event?
             self.stats.inc_counter.remote(DOWNLOAD_TASKS_SCHEDULED, len(download_task_ids))
             self.stats.inc_counter.remote(INDEX_TASKS_SCHEDULED, len(index_task_ids))
+            # TODO figure out what to do with write_status
+            write_status_ref = workflow.run_async(dag, workflow_id=workflow_id)
             # TODO add cleanup coroutine for self.workflow_task_ids when finished
 
     async def stop(self):

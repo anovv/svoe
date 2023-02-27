@@ -26,7 +26,7 @@ from tornado.ioloop import IOLoop
 TIME = 'time'
 
 DOWNLOAD_TASKS_SCHEDULED = 'download_tasks_scheduled'
-DOWNLOAD_TASKS_STARTED = 'download_tasks_finished'
+DOWNLOAD_TASKS_STARTED = 'download_tasks_started'
 DOWNLOAD_TASKS_FINISHED = 'download_tasks_finished'
 INDEX_TASKS_SCHEDULED = 'index_tasks_scheduled'
 INDEX_TASKS_STARTED = 'index_tasks_started'
@@ -111,7 +111,8 @@ class Stats:
             WheelZoomTool(dimensions="width")
         )
 
-        # p = row([fig])
+        fig.legend.location = 'top_left'
+        fig.legend.label_text_font_size = '6pt'
 
         doc.title = "Indexer State"
         doc.add_root(fig)

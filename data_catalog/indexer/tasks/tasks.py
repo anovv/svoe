@@ -24,9 +24,9 @@ def load_df(input_item: InputItem, stats: Stats) -> pd.DataFrame:
     stats.inc_counter.remote(DOWNLOAD_TASKS_STARTED)
     print(input_item)
     path = input_item['path']
-    print(f'Loading {path}...')
+    # print(f'Loading {path}...')
     df = s3_utils.load_df(path)
-    print(f'Loaded {path}')
+    # print(f'Loaded {path}')
     stats.inc_counter.remote(DOWNLOAD_TASKS_FINISHED)
     return df
 
@@ -43,7 +43,7 @@ def index_df(df: pd.DataFrame, input_item: InputItem, stats: Stats) -> IndexItem
 # debug IndexError: single positional indexer is out-of-bounds in l2_utils.get_snapshot_ts(df)
 def _index_df(df: pd.DataFrame, input_item: InputItem) -> IndexItem:
     path = input_item['path']
-    print(f'Indexing {path}...')
+    # print(f'Indexing {path}...')
     index_item = input_item.copy()
     _time_range = df_utils.time_range(df)
 
@@ -62,6 +62,6 @@ def _index_df(df: pd.DataFrame, input_item: InputItem) -> IndexItem:
             }
             index_item['meta'] = json.dumps(meta)
 
-    print(f'Indexed {path}...')
+    # print(f'Indexed {path}...')
 
     return index_item
