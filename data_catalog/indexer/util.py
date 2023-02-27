@@ -26,8 +26,6 @@ def generate_input_items(batch_size: int) -> Generator[InputItemBatch, None, Non
                 meta['batch_id'] += 1
 
     if len(items) != 0:
-        # TODO indicate last batch
-        meta['is_last'] = True
         yield meta, items
 
 
