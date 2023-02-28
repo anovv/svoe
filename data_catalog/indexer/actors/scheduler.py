@@ -11,7 +11,13 @@ from data_catalog.indexer.actors.stats import Stats, DOWNLOAD_TASKS_SCHEDULED, I
 from data_catalog.indexer.models import InputItemBatch
 from data_catalog.indexer.tasks.tasks import load_df, index_df, gather_and_wait
 
+# TODO sync this with stats?
+DOWNLOAD_TASK_TYPE = 'DOWNLOAD_TASK_TYPE'
+INDEX_TASK_TYPE = 'INDEX_TASK_TYPE'
+FILTER_TASK_TYPE = 'FILTER_TASK_TYPE'
+WRITE_DB_TASK_TYPE = 'WRITE_DB_TASK_TYPE'
 
+# TODO use uvloop
 @ray.remote
 class Scheduler:
 
@@ -23,6 +29,14 @@ class Scheduler:
         self.stats = stats
         self.db_actor = db_actor
         self.workflow_task_ids = {} # maps workflow ids to task ids
+
+        # stats collection
+        self.windowed_task_latencies = {
+            DOWNLOAD_TASK_TYPE: [],
+            INDEX_TASK_TYPE: [],
+            FILTER_TASK_TYPE: [],
+            WRITE_DB_TASK_TYPE: []
+        }
 
     async def pipe_input(self, input_item_batch: InputItemBatch):
         await self.read_queue.put(input_item_batch)
@@ -38,10 +52,29 @@ class Scheduler:
     async def stats_loop(self):
         while self.is_running:
             metadata = []
-            for workflow_id, workflow_status in self._list_workflows_for_current_run():
-                metadata.append(workflow.get_metadata(workflow_id))
-            # print(metadata)
-            await asyncio.sleep(1)
+            # TODO for a large number of tasks this may eat up cpu/mem
+            # TODO we should filter running workflows and check only them
+            for workflow_id, task_ids in self.workflow_task_ids:
+                for task_id in task_ids:
+                    task_type = self._get_task_type(task_id)
+                    meta = workflow.get_metadata(workflow_id, task_id)
+                    if 'end_time' in meta:
+                        # push to windowed queue
+                        self.windowed_task_latencies[task_type].append({
+                            'start_time': meta['start_time'],
+                            'end_time': meta['end_time'],
+                            'latency': meta['end_time'] - meta['start_time']
+                        })
+                        # pop last if window is above thresh
+                        if len(self.windowed_task_latencies[task_type]) > 1:
+                            # TODO const window size
+                            if self.windowed_task_latencies[task_type][-1]['end_time'] - self.windowed_task_latencies[task_type][0]['end_time'] > 60:
+                                self.windowed_task_latencies[task_type].pop(0)
+
+            # report averaged latencies to stats actor
+            latencies = {task}
+
+            await asyncio.sleep(0.1)
 
     async def scheduler_loop(self):
         while self.is_running:
@@ -55,8 +88,8 @@ class Scheduler:
                 raise ValueError(f'Duplicate workflow scheduled: {workflow_id}')
             self.workflow_task_ids[workflow_id] = {}
 
-            filter_task_id = f'{workflow_id}_filter_batch_task'
-            self.workflow_task_ids[workflow_id]['filter_task_id'] = filter_task_id
+            filter_task_id = f'{workflow_id}_{FILTER_TASK_TYPE}'
+            self.workflow_task_ids[workflow_id][FILTER_TASK_TYPE] = filter_task_id
 
             # construct DAG
             _, filtered_items = workflow.continuation(filter_existing.options(**workflow.options(task_id=filter_task_id), num_cpus=0.01).bind(self.db_actor, input_batch, self.stats))
@@ -67,22 +100,22 @@ class Scheduler:
 
             for i in range(len(filtered_items)):
                 item = filtered_items[i]
-                download_task_id = f'{workflow_id}_download_task_{i}'
+                download_task_id = f'{workflow_id}_{DOWNLOAD_TASK_TYPE}_{i}'
                 download_task_ids.append(download_task_id)
 
-                index_task_id = f'{workflow_id}_index_task_{i}'
+                index_task_id = f'{workflow_id}_{INDEX_TASK_TYPE}_{i}'
                 index_task_ids.append(index_task_id)
 
                 download_task = load_df.options(**workflow.options(task_id=download_task_id), num_cpus=0.001).bind(item, self.stats)
                 index_task = index_df.options(**workflow.options(task_id=index_task_id), num_cpus=0.01).bind(download_task, item, self.stats)
                 index_tasks.append(index_task)
 
-            self.workflow_task_ids[workflow_id]['download_task_ids'] = download_task_ids
-            self.workflow_task_ids[workflow_id]['index_task_ids'] = index_task_ids
+            self.workflow_task_ids[workflow_id][DOWNLOAD_TASK_TYPE] = download_task_ids
+            self.workflow_task_ids[workflow_id][INDEX_TASK_TYPE] = index_task_ids
 
             gathered_index_items = gather_and_wait.bind(index_tasks)
 
-            write_task_id = f'{workflow_id}_write_batch_task'
+            write_task_id = f'{workflow_id}_{WRITE_DB_TASK_TYPE}'
 
             dag = write_batch.options(**workflow.options(task_id=write_task_id), num_cpus=0.01).bind(self.db_actor, gathered_index_items, self.stats)
 
@@ -129,6 +162,18 @@ class Scheduler:
         # filter only for current run id
         # return list(filter(lambda wf: self.run_id in wf[0], to_wait))
         return all
+
+    def _get_task_type(self, task_id: str) -> str:
+        task_type = None
+        if DOWNLOAD_TASK_TYPE in task_id:
+            return DOWNLOAD_TASK_TYPE
+        if INDEX_TASK_TYPE in task_id:
+            return INDEX_TASK_TYPE
+        if FILTER_TASK_TYPE in task_id:
+            return FILTER_TASK_TYPE
+        if WRITE_DB_TASK_TYPE in task_id:
+            return WRITE_DB_TASK_TYPE
+        raise ValueError(f'Unknown task_type for {task_id}')
 
 
 

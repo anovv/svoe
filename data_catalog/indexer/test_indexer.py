@@ -50,7 +50,7 @@ class TestDataCatalogIndexer(unittest.TestCase):
 
     def test_indexer(self):
         with ray.init(address='auto'):
-            batch_size = 100
+            batch_size = 20
             num_batches = 2
             indexer = Indexer()
             indexer.run()
@@ -81,7 +81,7 @@ class TestDataCatalogIndexer(unittest.TestCase):
             stats.run.remote()
             time.sleep(2)
             for _ in range(500):
-                ray.get(stats.inc_counter.remote(FILTER_BATCH))
+                ray.get(stats.inc_task_events_counter.remote(FILTER_BATCH))
                 time.sleep(0.1)
             time.sleep(20)
 
