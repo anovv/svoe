@@ -1,5 +1,6 @@
 import copy
 import functools
+import math
 from threading import Thread
 from time import time, sleep
 from typing import Dict, List, Callable, Tuple, Optional, Union
@@ -10,7 +11,7 @@ from bokeh.application.handlers import FunctionHandler
 from bokeh.server.server import Server
 from bokeh.models import ColumnDataSource, DataRange1d, ResetTool, PanTool, WheelZoomTool
 from bokeh.plotting import figure
-from bokeh.layouts import row
+from bokeh.layouts import row, column
 from ray.types import ObjectRef
 
 import ray
@@ -102,6 +103,8 @@ def _make_task_latencies_graph_data() -> GraphData:
 def _make_task_latencies_graph_figure(source):
     fig = figure(title="Normalized Tasks Latencies (seconds per kb per task)", x_axis_type='datetime', tools='')
 
+    # TODO for running ranges
+    # x_range = DataRange1d(follow='end', follow_interval=20000, range_padding=0)
     for name in [DOWNLOAD_TASK_TYPE, INDEX_TASK_TYPE, FILTER_TASK_TYPE, WRITE_DB_TASK_TYPE]:
         color = None
         if 'DOWNLOAD' in name:
@@ -131,6 +134,39 @@ def _make_task_latencies_graph_figure(source):
     return fig
 
 
+GRAPH_NAME_DOWNLOAD_THROUGHPUT_MB = 'GRAPH_NAME_DOWNLOAD_THROUGHPUT_MB'
+DOWNLOAD_THROUGHPUT_MB = 'DOWNLOAD_THROUGHPUT_MB'
+GRAPH_NAME_DOWNLOAD_THROUGHPUT_NUM_FILES = 'GRAPH_NAME_DOWNLOAD_THROUGHPUT_NUM_FILES'
+DOWNLOAD_THROUGHPUT_NUM_FILES = 'DOWNLOAD_THROUGHPUT_NUM_FILES'
+
+
+def _make_throughput_graph_data(use_num_files: bool) -> GraphData:
+    return [[{
+        TIME: [time() * 1000],
+        DOWNLOAD_THROUGHPUT_NUM_FILES if use_num_files else DOWNLOAD_THROUGHPUT_MB: [0],
+    }], None]
+
+
+def _make_throughput_graph_figure(source, use_num_files: bool):
+    title1 = 'Download Throughput (Mb/s)'
+    title2 = 'Download Throughput (Files/s)'
+    fig = figure(title=title2 if use_num_files else title1, x_axis_type='datetime', tools='')
+
+    # TODO for running ranges
+    # x_range = DataRange1d(follow='end', follow_interval=20000, range_padding=0)
+    fig.line(source=source, x=TIME, y=DOWNLOAD_THROUGHPUT_NUM_FILES if use_num_files else DOWNLOAD_THROUGHPUT_MB, color='red')
+    fig.yaxis.minor_tick_line_color = None
+    fig.add_tools(
+        ResetTool(),
+        PanTool(dimensions="width"),
+        WheelZoomTool(dimensions="width")
+    )
+    # fig.legend.location = 'top_left'
+    # fig.legend.label_text_font_size = '6pt'
+
+    return fig
+
+
 @ray.remote
 class Stats:
     def __init__(self):
@@ -142,7 +178,9 @@ class Stats:
         }
         self.graphs_data = {
             GRAPH_NAME_TASK_EVENTS: _make_task_events_graph_data(),
-            GRAPH_NAME_TASK_LATENCIES: _make_task_latencies_graph_data()
+            GRAPH_NAME_TASK_LATENCIES: _make_task_latencies_graph_data(),
+            GRAPH_NAME_DOWNLOAD_THROUGHPUT_NUM_FILES: _make_throughput_graph_data(True),
+            GRAPH_NAME_DOWNLOAD_THROUGHPUT_MB: _make_throughput_graph_data(False),
         }
 
     def event(self, task_type: str, event: Dict):
@@ -197,15 +235,15 @@ class Stats:
                     last_update_ts = new_append[TIME][0]/1000.0
                     new_append[TIME] = [now * 1000.0]
 
-                    has_change = False
+                    has_changed = False
                     for task_type in [DOWNLOAD_TASK_TYPE, INDEX_TASK_TYPE, FILTER_TASK_TYPE, WRITE_DB_TASK_TYPE]:
                         for event in self.task_events[task_type]:
                             if event['timestamp'] < last_update_ts:
                                 continue
-                            has_change = True
+                            has_changed = True
                             event_type = event['event_type']
                             new_append[event_type][0] += 1
-                    if has_change:
+                    if has_changed:
                         self.graphs_data[graph_name][0].append(new_append)
                     continue
                 if graph_name == GRAPH_NAME_TASK_LATENCIES:
@@ -215,21 +253,71 @@ class Stats:
                     # plot data stores TIME is seconds
                     last_update_ts = new_append[TIME][0]/1000.0
                     new_append[TIME] = [now * 1000.0]
-                    has_change = False
+                    has_changed = False
                     for task_type in [DOWNLOAD_TASK_TYPE, INDEX_TASK_TYPE, FILTER_TASK_TYPE, WRITE_DB_TASK_TYPE]:
                         for event in self.task_events[task_type]:
                             if event['timestamp'] < last_update_ts:
                                 continue
                             if 'latency' in event:
-                                has_change = True
+                                has_changed = True
                                 latency = event['latency']
                                 if 'size_kb' in event:
                                     # normalize
                                     latency /= float(event['size_kb'])
                                 new_append[task_type][0] = latency
-                    if has_change:
+                    if has_changed:
                         self.graphs_data[graph_name][0].append(new_append)
                     continue
+
+                if graph_name == GRAPH_NAME_DOWNLOAD_THROUGHPUT_MB or GRAPH_NAME_DOWNLOAD_THROUGHPUT_NUM_FILES:
+                    use_num_files = graph_name == GRAPH_NAME_DOWNLOAD_THROUGHPUT_NUM_FILES
+
+                    # TODO const this
+                    window_s = 60.0
+                    now = time()
+                    new_append = copy.deepcopy(self.graphs_data[graph_name][0][-1])
+                    # print(new_append)
+                    # print(use_num_files)
+                    # print(self.graphs_data[graph_name][0])
+                    # print(graph_name)
+                    # raise
+
+                    # plot data stores TIME is seconds
+                    new_append[TIME] = [now * 1000.0]
+                    size_kb = 0
+                    num_files = 0
+                    for event in self.task_events[DOWNLOAD_TASK_TYPE]:
+                        if event['event_type'] == DOWNLOAD_TASKS_FINISHED and event['timestamp'] <= now and event['timestamp'] >= now - window_s:
+                            # find corresponding DOWNLOAD_TASKS_STARTED event for this task_id
+                            started_event = None
+                            # TODO this can be optimized to avoid nested loop
+                            for s_event in self.task_events[DOWNLOAD_TASK_TYPE]:
+                                if s_event['task_id'] == event['task_id'] and s_event['event_type'] == DOWNLOAD_TASKS_STARTED:
+                                    started_event = s_event
+                            if started_event is None:
+                                continue
+                            # two cases:
+                            # 1. if start event is inside the window, we simply add it to total size
+                            # 2. is it's outside, we add size proportional to what is inside the window
+                            factor = 1 # default first case
+                            if started_event['timestamp'] < now - window_s:
+                                # second case
+                                factor = window_s/(event['timestamp'] - started_event['timestamp'])
+                            size_kb += factor * event['size_kb']
+                            num_files += factor
+                    if use_num_files:
+                        val = num_files/window_s
+                        # compare floats
+                        has_changed = not math.isclose(new_append[DOWNLOAD_THROUGHPUT_NUM_FILES][0], val)
+                        new_append[DOWNLOAD_THROUGHPUT_NUM_FILES][0] = val
+                    else:
+                        val = (size_kb/1024.0)/window_s
+                        # compare floats
+                        has_changed = not math.isclose(new_append[DOWNLOAD_THROUGHPUT_MB][0], val)
+                        new_append[DOWNLOAD_THROUGHPUT_MB][0] = val
+
+                    if has_changed:
+                        self.graphs_data[graph_name][0].append(new_append)
 
             sleep(0.1)
             # TODO clean up stale data (both task_events and graph_data) to avoid OOM
@@ -237,9 +325,12 @@ class Stats:
     def _make_bokeh_doc(self, doc, update):
         # TODO add rollover to ColumnDataSource to avoid OOM
         sources = {graph_name: ColumnDataSource(self.graphs_data[graph_name][0][0]) for graph_name in self.graphs_data}
-        # x_range = DataRange1d(follow='end', follow_interval=20000, range_padding=0)
-        # fig = _make_task_events_graph_figure(sources[GRAPH_NAME_TASK_EVENTS])
-        fig = _make_task_latencies_graph_figure(sources[GRAPH_NAME_TASK_LATENCIES])
-        doc.title = "Indexer State"
-        doc.add_root(fig)
+        fig_events = _make_task_events_graph_figure(sources[GRAPH_NAME_TASK_EVENTS])
+        fig_latencies = _make_task_latencies_graph_figure(sources[GRAPH_NAME_TASK_LATENCIES])
+        fig_throughput_mb = _make_throughput_graph_figure(sources[GRAPH_NAME_DOWNLOAD_THROUGHPUT_MB], False)
+        fig_throughput_num_files = _make_throughput_graph_figure(sources[GRAPH_NAME_DOWNLOAD_THROUGHPUT_NUM_FILES], True)
+        c = column(fig_latencies, fig_throughput_mb, fig_throughput_num_files)
+        r = row(fig_events, c)
+        doc.title = "Indexer Stats"
+        doc.add_root(r)
         doc.add_periodic_callback(functools.partial(update, sources=sources), 100)
