@@ -50,7 +50,7 @@ class TestDataCatalogIndexer(unittest.TestCase):
 
     def test_indexer(self):
         with ray.init(address='auto'):
-            batch_size = 20
+            batch_size = 40
             num_batches = 2
             indexer = Indexer()
             indexer.run()

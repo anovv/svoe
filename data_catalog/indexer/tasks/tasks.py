@@ -28,6 +28,8 @@ def load_df(input_item: InputItem, stats: Stats, task_id: str, extra: Optional[D
         'event_type': DOWNLOAD_TASKS_STARTED,
         'timestamp': time.time()
     }
+    if extra is not None and 'size_kb' in extra:
+        event['size_kb'] = extra['size_kb']
     stats.event.remote(DOWNLOAD_TASK_TYPE, event)
     path = input_item['path']
     # TODO use https://github.com/aio-libs/aiobotocore for df download
@@ -49,6 +51,8 @@ def index_df(df: pd.DataFrame, input_item: InputItem, stats: Stats, task_id: str
         'event_type': INDEX_TASKS_STARTED,
         'timestamp': time.time()
     }
+    if extra is not None and 'size_kb' in extra:
+        event['size_kb'] = extra['size_kb']
     stats.event.remote(INDEX_TASK_TYPE, event)
     res = _index_df(df, input_item)
     event['event_type'] = INDEX_TASKS_FINISHED

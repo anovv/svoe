@@ -52,7 +52,7 @@ def _make_task_events_graph_data() -> GraphData:
     }], None]
 
 def _make_task_events_graph_figure(source):
-    fig = figure(title="Tasks Events", x_axis_type='datetime', tools='')
+    fig = figure(title="Tasks Events (count)", x_axis_type='datetime', tools='')
 
     for name in [DOWNLOAD_TASKS_SCHEDULED, DOWNLOAD_TASKS_STARTED, DOWNLOAD_TASKS_FINISHED, INDEX_TASKS_SCHEDULED, INDEX_TASKS_STARTED, INDEX_TASKS_FINISHED]:
         color = 'red' if 'DOWNLOAD' in name else 'green'
@@ -100,7 +100,7 @@ def _make_task_latencies_graph_data() -> GraphData:
 
 
 def _make_task_latencies_graph_figure(source):
-    fig = figure(title="Tasks Latencies", x_axis_type='datetime', tools='')
+    fig = figure(title="Normalized Tasks Latencies (seconds per kb per task)", x_axis_type='datetime', tools='')
 
     for name in [DOWNLOAD_TASK_TYPE, INDEX_TASK_TYPE, FILTER_TASK_TYPE, WRITE_DB_TASK_TYPE]:
         color = None
@@ -207,6 +207,30 @@ class Stats:
                             new_append[event_type][0] += 1
                     if has_change:
                         self.graphs_data[graph_name][0].append(new_append)
+                    continue
+                if graph_name == GRAPH_NAME_TASK_LATENCIES:
+                    now = time()
+                    new_append = copy.deepcopy(self.graphs_data[graph_name][0][-1])
+
+                    # plot data stores TIME is seconds
+                    last_update_ts = new_append[TIME][0]/1000.0
+                    new_append[TIME] = [now * 1000.0]
+                    has_change = False
+                    for task_type in [DOWNLOAD_TASK_TYPE, INDEX_TASK_TYPE, FILTER_TASK_TYPE, WRITE_DB_TASK_TYPE]:
+                        for event in self.task_events[task_type]:
+                            if event['timestamp'] < last_update_ts:
+                                continue
+                            if 'latency' in event:
+                                has_change = True
+                                latency = event['latency']
+                                if 'size_kb' in event:
+                                    # normalize
+                                    latency /= float(event['size_kb'])
+                                new_append[task_type][0] = latency
+                    if has_change:
+                        self.graphs_data[graph_name][0].append(new_append)
+                    continue
+
             sleep(0.1)
             # TODO clean up stale data (both task_events and graph_data) to avoid OOM
 
@@ -214,8 +238,8 @@ class Stats:
         # TODO add rollover to ColumnDataSource to avoid OOM
         sources = {graph_name: ColumnDataSource(self.graphs_data[graph_name][0][0]) for graph_name in self.graphs_data}
         # x_range = DataRange1d(follow='end', follow_interval=20000, range_padding=0)
-        fig = _make_task_events_graph_figure(sources[GRAPH_NAME_TASK_EVENTS])
-        # fig = _make_task_latencies_graph_figure(sources[GRAPH_NAME_TASK_LATENCIES])
+        # fig = _make_task_events_graph_figure(sources[GRAPH_NAME_TASK_EVENTS])
+        fig = _make_task_latencies_graph_figure(sources[GRAPH_NAME_TASK_LATENCIES])
         doc.title = "Indexer State"
         doc.add_root(fig)
         doc.add_periodic_callback(functools.partial(update, sources=sources), 100)

@@ -76,8 +76,10 @@ class Scheduler:
                 index_task_id = f'{workflow_id}_{INDEX_TASK_TYPE}_{i}'
                 index_task_ids.append(index_task_id)
 
-                download_task = load_df.options(**workflow.options(task_id=download_task_id), num_cpus=0.001).bind(item, self.stats, download_task_id)
-                index_task = index_df.options(**workflow.options(task_id=index_task_id), num_cpus=0.01).bind(download_task, item, self.stats, index_task_id)
+                extra = {'size_kb': item['size_kb']}
+
+                download_task = load_df.options(**workflow.options(task_id=download_task_id), num_cpus=0.001).bind(item, self.stats, download_task_id, extra)
+                index_task = index_df.options(**workflow.options(task_id=index_task_id), num_cpus=0.01).bind(download_task, item, self.stats, index_task_id, extra)
                 index_tasks.append(index_task)
 
             self.workflow_task_ids[workflow_id][DOWNLOAD_TASK_TYPE] = download_task_ids
