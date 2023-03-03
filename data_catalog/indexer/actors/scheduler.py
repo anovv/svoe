@@ -1,21 +1,19 @@
 import asyncio
 import time
 import uuid
+import numpy as np
+import heapq
 
 from ray import workflow
 from ray.util.client import ray
 from ray.workflow import WorkflowStatus
+from ray.workflow.event_listener import EventListener
 
 from data_catalog.indexer.actors.db import DbActor, filter_existing, write_batch
-from data_catalog.indexer.actors.stats import Stats, DOWNLOAD_TASKS_SCHEDULED, INDEX_TASKS_SCHEDULED
+from data_catalog.indexer.actors.stats import Stats, DOWNLOAD_TASKS_SCHEDULED, INDEX_TASKS_SCHEDULED, DOWNLOAD_TASK_TYPE, INDEX_TASK_TYPE, FILTER_TASK_TYPE, WRITE_DB_TASK_TYPE
 from data_catalog.indexer.models import InputItemBatch
 from data_catalog.indexer.tasks.tasks import load_df, index_df, gather_and_wait
 
-# TODO sync this with stats?
-DOWNLOAD_TASK_TYPE = 'DOWNLOAD_TASK_TYPE'
-INDEX_TASK_TYPE = 'INDEX_TASK_TYPE'
-FILTER_TASK_TYPE = 'FILTER_TASK_TYPE'
-WRITE_DB_TASK_TYPE = 'WRITE_DB_TASK_TYPE'
 
 # TODO use uvloop
 @ray.remote
@@ -28,15 +26,10 @@ class Scheduler:
         self.is_running = True
         self.stats = stats
         self.db_actor = db_actor
+
+        # TODo is this needed?
         self.workflow_task_ids = {} # maps workflow ids to task ids
 
-        # stats collection
-        self.windowed_task_latencies = {
-            DOWNLOAD_TASK_TYPE: [],
-            INDEX_TASK_TYPE: [],
-            FILTER_TASK_TYPE: [],
-            WRITE_DB_TASK_TYPE: []
-        }
 
     async def pipe_input(self, input_item_batch: InputItemBatch):
         await self.read_queue.put(input_item_batch)
@@ -51,29 +44,6 @@ class Scheduler:
 
     async def stats_loop(self):
         while self.is_running:
-            metadata = []
-            # TODO for a large number of tasks this may eat up cpu/mem
-            # TODO we should filter running workflows and check only them
-            for workflow_id, task_ids in self.workflow_task_ids:
-                for task_id in task_ids:
-                    task_type = self._get_task_type(task_id)
-                    meta = workflow.get_metadata(workflow_id, task_id)
-                    if 'end_time' in meta:
-                        # push to windowed queue
-                        self.windowed_task_latencies[task_type].append({
-                            'start_time': meta['start_time'],
-                            'end_time': meta['end_time'],
-                            'latency': meta['end_time'] - meta['start_time']
-                        })
-                        # pop last if window is above thresh
-                        if len(self.windowed_task_latencies[task_type]) > 1:
-                            # TODO const window size
-                            if self.windowed_task_latencies[task_type][-1]['end_time'] - self.windowed_task_latencies[task_type][0]['end_time'] > 60:
-                                self.windowed_task_latencies[task_type].pop(0)
-
-            # report averaged latencies to stats actor
-            latencies = {task}
-
             await asyncio.sleep(0.1)
 
     async def scheduler_loop(self):
@@ -89,10 +59,10 @@ class Scheduler:
             self.workflow_task_ids[workflow_id] = {}
 
             filter_task_id = f'{workflow_id}_{FILTER_TASK_TYPE}'
-            self.workflow_task_ids[workflow_id][FILTER_TASK_TYPE] = filter_task_id
+            self.workflow_task_ids[workflow_id][FILTER_TASK_TYPE] = [filter_task_id]
 
             # construct DAG
-            _, filtered_items = workflow.continuation(filter_existing.options(**workflow.options(task_id=filter_task_id), num_cpus=0.01).bind(self.db_actor, input_batch, self.stats))
+            _, filtered_items = workflow.continuation(filter_existing.options(**workflow.options(task_id=filter_task_id), num_cpus=0.01).bind(self.db_actor, input_batch, self.stats, filter_task_id))
 
             download_task_ids = []
             index_task_ids = []
@@ -106,8 +76,8 @@ class Scheduler:
                 index_task_id = f'{workflow_id}_{INDEX_TASK_TYPE}_{i}'
                 index_task_ids.append(index_task_id)
 
-                download_task = load_df.options(**workflow.options(task_id=download_task_id), num_cpus=0.001).bind(item, self.stats)
-                index_task = index_df.options(**workflow.options(task_id=index_task_id), num_cpus=0.01).bind(download_task, item, self.stats)
+                download_task = load_df.options(**workflow.options(task_id=download_task_id), num_cpus=0.001).bind(item, self.stats, download_task_id)
+                index_task = index_df.options(**workflow.options(task_id=index_task_id), num_cpus=0.01).bind(download_task, item, self.stats, index_task_id)
                 index_tasks.append(index_task)
 
             self.workflow_task_ids[workflow_id][DOWNLOAD_TASK_TYPE] = download_task_ids
@@ -116,13 +86,30 @@ class Scheduler:
             gathered_index_items = gather_and_wait.bind(index_tasks)
 
             write_task_id = f'{workflow_id}_{WRITE_DB_TASK_TYPE}'
+            self.workflow_task_ids[workflow_id][WRITE_DB_TASK_TYPE] = [write_task_id]
 
-            dag = write_batch.options(**workflow.options(task_id=write_task_id), num_cpus=0.01).bind(self.db_actor, gathered_index_items, self.stats)
+            dag = write_batch.options(**workflow.options(task_id=write_task_id), num_cpus=0.01).bind(self.db_actor, gathered_index_items, self.stats, write_task_id)
 
             # schedule execution
             # TODO is there a workflow callback for scheduled event?
-            self.stats.inc_counter.remote(DOWNLOAD_TASKS_SCHEDULED, len(download_task_ids))
-            self.stats.inc_counter.remote(INDEX_TASKS_SCHEDULED, len(index_task_ids))
+            scheduled_events = []
+            now = time.time()
+            for _id in download_task_ids:
+                scheduled_events.append({
+                    'task_id': _id,
+                    'event_type': DOWNLOAD_TASKS_SCHEDULED,
+                    'timestamp': now
+                })
+            self.stats.events.remote(DOWNLOAD_TASK_TYPE, scheduled_events)
+            scheduled_events = []
+            now = time.time()
+            for _id in index_task_ids:
+                scheduled_events.append({
+                    'task_id': _id,
+                    'event_type': INDEX_TASKS_SCHEDULED,
+                    'timestamp': now
+                })
+            self.stats.events.remote(INDEX_TASK_TYPE, scheduled_events)
             # TODO figure out what to do with write_status
             write_status_ref = workflow.run_async(dag, workflow_id=workflow_id)
             # TODO add cleanup coroutine for self.workflow_task_ids when finished
@@ -163,8 +150,8 @@ class Scheduler:
         # return list(filter(lambda wf: self.run_id in wf[0], to_wait))
         return all
 
+    # TODO is this needed?
     def _get_task_type(self, task_id: str) -> str:
-        task_type = None
         if DOWNLOAD_TASK_TYPE in task_id:
             return DOWNLOAD_TASK_TYPE
         if INDEX_TASK_TYPE in task_id:
