@@ -13,3 +13,6 @@ dask
 tqdm
 matplotlib
 intervaltree
+bokeh
+portion
+sqlalchemy
