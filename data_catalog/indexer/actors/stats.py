@@ -12,7 +12,7 @@ from bokeh.server.server import Server
 from bokeh.models import ColumnDataSource, DataRange1d, ResetTool, PanTool, WheelZoomTool
 from bokeh.plotting import figure
 from bokeh.layouts import row, column
-from ray.types import ObjectRef
+from ray.experimental.state.api import list_workers
 
 import ray
 
@@ -24,6 +24,11 @@ from tornado.ioloop import IOLoop
 
 
 GraphData = List[Union[List, Optional[int]]] # List with timestamped data point and last read data length
+
+def _make_graph_data(keys) -> GraphData:
+    first = {TIME: [time() * 1000.0]}
+    first.update(dict(zip(keys, [[0] for _ in keys])))
+    return [[first], None]
 
 TIME = 'time'
 
@@ -38,19 +43,6 @@ INDEX_TASKS_FINISHED = 'INDEX_TASKS_FINISHED'
 FILTER_BATCH = 'FILTER_BATCH'
 WRITE_DB = 'WRITE_DB'
 
-
-def _make_task_events_graph_data() -> GraphData:
-    return [[{
-        TIME: [time() * 1000],
-        DOWNLOAD_TASKS_SCHEDULED: [0],
-        DOWNLOAD_TASKS_STARTED: [0],
-        DOWNLOAD_TASKS_FINISHED: [0],
-        INDEX_TASKS_SCHEDULED: [0],
-        INDEX_TASKS_STARTED: [0],
-        INDEX_TASKS_FINISHED: [0],
-        FILTER_BATCH: [0],
-        WRITE_DB: [0]
-    }], None]
 
 def _make_task_events_graph_figure(source):
     fig = figure(title="Tasks Events (count)", x_axis_type='datetime', tools='')
@@ -88,16 +80,6 @@ DOWNLOAD_TASK_TYPE = 'DOWNLOAD_TASK_TYPE'
 INDEX_TASK_TYPE = 'INDEX_TASK_TYPE'
 FILTER_TASK_TYPE = 'FILTER_TASK_TYPE'
 WRITE_DB_TASK_TYPE = 'WRITE_DB_TASK_TYPE'
-
-
-def _make_task_latencies_graph_data() -> GraphData:
-    return [[{
-        TIME: [time() * 1000],
-        DOWNLOAD_TASK_TYPE: [0],
-        INDEX_TASK_TYPE: [0],
-        FILTER_TASK_TYPE: [0],
-        WRITE_DB_TASK_TYPE: [0]
-    }], None]
 
 
 def _make_task_latencies_graph_figure(source):
@@ -140,21 +122,12 @@ GRAPH_NAME_DOWNLOAD_THROUGHPUT_NUM_FILES = 'GRAPH_NAME_DOWNLOAD_THROUGHPUT_NUM_F
 DOWNLOAD_THROUGHPUT_NUM_FILES = 'DOWNLOAD_THROUGHPUT_NUM_FILES'
 
 
-def _make_throughput_graph_data(use_num_files: bool) -> GraphData:
-    return [[{
-        TIME: [time() * 1000],
-        DOWNLOAD_THROUGHPUT_NUM_FILES if use_num_files else DOWNLOAD_THROUGHPUT_MB: [0],
-    }], None]
-
-
-def _make_throughput_graph_figure(source, use_num_files: bool):
-    title1 = 'Download Throughput (Mb/s)'
-    title2 = 'Download Throughput (Files/s)'
-    fig = figure(title=title2 if use_num_files else title1, x_axis_type='datetime', tools='')
+def _make_single_line_graph_figure(source, title, y_name):
+    fig = figure(title=title, x_axis_type='datetime', tools='')
 
     # TODO for running ranges
     # x_range = DataRange1d(follow='end', follow_interval=20000, range_padding=0)
-    fig.line(source=source, x=TIME, y=DOWNLOAD_THROUGHPUT_NUM_FILES if use_num_files else DOWNLOAD_THROUGHPUT_MB, color='red')
+    fig.line(source=source, x=TIME, y=y_name, color='red')
     fig.yaxis.minor_tick_line_color = None
     fig.add_tools(
         ResetTool(),
@@ -167,6 +140,10 @@ def _make_throughput_graph_figure(source, use_num_files: bool):
     return fig
 
 
+GRAPH_NAME_CLUSTER_NUM_WORKERS = 'GRAPH_NAME_CLUSTER_NUM_WORKERS'
+CLUSTER_NUM_WORKERS = 'CLUSTER_NUM_WORKERS'
+
+
 @ray.remote
 class Stats:
     def __init__(self):
@@ -176,11 +153,13 @@ class Stats:
             FILTER_TASK_TYPE: [],
             WRITE_DB_TASK_TYPE: []
         }
+
         self.graphs_data = {
-            GRAPH_NAME_TASK_EVENTS: _make_task_events_graph_data(),
-            GRAPH_NAME_TASK_LATENCIES: _make_task_latencies_graph_data(),
-            GRAPH_NAME_DOWNLOAD_THROUGHPUT_NUM_FILES: _make_throughput_graph_data(True),
-            GRAPH_NAME_DOWNLOAD_THROUGHPUT_MB: _make_throughput_graph_data(False),
+            GRAPH_NAME_TASK_EVENTS: _make_graph_data([DOWNLOAD_TASKS_SCHEDULED, DOWNLOAD_TASKS_STARTED, DOWNLOAD_TASKS_FINISHED, INDEX_TASKS_SCHEDULED, INDEX_TASKS_STARTED, INDEX_TASKS_FINISHED, FILTER_BATCH, WRITE_DB]),
+            GRAPH_NAME_TASK_LATENCIES: _make_graph_data([DOWNLOAD_TASK_TYPE, INDEX_TASK_TYPE, FILTER_TASK_TYPE, WRITE_DB_TASK_TYPE]),
+            GRAPH_NAME_DOWNLOAD_THROUGHPUT_NUM_FILES: _make_graph_data([DOWNLOAD_THROUGHPUT_NUM_FILES]),
+            GRAPH_NAME_DOWNLOAD_THROUGHPUT_MB: _make_graph_data([DOWNLOAD_THROUGHPUT_MB]),
+            GRAPH_NAME_CLUSTER_NUM_WORKERS: _make_graph_data([CLUSTER_NUM_WORKERS]),
         }
 
     def event(self, task_type: str, event: Dict):
@@ -201,6 +180,7 @@ class Stats:
             server.start()
             loop.start()
 
+        # TODO use asyncio?
         self.server_thread = Thread(target=_run_loop)
         self.server_thread.start()
         self.calc_metrics_thread = Thread(target=self._calc_metrics_loop)
@@ -221,6 +201,7 @@ class Stats:
 
             # update last_data_length for this graph
             self.graphs_data[graph_name][1] = len(plot_data)
+
 
     def _calc_metrics_loop(self):
         # TODO make proper flag
@@ -269,18 +250,13 @@ class Stats:
                         self.graphs_data[graph_name][0].append(new_append)
                     continue
 
-                if graph_name == GRAPH_NAME_DOWNLOAD_THROUGHPUT_MB or GRAPH_NAME_DOWNLOAD_THROUGHPUT_NUM_FILES:
+                if graph_name == GRAPH_NAME_DOWNLOAD_THROUGHPUT_MB or graph_name == GRAPH_NAME_DOWNLOAD_THROUGHPUT_NUM_FILES:
                     use_num_files = graph_name == GRAPH_NAME_DOWNLOAD_THROUGHPUT_NUM_FILES
 
                     # TODO const this
                     window_s = 60.0
                     now = time()
                     new_append = copy.deepcopy(self.graphs_data[graph_name][0][-1])
-                    # print(new_append)
-                    # print(use_num_files)
-                    # print(self.graphs_data[graph_name][0])
-                    # print(graph_name)
-                    # raise
 
                     # plot data stores TIME is seconds
                     new_append[TIME] = [now * 1000.0]
@@ -318,6 +294,23 @@ class Stats:
 
                     if has_changed:
                         self.graphs_data[graph_name][0].append(new_append)
+                    continue
+
+                if graph_name == GRAPH_NAME_CLUSTER_NUM_WORKERS:
+                    # TODO try catch this
+                    workers = list_workers(address='auto', limit=100, timeout=30, raise_on_missing_output=True)
+                    num_alive_workers = 0
+                    for worker_state in workers:
+                        # TODO add dead worker count
+                        if worker_state['worker_type'] == 'WORKER' and worker_state['is_alive']:
+                            num_alive_workers += 1
+
+                    now = time()
+                    new_append = copy.deepcopy(self.graphs_data[graph_name][0][-1])
+                    new_append[TIME] = [now * 1000.0]
+                    new_append[CLUSTER_NUM_WORKERS] = [num_alive_workers]
+                    self.graphs_data[graph_name][0].append(new_append)
+                    continue
 
             sleep(0.1)
             # TODO clean up stale data (both task_events and graph_data) to avoid OOM
@@ -327,10 +320,15 @@ class Stats:
         sources = {graph_name: ColumnDataSource(self.graphs_data[graph_name][0][0]) for graph_name in self.graphs_data}
         fig_events = _make_task_events_graph_figure(sources[GRAPH_NAME_TASK_EVENTS])
         fig_latencies = _make_task_latencies_graph_figure(sources[GRAPH_NAME_TASK_LATENCIES])
-        fig_throughput_mb = _make_throughput_graph_figure(sources[GRAPH_NAME_DOWNLOAD_THROUGHPUT_MB], False)
-        fig_throughput_num_files = _make_throughput_graph_figure(sources[GRAPH_NAME_DOWNLOAD_THROUGHPUT_NUM_FILES], True)
-        c = column(fig_latencies, fig_throughput_mb, fig_throughput_num_files)
-        r = row(fig_events, c)
+
+        fig_throughput_mb = _make_single_line_graph_figure(sources[GRAPH_NAME_DOWNLOAD_THROUGHPUT_MB], 'Download Throughput (Mb/s)', DOWNLOAD_THROUGHPUT_MB)
+        fig_throughput_num_files = _make_single_line_graph_figure(sources[GRAPH_NAME_DOWNLOAD_THROUGHPUT_NUM_FILES], 'Download Throughput (Files/s)', DOWNLOAD_THROUGHPUT_NUM_FILES)
+
+        fig_cluster_num_workers = _make_single_line_graph_figure(sources[GRAPH_NAME_CLUSTER_NUM_WORKERS], 'Cluster Worker Actors (count)', CLUSTER_NUM_WORKERS)
+
+        c1 = column(fig_events, fig_cluster_num_workers)
+        c2 = column(fig_latencies, fig_throughput_mb, fig_throughput_num_files)
+        r = row(c1, c2)
         doc.title = "Indexer Stats"
         doc.add_root(r)
         doc.add_periodic_callback(functools.partial(update, sources=sources), 100)

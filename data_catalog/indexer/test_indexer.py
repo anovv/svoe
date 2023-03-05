@@ -4,7 +4,7 @@ import unittest
 
 from ray.util.client import ray
 
-from data_catalog.indexer.actors.stats import Stats
+from data_catalog.indexer.actors.stats import Stats, FILTER_BATCH
 from data_catalog.indexer.indexer import Indexer
 from data_catalog.indexer.sql.client import MysqlClient
 from data_catalog.indexer.sql.models import add_defaults
@@ -50,8 +50,8 @@ class TestDataCatalogIndexer(unittest.TestCase):
 
     def test_indexer(self):
         with ray.init(address='auto'):
-            batch_size = 40
-            num_batches = 2
+            batch_size = 50
+            num_batches = 10
             indexer = Indexer()
             indexer.run()
             print('Inited indexer')
@@ -67,7 +67,10 @@ class TestDataCatalogIndexer(unittest.TestCase):
                 print(f'Queued {i + 1} batches')
             print('Done queueing')
             # wait for everything to process
-            time.sleep(360)
+
+            # TODO this quits early if job is long
+            # TODO make wait_for_completion func
+            time.sleep(720)
 
             # check if index was written to db
             client = MysqlClient()
