@@ -1,9 +1,9 @@
 from typing import Optional, Dict, List
 
-from sqlalchemy import create_engine, Column, String, JSON, DateTime, func
+from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from data_catalog.indexer.sql.models import DataCatalog, add_defaults, Base
-from data_catalog.indexer.models import IndexItemBatch, InputItemBatch, InputItem
+from data_catalog.utils.sql.models import DataCatalog, add_defaults, Base
+from data_catalog.indexer.models import IndexItemBatch, InputItemBatch
 
 import os
 
@@ -41,6 +41,9 @@ class MysqlClient:
         # creates if not exists
         Base.metadata.create_all(self.engine)
 
+    # TODO separate api methods and indexer methods
+    #indexer methods
+
     # see 2nd comment in https://stackoverflow.com/questions/3659142/bulk-insert-with-sqlalchemy-orm
     # RE: bulk insert perf
     def write_index_item_batch(self, batch: IndexItemBatch):
@@ -74,4 +77,23 @@ class MysqlClient:
         non_exist = list(filter(lambda item: item['path'] not in res, items))
         print(f'Checked db for items: {len(non_exist)} not in DB')
         return meta, non_exist
+
+    # api methods
+    # TODO typing
+    def select(
+        self,
+        exchange: str,
+        data_type: str,
+        instrument_type: str,
+        symbol: str,
+        start_date: Optional[str] = None,
+        end_date: Optional[str] = None
+    ) -> List:
+        # TODO instrument_extras
+        # TODO is base/quote necesery here?
+        defaults = add_defaults({})
+        session = Session()
+        res = session.query(DataCatalog).filter_by(exchange=exchange, data_type=data_type, instrument_type=instrument_type, symbol=symbol, **defaults).order_by(DataCatalog.start_ts).all()
+        # TODO this adds unnecessary sqlalchemy fields, remove to reduce memory footprint
+        return [r.__dict__ for r in res]
 

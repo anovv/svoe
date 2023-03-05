@@ -1,11 +1,11 @@
 import time
-from typing import Optional, Dict, List
+from typing import Optional, Dict
 
 import ray
 
 from data_catalog.indexer.actors.stats import Stats, WRITE_DB, FILTER_BATCH, FILTER_TASK_TYPE, WRITE_DB_TASK_TYPE
 from data_catalog.indexer.models import IndexItemBatch, InputItemBatch
-from data_catalog.indexer.sql.client import MysqlClient
+from data_catalog.utils.sql.client import MysqlClient
 
 
 @ray.remote

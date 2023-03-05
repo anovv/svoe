@@ -6,8 +6,8 @@ from ray.util.client import ray
 
 from data_catalog.indexer.actors.stats import Stats, FILTER_BATCH
 from data_catalog.indexer.indexer import Indexer
-from data_catalog.indexer.sql.client import MysqlClient
-from data_catalog.indexer.sql.models import add_defaults
+from data_catalog.utils.sql.client import MysqlClient
+from data_catalog.utils.sql.models import add_defaults
 from data_catalog.indexer.tasks.tasks import _index_df
 from data_catalog.indexer.util import generate_input_items
 from utils.pandas.df_utils import load_dfs

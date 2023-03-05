@@ -1,7 +1,6 @@
 import json
 
 from sqlalchemy import Column, String, JSON, DateTime, func, Integer, Float
-from sqlalchemy.dialects.mysql import FLOAT
 from sqlalchemy.orm import declarative_base
 from data_catalog.indexer.models import InputItem
 
@@ -24,6 +23,8 @@ class DataCatalog(Base):
     # TODO this should be JSON but MySQL does not allow JSON keys
     instrument_extra = Column(String(32), primary_key=True)
     symbol = Column(String(32), primary_key=True)
+
+    # TODO do base/quote need to be part of key? they are derived from symbol
     base = Column(String(32), primary_key=True)
     quote = Column(String(32), primary_key=True)
     # start_ts = Column(Float(precision='16,6'), primary_key=True)
