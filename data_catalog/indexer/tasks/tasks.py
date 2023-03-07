@@ -34,7 +34,7 @@ def load_df(input_item: InputItem, stats: Stats, task_id: str, extra: Optional[D
     path = input_item['path']
     # TODO use https://github.com/aio-libs/aiobotocore for df download
     # example https://gist.github.com/mattwang44/0c2e0e244b9e5f901f3881d5f1e85d3a
-    df = s3_utils.load_df(path)
+    df = df_utils.load_df(path)
     event['event_type'] = DOWNLOAD_TASKS_FINISHED
     now = time.time()
     event['latency'] = now - event['timestamp']

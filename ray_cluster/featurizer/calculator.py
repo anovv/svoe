@@ -1,4 +1,9 @@
+import itertools
 from typing import Dict, Type, List, Any, Tuple, Optional
+
+import ray
+from ray import workflow
+from ray.types import ObjectRef
 
 from featurizer.features.definitions.feature_definition import FeatureDefinition
 from featurizer.features.data.data_definition import Event
@@ -9,7 +14,7 @@ from portion import Interval, IntervalDict, closed
 import pandas as pd
 from streamz import Stream
 import heapq
-from utils.pandas.df_utils import load_single_file
+from utils.pandas.df_utils import load_df
 
 
 # TODO move this to FeatureDefinition package
@@ -31,16 +36,6 @@ def build_stream_graph(feature: Feature) -> Dict[Feature, Stream]:
     return stream_graph
 
 
-def load_data_ranges(
-    feature_definition: Type[FeatureDefinition],
-    data_params: DataParams,
-    start_date: str = None,
-    end_date: str = None
-) -> Dict:
-    # TODO call data catalog service
-    return {}
-
-
 # TODO type hint
 def get_ranges_overlaps(grouped_ranges: Dict[Feature, IntervalDict]) -> Dict:
     # TODO add visualization?
@@ -58,6 +53,7 @@ def get_ranges_overlaps(grouped_ranges: Dict[Feature, IntervalDict]) -> Dict:
             continue
 
         def concat(named_ranges_dict, ranges):
+            # TODO copy.deepcopy?
             res = named_ranges_dict.copy()
             res[feature] = ranges
             return res
@@ -75,14 +71,14 @@ def get_ranges_overlaps(grouped_ranges: Dict[Feature, IntervalDict]) -> Dict:
 # s3/data lake aux methods
 # TODO move to separate class
 # TODO add cpu/mem budget
-@dask.delayed
+@ray.remote
 def load_if_needed(
     block_meta: BlockMeta,
 ) -> Block:
     # TODO if using Ray's Plasma, check shared obj store first, if empty - load from s3
     # TODO figure out how to split BlockRange -> Block and cache if needed
     # TODO sync keys
-    return load_single_file(block_meta['path'])
+    return load_df(block_meta['path'])
 
 
 # TODO for Virtual clock
@@ -99,31 +95,46 @@ def load_if_needed(
 # https://github.com/topics/discrete-event-simulation?l=python&o=desc&s=forks
 # https://docs.python.org/3/library/tkinter.html
 # TODO this should be in Feature class
-@dask.delayed
+@ray.remote
 def calculate_feature(
     feature: Feature,
-    dep_feature_results: Dict[Feature, BlockRange], # maps dep feature to BlockRange # TODO List[BlockRange] when using 'holes'
+    dep_refs: Dict[Feature, List[ObjectRef[Block]]], # maps dep feature to BlockRange # TODO List[BlockRange] when using 'holes'
     interval: Interval
 ) -> Block:
-    merged = merge_feature_blocks(dep_feature_results)
+    # TODO add mem tracking
+    # this loads blocks for all dep features from shared object store to workers heap
+    # hence we need to reserve a lot of mem here
+    dep_features = list(dep_refs.keys())
+    dep_block_refs = list(dep_refs.values())
+    all_block_refs = list(itertools.chain(dep_block_refs))
+    all_objs = ray.get(all_block_refs)
+    start = 0
+    deps = {}
+    for i in range(len(dep_features)):
+        dep_feature = dep_features[i]
+        dep_blocks = all_objs[start: start + len(dep_block_refs[i]) - 1]
+        deps[dep_feature] = dep_blocks
+        start = start + len(dep_block_refs[i])
+
+    merged = merge_blocks(deps)
     # construct upstreams
-    upstreams = {dep_named_feature: Stream() for dep_named_feature in dep_feature_results.keys()}
+    upstreams = {dep_named_feature: Stream() for dep_named_feature in deps.keys()}
     out_stream = feature.feature_definition.stream(upstreams, feature.params)
     return run_stream(merged, upstreams, out_stream, interval)
 
 
 # TODO util this
 # TODO we assume no 'holes' here
-def merge_feature_blocks(
-    feature_blocks: Dict[Feature, BlockRange]
+def merge_blocks(
+    blocks: Dict[Feature, BlockRange]
 ) -> List[Tuple[Feature, Event]]:
     # TODO we assume no 'hoes' here
     # merge
     merged = None
-    features = list(feature_blocks.keys())
+    features = list(blocks.keys())
     for i in range(0, len(features)):
         feature = features[i]
-        block_range = feature_blocks[feature]
+        block_range = blocks[feature]
         named_events = []
         for block in block_range:
             parsed = feature.feature_definition.parse_events(block)
@@ -135,6 +146,7 @@ def merge_feature_blocks(
         if i == 0:
             merged = named_events
         else:
+            # TODO explore heapdict
             merged = heapq.merge(merged, named_events, key=lambda named_event: named_event[1]['timestamp'])
 
     return merged
@@ -170,13 +182,7 @@ def run_stream(
     return pd.DataFrame(res)  # TODO set column names properly, using FeatureDefinition schema method?
 
 
-# TODO should be FeatureDefinition/Feature method
-def calculate_feature_meta(
-    feature: Feature,
-    dep_feature_results: Dict[Feature, BlockRangeMeta],
-    # maps dep feature to BlockRange # TODO List[BlockRangeMeta]?
-    interval: Interval
-) -> BlockMeta:
+def _interval_meta(interval: Interval) -> BlockMeta:
     return {
         'start_ts': interval.lower,
         'end_ts': interval.upper,
@@ -188,57 +194,69 @@ def calculate_feature_meta(
 def build_feature_task_graph(
     feature: Feature,
     # TODO decouple derived feature_ranges_meta and input data ranges meta
-    feature_ranges_meta: Dict[Feature, List]  # TODO typehint when decide on BlockRangeMeta/BlockMeta
+    ranges_meta: Dict[Feature, List]  # TODO typehint when decide on BlockRangeMeta/BlockMeta
 ):
-    feature_delayed_funcs = {}  # feature delayed functions per range per feature
+    dag = {} # DAGNode per range per feature
 
     # bottom up/postorder traversal
     def tree_traversal_callback(feature: Feature):
         if feature.feature_definition.is_data_source():
             # leaves
             # TODO decouple derived feature_ranges_meta and input data ranges meta
-            ranges = feature_ranges_meta[feature]  # this is already populated for Data in load_data_ranges above
+            ranges = ranges_meta[feature]  # this is already populated for Data in load_data_ranges above
             for block_meta in ranges:
                 # TODO we assume no 'holes' in data here
                 interval = get_interval(block_meta)
-                if feature not in feature_delayed_funcs:
-                    feature_delayed_funcs[feature] = {}
-                feature_delayed = load_if_needed(block_meta)
-                feature_delayed_funcs[feature][interval] = feature_delayed
+                if feature not in dag:
+                    dag[feature] = {}
+                node = load_if_needed.bind(block_meta)
+                dag[feature][interval] = node
             return
 
         grouped_ranges_by_dep_feature = {}
         for dep_feature in feature.children:
-            dep_ranges = feature_ranges_meta[dep_feature]
+            dep_ranges = ranges_meta[dep_feature]
             # TODO this should be in Feature class
             grouped_ranges_by_dep_feature[dep_feature] = feature.feature_definition.group_dep_ranges(dep_ranges, feature, dep_feature)
 
         overlaps = get_ranges_overlaps(grouped_ranges_by_dep_feature)
         ranges = []
         for interval, overlap in overlaps.items():
-            # TODO is this needed? is it for block or range ?
-            result_meta = calculate_feature_meta(feature, overlap, interval)
+            # TODO is this needed? is it for block or range?
+            result_meta = _interval_meta(interval)
             ranges.append(result_meta)
-            if feature not in feature_delayed_funcs:
-                feature_delayed_funcs[feature] = {}
+            if feature not in dag:
+                dag[feature] = {}
 
             # TODO use overlap to fetch results of dep delayed funcs
-            dep_delayed_funcs = {}
+            dep_nodes = {}
             for dep_feature in overlap:
                 ds = []
                 for dep_block_meta in overlap[dep_feature]:
                     dep_interval = get_interval(dep_block_meta)
-                    dep_delayed_func = feature_delayed_funcs[dep_feature][dep_interval]
-                    ds.append(dep_delayed_func)
-                dep_delayed_funcs[dep_feature] = ds
-            feature_delayed = calculate_feature(feature, dep_delayed_funcs, interval)
-            feature_delayed_funcs[feature][interval] = feature_delayed
+                    dep_node = dag[dep_feature][dep_interval]
+                    ds.append(dep_node)
+                dep_nodes[dep_feature] = ds
+            feature_delayed = calculate_feature(feature, dep_nodes, interval)
+            dag[feature][interval] = feature_delayed
 
-        feature_ranges_meta[feature] = ranges
+        ranges_meta[feature] = ranges
 
     postorder(feature, tree_traversal_callback)
-    # list of root feature delayed funcs for all ranges
-    return list(feature_delayed_funcs[feature].values())
+    # list of root nodes for all ranges
+    # return list(dag[feature].values())
+    return dag
+
+
+def execute_task_graph(dag: Dict, feature: Feature) -> List[Block]:
+    root_nodes = list(dag[feature].values())
+    res = []
+    for node in root_nodes:
+        r = workflow.run_async(node)
+        res.append(r)
+
+    return ray.get(res)
+
 
 def build_feature_set_task_graph(
     feature_set: List[Feature]

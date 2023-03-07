@@ -27,6 +27,7 @@ class DbActor:
         return {}
 
 
+# TODO we can add actor method ad as DAG node directly https://docs.ray.io/en/latest/ray-core/ray-dag.html#ray-dag-guide
 # TODO set CPU=0, or add parallelism resource, set memory and object_store_memory
 @ray.remote
 def filter_existing(db_actor: DbActor, input_batch: InputItemBatch, stats: Stats, task_id: str, extra: Optional[Dict] = None) -> InputItemBatch:

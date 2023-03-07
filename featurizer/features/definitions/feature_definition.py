@@ -1,8 +1,6 @@
 from __future__ import annotations
 from streamz import Stream
 from typing import Dict, List, Tuple, Union, Type, Any
-from ta.utils import dropna
-from ta.volatility import BollingerBands
 from portion import IntervalDict
 from featurizer.features.data.data_definition import DataDefinition
 # from featurizer.features.feature_tree.feature_tree import FeatureTreeNode
@@ -50,3 +48,7 @@ class FeatureDefinition(DataDefinition):
 # check https://github.com/freqtrade/freqtrade
 
 # http://alkaline-ml.com/pmdarima/
+
+# https://kernc.github.io/backtesting.py/
+
+# https://tulipindicators.org/

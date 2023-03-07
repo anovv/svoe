@@ -16,3 +16,5 @@ intervaltree
 bokeh
 portion
 sqlalchemy
+frozendict
+anytree

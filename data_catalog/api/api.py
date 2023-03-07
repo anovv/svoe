@@ -53,7 +53,12 @@ class Api:
         return intervals_df
 
     # TODO utils this
+    # TODO make this proper work
+    # TODO https://docs.bokeh.org/en/3.0.2/docs/examples/basic/bars/intervals.html
+    # TODO use stacked hbars https://stackoverflow.com/questions/50417528/bokeh-horizontal-stacked-bar-chart
     def plot_ranges(self, ranges: List):
+
+        # TODO this doesn't need to use df as input?
         cds_df = ColumnDataSource(self.ranges_to_intervals_df(ranges))
 
         p = figure(x_axis_type='datetime', plot_height=100, plot_width=500)

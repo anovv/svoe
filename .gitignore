@@ -43,3 +43,5 @@ data_feed/perf/resources-estimation-out/*
 
 featurizer/notebooks
 utils/s3/s3_svoe.test.1_inventory
+ray_cluster/featurizer/cached_dfs
+

@@ -97,21 +97,3 @@ def inventory() -> Generator[pd.DataFrame, None, None]:
 
 # for progress https://github.com/alphatwirl/atpbar
 # https://leimao.github.io/blog/Python-tqdm-Multiprocessing/
-
-
-def load_df(path: str) -> pd.DataFrame:
-    # split path into prefix and suffix
-    # this is needed because if dataset=True data wrangler handles input path as a glob pattern,
-    # hence messing up special characters
-
-    # for Python < 3.9
-    def remove_suffix(input_string, suffix):
-        if suffix and input_string.endswith(suffix):
-            return input_string[:-len(suffix)]
-        return input_string
-
-    split = path.split('/')
-    suffix = split[len(split) - 1]
-    prefix = remove_suffix(path, suffix)
-    session = get_session()
-    return wr.s3.read_parquet(path=prefix, path_suffix=suffix, dataset=True, boto3_session=session)

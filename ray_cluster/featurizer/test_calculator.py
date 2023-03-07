@@ -1,3 +1,8 @@
+import time
+
+import ray
+from ray import workflow
+
 import calculator as C
 from featurizer.features.data.data_source_definition import DataSourceDefinition
 from featurizer.features.data.l2_book_delats.l2_book_deltas import L2BookDeltasData
@@ -73,9 +78,12 @@ class TestFeatureCalculator(unittest.TestCase):
         print(RenderTree(feature))
         # calculate in offline/distributed way
         task_graph = C.build_feature_task_graph(feature, block_range_meta)
+        print(task_graph)
         # dask.visualize(*task_graph)
-        res_blocks = dask.compute(task_graph)
-        offline_res = pd.concat(*res_blocks)
+        # res_blocks = dask.compute(task_graph)
+        # offline_res = pd.concat(*res_blocks)
+        offline_res = C.execute_task_graph(task_graph, feature)
+
         print(offline_res)
 
         # calculate online
@@ -90,7 +98,50 @@ class TestFeatureCalculator(unittest.TestCase):
         # assert_frame_equal(offline_res, online_res)
 
 
+@ray.remote
+def t1():
+    print('Started t1')
+    time.sleep(1)
+    print('Finished t1')
+    return ['t1']
+
+
+@ray.remote
+def t2():
+    print('Started t2')
+    time.sleep(1)
+    print('Finished t2')
+    return ['t2']
+
+
+# @ray.remote
+# def t3(data):
+#     print('Started t3')
+#     time.sleep(1)
+#     print('Finished t3')
+#     return data['t1'] + data['t2']
+
+@ray.remote
+def t3(t1, t2):
+    print('Started t3')
+    time.sleep(1)
+    print('Finished t3')
+    return t1 + t2
+
+
+def test_dep_tasks():
+    with ray.init(address='auto'):
+        _t1 = t1.bind()
+        _t2 = t2.bind()
+        # data = {'t1': _t1, 't2': _t2}
+        _t3 = t3.bind(_t1, _t2)
+
+        r = workflow.run_async(_t3)
+
+        print(ray.get(r))
+
 if __name__ == '__main__':
     # unittest.main()
     t = TestFeatureCalculator()
     t.test_featurization(OHLCVFeatureDefinition, TradesData)
+    # test_dep_tasks()
