@@ -8,6 +8,7 @@ from featurizer.features.data.data_source_definition import DataSourceDefinition
 from featurizer.features.data.l2_book_delats.l2_book_deltas import L2BookDeltasData
 from featurizer.features.data.trades.trades import TradesData
 from featurizer.features.definitions.ohlcv.ohlcv_feature_definition import OHLCVFeatureDefinition
+from featurizer.features.definitions.l2_book_snapshot.l2_book_snapshot_feature_definition import L2BookSnapshotFeatureDefinition
 from featurizer.features.definitions.feature_definition import FeatureDefinition
 from featurizer.features.feature_tree.feature_tree import construct_feature_tree
 
@@ -81,16 +82,15 @@ class TestFeatureCalculator(unittest.TestCase):
         print(task_graph)
         # dask.visualize(*task_graph)
         # res_blocks = dask.compute(task_graph)
-        # offline_res = pd.concat(*res_blocks)
-        offline_res = C.execute_task_graph(task_graph, feature)
-
+        res_blocks = C.execute_task_graph(task_graph, feature)
+        offline_res = pd.concat(res_blocks)
         print(offline_res)
 
         # calculate online
         stream_graph = C.build_stream_graph(feature)
         stream = stream_graph[feature]
         sources = {data: stream_graph[data] for data in block_range_meta.keys()}
-        merged_events = C.merge_feature_blocks(block_range)
+        merged_events = C.merge_blocks(block_range)
         online_res = C.run_stream(merged_events, sources, stream)
         print(online_res)
 
@@ -98,50 +98,8 @@ class TestFeatureCalculator(unittest.TestCase):
         # assert_frame_equal(offline_res, online_res)
 
 
-@ray.remote
-def t1():
-    print('Started t1')
-    time.sleep(1)
-    print('Finished t1')
-    return ['t1']
-
-
-@ray.remote
-def t2():
-    print('Started t2')
-    time.sleep(1)
-    print('Finished t2')
-    return ['t2']
-
-
-# @ray.remote
-# def t3(data):
-#     print('Started t3')
-#     time.sleep(1)
-#     print('Finished t3')
-#     return data['t1'] + data['t2']
-
-@ray.remote
-def t3(t1, t2):
-    print('Started t3')
-    time.sleep(1)
-    print('Finished t3')
-    return t1 + t2
-
-
-def test_dep_tasks():
-    with ray.init(address='auto'):
-        _t1 = t1.bind()
-        _t2 = t2.bind()
-        # data = {'t1': _t1, 't2': _t2}
-        _t3 = t3.bind(_t1, _t2)
-
-        r = workflow.run_async(_t3)
-
-        print(ray.get(r))
-
 if __name__ == '__main__':
     # unittest.main()
     t = TestFeatureCalculator()
-    t.test_featurization(OHLCVFeatureDefinition, TradesData)
+    t.test_featurization(L2BookSnapshotFeatureDefinition, L2BookDeltasData)
     # test_dep_tasks()

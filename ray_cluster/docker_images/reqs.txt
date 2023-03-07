@@ -18,3 +18,4 @@ portion
 sqlalchemy
 frozendict
 anytree
+joblib

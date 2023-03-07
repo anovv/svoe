@@ -107,12 +107,12 @@ def calculate_feature(
     dep_features = list(dep_refs.keys())
     dep_block_refs = list(dep_refs.values())
     all_block_refs = list(itertools.chain(dep_block_refs))
-    all_objs = ray.get(all_block_refs)
+    all_objs = ray.get(*all_block_refs)
     start = 0
     deps = {}
     for i in range(len(dep_features)):
         dep_feature = dep_features[i]
-        dep_blocks = all_objs[start: start + len(dep_block_refs[i]) - 1]
+        dep_blocks = all_objs[start: start + len(dep_block_refs[i])]
         deps[dep_feature] = dep_blocks
         start = start + len(dep_block_refs[i])
 
@@ -237,25 +237,25 @@ def build_feature_task_graph(
                     dep_node = dag[dep_feature][dep_interval]
                     ds.append(dep_node)
                 dep_nodes[dep_feature] = ds
-            feature_delayed = calculate_feature(feature, dep_nodes, interval)
-            dag[feature][interval] = feature_delayed
+            node = calculate_feature.bind(feature, dep_nodes, interval)
+            dag[feature][interval] = node
 
         ranges_meta[feature] = ranges
 
     postorder(feature, tree_traversal_callback)
-    # list of root nodes for all ranges
-    # return list(dag[feature].values())
+
     return dag
 
 
 def execute_task_graph(dag: Dict, feature: Feature) -> List[Block]:
     root_nodes = list(dag[feature].values())
-    res = []
-    for node in root_nodes:
-        r = workflow.run_async(node)
-        res.append(r)
+    workflow_results_refs = []
+    with ray.init(address='auto'):
+        for node in root_nodes:
+            r = workflow.run_async(node)
+            workflow_results_refs.append(r)
 
-    return ray.get(res)
+        return ray.get(workflow_results_refs)
 
 
 def build_feature_set_task_graph(

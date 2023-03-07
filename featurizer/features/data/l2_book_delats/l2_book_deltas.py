@@ -1,3 +1,5 @@
+import numpy as np
+
 from featurizer.features.data.data_source_definition import DataSourceDefinition
 from featurizer.features.data.data_definition import DataDefinition, EventSchema, Event
 from collections import OrderedDict
@@ -19,6 +21,12 @@ class L2BookDeltasData(DataSourceDefinition):
 
     @classmethod
     def parse_events(cls, df: DataFrame) -> List[Event]:
+
+        # TODO this is a bug in ray's version of pandas
+        # TODO see https://stackoverflow.com/questions/53985535/pandas-valueerror-buffer-source-array-is-read-only
+        # TODO update ray's image to use latest pandas
+        df = df.copy()
+
         # TODO merge this logic with TradesData parse_events
         grouped = df.groupby(['timestamp', 'delta'])
         dfs = [grouped.get_group(x) for x in grouped.groups]
