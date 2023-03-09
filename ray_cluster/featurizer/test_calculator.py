@@ -97,9 +97,77 @@ class TestFeatureCalculator(unittest.TestCase):
         # TODO we may have 1ts duplicate entry (due to snapshot_ts based block partition of l2_delta data source)
         # assert_frame_equal(offline_res, online_res)
 
+    def test_merge_asof(self):
+        look_ahead = 3
+        a = [1, 2, 3, 5, 8, 9, 20, 21, 22, 23, 28, 31, 32, 33, 34, 40, 41, 42, 46]
+
+        b = [3, 5, 5, 8, 9, 9, 23, 23, 23, 23, 31, 34, 34, 34, 34, 42, 42, 42, 46]
+
+        df = pd.DataFrame(a, columns=['ts'])
+        df['ahead_timestamp'] = df['timestamp'] + look_ahead
+        shifted = pd.merge_asof(df, df, left_on='ahead_timestamp', right_on='ts', direction='backward')
+        print(shifted)
+
+    def test_merge_as_of_multi(self):
+        a = [[1, 2, 3, 5], [8, 9, 20, 21], [22, 23, 28], [31, 32, 33, 34, 40], [41, 42, 46], [47, 48]]
+        metas = [{'start_ts': l[0], 'end_ts': l[-1]} for l in a]
+        look_ahead = 3
+
+        groups = []
+
+        # groups
+        for i in range(len(metas)):
+            meta = metas[i]
+            group = [meta]
+            end = meta['end_ts'] + look_ahead
+            for j in range(i + 1, len(metas)):
+                if metas[j]['end_ts'] <= end or (metas[j]['start_ts'] <= end <= metas[j]['end_ts']):
+                    group.append(metas[j])
+                else:
+                    break
+            groups.append(group)
+
+
+        res_metas = []
+        results = []
+        for i in range(len(metas)):
+            meta = metas[i]
+            group = groups[i]
+            start = meta['start_ts'] + look_ahead
+            if start > group[-1]['end_ts']:
+                # no data in lookahead window for this block
+                continue
+
+            # TODO need to check if end is larger than last group end?
+            end = meta['end_ts'] + look_ahead
+
+            df = dfs[i]
+            df['ahead_ts'] = df['ts'] + look_ahead
+            grouped = concat(group)
+            shifted = pd.merge_asof(df, grouped, left_on='ahead_timestamp', right_on='ts', direction='backward')
+            result = sub_df(to_res(shifted), start, end)
+
+            res_meta = {'start_ts': start, 'end_ts': end}
+
+            # todo put this in task graph
+            results.append(result)
+            res_metas.append(res_meta)
+
+
+
+
+
+
+
+
+
+
+
+
 
 if __name__ == '__main__':
     # unittest.main()
     t = TestFeatureCalculator()
-    t.test_featurization(L2BookSnapshotFeatureDefinition, L2BookDeltasData)
-    # test_dep_tasks()
+    # t.test_featurization(L2BookSnapshotFeatureDefinition, L2BookDeltasData)
+    # t.test_featurization(OHLCVFeatureDefinition, TradesData)
+    t.test_merge_asof()

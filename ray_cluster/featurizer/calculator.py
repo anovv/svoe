@@ -1,15 +1,14 @@
 import itertools
-from typing import Dict, Type, List, Any, Tuple, Optional
+from typing import Dict, List, Any, Tuple, Optional
+
 
 import ray
 from ray import workflow
 from ray.types import ObjectRef
 
-from featurizer.features.definitions.feature_definition import FeatureDefinition
 from featurizer.features.data.data_definition import Event
 from featurizer.features.feature_tree.feature_tree import Feature, postorder
 from featurizer.features.blocks.blocks import Block, BlockRange, BlockMeta, BlockRangeMeta, get_interval, DataParams
-import dask.graph_manipulation
 from portion import Interval, IntervalDict, closed
 import pandas as pd
 from streamz import Stream
