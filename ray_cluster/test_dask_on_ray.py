@@ -19,7 +19,7 @@ class TestDaskOnRay(unittest.TestCase):
         data_params = {}
         feature_params = {}
         feature = construct_feature_tree(MidPriceFeatureDefinition, data_params, feature_params)
-        task_graph = C.build_feature_task_graph(feature, block_range_meta)
+        task_graph = C.build_feature_task_graph({}, feature, block_range_meta)
         cluster_utils.connect()
         res = dask.compute(task_graph, scheduler=ray_dask_get)
         ray.shutdown()

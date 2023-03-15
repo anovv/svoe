@@ -36,29 +36,29 @@ def build_stream_graph(feature: Feature) -> Dict[Feature, Stream]:
 
 
 # TODO type hint
-def get_ranges_overlaps(grouped_ranges: Dict[Feature, IntervalDict]) -> Dict:
+def get_overlaps(intervaled_values_per_feature: Dict[Feature, IntervalDict]) -> Dict:
     # TODO add visualization?
     # https://github.com/AlexandreDecan/portion
     # https://stackoverflow.com/questions/40367461/intersection-of-two-lists-of-ranges-in-python
     d = IntervalDict()
-    first_feature = list(grouped_ranges.keys())[0]
-    for interval, ranges in grouped_ranges[first_feature].items():
-        d[interval] = {first_feature: ranges}  # named_ranges_dict
+    first_feature = list(intervaled_values_per_feature.keys())[0]
+    for interval, values in intervaled_values_per_feature[first_feature].items():
+        d[interval] = {first_feature: values}  # named_intervaled_values_dict
 
-    # join ranges_dict for each feature_name with first to find all possible intersecting intervals
+    # join intervaled_values_dict for each feature_name with first to find all possible intersecting intervals
     # and their corresponding BlockRange/BlockRangeMeta objects
-    for feature, ranges_dict in grouped_ranges.items():
+    for feature, intervaled_values_dict in intervaled_values_per_feature.items():
         if feature == first_feature:
             continue
 
-        def concat(named_ranges_dict, ranges):
+        def concat(named_intervaled_values_dict, values):
             # TODO copy.deepcopy?
-            res = named_ranges_dict.copy()
-            res[feature] = ranges
+            res = named_intervaled_values_dict.copy()
+            res[feature] = values
             return res
 
-        combined = d.combine(ranges_dict, how=concat)  # outer join
-        d = combined[d.domain() & ranges_dict.domain()]  # inner join
+        combined = d.combine(intervaled_values_dict, how=concat)  # outer join
+        d = combined[d.domain() & intervaled_values_dict.domain()]  # inner join
 
     # make sure all intervals are closed
     res = {}
@@ -191,11 +191,12 @@ def _interval_meta(interval: Interval) -> BlockMeta:
 # graph construction
 # TODO make 3d visualization with networkx/graphviz
 def build_feature_task_graph(
+    dag: Dict, # DAGNode per feature per range
     feature: Feature,
     # TODO decouple derived feature_ranges_meta and input data ranges meta
     ranges_meta: Dict[Feature, List]  # TODO typehint when decide on BlockRangeMeta/BlockMeta
 ):
-    dag = {} # DAGNode per range per feature
+    # TODO pass this as a param
 
     # bottom up/postorder traversal
     def tree_traversal_callback(feature: Feature):
@@ -209,6 +210,8 @@ def build_feature_task_graph(
                 if feature not in dag:
                     dag[feature] = {}
                 node = load_if_needed.bind(block_meta)
+
+                # TODO check if duplicate feature/interval
                 dag[feature][interval] = node
             return
 
@@ -218,10 +221,10 @@ def build_feature_task_graph(
             # TODO this should be in Feature class
             grouped_ranges_by_dep_feature[dep_feature] = feature.feature_definition.group_dep_ranges(dep_ranges, feature, dep_feature)
 
-        overlaps = get_ranges_overlaps(grouped_ranges_by_dep_feature)
+        overlaps = get_overlaps(grouped_ranges_by_dep_feature)
         ranges = []
         for interval, overlap in overlaps.items():
-            # TODO is this needed? is it for block or range?
+            # TODO add size_kb/memory_size_kb to proper size memory usage for aggregate tasks downstream
             result_meta = _interval_meta(interval)
             ranges.append(result_meta)
             if feature not in dag:
@@ -237,8 +240,11 @@ def build_feature_task_graph(
                     ds.append(dep_node)
                 dep_nodes[dep_feature] = ds
             node = calculate_feature.bind(feature, dep_nodes, interval)
+
+            # TODO check if duplicate feature/interval
             dag[feature][interval] = node
 
+        # TODO check if duplicate feature
         ranges_meta[feature] = ranges
 
     postorder(feature, tree_traversal_callback)
@@ -250,6 +256,7 @@ def execute_task_graph(dag: Dict, feature: Feature) -> List[Block]:
     root_nodes = list(dag[feature].values())
     workflow_results_refs = []
     with ray.init(address='auto'):
+        # TODO launch single workflow for this?
         for node in root_nodes:
             r = workflow.run_async(node)
             workflow_results_refs.append(r)
@@ -257,7 +264,50 @@ def execute_task_graph(dag: Dict, feature: Feature) -> List[Block]:
         return ray.get(workflow_results_refs)
 
 
-def build_feature_set_task_graph(
-    feature_set: List[Feature]
+def _build_feature_set_task_graph(
+    dag: Dict,
+    features: List[Feature],
+    ranges_meta: Dict[Feature, List]
+):
+    for feature in features:
+        # TODO check if feature is already in dag and skip?
+        dag = build_feature_task_graph(dag, feature, ranges_meta)
+
+    return dag
+
+
+def _point_in_time_join(dag: Dict) -> Tuple[List, Dict]:
+    # TODO can we use IntervalDict directly in dag?
+    nodes_per_feature_per_interval = {}
+    for feature in dag:
+        nodes_per_interval = IntervalDict()
+        for interval in dag[feature]:
+            nodes_per_interval[interval] = dag[feature][interval]
+        nodes_per_feature_per_interval[feature] = nodes_per_interval
+
+    overlaps = get_overlaps(nodes_per_feature_per_interval)
+
+    joined_nodes = []
+    for overlap, nodes in overlaps:
+        # TODO set resource spec here
+        join_node = _point_in_time_join_block.bind(overlap, nodes)
+        joined_nodes.append(join_node)
+
+    return joined_nodes, dag
+
+
+@ray.remote
+def _point_in_time_join_block(interval: Interval, blocks_refs: List[ObjectRef[Block]]):
+    # TODO
+    return
+
+
+def build_feature_label_set_task_graph(
+    dag: Dict,
+    features: List[Feature],
+    label: Feature,
+    label_lookahead: str = '1m',
 ):
     return
+
+

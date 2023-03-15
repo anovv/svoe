@@ -56,7 +56,7 @@ class TestFeatureCalculator(unittest.TestCase):
                                              {'start_ts': 18.1, 'end_ts': 22}]
         }
 
-        overlaps = C.get_ranges_overlaps(grouped_range)
+        overlaps = C.get_overlaps(grouped_range)
         self.assertEqual(overlaps, expected)
 
     # TODO customize dask graph visualization
@@ -78,7 +78,7 @@ class TestFeatureCalculator(unittest.TestCase):
         feature = construct_feature_tree(feature_def, data_params, feature_params)
         print(RenderTree(feature))
         # calculate in offline/distributed way
-        task_graph = C.build_feature_task_graph(feature, block_range_meta)
+        task_graph = C.build_feature_task_graph({}, feature, block_range_meta)
         print(task_graph)
         # dask.visualize(*task_graph)
         # res_blocks = dask.compute(task_graph)
@@ -138,7 +138,7 @@ class TestFeatureCalculator(unittest.TestCase):
                 # no data in lookahead window for this block
                 continue
 
-            # TODO need to check if end is larger than last group end?
+            # TODO overlap with groups end?
             end = meta['end_ts'] + look_ahead
 
             df = dfs[i]
@@ -147,6 +147,7 @@ class TestFeatureCalculator(unittest.TestCase):
             shifted = pd.merge_asof(df, grouped, left_on='ahead_timestamp', right_on='ts', direction='backward')
             result = sub_df(to_res(shifted), start, end)
 
+            # TODO overlap with groups end?
             res_meta = {'start_ts': start, 'end_ts': end}
 
             # todo put this in task graph
