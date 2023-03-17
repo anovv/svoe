@@ -293,6 +293,7 @@ def _point_in_time_join(dag: Dict) -> Tuple[List, Dict]:
         join_node = _point_in_time_join_block.bind(overlap, nodes)
         joined_nodes.append(join_node)
 
+    # TODO make sure nodes are time sorted so we can streamline execution
     return joined_nodes, dag
 
 

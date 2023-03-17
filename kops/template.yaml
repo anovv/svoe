@@ -146,7 +146,7 @@ spec:
     k8s.io/cluster-autoscaler/{{.cluster_name}}: ""
   # TODO set cluster roles
   {{if eq .cluster_id "1"}}
-  machineType: t3.large
+  machineType: t3.medium
   {{else}}
   machineType: t3.medium
   {{end}}

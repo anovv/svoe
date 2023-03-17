@@ -97,7 +97,7 @@ class TestFeatureCalculator(unittest.TestCase):
         # TODO we may have 1ts duplicate entry (due to snapshot_ts based block partition of l2_delta data source)
         # assert_frame_equal(offline_res, online_res)
 
-    def test_merge_asof(self):
+    def test_look_ahead_merge(self):
         look_ahead = 3
         a = [1, 2, 3, 5, 8, 9, 20, 21, 22, 23, 28, 31, 32, 33, 34, 40, 41, 42, 46]
 
@@ -108,7 +108,7 @@ class TestFeatureCalculator(unittest.TestCase):
         shifted = pd.merge_asof(df, df, left_on='ahead_timestamp', right_on='ts', direction='backward')
         print(shifted)
 
-    def test_merge_as_of_multi(self):
+    def test_look_ahead_merge_multi(self):
         a = [[1, 2, 3, 5], [8, 9, 20, 21], [22, 23, 28], [31, 32, 33, 34, 40], [41, 42, 46], [47, 48]]
         metas = [{'start_ts': l[0], 'end_ts': l[-1]} for l in a]
         look_ahead = 3
@@ -127,7 +127,6 @@ class TestFeatureCalculator(unittest.TestCase):
                     break
             groups.append(group)
 
-
         res_metas = []
         results = []
         for i in range(len(metas)):
@@ -140,6 +139,21 @@ class TestFeatureCalculator(unittest.TestCase):
 
             # TODO overlap with groups end?
             end = meta['end_ts'] + look_ahead
+
+            # TODO
+            def concat(group):
+                return
+
+            # TODO
+            def sub_df(*args):
+                return
+
+            # TODO
+            def to_res(*args):
+                return
+
+            # TODO
+            dfs = []
 
             df = dfs[i]
             df['ahead_ts'] = df['ts'] + look_ahead
@@ -154,17 +168,28 @@ class TestFeatureCalculator(unittest.TestCase):
             results.append(result)
             res_metas.append(res_meta)
 
+    def _mock_ts_df(self, ts, df_name):
+        vals = [f'{df_name}{i}' for i in range(len(ts))]
+        df = pd.DataFrame(list(zip(ts, vals)), columns=['timestamp', df_name])
+        df.set_index('timestamp')
+        return df
 
 
+    def test_merge_asof(self):
 
-
-
-
-
-
-
-
-
+        dfs = [
+            self._mock_ts_df([4, 7, 9], 'a'),
+            self._mock_ts_df([2, 5, 6, 8], 'b'),
+            self._mock_ts_df([1, 3, 6, 10], 'c'),
+        ]
+        # dfs = dfs * 100
+        res = dfs[0]
+        for i in range(1, len(dfs)):
+            res = pd.merge_asof(res, dfs[i], on='timestamp', direction='backward')
+            # res = pd.merge(res, dfs[i], how='outer', on='timestamp')
+            res.set_index('timestamp')
+        # res.fillna(method='ffill')
+        print(res)
 
 if __name__ == '__main__':
     # unittest.main()
