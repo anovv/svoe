@@ -13,7 +13,7 @@ from portion import Interval, IntervalDict, closed
 import pandas as pd
 from streamz import Stream
 import heapq
-from utils.pandas.df_utils import load_df
+from utils.pandas.df_utils import load_df, concat, sub_df_ts
 
 
 # TODO move this to FeatureDefinition package
@@ -36,7 +36,7 @@ def build_stream_graph(feature: Feature) -> Dict[Feature, Stream]:
 
 
 # TODO type hint
-def get_overlaps(intervaled_values_per_feature: Dict[Feature, IntervalDict]) -> Dict:
+def get_overlaps(intervaled_values_per_feature: Dict[Feature, IntervalDict]) -> Dict[Interval, Dict[Feature, List]]:
     # TODO add visualization?
     # https://github.com/AlexandreDecan/portion
     # https://stackoverflow.com/questions/40367461/intersection-of-two-lists-of-ranges-in-python
@@ -287,10 +287,35 @@ def _point_in_time_join(dag: Dict) -> Tuple[List, Dict]:
 
     overlaps = get_overlaps(nodes_per_feature_per_interval)
 
+    def get_prev_nodes(overlap: Interval) -> Dict[Feature, ObjectRef]:
+        res = {}
+        prev_overlap = None
+        min_dist = -1
+        # find prev interval
+        for o in overlaps:
+            if o == overlap:
+                continue
+            dist = overlap.lower - o.upper
+            if dist < 0:
+                # we skip all intervals after this one
+                continue
+            if (prev_overlap is None or min_dist == -1) or dist < min_dist:
+                min_dist = dist
+                prev_overlap = o
+
+        for feature in overlap[prev_overlap]:
+            # use last block
+            res[feature] = overlap[prev_overlap][feature][-1]
+
+        return res
+
     joined_nodes = []
-    for overlap, nodes in overlaps:
+    for overlap, nodes_per_feature in overlaps:
+        # we need to know prev values for join
+        # in case one value is at the start of current block and another is in the end of prev block
+        prev_interval_nodes = get_prev_nodes(overlap, nodes_per_feature)
         # TODO set resource spec here
-        join_node = _point_in_time_join_block.bind(overlap, nodes)
+        join_node = _point_in_time_join_block.bind(overlap, nodes_per_feature, prev_interval_nodes)
         joined_nodes.append(join_node)
 
     # TODO make sure nodes are time sorted so we can streamline execution
@@ -298,9 +323,25 @@ def _point_in_time_join(dag: Dict) -> Tuple[List, Dict]:
 
 
 @ray.remote
-def _point_in_time_join_block(interval: Interval, blocks_refs: List[ObjectRef[Block]]):
-    # TODO
-    return
+def _point_in_time_join_block(
+    interval: Interval,
+    blocks_refs_per_feature: Dict[Feature, List[ObjectRef[Block]]],
+    prev_block_ref_per_feature: Dict[Feature, ObjectRef[Block]],
+    label_feature: Feature,
+) -> pd.DataFrame:
+    concated = {}
+    for feature in blocks_refs_per_feature:
+        # TODO wrap concat in ray task and call bind instead of get
+        blocks = ray.get([prev_block_ref_per_feature[feature]].extend(blocks_refs_per_feature[feature]))
+        concated[feature] = concat(blocks)
+
+    joined = concated[label_feature]
+    for feature in concated:
+        if feature == label_feature:
+            continue
+        joined = pd.merge_asof(joined, concated[feature], on='timestamp', direction='backward')
+
+    return sub_df_ts(joined, interval.lower, interval.upper)
 
 
 def build_feature_label_set_task_graph(

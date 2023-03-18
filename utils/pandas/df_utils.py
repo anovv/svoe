@@ -65,6 +65,10 @@ def sub_df(df: pd.DataFrame, start: int, end: int) -> pd.DataFrame:
     return df[start: end + 1].reset_index(drop=True)
 
 
+def sub_df_ts(df: pd.DataFrame, start_ts: float, end_ts: float) -> pd.DataFrame:
+    return df[df['timestamp'].between(start_ts, end_ts,inclusive='both')]
+
+
 def concat(dfs: List[pd.DataFrame]) -> pd.DataFrame:
     return pd.concat(dfs, ignore_index=True)
 

@@ -1,7 +1,9 @@
 import time
 
 import ray
+from portion import Interval
 from ray import workflow
+from xgboost_ray import RayDMatrix
 
 import calculator as C
 from featurizer.features.data.data_source_definition import DataSourceDefinition
@@ -16,7 +18,7 @@ import portion as P
 import unittest
 import dask
 import pandas as pd
-from typing import Type
+from typing import Type, List
 from anytree import RenderTree
 from ray_cluster.testing_utils import mock_meta, mock_feature, mock_trades_data_and_meta, mock_l2_book_delta_data_and_meta
 
@@ -97,99 +99,24 @@ class TestFeatureCalculator(unittest.TestCase):
         # TODO we may have 1ts duplicate entry (due to snapshot_ts based block partition of l2_delta data source)
         # assert_frame_equal(offline_res, online_res)
 
-    def test_look_ahead_merge(self):
-        look_ahead = 3
-        a = [1, 2, 3, 5, 8, 9, 20, 21, 22, 23, 28, 31, 32, 33, 34, 40, 41, 42, 46]
-
-        b = [3, 5, 5, 8, 9, 9, 23, 23, 23, 23, 31, 34, 34, 34, 34, 42, 42, 42, 46]
-
-        df = pd.DataFrame(a, columns=['ts'])
-        df['ahead_timestamp'] = df['timestamp'] + look_ahead
-        shifted = pd.merge_asof(df, df, left_on='ahead_timestamp', right_on='ts', direction='backward')
-        print(shifted)
-
-    def test_look_ahead_merge_multi(self):
-        a = [[1, 2, 3, 5], [8, 9, 20, 21], [22, 23, 28], [31, 32, 33, 34, 40], [41, 42, 46], [47, 48]]
-        metas = [{'start_ts': l[0], 'end_ts': l[-1]} for l in a]
-        look_ahead = 3
-
-        groups = []
-
-        # groups
-        for i in range(len(metas)):
-            meta = metas[i]
-            group = [meta]
-            end = meta['end_ts'] + look_ahead
-            for j in range(i + 1, len(metas)):
-                if metas[j]['end_ts'] <= end or (metas[j]['start_ts'] <= end <= metas[j]['end_ts']):
-                    group.append(metas[j])
-                else:
-                    break
-            groups.append(group)
-
-        res_metas = []
-        results = []
-        for i in range(len(metas)):
-            meta = metas[i]
-            group = groups[i]
-            start = meta['start_ts'] + look_ahead
-            if start > group[-1]['end_ts']:
-                # no data in lookahead window for this block
-                continue
-
-            # TODO overlap with groups end?
-            end = meta['end_ts'] + look_ahead
-
-            # TODO
-            def concat(group):
-                return
-
-            # TODO
-            def sub_df(*args):
-                return
-
-            # TODO
-            def to_res(*args):
-                return
-
-            # TODO
-            dfs = []
-
-            df = dfs[i]
-            df['ahead_ts'] = df['ts'] + look_ahead
-            grouped = concat(group)
-            shifted = pd.merge_asof(df, grouped, left_on='ahead_timestamp', right_on='ts', direction='backward')
-            result = sub_df(to_res(shifted), start, end)
-
-            # TODO overlap with groups end?
-            res_meta = {'start_ts': start, 'end_ts': end}
-
-            # todo put this in task graph
-            results.append(result)
-            res_metas.append(res_meta)
-
     def _mock_ts_df(self, ts, df_name):
         vals = [f'{df_name}{i}' for i in range(len(ts))]
         df = pd.DataFrame(list(zip(ts, vals)), columns=['timestamp', df_name])
-        df.set_index('timestamp')
         return df
 
-
     def test_merge_asof(self):
-
         dfs = [
             self._mock_ts_df([4, 7, 9], 'a'),
             self._mock_ts_df([2, 5, 6, 8], 'b'),
             self._mock_ts_df([1, 3, 6, 10], 'c'),
         ]
-        # dfs = dfs * 100
         res = dfs[0]
         for i in range(1, len(dfs)):
             res = pd.merge_asof(res, dfs[i], on='timestamp', direction='backward')
-            # res = pd.merge(res, dfs[i], how='outer', on='timestamp')
-            res.set_index('timestamp')
-        # res.fillna(method='ffill')
         print(res)
+
+    def point_in_time_join(self, interval: Interval, dfs: List[pd.DataFrame], prev_dfs: List[pd.DataFrame]) -> pd.DataFrame:
+        res = dfs[0]
 
 if __name__ == '__main__':
     # unittest.main()
@@ -197,3 +124,78 @@ if __name__ == '__main__':
     # t.test_featurization(L2BookSnapshotFeatureDefinition, L2BookDeltasData)
     # t.test_featurization(OHLCVFeatureDefinition, TradesData)
     t.test_merge_asof()
+
+
+    # TODO figure out if we need to use lookahead_shift as a label
+    # TODO (since all the features are autoregressive and already imply past values,
+    # TODO we may use just current values as labels?)
+    # def test_look_ahead_merge(self):
+    #     look_ahead = 3
+    #     a = [1, 2, 3, 5, 8, 9, 20, 21, 22, 23, 28, 31, 32, 33, 34, 40, 41, 42, 46]
+    #
+    #     b = [3, 5, 5, 8, 9, 9, 23, 23, 23, 23, 31, 34, 34, 34, 34, 42, 42, 42, 46]
+    #
+    #     df = pd.DataFrame(a, columns=['ts'])
+    #     df['ahead_timestamp'] = df['timestamp'] + look_ahead
+    #     shifted = pd.merge_asof(df, df, left_on='ahead_timestamp', right_on='ts', direction='backward')
+    #     print(shifted)
+    #
+    # def test_look_ahead_merge_multi(self):
+    #     a = [[1, 2, 3, 5], [8, 9, 20, 21], [22, 23, 28], [31, 32, 33, 34, 40], [41, 42, 46], [47, 48]]
+    #     metas = [{'start_ts': l[0], 'end_ts': l[-1]} for l in a]
+    #     look_ahead = 3
+    #
+    #     groups = []
+    #
+    #     # groups
+    #     for i in range(len(metas)):
+    #         meta = metas[i]
+    #         group = [meta]
+    #         end = meta['end_ts'] + look_ahead
+    #         for j in range(i + 1, len(metas)):
+    #             if metas[j]['end_ts'] <= end or (metas[j]['start_ts'] <= end <= metas[j]['end_ts']):
+    #                 group.append(metas[j])
+    #             else:
+    #                 break
+    #         groups.append(group)
+    #
+    #     res_metas = []
+    #     results = []
+    #     for i in range(len(metas)):
+    #         meta = metas[i]
+    #         group = groups[i]
+    #         start = meta['start_ts'] + look_ahead
+    #         if start > group[-1]['end_ts']:
+    #             # no data in lookahead window for this block
+    #             continue
+    #
+    #         # TODO overlap with groups end?
+    #         end = meta['end_ts'] + look_ahead
+    #
+    #         # TODO
+    #         def concat(group):
+    #             return
+    #
+    #         # TODO
+    #         def sub_df(*args):
+    #             return
+    #
+    #         # TODO
+    #         def to_res(*args):
+    #             return
+    #
+    #         # TODO
+    #         dfs = []
+    #
+    #         df = dfs[i]
+    #         df['ahead_ts'] = df['ts'] + look_ahead
+    #         grouped = concat(group)
+    #         shifted = pd.merge_asof(df, grouped, left_on='ahead_timestamp', right_on='ts', direction='backward')
+    #         result = sub_df(to_res(shifted), start, end)
+    #
+    #         # TODO overlap with groups end?
+    #         res_meta = {'start_ts': start, 'end_ts': end}
+    #
+    #         # todo put this in task graph
+    #         results.append(result)
+    #         res_metas.append(res_meta)
