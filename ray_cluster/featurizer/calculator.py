@@ -36,7 +36,7 @@ def build_stream_graph(feature: Feature) -> Dict[Feature, Stream]:
 
 
 # TODO type hint
-def get_overlaps(intervaled_values_per_feature: Dict[Feature, IntervalDict]) -> Dict[Interval, Dict[Feature, List]]:
+def get_overlaps(intervaled_values_per_feature: Dict[Feature, IntervalDict]) -> Dict[Interval, Dict[Feature, Any]]:
     # TODO add visualization?
     # https://github.com/AlexandreDecan/portion
     # https://stackoverflow.com/questions/40367461/intersection-of-two-lists-of-ranges-in-python
@@ -276,7 +276,7 @@ def _build_feature_set_task_graph(
     return dag
 
 
-def _point_in_time_join(dag: Dict) -> Tuple[List, Dict]:
+def point_in_time_join(dag: Dict) -> List:
     # TODO can we use IntervalDict directly in dag?
     nodes_per_feature_per_interval = {}
     for feature in dag:
@@ -286,42 +286,61 @@ def _point_in_time_join(dag: Dict) -> Tuple[List, Dict]:
         nodes_per_feature_per_interval[feature] = nodes_per_interval
 
     overlaps = get_overlaps(nodes_per_feature_per_interval)
+    # print(overlaps.keys())
+    # raise
 
     def get_prev_nodes(overlap: Interval) -> Dict[Feature, ObjectRef]:
         res = {}
         prev_overlap = None
-        min_dist = -1
-        # find prev interval
-        for o in overlaps:
-            if o == overlap:
-                continue
-            dist = overlap.lower - o.upper
-            if dist < 0:
-                # we skip all intervals after this one
-                continue
-            if (prev_overlap is None or min_dist == -1) or dist < min_dist:
-                min_dist = dist
-                prev_overlap = o
 
-        for feature in overlap[prev_overlap]:
+        # TODO we assume here overlaps are sorted, check this?
+        overlaps_list = list(overlaps.keys())
+        for i in range(len(overlaps_list)):
+            if overlaps_list[i] == overlap and i > 0:
+                prev_overlap = overlaps_list[i - 1]
+                break
+
+        # TODO code below should produce same result as above, check it?
+        # min_dist = -1
+        # # find prev interval
+        # for o in overlaps:
+        #     if o == overlap:
+        #         continue
+        #     dist = overlap.lower - o.upper
+        #     if dist < 0:
+        #         # we skip all intervals after this one
+        #         continue
+        #     if (prev_overlap is None or min_dist == -1) or dist < min_dist:
+        #         min_dist = dist
+        #         prev_overlap = o
+
+        # TODO if overlap is first then prev_overlap us None, handle this
+        for feature in overlaps[prev_overlap]:
             # use last block
-            res[feature] = overlap[prev_overlap][feature][-1]
+            res[feature] = overlaps[prev_overlap][feature]
 
         return res
 
     joined_nodes = []
-    for overlap, nodes_per_feature in overlaps:
+    for overlap in overlaps:
+        nodes_per_feature = overlaps[overlap]
         # we need to know prev values for join
         # in case one value is at the start of current block and another is in the end of prev block
-        prev_interval_nodes = get_prev_nodes(overlap, nodes_per_feature)
+        prev_interval_nodes = get_prev_nodes(overlap)
         # TODO set resource spec here
         join_node = _point_in_time_join_block.bind(overlap, nodes_per_feature, prev_interval_nodes)
         joined_nodes.append(join_node)
 
     # TODO make sure nodes are time sorted so we can streamline execution
-    return joined_nodes, dag
+    return joined_nodes
 
+# # TODO util this
+# @ray.remote
+# def _concat_remote(refs: List[ObjectRef]) -> pd.DataFrame:
+#     blocks = ray.get(refs)
+#     return concat(blocks)
 
+# TODO set memory consumption
 @ray.remote
 def _point_in_time_join_block(
     interval: Interval,
@@ -329,19 +348,31 @@ def _point_in_time_join_block(
     prev_block_ref_per_feature: Dict[Feature, ObjectRef[Block]],
     label_feature: Feature,
 ) -> pd.DataFrame:
+    # TODO this loads all dfs at once,
+    # TODO can we do it iteratively so gc has time to collect old dfs to reduce mem footprint? (tradeoff speed/memory)
     concated = {}
     for feature in blocks_refs_per_feature:
-        # TODO wrap concat in ray task and call bind instead of get
         blocks = ray.get([prev_block_ref_per_feature[feature]].extend(blocks_refs_per_feature[feature]))
         concated[feature] = concat(blocks)
 
-    joined = concated[label_feature]
+    dfs = [concated[label_feature]] # make sure label is first so we use it's ts as join keys
     for feature in concated:
         if feature == label_feature:
+            # it's already there
             continue
-        joined = pd.merge_asof(joined, concated[feature], on='timestamp', direction='backward')
+        dfs.append(concated[feature])
 
-    return sub_df_ts(joined, interval.lower, interval.upper)
+    merged = merge_asof_multi(dfs)
+    return sub_df_ts(merged, interval.lower, interval.upper)
+
+
+# TODO util this
+def merge_asof_multi(dfs: List) -> pd.DataFrame:
+    res = dfs[0]
+    for i in range(1, len(dfs)):
+        res = pd.merge_asof(res, dfs[i], on='timestamp', direction='backward')
+
+    return res
 
 
 def build_feature_label_set_task_graph(

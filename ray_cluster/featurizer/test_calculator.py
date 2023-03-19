@@ -1,9 +1,8 @@
 import time
 
 import ray
-from portion import Interval
+from portion import Interval, closed
 from ray import workflow
-from xgboost_ray import RayDMatrix
 
 import calculator as C
 from featurizer.features.data.data_source_definition import DataSourceDefinition
@@ -20,7 +19,8 @@ import dask
 import pandas as pd
 from typing import Type, List
 from anytree import RenderTree
-from ray_cluster.testing_utils import mock_meta, mock_feature, mock_trades_data_and_meta, mock_l2_book_delta_data_and_meta
+from ray_cluster.testing_utils import mock_meta, mock_feature, mock_trades_data_and_meta, mock_l2_book_delta_data_and_meta, mock_ts_df, mock_ts_df_remote
+from utils.pandas.df_utils import concat
 
 
 class TestFeatureCalculator(unittest.TestCase):
@@ -99,32 +99,64 @@ class TestFeatureCalculator(unittest.TestCase):
         # TODO we may have 1ts duplicate entry (due to snapshot_ts based block partition of l2_delta data source)
         # assert_frame_equal(offline_res, online_res)
 
-    def _mock_ts_df(self, ts, df_name):
-        vals = [f'{df_name}{i}' for i in range(len(ts))]
-        df = pd.DataFrame(list(zip(ts, vals)), columns=['timestamp', df_name])
-        return df
-
     def test_merge_asof(self):
+        # dfs = [
+        #     mock_ts_df([4, 7, 9], 'a'),
+        #     mock_ts_df([2, 5, 6, 8], 'b'),
+        #     mock_ts_df([1, 3, 6, 10], 'c'),
+        # ]
         dfs = [
-            self._mock_ts_df([4, 7, 9], 'a'),
-            self._mock_ts_df([2, 5, 6, 8], 'b'),
-            self._mock_ts_df([1, 3, 6, 10], 'c'),
+            mock_ts_df([4, 7, 9, 14, 16, 20], 'a'),
+            mock_ts_df([2, 5, 6, 8, 10, 11, 12, 18], 'b'),
+            mock_ts_df([1, 3, 7, 10, 19], 'c'),
         ]
-        res = dfs[0]
-        for i in range(1, len(dfs)):
-            res = pd.merge_asof(res, dfs[i], on='timestamp', direction='backward')
+        res = C.merge_asof_multi(dfs)
         print(res)
 
-    def point_in_time_join(self, interval: Interval, dfs: List[pd.DataFrame], prev_dfs: List[pd.DataFrame]) -> pd.DataFrame:
-        res = dfs[0]
+    def test_point_in_time_join(self):
+        dag = {
+            mock_feature(1): {
+                closed(0, 5.01): mock_ts_df_remote.bind([4], 'a', ['a0']),
+                closed(5.02, 11.01): mock_ts_df_remote.bind([7, 9], 'a', ['a1', 'a2']),
+                closed(11.02, 15.01): mock_ts_df_remote.bind([14], 'a', ['a3']),
+                closed(15.02, 18.01): mock_ts_df_remote.bind([16], 'a', ['a4']),
+                closed(18.02, 21.01): mock_ts_df_remote.bind([20], 'a', ['a5']),
+            },
+            mock_feature(2): {
+                closed(0, 9.01): mock_ts_df_remote.bind([2, 5, 6, 8], 'b', ['b0', 'b1', 'b2', 'b3']),
+                closed(9.02, 17.01): mock_ts_df_remote.bind([10, 11, 12], 'b', ['b4', 'b5', 'b6']),
+                closed(17.02, 21.01): mock_ts_df_remote.bind([18], 'b', ['b7'])
+            },
+            mock_feature(3): {
+                closed(0, 4.01): mock_ts_df_remote.bind([1, 3], 'c', ['c0', 'c1']),
+                closed(4.02, 21.01): mock_ts_df_remote.bind([7, 10, 19], 'c', ['c2', 'c3', 'c4']),
+            },
+        }
+
+        # distributed
+        nodes = C.point_in_time_join(dag)
+        with ray.init(address='auto'):
+            # execute dag
+            nodes_res_dfs = ray.get([ray.workflow.run_async(node) for node in nodes])
+            res_ray = concat(nodes_res_dfs)
+            print(res_ray)
+
+        # sequential
+        with ray.init(address='auto'):
+            dfs = []
+            for feature in dag:
+                nodes_res_dfs = ray.get([ray.workflow.run_async(node) for node in list(dag[feature].values())])
+                dfs.append(concat(nodes_res_dfs))
+            res_seq = C.merge_asof_multi(dfs)
+            print(res_seq)
 
 if __name__ == '__main__':
     # unittest.main()
     t = TestFeatureCalculator()
     # t.test_featurization(L2BookSnapshotFeatureDefinition, L2BookDeltasData)
     # t.test_featurization(OHLCVFeatureDefinition, TradesData)
-    t.test_merge_asof()
-
+    t.test_point_in_time_join()
+    # t.test_merge_asof()
 
     # TODO figure out if we need to use lookahead_shift as a label
     # TODO (since all the features are autoregressive and already imply past values,

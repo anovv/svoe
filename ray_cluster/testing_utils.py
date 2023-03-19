@@ -1,4 +1,8 @@
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Optional
+
+import pandas as pd
+import ray
+
 from featurizer.features.blocks.blocks import BlockRangeMeta, BlockRange
 from featurizer.features.data.l2_book_delats.l2_book_deltas import L2BookDeltasData
 from featurizer.features.data.trades.trades import TradesData
@@ -25,6 +29,18 @@ def mock_meta(start_ts, end_ts, extra=None):
     if extra:
         res.update(extra)
     return res
+
+
+def mock_ts_df(ts: List, df_name: str, vals: Optional[List[str]] = None):
+    if vals is None:
+        vals = [f'{df_name}{i}' for i in range(len(ts))]
+    df = pd.DataFrame(list(zip(ts, vals)), columns=['timestamp', df_name])
+    return df
+
+
+@ray.remote
+def mock_ts_df_remote(ts: List, df_name: str, vals: Optional[List[str]] = None):
+    return mock_ts_df(ts, df_name, vals)
 
 
 def mock_l2_book_deltas_data_ranges_meta(
@@ -108,6 +124,6 @@ def mock_l2_book_delta_data_and_meta() -> Tuple[Dict[Feature, BlockRange], Dict[
             block_meta['snapshot_ts'] = infos[i]['snapshot_ts']
         block_range_meta.append(block_meta)
 
-    data_params = {  }# TODO mock
+    data_params = {}# TODO mock
     data = Feature([], 0, L2BookDeltasData, data_params)
     return {data: block_range}, {data: block_range_meta}
