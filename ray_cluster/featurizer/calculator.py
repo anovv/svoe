@@ -264,7 +264,7 @@ def execute_task_graph(dag: Dict, feature: Feature) -> List[Block]:
         return ray.get(workflow_results_refs)
 
 
-def _build_feature_set_task_graph(
+def build_feature_set_task_graph(
     dag: Dict,
     features: List[Feature],
     ranges_meta: Dict[Feature, List]
@@ -276,10 +276,12 @@ def _build_feature_set_task_graph(
     return dag
 
 
-def point_in_time_join(dag: Dict, label_feature: Feature) -> List:
+def point_in_time_join(dag: Dict, features_to_join: List[Feature], label_feature: Feature) -> List:
     # TODO can we use IntervalDict directly in dag?
     nodes_per_feature_per_interval = {}
-    for feature in dag:
+    for feature in features_to_join:
+        if feature not in dag:
+            raise ValueError(f'Feature {feature} not found in dag')
         nodes_per_interval = IntervalDict()
         for interval in dag[feature]:
             nodes_per_interval[interval] = dag[feature][interval]
@@ -366,8 +368,8 @@ def build_feature_label_set_task_graph(
 ):
     # TODO implement label lookahead
     dag = {}
-    dag = _build_feature_set_task_graph(dag, features, ranges_meta)
+    dag = build_feature_set_task_graph(dag, features, ranges_meta)
 
-    return point_in_time_join(dag, label)
+    return point_in_time_join(dag, features, label)
 
 
