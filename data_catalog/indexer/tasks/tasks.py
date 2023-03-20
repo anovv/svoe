@@ -15,6 +15,7 @@ from utils.s3 import s3_utils
 
 
 # TODO set resources
+# TODO util this
 @ray.remote
 def gather_and_wait(args):
     return ray.get(args)

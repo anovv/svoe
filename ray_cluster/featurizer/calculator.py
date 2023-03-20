@@ -276,7 +276,7 @@ def _build_feature_set_task_graph(
     return dag
 
 
-def point_in_time_join(dag: Dict) -> List:
+def point_in_time_join(dag: Dict, label_feature: Feature) -> List:
     # TODO can we use IntervalDict directly in dag?
     nodes_per_feature_per_interval = {}
     for feature in dag:
@@ -286,38 +286,20 @@ def point_in_time_join(dag: Dict) -> List:
         nodes_per_feature_per_interval[feature] = nodes_per_interval
 
     overlaps = get_overlaps(nodes_per_feature_per_interval)
-    # print(overlaps.keys())
-    # raise
 
-    def get_prev_nodes(overlap: Interval) -> Dict[Feature, ObjectRef]:
+    def get_prev_nodes(cur_nodes_per_feature: Dict[Feature, ObjectRef]) -> Dict[Feature, ObjectRef]:
         res = {}
-        prev_overlap = None
+        for feature in cur_nodes_per_feature:
+            # TODO here we assume they are ts sorted
+            nodes = list(nodes_per_feature_per_interval[feature].values())
+            prev_node = None
+            cur_node = cur_nodes_per_feature[feature]
+            for i in range(len(nodes)):
+                if nodes[i] == cur_node and i > 0:
+                    prev_node = nodes[i - 1]
 
-        # TODO we assume here overlaps are sorted, check this?
-        overlaps_list = list(overlaps.keys())
-        for i in range(len(overlaps_list)):
-            if overlaps_list[i] == overlap and i > 0:
-                prev_overlap = overlaps_list[i - 1]
-                break
-
-        # TODO code below should produce same result as above, check it?
-        # min_dist = -1
-        # # find prev interval
-        # for o in overlaps:
-        #     if o == overlap:
-        #         continue
-        #     dist = overlap.lower - o.upper
-        #     if dist < 0:
-        #         # we skip all intervals after this one
-        #         continue
-        #     if (prev_overlap is None or min_dist == -1) or dist < min_dist:
-        #         min_dist = dist
-        #         prev_overlap = o
-
-        # TODO if overlap is first then prev_overlap us None, handle this
-        for feature in overlaps[prev_overlap]:
-            # use last block
-            res[feature] = overlaps[prev_overlap][feature]
+            if prev_node is not None:
+                res[feature] = prev_node
 
         return res
 
@@ -326,25 +308,19 @@ def point_in_time_join(dag: Dict) -> List:
         nodes_per_feature = overlaps[overlap]
         # we need to know prev values for join
         # in case one value is at the start of current block and another is in the end of prev block
-        prev_interval_nodes = get_prev_nodes(overlap)
+        prev_interval_nodes = get_prev_nodes(nodes_per_feature)
         # TODO set resource spec here
-        join_node = _point_in_time_join_block.bind(overlap, nodes_per_feature, prev_interval_nodes)
+        join_node = _point_in_time_join_block.bind(overlap, nodes_per_feature, prev_interval_nodes, label_feature)
         joined_nodes.append(join_node)
 
-    # TODO make sure nodes are time sorted so we can streamline execution
     return joined_nodes
 
-# # TODO util this
-# @ray.remote
-# def _concat_remote(refs: List[ObjectRef]) -> pd.DataFrame:
-#     blocks = ray.get(refs)
-#     return concat(blocks)
 
 # TODO set memory consumption
 @ray.remote
 def _point_in_time_join_block(
     interval: Interval,
-    blocks_refs_per_feature: Dict[Feature, List[ObjectRef[Block]]],
+    blocks_refs_per_feature: Dict[Feature, ObjectRef[Block]],
     prev_block_ref_per_feature: Dict[Feature, ObjectRef[Block]],
     label_feature: Feature,
 ) -> pd.DataFrame:
@@ -352,7 +328,11 @@ def _point_in_time_join_block(
     # TODO can we do it iteratively so gc has time to collect old dfs to reduce mem footprint? (tradeoff speed/memory)
     concated = {}
     for feature in blocks_refs_per_feature:
-        blocks = ray.get([prev_block_ref_per_feature[feature]].extend(blocks_refs_per_feature[feature]))
+        block_refs = [prev_block_ref_per_feature[feature]] if feature in prev_block_ref_per_feature else []
+        block_refs.append(blocks_refs_per_feature[feature])
+
+        # TODO have single ray.get
+        blocks = ray.get(block_refs)
         concated[feature] = concat(blocks)
 
     dfs = [concated[label_feature]] # make sure label is first so we use it's ts as join keys

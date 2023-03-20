@@ -1,3 +1,6 @@
+import glob
+import os
+import shutil
 import time
 
 import ray
@@ -114,18 +117,19 @@ class TestFeatureCalculator(unittest.TestCase):
         print(res)
 
     def test_point_in_time_join(self):
+        label_feature = mock_feature(1)
         dag = {
-            mock_feature(1): {
+            label_feature: {
                 closed(0, 5.01): mock_ts_df_remote.bind([4], 'a', ['a0']),
-                closed(5.02, 11.01): mock_ts_df_remote.bind([7, 9], 'a', ['a1', 'a2']),
+                closed(5.02, 11.01): mock_ts_df_remote.bind([7, 10], 'a', ['a1', 'a2']),
                 closed(11.02, 15.01): mock_ts_df_remote.bind([14], 'a', ['a3']),
                 closed(15.02, 18.01): mock_ts_df_remote.bind([16], 'a', ['a4']),
                 closed(18.02, 21.01): mock_ts_df_remote.bind([20], 'a', ['a5']),
             },
             mock_feature(2): {
                 closed(0, 9.01): mock_ts_df_remote.bind([2, 5, 6, 8], 'b', ['b0', 'b1', 'b2', 'b3']),
-                closed(9.02, 17.01): mock_ts_df_remote.bind([10, 11, 12], 'b', ['b4', 'b5', 'b6']),
-                closed(17.02, 21.01): mock_ts_df_remote.bind([18], 'b', ['b7'])
+                closed(9.02, 17.01): mock_ts_df_remote.bind([11, 12], 'b', ['b4', 'b5']),
+                closed(17.02, 21.01): mock_ts_df_remote.bind([18], 'b', ['b6'])
             },
             mock_feature(3): {
                 closed(0, 4.01): mock_ts_df_remote.bind([1, 3], 'c', ['c0', 'c1']),
@@ -133,11 +137,18 @@ class TestFeatureCalculator(unittest.TestCase):
             },
         }
 
+        # purge workflows storage
+        path = '/tmp/ray/workflows_data/workflows/'
+        try:
+            shutil.rmtree(path)
+        except:
+            pass
+
         # distributed
-        nodes = C.point_in_time_join(dag)
+        nodes = C.point_in_time_join(dag, label_feature)
         with ray.init(address='auto'):
             # execute dag
-            nodes_res_dfs = ray.get([ray.workflow.run_async(node) for node in nodes])
+            nodes_res_dfs = ray.get([ray.workflow.run_async(dag=node, workflow_id=f'{time.time_ns()}') for node in nodes])
             res_ray = concat(nodes_res_dfs)
             print(res_ray)
 
@@ -149,6 +160,9 @@ class TestFeatureCalculator(unittest.TestCase):
                 dfs.append(concat(nodes_res_dfs))
             res_seq = C.merge_asof_multi(dfs)
             print(res_seq)
+
+        # TODO assert
+        print(res_ray.equals(res_seq))
 
 if __name__ == '__main__':
     # unittest.main()
