@@ -8,11 +8,8 @@ from featurizer.features.data.l2_book_delats.l2_book_deltas import L2BookDeltasD
 from featurizer.features.data.trades.trades import TradesData
 from featurizer.features.definitions.feature_definition import FeatureDefinition
 from featurizer.features.feature_tree.feature_tree import Feature
-from utils.pandas.df_utils import load_and_cache, time_range, get_size_kb, get_num_rows
+from utils.pandas.df_utils import load_dfs, time_range, get_size_kb, get_num_rows
 from featurizer.features.loader.l2_snapshot_utils import get_info
-
-# TODO make default global cache dir
-CACHE_DIR = './cached_dfs'
 
 def mock_feature(position: int):
     return Feature(
@@ -80,7 +77,7 @@ def mock_trades_data_and_meta() -> Tuple[Dict[Feature, BlockRange], Dict[Feature
         's3://svoe.test.1/parquet/BINANCE_FUTURES/trades/ETH-USDT/BINANCE_FUTURES-trades-ETH-USDT-1622120594.parquet',
         's3://svoe.test.1/parquet/BINANCE_FUTURES/trades/ETH-USDT/BINANCE_FUTURES-trades-ETH-USDT-1622120624.parquet'
     ]
-    block_range = load_and_cache(consec_athena_files_BINANCE_FUTURES_ETH_USD_PERP, CACHE_DIR)
+    block_range = load_dfs(consec_athena_files_BINANCE_FUTURES_ETH_USD_PERP)
     block_range_meta = []
     for i in range(len(consec_athena_files_BINANCE_FUTURES_ETH_USD_PERP)):
         # TODO util this
@@ -110,7 +107,7 @@ def mock_l2_book_delta_data_and_meta() -> Tuple[Dict[Feature, BlockRange], Dict[
         's3://svoe.test.1/data_lake/data_feed_market_data/l2_book/exchange=BINANCE_FUTURES/instrument_type=perpetual/instrument_extra={}/symbol=BTC-USDT-PERP/base=BTC/quote=USDT/date=2022-10-03/compaction=raw/version=local/BINANCE_FUTURES*l2_book*BTC-USDT-PERP*1664778949.313781*1664778979.103868*f3605c1202f64eb3bca1960eb5b9b241.gz.parquet',
         's3://svoe.test.1/data_lake/data_feed_market_data/l2_book/exchange=BINANCE_FUTURES/instrument_type=perpetual/instrument_extra={}/symbol=BTC-USDT-PERP/base=BTC/quote=USDT/date=2022-10-03/compaction=raw/version=local/BINANCE_FUTURES*l2_book*BTC-USDT-PERP*1664778979.1611981*1664779009.082793*71c48c0b589d4c0b9ee2961dde59d9a1.gz.parquet'
     ]
-    block_range = load_and_cache(consec_athena_files_BINANCE_FUTURES_BTC_USD_PERP, CACHE_DIR)
+    block_range = load_dfs(consec_athena_files_BINANCE_FUTURES_BTC_USD_PERP)
 
     infos = [get_info(block) for block in block_range]
     block_range_meta = []

@@ -349,6 +349,8 @@ def _point_in_time_join_block(
 # TODO util this
 def merge_asof_multi(dfs: List) -> pd.DataFrame:
     res = dfs[0]
+    for df in dfs:
+        print(df)
     for i in range(1, len(dfs)):
         res = pd.merge_asof(res, dfs[i], on='timestamp', direction='backward')
     return res
