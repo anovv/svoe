@@ -351,16 +351,21 @@ def merge_asof_multi(dfs: List) -> pd.DataFrame:
     res = dfs[0]
     for i in range(1, len(dfs)):
         res = pd.merge_asof(res, dfs[i], on='timestamp', direction='backward')
-
     return res
 
 
+# TODO type hint
+# TODO for scaling https://github.com/online-ml/river/blob/main/river/preprocessing/scale.py
 def build_feature_label_set_task_graph(
-    dag: Dict,
     features: List[Feature],
+    ranges_meta: Dict[Feature, List],
     label: Feature,
-    label_lookahead: str = '1m',
+    label_lookahead: Optional[str] = None,
 ):
-    return
+    # TODO implement label lookahead
+    dag = {}
+    dag = _build_feature_set_task_graph(dag, features, ranges_meta)
+
+    return point_in_time_join(dag, label)
 
 

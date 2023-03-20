@@ -13,6 +13,8 @@ from featurizer.features.data.l2_book_delats.l2_book_deltas import L2BookDeltasD
 from featurizer.features.data.trades.trades import TradesData
 from featurizer.features.definitions.ohlcv.ohlcv_feature_definition import OHLCVFeatureDefinition
 from featurizer.features.definitions.l2_book_snapshot.l2_book_snapshot_feature_definition import L2BookSnapshotFeatureDefinition
+from featurizer.features.definitions.mid_price.mid_price_feature_definition import MidPriceFeatureDefinition
+from featurizer.features.definitions.volatility.volatility_stddev_feature_definition import VolatilityStddevFeatureDefinition
 from featurizer.features.definitions.feature_definition import FeatureDefinition
 from featurizer.features.feature_tree.feature_tree import construct_feature_tree
 
@@ -164,13 +166,27 @@ class TestFeatureCalculator(unittest.TestCase):
         # TODO assert
         print(res_ray.equals(res_seq))
 
+    def test_feature_label_set(self):
+        block_range, block_range_meta = mock_l2_book_delta_data_and_meta()
+        data_params = {}
+        feature_params = {}
+        feature_mid_price = construct_feature_tree(MidPriceFeatureDefinition, data_params, feature_params)
+        feature_volatility = construct_feature_tree(VolatilityStddevFeatureDefinition, data_params, feature_params)
+        flset = C.build_feature_label_set_task_graph([feature_mid_price, feature_volatility], block_range_meta, feature_mid_price)
+        with ray.init(address='auto'):
+            # execute dag
+            nodes_res_dfs = ray.get([ray.workflow.run_async(dag=node, workflow_id=f'{time.time_ns()}') for node in flset])
+            res = concat(nodes_res_dfs)
+            print(res)
+
 if __name__ == '__main__':
     # unittest.main()
     t = TestFeatureCalculator()
     # t.test_featurization(L2BookSnapshotFeatureDefinition, L2BookDeltasData)
     # t.test_featurization(OHLCVFeatureDefinition, TradesData)
-    t.test_point_in_time_join()
+    # t.test_point_in_time_join()
     # t.test_merge_asof()
+    t.test_feature_label_set()
 
     # TODO figure out if we need to use lookahead_shift as a label
     # TODO (since all the features are autoregressive and already imply past values,
