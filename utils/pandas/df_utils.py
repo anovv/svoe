@@ -36,7 +36,7 @@ def load_df(path: str, use_cache: bool = True, cache_dir: str = CACHE_DIR) -> pd
     suffix = split[len(split) - 1]
     prefix = remove_suffix(path, suffix)
     session = get_session()
-    df = wr.s3.read_parquet(path=prefix, path_suffix=suffix, dataset=True, boto3_session=session)
+    df = wr.s3.read_parquet(path=prefix, path_suffix=suffix, dataset=False, boto3_session=session)
 
     if use_cache:
         cache = CacheDF(cache_dir=cache_dir)
@@ -85,4 +85,15 @@ def get_time_diff(df1: pd.DataFrame, df2: pd.DataFrame) -> float:
     start1 = df1.iloc[0].timestamp
     start2 = df2.iloc[0].timestamp
     return start1 - start2
+
+
+def merge_asof_multi(dfs: List[pd.DataFrame]) -> pd.DataFrame:
+    res = dfs[0]
+    for i in range(1, len(dfs)):
+        res = pd.merge_asof(res, dfs[i], on='timestamp', direction='backward')
+    return res
+
+
+def is_ts_sorted(df: pd.DataFrame) -> bool:
+    return df['timestamp'].is_monotonic_increasing
 

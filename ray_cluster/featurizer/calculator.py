@@ -13,7 +13,7 @@ from portion import Interval, IntervalDict, closed
 import pandas as pd
 from streamz import Stream
 import heapq
-from utils.pandas.df_utils import load_df, concat, sub_df_ts
+from utils.pandas.df_utils import load_df, concat, sub_df_ts, merge_asof_multi, is_ts_sorted
 
 
 # TODO move this to FeatureDefinition package
@@ -77,7 +77,13 @@ def load_if_needed(
     # TODO if using Ray's Plasma, check shared obj store first, if empty - load from s3
     # TODO figure out how to split BlockRange -> Block and cache if needed
     # TODO sync keys
-    return load_df(block_meta['path'])
+    path = block_meta['path']
+    df = load_df(path)
+
+    # TODO move this check to loading logic
+    if not is_ts_sorted(df):
+        raise ValueError(f'Data df is not ts sorted {path}')
+    return df
 
 
 # TODO for Virtual clock
@@ -119,7 +125,10 @@ def calculate_feature(
     # construct upstreams
     upstreams = {dep_named_feature: Stream() for dep_named_feature in deps.keys()}
     out_stream = feature.feature_definition.stream(upstreams, feature.params)
-    return run_stream(merged, upstreams, out_stream, interval)
+    df = run_stream(merged, upstreams, out_stream, interval)
+    if not is_ts_sorted(df):
+        raise ValueError(f'Feature df is not ts sorted {feature, interval}')
+    return df
 
 
 # TODO util this
@@ -140,13 +149,13 @@ def merge_blocks(
             named = []
             for e in parsed:
                 named.append((feature, e))
-            named_events.extend(named)
-        # TODO check if events are timestamp sorted?
+            named_events = list(heapq.merge(named_events, named, key=lambda named_event: named_event[1]['timestamp']))
+
         if i == 0:
             merged = named_events
         else:
             # TODO explore heapdict
-            merged = heapq.merge(merged, named_events, key=lambda named_event: named_event[1]['timestamp'])
+            merged = list(heapq.merge(merged, named_events, key=lambda named_event: named_event[1]['timestamp']))
 
     return merged
 
@@ -346,16 +355,6 @@ def _point_in_time_join_block(
 
     merged = merge_asof_multi(dfs)
     return sub_df_ts(merged, interval.lower, interval.upper)
-
-
-# TODO util this
-def merge_asof_multi(dfs: List) -> pd.DataFrame:
-    res = dfs[0]
-    for df in dfs:
-        print(df)
-    for i in range(1, len(dfs)):
-        res = pd.merge_asof(res, dfs[i], on='timestamp', direction='backward')
-    return res
 
 
 # TODO type hint
