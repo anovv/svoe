@@ -1,26 +1,25 @@
 from pathlib import Path
 
 import awswrangler as wr
+import joblib
 import pandas as pd
 from cache_df import CacheDF
 import functools
-from typing import List, Tuple, Generator
+from typing import List, Tuple, Generator, Optional
 import utils.concurrency.concurrency_utils as cu
 from utils.s3.s3_utils import get_session
-from joblib import hash
 
 CACHE_DIR = '/tmp/svoe/dfs_cache/'
 
 
 def load_df(path: str, use_cache: bool = True, cache_dir: str = CACHE_DIR, extension: str = 'parquet') -> pd.DataFrame:
     # caching first
-    cache_key = str(hash(path)) # can't use s3:// strings as keys, cache_df lib flips out
+    cache_key = joblib.hash(path) # can't use s3:// strings as keys, cache_df lib flips out
     if use_cache:
-        Path(cache_dir).mkdir(parents=True, exist_ok=True)
         # TODO use joblib.Memory instead ?
-        cache = CacheDF(cache_dir=cache_dir)
-        if cache.is_cached(cache_key):
-            return cache.read(cache_key)
+        df = get_cached_df(cache_key)
+        if df is not None:
+            return df
 
     # split path into prefix and suffix
     # this is needed because if dataset=True data wrangler handles input path as a glob pattern,
@@ -39,15 +38,26 @@ def load_df(path: str, use_cache: bool = True, cache_dir: str = CACHE_DIR, exten
     if extension == 'parquet':
         df = wr.s3.read_parquet(path=prefix, path_suffix=suffix, dataset=False, boto3_session=session)
     elif extension == 'csv':
-        df = wr.s3.read_csv(path=prefix, path_suffix=suffix, dataset=False, boto3_session=session)
+        df = wr.s3.read_csv(path=prefix, path_suffix=suffix, dataset=False, boto3_session=session, delimiter=';')
     else:
         raise ValueError(f'Unsupported file extension: {extension}')
 
     if use_cache:
-        cache = CacheDF(cache_dir=cache_dir)
-        if not cache.is_cached(cache_key):
-            cache.cache(df, cache_key)
+        cache_df_if_needed(df, cache_key)
     return df
+
+
+def cache_df_if_needed(df: pd.DataFrame, cache_key: str, cache_dir: str = CACHE_DIR):
+    Path(cache_dir).mkdir(parents=True, exist_ok=True)
+    cache = CacheDF(cache_dir=cache_dir)
+    if not cache.is_cached(cache_key):
+        cache.cache(df, cache_key)
+
+
+def get_cached_df(cache_key: str, cache_dir: str = CACHE_DIR) -> Optional[pd.DataFrame]:
+    cache = CacheDF(cache_dir=cache_dir)
+    if cache.is_cached(cache_key):
+        return cache.read(cache_key)
 
 
 def load_dfs(paths: List[str], use_cache: bool = True, cache_dir: str = CACHE_DIR) -> List[pd.DataFrame]:
@@ -105,7 +115,7 @@ def is_ts_sorted(df: pd.DataFrame) -> bool:
 
 # TODO make sure split does not happen at rows with the same timestamp
 # TODO typing
-def gen_split_df_by_mem(df: pd.DataFrame, chunk_size_kb: int) -> Generator:
+def gen_split_df_by_mem(df: pd.DataFrame, chunk_size_kb: int, ts_col_name: str = 'timestamp') -> Generator:
     num_rows = len(df)
     df_size_kb = get_size_kb(df)
 
@@ -120,9 +130,8 @@ def gen_split_df_by_mem(df: pd.DataFrame, chunk_size_kb: int) -> Generator:
     while start < num_rows:
         end = min(start + chunk_num_rows, num_rows)
         # move end while we have same ts to make sure we don't split it
-        end_ts = df.iloc[end - 1]['timestamp']
-        while end < num_rows and df.iloc[end - 1]['timestamp'] == end_ts:
+        end_ts = df.iloc[end - 1][ts_col_name]
+        while end < num_rows and df.iloc[end - 1][ts_col_name] == end_ts:
             end += 1
         yield df.iloc[start:end]
         start = end
-

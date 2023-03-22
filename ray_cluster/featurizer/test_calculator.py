@@ -4,6 +4,7 @@ import shutil
 import time
 
 import dask
+import joblib
 import numpy as np
 import ray
 from bokeh.io import show
@@ -32,7 +33,7 @@ import pandas as pd
 from typing import Type, List
 from anytree import RenderTree
 from ray_cluster.testing_utils import mock_meta, mock_feature, mock_trades_data_and_meta, mock_l2_book_delta_data_and_meta, mock_ts_df, mock_ts_df_remote
-from utils.pandas.df_utils import concat, load_df, get_size_kb, gen_split_df_by_mem
+from utils.pandas.df_utils import concat, load_df, get_size_kb, gen_split_df_by_mem, cache_df_if_needed, get_cached_df
 
 
 class TestFeatureCalculator(unittest.TestCase):
@@ -213,9 +214,22 @@ class TestFeatureCalculator(unittest.TestCase):
         # output_file("ts.html")
         show(p)
 
-    def test_cryptotick(self):
-        df = load_df('s3://svoe-cryptotick-data/limitbook_full/20230201/BINANCE_SPOT_BTC_USDT.csv.gz', extension='csv')
-        print(get_size_kb(df))
+    def test_split_and_cache_big_cryptotick_df(self):
+        big_df_path = 's3://svoe-cryptotick-data/limitbook_full/20230201/BINANCE_SPOT_BTC_USDT.csv.gz'
+        #  5Gb in-memory
+        big_df = load_df(big_df_path, extension='csv')
+        print(big_df.head(1))
+        split_gen = gen_split_df_by_mem(big_df, 100 * 1024, ts_col_name='time_exchange')
+
+        def _cache_key_for_split(split_id: int):
+            return joblib.hash(big_df_path + str(split_id))
+        i = 0
+        for split_df in split_gen:
+            cache_df_if_needed(split_df, _cache_key_for_split(i))
+            i += 1
+
+        print(get_cached_df(_cache_key_for_split(0)))
+
 
     # TODO util this
     def test_df_split(self):
@@ -259,8 +273,8 @@ if __name__ == '__main__':
     # t.test_point_in_time_join()
     # t.test_merge_asof()
     # t.test_feature_label_set()
-    # t.test_cryptotick()
-    t.test_df_split()
+    # t.test_df_split()
+    t.test_split_and_cache_big_cryptotick_df()
 
     # TODO figure out if we need to use lookahead_shift as a label
     # TODO (since all the features are autoregressive and already imply past values,
