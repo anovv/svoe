@@ -118,11 +118,11 @@ def gen_split_df_by_mem(df: pd.DataFrame, chunk_size_kb: int) -> Generator:
 
     start = 0
     while start < num_rows:
-        end = min(start + chunk_num_rows - 1, num_rows - 1)
+        end = min(start + chunk_num_rows, num_rows)
         # move end while we have same ts to make sure we don't split it
-        end_ts = df.iloc[end]['timestamp']
-        while end < num_rows - 1 and df.iloc[end]['timestamp'] == end_ts:
+        end_ts = df.iloc[end - 1]['timestamp']
+        while end < num_rows and df.iloc[end - 1]['timestamp'] == end_ts:
             end += 1
         yield df.iloc[start:end]
-        start = end + 1
+        start = end
 

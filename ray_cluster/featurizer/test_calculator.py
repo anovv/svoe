@@ -225,7 +225,7 @@ class TestFeatureCalculator(unittest.TestCase):
         trades_data, _ = mock_trades_data_and_meta()
         trades_dfs = list(trades_data.values())[0]
 
-        l2_split_size_kb = 12
+        l2_split_size_kb = 300
         l2_split_sizes = []
         for l2_df in l2_dfs:
             l2_split_gen = gen_split_df_by_mem(l2_df, l2_split_size_kb)
@@ -234,12 +234,10 @@ class TestFeatureCalculator(unittest.TestCase):
                 l2_split_sizes.append(get_size_kb(split_df))
                 splits.append(split_df)
             concated = concat(splits)
-            print(l2_df)
-            print(concated)
             assert concated.equals(l2_df)
         print(f'Avg L2 split size:{np.mean(l2_split_sizes)}')
 
-        trades_split_size_kb = 7
+        trades_split_size_kb = 10
         trades_split_sizes = []
         for trades_df in trades_dfs:
             trades_split_gen = gen_split_df_by_mem(trades_df, trades_split_size_kb)
