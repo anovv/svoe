@@ -4,6 +4,7 @@ import shutil
 import time
 
 import dask
+import numpy as np
 import ray
 from bokeh.io import show
 from bokeh.models import ColumnDataSource, Range1d, LinearAxis
@@ -31,7 +32,7 @@ import pandas as pd
 from typing import Type, List
 from anytree import RenderTree
 from ray_cluster.testing_utils import mock_meta, mock_feature, mock_trades_data_and_meta, mock_l2_book_delta_data_and_meta, mock_ts_df, mock_ts_df_remote
-from utils.pandas.df_utils import concat, load_df, get_size_kb
+from utils.pandas.df_utils import concat, load_df, get_size_kb, gen_split_df_by_mem
 
 
 class TestFeatureCalculator(unittest.TestCase):
@@ -218,7 +219,38 @@ class TestFeatureCalculator(unittest.TestCase):
 
     # TODO util this
     def test_df_split(self):
-        pass
+        l2_data, _ = mock_l2_book_delta_data_and_meta()
+        l2_dfs = list(l2_data.values())[0]
+
+        trades_data, _ = mock_trades_data_and_meta()
+        trades_dfs = list(trades_data.values())[0]
+
+        l2_split_size_kb = 12
+        l2_split_sizes = []
+        for l2_df in l2_dfs:
+            l2_split_gen = gen_split_df_by_mem(l2_df, l2_split_size_kb)
+            splits = []
+            for split_df in l2_split_gen:
+                l2_split_sizes.append(get_size_kb(split_df))
+                splits.append(split_df)
+            concated = concat(splits)
+            print(l2_df)
+            print(concated)
+            assert concated.equals(l2_df)
+        print(f'Avg L2 split size:{np.mean(l2_split_sizes)}')
+
+        trades_split_size_kb = 7
+        trades_split_sizes = []
+        for trades_df in trades_dfs:
+            trades_split_gen = gen_split_df_by_mem(trades_df, trades_split_size_kb)
+            splits = []
+            for split_df in trades_split_gen:
+                trades_split_sizes.append(get_size_kb(split_df))
+                splits.append(split_df)
+            concated = concat(splits)
+            assert concated.equals(trades_df)
+
+        print(f'Avg Trades split size:{np.mean(trades_split_sizes)}')
 
 
 if __name__ == '__main__':
@@ -229,7 +261,8 @@ if __name__ == '__main__':
     # t.test_point_in_time_join()
     # t.test_merge_asof()
     # t.test_feature_label_set()
-    t.test_cryptotick()
+    # t.test_cryptotick()
+    t.test_df_split()
 
     # TODO figure out if we need to use lookahead_shift as a label
     # TODO (since all the features are autoregressive and already imply past values,

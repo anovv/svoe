@@ -102,6 +102,7 @@ def merge_asof_multi(dfs: List[pd.DataFrame]) -> pd.DataFrame:
 def is_ts_sorted(df: pd.DataFrame) -> bool:
     return df['timestamp'].is_monotonic_increasing
 
+
 # TODO make sure split does not happen at rows with the same timestamp
 # TODO typing
 def gen_split_df_by_mem(df: pd.DataFrame, chunk_size_kb: int) -> Generator:
@@ -111,13 +112,17 @@ def gen_split_df_by_mem(df: pd.DataFrame, chunk_size_kb: int) -> Generator:
     if chunk_size_kb > df_size_kb:
         raise ValueError(f'Chunk size {chunk_size_kb}kb is larger then df size {df_size_kb}kb')
 
-    row_size_kb = int(df_size_kb/num_rows)
+    row_size_kb = df_size_kb/num_rows
 
-    # maximum number of rows of each segment
     chunk_num_rows = int(chunk_size_kb/row_size_kb)
 
-    # number of chunks
-    num_chunks = int((num_rows + chunk_num_rows - 1)/chunk_num_rows)
-    for i in range(num_chunks):
-        yield df.iloc[i * chunk_num_rows: (i + 1) * chunk_num_rows]
+    start = 0
+    while start < num_rows:
+        end = min(start + chunk_num_rows - 1, num_rows - 1)
+        # move end while we have same ts to make sure we don't split it
+        end_ts = df.iloc[end]['timestamp']
+        while end < num_rows - 1 and df.iloc[end]['timestamp'] == end_ts:
+            end += 1
+        yield df.iloc[start:end]
+        start = end + 1
 
