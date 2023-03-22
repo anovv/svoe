@@ -3,9 +3,15 @@ import os
 import shutil
 import time
 
+import dask
 import ray
+from bokeh.io import show
+from bokeh.models import ColumnDataSource, Range1d, LinearAxis
+from bokeh.plotting import figure
 from portion import Interval, closed
 from ray import workflow
+from ray.types import ObjectRef
+from ray.util.dask import enable_dask_on_ray
 
 import calculator as C
 from featurizer.features.data.data_source_definition import DataSourceDefinition
@@ -20,12 +26,12 @@ from featurizer.features.feature_tree.feature_tree import construct_feature_tree
 
 import portion as P
 import unittest
-import dask
+import dask.dataframe as dd
 import pandas as pd
 from typing import Type, List
 from anytree import RenderTree
 from ray_cluster.testing_utils import mock_meta, mock_feature, mock_trades_data_and_meta, mock_l2_book_delta_data_and_meta, mock_ts_df, mock_ts_df_remote
-from utils.pandas.df_utils import concat
+from utils.pandas.df_utils import concat, load_df, get_size_kb
 
 
 class TestFeatureCalculator(unittest.TestCase):
@@ -147,7 +153,7 @@ class TestFeatureCalculator(unittest.TestCase):
             pass
 
         # distributed
-        nodes = C.point_in_time_join(dag, label_feature)
+        nodes = C.point_in_time_join(dag, list(dag.keys()), label_feature)
         with ray.init(address='auto'):
             # execute dag
             nodes_res_dfs = ray.get([ray.workflow.run_async(dag=node, workflow_id=f'{time.time_ns()}') for node in nodes])
@@ -173,11 +179,47 @@ class TestFeatureCalculator(unittest.TestCase):
         feature_mid_price = construct_feature_tree(MidPriceFeatureDefinition, data_params, feature_params)
         feature_volatility = construct_feature_tree(VolatilityStddevFeatureDefinition, data_params, feature_params)
         flset = C.build_feature_label_set_task_graph([feature_mid_price, feature_volatility], block_range_meta, feature_mid_price)
+        res = None
+
+        # @dask.delayed
+        # def ref_to_df(ref: List[ObjectRef]) -> pd.DataFrame:
+        #     return ref[0]
+
+        # with ray.init(address='auto', runtime_env={'pip': ['pyarrow==6.0.1']}):
         with ray.init(address='auto'):
             # execute dag
-            nodes_res_dfs = ray.get([ray.workflow.run_async(dag=node, workflow_id=f'{time.time_ns()}') for node in flset])
-            res = concat(nodes_res_dfs)
+            refs = [ray.workflow.run_async(dag=node, workflow_id=f'{time.time_ns()}') for node in flset]
+            # nodes_res_dfs = ray.get(refs)
+            # res = concat(nodes_res_dfs)
+            ray.wait(refs, num_returns=len(refs))
+            dataset = ray.data.from_pandas_refs(refs)
+            with enable_dask_on_ray():
+                # ddf = dd.from_delayed([ref_to_df([ref]) for ref in refs])
+                ddf = dataset.to_dask()
+                res = ddf.sample(frac=0.5).compute()
             print(res)
+
+        # res.plot(x='timestamp', y=['mid_price', 'volatility'])
+
+        source = ColumnDataSource(res)
+        p = figure(x_axis_type="datetime", plot_width=800, plot_height=350)
+        p.line('timestamp', 'mid_price', source=source)
+        p.y_range = Range1d(start=19000, end=20000)
+        p.extra_y_ranges = {'volatility': Range1d(start=0, end=10)}
+        p.add_layout(LinearAxis(y_range_name='volatility'), 'right')
+        p.line('timestamp', 'volatility', source=source, y_range_name='volatility')
+
+        # output_file("ts.html")
+        show(p)
+
+    def test_cryptotick(self):
+        df = load_df('s3://svoe-cryptotick-data/limitbook_full/20230201/BINANCE_SPOT_BTC_USDT.csv.gz', extension='csv')
+        print(get_size_kb(df))
+
+    # TODO util this
+    def test_df_split(self):
+        pass
+
 
 if __name__ == '__main__':
     # unittest.main()
@@ -186,7 +228,8 @@ if __name__ == '__main__':
     # t.test_featurization(OHLCVFeatureDefinition, TradesData)
     # t.test_point_in_time_join()
     # t.test_merge_asof()
-    t.test_feature_label_set()
+    # t.test_feature_label_set()
+    t.test_cryptotick()
 
     # TODO figure out if we need to use lookahead_shift as a label
     # TODO (since all the features are autoregressive and already imply past values,
