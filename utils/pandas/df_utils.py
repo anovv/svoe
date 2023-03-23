@@ -17,7 +17,7 @@ def load_df(path: str, use_cache: bool = True, cache_dir: str = CACHE_DIR, exten
     cache_key = joblib.hash(path) # can't use s3:// strings as keys, cache_df lib flips out
     if use_cache:
         # TODO use joblib.Memory instead ?
-        df = get_cached_df(cache_key)
+        df = get_cached_df(cache_key, cache_dir=cache_dir)
         if df is not None:
             return df
 
@@ -43,7 +43,7 @@ def load_df(path: str, use_cache: bool = True, cache_dir: str = CACHE_DIR, exten
         raise ValueError(f'Unsupported file extension: {extension}')
 
     if use_cache:
-        cache_df_if_needed(df, cache_key)
+        cache_df_if_needed(df, cache_key, cache_dir=cache_dir)
     return df
 
 
@@ -58,6 +58,11 @@ def get_cached_df(cache_key: str, cache_dir: str = CACHE_DIR) -> Optional[pd.Dat
     cache = CacheDF(cache_dir=cache_dir)
     if cache.is_cached(cache_key):
         return cache.read(cache_key)
+
+
+def delete_cached_df(cache_key: str, cache_dir: str = CACHE_DIR):
+    cache = CacheDF(cache_dir=cache_dir)
+    cache.uncache(cache_key)
 
 
 def load_dfs(paths: List[str], use_cache: bool = True, cache_dir: str = CACHE_DIR) -> List[pd.DataFrame]:
@@ -128,10 +133,12 @@ def gen_split_df_by_mem(df: pd.DataFrame, chunk_size_kb: int, ts_col_name: str =
 
     start = 0
     while start < num_rows:
-        end = min(start + chunk_num_rows, num_rows)
+        end = min(start + chunk_num_rows, num_rows) - 1
         # move end while we have same ts to make sure we don't split it
-        end_ts = df.iloc[end - 1][ts_col_name]
-        while end < num_rows and df.iloc[end - 1][ts_col_name] == end_ts:
+        end_ts = df.iloc[end][ts_col_name]
+        while end < num_rows and df.iloc[end][ts_col_name] == end_ts:
             end += 1
-        yield df.iloc[start:end]
+        yield df.iloc[start: end]
         start = end
+
+    # TODO return num splits?

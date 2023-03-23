@@ -28,12 +28,11 @@ from featurizer.features.feature_tree.feature_tree import construct_feature_tree
 
 import portion as P
 import unittest
-import dask.dataframe as dd
 import pandas as pd
 from typing import Type, List
 from anytree import RenderTree
 from ray_cluster.testing_utils import mock_meta, mock_feature, mock_trades_data_and_meta, mock_l2_book_delta_data_and_meta, mock_ts_df, mock_ts_df_remote
-from utils.pandas.df_utils import concat, load_df, get_size_kb, gen_split_df_by_mem, cache_df_if_needed, get_cached_df
+from utils.pandas.df_utils import concat, load_df, get_size_kb, gen_split_df_by_mem, cache_df_if_needed, get_cached_df, delete_cached_df
 
 
 class TestFeatureCalculator(unittest.TestCase):
@@ -217,19 +216,42 @@ class TestFeatureCalculator(unittest.TestCase):
     def test_split_and_cache_big_cryptotick_df(self):
         big_df_path = 's3://svoe-cryptotick-data/limitbook_full/20230201/BINANCE_SPOT_BTC_USDT.csv.gz'
         #  5Gb in-memory
+        print('Loading df')
         big_df = load_df(big_df_path, extension='csv')
-        print(big_df.head(1))
+        print('Loaded df')
+        print(big_df.head(10))
         split_gen = gen_split_df_by_mem(big_df, 100 * 1024, ts_col_name='time_exchange')
 
         def _cache_key_for_split(split_id: int):
             return joblib.hash(big_df_path + str(split_id))
         i = 0
         for split_df in split_gen:
+            delete_cached_df(_cache_key_for_split(i))
+            print(f'Split {i}')
             cache_df_if_needed(split_df, _cache_key_for_split(i))
             i += 1
 
         print(get_cached_df(_cache_key_for_split(0)))
 
+    def test_split_small_cryptotick_df(self):
+        path = 's3://svoe-junk/27606-BITSTAMP_SPOT_BTC_EUR.csv.gz'
+        print('Started loading')
+        df = load_df(path, extension='csv')
+        print('Finished loading')
+        split_gen = gen_split_df_by_mem(df, 100 * 1024, ts_col_name='time_exchange')
+        splits = []
+        i = 0
+        for split in split_gen:
+            print(f'Split {i}')
+            splits.append(split)
+            if i > 0:
+                assert splits[i - 1].iloc[-1]['time_exchange'] != splits[i].iloc[0]['time_exchange']
+            i += 1
+
+        print(len(splits))
+        print(f'Avg split size {np.mean([get_size_kb(split) for split in splits])}kb')
+
+        assert concat(splits).equals(df)
 
     # TODO util this
     def test_df_split(self):
@@ -247,6 +269,10 @@ class TestFeatureCalculator(unittest.TestCase):
             for split_df in l2_split_gen:
                 l2_split_sizes.append(get_size_kb(split_df))
                 splits.append(split_df)
+
+            for i in range(1, len(splits)):
+                assert splits[i - 1].iloc[-1]['timestamp'] != splits[i].iloc[0]['timestamp']
+
             concated = concat(splits)
             assert concated.equals(l2_df)
         print(f'Avg L2 split size:{np.mean(l2_split_sizes)}')
@@ -259,6 +285,10 @@ class TestFeatureCalculator(unittest.TestCase):
             for split_df in trades_split_gen:
                 trades_split_sizes.append(get_size_kb(split_df))
                 splits.append(split_df)
+
+            for i in range(1, len(splits)):
+                assert splits[i - 1].iloc[-1]['timestamp'] != splits[i].iloc[0]['timestamp']
+
             concated = concat(splits)
             assert concated.equals(trades_df)
 
@@ -275,6 +305,8 @@ if __name__ == '__main__':
     # t.test_feature_label_set()
     # t.test_df_split()
     t.test_split_and_cache_big_cryptotick_df()
+    # t.test_split_small_cryptotick_df()
+
 
     # TODO figure out if we need to use lookahead_shift as a label
     # TODO (since all the features are autoregressive and already imply past values,
