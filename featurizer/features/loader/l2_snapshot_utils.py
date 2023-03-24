@@ -48,11 +48,20 @@ def get_snapshots_ranges(df: pd.DataFrame) -> List[Tuple[int, int]]:
     return list(snapshot_ranges_df.itertuples(index=False, name=None))
 
 
-def get_snapshot_ts(df: pd.DataFrame) -> Optional[float]:
-    snaps = df[df.delta==False]
-    if len(snaps) == 0:
-        return None
-    return snaps.iloc[0].timestamp
+# TODO refactor on per-source basis
+def get_snapshot_ts(df: pd.DataFrame, source: str = 'cryptofeed') -> Optional[List]:
+    if source == 'cryptofeed':
+        snaps = df[df.delta == False]
+        if len(snaps) == 0:
+            return None
+        return list(snaps.timestamp.unique())
+    elif source == 'cryptotick':
+        snaps = df[df.update_type == 'SNAPSHOT']
+        if len(snaps) == 0:
+            return None
+        return list(snaps.time_exchange.unique())
+    else:
+        raise ValueError(f'Unknown source: {source}')
 
 
 def get_info(df: pd.DataFrame) -> Dict[str, Any]:

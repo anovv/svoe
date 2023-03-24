@@ -9,7 +9,7 @@ from featurizer.features.data.data_definition import DataDefinition, Event, Even
 from featurizer.features.feature_tree.feature_tree import Feature
 from featurizer.features.definitions.feature_definition import FeatureDefinition
 import utils.streamz.stream_utils as su
-from featurizer.features.data.l2_book_delats.l2_book_deltas import L2BookDeltasData
+from featurizer.features.data.l2_book_incremental.cryptofeed.cryptofeed_l2_book_incremental import CryptofeedL2BookIncrementalData
 from featurizer.features.blocks.blocks import BlockMeta
 import functools
 import toolz
@@ -156,7 +156,7 @@ class L2BookSnapshotFeatureDefinition(FeatureDefinition):
 
     @classmethod
     def dep_upstream_schema(cls) -> List[Type[DataDefinition]]:
-        return [L2BookDeltasData]
+        return [CryptofeedL2BookIncrementalData]
 
     # @staticmethod
     # def test():

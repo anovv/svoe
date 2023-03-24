@@ -27,7 +27,7 @@ class DataDefinition:
         raise NotImplemented
 
     @classmethod
-    def parse_events(cls, df: DataFrame) -> List[Event]:
+    def parse_events(cls, df: DataFrame, **kwargs) -> List[Event]:
         # TODO validate schema here?
         return df.to_dict('records')
 

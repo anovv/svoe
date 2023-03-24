@@ -20,7 +20,7 @@ class TradesData(DataSourceDefinition):
         }
 
     @classmethod
-    def parse_events(cls, df: DataFrame) -> List[Event]:
+    def parse_events(cls, df: DataFrame, **kwargs) -> List[Event]:
         # TODO merge this logic with L2BookDeltaData parse_events
         grouped = df.groupby(['timestamp'])
         dfs = [grouped.get_group(x) for x in grouped.groups]

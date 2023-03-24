@@ -7,7 +7,7 @@ from typing import List, Dict, Tuple, Type
 from pandas import DataFrame
 
 
-class L2BookDeltasData(DataSourceDefinition):
+class CryptofeedL2BookIncrementalData(DataSourceDefinition):
 
     @classmethod
     def event_schema(cls) -> EventSchema:
@@ -20,7 +20,7 @@ class L2BookDeltasData(DataSourceDefinition):
         }
 
     @classmethod
-    def parse_events(cls, df: DataFrame) -> List[Event]:
+    def parse_events(cls, df: DataFrame, **kwargs) -> List[Event]:
 
         # TODO this is a bug in ray's version of pandas
         # TODO see https://stackoverflow.com/questions/53985535/pandas-valueerror-buffer-source-array-is-read-only

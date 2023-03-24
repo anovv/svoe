@@ -80,7 +80,7 @@ def _index_df(df: pd.DataFrame, input_item: InputItem) -> IndexItem:
         snapshot_ts = l2_utils.get_snapshot_ts(df)
         if snapshot_ts is not None:
             meta = {
-                'snapshot_ts': l2_utils.get_snapshot_ts(df)
+                'snapshot_ts': snapshot_ts
             }
             index_item['meta'] = json.dumps(meta)
 

@@ -145,7 +145,7 @@ def merge_blocks(
         block_range = blocks[feature]
         named_events = []
         for block in block_range:
-            parsed = feature.feature_definition.parse_events(block)
+            parsed = feature.feature_definition.parse_events(block, )
             named = []
             for e in parsed:
                 named.append((feature, e))

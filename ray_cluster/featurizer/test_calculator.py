@@ -1,4 +1,6 @@
+import datetime
 import glob
+import itertools
 import os
 import shutil
 import time
@@ -6,10 +8,12 @@ import time
 import dask
 import joblib
 import numpy as np
+import pytz
 import ray
 from bokeh.io import show
 from bokeh.models import ColumnDataSource, Range1d, LinearAxis
 from bokeh.plotting import figure
+from matplotlib import pyplot as plt
 from portion import Interval, closed
 from ray import workflow
 from ray.types import ObjectRef
@@ -17,7 +21,8 @@ from ray.util.dask import enable_dask_on_ray
 
 import calculator as C
 from featurizer.features.data.data_source_definition import DataSourceDefinition
-from featurizer.features.data.l2_book_delats.l2_book_deltas import L2BookDeltasData
+from featurizer.features.data.l2_book_incremental.cryptofeed.cryptofeed_l2_book_incremental import CryptofeedL2BookIncrementalData
+from featurizer.features.data.l2_book_incremental.cryptotick.cryptotick_l2_book_incremental import CryptotickL2BookIncrementalData
 from featurizer.features.data.trades.trades import TradesData
 from featurizer.features.definitions.ohlcv.ohlcv_feature_definition import OHLCVFeatureDefinition
 from featurizer.features.definitions.l2_book_snapshot.l2_book_snapshot_feature_definition import L2BookSnapshotFeatureDefinition
@@ -25,6 +30,7 @@ from featurizer.features.definitions.mid_price.mid_price_feature_definition impo
 from featurizer.features.definitions.volatility.volatility_stddev_feature_definition import VolatilityStddevFeatureDefinition
 from featurizer.features.definitions.feature_definition import FeatureDefinition
 from featurizer.features.feature_tree.feature_tree import construct_feature_tree
+from featurizer.features.loader.l2_snapshot_utils import get_snapshot_ts
 
 import portion as P
 import unittest
@@ -78,7 +84,7 @@ class TestFeatureCalculator(unittest.TestCase):
     # https://stackoverflow.com/questions/67680325/annotations-for-custom-graphs-in-dask
     def test_featurization(self, feature_def: Type[FeatureDefinition], data_def: Type[DataSourceDefinition]):
         # mock consecutive l2 delta blocks
-        if data_def == L2BookDeltasData:
+        if data_def == CryptofeedL2BookIncrementalData:
             block_range, block_range_meta = mock_l2_book_delta_data_and_meta()
         elif data_def == TradesData:
             block_range, block_range_meta = mock_trades_data_and_meta()
@@ -213,25 +219,30 @@ class TestFeatureCalculator(unittest.TestCase):
         # output_file("ts.html")
         show(p)
 
-    def test_split_and_cache_big_cryptotick_df(self):
+    # TODO util
+    def _big_cryptotick_df_path(self, index: int = - 1) -> str:
         big_df_path = 's3://svoe-cryptotick-data/limitbook_full/20230201/BINANCE_SPOT_BTC_USDT.csv.gz'
+        if index < 0:
+            return big_df_path
+        return big_df_path + str(index)
+
+    def _cache_key_for_big_cryptotick_df_split(self, split_id: int):
+        return joblib.hash(self._big_cryptotick_df_path(split_id))
+
+    def test_split_and_cache_big_cryptotick_df(self):
         #  5Gb in-memory
         print('Loading df')
-        big_df = load_df(big_df_path, extension='csv')
+        big_df = load_df(self._big_cryptotick_df_path(), extension='csv')
         print('Loaded df')
         print(big_df.head(10))
         split_gen = gen_split_df_by_mem(big_df, 100 * 1024, ts_col_name='time_exchange')
-
-        def _cache_key_for_split(split_id: int):
-            return joblib.hash(big_df_path + str(split_id))
         i = 0
         for split_df in split_gen:
-            delete_cached_df(_cache_key_for_split(i))
             print(f'Split {i}')
-            cache_df_if_needed(split_df, _cache_key_for_split(i))
+            cache_df_if_needed(split_df, self._cache_key_for_big_cryptotick_df_split(i))
             i += 1
 
-        print(get_cached_df(_cache_key_for_split(0)))
+        print(get_cached_df(self._cache_key_for_big_cryptotick_df_split(0)))
 
     def test_split_small_cryptotick_df(self):
         path = 's3://svoe-junk/27606-BITSTAMP_SPOT_BTC_EUR.csv.gz'
@@ -294,6 +305,40 @@ class TestFeatureCalculator(unittest.TestCase):
 
         print(f'Avg Trades split size:{np.mean(trades_split_sizes)}')
 
+    def test_snapshot_cryptotick(self):
+        # num = 20
+        # dfs = [get_cached_df(self._cache_key_for_big_cryptotick_df_split(i)) for i in range(num)]
+        df = get_cached_df(self._cache_key_for_big_cryptotick_df_split(0))
+        print('Loaded')
+        # snap = df[df.update_type == 'SNAPSHOT']
+        # print(len(snap[(snap.is_buy == 0)]))
+        # print(snap[snap.is_buy == 0].head(10))
+        # prices = snap.entry_px.tolist()
+        # prices.sort()
+        # price_diffs = [t - s for s, t in zip(prices, prices[1:])]
+        print(df.head(10))
+
+        date_str = '20230201'
+        # print(df['time_exchange'].is_monotonic_increasing)
+        # datetime_str = f'{date_str[0:4]}-{date_str[4:6]}-{date_str[6:8]} ' #yyyy-mm-dd
+        # df['time_exchange'] = datetime_str + df['time_exchange']
+        # df['datetime'] = pd.to_datetime(df['time_exchange'])
+        # # # https://stackoverflow.com/questions/54313463/pandas-datetime-to-unix-timestamp-seconds
+        # df['timestamp'] = df['datetime'].astype(int)/10**9
+
+        events = CryptotickL2BookIncrementalData.parse_events(df, date_str=date_str)
+        # print(list(df['update_type'].unique()))
+        # print(df.iloc[-1]['timestamp'] - df.iloc[0]['timestamp'])
+        # print(df['time_exchange'].is_monotonic_increasing)
+
+        print(len(events))
+        print(events[0]['update_type'])
+        print(datetime.datetime.fromtimestamp(events[0]['timestamp'], tz=pytz.utc))
+        # plt.hist(price_diffs)
+        # plt.show()
+        # print(get_snapshot_ts(df, source='cryptotick'))
+
+
 
 if __name__ == '__main__':
     # unittest.main()
@@ -304,8 +349,9 @@ if __name__ == '__main__':
     # t.test_merge_asof()
     # t.test_feature_label_set()
     # t.test_df_split()
-    t.test_split_and_cache_big_cryptotick_df()
+    # t.test_split_and_cache_big_cryptotick_df()
     # t.test_split_small_cryptotick_df()
+    t.test_snapshot_cryptotick()
 
 
     # TODO figure out if we need to use lookahead_shift as a label
