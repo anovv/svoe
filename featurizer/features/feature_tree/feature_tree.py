@@ -73,7 +73,7 @@ def _construct_feature_tree(
     params = {}
     position = feature_position_ref[0]
     if position not in feature_params:
-        # TODO raise
+        # TODO raise?
         print('No feature params specified')
         pass
     else:

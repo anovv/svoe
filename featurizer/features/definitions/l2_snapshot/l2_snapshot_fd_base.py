@@ -27,7 +27,7 @@ class _State:
 
 # TODO good data 'l2_book', 'BINANCE', 'spot', 'BTC-USDT', '2022-09-29', '2022-09-29'
 # TODO remove malformed files
-class L2BookSnapshotFeatureDefinition(FeatureDefinition):
+class L2SnapshotFDBase(FeatureDefinition):
 
     @classmethod
     def event_schema(cls) -> EventSchema:
@@ -65,28 +65,7 @@ class L2BookSnapshotFeatureDefinition(FeatureDefinition):
 
     @classmethod
     def _update_state(cls, state: _State, event: Event, depth: Optional[int]) -> Tuple[_State, Optional[Event]]:
-        if event['delta'] and not state.inited:
-            # skip deltas if no snapshot was inited
-            return state, None
-        if not event['delta']:
-            # reset order book
-            state.inited = True
-            state.order_book = OrderBook()
-            state.ob_count += 1
-        for side, price, size in event['orders']:
-            if size == 0.0:
-                if price in state.order_book[side]:
-                    del state.order_book[side][price]
-                else:
-                    inconsistency_type = 'no_price_with_zero_size'
-                    state.data_inconsistencies[inconsistency_type] = state.data_inconsistencies.get(inconsistency_type, 0) + 1
-            else:
-                state.order_book[side][price] = size
-
-        state.timestamp = event['timestamp']
-        state.receipt_timestamp = event['receipt_timestamp']
-
-        return state, cls._state_snapshot(state, depth)
+        raise NotImplemented
 
     @classmethod
     def _state_snapshot(cls, state: _State, depth: Optional[int]) -> Event:
@@ -153,17 +132,4 @@ class L2BookSnapshotFeatureDefinition(FeatureDefinition):
             res[interval] = cur_ranges
 
         return res
-
-    @classmethod
-    def dep_upstream_schema(cls) -> List[Type[DataDefinition]]:
-        return [CryptofeedL2BookIncrementalData]
-
-    # @staticmethod
-    # def test():
-    #     files = json.load(open('./test_files.json'))
-    #     files = files[:1]
-    #     df = pd.concat(dfu.load_files(files))
-    #     snaps, inconsistencies = L2SnapsFeatureDefinition.l2_deltas_to_snaps(df)
-    #     print(snaps)
-    #     print(inconsistencies)
 

@@ -1,4 +1,4 @@
-from typing import List, Dict, Type, Deque
+from typing import List, Dict, Type, Deque, Optional
 from streamz import Stream
 from featurizer.features.definitions.feature_definition import FeatureDefinition
 from featurizer.features.definitions.mid_price.mid_price_feature_definition import MidPriceFeatureDefinition

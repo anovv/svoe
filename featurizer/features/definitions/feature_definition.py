@@ -1,6 +1,6 @@
 from __future__ import annotations
 from streamz import Stream
-from typing import Dict, List, Tuple, Union, Type, Any
+from typing import Dict, List, Tuple, Union, Type, Any, Optional
 from portion import IntervalDict
 from featurizer.features.data.data_definition import DataDefinition
 # from featurizer.features.feature_tree.feature_tree import FeatureTreeNode

@@ -25,11 +25,11 @@ from featurizer.features.data.l2_book_incremental.cryptofeed.cryptofeed_l2_book_
 from featurizer.features.data.l2_book_incremental.cryptotick.cryptotick_l2_book_incremental import CryptotickL2BookIncrementalData
 from featurizer.features.data.trades.trades import TradesData
 from featurizer.features.definitions.ohlcv.ohlcv_feature_definition import OHLCVFeatureDefinition
-from featurizer.features.definitions.l2_book_snapshot.l2_book_snapshot_feature_definition import L2BookSnapshotFeatureDefinition
+from featurizer.features.definitions.l2_snapshot.cryptotick_l2_snapshot_fd import CryptotickL2BookSnapshotFD
 from featurizer.features.definitions.mid_price.mid_price_feature_definition import MidPriceFeatureDefinition
 from featurizer.features.definitions.volatility.volatility_stddev_feature_definition import VolatilityStddevFeatureDefinition
 from featurizer.features.definitions.feature_definition import FeatureDefinition
-from featurizer.features.feature_tree.feature_tree import construct_feature_tree
+from featurizer.features.feature_tree.feature_tree import construct_feature_tree, Feature
 from featurizer.features.loader.l2_snapshot_utils import get_snapshot_ts
 
 import portion as P
@@ -310,6 +310,7 @@ class TestFeatureCalculator(unittest.TestCase):
         # dfs = [get_cached_df(self._cache_key_for_big_cryptotick_df_split(i)) for i in range(num)]
         df = get_cached_df(self._cache_key_for_big_cryptotick_df_split(0))
         print('Loaded')
+        print(get_size_kb(df))
         # snap = df[df.update_type == 'SNAPSHOT']
         # print(len(snap[(snap.is_buy == 0)]))
         # print(snap[snap.is_buy == 0].head(10))
@@ -337,7 +338,25 @@ class TestFeatureCalculator(unittest.TestCase):
         # plt.hist(price_diffs)
         # plt.show()
         # print(get_snapshot_ts(df, source='cryptotick'))
+        events_df = pd.DataFrame(events)
+        print(len(events_df))
+        print(get_size_kb(events_df))
+        print(events_df.head(10))
+        print(events_df['timestamp'].is_monotonic_increasing)
+        print(len(events_df.iloc[0].orders))
 
+    def test_cryptotick_l2_snap_feature(self):
+        data_params = {}
+        feature_params = {}
+        feature = construct_feature_tree(CryptotickL2BookSnapshotFD, data_params, feature_params)
+        stream_graph = C.build_stream_graph(feature)
+        stream = stream_graph[feature]
+        data = Feature([], 0, CryptotickL2BookIncrementalData, data_params)
+        sources = {data: stream_graph[data]}
+        df = get_cached_df(self._cache_key_for_big_cryptotick_df_split(0))
+        merged_events = C.merge_blocks({data: [df]})
+        online_res = C.run_stream(merged_events, sources, stream)
+        print(online_res)
 
 
 if __name__ == '__main__':
@@ -351,7 +370,8 @@ if __name__ == '__main__':
     # t.test_df_split()
     # t.test_split_and_cache_big_cryptotick_df()
     # t.test_split_small_cryptotick_df()
-    t.test_snapshot_cryptotick()
+    # t.test_snapshot_cryptotick()
+    t.test_cryptotick_l2_snap_feature()
 
 
     # TODO figure out if we need to use lookahead_shift as a label

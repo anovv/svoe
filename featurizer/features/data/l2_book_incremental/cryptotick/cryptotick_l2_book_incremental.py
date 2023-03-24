@@ -25,7 +25,9 @@ class CryptotickL2BookIncrementalData(DataSourceDefinition):
     def parse_events(cls, df: pd.DataFrame, **kwargs) -> List[Event]:
         # TODO for some reason raw crypottick dates are not sorted
         # calc timestamps
-        date_str = kwargs['date_str'] # 20230201
+        # date_str = kwargs['date_str'] # 20230201
+        # TODO pass this
+        date_str = '20230201'
         datetime_str = f'{date_str[0:4]}-{date_str[4:6]}-{date_str[6:8]} ' #yyyy-mm-dd
         df['time_exchange'] = datetime_str + df['time_exchange']
         df['time_coinapi'] = datetime_str + df['time_coinapi']

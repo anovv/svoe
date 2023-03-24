@@ -1,7 +1,9 @@
-from typing import List, Dict, Optional, Any, Tuple
+from typing import List, Dict, Optional, Any, Tuple, Type
 from streamz import Stream
 from featurizer.features.definitions.feature_definition import FeatureDefinition
 from featurizer.features.data.data_definition import DataDefinition, EventSchema
+from featurizer.features.definitions.l2_book_snapshot.l2_book_snapshot_feature_definition import \
+    L2BookSnapshotFeatureDefinition
 from featurizer.features.feature_tree.feature_tree import Feature
 
 import math
@@ -26,5 +28,9 @@ class RelativeBidAskSpreadFeatureDefinition(FeatureDefinition):
             snap['receipt_timestamp'],
             2 * math.fabs((snap['bids'][0][0] - snap['asks'][0][0]))/(snap['bids'][0][0] + snap['asks'][0][0])
         ))
+
+    @classmethod
+    def dep_upstream_schema(cls) -> List[Type[DataDefinition]]:
+        return [L2BookSnapshotFeatureDefinition]
 
     # TODO grouping
