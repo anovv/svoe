@@ -24,13 +24,12 @@ from featurizer.features.data.data_source_definition import DataSourceDefinition
 from featurizer.features.data.l2_book_incremental.cryptofeed.cryptofeed_l2_book_incremental import CryptofeedL2BookIncrementalData
 from featurizer.features.data.l2_book_incremental.cryptotick.cryptotick_l2_book_incremental import CryptotickL2BookIncrementalData
 from featurizer.features.data.trades.trades import TradesData
-from featurizer.features.definitions.ohlcv.ohlcv_feature_definition import OHLCVFeatureDefinition
-from featurizer.features.definitions.l2_snapshot.cryptotick_l2_snapshot_fd import CryptotickL2BookSnapshotFD
-from featurizer.features.definitions.mid_price.mid_price_feature_definition import MidPriceFeatureDefinition
-from featurizer.features.definitions.volatility.volatility_stddev_feature_definition import VolatilityStddevFeatureDefinition
+from featurizer.features.definitions.ohlcv.ohlcv_fd import OHLCVFD
+from featurizer.features.definitions.l2_snapshot.l2_snapshot_fd import L2SnapshotFD
+from featurizer.features.definitions.mid_price.mid_price_fd import MidPriceFD
+from featurizer.features.definitions.volatility.volatility_stddev_fd import VolatilityStddevFD
 from featurizer.features.definitions.feature_definition import FeatureDefinition
 from featurizer.features.feature_tree.feature_tree import construct_feature_tree, Feature
-from featurizer.features.loader.l2_snapshot_utils import get_snapshot_ts
 
 import portion as P
 import unittest
@@ -183,8 +182,8 @@ class TestFeatureCalculator(unittest.TestCase):
         block_range, block_range_meta = mock_l2_book_delta_data_and_meta()
         data_params = {}
         feature_params = {}
-        feature_mid_price = construct_feature_tree(MidPriceFeatureDefinition, data_params, feature_params)
-        feature_volatility = construct_feature_tree(VolatilityStddevFeatureDefinition, data_params, feature_params)
+        feature_mid_price = construct_feature_tree(MidPriceFD, data_params, feature_params)
+        feature_volatility = construct_feature_tree(VolatilityStddevFD, data_params, feature_params)
         flset = C.build_feature_label_set_task_graph([feature_mid_price, feature_volatility], block_range_meta, feature_mid_price)
         res = None
 
@@ -347,8 +346,8 @@ class TestFeatureCalculator(unittest.TestCase):
 
     def test_cryptotick_l2_snap_feature(self):
         data_params = {}
-        feature_params = {}
-        feature = construct_feature_tree(CryptotickL2BookSnapshotFD, data_params, feature_params)
+        feature_params = [{'dep_schema': 'cryptotick'}]
+        feature = construct_feature_tree(L2SnapshotFD, data_params, feature_params)
         stream_graph = C.build_stream_graph(feature)
         stream = stream_graph[feature]
         data = Feature([], 0, CryptotickL2BookIncrementalData, data_params)

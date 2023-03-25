@@ -47,37 +47,25 @@ def _construct_feature_tree(
     feature_params: Union[Dict, List]
 ) -> Feature:
     if root_def.is_data_source():
-        params = {}
         position = data_position_ref[0]
-        if position not in data_params:
-            # TODO raise
-            print('No data params specified')
-            pass
-        else:
-            params = data_params[position]
         data_position_ref[0] += 1
         return Feature(
             children=[],
             position=position,
             feature_definition=root_def,
-            params=params
+            params=_parse_params(data_params, position)
         )
 
-    deps = root_def.dep_upstream_schema()
+    position = feature_position_ref[0]
+    params = _parse_params(feature_params, position)
+    dep_schema = params.get('dep_schema', None)
+    print(dep_schema)
+    deps = root_def.dep_upstream_schema(dep_schema)
     children = []
     for dep_fd in deps:
         if not dep_fd.is_data_source():
             feature_position_ref[0] += 1
         children.append(_construct_feature_tree(dep_fd, feature_position_ref, data_position_ref, data_params, feature_params))
-
-    params = {}
-    position = feature_position_ref[0]
-    if position not in feature_params:
-        # TODO raise?
-        print('No feature params specified')
-        pass
-    else:
-        params = feature_params[position]
 
     feature = Feature(
         children=children,
@@ -87,6 +75,23 @@ def _construct_feature_tree(
     )
     feature_position_ref[0] -= 1
     return feature
+
+
+def _parse_params(params: Union[Dict, List], position: int):
+    if params is None:
+        return {}
+
+    if isinstance(params, Dict):
+        return params.get(position, {})
+
+    if isinstance(params, List):
+        if position <= len(params):
+            return params[position]
+        else:
+            raise ValueError(f'Position {position} is larger then params len: {len(params)}')
+
+    raise ValueError(f'Unsupported params type: {type(params)}')
+
 
 
 # TODO use anytree api

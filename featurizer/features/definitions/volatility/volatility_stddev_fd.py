@@ -1,8 +1,8 @@
 from typing import List, Dict, Type, Deque, Optional
 from streamz import Stream
 from featurizer.features.definitions.feature_definition import FeatureDefinition
-from featurizer.features.definitions.mid_price.mid_price_feature_definition import MidPriceFeatureDefinition
 from featurizer.features.data.data_definition import DataDefinition, Event, EventSchema
+from featurizer.features.definitions.mid_price.mid_price_fd import MidPriceFD
 from featurizer.features.feature_tree.feature_tree import Feature
 from featurizer.features.blocks.blocks import BlockMeta, get_interval
 from utils.streamz.stream_utils import lookback_apply
@@ -13,7 +13,7 @@ import numpy as np
 import toolz
 
 
-class VolatilityStddevFeatureDefinition(FeatureDefinition):
+class VolatilityStddevFD(FeatureDefinition):
 
     @classmethod
     def event_schema(cls) -> EventSchema:
@@ -24,8 +24,8 @@ class VolatilityStddevFeatureDefinition(FeatureDefinition):
         }
 
     @classmethod
-    def dep_upstream_schema(cls) -> List[Type[DataDefinition]]:
-        return [MidPriceFeatureDefinition]
+    def dep_upstream_schema(cls, dep_schema: str = Optional[None]) -> List[Type[DataDefinition]]:
+        return [MidPriceFD]
 
     @classmethod
     def stream(cls, upstreams: Dict[Feature, Stream], feature_params: Dict) -> Stream:

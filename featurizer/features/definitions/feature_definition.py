@@ -23,7 +23,7 @@ class FeatureDefinition(DataDefinition):
         raise NotImplemented
 
     @classmethod
-    def dep_upstream_schema(cls) -> List[Type[DataDefinition]]:
+    def dep_upstream_schema(cls, dep_schema: str = Optional[None]) -> List[Type[DataDefinition]]:
         # upstream dependencies
         raise NotImplemented
 

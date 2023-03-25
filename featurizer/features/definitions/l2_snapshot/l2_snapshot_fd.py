@@ -3,9 +3,11 @@ from typing import List, Dict, Optional, Tuple, Type
 from portion import IntervalDict, closed
 from streamz import Stream
 from order_book import OrderBook
-from dataclasses import dataclass
 from frozenlist import FrozenList
 from featurizer.features.data.data_definition import DataDefinition, Event, EventSchema
+from featurizer.features.data.l2_book_incremental.cryptotick.cryptotick_l2_book_incremental import \
+    CryptotickL2BookIncrementalData
+from featurizer.features.definitions.l2_snapshot.utils import _State, cryptofeed_update_state, cryptotick_update_state
 from featurizer.features.feature_tree.feature_tree import Feature
 from featurizer.features.definitions.feature_definition import FeatureDefinition
 import utils.streamz.stream_utils as su
@@ -14,20 +16,11 @@ from featurizer.features.blocks.blocks import BlockMeta
 import functools
 import toolz
 
-
-@dataclass
-class _State:
-    timestamp: float
-    receipt_timestamp: float
-    order_book: OrderBook
-    data_inconsistencies: Dict
-    depth: Optional[int] = None
-    inited: bool = False
-    ob_count: int = 0
-
 # TODO good data 'l2_book', 'BINANCE', 'spot', 'BTC-USDT', '2022-09-29', '2022-09-29'
 # TODO remove malformed files
-class L2SnapshotFDBase(FeatureDefinition):
+class L2SnapshotFD(FeatureDefinition):
+
+    DEFAULT_DEPTH = 25
 
     @classmethod
     def event_schema(cls) -> EventSchema:
@@ -41,34 +34,33 @@ class L2SnapshotFDBase(FeatureDefinition):
     @classmethod
     def stream(cls, upstreams: Dict[Feature, Stream], feature_params: Dict) -> Stream:
         l2_book_deltas_upstream = toolz.first(upstreams.values())
-        state = cls._build_state()
-        depth = 20 # TODO figure out how to set default values
-        if feature_params is not None and 'depth' in feature_params:
-            depth = feature_params['depth']
-        update = functools.partial(cls._update_state, depth=depth)
-        acc = l2_book_deltas_upstream.accumulate(update, returns_state=True, start=state)
-        return su.filter_none(acc).unique(maxsize=1)
-
-
-    # large file BTC-USDT BINANCE spot 2022-09-30
-    # s3://svoe.test.1/data_lake/data_feed_market_data/l2_book/exchange=BINANCE/instrument_type=spot/instrument_extra={}/symbol=BTC-USDT/base=BTC/quote=USDT/date=2022-09-30/compaction=raw/version=local/BINANCE*l2_book*BTC-USDT*1664490725.3139572*1664509128.894638*bcf4df95abab48c1a5635a0a95cfaffa.gz.parquet
-    # BTC-USDT-PERP BINANCE_FUTURES perpetual 2022-09-30
-    # s3://svoe.test.1/data_lake/data_feed_market_data/l2_book/exchange=BINANCE_FUTURES/instrument_type=perpetual/instrument_extra={}/symbol=BTC-USDT-PERP/base=BTC/quote=USDT/date=2022-09-30/compaction=raw/version=local/BINANCE_FUTURES*l2_book*BTC-USDT-PERP*1664490725.119688*1664509128.977472*597e77f33f9e43aeaa9c6267eb281ee7.gz.parquet
-    @staticmethod
-    def _build_state() -> _State:
-        return _State(
+        state = _State(
             timestamp=-1,
             receipt_timestamp=-1,
             order_book=OrderBook(),
             data_inconsistencies={},
         )
+        dep_schema = None
+        depth = cls.DEFAULT_DEPTH
+        if feature_params is not None:
+            depth = feature_params.get('depth', depth)
+            dep_schema = feature_params.get('dep_schema', None)
+        update = functools.partial(cls._update_state, depth=depth, dep_schema=dep_schema)
+        acc = l2_book_deltas_upstream.accumulate(update, returns_state=True, start=state)
+        return su.filter_none(acc).unique(maxsize=1)
 
     @classmethod
-    def _update_state(cls, state: _State, event: Event, depth: Optional[int]) -> Tuple[_State, Optional[Event]]:
-        raise NotImplemented
+    def _update_state(cls, state: _State, event: Event, depth: Optional[int] = None, dep_schema: Optional[str] = None) -> Tuple[_State, Optional[Event]]:
+        if dep_schema is None:
+            state, skip_event = cryptofeed_update_state(state, event, depth)
+        elif dep_schema == 'cryptotick':
+            state, skip_event = cryptotick_update_state(state, event, depth)
+        else:
+            raise ValueError(f'Unsupported dep_schema: {dep_schema}')
+        return state, None if skip_event else cls._state_snapshot(state, depth)
 
     @classmethod
-    def _state_snapshot(cls, state: _State, depth: Optional[int]) -> Event:
+    def _state_snapshot(cls, state: _State, depth: Optional[int] = None) -> Event:
         bids = FrozenList()
         asks = FrozenList()
         if depth is None:
@@ -133,3 +125,12 @@ class L2SnapshotFDBase(FeatureDefinition):
 
         return res
 
+    @classmethod
+    def dep_upstream_schema(cls, dep_schema: str = Optional[None]) -> List[Type[DataDefinition]]:
+        if dep_schema is None:
+            return [CryptofeedL2BookIncrementalData]
+
+        if dep_schema == 'cryptotick':
+            return [CryptotickL2BookIncrementalData]
+
+        raise ValueError(f'Unknown dep_schema: {dep_schema}')

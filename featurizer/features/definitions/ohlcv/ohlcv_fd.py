@@ -26,7 +26,7 @@ class _State:
     start_ts: Optional[float] = None
 
 
-class OHLCVFeatureDefinition(FeatureDefinition):
+class OHLCVFD(FeatureDefinition):
 
     @classmethod
     def event_schema(cls) -> EventSchema:
@@ -43,7 +43,7 @@ class OHLCVFeatureDefinition(FeatureDefinition):
         }
 
     @classmethod
-    def dep_upstream_schema(cls) -> List[Type[DataDefinition]]:
+    def dep_upstream_schema(cls, dep_schema: str = Optional[None]) -> List[Type[DataDefinition]]:
         return [TradesData]
 
     @classmethod

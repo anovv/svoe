@@ -2,15 +2,14 @@ from typing import List, Dict, Optional, Any, Tuple, Type
 from streamz import Stream
 from featurizer.features.definitions.feature_definition import FeatureDefinition
 from featurizer.features.data.data_definition import DataDefinition, EventSchema
-from featurizer.features.definitions.l2_book_snapshot.l2_book_snapshot_feature_definition import \
-    L2BookSnapshotFeatureDefinition
+from featurizer.features.definitions.l2_snapshot.l2_snapshot_fd import L2SnapshotFD
 from featurizer.features.feature_tree.feature_tree import Feature
 
 import math
 import toolz
 
 
-class RelativeBidAskSpreadFeatureDefinition(FeatureDefinition):
+class RelativeBidAskSpreadFD(FeatureDefinition):
 
     @classmethod
     def event_schema(cls) -> EventSchema:
@@ -30,7 +29,7 @@ class RelativeBidAskSpreadFeatureDefinition(FeatureDefinition):
         ))
 
     @classmethod
-    def dep_upstream_schema(cls) -> List[Type[DataDefinition]]:
-        return [L2BookSnapshotFeatureDefinition]
+    def dep_upstream_schema(cls, dep_schema: str = Optional[None]) -> List[Type[DataDefinition]]:
+        return [L2SnapshotFD]
 
     # TODO grouping

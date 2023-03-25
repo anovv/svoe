@@ -2,15 +2,15 @@ from typing import List, Type, Union, Dict, Optional
 from streamz import Stream
 from featurizer.features.definitions.feature_definition import FeatureDefinition
 from featurizer.features.data.data_definition import DataDefinition, Event, EventSchema
+from featurizer.features.definitions.l2_snapshot.l2_snapshot_fd import L2SnapshotFD
 from featurizer.features.feature_tree.feature_tree import Feature
-from featurizer.features.definitions.l2_snapshot.cryptofeed_l2_snapshot_fd import CryptofeedL2BookSnapshotFD
 from featurizer.features.blocks.blocks import BlockMeta
 from featurizer.features.blocks.utils import identity_grouping
 from portion import IntervalDict
 import toolz
 
 
-class MidPriceFeatureDefinition(FeatureDefinition):
+class MidPriceFD(FeatureDefinition):
 
     @classmethod
     def event_schema(cls) -> EventSchema:
@@ -32,8 +32,8 @@ class MidPriceFeatureDefinition(FeatureDefinition):
         )
 
     @classmethod
-    def dep_upstream_schema(cls) -> List[Type[DataDefinition]]:
-        return [CryptofeedL2BookSnapshotFD]
+    def dep_upstream_schema(cls, dep_schema: str = Optional[None]) -> List[Type[DataDefinition]]:
+        return [L2SnapshotFD]
 
     @classmethod
     def group_dep_ranges(cls, ranges: List[BlockMeta], feature: Feature, dep_feature: Feature) -> IntervalDict:  # TODO typehint Block/BlockRange/BlockMeta/BlockRangeMeta
