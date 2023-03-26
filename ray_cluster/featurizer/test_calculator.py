@@ -117,11 +117,6 @@ class TestFeatureCalculator(unittest.TestCase):
         # assert_frame_equal(offline_res, online_res)
 
     def test_merge_asof(self):
-        # dfs = [
-        #     mock_ts_df([4, 7, 9], 'a'),
-        #     mock_ts_df([2, 5, 6, 8], 'b'),
-        #     mock_ts_df([1, 3, 6, 10], 'c'),
-        # ]
         dfs = [
             mock_ts_df([4, 7, 9, 14, 16, 20], 'a'),
             mock_ts_df([2, 5, 6, 8, 10, 11, 12, 18], 'b'),

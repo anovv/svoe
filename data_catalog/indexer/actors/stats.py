@@ -14,6 +14,8 @@ from bokeh.plotting import figure
 from bokeh.layouts import row, column
 from ray.experimental.state.api import list_workers
 
+from data_catalog.utils.register import TASK_NAMES, EVENT_NAMES
+
 import ray
 
 # for async wait/signaling see last comment https://github.com/ray-project/ray/issues/7229
@@ -33,21 +35,33 @@ def _make_graph_data(keys) -> GraphData:
 TIME = 'time'
 
 # task events graph
-GRAPH_NAME_TASK_EVENTS = 'GRAPH_NAME_TASK_EVENTS'
-DOWNLOAD_TASKS_SCHEDULED = 'DOWNLOAD_TASKS_SCHEDULED'
-DOWNLOAD_TASKS_STARTED = 'DOWNLOAD_TASKS_STARTED'
-DOWNLOAD_TASKS_FINISHED = 'DOWNLOAD_TASKS_FINISHED'
-INDEX_TASKS_SCHEDULED = 'INDEX_TASKS_SCHEDULED'
-INDEX_TASKS_STARTED = 'INDEX_TASKS_STARTED'
-INDEX_TASKS_FINISHED = 'INDEX_TASKS_FINISHED'
-FILTER_BATCH = 'FILTER_BATCH'
-WRITE_DB = 'WRITE_DB'
+# GRAPH_NAME_TASK_EVENTS = 'GRAPH_NAME_TASK_EVENTS'
+# DOWNLOAD_TASKS_SCHEDULED = 'DOWNLOAD_TASKS_SCHEDULED'
+# DOWNLOAD_TASKS_STARTED = 'DOWNLOAD_TASKS_STARTED'
+# DOWNLOAD_TASKS_FINISHED = 'DOWNLOAD_TASKS_FINISHED'
+# INDEX_TASKS_SCHEDULED = 'INDEX_TASKS_SCHEDULED'
+# INDEX_TASKS_STARTED = 'INDEX_TASKS_STARTED'
+# INDEX_TASKS_FINISHED = 'INDEX_TASKS_FINISHED'
+# FILTER_BATCH = 'FILTER_BATCH'
+# WRITE_DB = 'WRITE_DB'
 
 
 def _make_task_events_graph_figure(source):
     fig = figure(title="Tasks Events (count)", x_axis_type='datetime', tools='')
 
-    for name in [DOWNLOAD_TASKS_SCHEDULED, DOWNLOAD_TASKS_STARTED, DOWNLOAD_TASKS_FINISHED, INDEX_TASKS_SCHEDULED, INDEX_TASKS_STARTED, INDEX_TASKS_FINISHED]:
+    # for name in [DOWNLOAD_TASKS_SCHEDULED, DOWNLOAD_TASKS_STARTED, DOWNLOAD_TASKS_FINISHED, INDEX_TASKS_SCHEDULED, INDEX_TASKS_STARTED, INDEX_TASKS_FINISHED]:
+    #     color = 'red' if 'DOWNLOAD' in name else 'green'
+    #     line_dash = 'solid'
+    #     if 'SCHEDULED' in name:
+    #         line_dash = 'dotted'
+    #     elif 'STARTED' in name:
+    #         line_dash = 'dashed'
+    #     legend_label = name
+    #
+    #     fig.line(source=source, x=TIME, y=name, color=color, legend_label=legend_label, line_dash=line_dash)
+
+    for name in EVENT_NAMES:
+        # TODO
         color = 'red' if 'DOWNLOAD' in name else 'green'
         line_dash = 'solid'
         if 'SCHEDULED' in name:
@@ -58,8 +72,8 @@ def _make_task_events_graph_figure(source):
 
         fig.line(source=source, x=TIME, y=name, color=color, legend_label=legend_label, line_dash=line_dash)
 
-    fig.line(source=source, x=TIME, y=FILTER_BATCH, color='blue', legend_label=FILTER_BATCH)
-    fig.line(source=source, x=TIME, y=WRITE_DB, color='yellow', legend_label=WRITE_DB)
+    # fig.line(source=source, x=TIME, y=FILTER_BATCH, color='blue', legend_label=FILTER_BATCH)
+    # fig.line(source=source, x=TIME, y=WRITE_DB, color='yellow', legend_label=WRITE_DB)
     fig.yaxis.minor_tick_line_color = None
 
     fig.add_tools(
@@ -76,10 +90,10 @@ def _make_task_events_graph_figure(source):
 
 # task latencies graph
 GRAPH_NAME_TASK_LATENCIES = 'GRAPH_NAME_TASK_LATENCIES'
-DOWNLOAD_TASK_TYPE = 'DOWNLOAD_TASK_TYPE'
-INDEX_TASK_TYPE = 'INDEX_TASK_TYPE'
-FILTER_TASK_TYPE = 'FILTER_TASK_TYPE'
-WRITE_DB_TASK_TYPE = 'WRITE_DB_TASK_TYPE'
+# DOWNLOAD_TASK_TYPE = 'DOWNLOAD_TASK_TYPE'
+# INDEX_TASK_TYPE = 'INDEX_TASK_TYPE'
+# FILTER_TASK_TYPE = 'FILTER_TASK_TYPE'
+# WRITE_DB_TASK_TYPE = 'WRITE_DB_TASK_TYPE'
 
 
 def _make_task_latencies_graph_figure(source):
@@ -87,7 +101,23 @@ def _make_task_latencies_graph_figure(source):
 
     # TODO for running ranges
     # x_range = DataRange1d(follow='end', follow_interval=20000, range_padding=0)
-    for name in [DOWNLOAD_TASK_TYPE, INDEX_TASK_TYPE, FILTER_TASK_TYPE, WRITE_DB_TASK_TYPE]:
+    # for name in [DOWNLOAD_TASK_TYPE, INDEX_TASK_TYPE, FILTER_TASK_TYPE, WRITE_DB_TASK_TYPE]:
+    #     color = None
+    #     if 'DOWNLOAD' in name:
+    #         color = 'red'
+    #     elif 'INDEX' in name:
+    #         color = 'green'
+    #     elif 'FILTER' in name:
+    #         color = 'blue'
+    #     elif 'WRITE' in name:
+    #         color = 'yellow'
+    #
+    #     legend_label = name
+    #
+    #     fig.line(source=source, x=TIME, y=name, color=color, legend_label=legend_label, line_dash='solid')
+
+    for name in TASK_NAMES:
+        # TODO
         color = None
         if 'DOWNLOAD' in name:
             color = 'red'
