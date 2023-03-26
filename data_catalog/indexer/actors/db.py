@@ -3,7 +3,7 @@ from typing import Optional, Dict
 
 import ray
 
-from data_catalog.indexer.actors.stats import Stats, WRITE_DB, FILTER_BATCH, FILTER_TASK_TYPE, WRITE_DB_TASK_TYPE
+# from data_catalog.indexer.actors.stats import Stats, WRITE_DB, FILTER_BATCH, FILTER_TASK_TYPE, WRITE_DB_TASK_TYPE
 from data_catalog.indexer.models import IndexItemBatch, InputItemBatch
 from data_catalog.utils.register import EventType, report_stats_decor
 from data_catalog.utils.sql.client import MysqlClient
@@ -32,7 +32,7 @@ class DbActor:
 # TODO set CPU=0, or add parallelism resource, set memory and object_store_memory
 @ray.remote
 @report_stats_decor([EventType.FINISHED])
-def filter_existing(db_actor: DbActor, input_batch: InputItemBatch, stats: Stats, task_id: str, extra: Optional[Dict] = None) -> InputItemBatch:
+def filter_existing(db_actor: DbActor, input_batch: InputItemBatch, stats: 'Stats', task_id: str, extra: Optional[Dict] = None) -> InputItemBatch:
     res = ray.get(db_actor._filter_batch.remote(input_batch))
     return res
     # print('Filtering batch...')
@@ -50,7 +50,7 @@ def filter_existing(db_actor: DbActor, input_batch: InputItemBatch, stats: Stats
 # TODO set CPU=0, or add parallelism resource, set memory and object_store_memory
 @ray.remote
 @report_stats_decor([EventType.FINISHED])
-def write_batch(db_actor: DbActor, batch: IndexItemBatch, stats: Stats, task_id: str, extra: Optional[Dict] = None) -> Dict:
+def write_batch(db_actor: DbActor, batch: IndexItemBatch, stats: 'Stats', task_id: str, extra: Optional[Dict] = None) -> Dict:
     # print('Writing batch...')
     # print(batch)
     res = ray.get(db_actor._write_batch.remote(batch))
