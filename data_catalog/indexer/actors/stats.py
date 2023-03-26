@@ -14,7 +14,9 @@ from bokeh.plotting import figure
 from bokeh.layouts import row, column
 from ray.experimental.state.api import list_workers
 
-from data_catalog.utils.register import TASK_NAMES, EVENT_NAMES
+from data_catalog.utils.register import TASK_NAMES, EVENT_NAMES, EventType, get_event_name, ray_task_name
+from data_catalog.indexer.tasks.tasks import load_df, index_df
+from data_catalog.indexer.actors.db import write_batch, filter_existing
 
 import ray
 
@@ -23,7 +25,6 @@ import ray
 # for threaded updates https://stackoverflow.com/questions/55176868/asynchronous-streaming-to-embedded-bokeh-server
 
 from tornado.ioloop import IOLoop
-
 
 GraphData = List[Union[List, Optional[int]]] # List with timestamped data point and last read data length
 
@@ -34,46 +35,31 @@ def _make_graph_data(keys) -> GraphData:
 
 TIME = 'time'
 
-# task events graph
-# GRAPH_NAME_TASK_EVENTS = 'GRAPH_NAME_TASK_EVENTS'
-# DOWNLOAD_TASKS_SCHEDULED = 'DOWNLOAD_TASKS_SCHEDULED'
-# DOWNLOAD_TASKS_STARTED = 'DOWNLOAD_TASKS_STARTED'
-# DOWNLOAD_TASKS_FINISHED = 'DOWNLOAD_TASKS_FINISHED'
-# INDEX_TASKS_SCHEDULED = 'INDEX_TASKS_SCHEDULED'
-# INDEX_TASKS_STARTED = 'INDEX_TASKS_STARTED'
-# INDEX_TASKS_FINISHED = 'INDEX_TASKS_FINISHED'
-# FILTER_BATCH = 'FILTER_BATCH'
-# WRITE_DB = 'WRITE_DB'
+GRAPH_NAME_TASK_EVENTS = 'GRAPH_NAME_TASK_EVENTS'
 
 
 def _make_task_events_graph_figure(source):
     fig = figure(title="Tasks Events (count)", x_axis_type='datetime', tools='')
-
-    # for name in [DOWNLOAD_TASKS_SCHEDULED, DOWNLOAD_TASKS_STARTED, DOWNLOAD_TASKS_FINISHED, INDEX_TASKS_SCHEDULED, INDEX_TASKS_STARTED, INDEX_TASKS_FINISHED]:
-    #     color = 'red' if 'DOWNLOAD' in name else 'green'
-    #     line_dash = 'solid'
-    #     if 'SCHEDULED' in name:
-    #         line_dash = 'dotted'
-    #     elif 'STARTED' in name:
-    #         line_dash = 'dashed'
-    #     legend_label = name
-    #
-    #     fig.line(source=source, x=TIME, y=name, color=color, legend_label=legend_label, line_dash=line_dash)
-
     for name in EVENT_NAMES:
-        # TODO
-        color = 'red' if 'DOWNLOAD' in name else 'green'
+        # TODO simplify this
+        if ray_task_name(load_df) in name:
+            color = 'red'
+        elif ray_task_name(index_df) in name:
+            color = 'green'
+        elif ray_task_name(filter_existing) in name:
+            color = 'blue'
+        elif ray_task_name(write_batch) in name:
+            color = 'yellow'
+
         line_dash = 'solid'
-        if 'SCHEDULED' in name:
+        if EventType.SCHEDULED.value in name:
             line_dash = 'dotted'
-        elif 'STARTED' in name:
+        elif EventType.STARTED.value in name:
             line_dash = 'dashed'
         legend_label = name
 
         fig.line(source=source, x=TIME, y=name, color=color, legend_label=legend_label, line_dash=line_dash)
 
-    # fig.line(source=source, x=TIME, y=FILTER_BATCH, color='blue', legend_label=FILTER_BATCH)
-    # fig.line(source=source, x=TIME, y=WRITE_DB, color='yellow', legend_label=WRITE_DB)
     fig.yaxis.minor_tick_line_color = None
 
     fig.add_tools(
@@ -90,10 +76,6 @@ def _make_task_events_graph_figure(source):
 
 # task latencies graph
 GRAPH_NAME_TASK_LATENCIES = 'GRAPH_NAME_TASK_LATENCIES'
-# DOWNLOAD_TASK_TYPE = 'DOWNLOAD_TASK_TYPE'
-# INDEX_TASK_TYPE = 'INDEX_TASK_TYPE'
-# FILTER_TASK_TYPE = 'FILTER_TASK_TYPE'
-# WRITE_DB_TASK_TYPE = 'WRITE_DB_TASK_TYPE'
 
 
 def _make_task_latencies_graph_figure(source):
@@ -101,31 +83,16 @@ def _make_task_latencies_graph_figure(source):
 
     # TODO for running ranges
     # x_range = DataRange1d(follow='end', follow_interval=20000, range_padding=0)
-    # for name in [DOWNLOAD_TASK_TYPE, INDEX_TASK_TYPE, FILTER_TASK_TYPE, WRITE_DB_TASK_TYPE]:
-    #     color = None
-    #     if 'DOWNLOAD' in name:
-    #         color = 'red'
-    #     elif 'INDEX' in name:
-    #         color = 'green'
-    #     elif 'FILTER' in name:
-    #         color = 'blue'
-    #     elif 'WRITE' in name:
-    #         color = 'yellow'
-    #
-    #     legend_label = name
-    #
-    #     fig.line(source=source, x=TIME, y=name, color=color, legend_label=legend_label, line_dash='solid')
-
     for name in TASK_NAMES:
-        # TODO
+        # TODO simplify this
         color = None
-        if 'DOWNLOAD' in name:
+        if ray_task_name(load_df) in name:
             color = 'red'
-        elif 'INDEX' in name:
+        elif ray_task_name(index_df) in name:
             color = 'green'
-        elif 'FILTER' in name:
+        elif ray_task_name(filter_existing) in name:
             color = 'blue'
-        elif 'WRITE' in name:
+        elif ray_task_name(write_batch) in name:
             color = 'yellow'
 
         legend_label = name
@@ -177,26 +144,20 @@ CLUSTER_NUM_WORKERS = 'CLUSTER_NUM_WORKERS'
 @ray.remote
 class Stats:
     def __init__(self):
-        self.task_events = {
-            DOWNLOAD_TASK_TYPE: [],
-            INDEX_TASK_TYPE: [],
-            FILTER_TASK_TYPE: [],
-            WRITE_DB_TASK_TYPE: []
-        }
-
+        self.task_events = {task_name : [] for task_name in TASK_NAMES}
         self.graphs_data = {
-            GRAPH_NAME_TASK_EVENTS: _make_graph_data([DOWNLOAD_TASKS_SCHEDULED, DOWNLOAD_TASKS_STARTED, DOWNLOAD_TASKS_FINISHED, INDEX_TASKS_SCHEDULED, INDEX_TASKS_STARTED, INDEX_TASKS_FINISHED, FILTER_BATCH, WRITE_DB]),
-            GRAPH_NAME_TASK_LATENCIES: _make_graph_data([DOWNLOAD_TASK_TYPE, INDEX_TASK_TYPE, FILTER_TASK_TYPE, WRITE_DB_TASK_TYPE]),
+            GRAPH_NAME_TASK_EVENTS: _make_graph_data(EVENT_NAMES),
+            GRAPH_NAME_TASK_LATENCIES: _make_graph_data(TASK_NAMES),
             GRAPH_NAME_DOWNLOAD_THROUGHPUT_NUM_FILES: _make_graph_data([DOWNLOAD_THROUGHPUT_NUM_FILES]),
             GRAPH_NAME_DOWNLOAD_THROUGHPUT_MB: _make_graph_data([DOWNLOAD_THROUGHPUT_MB]),
             GRAPH_NAME_CLUSTER_NUM_WORKERS: _make_graph_data([CLUSTER_NUM_WORKERS]),
         }
 
-    def event(self, task_type: str, event: Dict):
-        self.task_events[task_type].append(event)
+    def event(self, task_name: str, event: Dict):
+        self.task_events[task_name].append(event)
 
-    def events(self, task_type: str, events: List[Dict]):
-        self.task_events[task_type].extend(events)
+    def events(self, task_name: str, events: List[Dict]):
+        self.task_events[task_name].extend(events)
 
     def poll_cluster_state(self):
         pass
@@ -247,13 +208,13 @@ class Stats:
                     new_append[TIME] = [now * 1000.0]
 
                     has_changed = False
-                    for task_type in [DOWNLOAD_TASK_TYPE, INDEX_TASK_TYPE, FILTER_TASK_TYPE, WRITE_DB_TASK_TYPE]:
-                        for event in self.task_events[task_type]:
+                    for task_name in TASK_NAMES:
+                        for event in self.task_events[task_name]:
                             if event['timestamp'] < last_update_ts:
                                 continue
                             has_changed = True
-                            event_type = event['event_type']
-                            new_append[event_type][0] += 1
+                            event_name = event['event_name']
+                            new_append[event_name][0] += 1
                     if has_changed:
                         self.graphs_data[graph_name][0].append(new_append)
                     continue
@@ -265,8 +226,8 @@ class Stats:
                     last_update_ts = new_append[TIME][0]/1000.0
                     new_append[TIME] = [now * 1000.0]
                     has_changed = False
-                    for task_type in [DOWNLOAD_TASK_TYPE, INDEX_TASK_TYPE, FILTER_TASK_TYPE, WRITE_DB_TASK_TYPE]:
-                        for event in self.task_events[task_type]:
+                    for task_name in TASK_NAMES:
+                        for event in self.task_events[task_name]:
                             if event['timestamp'] < last_update_ts:
                                 continue
                             if 'latency' in event:
@@ -275,7 +236,7 @@ class Stats:
                                 if 'size_kb' in event:
                                     # normalize
                                     latency /= float(event['size_kb'])
-                                new_append[task_type][0] = latency
+                                new_append[task_name][0] = latency
                     if has_changed:
                         self.graphs_data[graph_name][0].append(new_append)
                     continue
@@ -292,13 +253,14 @@ class Stats:
                     new_append[TIME] = [now * 1000.0]
                     size_kb = 0
                     num_files = 0
-                    for event in self.task_events[DOWNLOAD_TASK_TYPE]:
-                        if event['event_type'] == DOWNLOAD_TASKS_FINISHED and event['timestamp'] <= now and event['timestamp'] >= now - window_s:
-                            # find corresponding DOWNLOAD_TASKS_STARTED event for this task_id
+                    for event in self.task_events[ray_task_name(load_df)]:
+                        if event['event_name'] == get_event_name(ray_task_name(load_df), EventType.FINISHED) and event['timestamp'] <= now and event['timestamp'] >= now - window_s:
+
+                            # find corresponding 'load_df_started' event for this task_id
                             started_event = None
                             # TODO this can be optimized to avoid nested loop
-                            for s_event in self.task_events[DOWNLOAD_TASK_TYPE]:
-                                if s_event['task_id'] == event['task_id'] and s_event['event_type'] == DOWNLOAD_TASKS_STARTED:
+                            for s_event in self.task_events[ray_task_name(load_df)]:
+                                if s_event['task_id'] == event['task_id'] and s_event['event_name'] == get_event_name(ray_task_name(load_df), EventType.STARTED):
                                     started_event = s_event
                             if started_event is None:
                                 continue

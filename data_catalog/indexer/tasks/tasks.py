@@ -7,11 +7,9 @@ import featurizer.features.loader.l2_snapshot_utils as l2_utils
 import pandas as pd
 from ray.util.client import ray
 
-from data_catalog.indexer.actors.stats import Stats, INDEX_TASKS_STARTED, INDEX_TASKS_FINISHED, DOWNLOAD_TASKS_FINISHED, \
-    DOWNLOAD_TASKS_STARTED, DOWNLOAD_TASK_TYPE, INDEX_TASK_TYPE
 from data_catalog.indexer.models import InputItem, IndexItem
+from data_catalog.utils.register import report_stats_decor, EventType
 from utils.pandas import df_utils
-from utils.s3 import s3_utils
 
 
 # TODO set resources
@@ -23,45 +21,17 @@ def gather_and_wait(args):
 
 # TODO set CPU=0, or add parallelism resource, set memory and object_store_memory
 @ray.remote
-def load_df(input_item: InputItem, stats: Stats, task_id: str, extra: Optional[Dict] = None) -> pd.DataFrame:
-    event = {
-        'task_id': task_id,
-        'event_type': DOWNLOAD_TASKS_STARTED,
-        'timestamp': time.time()
-    }
-    if extra is not None and 'size_kb' in extra:
-        event['size_kb'] = extra['size_kb']
-    stats.event.remote(DOWNLOAD_TASK_TYPE, event)
+@report_stats_decor([EventType.SCHEDULED, EventType.STARTED, EventType.FINISHED])
+def load_df(input_item: InputItem, stats: 'Stats', task_id: str, extra: Optional[Dict] = None) -> pd.DataFrame:
     path = input_item['path']
-    # TODO use https://github.com/aio-libs/aiobotocore for df download
-    # example https://gist.github.com/mattwang44/0c2e0e244b9e5f901f3881d5f1e85d3a
-    df = df_utils.load_df(path)
-    event['event_type'] = DOWNLOAD_TASKS_FINISHED
-    now = time.time()
-    event['latency'] = now - event['timestamp']
-    event['timestamp'] = now
-    stats.event.remote(DOWNLOAD_TASK_TYPE, event)
-    return df
+    return df_utils.load_df(path)
 
 
 # TODO set CPU=0, set memory and object_store_memory
 @ray.remote
-def index_df(df: pd.DataFrame, input_item: InputItem, stats: Stats, task_id: str, extra: Optional[Dict] = None) -> IndexItem:
-    event = {
-        'task_id': task_id,
-        'event_type': INDEX_TASKS_STARTED,
-        'timestamp': time.time()
-    }
-    if extra is not None and 'size_kb' in extra:
-        event['size_kb'] = extra['size_kb']
-    stats.event.remote(INDEX_TASK_TYPE, event)
-    res = _index_df(df, input_item)
-    event['event_type'] = INDEX_TASKS_FINISHED
-    now = time.time()
-    event['latency'] = now - event['timestamp']
-    event['timestamp'] = now
-    stats.event.remote(INDEX_TASK_TYPE, event)
-    return res
+@report_stats_decor([EventType.SCHEDULED, EventType.STARTED, EventType.FINISHED])
+def index_df(df: pd.DataFrame, input_item: InputItem, stats: 'Stats', task_id: str, extra: Optional[Dict] = None) -> IndexItem:
+    return _index_df(df, input_item)
 
 
 def _index_df(df: pd.DataFrame, input_item: InputItem) -> IndexItem:

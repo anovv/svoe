@@ -4,13 +4,15 @@ import unittest
 
 from ray.util.client import ray
 
-from data_catalog.indexer.actors.stats import Stats, FILTER_BATCH
+from data_catalog.indexer.actors.stats import Stats
 from data_catalog.indexer.indexer import Indexer
+from data_catalog.utils.register import ray_task_name
 from data_catalog.utils.sql.client import MysqlClient
 from data_catalog.utils.sql.models import add_defaults
 from data_catalog.indexer.tasks.tasks import _index_df
 from data_catalog.indexer.util import generate_input_items
 from utils.pandas.df_utils import load_dfs
+from data_catalog.indexer.tasks.tasks import load_df
 
 
 class TestDataCatalogIndexer(unittest.TestCase):
@@ -84,11 +86,22 @@ class TestDataCatalogIndexer(unittest.TestCase):
             stats.run.remote()
             time.sleep(2)
             for _ in range(500):
-                ray.get(stats.inc_task_events_counter.remote(FILTER_BATCH))
+                # TODO
+                # ray.get(stats.inc_task_events_counter.remote(FILTER_BATCH))
                 time.sleep(0.1)
             time.sleep(20)
+
+    def test_name(self):
+
+        @ray.remote
+        def test():
+            print('test')
+
+        print(test.__dict__['_func'].__name__)
+        print(ray_task_name(load_df))
 
 
 if __name__ == '__main__':
     t = TestDataCatalogIndexer()
     t.test_indexer()
+    # t.test_name()

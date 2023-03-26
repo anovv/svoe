@@ -3,12 +3,10 @@ from enum import Enum
 from typing import List, Dict
 from functools import wraps
 
-from data_catalog.indexer.actors.stats import Stats
-
 
 class EventType(Enum):
     SCHEDULED = 'scheduled'
-    STARTED = 'donwloaded'
+    STARTED = 'started'
     FINISHED = 'finished'
 
 
@@ -20,7 +18,7 @@ def report_stats_decor(event_types: List[EventType]):
     def decorate(task):
         # register event names and task names for stats dashboards
         for event_type in event_types:
-            EVENT_NAMES.append(_event_name(task.__name__, event_type))
+            EVENT_NAMES.append(get_event_name(task.__name__, event_type))
 
         TASK_NAMES.append(task.__name__)
 
@@ -28,13 +26,12 @@ def report_stats_decor(event_types: List[EventType]):
         def wrapper(*args, **kwargs):
             task_id = kwargs['task_id']
             stats = kwargs['stats']
-            extra = kwargs['extra']
+            extra = kwargs.get('extra', None)
             task_name = task.__name__
 
-            # TODO event_type -> event_name
             event = {
                 'task_id': task_id,
-                'event_type': _event_name(task_name, EventType.STARTED),
+                'event_name': get_event_name(task_name, EventType.STARTED),
                 'timestamp': time.time()
             }
             if extra is not None and 'size_kb' in extra:
@@ -42,7 +39,7 @@ def report_stats_decor(event_types: List[EventType]):
             if EventType.STARTED in event_types:
                 stats.event.remote(task_name, event)
             res = task(*args, **kwargs)
-            event['event_type'] = _event_name(task_name, EventType.FINISHED)
+            event['event_name'] = get_event_name(task_name, EventType.FINISHED)
             now = time.time()
             event['latency'] = now - event['timestamp']
             event['timestamp'] = now
@@ -55,5 +52,15 @@ def report_stats_decor(event_types: List[EventType]):
     return decorate
 
 
-def _event_name(task_name: str, event_type: EventType) -> str:
+def get_event_name(task_name: str, event_type: EventType) -> str:
     return task_name + '_' + event_type.value
+
+def ray_task_name(task) -> str:
+    d = task.__dict__
+    if '_func' in d:
+        return d['_func'].__name__
+
+    if '_function' in d:
+        return d['_function'].__name__
+
+    raise ValueError(f'Unable to parse underlying function name from ray task: {d}')
