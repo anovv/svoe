@@ -2,17 +2,15 @@ import itertools
 import time
 import unittest
 
-from ray.util.client import ray
+# from ray.util.client import ray
+import ray
 
-from data_catalog.indexer.actors.stats import Stats
-from data_catalog.indexer.indexer import Indexer
-from data_catalog.utils.register import ray_task_name
-from data_catalog.utils.sql.client import MysqlClient
-from data_catalog.utils.sql.models import add_defaults
-from data_catalog.indexer.tasks.tasks import _index_df
-from data_catalog.indexer.util import generate_input_items
+from data_catalog.pipelines.pipeline_runner import PipelineRunner
+from data_catalog.common.utils.sql.client import MysqlClient
+from data_catalog.common.utils.sql.models import add_defaults
+from data_catalog.common.tasks.tasks import _index_df
+from data_catalog.common.utils.utils import generate_input_items
 from utils.pandas.df_utils import load_dfs
-from data_catalog.indexer.tasks.tasks import load_df
 
 
 class TestDataCatalogIndexer(unittest.TestCase):
@@ -51,10 +49,10 @@ class TestDataCatalogIndexer(unittest.TestCase):
 
 
     def test_indexer(self):
-        with ray.init(address='auto'):
+        with ray.util.client.init(address='auto'):
             batch_size = 50
             num_batches = 10
-            indexer = Indexer()
+            indexer = PipelineRunner()
             indexer.run()
             print('Inited indexer')
             print('Loading generator...')
@@ -80,28 +78,9 @@ class TestDataCatalogIndexer(unittest.TestCase):
             # should be 0
             print(len(not_exist))
 
-    def test_bokeh_dashboard(self):
-        with ray.init(address='auto'):
-            stats = Stats.remote()
-            stats.run.remote()
-            time.sleep(2)
-            for _ in range(500):
-                # TODO
-                # ray.get(stats.inc_task_events_counter.remote(FILTER_BATCH))
-                time.sleep(0.1)
-            time.sleep(20)
-
-    def test_name(self):
-
-        @ray.remote
-        def test():
-            print('test')
-
-        print(test.__dict__['_func'].__name__)
-        print(ray_task_name(load_df))
-
 
 if __name__ == '__main__':
     t = TestDataCatalogIndexer()
     t.test_indexer()
-    # t.test_name()
+
+

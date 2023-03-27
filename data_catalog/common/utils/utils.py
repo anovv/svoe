@@ -1,7 +1,7 @@
 import json
 from typing import Generator, Optional, Tuple, Dict
 
-from data_catalog.indexer.models import InputItemBatch
+from data_catalog.common.data_models.models import InputItemBatch
 from utils.s3.s3_utils import inventory
 
 S3_BUCKET = 'svoe.test.1'

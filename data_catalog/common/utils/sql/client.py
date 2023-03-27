@@ -2,8 +2,8 @@ from typing import Optional, Dict, List
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from data_catalog.utils.sql.models import DataCatalog, add_defaults, Base
-from data_catalog.indexer.models import IndexItemBatch, InputItemBatch
+from data_catalog.common.utils.sql.models import DataCatalog, add_defaults, Base
+from data_catalog.common.data_models.models import IndexItemBatch, InputItemBatch
 
 import os
 

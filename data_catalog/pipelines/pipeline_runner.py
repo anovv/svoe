@@ -3,7 +3,7 @@ import ray
 # from data_catalog.indexer.actors.coordinator import Coordinator
 # from data_catalog.indexer.actors.db import DbReader, DbWriter, DbActor
 # from data_catalog.indexer.actors.queues import DownloadQueue, StoreQueue, InputQueue
-from data_catalog.indexer.actors.db import DbActor
+from data_catalog.common.actors.db import DbActor
 
 # for pipelined queue https://docs.ray.io/en/latest/ray-core/patterns/pipelining.html
 # for backpressure https://docs.ray.io/en/latest/ray-core/patterns/limit-pending-tasks.html
@@ -15,15 +15,16 @@ from data_catalog.indexer.actors.db import DbActor
 
 # implement workflows (for checkpointing/persistence):
 # https://docs.ray.io/en/latest/workflows/key-concepts.html
-from data_catalog.indexer.actors.scheduler import Scheduler
-from data_catalog.indexer.actors.stats import Stats
-from data_catalog.indexer.models import InputItemBatch
+from data_catalog.common.actors.scheduler import Scheduler
+from data_catalog.common.actors.stats import Stats
+from data_catalog.common.data_models.models import InputItemBatch
 
 # TODO workflow exception handling
 #  example exceptions
 #  download_task: botocore.exceptions.ReadTimeoutError: Read timeout on endpoint URL: "None"
 
-class Indexer:
+
+class PipelineRunner:
     stats: Stats
     db_actor: DbActor
     scheduler: Scheduler

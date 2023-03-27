@@ -1,8 +1,8 @@
 import json
 
-from sqlalchemy import Column, String, JSON, DateTime, func, Integer, Float
+from sqlalchemy import Column, String, JSON, DateTime, func, Integer
 from sqlalchemy.orm import declarative_base
-from data_catalog.indexer.models import InputItem
+from data_catalog.common.data_models.models import InputItem
 
 Base = declarative_base()
 

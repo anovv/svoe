@@ -3,20 +3,19 @@ import functools
 import math
 from threading import Thread
 from time import time, sleep
-from typing import Dict, List, Callable, Tuple, Optional, Union
+from typing import Dict, List, Optional, Union
 
 import tornado
 from bokeh.application import Application
 from bokeh.application.handlers import FunctionHandler
 from bokeh.server.server import Server
-from bokeh.models import ColumnDataSource, DataRange1d, ResetTool, PanTool, WheelZoomTool
+from bokeh.models import ColumnDataSource, ResetTool, PanTool, WheelZoomTool
 from bokeh.plotting import figure
 from bokeh.layouts import row, column
 from ray.experimental.state.api import list_workers
 
-from data_catalog.utils.register import TASK_NAMES, EVENT_NAMES, EventType, get_event_name, ray_task_name
-from data_catalog.indexer.tasks.tasks import load_df, index_df
-from data_catalog.indexer.actors.db import write_batch, filter_existing
+from data_catalog.common.utils.register import TASK_NAMES, EVENT_NAMES, EventType, get_event_name, ray_task_name
+from data_catalog.common.tasks.tasks import load_df, index_df, write_batch, filter_existing
 
 import ray
 

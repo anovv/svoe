@@ -5,7 +5,7 @@ from bokeh.io import show
 from bokeh.models import ColumnDataSource
 from bokeh.plotting import figure
 
-from data_catalog.utils.sql.client import MysqlClient
+from data_catalog.common.utils.sql.client import MysqlClient
 
 class Api:
     def __init__(self, db_config: Optional[Dict] = None):
