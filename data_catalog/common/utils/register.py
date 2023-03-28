@@ -31,7 +31,7 @@ def report_stats_decor(event_types: List[EventType]):
             extra = kwargs.get('extra', None)
             task_name = task.__name__
             if EventType.STARTED in event_types:
-                send_events_to_stats.remote(stats, [task_id], task_name, EventType.STARTED, [extra])
+                _send_events_to_stats(stats, [task_id], task_name, EventType.STARTED, [extra])
             start = time.time()
             res = task(*args, **kwargs)
             latency = time.time() - start
@@ -39,7 +39,7 @@ def report_stats_decor(event_types: List[EventType]):
                 extra = {}
             extra['latency'] = latency
             if EventType.FINISHED in event_types:
-                send_events_to_stats.remote(stats, [task_id], task_name, EventType.FINISHED, [extra])
+                _send_events_to_stats(stats, [task_id], task_name, EventType.FINISHED, [extra])
             # event = {
             #     'task_id': task_id,
             #     'event_name': get_event_name(task_name, EventType.STARTED),
@@ -62,9 +62,11 @@ def report_stats_decor(event_types: List[EventType]):
         return wrapper
     return decorate
 
-
 @ray.remote
 def send_events_to_stats(stats: 'Stats', task_ids: List[str], task_name: str, event_type: EventType, extras: List[Optional[Dict]]):
+    _send_events_to_stats(stats, task_ids, task_name, event_type, extras)
+
+def _send_events_to_stats(stats: 'Stats', task_ids: List[str], task_name: str, event_type: EventType, extras: List[Optional[Dict]]):
     if len(task_ids) != len(extras):
         raise ValueError('Each task should have corresponding extra')
 
@@ -76,10 +78,7 @@ def send_events_to_stats(stats: 'Stats', task_ids: List[str], task_name: str, ev
 
     for i in range(len(extras)):
         events[i].update(extras[i])
-    if len(events) == 1:
-        stats.event.remote(task_name, events[0])
-    else:
-        stats.events.remote(task_name, events)
+    stats.send_events.remote(task_name, events)
 
 
 def get_event_name(task_name: str, event_type: EventType) -> str:

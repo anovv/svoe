@@ -18,6 +18,7 @@ class DbActor:
         return to_download_batch
 
     # TODO asyncify this
+    # TODO debug sqlalchemy.exc.IntegrityError: (pymysql.err.IntegrityError) (1062, "Duplicate entry 'l2_book-BINANCE-spot-{}-BTC-USDT-BTC-USDT-1641113668.511-1641113' for key 'data_catalog.PRIMARY'")
     def _write_batch(self, batch: IndexItemBatch) -> Dict:
         self.client.create_tables()
         self.client.write_index_item_batch(batch)

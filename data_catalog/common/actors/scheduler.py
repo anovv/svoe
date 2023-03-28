@@ -3,16 +3,16 @@ import time
 import uuid
 
 from ray import workflow
-from ray.util.client import ray
+# from ray.util.client import ray
+import ray
 from ray.workflow import WorkflowStatus
 
 from data_catalog.common.actors.db import DbActor
 from data_catalog.common.data_models.models import InputItemBatch
-from data_catalog.common.tasks.tasks import load_df, index_df, gather_and_wait, write_batch, filter_existing
 from data_catalog.common.actors.stats import Stats
-from data_catalog.common.utils.register import get_event_name, EventType, ray_task_name
 
 # TODO use uvloop
+from data_catalog.pipelines.dag import Dag
 
 
 @ray.remote
@@ -41,7 +41,7 @@ class Scheduler:
         while self.is_running:
             await asyncio.sleep(0.1)
 
-    async def scheduler_loop(self):
+    async def scheduler_loop(self, dag: Dag):
         while self.is_running:
             if self.input_queue.qsize() == 0:
                 await asyncio.sleep(0.1)
@@ -51,7 +51,7 @@ class Scheduler:
             workflow_id = f'workflow_{self.run_id}_{batch_id}'
 
             # TODO figure out what to do with write_status
-            write_status_ref = workflow.run_async(dag, workflow_id=workflow_id)
+            write_status_ref = workflow.run_async(dag.get(workflow_id, input_batch, self.stats, self.db_actor), workflow_id=workflow_id)
             # TODO add cleanup coroutine for self.workflow_task_ids when finished
 
     async def stop(self):
@@ -67,10 +67,10 @@ class Scheduler:
             await asyncio.sleep(0.1)
             to_wait = self._list_workflows_for_current_run({WorkflowStatus.RUNNING, WorkflowStatus.PENDING})
 
-    async def run(self):
+    async def run(self, dag: Dag):
         self.run_id = self._gen_run_id()
         reader = asyncio.create_task(self.read_loop())
-        scheduler = asyncio.create_task(self.scheduler_loop())
+        scheduler = asyncio.create_task(self.scheduler_loop(dag))
         stats = asyncio.create_task(self.stats_loop())
 
         tasks = [reader, scheduler, stats]

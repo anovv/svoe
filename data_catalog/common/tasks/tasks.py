@@ -6,7 +6,6 @@ import ray
 import featurizer.features.loader.l2_snapshot_utils as l2_utils
 
 import pandas as pd
-from ray.util.client import ray
 
 from data_catalog.common.actors.db import DbActor
 from data_catalog.common.data_models.models import InputItem, IndexItem, IndexItemBatch, InputItemBatch
@@ -26,6 +25,13 @@ def gather_and_wait(args):
 def gather_and_wait_empty_return(args):
     ray.get(args)
     return []
+
+
+# TODO set resources
+# used to pipe dag nodes which outputs do not depend on each other
+@ray.remote
+def chain_no_ret(a, b):
+    return a
 
 
 # TODO set CPU=0, or add parallelism resource, set memory and object_store_memory

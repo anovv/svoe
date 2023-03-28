@@ -33,7 +33,7 @@ def _make_graph_data(keys) -> GraphData:
     return [[first], None]
 
 TIME = 'time'
-
+LOAD_DF_TASK_NAME = ray_task_name(load_df)
 GRAPH_NAME_TASK_EVENTS = 'GRAPH_NAME_TASK_EVENTS'
 
 
@@ -41,6 +41,7 @@ def _make_task_events_graph_figure(source):
     fig = figure(title="Tasks Events (count)", x_axis_type='datetime', tools='')
     for name in EVENT_NAMES:
         # TODO simplify this
+        color = 'red'
         if ray_task_name(load_df) in name:
             color = 'red'
         elif ray_task_name(index_df) in name:
@@ -84,7 +85,7 @@ def _make_task_latencies_graph_figure(source):
     # x_range = DataRange1d(follow='end', follow_interval=20000, range_padding=0)
     for name in TASK_NAMES:
         # TODO simplify this
-        color = None
+        color = 'red'
         if ray_task_name(load_df) in name:
             color = 'red'
         elif ray_task_name(index_df) in name:
@@ -143,7 +144,7 @@ CLUSTER_NUM_WORKERS = 'CLUSTER_NUM_WORKERS'
 @ray.remote
 class Stats:
     def __init__(self):
-        self.task_events = {task_name : [] for task_name in TASK_NAMES}
+        self.task_events = {task_name: [] for task_name in TASK_NAMES}
         self.graphs_data = {
             GRAPH_NAME_TASK_EVENTS: _make_graph_data(EVENT_NAMES),
             GRAPH_NAME_TASK_LATENCIES: _make_graph_data(TASK_NAMES),
@@ -152,14 +153,8 @@ class Stats:
             GRAPH_NAME_CLUSTER_NUM_WORKERS: _make_graph_data([CLUSTER_NUM_WORKERS]),
         }
 
-    def event(self, task_name: str, event: Dict):
-        self.task_events[task_name].append(event)
-
-    def events(self, task_name: str, events: List[Dict]):
+    def send_events(self, task_name: str, events: List[Dict]):
         self.task_events[task_name].extend(events)
-
-    def poll_cluster_state(self):
-        pass
 
     def run(self):
         def _run_loop():
@@ -191,7 +186,6 @@ class Stats:
 
             # update last_data_length for this graph
             self.graphs_data[graph_name][1] = len(plot_data)
-
 
     def _calc_metrics_loop(self):
         # TODO make proper flag
@@ -252,14 +246,17 @@ class Stats:
                     new_append[TIME] = [now * 1000.0]
                     size_kb = 0
                     num_files = 0
-                    for event in self.task_events[ray_task_name(load_df)]:
-                        if event['event_name'] == get_event_name(ray_task_name(load_df), EventType.FINISHED) and event['timestamp'] <= now and event['timestamp'] >= now - window_s:
 
+                    # if call ray_task_name(load_df) directly here, it won't serialize
+                    load_df_task_name = LOAD_DF_TASK_NAME
+                    for event in self.task_events[load_df_task_name]:
+                        if event['event_name'] == get_event_name(load_df_task_name, EventType.FINISHED) \
+                                and now - window_s <= event['timestamp'] <= now:
                             # find corresponding 'load_df_started' event for this task_id
                             started_event = None
                             # TODO this can be optimized to avoid nested loop
-                            for s_event in self.task_events[ray_task_name(load_df)]:
-                                if s_event['task_id'] == event['task_id'] and s_event['event_name'] == get_event_name(ray_task_name(load_df), EventType.STARTED):
+                            for s_event in self.task_events[load_df_task_name]:
+                                if s_event['task_id'] == event['task_id'] and s_event['event_name'] == get_event_name(load_df_task_name, EventType.STARTED):
                                     started_event = s_event
                             if started_event is None:
                                 continue

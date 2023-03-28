@@ -22,6 +22,7 @@ from data_catalog.common.data_models.models import InputItemBatch
 # TODO workflow exception handling
 #  example exceptions
 #  download_task: botocore.exceptions.ReadTimeoutError: Read timeout on endpoint URL: "None"
+from data_catalog.pipelines.dag import Dag
 
 
 class PipelineRunner:
@@ -29,7 +30,7 @@ class PipelineRunner:
     db_actor: DbActor
     scheduler: Scheduler
 
-    def run(self):
+    def run(self, dag: Dag):
         # TODO init throughput
         #  workflow.init(max_running_workflows=10, max_pending_workflows=50)
 
@@ -46,7 +47,7 @@ class PipelineRunner:
 
         # run scheduler
         self.scheduler = Scheduler.remote(self.stats, self.db_actor)
-        self.scheduler.run.remote()
+        self.scheduler.run.remote(dag)
 
     def pipe_input(self, input_batch: InputItemBatch):
         # TODO make it async? do we need ray.get here?

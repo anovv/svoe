@@ -2,9 +2,10 @@ import itertools
 import time
 import unittest
 
-# from ray.util.client import ray
 import ray
+from ray import workflow
 
+from data_catalog.pipelines.index_cryptofeed.dag import IndexCryptofeedDag
 from data_catalog.pipelines.pipeline_runner import PipelineRunner
 from data_catalog.common.utils.sql.client import MysqlClient
 from data_catalog.common.utils.sql.models import add_defaults
@@ -13,8 +14,9 @@ from data_catalog.common.utils.utils import generate_input_items
 from utils.pandas.df_utils import load_dfs
 
 
-class TestDataCatalogIndexer(unittest.TestCase):
+class TestIndexCryptofeedPipeline(unittest.TestCase):
 
+    # TODO util this
     def test_parse_s3_keys(self):
         # TODO add multiproc
         batch_size = 1000
@@ -36,7 +38,8 @@ class TestDataCatalogIndexer(unittest.TestCase):
         batch = next(generator)
         client = MysqlClient()
         client.create_tables()
-        not_exist = client.filter_batch(batch)
+        _, not_exist = client.filter_batch(batch)
+        print(not_exist)
         print(f'Found {batch_size - len(not_exist)} items in db, {len(not_exist)} to write')
         dfs = load_dfs([i['path'] for i in not_exist])
         index_items = []
@@ -44,17 +47,18 @@ class TestDataCatalogIndexer(unittest.TestCase):
             index_items.append(add_defaults(_index_df(df, i)))
         write_res = client.write_index_item_batch(index_items)
         print(f'Written {len(index_items)} to db, checking again...')
-        not_exist = client.filter_batch(batch)
+        _, not_exist = client.filter_batch(batch)
         print(f'Found {batch_size - len(not_exist)} existing records in db')
+        assert len(not_exist) == 0
 
 
-    def test_indexer(self):
-        with ray.util.client.init(address='auto'):
+    def test_pipeline(self):
+        with ray.init(address='auto'):
             batch_size = 50
             num_batches = 10
-            indexer = PipelineRunner()
-            indexer.run()
-            print('Inited indexer')
+            runner = PipelineRunner()
+            runner.run(IndexCryptofeedDag())
+            print('Inited runner')
             print('Loading generator...')
             generator = generate_input_items(batch_size)
             print('Generator loaded')
@@ -63,7 +67,7 @@ class TestDataCatalogIndexer(unittest.TestCase):
             for i in range(num_batches):
                 input_batch = next(generator)
                 inputs.append(input_batch)
-                indexer.pipe_input(input_batch)
+                runner.pipe_input(input_batch)
                 print(f'Queued {i + 1} batches')
             print('Done queueing')
             # wait for everything to process
@@ -78,9 +82,8 @@ class TestDataCatalogIndexer(unittest.TestCase):
             # should be 0
             print(len(not_exist))
 
-
 if __name__ == '__main__':
-    t = TestDataCatalogIndexer()
-    t.test_indexer()
-
+    t = TestIndexCryptofeedPipeline()
+    # t.test_pipeline()
+    t.test_db_client()
 
