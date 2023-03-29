@@ -84,6 +84,6 @@ class TestIndexCryptofeedPipeline(unittest.TestCase):
 
 if __name__ == '__main__':
     t = TestIndexCryptofeedPipeline()
-    # t.test_pipeline()
-    t.test_db_client()
+    t.test_pipeline()
+    # t.test_db_client()
 

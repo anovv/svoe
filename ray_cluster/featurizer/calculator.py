@@ -133,11 +133,10 @@ def calculate_feature(
 
 # TODO util this
 # TODO we assume no 'holes' here
+# TODO can we use pandas merge_asof here or some other merge functionality?
 def merge_blocks(
     blocks: Dict[Feature, BlockRange]
 ) -> List[Tuple[Feature, Event]]:
-    # TODO we assume no 'hoes' here
-    # merge
     merged = None
     features = list(blocks.keys())
     for i in range(0, len(features)):
@@ -145,7 +144,7 @@ def merge_blocks(
         block_range = blocks[feature]
         named_events = []
         for block in block_range:
-            parsed = feature.feature_definition.parse_events(block, )
+            parsed = feature.feature_definition.parse_events(block)
             named = []
             for e in parsed:
                 named.append((feature, e))

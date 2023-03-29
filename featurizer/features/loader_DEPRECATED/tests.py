@@ -1,5 +1,5 @@
 import utils.pandas.df_utils as dfu
-import featurizer.features.loader.l2_snapshot_utils as l2u
+import featurizer.features.data.l2_book_incremental.cryptofeed.l2_snapshot_utils as l2u
 import featurizer.features.loader.catalog as catalog
 import utils.concurrency.concurrency_utils as cu
 import featurizer.features.loader.loader as loader

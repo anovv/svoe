@@ -9,7 +9,7 @@ from featurizer.features.data.trades.trades import TradesData
 from featurizer.features.definitions.feature_definition import FeatureDefinition
 from featurizer.features.feature_tree.feature_tree import Feature
 from utils.pandas.df_utils import load_dfs, time_range, get_size_kb, get_num_rows
-from featurizer.features.loader.l2_snapshot_utils import get_info
+from featurizer.features.data.l2_book_incremental.cryptofeed.utils import get_info
 
 def mock_feature(position: int):
     return Feature(

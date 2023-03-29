@@ -3,7 +3,7 @@ from typing import Optional, Dict
 
 import ray
 
-import featurizer.features.loader.l2_snapshot_utils as l2_utils
+import featurizer.features.data.l2_book_incremental.cryptofeed.utils as cryptofeed_l2_utils
 
 import pandas as pd
 
@@ -22,16 +22,8 @@ def gather_and_wait(args):
 # TODO set resources
 # used to pipe dag nodes which outputs do not depend on each other
 @ray.remote
-def gather_and_wait_empty_return(args):
-    ray.get(args)
-    return []
-
-
-# TODO set resources
-# used to pipe dag nodes which outputs do not depend on each other
-@ray.remote
-def chain_no_ret(a, b):
-    return a
+def chain_no_ret(*args):
+    return args[0]
 
 
 # TODO set CPU=0, or add parallelism resource, set memory and object_store_memory
@@ -64,6 +56,14 @@ def write_batch(db_actor: DbActor, batch: IndexItemBatch, stats: 'Stats', task_i
 def filter_existing(db_actor: DbActor, input_batch: InputItemBatch, stats: 'Stats', task_id: str, extra: Optional[Dict] = None) -> InputItemBatch:
     return ray.get(db_actor._filter_batch.remote(input_batch))
 
+# TODO set CPU=0, or add parallelism resource, set memory and object_store_memory
+@ray.remote
+@report_stats_decor([EventType.STARTED, EventType.FINISHED])
+def store_df(input_item: InputItem, stats: 'Stats', task_id: str, extra: Optional[Dict] = None):
+    path = input_item['path']
+    # TODO implement
+    return
+
 
 def _index_df(df: pd.DataFrame, input_item: InputItem) -> IndexItem:
     path = input_item['path']
@@ -78,7 +78,7 @@ def _index_df(df: pd.DataFrame, input_item: InputItem) -> IndexItem:
         'num_rows': df_utils.get_num_rows(df),
     })
     if index_item['data_type'] == 'l2_book':
-        snapshot_ts = l2_utils.get_snapshot_ts(df)
+        snapshot_ts = cryptofeed_l2_utils.get_snapshot_ts(df)
         if snapshot_ts is not None:
             meta = {
                 'snapshot_ts': snapshot_ts

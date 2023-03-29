@@ -3,9 +3,8 @@ import ray
 from typing import Optional, List, Dict, Any
 from ray_cluster.datasource.svoe_datasource import SvoeDatasource
 from ray.data.dataset import Dataset
-from ray.data.context import DatasetContext
 
-from featurizer.features.loader.l2_snapshot_utils import get_info
+from featurizer.features.data.l2_book_incremental.cryptofeed.l2_snapshot_utils import get_info
 
 
 def read_files(file_paths: List[str], parallelism: Optional[int] = 100) -> Dataset:

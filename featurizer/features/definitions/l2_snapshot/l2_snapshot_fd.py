@@ -50,7 +50,7 @@ class L2SnapshotFD(FeatureDefinition):
         return su.filter_none(acc).unique(maxsize=1)
 
     @classmethod
-    def _update_state(cls, state: _State, event: Event, depth: Optional[int] = None, dep_schema: Optional[str] = None) -> Tuple[_State, Optional[Event]]:
+    def _update_state(cls, state: _State, event: Event, depth: int, dep_schema: Optional[str] = None) -> Tuple[_State, Optional[Event]]:
         if dep_schema is None:
             state, skip_event = cryptofeed_update_state(state, event, depth)
         elif dep_schema == 'cryptotick':
@@ -60,10 +60,10 @@ class L2SnapshotFD(FeatureDefinition):
         return state, None if skip_event else cls._state_snapshot(state, depth)
 
     @classmethod
-    def _state_snapshot(cls, state: _State, depth: Optional[int] = None) -> Event:
+    def _state_snapshot(cls, state: _State, depth: int) -> Event:
         bids = FrozenList()
         asks = FrozenList()
-        if depth is None:
+        if depth == -1: # indicates full book
             depth = max(len(state.order_book.bids), len(state.order_book.asks))
 
         for level in range(depth):

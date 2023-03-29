@@ -213,7 +213,7 @@ class TestFeatureCalculator(unittest.TestCase):
         # output_file("ts.html")
         show(p)
 
-    # TODO util
+    # TODO util/merge this with stuff in test_index_cryptotick
     def _big_cryptotick_df_path(self, index: int = - 1) -> str:
         big_df_path = 's3://svoe-cryptotick-data/limitbook_full/20230201/BINANCE_SPOT_BTC_USDT.csv.gz'
         if index < 0:
