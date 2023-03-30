@@ -59,10 +59,9 @@ def filter_existing(db_actor: DbActor, input_batch: InputItemBatch, stats: 'Stat
 # TODO set CPU=0, or add parallelism resource, set memory and object_store_memory
 @ray.remote
 @report_stats_decor([EventType.STARTED, EventType.FINISHED])
-def store_df(input_item: InputItem, stats: 'Stats', task_id: str, extra: Optional[Dict] = None):
-    path = input_item['path']
-    # TODO implement
-    return
+def store_df(df: pd.DataFrame, input_item: InputItem, stats: 'Stats', task_id: str, extra: Optional[Dict] = None):
+    path = get_store_path(df, input_item)
+    df_utils.store_df(path, df)
 
 
 def _index_df(df: pd.DataFrame, input_item: InputItem) -> IndexItem:

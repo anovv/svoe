@@ -12,6 +12,12 @@ from utils.s3.s3_utils import get_session
 CACHE_DIR = '/tmp/svoe/dfs_cache/'
 
 
+def store_df(path: str, df: pd.DataFrame, cache_dir: str = CACHE_DIR):
+    # TODO add caching
+    session = get_session()
+    wr.s3.to_parquet(df, path=path, dataset=False, compression='gz', boto3_session=session)
+    
+
 def load_df(path: str, use_cache: bool = True, cache_dir: str = CACHE_DIR, extension: str = 'parquet') -> pd.DataFrame:
     # caching first
     cache_key = joblib.hash(path) # can't use s3:// strings as keys, cache_df lib flips out
