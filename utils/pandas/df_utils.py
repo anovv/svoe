@@ -58,6 +58,7 @@ def get_cached_df(cache_key: str, cache_dir: str = CACHE_DIR) -> Optional[pd.Dat
     cache = CacheDF(cache_dir=cache_dir)
     if cache.is_cached(cache_key):
         return cache.read(cache_key)
+    return None
 
 
 def delete_cached_df(cache_key: str, cache_dir: str = CACHE_DIR):

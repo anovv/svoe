@@ -153,7 +153,7 @@ def prepend_snap(df: pd.DataFrame, snap) -> pd.DataFrame:
     ts += microsec
     receipt_ts += microsec
 
-    if df.iloc[0]['timestamp'] >= ts or df.iloc[0]['receipt_ts'] >= receipt_ts:
+    if ts >= df.iloc[0]['timestamp'] or receipt_ts >= df.iloc[0]['receipt_timestamp']:
         raise ValueError('Unable to shift snapshot ts when prepending')
 
     df_bids = pd.DataFrame(snap['bids'], columns=['price', 'size'])

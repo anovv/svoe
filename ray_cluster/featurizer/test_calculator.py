@@ -23,6 +23,7 @@ import calculator as C
 from featurizer.features.data.data_source_definition import DataSourceDefinition
 from featurizer.features.data.l2_book_incremental.cryptofeed.cryptofeed_l2_book_incremental import CryptofeedL2BookIncrementalData
 from featurizer.features.data.l2_book_incremental.cryptotick.cryptotick_l2_book_incremental import CryptotickL2BookIncrementalData
+from featurizer.features.data.l2_book_incremental.cryptotick.utils import preprocess_l2_inc_df
 from featurizer.features.data.trades.trades import TradesData
 from featurizer.features.definitions.ohlcv.ohlcv_fd import OHLCVFD
 from featurizer.features.definitions.l2_snapshot.l2_snapshot_fd import L2SnapshotFD
@@ -37,7 +38,7 @@ import pandas as pd
 from typing import Type, List
 from anytree import RenderTree
 from ray_cluster.testing_utils import mock_meta, mock_feature, mock_trades_data_and_meta, mock_l2_book_delta_data_and_meta, mock_ts_df, mock_ts_df_remote
-from utils.pandas.df_utils import concat, load_df, get_size_kb, gen_split_df_by_mem, cache_df_if_needed, get_cached_df, delete_cached_df
+from utils.pandas.df_utils import concat, load_df, get_size_kb, gen_split_df_by_mem, cache_df_if_needed, get_cached_df
 
 
 class TestFeatureCalculator(unittest.TestCase):
@@ -224,11 +225,14 @@ class TestFeatureCalculator(unittest.TestCase):
         return joblib.hash(self._big_cryptotick_df_path(split_id))
 
     def test_split_and_cache_big_cryptotick_df(self):
+        # TODO mark processed vs raw
         #  5Gb in-memory
         print('Loading df')
         big_df = load_df(self._big_cryptotick_df_path(), extension='csv')
         print('Loaded df')
         print(big_df.head(10))
+
+        # TODO we can split only processed dfs
         split_gen = gen_split_df_by_mem(big_df, 100 * 1024, ts_col_name='time_exchange')
         i = 0
         for split_df in split_gen:
@@ -243,6 +247,8 @@ class TestFeatureCalculator(unittest.TestCase):
         print('Started loading')
         df = load_df(path, extension='csv')
         print('Finished loading')
+
+        # TODO we can split only processed dfs
         split_gen = gen_split_df_by_mem(df, 100 * 1024, ts_col_name='time_exchange')
         splits = []
         i = 0
@@ -299,39 +305,18 @@ class TestFeatureCalculator(unittest.TestCase):
 
         print(f'Avg Trades split size:{np.mean(trades_split_sizes)}')
 
+    # TODO is this needed?
     def test_snapshot_cryptotick(self):
-        # num = 20
-        # dfs = [get_cached_df(self._cache_key_for_big_cryptotick_df_split(i)) for i in range(num)]
+        date_str = '20230201'
         df = get_cached_df(self._cache_key_for_big_cryptotick_df_split(0))
+        df = preprocess_l2_inc_df(df, date_str)
         print('Loaded')
         print(get_size_kb(df))
-        # snap = df[df.update_type == 'SNAPSHOT']
-        # print(len(snap[(snap.is_buy == 0)]))
-        # print(snap[snap.is_buy == 0].head(10))
-        # prices = snap.entry_px.tolist()
-        # prices.sort()
-        # price_diffs = [t - s for s, t in zip(prices, prices[1:])]
         print(df.head(10))
-
-        date_str = '20230201'
-        # print(df['time_exchange'].is_monotonic_increasing)
-        # datetime_str = f'{date_str[0:4]}-{date_str[4:6]}-{date_str[6:8]} ' #yyyy-mm-dd
-        # df['time_exchange'] = datetime_str + df['time_exchange']
-        # df['datetime'] = pd.to_datetime(df['time_exchange'])
-        # # # https://stackoverflow.com/questions/54313463/pandas-datetime-to-unix-timestamp-seconds
-        # df['timestamp'] = df['datetime'].astype(int)/10**9
-
-        events = CryptotickL2BookIncrementalData.parse_events(df, date_str=date_str)
-        # print(list(df['update_type'].unique()))
-        # print(df.iloc[-1]['timestamp'] - df.iloc[0]['timestamp'])
-        # print(df['time_exchange'].is_monotonic_increasing)
-
+        events = CryptotickL2BookIncrementalData.parse_events(df)
         print(len(events))
         print(events[0]['update_type'])
         print(datetime.datetime.fromtimestamp(events[0]['timestamp'], tz=pytz.utc))
-        # plt.hist(price_diffs)
-        # plt.show()
-        # print(get_snapshot_ts(df, source='cryptotick'))
         events_df = pd.DataFrame(events)
         print(len(events_df))
         print(get_size_kb(events_df))
@@ -362,10 +347,10 @@ if __name__ == '__main__':
     # t.test_merge_asof()
     # t.test_feature_label_set()
     # t.test_df_split()
-    # t.test_split_and_cache_big_cryptotick_df()
+    t.test_split_and_cache_big_cryptotick_df()
     # t.test_split_small_cryptotick_df()
     # t.test_snapshot_cryptotick()
-    t.test_cryptotick_l2_snap_feature()
+    # t.test_cryptotick_l2_snap_feature()
 
 
     # TODO figure out if we need to use lookahead_shift as a label
