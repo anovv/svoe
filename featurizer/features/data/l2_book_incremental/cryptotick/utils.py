@@ -1,4 +1,5 @@
 from typing import Optional, List, Tuple
+from utils.pandas.df_utils import is_ts_sorted
 
 import pandas as pd
 
@@ -15,7 +16,7 @@ def preprocess_l2_inc_df(df: pd.DataFrame, date_str: str) -> pd.DataFrame:
 
     # TODO for some reason raw crypottick dates are not sorted
     df.sort_values(by=['timestamp'], ignore_index=True, inplace=True)
-    if not df['timestamp'].is_monotonic_increasing:
+    if not is_ts_sorted(df):
         raise ValueError('Unable to sort df by timestamp')
 
     df.drop(columns=['time_exchange', 'time_coinapi'], inplace=True)

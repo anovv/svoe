@@ -119,9 +119,12 @@ def is_ts_sorted(df: pd.DataFrame) -> bool:
     return df['timestamp'].is_monotonic_increasing
 
 
-# TODO make sure split does not happen at rows with the same timestamp
 # TODO typing
-def gen_split_df_by_mem(df: pd.DataFrame, chunk_size_kb: int, ts_col_name: str = 'timestamp') -> Generator:
+def gen_split_df_by_mem(df: pd.DataFrame, chunk_size_kb: int) -> Generator:
+    # split only ts sorted dfs
+    if not is_ts_sorted(df):
+        raise ValueError('Only ts-sorted dfs can be split')
+
     num_rows = len(df)
     df_size_kb = get_size_kb(df)
 
@@ -136,8 +139,8 @@ def gen_split_df_by_mem(df: pd.DataFrame, chunk_size_kb: int, ts_col_name: str =
     while start < num_rows:
         end = min(start + chunk_num_rows, num_rows) - 1
         # move end while we have same ts to make sure we don't split it
-        end_ts = df.iloc[end][ts_col_name]
-        while end < num_rows and df.iloc[end][ts_col_name] == end_ts:
+        end_ts = df.iloc[end]['timestamp']
+        while end < num_rows and df.iloc[end]['timestamp'] == end_ts:
             end += 1
         yield df.iloc[start: end]
         start = end

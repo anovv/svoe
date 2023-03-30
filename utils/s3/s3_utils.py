@@ -55,18 +55,7 @@ def to_bucket_and_key(path: str) -> Tuple[str, str]:
     return bucket_name, key
 
 
-# TODO asyncify paginator https://gist.github.com/gudgud96/bdde37c9cc6b56a88ae3a7a0a217a723
-# TODO multithreaded version https://gist.github.com/sjakthol/19367500519a8828ec77ef5d34b1b0b9
-# TODO for threaded delete https://gist.github.com/angrychimp/76b8fe9f15c88d7f121db1cc5d2c215d
-# TODO retriving common prefixes https://stackoverflow.com/questions/36991468/how-to-retrieve-bucket-prefixes-in-a-filesystem-style-using-boto3
-# TODO parallel list https://joshua-robinson.medium.com/listing-67-billion-objects-in-1-bucket-806e4895130f
-# TODO more https://gist.github.com/joshuarobinson/ecf4f82e5d935f841b94b8cccae7c990
-# https://alukach.com/posts/tips-for-working-with-a-large-number-of-files-in-s3/
-
-# for s3 inventory
-# https://gist.github.com/alukach/1a2b8b6366410fb94fa5cee7f72ee304
-# https://alukach.com/posts/parsing-s3-inventory-output/
-def list_files(bucket_name: str, prefix: str = '', page_size: int = 1000, max_items: Optional[int] = None) -> List[Any]:
+def list_files_and_sizes_kb(bucket_name: str, prefix: str = '', page_size: int = 1000, max_items: Optional[int] = None) -> List[Tuple[str, int]]:
     session = get_session()
     client = session.client('s3')
     paginator = client.get_paginator('list_objects') # TODO use list_objects_v2
@@ -82,9 +71,9 @@ def list_files(bucket_name: str, prefix: str = '', page_size: int = 1000, max_it
     res = []
     for obj in iterator:
         fetched = obj['Contents']
-        keys = [f['Key'] for f in fetched]
+        keys_and_sizes = [(f['Key'], f['Size']/1024) for f in fetched]
         # filter names that match prefix
-        res.extend(list(filter(lambda e: e != prefix, keys)))
+        res.extend(list(filter(lambda e: e[0] != prefix, keys_and_sizes)))
     return res
 
 
@@ -95,5 +84,5 @@ def inventory() -> Generator[pd.DataFrame, None, None]:
     for f in files:
         yield pd.read_parquet(f'{inventory_files_folder}/{f}')
 
-# for progress https://github.com/alphatwirl/atpbar
+# for progress bar https://github.com/alphatwirl/atpbar
 # https://leimao.github.io/blog/Python-tqdm-Multiprocessing/
