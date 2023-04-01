@@ -3,13 +3,12 @@ from typing import Optional, Dict
 
 import ray
 
-import featurizer.features.data.l2_book_incremental.cryptofeed.utils as cryptofeed_l2_utils
-
 import pandas as pd
 
 from data_catalog.common.actors.db import DbActor
 from data_catalog.common.data_models.models import InputItem, IndexItem, IndexItemBatch, InputItemBatch
 from data_catalog.common.utils.register import report_stats_decor, EventType
+from data_catalog.common.utils.utils import make_index_item
 from utils.pandas import df_utils
 
 
@@ -37,9 +36,8 @@ def load_df(input_item: InputItem, stats: 'Stats', task_id: str, extra: Optional
 # TODO set CPU=0, set memory and object_store_memory
 @ray.remote
 @report_stats_decor([EventType.SCHEDULED, EventType.STARTED, EventType.FINISHED])
-def index_df(df: pd.DataFrame, input_item: InputItem, stats: 'Stats', task_id: str, extra: Optional[Dict] = None) -> IndexItem:
-    return _index_df(df, input_item)
-
+def index_df(df: pd.DataFrame, input_item: InputItem, stats: 'Stats', task_id: str, source:str, extra: Optional[Dict] = None) -> IndexItem:
+    return make_index_item(df, input_item, source)
 
 # TODO set CPU=0, or add parallelism resource, set memory and object_store_memory
 @ray.remote
@@ -59,29 +57,6 @@ def filter_existing(db_actor: DbActor, input_batch: InputItemBatch, stats: 'Stat
 # TODO set CPU=0, or add parallelism resource, set memory and object_store_memory
 @ray.remote
 @report_stats_decor([EventType.STARTED, EventType.FINISHED])
-def store_df(df: pd.DataFrame, input_item: InputItem, stats: 'Stats', task_id: str, extra: Optional[Dict] = None):
-    path = get_store_path(df, input_item)
+def store_df(df: pd.DataFrame, index_item: IndexItem, stats: 'Stats', task_id: str, extra: Optional[Dict] = None):
+    path = index_item['path']
     df_utils.store_df(path, df)
-
-
-def _index_df(df: pd.DataFrame, input_item: InputItem) -> IndexItem:
-    path = input_item['path']
-    index_item = input_item.copy()
-    _time_range = df_utils.time_range(df)
-
-    # TODO sync keys with DataCatalog sql model
-    index_item.update({
-        'start_ts': _time_range[1],
-        'end_ts': _time_range[2],
-        'size_in_memory_kb': df_utils.get_size_kb(df),
-        'num_rows': df_utils.get_num_rows(df),
-    })
-    if index_item['data_type'] == 'l2_book':
-        snapshot_ts = cryptofeed_l2_utils.get_snapshot_ts(df)
-        if snapshot_ts is not None:
-            meta = {
-                'snapshot_ts': snapshot_ts
-            }
-            index_item['meta'] = json.dumps(meta)
-
-    return index_item

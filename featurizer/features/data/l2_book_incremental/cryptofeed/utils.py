@@ -1,6 +1,5 @@
 import pandas as pd
-import utils.pandas.df_utils as dfu
-from typing import List, Tuple, Dict, Any, Optional
+from typing import List, Tuple, Optional
 
 
 def starts_with_snapshot(df: pd.DataFrame) -> bool:
@@ -53,28 +52,3 @@ def get_snapshot_ts(df: pd.DataFrame) -> Optional[List]:
     if len(snaps) == 0:
         return None
     return list(snaps.timestamp.unique())
-
-
-def get_info(df: pd.DataFrame) -> Dict[str, Any]:
-    _has_snapshot = has_snapshot(df)
-    res = {
-        'df_size_kb': dfu.get_size_kb(df),
-        'length': dfu.get_num_rows(df),
-        'has_snapshot': _has_snapshot,
-        'time_range': dfu.time_range(df)
-    }
-    if _has_snapshot:
-        res.update({
-            'starts_with_snapshot': starts_with_snapshot(df),
-            'ends_with_snapshot': ends_with_snapshot(df),
-            'snapshot_ranges': get_snapshots_ranges(df),
-            'snapshot_ts': get_snapshot_ts(df)
-        })
-
-    return res
-
-
-
-
-
-

@@ -15,8 +15,8 @@ CACHE_DIR = '/tmp/svoe/dfs_cache/'
 def store_df(path: str, df: pd.DataFrame, cache_dir: str = CACHE_DIR):
     # TODO add caching
     session = get_session()
-    wr.s3.to_parquet(df, path=path, dataset=False, compression='gz', boto3_session=session)
-    
+    wr.s3.to_parquet(df, path=path, dataset=False, compression='gzip', boto3_session=session)
+
 
 def load_df(path: str, use_cache: bool = True, cache_dir: str = CACHE_DIR, extension: str = 'parquet') -> pd.DataFrame:
     # caching first

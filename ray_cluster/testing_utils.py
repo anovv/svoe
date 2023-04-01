@@ -9,7 +9,8 @@ from featurizer.features.data.trades.trades import TradesData
 from featurizer.features.definitions.feature_definition import FeatureDefinition
 from featurizer.features.feature_tree.feature_tree import Feature
 from utils.pandas.df_utils import load_dfs, time_range, get_size_kb, get_num_rows
-from featurizer.features.data.l2_book_incremental.cryptofeed.utils import get_info
+import featurizer.features.data.l2_book_incremental.cryptofeed.utils as cryptofeed_l2_utils
+
 
 def mock_feature(position: int):
     return Feature(
@@ -108,17 +109,18 @@ def mock_l2_book_delta_data_and_meta() -> Tuple[Dict[Feature, BlockRange], Dict[
         's3://svoe.test.1/data_lake/data_feed_market_data/l2_book/exchange=BINANCE_FUTURES/instrument_type=perpetual/instrument_extra={}/symbol=BTC-USDT-PERP/base=BTC/quote=USDT/date=2022-10-03/compaction=raw/version=local/BINANCE_FUTURES*l2_book*BTC-USDT-PERP*1664778979.1611981*1664779009.082793*71c48c0b589d4c0b9ee2961dde59d9a1.gz.parquet'
     ]
     block_range = load_dfs(consec_athena_files_BINANCE_FUTURES_BTC_USD_PERP)
-
-    infos = [get_info(block) for block in block_range]
     block_range_meta = []
     for i in range(len(consec_athena_files_BINANCE_FUTURES_BTC_USD_PERP)):
+        block = block_range[i]
+        snapshot_ts = cryptofeed_l2_utils.get_snapshot_ts(block)
+        _time_range = time_range(block)
         block_meta = {
             'path': consec_athena_files_BINANCE_FUTURES_BTC_USD_PERP[i],
-            'start_ts': infos[i]['time_range'][1],
-            'end_ts': infos[i]['time_range'][2],
+            'start_ts': _time_range[1],
+            'end_ts': _time_range[2],
         }
-        if 'snapshot_ts' in infos[i]:
-            block_meta['snapshot_ts'] = infos[i]['snapshot_ts']
+        if snapshot_ts is not None:
+            block_meta['snapshot_ts'] = snapshot_ts
         block_range_meta.append(block_meta)
 
     data_params = {}# TODO mock

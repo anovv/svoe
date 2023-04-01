@@ -3,14 +3,12 @@ import time
 import unittest
 
 import ray
-from ray import workflow
 
+from data_catalog.common.utils.utils import make_index_item
 from data_catalog.pipelines.index_cryptofeed.dag import IndexCryptofeedDag
 from data_catalog.pipelines.pipeline_runner import PipelineRunner
 from data_catalog.common.utils.sql.client import MysqlClient
-from data_catalog.common.utils.sql.models import add_defaults
-from data_catalog.common.tasks.tasks import _index_df
-from data_catalog.common.utils.utils import generate_input_items
+from data_catalog.common.utils.cryptofeed.utils import generate_cryptofeed_input_items
 from utils.pandas.df_utils import load_dfs
 
 
@@ -22,7 +20,7 @@ class TestIndexCryptofeedPipeline(unittest.TestCase):
         batch_size = 1000
         exchange_symbol_unique_pairs = set()
         print('Loading generator...')
-        generator = generate_input_items(batch_size)
+        generator = generate_cryptofeed_input_items(batch_size)
         print('Generator loaded')
         for _ in range(5):
             batch = next(generator)
@@ -33,7 +31,7 @@ class TestIndexCryptofeedPipeline(unittest.TestCase):
     def test_db_client(self):
         batch_size = 2
         print('Loading generator...')
-        generator = generate_input_items(batch_size)
+        generator = generate_cryptofeed_input_items(batch_size)
         print('Generator loaded')
         batch = next(generator)
         client = MysqlClient()
@@ -44,7 +42,7 @@ class TestIndexCryptofeedPipeline(unittest.TestCase):
         dfs = load_dfs([i['path'] for i in not_exist])
         index_items = []
         for df, i in zip(dfs, not_exist):
-            index_items.append(add_defaults(_index_df(df, i)))
+            index_items.append(make_index_item(df, i, 'cryptofeed'))
         write_res = client.write_index_item_batch(index_items)
         print(f'Written {len(index_items)} to db, checking again...')
         _, not_exist = client.filter_batch(batch)
@@ -60,7 +58,7 @@ class TestIndexCryptofeedPipeline(unittest.TestCase):
             runner.run(IndexCryptofeedDag())
             print('Inited runner')
             print('Loading generator...')
-            generator = generate_input_items(batch_size)
+            generator = generate_cryptofeed_input_items(batch_size)
             print('Generator loaded')
             print('Queueing batch...')
             inputs = []

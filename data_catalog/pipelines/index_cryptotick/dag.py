@@ -46,14 +46,12 @@ class IndexCryptotick(Dag):
 
             download_task_id = f'{workflow_id}_{ray_task_name(load_df)}_{i}'
             download_task_ids.append(download_task_id)
-            # index_task_ids.append(f'{workflow_id}_{ray_task_name(index_df)}_{i}')
-            # extras.append({'size_kb': item['size_kb']})
-
             download_task = load_df.options(**workflow.options(task_id=download_task_id), num_cpus=0.001).bind(item,
                                                                                                                stats=stats,
                                                                                                                task_id=download_task_id,
                                                                                                                extra=extra)
 
+            # TODO ids for split tasks
             splits = workflow.continuation(split_l2_inc_df.bind(download_task))
             for j in range(len(splits)):
                 split = splits[j]
@@ -63,6 +61,7 @@ class IndexCryptotick(Dag):
                                                                                                              item,
                                                                                                              stats=stats,
                                                                                                              task_id=index_task_id,
+                                                                                                             source='cryptotick',
                                                                                                              extra=extra)
                 index_tasks.append(index_task)
 
@@ -70,8 +69,9 @@ class IndexCryptotick(Dag):
                 store_task_ids.append(store_task_id)
 
                 # TODO update extra here to use split size_kb value for upload throughput
+                # TODO store depends on index_task/IndexItem?
                 store_task = store_df.options(**workflow.options(task_id=store_task_id), num_cpus=0.01).bind(split,
-                                                                                                             item,
+                                                                                                             index_task,
                                                                                                              stats=stats,
                                                                                                              task_id=store_task_id,
                                                                                                              extra=extra)

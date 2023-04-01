@@ -2,7 +2,8 @@ from typing import Optional, Dict, List
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from data_catalog.common.utils.sql.models import DataCatalog, add_defaults, Base
+from data_catalog.common.utils.sql.models import DataCatalog, Base, DEFAULT_COMPACTION, DEFAULT_SOURCE, \
+    DEFAULT_VERSION, DEFAULT_EXTRAS, DEFAULT_INSTRUMENT_EXTRA
 from data_catalog.common.data_models.models import IndexItemBatch, InputItemBatch
 
 import os
@@ -41,8 +42,7 @@ class MysqlClient:
         # creates if not exists
         Base.metadata.create_all(self.engine)
 
-    # TODO separate api methods and indexer methods
-    #indexer methods
+    # TODO separate api methods and pipeline methods
 
     # see 2nd comment in https://stackoverflow.com/questions/3659142/bulk-insert-with-sqlalchemy-orm
     # RE: bulk insert perf
@@ -52,7 +52,6 @@ class MysqlClient:
         # https://stackoverflow.com/questions/31750441/generalised-insert-into-sqlalchemy-using-dictionary
         objects = []
         for index_item in batch:
-            index_item = add_defaults(index_item)
             # TODO handle failed unpacking (e.g. missing keys)
             objects.append(DataCatalog(**index_item))
         session = Session()
@@ -86,14 +85,27 @@ class MysqlClient:
         data_type: str,
         instrument_type: str,
         symbol: str,
+        instrument_extra: str = DEFAULT_INSTRUMENT_EXTRA,
+        compaction: str = DEFAULT_COMPACTION,
+        source: str = DEFAULT_SOURCE,
+        version: str = DEFAULT_VERSION,
+        extras: str = DEFAULT_EXTRAS,
         start_date: Optional[str] = None,
         end_date: Optional[str] = None
     ) -> List:
-        # TODO instrument_extras
-        # TODO is base/quote necesery here?
-        defaults = add_defaults({})
+        # TODO instrument_extra
         session = Session()
-        res = session.query(DataCatalog).filter_by(exchange=exchange, data_type=data_type, instrument_type=instrument_type, symbol=symbol, **defaults).order_by(DataCatalog.start_ts).all()
+        res = session.query(DataCatalog).filter_by(
+            exchange=exchange,
+            data_type=data_type,
+            instrument_type=instrument_type,
+            symbol=symbol,
+            instrument_extra=instrument_extra,
+            compaction=compaction,
+            source=source,
+            version=version,
+            extras=extras
+        ).order_by(DataCatalog.start_ts).all()
         # TODO this adds unnecessary sqlalchemy fields, remove to reduce memory footprint
         return [r.__dict__ for r in res]
 

@@ -1,85 +1,51 @@
 import json
-from typing import Generator, Optional, Tuple, Dict
+from datetime import datetime
 
-from data_catalog.common.data_models.models import InputItemBatch
-from utils.s3.s3_utils import inventory
+import pandas as pd
+import pytz
 
-S3_BUCKET = 'svoe.test.1'
+import featurizer.features.data.l2_book_incremental.cryptofeed.utils as cryptofeed_l2_utils
+import featurizer.features.data.l2_book_incremental.cryptotick.utils as cryptotick_l2_utils
 
-
-def generate_input_items(batch_size: int) -> Generator[InputItemBatch, None, None]:
-    meta = {'batch_id': 0}
-    items = []
-    for inv_df in inventory():
-        for row in inv_df.itertuples():
-            d_row = row._asdict()
-
-            size_kb = d_row['size']/1024.0
-            input_item = parse_s3_key(d_row['key'])
-
-            # TODO sync keys with DataCatalog sql model
-            input_item['size_kb'] = size_kb
-            items.append(input_item)
-            if len(items) == batch_size:
-                yield meta, items
-                items = []
-                meta['batch_id'] += 1
-
-    if len(items) != 0:
-        yield meta, items
+from data_catalog.common.data_models.models import InputItem, IndexItem
+from data_catalog.common.utils.sql.models import DataCatalog, construct_s3_path
+from utils.pandas import df_utils
 
 
-def parse_s3_key(key: str) -> Optional[Dict]:
+def make_index_item(df: pd.DataFrame, input_item: InputItem, source: str) -> IndexItem:
+    if source not in ['cryptofeed', 'cryptotick']:
+        raise ValueError(f'Unknown source: {source}')
 
-    def _parse_symbol(symbol_raw: str, exchange: Optional[str] = None) -> Tuple[str, str, str, str]:
-        spl = symbol_raw.split('-')
-        base = spl[0]
-        quote = spl[1]
-        instrument_type = 'spot'
-        symbol = symbol_raw
-        if len(spl) > 2:
-            instrument_type = 'perpetual'
+    index_item = input_item.copy()
+    _time_range = df_utils.time_range(df)
 
-        # FTX special case:
-        if exchange == 'FTX' and spl[1] == 'PERP':
-            quote = 'USDT'
-            instrument_type = 'perpetual'
-            symbol = f'{base}-USDT-PERP'
-        return symbol, base, quote, instrument_type
+    date_str = datetime.fromtimestamp(_time_range[1], tz=pytz.utc).strftime('%Y-%m-%d')
+    # check if end_ts is also same date:
+    date_str_end = datetime.fromtimestamp(_time_range[2], tz=pytz.utc).strftime('%Y-%m-%d')
+    if date_str != date_str_end:
+        raise ValueError(f'start_ts and end_ts belong to different dates: {date_str}, {date_str_end}')
 
-    spl = key.split('/')
-    if len(spl) < 3:
-        return None
-    if spl[0] == 'data_lake' and spl[1] == 'data_feed_market_data':
-        # case 1
-        #  starts with 'data_lake/data_feed_market_data/funding/exchange=BINANCE_FUTURES/instrument_type=perpetual/instrument_extra={}/symbol=ADA-USDT-PERP/base=ADA/quote=USDT/...'
-        data_type = spl[2]
-        exchange = spl[3].split('=')[1]
-        symbol_raw = spl[6].split('=')[1]
-        symbol, base, quote, instrument_type = _parse_symbol(symbol_raw, exchange)
-    elif spl[0] == 'data_lake' or spl[0] == 'parquet':
-        # case 2
-        # starts with 'data_lake/BINANCE/l2_book/BTC-USDT/...'
-        # starts with 'parquet/BINANCE/l2_book/AAVE-USDT/...'
-        exchange = spl[1]
-        data_type = spl[2]
-        symbol_raw = spl[3]
-        symbol, base, quote, instrument_type = _parse_symbol(symbol_raw, exchange)
-    else:
-        # unparsable
-        return None
+    index_item.update({
+        DataCatalog.start_ts.name: _time_range[1],
+        DataCatalog.end_ts.name: _time_range[2],
+        DataCatalog.size_in_memory_kb.name: df_utils.get_size_kb(df),
+        DataCatalog.num_rows.name: df_utils.get_num_rows(df),
+        DataCatalog.date.name: date_str
+    })
 
-    # TODO since we only have spot and perp
-    instrument_extra = json.dumps({})
+    # TODO l2_book -> l2_inc
+    if index_item['data_type'] == 'l2_book':
+        if source == 'cryptofeed':
+            snapshot_ts = cryptofeed_l2_utils.get_snapshot_ts(df)
+        else:
+            snapshot_ts = cryptotick_l2_utils.get_snapshot_ts(df)
+        if snapshot_ts is not None:
+            meta = {
+                'snapshot_ts': snapshot_ts
+            }
+            index_item['meta'] = json.dumps(meta)
 
-    # TODO sync keys with DataCatalog sql model
-    return {
-        'data_type': data_type,
-        'exchange': exchange,
-        'symbol': symbol,
-        'instrument_type': instrument_type,
-        'instrument_extra': instrument_extra,
-        'quote': quote,
-        'base': base,
-        'path': f's3://{S3_BUCKET}/{key}'
-    }
+    if DataCatalog.path.name not in index_item:
+        index_item['path'] = construct_s3_path(index_item)
+
+    return index_item

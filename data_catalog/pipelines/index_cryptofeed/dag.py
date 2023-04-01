@@ -43,6 +43,7 @@ class IndexCryptofeedDag(Dag):
                                                                                                          item,
                                                                                                          stats=stats,
                                                                                                          task_id=index_task_id,
+                                                                                                         source='cryptofeed',
                                                                                                          extra=extra)
             index_tasks.append(index_task)
 
