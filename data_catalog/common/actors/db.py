@@ -1,9 +1,10 @@
-from typing import Optional, Dict
+from typing import Optional, Dict, List
 
 import ray
 
-from data_catalog.common.data_models.models import IndexItemBatch, InputItemBatch
+from data_catalog.common.data_models.models import InputItemBatch
 from data_catalog.common.utils.sql.client import MysqlClient
+from data_catalog.common.utils.sql.models import DataCatalog
 
 
 @ray.remote
@@ -19,7 +20,7 @@ class DbActor:
 
     # TODO asyncify this
     # TODO debug sqlalchemy.exc.IntegrityError: (pymysql.err.IntegrityError) (1062, "Duplicate entry 'l2_book-BINANCE-spot-{}-BTC-USDT-BTC-USDT-1641113668.511-1641113' for key 'data_catalog.PRIMARY'")
-    def _write_batch(self, batch: IndexItemBatch) -> Dict:
+    def _write_batch(self, batch: List[DataCatalog]) -> Dict:
         self.client.create_tables()
         self.client.write_index_item_batch(batch)
         # TODO return status to pass to stats actor

@@ -15,7 +15,7 @@ from bokeh.layouts import row, column
 from ray.experimental.state.api import list_workers
 
 from data_catalog.common.utils.register import TASK_NAMES, EVENT_NAMES, EventType, get_event_name, ray_task_name
-from data_catalog.common.tasks.tasks import load_df, index_df, write_batch, filter_existing
+from data_catalog.common.tasks.tasks import load_df, catalog_df, write_batch, filter_existing
 
 import ray
 
@@ -44,7 +44,7 @@ def _make_task_events_graph_figure(source):
         color = 'red'
         if ray_task_name(load_df) in name:
             color = 'red'
-        elif ray_task_name(index_df) in name:
+        elif ray_task_name(catalog_df) in name:
             color = 'green'
         elif ray_task_name(filter_existing) in name:
             color = 'blue'
@@ -88,7 +88,7 @@ def _make_task_latencies_graph_figure(source):
         color = 'red'
         if ray_task_name(load_df) in name:
             color = 'red'
-        elif ray_task_name(index_df) in name:
+        elif ray_task_name(catalog_df) in name:
             color = 'green'
         elif ray_task_name(filter_existing) in name:
             color = 'blue'

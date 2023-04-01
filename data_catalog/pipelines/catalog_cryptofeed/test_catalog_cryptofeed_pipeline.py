@@ -4,15 +4,15 @@ import unittest
 
 import ray
 
-from data_catalog.common.utils.utils import make_index_item
-from data_catalog.pipelines.index_cryptofeed.dag import IndexCryptofeedDag
+from data_catalog.common.utils.sql.models import make_catalog_item
+from data_catalog.pipelines.catalog_cryptofeed.dag import CatalogCryptofeedDag
 from data_catalog.pipelines.pipeline_runner import PipelineRunner
 from data_catalog.common.utils.sql.client import MysqlClient
 from data_catalog.common.utils.cryptofeed.utils import generate_cryptofeed_input_items
 from utils.pandas.df_utils import load_dfs
 
 
-class TestIndexCryptofeedPipeline(unittest.TestCase):
+class TestCatalogCryptofeedPipeline(unittest.TestCase):
 
     # TODO util this
     def test_parse_s3_keys(self):
@@ -40,11 +40,11 @@ class TestIndexCryptofeedPipeline(unittest.TestCase):
         print(not_exist)
         print(f'Found {batch_size - len(not_exist)} items in db, {len(not_exist)} to write')
         dfs = load_dfs([i['path'] for i in not_exist])
-        index_items = []
+        catalog_items = []
         for df, i in zip(dfs, not_exist):
-            index_items.append(make_index_item(df, i, 'cryptofeed'))
-        write_res = client.write_index_item_batch(index_items)
-        print(f'Written {len(index_items)} to db, checking again...')
+            catalog_items.append(make_catalog_item(df, i, 'cryptofeed'))
+        write_res = client.write_index_item_batch(catalog_items)
+        print(f'Written {len(catalog_items)} to db, checking again...')
         _, not_exist = client.filter_batch(batch)
         print(f'Found {batch_size - len(not_exist)} existing records in db')
         assert len(not_exist) == 0
@@ -52,10 +52,10 @@ class TestIndexCryptofeedPipeline(unittest.TestCase):
 
     def test_pipeline(self):
         with ray.init(address='auto'):
-            batch_size = 50
-            num_batches = 10
+            batch_size = 10
+            num_batches = 5
             runner = PipelineRunner()
-            runner.run(IndexCryptofeedDag())
+            runner.run(CatalogCryptofeedDag())
             print('Inited runner')
             print('Loading generator...')
             generator = generate_cryptofeed_input_items(batch_size)
@@ -81,7 +81,7 @@ class TestIndexCryptofeedPipeline(unittest.TestCase):
             print(len(not_exist))
 
 if __name__ == '__main__':
-    t = TestIndexCryptofeedPipeline()
+    t = TestCatalogCryptofeedPipeline()
     t.test_pipeline()
     # t.test_db_client()
 

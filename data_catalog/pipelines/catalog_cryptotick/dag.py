@@ -8,7 +8,7 @@ from streamz import Stream
 from data_catalog.common.actors.db import DbActor
 from data_catalog.common.actors.stats import Stats
 from data_catalog.common.data_models.models import InputItemBatch
-from data_catalog.common.tasks.tasks import filter_existing, gather_and_wait, load_df, index_df, chain_no_ret, \
+from data_catalog.common.tasks.tasks import filter_existing, gather_and_wait, load_df, catalog_df, chain_no_ret, \
     write_batch, store_df
 from data_catalog.common.utils.register import ray_task_name, send_events_to_stats, EventType
 from data_catalog.pipelines.dag import Dag
@@ -19,12 +19,13 @@ from ray_cluster.testing_utils import mock_feature
 from utils.pandas.df_utils import gen_split_df_by_mem, concat
 
 
-class IndexCryptotick(Dag):
+class CatalogCryptotickDag(Dag):
 
     def get(self, workflow_id: str, input_batch: InputItemBatch, stats: Stats, db_actor: DbActor):
         filter_task_id = f'{workflow_id}_{ray_task_name(filter_existing)}'
 
         # construct DAG
+        # TODO this filters by path, won't work here
         _, filtered_items = workflow.continuation(
             filter_existing.options(**workflow.options(task_id=filter_task_id), num_cpus=0.01).bind(db_actor,
                                                                                                     input_batch,
@@ -32,11 +33,11 @@ class IndexCryptotick(Dag):
                                                                                                     task_id=filter_task_id))
 
         download_task_ids = []
-        index_task_ids = []
+        catalog_task_ids = []
         store_task_ids = []
         extras = []
         store_tasks = []
-        index_tasks = []
+        catalog_tasks = []
 
         for i in range(len(filtered_items)):
             item = filtered_items[i]
@@ -55,23 +56,23 @@ class IndexCryptotick(Dag):
             splits = workflow.continuation(split_l2_inc_df.bind(download_task))
             for j in range(len(splits)):
                 split = splits[j]
-                index_task_id = f'{workflow_id}_{ray_task_name(index_df)}_{j}_{i}'
-                index_task_ids.append(index_task_id)
-                index_task = index_df.options(**workflow.options(task_id=index_task_id), num_cpus=0.01).bind(split,
-                                                                                                             item,
-                                                                                                             stats=stats,
-                                                                                                             task_id=index_task_id,
-                                                                                                             source='cryptotick',
-                                                                                                             extra=extra)
-                index_tasks.append(index_task)
+                catalog_task_id = f'{workflow_id}_{ray_task_name(catalog_df)}_{j}_{i}'
+                catalog_task_ids.append(catalog_task_id)
+                catalog_task = catalog_df.options(**workflow.options(task_id=catalog_task_id), num_cpus=0.01).bind(split,
+                                                                                                               item,
+                                                                                                               stats=stats,
+                                                                                                               task_id=catalog_task_id,
+                                                                                                               source='cryptotick',
+                                                                                                               extra=extra)
+                catalog_tasks.append(catalog_task)
 
                 store_task_id = f'{workflow_id}_{ray_task_name(store_df)}_{j}_{i}'
                 store_task_ids.append(store_task_id)
 
                 # TODO update extra here to use split size_kb value for upload throughput
-                # TODO store depends on index_task/IndexItem?
+                # TODO store depends on catalog_task
                 store_task = store_df.options(**workflow.options(task_id=store_task_id), num_cpus=0.01).bind(split,
-                                                                                                             index_task,
+                                                                                                             catalog_task,
                                                                                                              stats=stats,
                                                                                                              task_id=store_task_id,
                                                                                                              extra=extra)
@@ -80,21 +81,20 @@ class IndexCryptotick(Dag):
         # report scheduled events to stats
         scheduled_events_reported = gather_and_wait.bind([
             send_events_to_stats.bind(stats, download_task_ids, ray_task_name(load_df), EventType.SCHEDULED, extras),
-            # send_events_to_stats.bind(stats, index_task_ids, ray_task_name(index_df), EventType.SCHEDULED, extras)
         ])
 
-        # wait for store and index to EACH complete synchronously
-        gathered_index_items = gather_and_wait.bind(index_tasks)
+        # wait for store and catalog to EACH complete synchronously
+        gathered_catalog_items = gather_and_wait.bind(catalog_tasks)
         gathered_store_tasks = gather_and_wait.bind(store_tasks)
         # TODO verify all is stored sucessfully here?
-        # TODO make sure ALL index AND store complete synchronously?
-        node = chain_no_ret.bind(gathered_index_items, gathered_store_tasks, scheduled_events_reported)
+        # TODO make sure ALL catalog AND store complete synchronously?
+        node = chain_no_ret.bind(gathered_catalog_items, gathered_store_tasks, scheduled_events_reported)
 
-        write_index_task_id = f'{workflow_id}_{ray_task_name(write_batch)}'
-        dag = write_batch.options(**workflow.options(task_id=write_index_task_id), num_cpus=0.01).bind(db_actor,
+        write_catalog_task_id = f'{workflow_id}_{ray_task_name(write_batch)}'
+        dag = write_batch.options(**workflow.options(task_id=write_catalog_task_id), num_cpus=0.01).bind(db_actor,
                                                                                                  node,
                                                                                                  stats=stats,
-                                                                                                 task_id=write_index_task_id)
+                                                                                                 task_id=write_catalog_task_id)
 
         return dag
 

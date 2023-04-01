@@ -4,7 +4,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from data_catalog.common.utils.sql.models import DataCatalog, Base, DEFAULT_COMPACTION, DEFAULT_SOURCE, \
     DEFAULT_VERSION, DEFAULT_EXTRAS, DEFAULT_INSTRUMENT_EXTRA
-from data_catalog.common.data_models.models import IndexItemBatch, InputItemBatch
+from data_catalog.common.data_models.models import InputItemBatch
 
 import os
 
@@ -46,16 +46,17 @@ class MysqlClient:
 
     # see 2nd comment in https://stackoverflow.com/questions/3659142/bulk-insert-with-sqlalchemy-orm
     # RE: bulk insert perf
-    def write_index_item_batch(self, batch: IndexItemBatch):
+    def write_index_item_batch(self, batch: List[DataCatalog]):
+        print(batch)
         # TODO figure out insert_or_update logic
         # use dict unpacking
         # https://stackoverflow.com/questions/31750441/generalised-insert-into-sqlalchemy-using-dictionary
-        objects = []
-        for index_item in batch:
-            # TODO handle failed unpacking (e.g. missing keys)
-            objects.append(DataCatalog(**index_item))
+        # objects = []
+        # for index_item in batch:
+        #     # TODO handle failed unpacking (e.g. missing keys)
+        #     # objects.append(DataCatalog(**index_item))
         session = Session()
-        session.bulk_save_objects(objects)
+        session.bulk_save_objects(batch)
 
         # TODO try catch and handle
         # 1) connection issues

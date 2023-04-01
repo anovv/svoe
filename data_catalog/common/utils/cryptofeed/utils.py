@@ -68,7 +68,6 @@ def _parse_s3_key(key: str) -> Optional[Dict]:
         # unparsable
         return None
 
-    # TODO return DataCatalog instance directly?
     return {
         DataCatalog.data_type.name: data_type,
         DataCatalog.exchange.name: exchange,

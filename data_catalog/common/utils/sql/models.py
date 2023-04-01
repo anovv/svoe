@@ -1,8 +1,15 @@
 import json
+from datetime import datetime
 
+import pandas as pd
+import pytz
 from sqlalchemy import Column, String, JSON, DateTime, func, Integer
 from sqlalchemy.orm import declarative_base
-from data_catalog.common.data_models.models import InputItem, IndexItem
+from data_catalog.common.data_models.models import InputItem
+import featurizer.features.data.l2_book_incremental.cryptofeed.utils as cryptofeed_l2_utils
+import featurizer.features.data.l2_book_incremental.cryptotick.utils as cryptotick_l2_utils
+# from data_catalog.common.utils.cryptotick.utils import CRYPTOTICK_RAW_BUCKET_NAME
+from utils.pandas import df_utils
 
 Base = declarative_base()
 
@@ -12,6 +19,7 @@ DEFAULT_VERSION = ''
 DEFAULT_COMPACTION = 'raw'
 DEFAULT_EXTRAS = ''
 DEFAULT_INSTRUMENT_EXTRA = ''
+
 
 # TODO figure out float precision issues
 class DataCatalog(Base):
@@ -51,8 +59,52 @@ class DataCatalog(Base):
     version = Column(String(256), primary_key=True, default=DEFAULT_VERSION)
     extras = Column(JSON, default=DEFAULT_EXTRAS)
 
+
+def make_catalog_item(df: pd.DataFrame, input_item: InputItem, source: str) -> DataCatalog:
+    if source not in ['cryptofeed', 'cryptotick']:
+        raise ValueError(f'Unknown source: {source}')
+
+    catalog_item_params = input_item.copy()
+    _time_range = df_utils.time_range(df)
+
+    date_str = datetime.fromtimestamp(_time_range[1], tz=pytz.utc).strftime('%Y-%m-%d')
+    # check if end_ts is also same date:
+    date_str_end = datetime.fromtimestamp(_time_range[2], tz=pytz.utc).strftime('%Y-%m-%d')
+    if date_str != date_str_end:
+        raise ValueError(f'start_ts and end_ts belong to different dates: {date_str}, {date_str_end}')
+
+    catalog_item_params.update({
+        DataCatalog.start_ts.name: _time_range[1],
+        DataCatalog.end_ts.name: _time_range[2],
+        DataCatalog.size_in_memory_kb.name: df_utils.get_size_kb(df),
+        DataCatalog.num_rows.name: df_utils.get_num_rows(df),
+        DataCatalog.date.name: date_str
+    })
+
+    # TODO l2_book -> l2_inc
+    if catalog_item_params['data_type'] == 'l2_book':
+        if source == 'cryptofeed':
+            snapshot_ts = cryptofeed_l2_utils.get_snapshot_ts(df)
+        else:
+            snapshot_ts = cryptotick_l2_utils.get_snapshot_ts(df)
+        if snapshot_ts is not None:
+            meta = {
+                'snapshot_ts': snapshot_ts
+            }
+            catalog_item_params['meta'] = json.dumps(meta)
+
+    res = DataCatalog(**catalog_item_params)
+    if res.path is None:
+        if source != 'cryptotick':
+            raise ValueError(f'Empty path only allowed for cryptotick')
+        res.path = construct_s3_path(res, 'TODO_PASS_CRYPTOTICK_BUCKET_NAME') # TODO
+
+    return res
+
+
 # TODO add bucket name
-def construct_s3_path(item: IndexItem, bucket: str = '') -> str:
+# TODO deprecate IndexItem and use DataCatalog model directly ?
+def construct_s3_path(item: DataCatalog, bucket: str) -> str:
     res = f's3://{bucket}/'
     for field in [
         DataCatalog.data_type,
@@ -61,8 +113,6 @@ def construct_s3_path(item: IndexItem, bucket: str = '') -> str:
         DataCatalog.instrument_extra,
         DataCatalog.symbol,
         DataCatalog.date,
-
-        # TODO defaultables are not present in index_item
         DataCatalog.source,
         DataCatalog.compaction,
         DataCatalog.version,
