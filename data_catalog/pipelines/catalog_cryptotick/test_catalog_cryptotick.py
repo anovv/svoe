@@ -14,7 +14,15 @@ class TestCatalogCryptotickPipeline(unittest.TestCase):
 
     def test_pipeline(self):
         batches = cryptotick_input_items(10)
-        # catalog_item = make_catalog_item(batches[0])
+        _, first_batch = batches[0]
+        big_df_path = 's3://svoe-cryptotick-data/limitbook_full/20230201/BINANCE_SPOT_BTC_USDT.csv.gz'
+        key = joblib.hash(big_df_path + str(0))
+        # TODO is this processed or not?
+        big_df = get_cached_df(key)
+        date_str = '20230201'
+        big_df = preprocess_l2_inc_df(big_df, date_str)
+        catalog_item = make_catalog_item(big_df, first_batch[0], 'cryptotick')
+        print(catalog_item.path)
 
     def test_split_l2_inc_df_and_pad_with_snapshot(self):
         # TODO merge this with stuff in test_calculator

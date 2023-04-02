@@ -1,4 +1,5 @@
 import json
+import uuid
 from datetime import datetime
 
 import pandas as pd
@@ -59,6 +60,20 @@ class DataCatalog(Base):
     version = Column(String(256), primary_key=True, default=DEFAULT_VERSION)
     extras = Column(JSON, default=DEFAULT_EXTRAS)
 
+    def __init__(self, **kwargs):
+        # set default values for model instance
+        super().__init__(**kwargs)
+        if self.instrument_extra is None:
+            setattr(self, DataCatalog.instrument_extra.name, DEFAULT_INSTRUMENT_EXTRA)
+        if self.source is None:
+            setattr(self, DataCatalog.source.name, DEFAULT_SOURCE)
+        if self.compaction is None:
+            setattr(self, DataCatalog.compaction.name, DEFAULT_COMPACTION)
+        if self.version is None:
+            setattr(self, DataCatalog.version.name, DEFAULT_VERSION)
+        if self.extras is None:
+            setattr(self, DataCatalog.extras.name, DEFAULT_EXTRAS)
+
 
 def make_catalog_item(df: pd.DataFrame, input_item: InputItem, source: str) -> DataCatalog:
     if source not in ['cryptofeed', 'cryptotick']:
@@ -82,7 +97,7 @@ def make_catalog_item(df: pd.DataFrame, input_item: InputItem, source: str) -> D
     })
 
     # TODO l2_book -> l2_inc
-    if catalog_item_params['data_type'] == 'l2_book':
+    if catalog_item_params[DataCatalog.data_type.name] == 'l2_book':
         if source == 'cryptofeed':
             snapshot_ts = cryptofeed_l2_utils.get_snapshot_ts(df)
         else:
@@ -91,9 +106,10 @@ def make_catalog_item(df: pd.DataFrame, input_item: InputItem, source: str) -> D
             meta = {
                 'snapshot_ts': snapshot_ts
             }
-            catalog_item_params['meta'] = json.dumps(meta)
+            catalog_item_params[DataCatalog.meta.name] = json.dumps(meta)
 
     res = DataCatalog(**catalog_item_params)
+    print(res.__dict__)
     if res.path is None:
         if source != 'cryptotick':
             raise ValueError(f'Empty path only allowed for cryptotick')
@@ -103,22 +119,22 @@ def make_catalog_item(df: pd.DataFrame, input_item: InputItem, source: str) -> D
 
 
 # TODO add bucket name
-# TODO deprecate IndexItem and use DataCatalog model directly ?
 def construct_s3_path(item: DataCatalog, bucket: str) -> str:
     res = f's3://{bucket}/'
     for field in [
-        DataCatalog.data_type,
-        DataCatalog.exchange,
-        DataCatalog.instrument_type,
-        DataCatalog.instrument_extra,
-        DataCatalog.symbol,
-        DataCatalog.date,
-        DataCatalog.source,
-        DataCatalog.compaction,
-        DataCatalog.version,
-        DataCatalog.extras
+        DataCatalog.data_type.name,
+        DataCatalog.exchange.name,
+        DataCatalog.instrument_type.name,
+        DataCatalog.instrument_extra.name,
+        DataCatalog.symbol.name,
+        DataCatalog.date.name,
+        DataCatalog.source.name,
+        DataCatalog.compaction.name,
+        DataCatalog.version.name,
+        DataCatalog.extras.name
     ]:
-        res += f'{item[field]}/'
-    uuid = None # TODO
-    res += f'{uuid}.parquet.gz'
+        v = item.__dict__[field]
+        if v is not None and len(v) > 0:
+            res += f'{v}/'
+    res += f'{int(item.__dict__[DataCatalog.start_ts.name])}-{str(uuid.uuid4())}.parquet.gz'
     return res

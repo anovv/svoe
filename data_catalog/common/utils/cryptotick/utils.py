@@ -34,9 +34,9 @@ def _parse_s3_key(key: str, size_kb) -> InputItem:
     if s[0] == 'limitbook_full':
         data_type = 'l2_book' # TODO l2_inc
     elif s[0] == 'quotes':
-        data_type = 'ticker' # TODO l2_inc
+        data_type = 'ticker'
     elif s[0] == 'trades':
-        data_type = 'trades' # TODO l2_inc
+        data_type = 'trades'
     else:
         raise ValueError(f'Unknown data_type {s[0]}')
 
@@ -51,7 +51,7 @@ def _parse_s3_key(key: str, size_kb) -> InputItem:
     else:
         raise ValueError(f'Unknown instrument_type {f[1]}')
     base = f[2]
-    quote = f[3]
+    quote = f[3].split('.')[0]
 
     # TODO call cryptofeed lib to construct symbol here?
     symbol = f'{base}-{quote}'
@@ -59,13 +59,14 @@ def _parse_s3_key(key: str, size_kb) -> InputItem:
     return {
         DataCatalog.data_type.name: data_type,
         DataCatalog.exchange.name: exchange,
-        DataCatalog.symbol: symbol,
-        DataCatalog.base: base,
-        DataCatalog.quote: quote,
-        DataCatalog.compaction: '100mb',
-        DataCatalog.source: 'cryptotick',
-        DataCatalog.date: date,
-        DataCatalog.size_kb: size_kb
+        DataCatalog.symbol.name: symbol,
+        DataCatalog.base.name: base,
+        DataCatalog.quote.name: quote,
+        DataCatalog.compaction.name: '100mb',
+        DataCatalog.source.name: 'cryptotick',
+        DataCatalog.date.name: date,
+        DataCatalog.size_kb.name: size_kb,
+        DataCatalog.instrument_type.name: instrument_type
     }
 
 
