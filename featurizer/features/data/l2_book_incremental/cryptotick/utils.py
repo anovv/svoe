@@ -41,7 +41,7 @@ def get_snapshot_ts(df: pd.DataFrame) -> Optional[List]:
     snaps = df[df.update_type == 'SNAPSHOT']
     if len(snaps) == 0:
         return None
-    return list(snaps.time_exchange.unique())
+    return list(snaps['timestamp'].unique())
 
 
 def starts_with_snapshot(df: pd.DataFrame) -> bool:

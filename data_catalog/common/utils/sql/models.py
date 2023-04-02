@@ -9,7 +9,6 @@ from sqlalchemy.orm import declarative_base
 from data_catalog.common.data_models.models import InputItem
 import featurizer.features.data.l2_book_incremental.cryptofeed.utils as cryptofeed_l2_utils
 import featurizer.features.data.l2_book_incremental.cryptotick.utils as cryptotick_l2_utils
-# from data_catalog.common.utils.cryptotick.utils import CRYPTOTICK_RAW_BUCKET_NAME
 from utils.pandas import df_utils
 
 Base = declarative_base()
@@ -18,8 +17,9 @@ Base = declarative_base()
 DEFAULT_SOURCE = 'cryptofeed'
 DEFAULT_VERSION = ''
 DEFAULT_COMPACTION = 'raw'
-DEFAULT_EXTRAS = ''
 DEFAULT_INSTRUMENT_EXTRA = ''
+
+SVOE_S3_CATALOGED_DATA_BUCKET = 'svoe-cataloged-data'
 
 
 # TODO figure out float precision issues
@@ -51,6 +51,7 @@ class DataCatalog(Base):
     size_kb = Column(String(32))
     size_in_memory_kb = Column(String(32))
     meta = Column(JSON)
+    extras = Column(JSON)
 
     # TODO these should be in a separate index table
     # defaultable
@@ -58,7 +59,6 @@ class DataCatalog(Base):
     source = Column(String(32), primary_key=True, default=DEFAULT_SOURCE)
     compaction = Column(String(32), primary_key=True, default=DEFAULT_COMPACTION)
     version = Column(String(256), primary_key=True, default=DEFAULT_VERSION)
-    extras = Column(JSON, default=DEFAULT_EXTRAS)
 
     def __init__(self, **kwargs):
         # set default values for model instance
@@ -71,8 +71,6 @@ class DataCatalog(Base):
             setattr(self, DataCatalog.compaction.name, DEFAULT_COMPACTION)
         if self.version is None:
             setattr(self, DataCatalog.version.name, DEFAULT_VERSION)
-        if self.extras is None:
-            setattr(self, DataCatalog.extras.name, DEFAULT_EXTRAS)
 
 
 def make_catalog_item(df: pd.DataFrame, input_item: InputItem, source: str) -> DataCatalog:
@@ -113,14 +111,14 @@ def make_catalog_item(df: pd.DataFrame, input_item: InputItem, source: str) -> D
     if res.path is None:
         if source != 'cryptotick':
             raise ValueError(f'Empty path only allowed for cryptotick')
-        res.path = construct_s3_path(res, 'TODO_PASS_CRYPTOTICK_BUCKET_NAME') # TODO
+        res.path = _construct_s3_path(res) # TODO
 
     return res
 
 
 # TODO add bucket name
-def construct_s3_path(item: DataCatalog, bucket: str) -> str:
-    res = f's3://{bucket}/'
+def _construct_s3_path(item: DataCatalog) -> str:
+    res = f's3://{SVOE_S3_CATALOGED_DATA_BUCKET}/'
     for field in [
         DataCatalog.data_type.name,
         DataCatalog.exchange.name,
@@ -131,7 +129,6 @@ def construct_s3_path(item: DataCatalog, bucket: str) -> str:
         DataCatalog.source.name,
         DataCatalog.compaction.name,
         DataCatalog.version.name,
-        DataCatalog.extras.name
     ]:
         v = item.__dict__[field]
         if v is not None and len(v) > 0:

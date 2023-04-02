@@ -22,15 +22,7 @@ from utils.pandas.df_utils import gen_split_df_by_mem, concat
 class CatalogCryptotickDag(Dag):
 
     def get(self, workflow_id: str, input_batch: InputItemBatch, stats: Stats, db_actor: DbActor):
-        filter_task_id = f'{workflow_id}_{ray_task_name(filter_existing)}'
-
-        # construct DAG
-        # TODO this filters by path, won't work here
-        _, filtered_items = workflow.continuation(
-            filter_existing.options(**workflow.options(task_id=filter_task_id), num_cpus=0.01).bind(db_actor,
-                                                                                                    input_batch,
-                                                                                                    stats=stats,
-                                                                                                    task_id=filter_task_id))
+        # TODO filter?
 
         download_task_ids = []
         catalog_task_ids = []
@@ -38,10 +30,10 @@ class CatalogCryptotickDag(Dag):
         extras = []
         store_tasks = []
         catalog_tasks = []
+        items = input_batch[1]
 
-        for i in range(len(filtered_items)):
-            item = filtered_items[i]
-
+        for i in range(len(items)):
+            item = items[i]
             extra = {'size_kb': item['size_kb']}
             extras.append(extra)
 
