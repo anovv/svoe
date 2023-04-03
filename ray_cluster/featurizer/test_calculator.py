@@ -249,7 +249,7 @@ class TestFeatureCalculator(unittest.TestCase):
         print('Finished loading')
 
         # TODO we can split only processed dfs
-        split_gen = gen_split_df_by_mem(df, 100 * 1024, ts_col_name='time_exchange')
+        split_gen = gen_split_df_by_mem(df, 100 * 1024)
         splits = []
         i = 0
         for split in split_gen:
@@ -308,9 +308,9 @@ class TestFeatureCalculator(unittest.TestCase):
     # TODO is this needed?
     def test_snapshot_cryptotick(self):
         date_str = '20230201'
+        # df = load_df(self._big_cryptotick_df_path())
         df = get_cached_df(self._cache_key_for_big_cryptotick_df_split(0))
         df = preprocess_l2_inc_df(df, date_str)
-        print('Loaded')
         print(get_size_kb(df))
         print(df.head(10))
         events = CryptotickL2BookIncrementalData.parse_events(df)
@@ -347,9 +347,9 @@ if __name__ == '__main__':
     # t.test_merge_asof()
     # t.test_feature_label_set()
     # t.test_df_split()
-    t.test_split_and_cache_big_cryptotick_df()
+    # t.test_split_and_cache_big_cryptotick_df()
     # t.test_split_small_cryptotick_df()
-    # t.test_snapshot_cryptotick()
+    t.test_snapshot_cryptotick()
     # t.test_cryptotick_l2_snap_feature()
 
 

@@ -1,10 +1,14 @@
+import itertools
+import time
 import unittest
 
 import joblib
 
 from data_catalog.common.utils.cryptotick.utils import cryptotick_input_items
+from data_catalog.common.utils.sql.client import MysqlClient
 from data_catalog.common.utils.sql.models import make_catalog_item
-from data_catalog.pipelines.catalog_cryptotick.dag import split_l2_inc_df_and_pad_with_snapshot
+from data_catalog.pipelines.catalog_cryptotick.dag import split_l2_inc_df_and_pad_with_snapshot, CatalogCryptotickDag
+from data_catalog.pipelines.pipeline_runner import PipelineRunner
 from featurizer.features.data.l2_book_incremental.cryptotick.utils import starts_with_snapshot, remove_snap, \
     get_snapshot_depth, preprocess_l2_inc_df
 from utils.pandas.df_utils import get_cached_df, concat
@@ -13,7 +17,36 @@ from utils.pandas.df_utils import get_cached_df, concat
 class TestCatalogCryptotickPipeline(unittest.TestCase):
 
     def test_pipeline(self):
-        batches = cryptotick_input_items(10)
+        batch_size = 1
+        num_batches = 1
+        runner = PipelineRunner()
+        runner.run(CatalogCryptotickDag())
+        print('Inited runner')
+        batches = cryptotick_input_items(batch_size)
+        print('Queueing batch...')
+        inputs = []
+        time.sleep(5)
+        for i in range(num_batches):
+            input_batch = batches[i]
+            inputs.append(input_batch)
+            runner.pipe_input(input_batch)
+            print(f'Queued {i + 1} batches')
+        print('Done queueing')
+        # wait for everything to process
+
+        # TODO this quits early if job is long
+        # TODO make wait_for_completion func
+        time.sleep(720)
+
+        # check if index was written to db
+        client = MysqlClient()
+        not_exist = client.filter_batch(list(itertools.chain(*inputs)))
+        # TODO should be 0
+        print(len(not_exist))
+
+    def test_construct_s3_path(self):
+        batch_size = 10
+        batches = cryptotick_input_items(batch_size)
         _, first_batch = batches[0]
         big_df_path = 's3://svoe-cryptotick-data/limitbook_full/20230201/BINANCE_SPOT_BTC_USDT.csv.gz'
         key = joblib.hash(big_df_path + str(0))

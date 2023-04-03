@@ -77,7 +77,7 @@ class TestCatalogCryptofeedPipeline(unittest.TestCase):
             # check if index was written to db
             client = MysqlClient()
             not_exist = client.filter_batch(list(itertools.chain(*inputs)))
-            # should be 0
+            # TODO should be 0
             print(len(not_exist))
 
 if __name__ == '__main__':

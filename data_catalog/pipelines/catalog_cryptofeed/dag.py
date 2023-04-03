@@ -38,7 +38,7 @@ class CatalogCryptofeedDag(Dag):
                                                                                                                extra=extra)
             catalog_task_id = f'{workflow_id}_{ray_task_name(catalog_df)}_{i}'
             catalog_task_ids.append(catalog_task_id)
-            catalog_task = catalog_df.options(**workflow.options(task_id=catalog_task_id), num_cpus=0.01).bind(download_task,
+            catalog_task = catalog_df.options(**workflow.options(task_id=catalog_task_id), num_cpus=0.9).bind(download_task,
                                                                                                            item,
                                                                                                            stats=stats,
                                                                                                            task_id=catalog_task_id,

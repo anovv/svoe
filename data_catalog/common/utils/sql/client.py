@@ -3,7 +3,7 @@ from typing import Optional, Dict, List
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from data_catalog.common.utils.sql.models import DataCatalog, Base, DEFAULT_COMPACTION, DEFAULT_SOURCE, \
-    DEFAULT_VERSION, DEFAULT_EXTRAS, DEFAULT_INSTRUMENT_EXTRA
+    DEFAULT_VERSION, DEFAULT_INSTRUMENT_EXTRA
 from data_catalog.common.data_models.models import InputItemBatch
 
 import os
@@ -90,7 +90,7 @@ class MysqlClient:
         compaction: str = DEFAULT_COMPACTION,
         source: str = DEFAULT_SOURCE,
         version: str = DEFAULT_VERSION,
-        extras: str = DEFAULT_EXTRAS,
+        extras: str = None,
         start_date: Optional[str] = None,
         end_date: Optional[str] = None
     ) -> List:

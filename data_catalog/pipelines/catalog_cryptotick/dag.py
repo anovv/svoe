@@ -14,6 +14,7 @@ from data_catalog.common.utils.register import ray_task_name, send_events_to_sta
 from data_catalog.pipelines.dag import Dag
 from featurizer.features.data.l2_book_incremental.cryptotick.cryptotick_l2_book_incremental import \
     CryptotickL2BookIncrementalData
+from featurizer.features.data.l2_book_incremental.cryptotick.utils import preprocess_l2_inc_df
 from featurizer.features.definitions.l2_snapshot.l2_snapshot_fd import L2SnapshotFD
 from ray_cluster.testing_utils import mock_feature
 from utils.pandas.df_utils import gen_split_df_by_mem, concat
@@ -23,7 +24,6 @@ class CatalogCryptotickDag(Dag):
 
     def get(self, workflow_id: str, input_batch: InputItemBatch, stats: Stats, db_actor: DbActor):
         # TODO filter?
-
         download_task_ids = []
         catalog_task_ids = []
         store_task_ids = []
@@ -34,7 +34,8 @@ class CatalogCryptotickDag(Dag):
 
         for i in range(len(items)):
             item = items[i]
-            extra = {'size_kb': item['size_kb']}
+            raw_size_kb = item['size_kb']
+            extra = {'size_kb': raw_size_kb}
             extras.append(extra)
 
             download_task_id = f'{workflow_id}_{ray_task_name(load_df)}_{i}'
@@ -45,12 +46,19 @@ class CatalogCryptotickDag(Dag):
                                                                                                                extra=extra)
 
             # TODO ids for split tasks
-            splits = workflow.continuation(split_l2_inc_df.bind(download_task))
+            split_task_id = f'{workflow_id}_{ray_task_name(split_l2_inc_df)}_{i}'
+            splits = workflow.continuation(split_l2_inc_df.options(**workflow.options(task_id=split_task_id), num_cpus=0.9).bind(download_task, item['raw_date']))
             for j in range(len(splits)):
                 split = splits[j]
+                new_size_kb = raw_size_kb/len(splits)
+                extra['size_kb'] = new_size_kb
+                item['size_kb'] = new_size_kb
+
+                # remove raw path so it is constructed when making catalog item
+                del item['path']
                 catalog_task_id = f'{workflow_id}_{ray_task_name(catalog_df)}_{j}_{i}'
                 catalog_task_ids.append(catalog_task_id)
-                catalog_task = catalog_df.options(**workflow.options(task_id=catalog_task_id), num_cpus=0.01).bind(split,
+                catalog_task = catalog_df.options(**workflow.options(task_id=catalog_task_id), num_cpus=0.9).bind(split,
                                                                                                                item,
                                                                                                                stats=stats,
                                                                                                                task_id=catalog_task_id,
@@ -60,9 +68,6 @@ class CatalogCryptotickDag(Dag):
 
                 store_task_id = f'{workflow_id}_{ray_task_name(store_df)}_{j}_{i}'
                 store_task_ids.append(store_task_id)
-
-                # TODO update extra here to use split size_kb value for upload throughput
-                # TODO store depends on catalog_task
                 store_task = store_df.options(**workflow.options(task_id=store_task_id), num_cpus=0.01).bind(split,
                                                                                                              catalog_task,
                                                                                                              stats=stats,
@@ -78,7 +83,7 @@ class CatalogCryptotickDag(Dag):
         # wait for store and catalog to EACH complete synchronously
         gathered_catalog_items = gather_and_wait.bind(catalog_tasks)
         gathered_store_tasks = gather_and_wait.bind(store_tasks)
-        # TODO verify all is stored sucessfully here?
+        # TODO verify all is stored successfully here?
         # TODO make sure ALL catalog AND store complete synchronously?
         node = chain_no_ret.bind(gathered_catalog_items, gathered_store_tasks, scheduled_events_reported)
 
@@ -94,12 +99,16 @@ class CatalogCryptotickDag(Dag):
 # TODO resource spec
 # TODO register for stats report and pass extra params
 @ray.remote
-def split_l2_inc_df(df: pd.DataFrame) -> List[pd.DataFrame]:
-    return split_l2_inc_df_and_pad_with_snapshot(df, 100 * 1024)
+def split_l2_inc_df(df: pd.DataFrame, raw_date_str: str) -> List[pd.DataFrame]:
+    return split_l2_inc_df_and_pad_with_snapshot(df, 100 * 1024, raw_date_str)
 
 
 # splits big L2 inc df into chunks, adding full snapshot to the beginning of each chunk
-def split_l2_inc_df_and_pad_with_snapshot(df: pd.DataFrame, split_size_kb: int) -> List[pd.DataFrame]:
+def split_l2_inc_df_and_pad_with_snapshot(df: pd.DataFrame, split_size_kb: int, raw_date_str: str) -> List[pd.DataFrame]:
+    print('split started')
+    print('preproc started')
+    df = preprocess_l2_inc_df(df, raw_date_str)
+    print('preproc finished')
     gen = gen_split_df_by_mem(df, split_size_kb)
     res = []
     prev_snap = None
@@ -113,6 +122,7 @@ def split_l2_inc_df_and_pad_with_snapshot(df: pd.DataFrame, split_size_kb: int) 
         prev_snap = snap
         i += 1
 
+    print('split finished')
     return res
 
 # TODO typing

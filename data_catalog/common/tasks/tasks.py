@@ -29,14 +29,19 @@ def chain_no_ret(*args):
 @ray.remote
 @report_stats_decor([EventType.SCHEDULED, EventType.STARTED, EventType.FINISHED])
 def load_df(input_item: InputItem, stats: 'Stats', task_id: str, extra: Optional[Dict] = None) -> pd.DataFrame:
+    print('load started')
     path = input_item['path']
-    return df_utils.load_df(path)
+    df = df_utils.load_df(path)
+    print('load finished')
+    return df
 
 
 # TODO set CPU=0, set memory and object_store_memory
 @ray.remote
 @report_stats_decor([EventType.SCHEDULED, EventType.STARTED, EventType.FINISHED])
 def catalog_df(df: pd.DataFrame, input_item: InputItem, stats: 'Stats', task_id: str, source:str, extra: Optional[Dict] = None) -> DataCatalog:
+    print('catalog_df started')
+
     return make_catalog_item(df, input_item, source)
 
 # TODO set CPU=0, or add parallelism resource, set memory and object_store_memory

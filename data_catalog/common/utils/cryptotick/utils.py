@@ -8,7 +8,8 @@ CRYPTOTICK_RAW_BUCKET_NAME = 'svoe-cryptotick-data'
 
 
 def cryptotick_input_items(batch_size: int) -> List[InputItemBatch]:
-    raw_files = list_files_and_sizes_kb(CRYPTOTICK_RAW_BUCKET_NAME)
+    # raw_files = list_files_and_sizes_kb(CRYPTOTICK_RAW_BUCKET_NAME)
+    raw_files = [('limitbook_full/20230201/BINANCE_SPOT_BTC_USDT.csv.gz', 252 * 1024)]
     grouped_by_data_type = {}
     for raw_path, size_kb in raw_files:
         item = _parse_s3_key(raw_path, size_kb)
@@ -28,9 +29,9 @@ def cryptotick_input_items(batch_size: int) -> List[InputItemBatch]:
     return res
 
 
-def _parse_s3_key(key: str, size_kb) -> InputItem:
+def _parse_s3_key(path: str, size_kb) -> InputItem:
     # example quotes/20230201/BINANCE_SPOT_BTC_USDT.csv.gz
-    s = key.split('/')
+    s = path.split('/')
     if s[0] == 'limitbook_full':
         data_type = 'l2_book' # TODO l2_inc
     elif s[0] == 'quotes':
@@ -40,9 +41,9 @@ def _parse_s3_key(key: str, size_kb) -> InputItem:
     else:
         raise ValueError(f'Unknown data_type {s[0]}')
 
-    date = s[1] # YYYY-MM-DD
+    raw_date = s[1] # YYYY-MM-DD
     # make DD-MM-YYYY
-    date = f'{date[6:8]}-{date[4:6]}-{date[0:4]}'
+    date = f'{raw_date[6:8]}-{raw_date[4:6]}-{raw_date[0:4]}'
     file = s[2] # BINANCE_SPOT_BTC_USDT.csv.gz
     f = file.split('_')
     exchange = f[0]
@@ -56,7 +57,9 @@ def _parse_s3_key(key: str, size_kb) -> InputItem:
     # TODO call cryptofeed lib to construct symbol here?
     symbol = f'{base}-{quote}'
 
+    path = f's3://{CRYPTOTICK_RAW_BUCKET_NAME}/' + path
     return {
+        DataCatalog.path.name: path,
         DataCatalog.data_type.name: data_type,
         DataCatalog.exchange.name: exchange,
         DataCatalog.symbol.name: symbol,
@@ -66,7 +69,8 @@ def _parse_s3_key(key: str, size_kb) -> InputItem:
         DataCatalog.source.name: 'cryptotick',
         DataCatalog.date.name: date,
         DataCatalog.size_kb.name: size_kb,
-        DataCatalog.instrument_type.name: instrument_type
+        DataCatalog.instrument_type.name: instrument_type,
+        'raw_date': raw_date
     }
 
 
