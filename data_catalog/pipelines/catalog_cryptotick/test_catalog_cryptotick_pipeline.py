@@ -7,10 +7,10 @@ import joblib
 from data_catalog.common.utils.cryptotick.utils import cryptotick_input_items
 from data_catalog.common.utils.sql.client import MysqlClient
 from data_catalog.common.utils.sql.models import make_catalog_item
-from data_catalog.pipelines.catalog_cryptotick.dag import split_l2_inc_df_and_pad_with_snapshot, CatalogCryptotickDag
+from data_catalog.pipelines.catalog_cryptotick.dag import CatalogCryptotickDag
 from data_catalog.pipelines.pipeline_runner import PipelineRunner
 from featurizer.features.data.l2_book_incremental.cryptotick.utils import starts_with_snapshot, remove_snap, \
-    get_snapshot_depth, preprocess_l2_inc_df
+    get_snapshot_depth, preprocess_l2_inc_df, split_l2_inc_df_and_pad_with_snapshot
 from utils.pandas.df_utils import get_cached_df, concat
 
 
@@ -36,7 +36,7 @@ class TestCatalogCryptotickPipeline(unittest.TestCase):
 
         # TODO this quits early if job is long
         # TODO make wait_for_completion func
-        time.sleep(720)
+        time.sleep(720 * 10)
 
         # check if index was written to db
         client = MysqlClient()

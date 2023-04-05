@@ -214,41 +214,15 @@ class TestFeatureCalculator(unittest.TestCase):
         # output_file("ts.html")
         show(p)
 
-    # TODO util/merge this with stuff in test_index_cryptotick
-    def _big_cryptotick_df_path(self, index: int = - 1) -> str:
-        big_df_path = 's3://svoe-cryptotick-data/limitbook_full/20230201/BINANCE_SPOT_BTC_USDT.csv.gz'
-        if index < 0:
-            return big_df_path
-        return big_df_path + str(index)
-
-    def _cache_key_for_big_cryptotick_df_split(self, split_id: int):
-        return joblib.hash(self._big_cryptotick_df_path(split_id))
-
-    def test_split_and_cache_big_cryptotick_df(self):
-        # TODO mark processed vs raw
-        #  5Gb in-memory
-        print('Loading df')
-        big_df = load_df(self._big_cryptotick_df_path(), extension='csv')
-        print('Loaded df')
-        print(big_df.head(10))
-
-        # TODO we can split only processed dfs
-        split_gen = gen_split_df_by_mem(big_df, 100 * 1024, ts_col_name='time_exchange')
-        i = 0
-        for split_df in split_gen:
-            print(f'Split {i}')
-            cache_df_if_needed(split_df, self._cache_key_for_big_cryptotick_df_split(i))
-            i += 1
-
-        print(get_cached_df(self._cache_key_for_big_cryptotick_df_split(0)))
-
-    def test_split_small_cryptotick_df(self):
+    def test_cryptotick_df_split(self):
         path = 's3://svoe-junk/27606-BITSTAMP_SPOT_BTC_EUR.csv.gz'
+        date_str = '20230201'
         print('Started loading')
         df = load_df(path, extension='csv')
-        print('Finished loading')
+        print('Finished loading, started processing')
+        df = preprocess_l2_inc_df(df, date_str)
+        print('Finished loading, started preprocessing')
 
-        # TODO we can split only processed dfs
         split_gen = gen_split_df_by_mem(df, 100 * 1024)
         splits = []
         i = 0
@@ -265,7 +239,7 @@ class TestFeatureCalculator(unittest.TestCase):
         assert concat(splits).equals(df)
 
     # TODO util this
-    def test_df_split(self):
+    def test_cryptofeed_df_split(self):
         l2_data, _ = mock_l2_book_delta_data_and_meta()
         l2_dfs = list(l2_data.values())[0]
 
@@ -305,25 +279,7 @@ class TestFeatureCalculator(unittest.TestCase):
 
         print(f'Avg Trades split size:{np.mean(trades_split_sizes)}')
 
-    # TODO is this needed?
-    def test_snapshot_cryptotick(self):
-        date_str = '20230201'
-        # df = load_df(self._big_cryptotick_df_path())
-        df = get_cached_df(self._cache_key_for_big_cryptotick_df_split(0))
-        df = preprocess_l2_inc_df(df, date_str)
-        print(get_size_kb(df))
-        print(df.head(10))
-        events = CryptotickL2BookIncrementalData.parse_events(df)
-        print(len(events))
-        print(events[0]['update_type'])
-        print(datetime.datetime.fromtimestamp(events[0]['timestamp'], tz=pytz.utc))
-        events_df = pd.DataFrame(events)
-        print(len(events_df))
-        print(get_size_kb(events_df))
-        print(events_df.head(10))
-        print(events_df['timestamp'].is_monotonic_increasing)
-        print(len(events_df.iloc[0].orders))
-
+    # TODO assertions
     def test_cryptotick_l2_snap_feature(self):
         data_params = {}
         feature_params = [{'dep_schema': 'cryptotick'}]
@@ -332,8 +288,10 @@ class TestFeatureCalculator(unittest.TestCase):
         stream = stream_graph[feature]
         data = Feature([], 0, CryptotickL2BookIncrementalData, data_params)
         sources = {data: stream_graph[data]}
-        df = get_cached_df(self._cache_key_for_big_cryptotick_df_split(0))
-        merged_events = C.merge_blocks({data: [df]})
+        # df = get_cached_df(self._cache_key_for_big_cryptotick_df_split(0))
+        df = None # TODO api for loading small testing cryptotick dfs
+        # merged_events = C.merge_blocks({data: [df]})
+        merged_events = []
         online_res = C.run_stream(merged_events, sources, stream)
         print(online_res)
 
@@ -346,10 +304,8 @@ if __name__ == '__main__':
     # t.test_point_in_time_join()
     # t.test_merge_asof()
     # t.test_feature_label_set()
-    # t.test_df_split()
-    # t.test_split_and_cache_big_cryptotick_df()
-    # t.test_split_small_cryptotick_df()
-    t.test_snapshot_cryptotick()
+    # t.test_cryptofeed_df_split()
+    # t.test_cryptotick_df_split()
     # t.test_cryptotick_l2_snap_feature()
 
 

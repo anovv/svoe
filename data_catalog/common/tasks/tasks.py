@@ -1,6 +1,8 @@
 import json
+import time
 from typing import Optional, Dict, List
 
+import joblib
 import ray
 
 import pandas as pd
@@ -8,11 +10,15 @@ import pandas as pd
 from data_catalog.common.actors.db import DbActor
 from data_catalog.common.data_models.models import InputItem, InputItemBatch
 from data_catalog.common.utils.register import report_stats_decor, EventType
-from data_catalog.common.utils.sql.models import make_catalog_item, DataCatalog
+from data_catalog.common.utils.sql.models import make_catalog_item, DataCatalog, SVOE_S3_CATALOGED_DATA_BUCKET
+from featurizer.features.data.l2_book_incremental.cryptotick.utils import split_l2_inc_df_and_pad_with_snapshot
 from utils.pandas import df_utils
 
 
 # TODO set resources
+from utils.pandas.df_utils import get_cached_df, cache_df_if_needed
+
+
 @ray.remote
 def gather_and_wait(args):
     return ray.get(args)
@@ -31,7 +37,15 @@ def chain_no_ret(*args):
 def load_df(input_item: InputItem, stats: 'Stats', task_id: str, extra: Optional[Dict] = None) -> pd.DataFrame:
     print('load started')
     path = input_item['path']
-    df = df_utils.load_df(path)
+    # TODO this is for debug
+    head = 100000
+    head_key = joblib.hash(f'{path}_head_{head}')
+    df = get_cached_df(head_key)
+    if df is None:
+        df = df_utils.load_df(path)
+        df = df.head(head) 
+        cache_df_if_needed(df, head_key)
+    print(input_item['size_kb'])
     print('load finished')
     return df
 
@@ -39,10 +53,15 @@ def load_df(input_item: InputItem, stats: 'Stats', task_id: str, extra: Optional
 # TODO set CPU=0, set memory and object_store_memory
 @ray.remote
 @report_stats_decor([EventType.SCHEDULED, EventType.STARTED, EventType.FINISHED])
-def catalog_df(df: pd.DataFrame, input_item: InputItem, stats: 'Stats', task_id: str, source:str, extra: Optional[Dict] = None) -> DataCatalog:
+def catalog_df(df: pd.DataFrame, input_item: InputItem, source: str, compaction: str, stats: 'Stats', task_id: str, extra: Optional[Dict] = None) -> DataCatalog:
     print('catalog_df started')
+    item = make_catalog_item(df, input_item, source, compaction)
+    print(item)
+    # print(item.path)
+    # print(item.size_kb)
+    print('catalog_df finished')
+    return item
 
-    return make_catalog_item(df, input_item, source)
 
 # TODO set CPU=0, or add parallelism resource, set memory and object_store_memory
 @ray.remote
@@ -59,9 +78,22 @@ def write_batch(db_actor: DbActor, batch: List[DataCatalog], stats: 'Stats', tas
 def filter_existing(db_actor: DbActor, input_batch: InputItemBatch, stats: 'Stats', task_id: str, extra: Optional[Dict] = None) -> InputItemBatch:
     return ray.get(db_actor._filter_batch.remote(input_batch))
 
+
 # TODO set CPU=0, or add parallelism resource, set memory and object_store_memory
 @ray.remote
 @report_stats_decor([EventType.STARTED, EventType.FINISHED])
 def store_df(df: pd.DataFrame, index_item: DataCatalog, stats: 'Stats', task_id: str, extra: Optional[Dict] = None):
-    path = index_item['path']
-    df_utils.store_df(path, df)
+    print('Store started')
+    print(index_item)
+    # path = index_item['path']
+    # path = f's3://{SVOE_S3_CATALOGED_DATA_BUCKET}/junk/{time.time()}.parquet.gz'
+    # print(df)
+    # df_utils.store_df(path, df)
+    print('Store finished')
+
+
+@ray.remote
+@report_stats_decor([EventType.STARTED, EventType.FINISHED])
+def split_l2_inc_df(path: str, df: pd.DataFrame, chunk_size_kb: int, date_str: str, stats: 'Stats', task_id: str) -> List[pd.DataFrame]:
+    return split_l2_inc_df_and_pad_with_snapshot(path, df, chunk_size_kb, date_str)
+

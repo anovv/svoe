@@ -19,9 +19,10 @@ class FeatureDefinition(DataDefinition):
         return False
 
     @classmethod
-    def stream(cls, dep_upstreams: Dict['Feature', Stream], feature_params: Dict) -> Stream:
+    def stream(cls, dep_upstreams: Dict['Feature', Stream], feature_params: Dict) -> Union[Stream, Tuple[Stream, Any]]:
         raise NotImplemented
 
+    # TODO dep_schema -> source
     @classmethod
     def dep_upstream_schema(cls, dep_schema: str = Optional[None]) -> List[Type[DataDefinition]]:
         # upstream dependencies

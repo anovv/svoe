@@ -28,35 +28,16 @@ def report_stats_decor(event_types: List[EventType]):
         def wrapper(*args, **kwargs):
             task_id = kwargs['task_id']
             stats = kwargs['stats']
-            extra = kwargs.get('extra', None)
+            extra = kwargs.get('extra', {})
             task_name = task.__name__
             if EventType.STARTED in event_types:
                 _send_events_to_stats(stats, [task_id], task_name, EventType.STARTED, [extra])
             start = time.time()
             res = task(*args, **kwargs)
             latency = time.time() - start
-            if extra is None:
-                extra = {}
             extra['latency'] = latency
             if EventType.FINISHED in event_types:
                 _send_events_to_stats(stats, [task_id], task_name, EventType.FINISHED, [extra])
-            # event = {
-            #     'task_id': task_id,
-            #     'event_name': get_event_name(task_name, EventType.STARTED),
-            #     'timestamp': time.time()
-            # }
-            # if extra is not None and 'size_kb' in extra:
-            #     event['size_kb'] = extra['size_kb']
-            # if EventType.STARTED in event_types:
-            #     stats.event.remote(task_name, event)
-            # res = task(*args, **kwargs)
-            # event['event_name'] = get_event_name(task_name, EventType.FINISHED)
-            # now = time.time()
-            # event['latency'] = now - event['timestamp']
-            # event['timestamp'] = now
-            # if EventType.FINISHED in event_types:
-            #     stats.event.remote(task_name, event)
-
             return res
 
         return wrapper
@@ -65,6 +46,7 @@ def report_stats_decor(event_types: List[EventType]):
 @ray.remote
 def send_events_to_stats(stats: 'Stats', task_ids: List[str], task_name: str, event_type: EventType, extras: List[Optional[Dict]]):
     _send_events_to_stats(stats, task_ids, task_name, event_type, extras)
+
 
 def _send_events_to_stats(stats: 'Stats', task_ids: List[str], task_name: str, event_type: EventType, extras: List[Optional[Dict]]):
     if len(task_ids) != len(extras):

@@ -32,7 +32,7 @@ class L2SnapshotFD(FeatureDefinition):
         }
 
     @classmethod
-    def stream(cls, upstreams: Dict[Feature, Stream], feature_params: Dict) -> Stream:
+    def stream(cls, upstreams: Dict[Feature, Stream], feature_params: Dict) -> Tuple[Stream, _State]:
         l2_book_deltas_upstream = toolz.first(upstreams.values())
         state = _State(
             timestamp=-1,
@@ -40,24 +40,34 @@ class L2SnapshotFD(FeatureDefinition):
             order_book=OrderBook(),
             data_inconsistencies={},
         )
-        dep_schema = None
-        depth = cls.DEFAULT_DEPTH
-        if feature_params is not None:
-            depth = feature_params.get('depth', depth)
-            dep_schema = feature_params.get('dep_schema', None)
-        update = functools.partial(cls._update_state, depth=depth, dep_schema=dep_schema)
+        if feature_params is None:
+            feature_params = {}
+
+        # TODO dep_schema -> source
+        depth = feature_params.get('depth', cls.DEFAULT_DEPTH)
+        dep_schema = feature_params.get('dep_schema', None)
+        sampling = feature_params.get('sampling', 'raw')
+
+        update = functools.partial(cls._update_state, depth=depth, sampling=sampling, dep_schema=dep_schema)
         acc = l2_book_deltas_upstream.accumulate(update, returns_state=True, start=state)
-        return su.filter_none(acc).unique(maxsize=1)
+        return su.filter_none(acc).unique(maxsize=1), state
 
     @classmethod
-    def _update_state(cls, state: _State, event: Event, depth: int, dep_schema: Optional[str] = None) -> Tuple[_State, Optional[Event]]:
+    def _update_state(cls, state: _State, event: Event, depth: int, sampling: str, dep_schema: Optional[str] = None) -> Tuple[_State, Optional[Event]]:
         if dep_schema is None:
             state, skip_event = cryptofeed_update_state(state, event, depth)
         elif dep_schema == 'cryptotick':
             state, skip_event = cryptotick_update_state(state, event, depth)
         else:
             raise ValueError(f'Unsupported dep_schema: {dep_schema}')
-        return state, None if skip_event else cls._state_snapshot(state, depth)
+        # calling cls._state_snapshot(state, depth) on every events is very heavy,
+        # 300x slowdown (383.938503742218s vs 1.4724829196929932s for run_stream on 5Gb dataframe)
+        if sampling == 'raw':
+            return state, None if skip_event else cls._state_snapshot(state, depth)
+        elif sampling == 'skip_all':
+            return state, None
+        else:
+            raise ValueError(f'Unknown sampling strategy: {sampling}')
 
     @classmethod
     def _state_snapshot(cls, state: _State, depth: int) -> Event:

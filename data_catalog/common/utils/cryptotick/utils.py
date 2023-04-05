@@ -41,7 +41,7 @@ def _parse_s3_key(path: str, size_kb) -> InputItem:
     else:
         raise ValueError(f'Unknown data_type {s[0]}')
 
-    raw_date = s[1] # YYYY-MM-DD
+    raw_date = s[1] # YYYYMMDD
     # make DD-MM-YYYY
     date = f'{raw_date[6:8]}-{raw_date[4:6]}-{raw_date[0:4]}'
     file = s[2] # BINANCE_SPOT_BTC_USDT.csv.gz
@@ -65,12 +65,10 @@ def _parse_s3_key(path: str, size_kb) -> InputItem:
         DataCatalog.symbol.name: symbol,
         DataCatalog.base.name: base,
         DataCatalog.quote.name: quote,
-        DataCatalog.compaction.name: '100mb',
         DataCatalog.source.name: 'cryptotick',
         DataCatalog.date.name: date,
         DataCatalog.size_kb.name: size_kb,
-        DataCatalog.instrument_type.name: instrument_type,
-        'raw_date': raw_date
+        DataCatalog.instrument_type.name: instrument_type
     }
 
 

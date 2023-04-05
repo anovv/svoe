@@ -101,7 +101,7 @@ def time_range(df: pd.DataFrame) -> Tuple[float, float, float]:
 def get_num_rows(df: pd.DataFrame) -> int:
     return len(df.index)
 
-
+# TODO this takes 10s on 5Gb dataframe
 def get_size_kb(df: pd.DataFrame) -> int:
     return int(df.memory_usage(index=True, deep=True).sum()/1024.0)
 

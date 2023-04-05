@@ -1,5 +1,14 @@
-from typing import Optional, List, Tuple
-from utils.pandas.df_utils import is_ts_sorted
+import time
+from typing import Optional, List, Tuple, Any
+
+import diskcache
+from streamz import Stream
+
+from featurizer.features.data.l2_book_incremental.cryptotick.cryptotick_l2_book_incremental import \
+    CryptotickL2BookIncrementalData
+from featurizer.features.definitions.l2_snapshot.l2_snapshot_fd import L2SnapshotFD
+from ray_cluster.testing_utils import mock_feature
+from utils.pandas.df_utils import is_ts_sorted, concat, gen_split_df_by_mem
 
 import ciso8601
 import pandas as pd
@@ -38,6 +47,110 @@ def preprocess_l2_inc_df(df: pd.DataFrame, date_str: str) -> pd.DataFrame:
     df = df.reset_index(drop=True)
 
     return df
+
+
+# splits big L2 inc df into chunks, adding full snapshot to the beginning of each chunk
+def split_l2_inc_df_and_pad_with_snapshot(path: str, raw_df: pd.DataFrame, split_size_kb: int, date_str: str) -> List[pd.DataFrame]:
+    # TODO move this to load_df?
+    print('split started')
+    print('preproc started')
+    # processed_cache_key = joblib.hash(path + '_processed')
+    # df = get_cached_df(processed_cache_key)
+    # if df is None:
+    #     print('preproc NOT in cache, calculating')
+    #     raw_date_str = to_raw(date_str)
+    #     df = preprocess_l2_inc_df(raw_df, raw_date_str)
+    #     cache_df_if_needed(df, processed_cache_key)
+    # else:
+    #     print('found cached preproc')
+
+    # DD-MM-YYYY -> YYYYMMDD
+    def to_raw_date(d):
+        return f'{d[6: 10]}{d[3:5]}{d[0:2]}'
+    raw_date_str = to_raw_date(date_str)
+    df = preprocess_l2_inc_df(raw_df, raw_date_str)
+    # approx_num_split = int(get_size_kb(df)/split_size_kb)
+    print('preproc finished')
+    gen = gen_split_df_by_mem(df, split_size_kb)
+    res = []
+    prev_snap = None
+    i = 0
+    for split in gen:
+        # TODO this is for debug
+        if i > 2:
+            break
+
+        if i > 0:
+            split = prepend_snap(split, prev_snap)
+        # events_cache_key = joblib.hash(f'{path}_{i}_events')
+        snap = run_l2_snapshot_stream(split)
+        res.append(split)
+        prev_snap = snap
+        print(f'split {i} finished')
+        i += 1
+
+    print('split finished')
+
+    return res
+
+
+# TODO typing
+def run_l2_snapshot_stream(l2_inc_df: pd.DataFrame, events_cache_key: Optional[str] = None) -> Any:
+    print('Parse events started')
+    t = time.time()
+    # if events_cache_key is not None:
+    #     cache = diskcache.Cache('/tmp/svoe/objs_cache/')
+    #     events = cache.get(events_cache_key)
+    #     if events is None:
+    #         print('No parsed events cached, calculating...')
+    #         events = CryptotickL2BookIncrementalData.parse_events(l2_inc_df)
+    #         cache[events_cache_key] = events
+    #     else:
+    #         print('Parsed events cached')
+    # else:
+    #     events = CryptotickL2BookIncrementalData.parse_events(l2_inc_df)
+
+    events = CryptotickL2BookIncrementalData.parse_events(l2_inc_df)
+    print(f'Parse events finished: {time.time() - t}s')
+    source = Stream()
+
+    # cryptotick stores 5000 depth levels
+    depth = 5000
+    feature_params = {'dep_schema': 'cryptotick', 'depth': depth, 'sampling': 'skip_all'}
+    _, stream_state = L2SnapshotFD.stream({mock_feature(0): source}, feature_params)
+
+    print('Running events started')
+    t = time.time()
+    for event in events:
+        source.emit(event)
+    print(f'Running events finished: {time.time() - t}s')
+
+    return L2SnapshotFD._state_snapshot(stream_state, depth)
+
+
+def prepend_snap(df: pd.DataFrame, snap) -> pd.DataFrame:
+    # TODO inc this
+    ts = snap['timestamp']
+    receipt_ts = snap['receipt_timestamp']
+
+    # make sure start of this block differs from prev
+    microsec = 0.000001
+    ts += microsec
+    receipt_ts += microsec
+
+    if ts >= df.iloc[0]['timestamp'] or receipt_ts >= df.iloc[0]['receipt_timestamp']:
+        raise ValueError('Unable to shift snapshot ts when prepending')
+
+    df_bids = pd.DataFrame(snap['bids'], columns=['price', 'size'])
+    df_bids['side'] = 'bid'
+    df_asks = pd.DataFrame(snap['asks'], columns=['price', 'size'])
+    df_asks['side'] = 'ask'
+    df_snap = concat([df_bids, df_asks])
+    df_snap['update_type'] = 'SNAPSHOT'
+    df_snap['timestamp'] = ts
+    df_snap['receipt_timestamp'] = receipt_ts
+
+    return concat([df_snap, df])
 
 
 def get_snapshot_ts(df: pd.DataFrame) -> Optional[List]:

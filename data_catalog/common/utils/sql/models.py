@@ -73,7 +73,7 @@ class DataCatalog(Base):
             setattr(self, DataCatalog.version.name, DEFAULT_VERSION)
 
 
-def make_catalog_item(df: pd.DataFrame, input_item: InputItem, source: str) -> DataCatalog:
+def make_catalog_item(df: pd.DataFrame, input_item: InputItem, source: str, compaction: str) -> DataCatalog:
     if source not in ['cryptofeed', 'cryptotick']:
         raise ValueError(f'Unknown source: {source}')
 
@@ -91,7 +91,8 @@ def make_catalog_item(df: pd.DataFrame, input_item: InputItem, source: str) -> D
         DataCatalog.end_ts.name: _time_range[2],
         DataCatalog.size_in_memory_kb.name: df_utils.get_size_kb(df),
         DataCatalog.num_rows.name: df_utils.get_num_rows(df),
-        DataCatalog.date.name: date_str
+        DataCatalog.date.name: date_str,
+        DataCatalog.compaction.name: compaction
     })
 
     # TODO l2_book -> l2_inc
@@ -107,11 +108,10 @@ def make_catalog_item(df: pd.DataFrame, input_item: InputItem, source: str) -> D
             catalog_item_params[DataCatalog.meta.name] = json.dumps(meta)
 
     res = DataCatalog(**catalog_item_params)
-    print(res.__dict__)
     if res.path is None:
         if source != 'cryptotick':
             raise ValueError(f'Empty path only allowed for cryptotick')
-        res.path = _construct_s3_path(res) # TODO
+        res.path = _construct_s3_path(res)
 
     return res
 

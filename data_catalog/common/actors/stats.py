@@ -17,6 +17,7 @@ from ray.experimental.state.api import list_workers
 from data_catalog.common.utils.register import TASK_NAMES, EVENT_NAMES, EventType, get_event_name, ray_task_name
 from data_catalog.common.tasks.tasks import load_df, catalog_df, write_batch, filter_existing
 
+
 import ray
 
 # for async wait/signaling see last comment https://github.com/ray-project/ray/issues/7229
@@ -24,6 +25,8 @@ import ray
 # for threaded updates https://stackoverflow.com/questions/55176868/asynchronous-streaming-to-embedded-bokeh-server
 
 from tornado.ioloop import IOLoop
+
+COLORS = ['red', 'green', 'blue', 'yellow', 'lightblue', 'chocolate', 'gray', 'lime', 'orange', 'pink', 'lavender']
 
 GraphData = List[Union[List, Optional[int]]] # List with timestamped data point and last read data length
 
@@ -36,20 +39,24 @@ TIME = 'time'
 LOAD_DF_TASK_NAME = ray_task_name(load_df)
 GRAPH_NAME_TASK_EVENTS = 'GRAPH_NAME_TASK_EVENTS'
 
-
 def _make_task_events_graph_figure(source):
     fig = figure(title="Tasks Events (count)", x_axis_type='datetime', tools='')
+    color_index = 0
+    color_per_task = {}
     for name in EVENT_NAMES:
-        # TODO simplify this
-        color = 'red'
-        if ray_task_name(load_df) in name:
-            color = 'red'
-        elif ray_task_name(catalog_df) in name:
-            color = 'green'
-        elif ray_task_name(filter_existing) in name:
-            color = 'blue'
-        elif ray_task_name(write_batch) in name:
-            color = 'yellow'
+        # same color for same task
+        task_name = None
+        for t_name in TASK_NAMES:
+            if t_name in name:
+                task_name = t_name
+                break
+
+        if task_name in color_per_task:
+            color = color_per_task[task_name]
+        else:
+            color = COLORS[color_index%len(COLORS)]
+            color_per_task[task_name] = color
+            color_index += 1
 
         line_dash = 'solid'
         if EventType.SCHEDULED.value in name:
@@ -83,17 +90,9 @@ def _make_task_latencies_graph_figure(source):
 
     # TODO for running ranges
     # x_range = DataRange1d(follow='end', follow_interval=20000, range_padding=0)
-    for name in TASK_NAMES:
-        # TODO simplify this
-        color = 'red'
-        if ray_task_name(load_df) in name:
-            color = 'red'
-        elif ray_task_name(catalog_df) in name:
-            color = 'green'
-        elif ray_task_name(filter_existing) in name:
-            color = 'blue'
-        elif ray_task_name(write_batch) in name:
-            color = 'yellow'
+    for i in range(len(TASK_NAMES)):
+        name = TASK_NAMES[i]
+        color = COLORS[i%len(COLORS)]
 
         legend_label = name
 

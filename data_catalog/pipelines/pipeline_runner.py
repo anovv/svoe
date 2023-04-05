@@ -1,8 +1,4 @@
 import ray
-
-# from data_catalog.indexer.actors.coordinator import Coordinator
-# from data_catalog.indexer.actors.db import DbReader, DbWriter, DbActor
-# from data_catalog.indexer.actors.queues import DownloadQueue, StoreQueue, InputQueue
 from data_catalog.common.actors.db import DbActor
 
 # for pipelined queue https://docs.ray.io/en/latest/ray-core/patterns/pipelining.html
@@ -36,7 +32,6 @@ class PipelineRunner:
 
         # TODO for workflow stats (per task) - workflow metadata
         # https://docs.ray.io/en/latest/workflows/metadata.html
-
         # run stats
         self.stats = Stats.remote()
         self.stats.run.remote()
