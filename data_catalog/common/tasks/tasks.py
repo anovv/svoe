@@ -51,9 +51,9 @@ def load_df(input_item: InputItem, stats: 'Stats', task_id: str, stats_extra: Op
 # TODO set CPU=0, set memory and object_store_memory
 @ray.remote
 @report_stats_decor([EventType.SCHEDULED, EventType.STARTED, EventType.FINISHED])
-def catalog_df(df: pd.DataFrame, input_item: InputItem, source: str, compaction: str, catalog_extras: Dict, stats: 'Stats', task_id: str) -> DataCatalog:
+def catalog_df(df: pd.DataFrame, input_item: InputItem, stats: 'Stats', task_id: str) -> DataCatalog:
     print('catalog_df started')
-    item = make_catalog_item(df, input_item, catalog_extras, source, compaction)
+    item = make_catalog_item(df, input_item)
     print('catalog_df finished')
     return item
 

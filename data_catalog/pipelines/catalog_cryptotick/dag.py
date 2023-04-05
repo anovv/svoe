@@ -6,6 +6,7 @@ from data_catalog.common.data_models.models import InputItemBatch
 from data_catalog.common.tasks.tasks import gather_and_wait, load_df, catalog_df, chain_no_ret, \
     write_batch, store_df, split_l2_inc_df
 from data_catalog.common.utils.register import ray_task_name, send_events_to_stats, EventType
+from data_catalog.common.utils.sql.models import DataCatalog
 from data_catalog.pipelines.dag import Dag
 
 SPLIT_CHUNK_SIZE_KB = 1024
@@ -25,7 +26,7 @@ class CatalogCryptotickDag(Dag):
 
         for i in range(len(items)):
             item = items[i]
-            raw_size_kb = item['size_kb']
+            raw_size_kb = item[DataCatalog.size_kb.name]
             stats_extra = {'size_kb': raw_size_kb}
             stats_extras.append(stats_extra)
 
@@ -37,27 +38,31 @@ class CatalogCryptotickDag(Dag):
 
             split_task_id = f'{workflow_id}_{ray_task_name(split_l2_inc_df)}_{i}'
             splits = workflow.continuation(split_l2_inc_df.options(**workflow.options(task_id=split_task_id), num_cpus=0.9).bind(
-                item['path'], download_task, SPLIT_CHUNK_SIZE_KB, item['date'], stats=stats, task_id=split_task_id
+                item[DataCatalog.path.name], download_task, SPLIT_CHUNK_SIZE_KB, item['date'], stats=stats, task_id=split_task_id
             ))
 
             for j in range(len(splits)):
                 split = splits[j]
                 item_split = item.copy()
 
-                catalog_extras = {
-                    'source_path': item_split['path'],
+                # additional info to be passed to catalog item
+                compaction = f'{SPLIT_CHUNK_SIZE_KB}kb' if SPLIT_CHUNK_SIZE_KB < 1024 else f'{round(SPLIT_CHUNK_SIZE_KB / 1024, 2)}mb'
+                item_split[DataCatalog.compaction.name] = compaction
+                item_split[DataCatalog.source.name] = 'cryptotick'
+                item_split[DataCatalog.extras.name] = {
+                    'source_path': item_split[DataCatalog.path.name],
                     'split_id': j,
                     'num_splits': len(splits),
                 }
+
                 # remove raw source path so it is constructed when making catalog item
-                del item_split['path']
+                del item_split[DataCatalog.path.name]
 
                 catalog_task_id = f'{workflow_id}_{ray_task_name(catalog_df)}_{j}_{i}'
                 catalog_task_ids.append(catalog_task_id)
 
-                compaction = f'{SPLIT_CHUNK_SIZE_KB}kb' if SPLIT_CHUNK_SIZE_KB < 1024 else f'{round(SPLIT_CHUNK_SIZE_KB/1024, 2)}mb'
                 catalog_task = catalog_df.options(**workflow.options(task_id=catalog_task_id), num_cpus=0.9).bind(
-                    split, item_split, 'cryptotick', compaction, catalog_extras, stats=stats, task_id=catalog_task_id
+                    split, item_split, stats=stats, task_id=catalog_task_id
                 )
                 catalog_tasks.append(catalog_task)
 
