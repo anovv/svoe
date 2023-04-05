@@ -1,5 +1,3 @@
-import json
-import time
 from typing import Optional, Dict, List
 
 import joblib
@@ -56,9 +54,6 @@ def load_df(input_item: InputItem, stats: 'Stats', task_id: str, extra: Optional
 def catalog_df(df: pd.DataFrame, input_item: InputItem, source: str, compaction: str, stats: 'Stats', task_id: str, extra: Optional[Dict] = None) -> DataCatalog:
     print('catalog_df started')
     item = make_catalog_item(df, input_item, source, compaction)
-    print(item)
-    # print(item.path)
-    # print(item.size_kb)
     print('catalog_df finished')
     return item
 
@@ -82,13 +77,10 @@ def filter_existing(db_actor: DbActor, input_batch: InputItemBatch, stats: 'Stat
 # TODO set CPU=0, or add parallelism resource, set memory and object_store_memory
 @ray.remote
 @report_stats_decor([EventType.STARTED, EventType.FINISHED])
-def store_df(df: pd.DataFrame, index_item: DataCatalog, stats: 'Stats', task_id: str, extra: Optional[Dict] = None):
+def store_df(df: pd.DataFrame, catalog_item: DataCatalog, stats: 'Stats', task_id: str, extra: Optional[Dict] = None):
     print('Store started')
-    print(index_item)
-    # path = index_item['path']
-    # path = f's3://{SVOE_S3_CATALOGED_DATA_BUCKET}/junk/{time.time()}.parquet.gz'
-    # print(df)
-    # df_utils.store_df(path, df)
+    path = catalog_item.path
+    df_utils.store_df(path, df)
     print('Store finished')
 
 

@@ -1,4 +1,3 @@
-import json
 import uuid
 from datetime import datetime
 
@@ -77,6 +76,8 @@ def make_catalog_item(df: pd.DataFrame, input_item: InputItem, source: str, comp
     if source not in ['cryptofeed', 'cryptotick']:
         raise ValueError(f'Unknown source: {source}')
 
+    print('make_catalog_item')
+
     catalog_item_params = input_item.copy()
     _time_range = df_utils.time_range(df)
 
@@ -105,7 +106,7 @@ def make_catalog_item(df: pd.DataFrame, input_item: InputItem, source: str, comp
             meta = {
                 'snapshot_ts': snapshot_ts
             }
-            catalog_item_params[DataCatalog.meta.name] = json.dumps(meta)
+            catalog_item_params[DataCatalog.meta.name] = meta
 
     res = DataCatalog(**catalog_item_params)
     if res.path is None:
@@ -116,7 +117,6 @@ def make_catalog_item(df: pd.DataFrame, input_item: InputItem, source: str, comp
     return res
 
 
-# TODO add bucket name
 def _construct_s3_path(item: DataCatalog) -> str:
     res = f's3://{SVOE_S3_CATALOGED_DATA_BUCKET}/'
     for field in [

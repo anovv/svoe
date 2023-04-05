@@ -1,12 +1,4 @@
-import time
-from typing import List, Any, Optional
-
-import diskcache
-import joblib
-import pandas as pd
-import ray
 from ray import workflow
-from streamz import Stream
 
 from data_catalog.common.actors.db import DbActor
 from data_catalog.common.actors.stats import Stats
@@ -18,6 +10,7 @@ from data_catalog.pipelines.dag import Dag
 
 SPLIT_CHUNK_SIZE_KB = 1024
 
+
 class CatalogCryptotickDag(Dag):
 
     def get(self, workflow_id: str, input_batch: InputItemBatch, stats: Stats, db_actor: DbActor):
@@ -27,7 +20,7 @@ class CatalogCryptotickDag(Dag):
         store_task_ids = []
         extras = []
         store_tasks = []
-        # catalog_tasks = []
+        catalog_tasks = []
         items = input_batch[1]
 
         for i in range(len(items)):
@@ -50,7 +43,6 @@ class CatalogCryptotickDag(Dag):
             for j in range(len(splits)):
                 split = splits[j]
                 item_split = item.copy()
-                # item_split['size_kb'] = new_size_kb
                 # remove raw path so it is constructed when making catalog item
                 del item_split['path']
 
@@ -61,7 +53,7 @@ class CatalogCryptotickDag(Dag):
                 catalog_task = catalog_df.options(**workflow.options(task_id=catalog_task_id), num_cpus=0.9).bind(
                     split, item_split, 'cryptotick', compaction, stats=stats, task_id=catalog_task_id
                 )
-                # catalog_tasks.append(catalog_task)
+                catalog_tasks.append(catalog_task)
 
                 store_task_id = f'{workflow_id}_{ray_task_name(store_df)}_{j}_{i}'
                 store_task_ids.append(store_task_id)
@@ -76,14 +68,13 @@ class CatalogCryptotickDag(Dag):
         ])
 
         gathered_store_tasks = gather_and_wait.bind(store_tasks)
+        gathered_catalog_tasks = gather_and_wait.bind(catalog_tasks)
         # TODO verify all is stored successfully here?
-        # TODO make sure ALL catalog AND store complete synchronously?
-        gathered_store_tasks = chain_no_ret.bind(gathered_store_tasks, scheduled_events_reported)
+        gathered_catalog_tasks = chain_no_ret.bind(gathered_catalog_tasks, gathered_store_tasks, scheduled_events_reported)
 
         write_catalog_task_id = f'{workflow_id}_{ray_task_name(write_batch)}'
         dag = write_batch.options(**workflow.options(task_id=write_catalog_task_id), num_cpus=0.01).bind(
-            db_actor, gathered_store_tasks, stats=stats, task_id=write_catalog_task_id
+            db_actor, gathered_catalog_tasks, stats=stats, task_id=write_catalog_task_id
         )
 
         return dag
-
