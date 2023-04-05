@@ -32,7 +32,7 @@ def chain_no_ret(*args):
 # TODO set CPU=0, or add parallelism resource, set memory and object_store_memory
 @ray.remote
 @report_stats_decor([EventType.SCHEDULED, EventType.STARTED, EventType.FINISHED])
-def load_df(input_item: InputItem, stats: 'Stats', task_id: str, extra: Optional[Dict] = None) -> pd.DataFrame:
+def load_df(input_item: InputItem, stats: 'Stats', task_id: str, stats_extra: Optional[Dict] = None) -> pd.DataFrame:
     print('load started')
     path = input_item['path']
     # TODO this is for debug
@@ -51,9 +51,9 @@ def load_df(input_item: InputItem, stats: 'Stats', task_id: str, extra: Optional
 # TODO set CPU=0, set memory and object_store_memory
 @ray.remote
 @report_stats_decor([EventType.SCHEDULED, EventType.STARTED, EventType.FINISHED])
-def catalog_df(df: pd.DataFrame, input_item: InputItem, source: str, compaction: str, stats: 'Stats', task_id: str, extra: Optional[Dict] = None) -> DataCatalog:
+def catalog_df(df: pd.DataFrame, input_item: InputItem, source: str, compaction: str, catalog_extras: Dict, stats: 'Stats', task_id: str) -> DataCatalog:
     print('catalog_df started')
-    item = make_catalog_item(df, input_item, source, compaction)
+    item = make_catalog_item(df, input_item, catalog_extras, source, compaction)
     print('catalog_df finished')
     return item
 
@@ -61,7 +61,7 @@ def catalog_df(df: pd.DataFrame, input_item: InputItem, source: str, compaction:
 # TODO set CPU=0, or add parallelism resource, set memory and object_store_memory
 @ray.remote
 @report_stats_decor([EventType.FINISHED])
-def write_batch(db_actor: DbActor, batch: List[DataCatalog], stats: 'Stats', task_id: str, extra: Optional[Dict] = None) -> Dict:
+def write_batch(db_actor: DbActor, batch: List[DataCatalog], stats: 'Stats', task_id: str) -> Dict:
     return ray.get(db_actor._write_batch.remote(batch))
 
 
@@ -70,14 +70,14 @@ def write_batch(db_actor: DbActor, batch: List[DataCatalog], stats: 'Stats', tas
 # TODO set CPU=0, or add parallelism resource, set memory and object_store_memory
 @ray.remote
 @report_stats_decor([EventType.FINISHED])
-def filter_existing(db_actor: DbActor, input_batch: InputItemBatch, stats: 'Stats', task_id: str, extra: Optional[Dict] = None) -> InputItemBatch:
+def filter_existing(db_actor: DbActor, input_batch: InputItemBatch, stats: 'Stats', task_id: str) -> InputItemBatch:
     return ray.get(db_actor._filter_batch.remote(input_batch))
 
 
 # TODO set CPU=0, or add parallelism resource, set memory and object_store_memory
 @ray.remote
 @report_stats_decor([EventType.STARTED, EventType.FINISHED])
-def store_df(df: pd.DataFrame, catalog_item: DataCatalog, stats: 'Stats', task_id: str, extra: Optional[Dict] = None):
+def store_df(df: pd.DataFrame, catalog_item: DataCatalog, stats: 'Stats', task_id: str, stats_extra: Optional[Dict] = None):
     print('Store started')
     path = catalog_item.path
     df_utils.store_df(path, df)

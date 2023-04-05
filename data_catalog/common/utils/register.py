@@ -28,7 +28,7 @@ def report_stats_decor(event_types: List[EventType]):
         def wrapper(*args, **kwargs):
             task_id = kwargs['task_id']
             stats = kwargs['stats']
-            extra = kwargs.get('extra', {})
+            extra = kwargs.get('stats_extra', {})
             task_name = task.__name__
             if EventType.STARTED in event_types:
                 _send_events_to_stats(stats, [task_id], task_name, EventType.STARTED, [extra])

@@ -18,7 +18,7 @@ class CatalogCryptotickDag(Dag):
         download_task_ids = []
         catalog_task_ids = []
         store_task_ids = []
-        extras = []
+        stats_extras = []
         store_tasks = []
         catalog_tasks = []
         items = input_batch[1]
@@ -26,13 +26,13 @@ class CatalogCryptotickDag(Dag):
         for i in range(len(items)):
             item = items[i]
             raw_size_kb = item['size_kb']
-            extra = {'size_kb': raw_size_kb}
-            extras.append(extra)
+            stats_extra = {'size_kb': raw_size_kb}
+            stats_extras.append(stats_extra)
 
             download_task_id = f'{workflow_id}_{ray_task_name(load_df)}_{i}'
             download_task_ids.append(download_task_id)
             download_task = load_df.options(**workflow.options(task_id=download_task_id), num_cpus=0.001).bind(
-                item, stats=stats, task_id=download_task_id, extra=extra
+                item, stats=stats, task_id=download_task_id, stats_extra=stats_extra
             )
 
             split_task_id = f'{workflow_id}_{ray_task_name(split_l2_inc_df)}_{i}'
@@ -43,7 +43,13 @@ class CatalogCryptotickDag(Dag):
             for j in range(len(splits)):
                 split = splits[j]
                 item_split = item.copy()
-                # remove raw path so it is constructed when making catalog item
+
+                catalog_extras = {
+                    'source_path': item_split['path'],
+                    'split_id': j,
+                    'num_splits': len(splits),
+                }
+                # remove raw source path so it is constructed when making catalog item
                 del item_split['path']
 
                 catalog_task_id = f'{workflow_id}_{ray_task_name(catalog_df)}_{j}_{i}'
@@ -51,20 +57,20 @@ class CatalogCryptotickDag(Dag):
 
                 compaction = f'{SPLIT_CHUNK_SIZE_KB}kb' if SPLIT_CHUNK_SIZE_KB < 1024 else f'{round(SPLIT_CHUNK_SIZE_KB/1024, 2)}mb'
                 catalog_task = catalog_df.options(**workflow.options(task_id=catalog_task_id), num_cpus=0.9).bind(
-                    split, item_split, 'cryptotick', compaction, stats=stats, task_id=catalog_task_id
+                    split, item_split, 'cryptotick', compaction, catalog_extras, stats=stats, task_id=catalog_task_id
                 )
                 catalog_tasks.append(catalog_task)
 
                 store_task_id = f'{workflow_id}_{ray_task_name(store_df)}_{j}_{i}'
                 store_task_ids.append(store_task_id)
                 store_task = store_df.options(**workflow.options(task_id=store_task_id), num_cpus=0.01).bind(
-                    split, catalog_task, stats=stats, task_id=store_task_id, extra={'size_kb': raw_size_kb/len(splits)}
+                    split, catalog_task, stats=stats, task_id=store_task_id, stats_extra={'size_kb': raw_size_kb/len(splits)}
                 )
                 store_tasks.append(store_task)
 
         # report scheduled events to stats
         scheduled_events_reported = gather_and_wait.bind([
-            send_events_to_stats.bind(stats, download_task_ids, ray_task_name(load_df), EventType.SCHEDULED, extras),
+            send_events_to_stats.bind(stats, download_task_ids, ray_task_name(load_df), EventType.SCHEDULED, stats_extras),
         ])
 
         gathered_store_tasks = gather_and_wait.bind(store_tasks)

@@ -1,5 +1,6 @@
 import uuid
 from datetime import datetime
+from typing import Dict
 
 import pandas as pd
 import pytz
@@ -72,7 +73,7 @@ class DataCatalog(Base):
             setattr(self, DataCatalog.version.name, DEFAULT_VERSION)
 
 
-def make_catalog_item(df: pd.DataFrame, input_item: InputItem, source: str, compaction: str) -> DataCatalog:
+def make_catalog_item(df: pd.DataFrame, input_item: InputItem, catalog_extras: Dict, source: str, compaction: str) -> DataCatalog:
     if source not in ['cryptofeed', 'cryptotick']:
         raise ValueError(f'Unknown source: {source}')
 
@@ -95,6 +96,11 @@ def make_catalog_item(df: pd.DataFrame, input_item: InputItem, source: str, comp
         DataCatalog.date.name: date_str,
         DataCatalog.compaction.name: compaction
     })
+
+    if catalog_extras is not None:
+        catalog_item_params.update({
+            DataCatalog.extras.name: catalog_extras
+        })
 
     # TODO l2_book -> l2_inc
     if catalog_item_params[DataCatalog.data_type.name] == 'l2_book':
