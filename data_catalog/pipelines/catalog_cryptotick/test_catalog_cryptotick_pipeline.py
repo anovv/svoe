@@ -44,6 +44,7 @@ class TestCatalogCryptotickPipeline(unittest.TestCase):
         # TODO should be 0
         print(len(not_exist))
 
+    # TODO assertions
     def test_construct_s3_path(self):
         batch_size = 10
         batches = cryptotick_input_items(batch_size)
@@ -54,7 +55,7 @@ class TestCatalogCryptotickPipeline(unittest.TestCase):
         big_df = get_cached_df(key)
         date_str = '20230201'
         big_df = preprocess_l2_inc_df(big_df, date_str)
-        catalog_item = make_catalog_item(big_df, first_batch[0], 'cryptotick')
+        catalog_item = make_catalog_item(big_df, first_batch[0])
         print(catalog_item.path)
 
     def test_split_l2_inc_df_and_pad_with_snapshot(self):
@@ -81,8 +82,17 @@ class TestCatalogCryptotickPipeline(unittest.TestCase):
         concated = concat(splits_to_concat)
         assert big_df.equals(concated)
 
+    # TODO asserts, write mock data
+    def test_db_client(self):
+        client = MysqlClient()
+        client.create_tables()
+        batch = ({'batch_id': 0}, [{'path': 's3://svoe-cryptotick-data/limitbook_full/20230201/BINANCE_SPOT_BTC_USDT.csv.gz'}])
+        _, not_exist = client.filter_cryptotick_batch(batch)
+        print(not_exist)
+
 
 if __name__ == '__main__':
     t = TestCatalogCryptotickPipeline()
     t.test_pipeline()
     # t.test_split_l2_inc_df_and_pad_with_snapshot()
+    # t.test_db_client()

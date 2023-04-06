@@ -4,7 +4,7 @@ from data_catalog.common.actors.db import DbActor
 from data_catalog.common.actors.stats import Stats
 from data_catalog.common.data_models.models import InputItemBatch
 from data_catalog.common.tasks.tasks import gather_and_wait, load_df, catalog_df, chain_no_ret, \
-    write_batch, store_df, split_l2_inc_df
+    write_batch, store_df, split_l2_inc_df, filter_existing
 from data_catalog.common.utils.register import ray_task_name, send_events_to_stats, EventType
 from data_catalog.common.utils.sql.models import DataCatalog
 from data_catalog.pipelines.dag import Dag
@@ -15,17 +15,22 @@ SPLIT_CHUNK_SIZE_KB = 1024
 class CatalogCryptotickDag(Dag):
 
     def get(self, workflow_id: str, input_batch: InputItemBatch, stats: Stats, db_actor: DbActor):
-        # TODO filter?
+        filter_task_id = f'{workflow_id}_{ray_task_name(filter_existing)}'
+
+        _, filtered_items = workflow.continuation(
+            filter_existing.options(**workflow.options(task_id=filter_task_id), num_cpus=0.01).bind(
+                db_actor, input_batch, stats=stats, task_id=filter_task_id
+            ))
+
         download_task_ids = []
         catalog_task_ids = []
         store_task_ids = []
         stats_extras = []
         store_tasks = []
         catalog_tasks = []
-        items = input_batch[1]
 
-        for i in range(len(items)):
-            item = items[i]
+        for i in range(len(filtered_items)):
+            item = filtered_items[i]
             raw_size_kb = item[DataCatalog.size_kb.name]
             stats_extra = {'size_kb': raw_size_kb}
             stats_extras.append(stats_extra)

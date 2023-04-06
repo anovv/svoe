@@ -1,6 +1,6 @@
 from typing import Optional, Dict, List
 
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, func
 from sqlalchemy.orm import sessionmaker
 from data_catalog.common.utils.sql.models import DataCatalog, Base, DEFAULT_COMPACTION, DEFAULT_SOURCE, \
     DEFAULT_VERSION, DEFAULT_INSTRUMENT_EXTRA
@@ -46,15 +46,9 @@ class MysqlClient:
 
     # see 2nd comment in https://stackoverflow.com/questions/3659142/bulk-insert-with-sqlalchemy-orm
     # RE: bulk insert perf
-    def write_index_item_batch(self, batch: List[DataCatalog]):
+    def write_catalog_item_batch(self, batch: List[DataCatalog]):
         print(batch)
         # TODO figure out insert_or_update logic
-        # use dict unpacking
-        # https://stackoverflow.com/questions/31750441/generalised-insert-into-sqlalchemy-using-dictionary
-        # objects = []
-        # for index_item in batch:
-        #     # TODO handle failed unpacking (e.g. missing keys)
-        #     # objects.append(DataCatalog(**index_item))
         session = Session()
         session.bulk_save_objects(batch)
 
@@ -65,16 +59,43 @@ class MysqlClient:
         print(f'Written {len(batch)} index items to Db')
         return # TODO return result?
 
-    def filter_batch(self, batch: InputItemBatch) -> InputItemBatch:
+
+    def filter_cryptofeed_batch(self, batch: InputItemBatch) -> InputItemBatch:
         # use path as a unique id per block
         items = batch[1]
         meta = batch[0]
-        paths = [item['path'] for item in items]
+        paths = [item[DataCatalog.path.name] for item in items]
         query_in = DataCatalog.path.in_(paths)
         session = Session()
         select_in_db = session.query(DataCatalog.path).filter(query_in)
         res = [r[0] for r in select_in_db.all()]
-        non_exist = list(filter(lambda item: item['path'] not in res, items))
+        non_exist = list(filter(lambda item: item[DataCatalog.path.name] not in res, items))
+        print(f'Checked db for items: {len(non_exist)} not in DB')
+        return meta, non_exist
+
+
+    def filter_cryptotick_batch(self, batch: InputItemBatch) -> InputItemBatch:
+        items = batch[1]
+        meta = batch[0]
+        paths = [item[DataCatalog.path.name] for item in items]
+        session = Session()
+        query_in = DataCatalog.extras['source_path'].in_(paths)
+        select_in_db = session.query(DataCatalog).filter(query_in)
+        rows = select_in_db.all()
+        if len(rows) == 0:
+            return batch
+        non_exist = []
+        for item in items:
+            # check if for given item num_splits == num returned rows
+            rows_for_item = list(filter(lambda row: row.extras['source_path'] == item[DataCatalog.path.name], rows))
+            if len(rows_for_item) == 0:
+                non_exist.append(item)
+                continue
+            # TODO verify split ids?
+            num_splits = rows_for_item[0].extras['num_splits']
+            if len(rows_for_item) != num_splits:
+                non_exist.append(item)
+
         print(f'Checked db for items: {len(non_exist)} not in DB')
         return meta, non_exist
 

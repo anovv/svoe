@@ -13,16 +13,23 @@ class DbActor:
         self.client = MysqlClient(db_config)
 
     # TODO asyncify this
-    def _filter_batch(self, input_batch: InputItemBatch) -> InputItemBatch:
+    def filter_batch(self, input_batch: InputItemBatch) -> InputItemBatch:
+        items = input_batch[1]
+        if len(items) == 0:
+            return input_batch
+        source = items[0]['source']
         self.client.create_tables()
-        to_download_batch = self.client.filter_batch(input_batch)
-        return to_download_batch
+        if source == 'cryptofeed':
+            return self.client.filter_cryptofeed_batch(input_batch)
+        elif source == 'cryptotick':
+            return self.client.filter_cryptotick_batch(input_batch)
+        else:
+            raise ValueError(f'Unsupported source:{ source}')
 
     # TODO asyncify this
-    # TODO debug sqlalchemy.exc.IntegrityError: (pymysql.err.IntegrityError) (1062, "Duplicate entry 'l2_book-BINANCE-spot-{}-BTC-USDT-BTC-USDT-1641113668.511-1641113' for key 'data_catalog.PRIMARY'")
-    def _write_batch(self, batch: List[DataCatalog]) -> Dict:
+    def write_batch(self, batch: List[DataCatalog]) -> Dict:
         self.client.create_tables()
-        self.client.write_index_item_batch(batch)
+        self.client.write_catalog_item_batch(batch)
         # TODO return status to pass to stats actor
         return {}
 

@@ -36,16 +36,16 @@ class TestCatalogCryptofeedPipeline(unittest.TestCase):
         batch = next(generator)
         client = MysqlClient()
         client.create_tables()
-        _, not_exist = client.filter_batch(batch)
+        _, not_exist = client.filter_cryptofeed_batch(batch)
         print(not_exist)
         print(f'Found {batch_size - len(not_exist)} items in db, {len(not_exist)} to write')
         dfs = load_dfs([i['path'] for i in not_exist])
         catalog_items = []
         for df, i in zip(dfs, not_exist):
-            catalog_items.append(make_catalog_item(df, i, 'cryptofeed'))
-        write_res = client.write_index_item_batch(catalog_items)
+            catalog_items.append(make_catalog_item(df, i))
+        write_res = client.write_catalog_item_batch(catalog_items)
         print(f'Written {len(catalog_items)} to db, checking again...')
-        _, not_exist = client.filter_batch(batch)
+        _, not_exist = client.filter_cryptofeed_batch(batch)
         print(f'Found {batch_size - len(not_exist)} existing records in db')
         assert len(not_exist) == 0
 
@@ -76,7 +76,7 @@ class TestCatalogCryptofeedPipeline(unittest.TestCase):
 
             # check if index was written to db
             client = MysqlClient()
-            not_exist = client.filter_batch(list(itertools.chain(*inputs)))
+            not_exist = client.filter_cryptofeed_batch(list(itertools.chain(*inputs)))
             # TODO should be 0
             print(len(not_exist))
 

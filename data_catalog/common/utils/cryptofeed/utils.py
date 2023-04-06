@@ -73,6 +73,7 @@ def _parse_s3_key(key: str) -> Optional[Dict]:
         DataCatalog.exchange.name: exchange,
         DataCatalog.symbol.name: symbol,
         DataCatalog.instrument_type.name: instrument_type,
+        DataCatalog.source.name: 'cryptofeed',
         DataCatalog.quote.name: quote,
         DataCatalog.base.name: base,
         DataCatalog.path.name: f's3://{S3_BUCKET}/{key}'
