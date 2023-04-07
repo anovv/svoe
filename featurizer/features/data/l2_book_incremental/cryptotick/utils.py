@@ -59,7 +59,7 @@ def preprocess_l2_inc_df(df: pd.DataFrame, date_str: str) -> pd.DataFrame:
 # splits big L2 inc df into chunks, adding full snapshot to the beginning of each chunk
 def split_l2_inc_df_and_pad_with_snapshot(processed_df: pd.DataFrame, split_size_kb: int) -> List[pd.DataFrame]:
     if split_size_kb < 0:
-        return processed_df
+        return [processed_df]
 
     gen = gen_split_df_by_mem(processed_df, split_size_kb)
     res = []
