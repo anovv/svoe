@@ -35,10 +35,7 @@ class CryptotickL2BookIncrementalData(DataSourceDefinition):
             df_dict = df.to_dict(orient='index', into=OrderedDict)  # TODO use df.values.tolist() instead and check perf?
             orders = []
             for v in df_dict.values():
-                side = v['side']
-                price = v['price']
-                size = v['size']
-                orders.append((side, price, size))
+                orders.append((v['side'], v['price'], v['size']))
             events.append(cls.construct_event(timestamp, receipt_timestamp, update_type, orders))
 
         return events

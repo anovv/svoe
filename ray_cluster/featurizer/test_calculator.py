@@ -223,14 +223,15 @@ class TestFeatureCalculator(unittest.TestCase):
         df = preprocess_l2_inc_df(df, date_str)
         print('Finished loading, started preprocessing')
 
-        split_gen = gen_split_df_by_mem(df, 100 * 1024)
+        split_size_kb = 100 * 1024
+        split_gen = gen_split_df_by_mem(df, split_size_kb)
         splits = []
         i = 0
         for split in split_gen:
             print(f'Split {i}')
             splits.append(split)
             if i > 0:
-                assert splits[i - 1].iloc[-1]['time_exchange'] != splits[i].iloc[0]['time_exchange']
+                assert splits[i - 1].iloc[-1]['timestamp'] != splits[i].iloc[0]['timestamp']
             i += 1
 
         print(len(splits))
@@ -305,7 +306,7 @@ if __name__ == '__main__':
     # t.test_merge_asof()
     # t.test_feature_label_set()
     # t.test_cryptofeed_df_split()
-    # t.test_cryptotick_df_split()
+    t.test_cryptotick_df_split()
     # t.test_cryptotick_l2_snap_feature()
 
 

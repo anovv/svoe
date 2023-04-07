@@ -9,7 +9,8 @@ from data_catalog.common.actors.db import DbActor
 from data_catalog.common.data_models.models import InputItem, InputItemBatch
 from data_catalog.common.utils.register import report_stats_decor, EventType
 from data_catalog.common.utils.sql.models import make_catalog_item, DataCatalog, SVOE_S3_CATALOGED_DATA_BUCKET
-from featurizer.features.data.l2_book_incremental.cryptotick.utils import split_l2_inc_df_and_pad_with_snapshot
+from featurizer.features.data.l2_book_incremental.cryptotick.utils import split_l2_inc_df_and_pad_with_snapshot, \
+    preprocess_l2_inc_df
 from utils.pandas import df_utils
 
 
@@ -86,6 +87,8 @@ def store_df(df: pd.DataFrame, catalog_item: DataCatalog, stats: 'Stats', task_i
 
 @ray.remote
 @report_stats_decor([EventType.STARTED, EventType.FINISHED])
-def split_l2_inc_df(path: str, df: pd.DataFrame, chunk_size_kb: int, date_str: str, stats: 'Stats', task_id: str) -> List[pd.DataFrame]:
-    return split_l2_inc_df_and_pad_with_snapshot(path, df, chunk_size_kb, date_str)
+def split_l2_inc_df(raw_df: pd.DataFrame, chunk_size_kb: int, date_str: str, stats: 'Stats', task_id: str) -> List[pd.DataFrame]:
+    # TODO make it a separate task?
+    processed_df = preprocess_l2_inc_df(raw_df, date_str)
+    return split_l2_inc_df_and_pad_with_snapshot(processed_df, chunk_size_kb)
 

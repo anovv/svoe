@@ -2,13 +2,15 @@ import time
 from typing import Optional, List, Tuple, Any
 
 import diskcache
+import joblib
 from streamz import Stream
 
 from featurizer.features.data.l2_book_incremental.cryptotick.cryptotick_l2_book_incremental import \
     CryptotickL2BookIncrementalData
 from featurizer.features.definitions.l2_snapshot.l2_snapshot_fd import L2SnapshotFD
 from ray_cluster.testing_utils import mock_feature
-from utils.pandas.df_utils import is_ts_sorted, concat, gen_split_df_by_mem
+from utils.pandas.df_utils import is_ts_sorted, concat, gen_split_df_by_mem, get_size_kb, get_cached_df, load_df, \
+    cache_df_if_needed
 
 import ciso8601
 import pandas as pd
@@ -17,14 +19,18 @@ import pandas as pd
 # see https://www.cryptotick.com/Faq
 # this is a heavy compute operation, 5Gb df takes 4-5 mins
 def preprocess_l2_inc_df(df: pd.DataFrame, date_str: str) -> pd.DataFrame:
-    # date_str = '20230201'
-    datetime_str = f'{date_str[0:4]}-{date_str[4:6]}-{date_str[6:8]}T'  # yyyy-mm-dd + 'T'
+    # raw_date_str = '20230201' # TODO this is old, delete
+    # datetime_str = f'{raw_date_str[0:4]}-{raw_date_str[4:6]}-{raw_date_str[6:8]}T'  # yyyy-mm-dd + 'T'
+
+    # date_str = dd-mm-yyyy '01-02-2023'
+    datetime_str = f'{date_str[6:10]}-{date_str[3:5]}-{date_str[0:2]}T'  # yyyy-mm-dd + 'T'
 
     def _to_ts(s):
         return ciso8601.parse_datetime(f'{datetime_str}{s}Z').timestamp()
 
     df['timestamp'] = df['time_exchange'].map(lambda x: _to_ts(x))
     df['receipt_timestamp'] = df['time_coinapi'].map(lambda x: _to_ts(x))
+
     # for some reason raw cryptotick dates are not sorted
     # don't use inplace=True as it harms perf https://sourcery.ai/blog/pandas-inplace/
     df = df.sort_values(by=['timestamp'], ignore_index=True)
@@ -34,10 +40,11 @@ def preprocess_l2_inc_df(df: pd.DataFrame, date_str: str) -> pd.DataFrame:
     df = df.drop(columns=['time_exchange', 'time_coinapi'])
 
     # cryptotick l2_inc should not contain any order_id info
-    if pd.notna(df['order_id']).sum() != 0:
+    if 'order_id' in df and pd.notna(df['order_id']).sum() != 0:
         raise ValueError('Cryptotick l2_inc df should not contain order_id values')
 
-    df = df.drop(columns=['order_id'])
+    if 'order_id' in df:
+        df = df.drop(columns=['order_id'])
 
     # rename is_buy -> side, entry_px -> price, entry_sx -> size
     df['side'] = df['is_buy'].map(lambda x: 'bid' if x == 1 else 'ask')
@@ -50,68 +57,39 @@ def preprocess_l2_inc_df(df: pd.DataFrame, date_str: str) -> pd.DataFrame:
 
 
 # splits big L2 inc df into chunks, adding full snapshot to the beginning of each chunk
-def split_l2_inc_df_and_pad_with_snapshot(path: str, raw_df: pd.DataFrame, split_size_kb: int, date_str: str) -> List[pd.DataFrame]:
-    # TODO move this to load_df?
-    print('split started')
-    print('preproc started')
-    # processed_cache_key = joblib.hash(path + '_processed')
-    # df = get_cached_df(processed_cache_key)
-    # if df is None:
-    #     print('preproc NOT in cache, calculating')
-    #     raw_date_str = to_raw(date_str)
-    #     df = preprocess_l2_inc_df(raw_df, raw_date_str)
-    #     cache_df_if_needed(df, processed_cache_key)
-    # else:
-    #     print('found cached preproc')
+def split_l2_inc_df_and_pad_with_snapshot(processed_df: pd.DataFrame, split_size_kb: int) -> List[pd.DataFrame]:
+    if split_size_kb < 0:
+        return processed_df
 
-    # DD-MM-YYYY -> YYYYMMDD
-    def to_raw_date(d):
-        return f'{d[6: 10]}{d[3:5]}{d[0:2]}'
-    raw_date_str = to_raw_date(date_str)
-    df = preprocess_l2_inc_df(raw_df, raw_date_str)
-    # approx_num_split = int(get_size_kb(df)/split_size_kb)
-    print('preproc finished')
-    gen = gen_split_df_by_mem(df, split_size_kb)
+    gen = gen_split_df_by_mem(processed_df, split_size_kb)
     res = []
     prev_snap = None
     i = 0
+    t = time.time()
     for split in gen:
         # TODO this is for debug
-        if i > 2:
-            break
-
+        # if i > 2:
+        #     break
+        t_s = time.time()
         if i > 0:
             split = prepend_snap(split, prev_snap)
-        # events_cache_key = joblib.hash(f'{path}_{i}_events')
         snap = run_l2_snapshot_stream(split)
         res.append(split)
         prev_snap = snap
-        print(f'split {i} finished')
+        print(f'split {i} finished: {time.time() - t_s}')
         i += 1
 
-    print('split finished')
+    print(f'split finished: {time.time() - t}')
 
     return res
 
 
 # TODO typing
-def run_l2_snapshot_stream(l2_inc_df: pd.DataFrame, events_cache_key: Optional[str] = None) -> Any:
-    print('Parse events started')
-    t = time.time()
-    # if events_cache_key is not None:
-    #     cache = diskcache.Cache('/tmp/svoe/objs_cache/')
-    #     events = cache.get(events_cache_key)
-    #     if events is None:
-    #         print('No parsed events cached, calculating...')
-    #         events = CryptotickL2BookIncrementalData.parse_events(l2_inc_df)
-    #         cache[events_cache_key] = events
-    #     else:
-    #         print('Parsed events cached')
-    # else:
-    #     events = CryptotickL2BookIncrementalData.parse_events(l2_inc_df)
-
+def run_l2_snapshot_stream(l2_inc_df: pd.DataFrame) -> Any:
+    # print('Parse events started')
+    # t = time.time()
     events = CryptotickL2BookIncrementalData.parse_events(l2_inc_df)
-    print(f'Parse events finished: {time.time() - t}s')
+    # print(f'Parse events finished: {time.time() - t}s')
     source = Stream()
 
     # cryptotick stores 5000 depth levels
@@ -119,17 +97,16 @@ def run_l2_snapshot_stream(l2_inc_df: pd.DataFrame, events_cache_key: Optional[s
     feature_params = {'dep_schema': 'cryptotick', 'depth': depth, 'sampling': 'skip_all'}
     _, stream_state = L2SnapshotFD.stream({mock_feature(0): source}, feature_params)
 
-    print('Running events started')
-    t = time.time()
+    # print('Running events started')
+    # t = time.time()
     for event in events:
         source.emit(event)
-    print(f'Running events finished: {time.time() - t}s')
+    # print(f'Running events finished: {time.time() - t}s')
 
     return L2SnapshotFD._state_snapshot(stream_state, depth)
 
 
 def prepend_snap(df: pd.DataFrame, snap) -> pd.DataFrame:
-    # TODO inc this
     ts = snap['timestamp']
     receipt_ts = snap['receipt_timestamp']
 
@@ -151,6 +128,25 @@ def prepend_snap(df: pd.DataFrame, snap) -> pd.DataFrame:
     df_snap['receipt_timestamp'] = receipt_ts
 
     return concat([df_snap, df])
+
+
+def mock_processed_cryptotick_df(
+    path: str = 's3://svoe-cryptotick-data/limitbook_full/20230201/BINANCE_SPOT_BTC_USDT.csv.gz',
+    split_size_kb: int = 100 * 1024
+) -> pd.DataFrame:
+    print('Loading mock cryptotick df...')
+    key = joblib.hash(path) if split_size_kb < 0 else joblib.hash(f'{path}_proc_{split_size_kb}')
+    df = get_cached_df(key)
+    if df is not None:
+        print('Mock cryptotick df cached')
+        return df
+    df = load_df(path, extension='csv')
+    df = preprocess_l2_inc_df(df, '01-02-2023')
+    split_gen = gen_split_df_by_mem(df, split_size_kb)
+    split = next(split_gen)
+    cache_df_if_needed(split, key)
+    print('Done loading mock cryptotick df')
+    return df
 
 
 def get_snapshot_ts(df: pd.DataFrame) -> Optional[List]:

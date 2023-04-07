@@ -43,7 +43,7 @@ class CatalogCryptotickDag(Dag):
 
             split_task_id = f'{workflow_id}_{ray_task_name(split_l2_inc_df)}_{i}'
             splits = workflow.continuation(split_l2_inc_df.options(**workflow.options(task_id=split_task_id), num_cpus=0.9).bind(
-                item[DataCatalog.path.name], download_task, SPLIT_CHUNK_SIZE_KB, item['date'], stats=stats, task_id=split_task_id
+                download_task, SPLIT_CHUNK_SIZE_KB, item['date'], stats=stats, task_id=split_task_id
             ))
 
             for j in range(len(splits)):
