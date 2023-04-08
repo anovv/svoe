@@ -39,20 +39,17 @@ def cryptotick_update_state(state: _State, event: Event, depth: Optional[int] = 
         for side, price, size in event['orders']:
             state.order_book[side][price] = size
     elif update_type == 'SUB':
+        # TODO proper log data inconsistency
+        no_keys_for_sub_event = 0
         for side, price, size in event['orders']:
             if price not in state.order_book[side]:
-                # TODO log data inconsistency?
-                prices = list(state.order_book[side].keys())
-                prices.sort()
-                pos = 0
-                for j in range(len(prices)):
-                    if prices[j] < price:
-                        pos += 1
-
-                print(f'boink {i}, {pos}')
-                i += 1
+                no_keys_for_sub_event += 1
             else:
                 state.order_book[side][price] -= size
+
+        # TODO proper log data inconsistency
+        if no_keys_for_sub_event > 0:
+            print(f'SUB update_type has {no_keys_for_sub_event} missing keys')
     else:
         raise ValueError(f'Unknown update_type: {update_type}')
 
@@ -76,6 +73,7 @@ def cryptofeed_update_state(state: _State, event: Event, depth: Optional[int] = 
             if price in state.order_book[side]:
                 del state.order_book[side][price]
             else:
+                # TODO proper log data inconsistency
                 inconsistency_type = 'no_price_with_zero_size'
                 state.data_inconsistencies[inconsistency_type] = state.data_inconsistencies.get(inconsistency_type, 0) + 1
         else:

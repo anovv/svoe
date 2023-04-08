@@ -1,7 +1,6 @@
 import time
 from typing import Optional, List, Tuple, Any
 
-import diskcache
 import joblib
 from streamz import Stream
 
@@ -55,7 +54,9 @@ def preprocess_l2_inc_df(df: pd.DataFrame, date_str: str) -> pd.DataFrame:
 
     return df
 
-
+# TODO split_size_kb == 2*1024 results in update_type == SUB not finding price level in a book?
+#  same for 512
+#  smaller splits seem to also work (1*1024 works)
 # splits big L2 inc df into chunks, adding full snapshot to the beginning of each chunk
 def split_l2_inc_df_and_pad_with_snapshot(processed_df: pd.DataFrame, split_size_kb: int) -> List[pd.DataFrame]:
     if split_size_kb < 0:
@@ -67,9 +68,6 @@ def split_l2_inc_df_and_pad_with_snapshot(processed_df: pd.DataFrame, split_size
     i = 0
     t = time.time()
     for split in gen:
-        # TODO this is for debug
-        # if i > 2:
-        #     break
         t_s = time.time()
         if i > 0:
             split = prepend_snap(split, prev_snap)
@@ -86,22 +84,15 @@ def split_l2_inc_df_and_pad_with_snapshot(processed_df: pd.DataFrame, split_size
 
 # TODO typing
 def run_l2_snapshot_stream(l2_inc_df: pd.DataFrame) -> Any:
-    # print('Parse events started')
-    # t = time.time()
     events = CryptotickL2BookIncrementalData.parse_events(l2_inc_df)
-    # print(f'Parse events finished: {time.time() - t}s')
     source = Stream()
 
     # cryptotick stores 5000 depth levels
     depth = 5000
     feature_params = {'dep_schema': 'cryptotick', 'depth': depth, 'sampling': 'skip_all'}
     _, stream_state = L2SnapshotFD.stream({mock_feature(0): source}, feature_params)
-
-    # print('Running events started')
-    # t = time.time()
     for event in events:
         source.emit(event)
-    # print(f'Running events finished: {time.time() - t}s')
 
     return L2SnapshotFD._state_snapshot(stream_state, depth)
 
@@ -127,26 +118,36 @@ def prepend_snap(df: pd.DataFrame, snap) -> pd.DataFrame:
     df_snap['timestamp'] = ts
     df_snap['receipt_timestamp'] = receipt_ts
 
+    print(f'Split size: {get_size_kb(df)}')
+    print(f'Snap size: {get_size_kb(df_snap)}')
+
     return concat([df_snap, df])
 
 
+# Also cached:
+# path='s3://svoe-cryptotick-data/limitbook_full/20230202/BINANCE_SPOT_BTC_USDT.csv.gz',
+# date_str='02-02-2023'
 def mock_processed_cryptotick_df(
     path: str = 's3://svoe-cryptotick-data/limitbook_full/20230201/BINANCE_SPOT_BTC_USDT.csv.gz',
+    date_str: str = '01-02-2023',
     split_size_kb: int = 100 * 1024
 ) -> pd.DataFrame:
     print('Loading mock cryptotick df...')
-    key = joblib.hash(path) if split_size_kb < 0 else joblib.hash(f'{path}_proc_{split_size_kb}')
-    df = get_cached_df(key)
-    if df is not None:
+    key_proc = joblib.hash(f'{path}_proc_{split_size_kb}')
+    proc_df = get_cached_df(key_proc)
+    if proc_df is not None:
         print('Mock cryptotick df cached')
-        return df
-    df = load_df(path, extension='csv')
-    df = preprocess_l2_inc_df(df, '01-02-2023')
-    split_gen = gen_split_df_by_mem(df, split_size_kb)
-    split = next(split_gen)
-    cache_df_if_needed(split, key)
+        return proc_df
+    raw_df = load_df(path, extension='csv')
+    proc_df = preprocess_l2_inc_df(raw_df, date_str)
+    if split_size_kb < 0:
+        split = proc_df
+    else:
+        split_gen = gen_split_df_by_mem(proc_df, split_size_kb)
+        split = next(split_gen)
+    cache_df_if_needed(split, key_proc)
     print('Done loading mock cryptotick df')
-    return df
+    return split
 
 
 def get_snapshot_ts(df: pd.DataFrame) -> Optional[List]:

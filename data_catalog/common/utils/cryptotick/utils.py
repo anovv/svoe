@@ -7,11 +7,9 @@ from utils.s3.s3_utils import list_files_and_sizes_kb
 CRYPTOTICK_RAW_BUCKET_NAME = 'svoe-cryptotick-data'
 
 
-def cryptotick_input_items(batch_size: int) -> List[InputItemBatch]:
-    # raw_files = list_files_and_sizes_kb(CRYPTOTICK_RAW_BUCKET_NAME)
-    raw_files = [('limitbook_full/20230201/BINANCE_SPOT_BTC_USDT.csv.gz', 252 * 1024)]
+def cryptotick_input_items(file_and_sizes: List[Tuple[str, int]], batch_size: int) -> List[InputItemBatch]:
     grouped_by_data_type = {}
-    for raw_path, size_kb in raw_files:
+    for raw_path, size_kb in file_and_sizes:
         item = _parse_s3_key(raw_path, size_kb)
         data_type = item[DataCatalog.data_type.name]
         if data_type in grouped_by_data_type:

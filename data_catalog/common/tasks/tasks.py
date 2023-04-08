@@ -1,6 +1,5 @@
 from typing import Optional, Dict, List
 
-import joblib
 import ray
 
 import pandas as pd
@@ -12,10 +11,6 @@ from data_catalog.common.utils.sql.models import make_catalog_item, DataCatalog,
 from featurizer.features.data.l2_book_incremental.cryptotick.utils import split_l2_inc_df_and_pad_with_snapshot, \
     preprocess_l2_inc_df
 from utils.pandas import df_utils
-
-
-# TODO set resources
-from utils.pandas.df_utils import get_cached_df, cache_df_if_needed
 
 
 @ray.remote
@@ -35,23 +30,21 @@ def chain_no_ret(*args):
 @report_stats_decor([EventType.SCHEDULED, EventType.STARTED, EventType.FINISHED])
 def load_df(input_item: InputItem, stats: 'Stats', task_id: str, stats_extra: Optional[Dict] = None) -> pd.DataFrame:
     print('load started')
-    path = input_item['path']
-    # TODO this is for debug
-    head = 100000
-    head_key = joblib.hash(f'{path}_head_{head}')
-    df = get_cached_df(head_key)
-    if df is None:
-        df = df_utils.load_df(path)
-        df = df.head(head) 
-        cache_df_if_needed(df, head_key)
-    print(input_item['size_kb'])
-    print('load finished')
+    path = input_item[DataCatalog.path.name]
+    source = input_item[DataCatalog.source.name]
+    if source == 'cryptotick':
+        extension = 'csv'
+    elif source == 'cryptofeed':
+        extension = 'parquet'
+    else:
+        raise ValueError(f'Unknown source {source}')
+    df = df_utils.load_df(path, extension=extension)
     return df
 
 
 # TODO set CPU=0, set memory and object_store_memory
 @ray.remote
-@report_stats_decor([EventType.SCHEDULED, EventType.STARTED, EventType.FINISHED])
+@report_stats_decor([EventType.STARTED, EventType.FINISHED])
 def catalog_df(df: pd.DataFrame, input_item: InputItem, stats: 'Stats', task_id: str) -> DataCatalog:
     print('catalog_df started')
     item = make_catalog_item(df, input_item)
@@ -81,8 +74,9 @@ def filter_existing(db_actor: DbActor, input_batch: InputItemBatch, stats: 'Stat
 def store_df(df: pd.DataFrame, catalog_item: DataCatalog, stats: 'Stats', task_id: str, stats_extra: Optional[Dict] = None):
     print('Store started')
     path = catalog_item.path
-    df_utils.store_df(path, df)
-    print('Store finished')
+    # TODO uncomment
+    # df_utils.store_df(path, df)
+    print(f'Store finished {path}')
 
 
 @ray.remote

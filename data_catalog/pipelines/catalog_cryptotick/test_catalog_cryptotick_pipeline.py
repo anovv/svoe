@@ -22,7 +22,9 @@ class TestCatalogCryptotickPipeline(unittest.TestCase):
         runner = PipelineRunner()
         runner.run(CatalogCryptotickDag())
         print('Inited runner')
-        batches = cryptotick_input_items(batch_size)
+        # raw_files = list_files_and_sizes_kb(CRYPTOTICK_RAW_BUCKET_NAME)
+        raw_files_and_sizes = [('limitbook_full/20230201/BINANCE_SPOT_BTC_USDT.csv.gz', 252 * 1024)]
+        batches = cryptotick_input_items(raw_files_and_sizes, batch_size)
         print('Queueing batch...')
         inputs = []
         time.sleep(5)
@@ -47,18 +49,13 @@ class TestCatalogCryptotickPipeline(unittest.TestCase):
 
     def test_split_l2_inc_df_and_pad_with_snapshot(self):
         # TODO merge this with stuff in test_calculator
-        # TODO mock cryptotick df
-        # date_str = '01-02-2023'
-        # print('Loading big df...')
-        # big_df_path = 's3://svoe-junk/27606-BITSTAMP_SPOT_BTC_EUR.csv.gz'
-        # big_df = load_df(big_df_path, extension='csv')
-        # big_df_path = 's3://svoe-cryptotick-data/limitbook_full/20230201/BINANCE_SPOT_BTC_USDT.csv.gz'
-        # big_df = load_df(big_df_path, extension='csv')
-        # print('Big df loaded')
-        # big_df = big_df.head(300000)
         processed_df = mock_processed_cryptotick_df()
-        split_size = -1
-        splits_with_snapshot = split_l2_inc_df_and_pad_with_snapshot(processed_df, split_size)
+
+        # TODO split_size_kb == 2*1024 results in update_type == SUB not finding price level in a book?
+        #  same for 512
+        #  smaller splits seem to also work (1*1024 works)
+        split_size_kb = 2 * 1024
+        splits_with_snapshot = split_l2_inc_df_and_pad_with_snapshot(processed_df, split_size_kb)
         splits_to_concat = []
         for i in range(len(splits_with_snapshot)):
             split = splits_with_snapshot[i]
@@ -84,6 +81,6 @@ class TestCatalogCryptotickPipeline(unittest.TestCase):
 
 if __name__ == '__main__':
     t = TestCatalogCryptotickPipeline()
-    # t.test_pipeline()
-    t.test_split_l2_inc_df_and_pad_with_snapshot()
+    t.test_pipeline()
+    # t.test_split_l2_inc_df_and_pad_with_snapshot()
     # t.test_db_client()
