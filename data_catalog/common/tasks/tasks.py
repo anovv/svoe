@@ -75,7 +75,7 @@ def store_df(df: pd.DataFrame, catalog_item: DataCatalog, stats: 'Stats', task_i
     print('Store started')
     path = catalog_item.path
     # TODO uncomment
-    # df_utils.store_df(path, df)
+    df_utils.store_df(path, df)
     print(f'Store finished {path}')
 
 

@@ -3,6 +3,7 @@ import time
 import unittest
 
 import joblib
+import ray
 
 from data_catalog.common.utils.cryptotick.utils import cryptotick_input_items
 from data_catalog.common.utils.sql.client import MysqlClient
@@ -17,34 +18,35 @@ from utils.pandas.df_utils import get_cached_df, concat, load_df
 class TestCatalogCryptotickPipeline(unittest.TestCase):
 
     def test_pipeline(self):
-        batch_size = 1
-        num_batches = 1
-        runner = PipelineRunner()
-        runner.run(CatalogCryptotickDag())
-        print('Inited runner')
-        # raw_files = list_files_and_sizes_kb(CRYPTOTICK_RAW_BUCKET_NAME)
-        raw_files_and_sizes = [('limitbook_full/20230201/BINANCE_SPOT_BTC_USDT.csv.gz', 252 * 1024)]
-        batches = cryptotick_input_items(raw_files_and_sizes, batch_size)
-        print('Queueing batch...')
-        inputs = []
-        time.sleep(5)
-        for i in range(num_batches):
-            input_batch = batches[i]
-            inputs.append(input_batch)
-            runner.pipe_input(input_batch)
-            print(f'Queued {i + 1} batches')
-        print('Done queueing')
-        # wait for everything to process
+        with ray.init(address='localhost:10001'):
+            batch_size = 1
+            num_batches = 1
+            runner = PipelineRunner()
+            runner.run(CatalogCryptotickDag())
+            print('Inited runner')
+            # raw_files = list_files_and_sizes_kb(CRYPTOTICK_RAW_BUCKET_NAME)
+            raw_files_and_sizes = [('limitbook_full/20230201/BINANCE_SPOT_BTC_USDT.csv.gz', 252 * 1024)]
+            batches = cryptotick_input_items(raw_files_and_sizes, batch_size)
+            print('Queueing batch...')
+            inputs = []
+            time.sleep(5)
+            for i in range(num_batches):
+                input_batch = batches[i]
+                inputs.append(input_batch)
+                runner.pipe_input(input_batch)
+                print(f'Queued {i + 1} batches')
+            print('Done queueing')
+            # wait for everything to process
 
-        # TODO this quits early if job is long
-        # TODO make wait_for_completion func
-        time.sleep(720 * 10)
+            # TODO this quits early if job is long
+            # TODO make wait_for_completion func
+            time.sleep(720 * 10)
 
-        # check if index was written to db
-        client = MysqlClient()
-        not_exist = client.filter_cryptotick_batch(list(itertools.chain(*inputs)))
-        # TODO should be 0
-        print(len(not_exist))
+            # check if index was written to db
+            client = MysqlClient()
+            not_exist = client.filter_cryptotick_batch(list(itertools.chain(*inputs)))
+            # TODO should be 0
+            print(len(not_exist))
 
 
     def test_split_l2_inc_df_and_pad_with_snapshot(self):
