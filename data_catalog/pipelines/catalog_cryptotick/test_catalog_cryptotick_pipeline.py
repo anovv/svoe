@@ -1,10 +1,15 @@
 import itertools
+import os
 import time
 import unittest
 
 import joblib
 import ray
 
+import data_catalog
+import featurizer
+import ray_cluster
+import utils
 from data_catalog.common.utils.cryptotick.utils import cryptotick_input_items
 from data_catalog.common.utils.sql.client import MysqlClient
 from data_catalog.common.utils.sql.models import make_catalog_item
@@ -18,7 +23,16 @@ from utils.pandas.df_utils import get_cached_df, concat, load_df
 class TestCatalogCryptotickPipeline(unittest.TestCase):
 
     def test_pipeline(self):
-        with ray.init(address='localhost:10001'):
+        # with ray.init(address='auto'):
+        with ray.init(
+                address='ray://127.0.0.1:10001',
+                runtime_env={
+                    'py_modules': [featurizer, ray_cluster, data_catalog, utils],
+                    'env_vars': {
+                        'AWS_ACCESS_KEY_ID': os.environ['AWS_KEY'],
+                        'AWS_SECRET_ACCESS_KEY': os.environ['AWS_SECRET'],
+                        'AWS_DEFAULT_REGION': 'ap-northeast-1'
+                    }}):
             batch_size = 1
             num_batches = 1
             runner = PipelineRunner()

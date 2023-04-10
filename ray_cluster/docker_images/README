@@ -1,9 +1,16 @@
 
 To build
-sudo docker build . -f Dockerfile -t ray-with-svoe-deps:latest
+sudo docker build . -f Dockerfile -t ray-with-svoe-deps:TAG (example TAG=0.0.4)
+
+To push to ECR
+docker image ls
+Find IMAGE_ID of latest image
+docker tag IMAGE_ID 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/ray-with-svoe-deps:TAG
+aws ecr get-login-password | docker login --username AWS --password-stdin 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/ray-with-svoe-deps
+docker push 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/ray-with-svoe-deps:TAG
 
 To add to minikube
-minikube image load ray-with-svoe-deps:latest -p <cluster-profile>
+minikube image load ray-with-svoe-deps:TAG -p <cluster-profile>
 
 To install 3.7.7 python using pyenv
  pyenv install 3.7.7 --patch < <(curl -sSL https://github.com/python/cpython/commit/8ea6353.patch)

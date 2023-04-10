@@ -3,3 +3,6 @@ CRDs copied from https://github.com/ray-project/kuberay/tree/master/ray-operator
 
 to install CRDs run # this should be a helmfile presync hook
 kubectl apply --server-side -k crd
+
+# TODO check https://github.com/ray-project/kuberay/blob/master/helm-chart/ray-cluster/README.md
+# looks like hosted helm charts work
