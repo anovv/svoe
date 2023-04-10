@@ -137,5 +137,5 @@ repositories:
     url: https://charts.bitnami.com/bitnami
   - name: bitpoke
     url: https://helm-charts.bitpoke.io
-  - name kuberay
+  - name: kuberay
     url: https://ray-project.github.io/kuberay-helm/
