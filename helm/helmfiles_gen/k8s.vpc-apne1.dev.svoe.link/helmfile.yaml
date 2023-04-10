@@ -105,21 +105,21 @@ releases:
     namespace: overprovisioner
     values:
       - ../../values/deliveryhero/cluster-overprovisioner/values.yaml.gotmpl
-  - chart: ../../charts/local/ray/kuberay-operator
+  - chart: kuberay/kuberay-operator
     name: kuberay-operator
     namespace: ray-system
     values:
-      - ../../values/local/ray/kuberay-operator/values.yaml.gotmpl
-  - chart: ../../charts/local/ray/kuberay-apiserver
+      - ../../values/kuberay/kuberay-operator/values.yaml.gotmpl
+  - chart: kuberay/kuberay-apiserver
     name: kuberay-apiserver
     namespace: ray-system
     values:
-      - ../../values/local/ray/kuberay-apiserver/values.yaml.gotmpl
-  - chart: ../../charts/local/ray/ray-cluster
+      - ../../values/kuberay/kuberay-apiserver/values.yaml.gotmpl
+  - chart: kuberay/ray-cluster
     name: ray-cluster
     namespace: ray-system
     values:
-      - ../../values/local/ray/ray-cluster/values.yaml.gotmpl
+      - ../../values/kuberay/ray-cluster/values.yaml.gotmpl
 repositories:
   - name: metrics-server
     url: https://kubernetes-sigs.github.io/metrics-server/
@@ -137,3 +137,5 @@ repositories:
     url: https://charts.bitnami.com/bitnami
   - name: bitpoke
     url: https://helm-charts.bitpoke.io
+  - name kuberay
+    url: https://ray-project.github.io/kuberay-helm/
