@@ -1,6 +1,6 @@
 image:
   repository: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/ray-with-svoe-deps
-  tag: 0.0.3
+  tag: 0.0.2 # TODO 0.0.2 -> ray 2.0.0, 0.0.3 -> ray 2.3.1
   pullPolicy: IfNotPresent
 #  repository: rayproject/ray
 #  tag: 2.3.1-py39-cpu
@@ -25,9 +25,11 @@ head:
       valueFrom:
         fieldRef:
           fieldPath: status.podIP
-  envFrom: []
-    # - secretRef:
-    #     name: my-env-secret
+  envFrom:
+     - secretRef:
+         name: ray-mysql-secret
+     - secretRef:
+         name: ray-aws-creds-secret
   resources:
     limits:
       cpu: 1
@@ -75,9 +77,11 @@ worker:
       valueFrom:
         fieldRef:
           fieldPath: metadata.name
-  envFrom: []
-    # - secretRef:
-    #     name: my-env-secret
+  envFrom:
+     - secretRef:
+         name: ray-mysql-secret
+     - secretRef:
+         name: ray-aws-creds-secret
   ports:
     - containerPort: 80
       protocol: TCP

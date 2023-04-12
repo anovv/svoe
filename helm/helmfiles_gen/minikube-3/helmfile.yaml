@@ -120,6 +120,11 @@ releases:
     namespace: ray-system
     values:
       - ../../values/kuberay/ray-cluster/values.yaml.gotmpl
+  - chart: ../../charts/local/ray-cluster-extra
+    name: ray-cluster-extra
+    namespace: ray-system
+    values:
+      - ../../values/local/ray-cluster-extra/values.yaml.gotmpl
 repositories:
   - name: metrics-server
     url: https://kubernetes-sigs.github.io/metrics-server/
