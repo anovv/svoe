@@ -29,6 +29,21 @@ def cryptotick_input_items(file_and_sizes: List[Tuple[str, int]], batch_size: in
 
 def _parse_s3_key(path: str, size_kb) -> InputItem:
     # example quotes/20230201/BINANCE_SPOT_BTC_USDT.csv.gz
+
+    if 'testing' in path:
+        return {
+            DataCatalog.path.name: path,
+            DataCatalog.data_type.name: 'l2_book',
+            DataCatalog.exchange.name: 'BINANCE',
+            DataCatalog.symbol.name: 'BTC-USDT',
+            DataCatalog.base.name: 'BTC',
+            DataCatalog.quote.name: 'USDT',
+            DataCatalog.source.name: 'cryptotick',
+            DataCatalog.date.name: '01-02-2023',
+            DataCatalog.size_kb.name: size_kb,
+            DataCatalog.instrument_type.name: 'spot'
+        }
+
     s = path.split('/')
     if s[0] == 'limitbook_full':
         data_type = 'l2_book' # TODO l2_inc

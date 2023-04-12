@@ -31,14 +31,15 @@ def chain_no_ret(*args):
 def load_df(input_item: InputItem, stats: 'Stats', task_id: str, stats_extra: Optional[Dict] = None) -> pd.DataFrame:
     print('load started')
     path = input_item[DataCatalog.path.name]
-    source = input_item[DataCatalog.source.name]
-    if source == 'cryptotick':
+    if '.csv' in path:
         extension = 'csv'
-    elif source == 'cryptofeed':
+    elif '.parquet' in path:
         extension = 'parquet'
     else:
-        raise ValueError(f'Unknown source {source}')
+        raise ValueError(f'Unknown file extension: {path}')
+
     df = df_utils.load_df(path, extension=extension)
+    print('load finished')
     return df
 
 

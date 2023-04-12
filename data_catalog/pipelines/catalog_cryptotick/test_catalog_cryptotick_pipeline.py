@@ -20,23 +20,26 @@ from data_catalog.pipelines.catalog_cryptotick.dag import CatalogCryptotickDag
 from data_catalog.pipelines.pipeline_runner import PipelineRunner
 from featurizer.features.data.l2_book_incremental.cryptotick.utils import starts_with_snapshot, remove_snap, \
     get_snapshot_depth, preprocess_l2_inc_df, split_l2_inc_df_and_pad_with_snapshot, mock_processed_cryptotick_df
-from utils.pandas.df_utils import get_cached_df, concat, load_df
+from utils.pandas.df_utils import get_cached_df, concat, load_df, store_df
 
 
 class TestCatalogCryptotickPipeline(unittest.TestCase):
+
+    def _store_test_df_to_s3(self):
+        small_df_path = 's3://svoe-cryptotick-data/testing/small_df.parquet.gz'
+        big_df = load_df('s3://svoe-cryptotick-data/limitbook_full/20230201/BINANCE_SPOT_BTC_USDT.csv.gz', extension='csv')
+        small_df = big_df.head(100000)
+        store_df(path=small_df_path, df=small_df)
+
 
     def test_pipeline(self):
         # with ray.init(address='auto'):
         with ray.init(
                 address='ray://127.0.0.1:10001',
+                storage='s3://ray-workflows-storage/test-cluster/', # TODO make subfolder per cluster
                 runtime_env={
                     'py_modules': [featurizer, ray_cluster, data_catalog, utils],
                     'pip': ['cache-df', 'ciso8601'],
-                    # 'env_vars': {
-                    #     'AWS_ACCESS_KEY_ID': os.environ['AWS_KEY'],
-                    #     'AWS_SECRET_ACCESS_KEY': os.environ['AWS_SECRET'],
-                    #     'AWS_DEFAULT_REGION': 'ap-northeast-1'
-                    # },
                     'excludes': ['*s3_svoe.test.1_inventory*']
                 }):
             batch_size = 1
@@ -45,7 +48,8 @@ class TestCatalogCryptotickPipeline(unittest.TestCase):
             runner.run(CatalogCryptotickDag())
             print('Inited runner')
             # raw_files = list_files_and_sizes_kb(CRYPTOTICK_RAW_BUCKET_NAME)
-            raw_files_and_sizes = [('limitbook_full/20230201/BINANCE_SPOT_BTC_USDT.csv.gz', 252 * 1024)]
+            # raw_files_and_sizes = [('limitbook_full/20230201/BINANCE_SPOT_BTC_USDT.csv.gz', 252 * 1024)]
+            raw_files_and_sizes = [('s3://svoe-cryptotick-data/testing/small_df.parquet.gz', 470)]
             batches = cryptotick_input_items(raw_files_and_sizes, batch_size)
             print('Queueing batch...')
             inputs = []
@@ -103,5 +107,6 @@ class TestCatalogCryptotickPipeline(unittest.TestCase):
 if __name__ == '__main__':
     t = TestCatalogCryptotickPipeline()
     t.test_pipeline()
+    # t._store_test_df_to_s3()
     # t.test_split_l2_inc_df_and_pad_with_snapshot()
     # t.test_db_client()
