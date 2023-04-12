@@ -151,7 +151,7 @@ spec:
   machineType: t3.medium
   {{end}}
   maxSize: 5
-  minSize: 1
+  minSize: 2
   role: Node
   rootVolumeSize: 20
   rootVolumeType: gp2
@@ -182,7 +182,7 @@ spec:
   machineType: t3.small
   maxPrice: "0.0273" # on-demand price
   maxSize: 30
-  minSize: 3
+  minSize: 0
   securityGroupOverride: {{.security_group_override}}
   nodeLabels:
     kops.k8s.io/instancegroup: nodes-data-feed-spot
