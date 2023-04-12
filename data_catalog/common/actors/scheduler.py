@@ -3,7 +3,7 @@ import time
 import uuid
 
 from ray import workflow
-# from ray.util.client import ray
+from ray.util.client import ray
 import ray
 from ray.workflow import WorkflowStatus
 
@@ -11,7 +11,7 @@ from data_catalog.common.actors.db import DbActor
 from data_catalog.common.data_models.models import InputItemBatch
 from data_catalog.common.actors.stats import Stats
 
-# TODO use uvloop
+# TODO use uvloop ?
 from data_catalog.pipelines.dag import Dag
 
 
@@ -83,7 +83,8 @@ class Scheduler:
         return f'{str(uuid.uuid4())}.{time.time():.9f}'
 
     def _list_workflows_for_current_run(self, statuses=None):
-        all = workflow.list_all(statuses)
+        all = []
+        # all = workflow.list_all(statuses)
         # print(all)
         # print(self.run_id)
         # TODO filter only for current run id

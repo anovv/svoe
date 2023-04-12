@@ -10,6 +10,9 @@ import data_catalog
 import featurizer
 import ray_cluster
 import utils
+from data_catalog.common.actors.db import DbActor
+from data_catalog.common.actors.scheduler import Scheduler
+from data_catalog.common.actors.stats import Stats
 from data_catalog.common.utils.cryptotick.utils import cryptotick_input_items
 from data_catalog.common.utils.sql.client import MysqlClient
 from data_catalog.common.utils.sql.models import make_catalog_item
@@ -28,11 +31,14 @@ class TestCatalogCryptotickPipeline(unittest.TestCase):
                 address='ray://127.0.0.1:10001',
                 runtime_env={
                     'py_modules': [featurizer, ray_cluster, data_catalog, utils],
-                    'env_vars': {
-                        'AWS_ACCESS_KEY_ID': os.environ['AWS_KEY'],
-                        'AWS_SECRET_ACCESS_KEY': os.environ['AWS_SECRET'],
-                        'AWS_DEFAULT_REGION': 'ap-northeast-1'
-                    }}):
+                    'pip': ['cache-df', 'ciso8601'],
+                    # 'env_vars': {
+                    #     'AWS_ACCESS_KEY_ID': os.environ['AWS_KEY'],
+                    #     'AWS_SECRET_ACCESS_KEY': os.environ['AWS_SECRET'],
+                    #     'AWS_DEFAULT_REGION': 'ap-northeast-1'
+                    # },
+                    'excludes': ['*s3_svoe.test.1_inventory*']
+                }):
             batch_size = 1
             num_batches = 1
             runner = PipelineRunner()
@@ -61,7 +67,6 @@ class TestCatalogCryptotickPipeline(unittest.TestCase):
             not_exist = client.filter_cryptotick_batch(list(itertools.chain(*inputs)))
             # TODO should be 0
             print(len(not_exist))
-
 
     def test_split_l2_inc_df_and_pad_with_snapshot(self):
         # TODO merge this with stuff in test_calculator

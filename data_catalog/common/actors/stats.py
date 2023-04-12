@@ -5,17 +5,19 @@ from threading import Thread
 from time import time, sleep
 from typing import Dict, List, Optional, Union
 
+from bokeh.server.server import Server
 import tornado
+from tornado.ioloop import IOLoop
 from bokeh.application import Application
 from bokeh.application.handlers import FunctionHandler
-from bokeh.server.server import Server
-from bokeh.models import ColumnDataSource, ResetTool, PanTool, WheelZoomTool
-from bokeh.plotting import figure
 from bokeh.layouts import row, column
-from ray.experimental.state.api import list_workers
+from bokeh.models import ColumnDataSource
+from bokeh.layouts import row, column
+from bokeh.plotting import figure
+import ray.experimental.state.api as ray_state_api
 
 from data_catalog.common.utils.register import TASK_NAMES, EVENT_NAMES, EventType, get_event_name, ray_task_name
-from data_catalog.common.tasks.tasks import load_df, catalog_df, write_batch, filter_existing
+from data_catalog.common.tasks.tasks import load_df
 
 
 import ray
@@ -24,117 +26,22 @@ import ray
 # for streaming to Bokeh https://matthewrocklin.com/blog/work/2017/06/28/simple-bokeh-server
 # for threaded updates https://stackoverflow.com/questions/55176868/asynchronous-streaming-to-embedded-bokeh-server
 
-from tornado.ioloop import IOLoop
 
 COLORS = ['red', 'green', 'blue', 'yellow', 'lightblue', 'chocolate', 'gray', 'lime', 'orange', 'pink', 'lavender']
 
 GraphData = List[Union[List, Optional[int]]] # List with timestamped data point and last read data length
 
-def _make_graph_data(keys) -> GraphData:
-    first = {TIME: [time() * 1000.0]}
-    first.update(dict(zip(keys, [[0] for _ in keys])))
-    return [[first], None]
-
 TIME = 'time'
-LOAD_DF_TASK_NAME = ray_task_name(load_df)
+# LOAD_DF_TASK_NAME = ray_task_name(load_df)
 GRAPH_NAME_TASK_EVENTS = 'GRAPH_NAME_TASK_EVENTS'
-
-def _make_task_events_graph_figure(source):
-    fig = figure(title="Tasks Events (count)", x_axis_type='datetime', tools='')
-    color_index = 0
-    color_per_task = {}
-    for name in EVENT_NAMES:
-        # same color for same task
-        task_name = None
-        for t_name in TASK_NAMES:
-            if t_name in name:
-                task_name = t_name
-                break
-
-        if task_name in color_per_task:
-            color = color_per_task[task_name]
-        else:
-            color = COLORS[color_index%len(COLORS)]
-            color_per_task[task_name] = color
-            color_index += 1
-
-        line_dash = 'solid'
-        if EventType.SCHEDULED.value in name:
-            line_dash = 'dotted'
-        elif EventType.STARTED.value in name:
-            line_dash = 'dashed'
-        legend_label = name
-
-        fig.line(source=source, x=TIME, y=name, color=color, legend_label=legend_label, line_dash=line_dash)
-
-    fig.yaxis.minor_tick_line_color = None
-
-    fig.add_tools(
-        ResetTool(),
-        PanTool(dimensions="width"),
-        WheelZoomTool(dimensions="width")
-    )
-
-    fig.legend.location = 'top_left'
-    fig.legend.label_text_font_size = '6pt'
-
-    return fig
-
 
 # task latencies graph
 GRAPH_NAME_TASK_LATENCIES = 'GRAPH_NAME_TASK_LATENCIES'
-
-
-def _make_task_latencies_graph_figure(source):
-    fig = figure(title="Normalized Tasks Latencies (seconds per kb per task)", x_axis_type='datetime', tools='')
-
-    # TODO for running ranges
-    # x_range = DataRange1d(follow='end', follow_interval=20000, range_padding=0)
-    for i in range(len(TASK_NAMES)):
-        name = TASK_NAMES[i]
-        color = COLORS[i%len(COLORS)]
-
-        legend_label = name
-
-        fig.line(source=source, x=TIME, y=name, color=color, legend_label=legend_label, line_dash='solid')
-
-    fig.yaxis.minor_tick_line_color = None
-
-    fig.add_tools(
-        ResetTool(),
-        PanTool(dimensions="width"),
-        WheelZoomTool(dimensions="width")
-    )
-
-    fig.legend.location = 'top_left'
-    fig.legend.label_text_font_size = '6pt'
-
-    return fig
-
 
 GRAPH_NAME_DOWNLOAD_THROUGHPUT_MB = 'GRAPH_NAME_DOWNLOAD_THROUGHPUT_MB'
 DOWNLOAD_THROUGHPUT_MB = 'DOWNLOAD_THROUGHPUT_MB'
 GRAPH_NAME_DOWNLOAD_THROUGHPUT_NUM_FILES = 'GRAPH_NAME_DOWNLOAD_THROUGHPUT_NUM_FILES'
 DOWNLOAD_THROUGHPUT_NUM_FILES = 'DOWNLOAD_THROUGHPUT_NUM_FILES'
-
-
-def _make_single_line_graph_figure(source, title, y_name):
-    fig = figure(title=title, x_axis_type='datetime', tools='')
-
-    # TODO for running ranges
-    # x_range = DataRange1d(follow='end', follow_interval=20000, range_padding=0)
-    fig.line(source=source, x=TIME, y=y_name, color='red')
-    fig.yaxis.minor_tick_line_color = None
-    fig.add_tools(
-        ResetTool(),
-        PanTool(dimensions="width"),
-        WheelZoomTool(dimensions="width")
-    )
-    # fig.legend.location = 'top_left'
-    # fig.legend.label_text_font_size = '6pt'
-
-    return fig
-
 
 GRAPH_NAME_CLUSTER_NUM_WORKERS = 'GRAPH_NAME_CLUSTER_NUM_WORKERS'
 CLUSTER_NUM_WORKERS = 'CLUSTER_NUM_WORKERS'
@@ -145,12 +52,17 @@ class Stats:
     def __init__(self):
         self.task_events = {task_name: [] for task_name in TASK_NAMES}
         self.graphs_data = {
-            GRAPH_NAME_TASK_EVENTS: _make_graph_data(EVENT_NAMES),
-            GRAPH_NAME_TASK_LATENCIES: _make_graph_data(TASK_NAMES),
-            GRAPH_NAME_DOWNLOAD_THROUGHPUT_NUM_FILES: _make_graph_data([DOWNLOAD_THROUGHPUT_NUM_FILES]),
-            GRAPH_NAME_DOWNLOAD_THROUGHPUT_MB: _make_graph_data([DOWNLOAD_THROUGHPUT_MB]),
-            GRAPH_NAME_CLUSTER_NUM_WORKERS: _make_graph_data([CLUSTER_NUM_WORKERS]),
+            GRAPH_NAME_TASK_EVENTS: self._make_graph_data(EVENT_NAMES),
+            GRAPH_NAME_TASK_LATENCIES: self._make_graph_data(TASK_NAMES),
+            GRAPH_NAME_DOWNLOAD_THROUGHPUT_NUM_FILES: self._make_graph_data([DOWNLOAD_THROUGHPUT_NUM_FILES]),
+            GRAPH_NAME_DOWNLOAD_THROUGHPUT_MB: self._make_graph_data([DOWNLOAD_THROUGHPUT_MB]),
+            GRAPH_NAME_CLUSTER_NUM_WORKERS: self._make_graph_data([CLUSTER_NUM_WORKERS]),
         }
+
+    def _make_graph_data(self, keys) -> GraphData:
+        first = {TIME: [time() * 1000.0]}
+        first.update(dict(zip(keys, [[0] for _ in keys])))
+        return [[first], None]
 
     def send_events(self, task_name: str, events: List[Dict]):
         self.task_events[task_name].extend(events)
@@ -185,6 +97,9 @@ class Stats:
 
             # update last_data_length for this graph
             self.graphs_data[graph_name][1] = len(plot_data)
+
+    # def _calc_metrics_loop(self):
+    #     sleep(1)
 
     def _calc_metrics_loop(self):
         # TODO make proper flag
@@ -247,7 +162,8 @@ class Stats:
                     num_files = 0
 
                     # if call ray_task_name(load_df) directly here, it won't serialize
-                    load_df_task_name = LOAD_DF_TASK_NAME
+                    # load_df_task_name = LOAD_DF_TASK_NAME
+                    load_df_task_name = 'load_df'
                     for event in self.task_events[load_df_task_name]:
                         if event['event_name'] == get_event_name(load_df_task_name, EventType.FINISHED) \
                                 and now - window_s <= event['timestamp'] <= now:
@@ -284,8 +200,8 @@ class Stats:
                     continue
 
                 if graph_name == GRAPH_NAME_CLUSTER_NUM_WORKERS:
-                    # TODO try catch this
-                    workers = list_workers(address='auto', limit=100, timeout=30, raise_on_missing_output=True)
+                    # TODO try except this
+                    workers = ray_state_api.list_workers(address='auto', limit=100, timeout=30, raise_on_missing_output=True)
                     num_alive_workers = 0
                     for worker_state in workers:
                         # TODO add dead worker count
@@ -305,13 +221,13 @@ class Stats:
     def _make_bokeh_doc(self, doc, update):
         # TODO add rollover to ColumnDataSource to avoid OOM
         sources = {graph_name: ColumnDataSource(self.graphs_data[graph_name][0][0]) for graph_name in self.graphs_data}
-        fig_events = _make_task_events_graph_figure(sources[GRAPH_NAME_TASK_EVENTS])
-        fig_latencies = _make_task_latencies_graph_figure(sources[GRAPH_NAME_TASK_LATENCIES])
+        fig_events = self._make_task_events_graph_figure(sources[GRAPH_NAME_TASK_EVENTS])
+        fig_latencies = self._make_task_latencies_graph_figure(sources[GRAPH_NAME_TASK_LATENCIES])
 
-        fig_throughput_mb = _make_single_line_graph_figure(sources[GRAPH_NAME_DOWNLOAD_THROUGHPUT_MB], 'Download Throughput (Mb/s)', DOWNLOAD_THROUGHPUT_MB)
-        fig_throughput_num_files = _make_single_line_graph_figure(sources[GRAPH_NAME_DOWNLOAD_THROUGHPUT_NUM_FILES], 'Download Throughput (Files/s)', DOWNLOAD_THROUGHPUT_NUM_FILES)
+        fig_throughput_mb = self._make_single_line_graph_figure(sources[GRAPH_NAME_DOWNLOAD_THROUGHPUT_MB], 'Download Throughput (Mb/s)', DOWNLOAD_THROUGHPUT_MB)
+        fig_throughput_num_files = self._make_single_line_graph_figure(sources[GRAPH_NAME_DOWNLOAD_THROUGHPUT_NUM_FILES], 'Download Throughput (Files/s)', DOWNLOAD_THROUGHPUT_NUM_FILES)
 
-        fig_cluster_num_workers = _make_single_line_graph_figure(sources[GRAPH_NAME_CLUSTER_NUM_WORKERS], 'Cluster Worker Actors (count)', CLUSTER_NUM_WORKERS)
+        fig_cluster_num_workers = self._make_single_line_graph_figure(sources[GRAPH_NAME_CLUSTER_NUM_WORKERS], 'Cluster Worker Actors (count)', CLUSTER_NUM_WORKERS)
 
         c1 = column(fig_events, fig_cluster_num_workers)
         c2 = column(fig_latencies, fig_throughput_mb, fig_throughput_num_files)
@@ -319,3 +235,68 @@ class Stats:
         doc.title = "Indexer Stats"
         doc.add_root(r)
         doc.add_periodic_callback(functools.partial(update, sources=sources), 100)
+
+    def _make_task_events_graph_figure(self, source):
+        fig = figure(title="Tasks Events (count)", x_axis_type='datetime', tools='')
+        color_index = 0
+        color_per_task = {}
+        for name in EVENT_NAMES:
+            # same color for same task
+            task_name = None
+            for t_name in TASK_NAMES:
+                if t_name in name:
+                    task_name = t_name
+                    break
+
+            if task_name in color_per_task:
+                color = color_per_task[task_name]
+            else:
+                color = COLORS[color_index % len(COLORS)]
+                color_per_task[task_name] = color
+                color_index += 1
+
+            line_dash = 'solid'
+            if EventType.SCHEDULED.value in name:
+                line_dash = 'dotted'
+            elif EventType.STARTED.value in name:
+                line_dash = 'dashed'
+            legend_label = name
+
+            fig.line(source=source, x=TIME, y=name, color=color, legend_label=legend_label, line_dash=line_dash)
+
+        fig.yaxis.minor_tick_line_color = None
+
+        fig.legend.location = 'top_left'
+        fig.legend.label_text_font_size = '6pt'
+
+        return fig
+
+    def _make_single_line_graph_figure(self, source, title, y_name):
+        fig = figure(title=title, x_axis_type='datetime', tools='')
+
+        # TODO for running ranges
+        # x_range = DataRange1d(follow='end', follow_interval=20000, range_padding=0)
+        fig.line(source=source, x=TIME, y=y_name, color='red')
+        fig.yaxis.minor_tick_line_color = None
+
+        return fig
+
+    def _make_task_latencies_graph_figure(self, source):
+        fig = figure(title="Normalized Tasks Latencies (seconds per kb per task)", x_axis_type='datetime', tools='')
+
+        # TODO for running ranges
+        # x_range = DataRange1d(follow='end', follow_interval=20000, range_padding=0)
+        for i in range(len(TASK_NAMES)):
+            name = TASK_NAMES[i]
+            color = COLORS[i % len(COLORS)]
+
+            legend_label = name
+
+            fig.line(source=source, x=TIME, y=name, color=color, legend_label=legend_label, line_dash='solid')
+
+        fig.yaxis.minor_tick_line_color = None
+
+        fig.legend.location = 'top_left'
+        fig.legend.label_text_font_size = '6pt'
+
+        return fig

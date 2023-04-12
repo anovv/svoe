@@ -28,11 +28,11 @@ class MysqlClient:
         self.engine = self._init_engine()
 
     def _init_engine(self):
-        user = self.config.get('mysql_user', os.getenv('MYSQL_USER'))
-        password = self.config.get('mysql_password', os.getenv('MYSQL_PASSWORD'))
-        host = self.config.get('mysql_host', os.getenv('MYSQL_HOST'))
-        port = self.config.get('mysql_port', os.getenv('MYSQL_PORT'))
-        db = self.config.get('mysql_database', os.getenv('MYSQL_DATABASE'))
+        user = os.getenv('MYSQL_USER', self.config.get('mysql_user'))
+        password = os.getenv('MYSQL_PASSWORD', self.config.get('mysql_password'))
+        host = os.getenv('MYSQL_HOST', self.config.get('mysql_host'))
+        port = os.getenv('MYSQL_PORT', self.config.get('mysql_port'))
+        db = os.getenv('MYSQL_DATABASE', self.config.get('mysql_database'))
         url = f'mysql+pymysql://{user}:{password}@{host}:{port}/{db}'
         engine = create_engine(url, echo=False)
         Session.configure(bind=engine)
