@@ -36,7 +36,6 @@ class TestCatalogCryptotickPipeline(unittest.TestCase):
         # with ray.init(address='auto'):
         with ray.init(
                 address='ray://127.0.0.1:10001',
-                storage='s3://ray-workflows-storage/test-cluster/', # TODO make subfolder per cluster
                 runtime_env={
                     'py_modules': [featurizer, ray_cluster, data_catalog, utils],
                     'pip': ['cache-df', 'ciso8601'],

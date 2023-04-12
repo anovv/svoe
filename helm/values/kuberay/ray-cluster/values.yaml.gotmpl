@@ -20,6 +20,8 @@ head:
     num-cpus: '1'  # can be auto-completed from the limits
 #    node-ip-address: $MY_POD_IP  # auto-completed as the head pod IP
     block: 'true'
+    # TODO make subfolder per cluster
+    storage: 's3://ray-workflows-storage/test-cluster/'
   containerEnv:
     - name: MY_POD_IP
       valueFrom:
@@ -61,6 +63,8 @@ worker:
     node-ip-address: $MY_POD_IP
     redis-password: LetMeInRay
     block: 'true'
+    # TODO make subfolder per cluster
+    storage: 's3://ray-workflows-storage/test-cluster/'
   containerEnv:
     - name: MY_POD_IP
       valueFrom:
