@@ -30,3 +30,4 @@ kubectl patch storageclass local-path -p '{"metadata": {"annotations":{"storagec
 ./update_docker_registry_secret.sh
 
 # TODO cilium pods take some time to spin up, wait for them?
+#
