@@ -5,6 +5,7 @@ image:
 #  repository: rayproject/ray
 #  tag: 2.3.1-py39-cpu
 #  pullPolicy: IfNotPresent
+# https://github.com/ray-project/kuberay/blob/master/helm-chart/ray-cluster/values.yaml
 
 nameOverride: "kuberay"
 
@@ -14,14 +15,23 @@ head:
   type: head
   labels:
     key: value
-  initArgs:
+  rayStartParams:
     port: '6379'
     dashboard-host: '0.0.0.0'
     num-cpus: '1'  # can be auto-completed from the limits
-#    node-ip-address: $MY_POD_IP  # auto-completed as the head pod IP
     block: 'true'
     # TODO make subfolder per cluster
     storage: 's3://ray-workflows-storage/test-cluster/'
+  autoscalerOptions:
+   upscalingMode: Default
+   idleTimeoutSeconds: 60
+   # resources:
+   #   limits:
+   #     cpu: "500m"
+   #     memory: "512Mi"
+   #   requests:
+   #     cpu: "500m"
+   #     memory: "512Mi"
   containerEnv:
     - name: MY_POD_IP
       valueFrom:
@@ -59,7 +69,7 @@ worker:
   type: worker
   labels:
     key: value
-  initArgs:
+  rayStartParams:
     node-ip-address: $MY_POD_IP
     redis-password: LetMeInRay
     block: 'true'
