@@ -1,5 +1,4 @@
-# 2.3.1 is the latest available pip version
-FROM rayproject/ray:2.3.1-py39-cpu
+FROM rayproject/ray:2.0.1-py39-cpu
 RUN sudo apt-get update
 RUN sudo apt-get -y install gcc
 COPY reqs.txt /opt/svoe/reqs.txt

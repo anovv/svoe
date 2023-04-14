@@ -15,7 +15,7 @@ STATE="s3://$(echo $CLUSTER_CONFIG | jq -r .kops_s3_bucket_name)"
 ./_gen_cluster_config.sh $1
 
 cd $TERRAFORM_OUTPUT_PATH
-#terraform init -upgrade # TODO this requires connecting to hashicorp servers, won't work without VPN
+#terraform init -upgrade TODO only with VPN
 terraform apply --auto-approve
 kops export kubeconfig --admin --name $CLUSTER_NAME --state $STATE
 echo "Cluster creation done"

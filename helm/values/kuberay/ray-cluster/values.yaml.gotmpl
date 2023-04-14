@@ -1,11 +1,11 @@
 image:
-  repository: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/ray-with-svoe-deps
-  tag: 0.0.2 # TODO 0.0.2 -> ray 2.0.0, 0.0.3 -> ray 2.3.1
-  pullPolicy: IfNotPresent
-#  repository: rayproject/ray
-#  tag: 2.3.1-py39-cpu
+# TODO indicate minikube vs remote
+#  repository: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/ray-with-svoe-deps
+#  tag: 0.0.2 # TODO 0.0.2 -> ray 2.0.0, 0.0.3 -> ray 2.3.1
 #  pullPolicy: IfNotPresent
-# https://github.com/ray-project/kuberay/blob/master/helm-chart/ray-cluster/values.yaml
+  repository: ray-with-svoe-deps
+  tag: 0.0.4-ray2.0.1-py39-amd64
+  pullPolicy: Never
 
 nameOverride: "kuberay"
 
@@ -21,7 +21,7 @@ head:
     num-cpus: '1'  # can be auto-completed from the limits
     block: 'true'
     # TODO make subfolder per cluster
-    storage: 's3://ray-workflows-storage/test-cluster/'
+#    storage: 's3://ray-workflows-storage/test-cluster/'
   autoscalerOptions:
    upscalingMode: Default
    idleTimeoutSeconds: 60
@@ -58,7 +58,14 @@ head:
     - mountPath: /tmp/ray
       name: log-volume
   sidecarContainers: []
-
+#  ports:
+#    - containerPort: 10001
+#      protocol: TCP
+#      name: client-connect
+#    - containerPort: 8265
+#      protocol: TCP
+#      port: 8265
+#      name: dashboard
 
 worker:
   # If you want to disable the default workergroup
@@ -73,8 +80,8 @@ worker:
     node-ip-address: $MY_POD_IP
     redis-password: LetMeInRay
     block: 'true'
-    # TODO make subfolder per cluster
-    storage: 's3://ray-workflows-storage/test-cluster/'
+    # TODO make subfolder per cluster, indicate minikube env
+#    storage: 's3://ray-workflows-storage/test-cluster/'
   containerEnv:
     - name: MY_POD_IP
       valueFrom:
