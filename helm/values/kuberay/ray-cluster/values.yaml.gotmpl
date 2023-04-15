@@ -4,8 +4,14 @@ image:
 #  tag: 0.0.2 # TODO 0.0.2 -> ray 2.0.0, 0.0.3 -> ray 2.3.1
 #  pullPolicy: IfNotPresent
   repository: ray-with-svoe-deps
-  tag: 0.0.4-ray2.0.1-py39-amd64
+  tag: ray2.3.1-py310-aarch64-1
   pullPolicy: Never
+#  repository: rayproject/ray
+#  tag: 2.3.1-py39
+#  pullPolicy: IfNotPresent
+
+# https://github.com/ray-project/ray/issues/13780
+# https://gist.github.com/yunqu/bdbe9c34b883398bf97cf5361db63171
 
 nameOverride: "kuberay"
 
@@ -19,12 +25,14 @@ head:
     port: '6379'
     dashboard-host: '0.0.0.0'
     num-cpus: '1'  # can be auto-completed from the limits
-    block: 'true'
+#    block: 'true'
     # TODO make subfolder per cluster
 #    storage: 's3://ray-workflows-storage/test-cluster/'
-  autoscalerOptions:
-   upscalingMode: Default
-   idleTimeoutSeconds: 60
+  # rayVersion determines the autoscaler's image version.
+#  rayVersion: 2.0.1
+#  autoscalerOptions:
+#   upscalingMode: Default
+#   idleTimeoutSeconds: 60
    # resources:
    #   limits:
    #     cpu: "500m"
@@ -44,9 +52,11 @@ head:
          name: ray-aws-creds-secret
   resources:
     limits:
-      cpu: 1
+      cpu: 2
+      memory: 3Gi
     requests:
-      cpu: 1
+      cpu: 2
+      memory: 3Gi
   annotations: {}
   nodeSelector: {}
   tolerations: []
@@ -60,6 +70,7 @@ head:
   sidecarContainers: []
 #  ports:
 #    - containerPort: 10001
+#      port: 10001
 #      protocol: TCP
 #      name: client-connect
 #    - containerPort: 8265
@@ -108,9 +119,11 @@ worker:
       protocol: TCP
   resources:
     limits:
-      cpu: 1
+      cpu: 2
+      memory: 3Gi
     requests:
-      cpu: 200m
+      cpu: 2
+      memory: 3Gi
   annotations:
     key: value
   nodeSelector: {}

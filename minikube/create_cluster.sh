@@ -3,6 +3,7 @@
 
 minikube config set memory 8192
 minikube start --driver docker --nodes 5 --extra-config=kubelet.housekeeping-interval=10s -p minikube-1
+#minikube start --driver docker --nodes 5 -p minikube-1
 
 # memory overcommit configuration
 #kubectl node-shell minikube-1-m02 -- bash -c "echo 2 > /proc/sys/vm/overcommit_memory && echo 100 > /proc/sys/vm/overcommit_ratio"

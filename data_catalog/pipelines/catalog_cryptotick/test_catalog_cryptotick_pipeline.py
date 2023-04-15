@@ -32,15 +32,16 @@ class TestCatalogCryptotickPipeline(unittest.TestCase):
         store_df(path=small_df_path, df=small_df)
 
 
+
     def test_pipeline(self):
         # with ray.init(address='auto', ignore_reinit_error=True):
-        # with ray.init(
-        #         address='ray://127.0.0.1:10001',
-        #         runtime_env={
-        #             'py_modules': [featurizer, ray_cluster, data_catalog, utils],
-        #             'pip': ['cache-df', 'ciso8601'],
-        #             'excludes': ['*s3_svoe.test.1_inventory*']
-        #         }):
+        with ray.init(
+                address='ray://127.0.0.1:10001',
+                runtime_env={
+                    'py_modules': [featurizer, ray_cluster, data_catalog, utils],
+                    # 'pip': ['cache-df', 'ciso8601'],
+                    'excludes': ['*s3_svoe.test.1_inventory*']
+                }):
             batch_size = 1
             num_batches = 1
             runner = PipelineRunner()

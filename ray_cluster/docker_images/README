@@ -1,6 +1,6 @@
 
 To build
-sudo docker build . -f Dockerfile -t ray-with-svoe-deps:TAG (example TAG=0.0.4)
+sudo docker buildx build --platform linux/amd64 . -f Dockerfile -t ray-with-svoe-deps:TAG (example TAG=ray2.0.1-amd64-1)
 
 To push to ECR
 docker image ls

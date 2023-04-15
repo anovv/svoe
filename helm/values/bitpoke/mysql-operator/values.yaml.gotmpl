@@ -1,1 +1,18 @@
 # TODO set podSpec and volumeSpec
+# TODO flag between aarch64 and amd64
+# this is for aarch64
+orchestrator:
+  image:
+    repository: docker.io/jiuker/mysql-operator-orchestrator
+    tag: latest
+image:
+  repository: docker.io/jiuker/mysql-operator
+  tag: latest
+sidecar57:
+  image:
+    repository: docker.io/jiuker/mysql-operator-sidecar-5.7
+    tag: latest
+sidecar80:
+  image:
+    repository: docker.io/jiuker/mysql-operator-sidecar-8.0
+    tag: latest
