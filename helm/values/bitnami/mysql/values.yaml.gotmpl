@@ -1,9 +1,9 @@
 auth:
   rootPassword: {{ .Values | get "mysqlRootPassword" }}
-## TODO terminationGracePeriodSeconds
 primary:
   # https://stackoverflow.com/questions/52148322/control-order-of-container-termination-in-a-single-pod-in-kubernetes
   # https://github.com/bitnami/bitnami-docker-mysql/blob/master/8.0/debian-10/Dockerfile
+  terminationGracePeriodSeconds: 300 # wait for dumper-restorer to make s3 dump on pod termination
   command: ["/bin/sh", "-c"]
   args:
     - |
@@ -102,7 +102,7 @@ metrics:
     annotations:
       prometheus.io/scrape: "true"
       prometheus.io/port: "9104"
-  serviceMonitor: # TODO when enabling this, dependency should be added on monitoring chart
-    enabled: true
-    namespace: mysql # should be synced with release namespace
-    interval: 10s
+#  serviceMonitor: # TODO when enabling this, dependency should be added on monitoring chart
+#    enabled: true
+#    namespace: mysql # should be synced with release namespace
+#    interval: 10s

@@ -10,10 +10,11 @@ image:
 #  tag: 2.3.1-py39
 #  pullPolicy: IfNotPresent
 
-# https://github.com/ray-project/ray/issues/13780
-# https://gist.github.com/yunqu/bdbe9c34b883398bf97cf5361db63171
-
 nameOverride: "kuberay"
+headServiceSuffix: "ray-operator.svc"
+service:
+  type: ClusterIP
+  port: 8080
 
 head:
   groupName: headgroup
@@ -25,21 +26,12 @@ head:
     port: '6379'
     dashboard-host: '0.0.0.0'
     num-cpus: '1'  # can be auto-completed from the limits
-#    block: 'true'
-    # TODO make subfolder per cluster
-#    storage: 's3://ray-workflows-storage/test-cluster/'
+    block: 'true'
   # rayVersion determines the autoscaler's image version.
-#  rayVersion: 2.0.1
-#  autoscalerOptions:
-#   upscalingMode: Default
-#   idleTimeoutSeconds: 60
-   # resources:
-   #   limits:
-   #     cpu: "500m"
-   #     memory: "512Mi"
-   #   requests:
-   #     cpu: "500m"
-   #     memory: "512Mi"
+  rayVersion: 2.3.1
+  autoscalerOptions:
+    upscalingMode: Default
+    idleTimeoutSeconds: 60
   containerEnv:
     - name: MY_POD_IP
       valueFrom:
@@ -83,7 +75,7 @@ worker:
   # uncomment the line below
   # disabled: true
   groupName: workergroup
-  replicas: 1
+  replicas: 3
   type: worker
   labels:
     key: value
@@ -91,8 +83,6 @@ worker:
     node-ip-address: $MY_POD_IP
     redis-password: LetMeInRay
     block: 'true'
-    # TODO make subfolder per cluster, indicate minikube env
-#    storage: 's3://ray-workflows-storage/test-cluster/'
   containerEnv:
     - name: MY_POD_IP
       valueFrom:
@@ -140,61 +130,55 @@ worker:
 # The map's key is used as the groupName.
 # For example, key:small-group in the map below
 # will be used as the groupName
-additionalWorkerGroups:
-  smallGroup:
-    # Disabled by default
-    disabled: true
-    replicas: 1
-    minReplicas: 1
-    maxReplicas: 3
-    type: worker
-    labels: {}
-    initArgs:
-      node-ip-address: $MY_POD_IP
-      redis-password: LetMeInRay
-      block: 'true'
-    containerEnv:
-      - name: MY_POD_IP
-        valueFrom:
-          fieldRef:
-            fieldPath: status.podIP
-      - name: RAY_DISABLE_DOCKER_CPU_WARNING
-        value: "1"
-      - name: CPU_REQUEST
-        valueFrom:
-          resourceFieldRef:
-            containerName: ray-worker
-            resource: requests.cpu
-      - name: MY_POD_NAME
-        valueFrom:
-          fieldRef:
-            fieldPath: metadata.name
-    envFrom: []
-      # - secretRef:
-      #     name: my-env-secret
-    ports:
-      - containerPort: 80
-        protocol: TCP
-    resources:
-      limits:
-        cpu: 1
-      requests:
-        cpu: 200m
-    annotations:
-      key: value
-    nodeSelector: {}
-    tolerations: []
-    affinity: {}
-    volumes:
-      - name: log-volume
-        emptyDir: {}
-    volumeMounts:
-      - mountPath: /tmp/ray
-        name: log-volume
-    sidecarContainers: []
-
-headServiceSuffix: "ray-operator.svc"
-
-service:
-  type: ClusterIP
-  port: 8080
+#additionalWorkerGroups:
+#  smallGroup:
+#    # Disabled by default
+#    disabled: true
+#    replicas: 1
+#    minReplicas: 1
+#    maxReplicas: 3
+#    type: worker
+#    labels: {}
+#    initArgs:
+#      node-ip-address: $MY_POD_IP
+#      redis-password: LetMeInRay
+#      block: 'true'
+#    containerEnv:
+#      - name: MY_POD_IP
+#        valueFrom:
+#          fieldRef:
+#            fieldPath: status.podIP
+#      - name: RAY_DISABLE_DOCKER_CPU_WARNING
+#        value: "1"
+#      - name: CPU_REQUEST
+#        valueFrom:
+#          resourceFieldRef:
+#            containerName: ray-worker
+#            resource: requests.cpu
+#      - name: MY_POD_NAME
+#        valueFrom:
+#          fieldRef:
+#            fieldPath: metadata.name
+#    envFrom: []
+#      # - secretRef:
+#      #     name: my-env-secret
+#    ports:
+#      - containerPort: 80
+#        protocol: TCP
+#    resources:
+#      limits:
+#        cpu: 1
+#      requests:
+#        cpu: 200m
+#    annotations:
+#      key: value
+#    nodeSelector: {}
+#    tolerations: []
+#    affinity: {}
+#    volumes:
+#      - name: log-volume
+#        emptyDir: {}
+#    volumeMounts:
+#      - mountPath: /tmp/ray
+#        name: log-volume
+#    sidecarContainers: []

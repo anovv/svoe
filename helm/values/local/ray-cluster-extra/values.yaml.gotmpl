@@ -2,7 +2,8 @@ mysql:
   rootPassword: {{ .Values | get "mysqlRootPassword" }}
   database: {{ .Values | get "mysqlDefaultSvoeDb" }}
   port: 3306
-  host: svoe-mysql-cluster-mysql.mysql.svc.cluster.local
+#  host: svoe-mysql-cluster-mysql.mysql.svc.cluster.local
+  host: mysql.mysql.svc.cluster.local
   user: root
 s3:
   accessKeyId: {{ .Values | get "awsKey" }}
