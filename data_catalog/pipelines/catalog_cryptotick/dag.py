@@ -14,8 +14,8 @@ SPLIT_CHUNK_SIZE_KB = 1024
 
 class CatalogCryptotickDag(Dag):
 
-    def get(self, workflow_id: str, input_batch: InputItemBatch, stats: Stats, db_actor: DbActor):
-        filter_task_id = f'{workflow_id}_{ray_task_name(filter_existing)}'
+    def get(self, dag_id: str, input_batch: InputItemBatch, stats: Stats, db_actor: DbActor):
+        filter_task_id = f'{dag_id}_{ray_task_name(filter_existing)}'
 
         _, filtered_items = workflow.continuation(
             filter_existing.options(**workflow.options(task_id=filter_task_id), num_cpus=0.01).bind(
@@ -35,13 +35,13 @@ class CatalogCryptotickDag(Dag):
             stats_extra = {'size_kb': raw_size_kb}
             stats_extras.append(stats_extra)
 
-            download_task_id = f'{workflow_id}_{ray_task_name(load_df)}_{i}'
+            download_task_id = f'{dag_id}_{ray_task_name(load_df)}_{i}'
             download_task_ids.append(download_task_id)
             download_task = load_df.options(**workflow.options(task_id=download_task_id), num_cpus=0.001).bind(
                 item, stats=stats, task_id=download_task_id, stats_extra=stats_extra
             )
 
-            split_task_id = f'{workflow_id}_{ray_task_name(split_l2_inc_df)}_{i}'
+            split_task_id = f'{dag_id}_{ray_task_name(split_l2_inc_df)}_{i}'
             splits = workflow.continuation(split_l2_inc_df.options(**workflow.options(task_id=split_task_id), num_cpus=0.9).bind(
                 download_task, SPLIT_CHUNK_SIZE_KB, item['date'], stats=stats, task_id=split_task_id
             ))
@@ -63,7 +63,7 @@ class CatalogCryptotickDag(Dag):
                 # remove raw source path so it is constructed when making catalog item
                 del item_split[DataCatalog.path.name]
 
-                catalog_task_id = f'{workflow_id}_{ray_task_name(catalog_df)}_{j}_{i}'
+                catalog_task_id = f'{dag_id}_{ray_task_name(catalog_df)}_{j}_{i}'
                 catalog_task_ids.append(catalog_task_id)
 
                 catalog_task = catalog_df.options(**workflow.options(task_id=catalog_task_id), num_cpus=0.9).bind(
@@ -71,7 +71,7 @@ class CatalogCryptotickDag(Dag):
                 )
                 catalog_tasks.append(catalog_task)
 
-                store_task_id = f'{workflow_id}_{ray_task_name(store_df)}_{j}_{i}'
+                store_task_id = f'{dag_id}_{ray_task_name(store_df)}_{j}_{i}'
                 store_task_ids.append(store_task_id)
                 store_task = store_df.options(**workflow.options(task_id=store_task_id), num_cpus=0.01).bind(
                     split, catalog_task, stats=stats, task_id=store_task_id, stats_extra={'size_kb': raw_size_kb/len(splits)}
@@ -88,7 +88,7 @@ class CatalogCryptotickDag(Dag):
         # TODO verify all is stored successfully here?
         gathered_catalog_tasks = chain_no_ret.bind(gathered_catalog_tasks, gathered_store_tasks, scheduled_events_reported)
 
-        write_catalog_task_id = f'{workflow_id}_{ray_task_name(write_batch)}'
+        write_catalog_task_id = f'{dag_id}_{ray_task_name(write_batch)}'
         dag = write_batch.options(**workflow.options(task_id=write_catalog_task_id), num_cpus=0.01).bind(
             db_actor, gathered_catalog_tasks, stats=stats, task_id=write_catalog_task_id
         )

@@ -36,7 +36,7 @@ class TestCatalogCryptotickPipeline(unittest.TestCase):
     def test_pipeline(self):
         # with ray.init(address='auto', ignore_reinit_error=True):
         with ray.init(
-                address='ray://127.0.0.1:10001',
+                address='ray://127.0.0.1:10002',
                 runtime_env={
                     'py_modules': [featurizer, ray_cluster, data_catalog, utils],
                     # 'pip': ['cache-df', 'ciso8601'],

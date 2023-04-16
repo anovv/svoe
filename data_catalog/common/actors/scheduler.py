@@ -2,8 +2,6 @@ import asyncio
 import time
 import uuid
 
-from ray import workflow
-from ray.util.client import ray
 import ray
 from ray.workflow import WorkflowStatus
 
@@ -48,10 +46,10 @@ class Scheduler:
                 continue
             input_batch = await self.input_queue.get()
             batch_id = input_batch[0]['batch_id']
-            workflow_id = f'workflow_{self.run_id}_{batch_id}'
-
+            dag_id = f'dag_{self.run_id}_{batch_id}'
+            _dag = dag.get(dag_id, input_batch, self.stats, self.db_actor)
+            write_status_ref = _dag.execute()
             # TODO figure out what to do with write_status
-            write_status_ref = workflow.run_async(dag.get(workflow_id, input_batch, self.stats, self.db_actor), workflow_id=workflow_id)
             # TODO add cleanup coroutine for self.workflow_task_ids when finished
 
     async def stop(self):

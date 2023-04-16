@@ -11,8 +11,8 @@ from data_catalog.pipelines.dag import Dag
 
 class CatalogCryptofeedDag(Dag):
 
-    def get(self, workflow_id: str, input_batch: InputItemBatch, stats: Stats, db_actor: DbActor):
-        filter_task_id = f'{workflow_id}_{ray_task_name(filter_existing)}'
+    def get(self, dag_id: str, input_batch: InputItemBatch, stats: Stats, db_actor: DbActor):
+        filter_task_id = f'{dag_id}_{ray_task_name(filter_existing)}'
 
         # construct DAG
         _, filtered_items = workflow.continuation(
@@ -30,12 +30,12 @@ class CatalogCryptofeedDag(Dag):
             stats_extra = {'size_kb': item['size_kb']}
             stats_extras.append(stats_extra)
 
-            download_task_id = f'{workflow_id}_{ray_task_name(load_df)}_{i}'
+            download_task_id = f'{dag_id}_{ray_task_name(load_df)}_{i}'
             download_task_ids.append(download_task_id)
             download_task = load_df.options(**workflow.options(task_id=download_task_id), num_cpus=0.001).bind(
                 item, stats=stats, task_id=download_task_id, stats_extra=stats_extra
             )
-            catalog_task_id = f'{workflow_id}_{ray_task_name(catalog_df)}_{i}'
+            catalog_task_id = f'{dag_id}_{ray_task_name(catalog_df)}_{i}'
             catalog_task_ids.append(catalog_task_id)
             item[DataCatalog.source.name] = 'cryptofeed'
             catalog_task = catalog_df.options(**workflow.options(task_id=catalog_task_id), num_cpus=0.9).bind(
@@ -53,7 +53,7 @@ class CatalogCryptofeedDag(Dag):
         gathered_catalog_items = gather_and_wait.bind(catalog_tasks)
         node = chain_no_ret.bind(gathered_catalog_items, scheduled_events_reported)
 
-        write_task_id = f'{workflow_id}_{ray_task_name(write_batch)}'
+        write_task_id = f'{dag_id}_{ray_task_name(write_batch)}'
         dag = write_batch.options(**workflow.options(task_id=write_task_id), num_cpus=0.01).bind(
             db_actor, node, stats=stats, task_id=write_task_id
         )
