@@ -39,7 +39,6 @@ class TestCatalogCryptotickPipeline(unittest.TestCase):
                 address='ray://127.0.0.1:10002',
                 runtime_env={
                     'py_modules': [featurizer, ray_cluster, data_catalog, utils],
-                    # 'pip': ['cache-df', 'ciso8601'],
                     'excludes': ['*s3_svoe.test.1_inventory*']
                 }):
             batch_size = 1

@@ -43,6 +43,7 @@ class DataCatalog(Base):
 
     # TODO this should be a secondary key
     path = Column(String(512), unique=True)
+    hash = Column(String(512), unique=True)
     base = Column(String(32))
     quote = Column(String(32))
 
@@ -106,6 +107,11 @@ def make_catalog_item(df: pd.DataFrame, input_item: InputItem) -> DataCatalog:
             }
             catalog_item_params[DataCatalog.meta.name] = meta
 
+    df_hash = df_utils.hash_df(df)
+    catalog_item_params[DataCatalog.hash.name] = df_hash
+
+    print(df_hash)
+
     res = DataCatalog(**catalog_item_params)
     if res.path is None:
         if source != 'cryptotick':
@@ -131,5 +137,5 @@ def _construct_s3_path(item: DataCatalog) -> str:
         v = item.__dict__[field]
         if v is not None and len(v) > 0:
             res += f'{v}/'
-    res += f'{int(item.__dict__[DataCatalog.start_ts.name])}-{str(uuid.uuid4())}.parquet.gz'
+    res += f'{int(item.__dict__[DataCatalog.start_ts.name])}-{item.__dict__[DataCatalog.hash.name]}.parquet.gz'
     return res
