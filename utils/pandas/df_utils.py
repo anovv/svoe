@@ -1,3 +1,4 @@
+import hashlib
 from pathlib import Path
 
 import awswrangler as wr
@@ -152,4 +153,8 @@ def gen_split_df_by_mem(df: pd.DataFrame, chunk_size_kb: int) -> Generator:
         yield df.iloc[start: end]
         start = end
 
-    # TODO return num splits?
+        # TODO return num splits?
+
+def hash_df(df: pd.DataFrame) -> str:
+    return hashlib.sha1(pd.util.hash_pandas_object(df).values).hexdigest()
+
