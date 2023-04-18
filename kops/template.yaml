@@ -120,7 +120,7 @@ spec:
     k8s.io/cluster-autoscaler/enabled: ""
     k8s.io/cluster-autoscaler/{{$.cluster_name}}: ""
   machineType: t3.medium
-  maxSize: 2
+  maxSize: 1
   minSize: 1
   role: Master
   rootVolumeSize: 20
@@ -174,24 +174,52 @@ kind: InstanceGroup
 metadata:
   labels:
     kops.k8s.io/cluster: {{.cluster_name}}
-  name: nodes-data-feed-spot
+  name: nodes-ray-on-demand
 spec:
   cloudLabels:
     k8s.io/cluster-autoscaler/enabled: ""
     k8s.io/cluster-autoscaler/{{.cluster_name}}: ""
-  machineType: t3.small
-  maxPrice: "0.0273" # on-demand price
-  maxSize: 30
+  machineType: t4g.medium # arm64 graviton proc
+  maxSize: 50
   minSize: 0
   securityGroupOverride: {{.security_group_override}}
   nodeLabels:
-    kops.k8s.io/instancegroup: nodes-data-feed-spot
+    kops.k8s.io/instancegroup: nodes-ray-on-demand
+    workload-type: ray
+    node-type: on-demand
+  taints:
+    - node-type=on-demand:NoSchedule
+    - workload-type=ray:NoSchedule
+  role: Node
+  rootVolumeSize: 20
+  rootVolumeType: gp2
+  subnets:
+  {{range .azs}}
+  - {{.}}
+  {{end}}
+
+apiVersion: kops/v1alpha2
+kind: InstanceGroup
+metadata:
+  labels:
+    kops.k8s.io/cluster: {{.cluster_name}}
+  name: nodes-ray-spot
+spec:
+  cloudLabels:
+    k8s.io/cluster-autoscaler/enabled: ""
+    k8s.io/cluster-autoscaler/{{.cluster_name}}: ""
+  machineType: r6g.medium # arm64 graviton proc
+  maxPrice: "0.02"
+  maxSize: 50
+  minSize: 0
+  securityGroupOverride: {{.security_group_override}}
+  nodeLabels:
+    kops.k8s.io/instancegroup: nodes-ray-spot
     node-type: spot
-    workload-type: data-feed
-    svoe-role: resource-estimator
+    workload-type: ray
   taints:
     - node-type=spot:NoSchedule
-    - workload-type=data-feed:NoSchedule
+    - workload-type=ray:NoSchedule
   role: Node
   rootVolumeSize: 20
   rootVolumeType: gp2

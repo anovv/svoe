@@ -8,9 +8,9 @@ image:
   tag: ray2.3.1-py310-aarch64-1
   pullPolicy: Never
   {{ else }}
-  repository: ray-with-svoe-deps
+  repository: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/ray-with-svoe-deps
   tag: ray2.3.1-py310-aarch64-1
-  pullPolicy: Never
+  pullPolicy: IfNotPresent
   {{ end }}
 
 nameOverride: "kuberay"
@@ -55,8 +55,33 @@ head:
       memory: 3Gi
   annotations: {}
   nodeSelector: {}
-  tolerations: []
+  {{ if (eq .Values.clusterType "minikube") }}
   affinity: {}
+  tolerations: []
+  {{ else }}
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: workload-type
+                operator: In
+                values:
+                  - ray
+              - key: instance-type
+                operator: In
+                values:
+                  - on-demand
+  tolerations:
+    - key: workload-type
+      operator: Equal
+      value: ray
+      effect: NoSchedule
+    - key: instance-type
+      operator: Equal
+      value: on-demand
+      effect: NoSchedule
+  {{ end }}
   volumes:
     - name: log-volume
       emptyDir: {}
@@ -115,8 +140,33 @@ worker:
   annotations:
     key: value
   nodeSelector: {}
-  tolerations: []
+  {{ if (eq .Values.clusterType "minikube") }}
   affinity: {}
+  tolerations: []
+  {{ else }}
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: workload-type
+                operator: In
+                values:
+                  - ray
+              - key: instance-type
+                operator: In
+                values:
+                  - on-demand
+  tolerations:
+    - key: workload-type
+      operator: Equal
+      value: ray
+      effect: NoSchedule
+    - key: instance-type
+      operator: Equal
+      value: on-demand
+      effect: NoSchedule
+  {{ end }}
   volumes:
     - name: log-volume
       emptyDir: {}
@@ -175,8 +225,33 @@ additionalWorkerGroups:
         cpu: 1
         memory: 3Gi
     nodeSelector: {}
-    tolerations: []
+    {{ if (eq .Values.clusterType "minikube") }}
     affinity: {}
+    tolerations: []
+    {{ else }}
+    affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+            - matchExpressions:
+                - key: workload-type
+                  operator: In
+                  values:
+                    - ray
+                - key: instance-type
+                  operator: In
+                  values:
+                    - spot
+    tolerations:
+      - key: workload-type
+        operator: Equal
+        value: ray
+        effect: NoSchedule
+      - key: instance-type
+        operator: Equal
+        value: spot
+        effect: NoSchedule
+    {{ end }}
     volumes:
       - name: log-volume
         emptyDir: {}
