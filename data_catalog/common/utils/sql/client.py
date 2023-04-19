@@ -43,11 +43,9 @@ class MysqlClient:
         Base.metadata.create_all(self.engine)
 
     # TODO separate api methods and pipeline methods
-
     # see 2nd comment in https://stackoverflow.com/questions/3659142/bulk-insert-with-sqlalchemy-orm
     # RE: bulk insert perf
     def write_catalog_item_batch(self, batch: List[DataCatalog]):
-        print(batch)
         # TODO figure out insert_or_update logic
         session = Session()
         session.bulk_save_objects(batch)

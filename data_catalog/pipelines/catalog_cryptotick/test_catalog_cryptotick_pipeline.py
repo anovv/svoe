@@ -34,13 +34,13 @@ class TestCatalogCryptotickPipeline(unittest.TestCase):
 
 
     def test_pipeline(self):
-        # with ray.init(address='auto', ignore_reinit_error=True):
-        with ray.init(
-                address='ray://127.0.0.1:10002',
-                runtime_env={
-                    'py_modules': [featurizer, ray_cluster, data_catalog, utils],
-                    'excludes': ['*s3_svoe.test.1_inventory*']
-                }):
+        with ray.init(address='auto', ignore_reinit_error=True):
+        # with ray.init(
+        #         address='ray://127.0.0.1:10001',
+        #         runtime_env={
+        #             'py_modules': [featurizer, ray_cluster, data_catalog, utils],
+        #             'excludes': ['*s3_svoe.test.1_inventory*']
+        #         }):
             batch_size = 1
             num_batches = 1
             runner = PipelineRunner()
@@ -59,17 +59,11 @@ class TestCatalogCryptotickPipeline(unittest.TestCase):
                 runner.pipe_input(input_batch)
                 print(f'Queued {i + 1} batches')
             print('Done queueing')
+
             # wait for everything to process
+            runner.wait_to_finish()
 
-            # TODO this quits early if job is long
-            # TODO make wait_for_completion func
-            time.sleep(720 * 10)
-
-            # check if index was written to db
-            client = MysqlClient()
-            not_exist = client.filter_cryptotick_batch(list(itertools.chain(*inputs)))
-            # TODO should be 0
-            print(len(not_exist))
+            # TODO assert index was written to db and
 
     def test_split_l2_inc_df_and_pad_with_snapshot(self):
         # TODO merge this with stuff in test_calculator

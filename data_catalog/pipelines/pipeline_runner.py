@@ -45,6 +45,9 @@ class PipelineRunner:
         self.scheduler.run.remote(dag)
         print('PipelineRunner started')
 
+    def wait_to_finish(self):
+        ray.get(self.scheduler.stop.remote())
+
     def pipe_input(self, input_batch: InputItemBatch):
         # TODO make it async? do we need ray.get here?
         ray.get(self.scheduler.pipe_input.remote(input_batch))

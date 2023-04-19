@@ -14,11 +14,11 @@ class DbActor:
 
     # TODO asyncify this
     def filter_batch(self, input_batch: InputItemBatch) -> InputItemBatch:
+        self.client.create_tables()
         items = input_batch[1]
         if len(items) == 0:
             return input_batch
         source = items[0]['source']
-        self.client.create_tables()
         if source == 'cryptofeed':
             return self.client.filter_cryptofeed_batch(input_batch)
         elif source == 'cryptotick':

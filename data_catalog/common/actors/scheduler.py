@@ -3,7 +3,6 @@ import time
 import uuid
 
 import ray
-from ray.workflow import WorkflowStatus
 
 from data_catalog.common.actors.db import DbActor
 from data_catalog.common.data_models.models import InputItemBatch
@@ -23,8 +22,11 @@ class Scheduler:
         self.is_running = True
         self.stats = stats
         self.db_actor = db_actor
+        self.result_refs = []
 
     async def pipe_input(self, input_item_batch: InputItemBatch):
+        if not self.is_running:
+            raise ValueError('Runner is marked as stopped, no more input is accepeted')
         await self.read_queue.put(input_item_batch)
 
     async def read_loop(self):
@@ -48,30 +50,46 @@ class Scheduler:
             batch_id = input_batch[0]['batch_id']
             dag_id = f'dag_{self.run_id}_{batch_id}'
             _dag = dag.get(dag_id, input_batch, self.stats, self.db_actor)
-            write_status_ref = _dag.execute()
-            # TODO figure out what to do with write_status
-            # TODO add cleanup coroutine for self.workflow_task_ids when finished
+
+            # TODO figure out what to do with result_refs
+            self.result_refs.append(_dag.execute())
+
+
+    # checks which dags finished and removes refs so Ray can release resources
+    async def process_results_loop(self):
+        while self.is_running:
+            ready, remaining = ray.wait(self.result_refs, timeout=0, num_returns=1, fetch_local=False)
+            self.result_refs = remaining
+            await asyncio.sleep(1)
+
 
     async def stop(self):
-        self.is_running = False
-        await self._wait_for_workflows_to_finish()
-        print('All workflows finished')
+        print('Waiting for runner to finish before stopping')
 
-    async def _wait_for_workflows_to_finish(self):
-        to_wait = self._list_workflows_for_current_run({WorkflowStatus.RUNNING, WorkflowStatus.PENDING})
-        while len(to_wait) != 0:
-            print('Waiting')
-            print(to_wait)
-            await asyncio.sleep(0.1)
-            to_wait = self._list_workflows_for_current_run({WorkflowStatus.RUNNING, WorkflowStatus.PENDING})
+        # wait for input q and read q to start processing
+        while self.input_queue.qsize() > 0 or self.read_queue.qsize() > 0:
+            await asyncio.sleep(1)
+
+        # TODO this will stop stats loop and hence stats actor early? Have separate flags?
+        self.is_running = False
+        while len(self.result_refs) > 0:
+            ready, remaining = ray.wait(self.result_refs, num_returns=len(self.result_refs), fetch_local=False, timeout=30)
+            self.result_refs = remaining
+
+        # These sleeps are for Ray to propagate prints to IO before killing everything
+        await asyncio.sleep(1)
+        print('Runner finished')
+        await asyncio.sleep(1)
+
 
     async def run(self, dag: Dag):
         self.run_id = self._gen_run_id()
         reader = asyncio.create_task(self.read_loop())
         scheduler = asyncio.create_task(self.scheduler_loop(dag))
         stats = asyncio.create_task(self.stats_loop())
+        process_results = asyncio.create_task(self.process_results_loop())
 
-        tasks = [reader, scheduler, stats]
+        tasks = [reader, scheduler, stats, process_results]
         await asyncio.gather(*tasks)
         print('Scheduler finished')
 
@@ -79,12 +97,3 @@ class Scheduler:
         # identifies current run
         # {Entry UUID}.{Unix time to nanoseconds}
         return f'{str(uuid.uuid4())}.{time.time():.9f}'
-
-    def _list_workflows_for_current_run(self, statuses=None):
-        all = []
-        # all = workflow.list_all(statuses)
-        # print(all)
-        # print(self.run_id)
-        # TODO filter only for current run id
-        # return list(filter(lambda wf: self.run_id in wf[0], to_wait))
-        return all

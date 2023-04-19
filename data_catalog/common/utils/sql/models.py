@@ -110,8 +110,6 @@ def make_catalog_item(df: pd.DataFrame, input_item: InputItem) -> DataCatalog:
     df_hash = df_utils.hash_df(df)
     catalog_item_params[DataCatalog.hash.name] = df_hash
 
-    print(df_hash)
-
     res = DataCatalog(**catalog_item_params)
     if res.path is None:
         if source != 'cryptotick':
