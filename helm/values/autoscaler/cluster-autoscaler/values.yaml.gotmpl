@@ -2,12 +2,14 @@ autoDiscovery:
   clusterName: {{ .Values | get "clusterName" }}
 # TODO pass region as param for each cluster
 awsRegion: ap-northeast-1
-serviceMonitor:
-  enabled: true
-  interval: 5s
-  namespace: monitoring
-  selector:
-    release: prometheus-operator
-  path: /metrics
+
+# TODO enable only if monitoring is on
+#serviceMonitor:
+#  enabled: true
+#  interval: 5s
+#  namespace: monitoring
+#  selector:
+#    release: prometheus-operator
+#  path: /metrics
 # TODO set pod requests/limits
 # TODO podDisruptionBudget? priorityClassName? make sure this is not terminated when resources are starved
