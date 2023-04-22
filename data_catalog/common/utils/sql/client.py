@@ -105,27 +105,32 @@ class MysqlClient:
         data_type: str,
         instrument_type: str,
         symbol: str,
-        instrument_extra: str = DEFAULT_INSTRUMENT_EXTRA,
-        compaction: str = DEFAULT_COMPACTION,
-        source: str = DEFAULT_SOURCE,
-        version: str = DEFAULT_VERSION,
-        extras: str = None,
+        instrument_extra: Optional[str] = None,
+        compaction: Optional[str] = None,
+        source: Optional[str] = None,
+        version: Optional[str] = None,
+        extras: Optional[str] = None,
         start_date: Optional[str] = None,
         end_date: Optional[str] = None
     ) -> List:
         # TODO instrument_extra
+        args = {
+            DataCatalog.exchange.name: exchange,
+            DataCatalog.data_type.name: data_type,
+            DataCatalog.instrument_type.name: instrument_type,
+            DataCatalog.symbol.name: symbol
+        }
+        if compaction is not None:
+            args[DataCatalog.compaction.name] = compaction
+        if source is not None:
+            args[DataCatalog.symbol.name] = source
+        if version is not None:
+            args[DataCatalog.version.name] = version
+        if extras is not None:
+            args[DataCatalog.extras.name] = extras
+
         session = Session()
-        res = session.query(DataCatalog).filter_by(
-            exchange=exchange,
-            data_type=data_type,
-            instrument_type=instrument_type,
-            symbol=symbol,
-            instrument_extra=instrument_extra,
-            compaction=compaction,
-            source=source,
-            version=version,
-            extras=extras
-        ).order_by(DataCatalog.start_ts).all()
+        res = session.query(DataCatalog).filter_by(**args).order_by(DataCatalog.start_ts).all()
         # TODO this adds unnecessary sqlalchemy fields, remove to reduce memory footprint
         return [r.__dict__ for r in res]
 

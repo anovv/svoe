@@ -22,6 +22,13 @@ else
   cluster_name="${CLUSTER_NAME}"
 fi
 
+if [ -n "$1" ]; then
+  cluster_name="$1"
+  echo "[$(date -Iseconds)] Cluster name is set via args"
+else
+  echo "[$(date -Iseconds)] Cluster name is set via env var"
+fi
+
 echo "[$(date -Iseconds)] Restoring for cluster ${cluster_name}"
 
 s3filename="${cluster_name}_${db_name_prefix}_mysqldump.sql.gz"

@@ -9,13 +9,10 @@ class TestDataCatalogApi(unittest.TestCase):
     def test_get_meta(self):
         api = Api()
         l2_data_ranges = api.get_meta('BINANCE', 'l2_book', 'spot', 'BTC-USDT')
+        print(l2_data_ranges)
         l2_data_intervals_df = api.ranges_to_intervals_df(l2_data_ranges)
         print(l2_data_intervals_df)
         # api.plot_ranges(l2_data_ranges)
-        print(l2_data_ranges[8])
-        print(float(l2_data_ranges[8][0]['end_ts']) - float(l2_data_ranges[8][0]['start_ts']))
-        # print(len(l2_data))
-        # trades_data = api.get_meta
 
     def test_make_range(self):
         api = Api()

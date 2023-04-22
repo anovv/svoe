@@ -10,8 +10,9 @@ from data_catalog.common.utils.sql.client import MysqlClient
 class Api:
     def __init__(self, db_config: Optional[Dict] = None):
         self.client = MysqlClient(db_config)
-# TODO should be synced with featurizer and indexer data models
-# TODO typing
+
+    # TODO should be synced with featurizer and indexer data models
+    # TODO typing
     def get_meta(
         self,
         exchange: str,
@@ -22,8 +23,8 @@ class Api:
         end_date: Optional[str] = None
     ) -> List:
         meta = self.client.select(exchange, data_type, instrument_type, symbol, start_date, end_date)
-        ranges = self._make_ranges(meta)
-        return ranges
+        print(len(meta))
+        return self._make_ranges(meta)
 
     # TODO sync typing with featurizer
     # TODO util this
