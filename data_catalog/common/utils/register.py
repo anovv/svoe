@@ -27,6 +27,8 @@ def report_stats_decor(event_types: List[EventType]):
         @wraps(task)
         def wrapper(*args, **kwargs):
             task_id = kwargs['task_id']
+
+            # TODO ray.get_actor("some_name") can get actor, so no need to pass it as a param
             stats = kwargs['stats']
             extra = kwargs.get('stats_extra', {})
             task_name = task.__name__

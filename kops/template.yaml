@@ -61,7 +61,7 @@ spec:
   iam:
     allowContainerRegistry: true
     legacy: false
-  kubernetesVersion: 1.22.5
+  kubernetesVersion: 1.25.9 # old - 1.22.5
   masterPublicName: api.{{.cluster_name}}
   networkCIDR: {{.vpc_cidr_block}}
   kubeProxy:
@@ -151,14 +151,14 @@ spec:
   machineType: t3.medium
   {{end}}
   maxSize: 5
-  minSize: 2
+  minSize: 1
   role: Node
   rootVolumeSize: 20
   rootVolumeType: gp2
   securityGroupOverride: {{.security_group_override}}
   nodeLabels:
     kops.k8s.io/instancegroup: nodes-common-on-demand
-    node-type: on-demand
+    instance-type: on-demand
     workload-type: common
   subnets:
   {{range .azs}}
@@ -181,14 +181,14 @@ spec:
     k8s.io/cluster-autoscaler/{{.cluster_name}}: ""
   machineType: t4g.medium # arm64 graviton proc
   maxSize: 50
-  minSize: 0
+  minSize: 1
   securityGroupOverride: {{.security_group_override}}
   nodeLabels:
     kops.k8s.io/instancegroup: nodes-ray-on-demand
     workload-type: ray
-    node-type: on-demand
+    instance-type: on-demand
   taints:
-    - node-type=on-demand:NoSchedule
+    - instance-type=on-demand:NoSchedule
     - workload-type=ray:NoSchedule
   role: Node
   rootVolumeSize: 20
@@ -197,6 +197,7 @@ spec:
   {{range .azs}}
   - {{.}}
   {{end}}
+---
 
 apiVersion: kops/v1alpha2
 kind: InstanceGroup
@@ -208,17 +209,17 @@ spec:
   cloudLabels:
     k8s.io/cluster-autoscaler/enabled: ""
     k8s.io/cluster-autoscaler/{{.cluster_name}}: ""
-  machineType: r6g.medium # arm64 graviton proc
-  maxPrice: "0.02"
+  machineType: r6g.large # arm64 graviton proc
+  maxPrice: "0.04"
   maxSize: 50
-  minSize: 0
+  minSize: 1
   securityGroupOverride: {{.security_group_override}}
   nodeLabels:
     kops.k8s.io/instancegroup: nodes-ray-spot
-    node-type: spot
+    instance-type: spot
     workload-type: ray
   taints:
-    - node-type=spot:NoSchedule
+    - instance-type=spot:NoSchedule
     - workload-type=ray:NoSchedule
   role: Node
   rootVolumeSize: 20

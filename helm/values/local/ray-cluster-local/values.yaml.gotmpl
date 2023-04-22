@@ -218,11 +218,11 @@ additionalWorkerGroups:
         protocol: TCP
     resources:
       limits:
-        cpu: 1
-        memory: 7Gi
+        cpu: 2
+        memory: 15Gi
       requests:
-        cpu: 800m
-        memory: 7Gi
+        cpu: 1800m
+        memory: 15Gi
     nodeSelector: {}
     {{ if (eq .Values.clusterType "minikube") }}
     affinity: {}

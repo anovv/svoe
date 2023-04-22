@@ -12,6 +12,7 @@ from data_catalog.common.actors.stats import Stats
 from data_catalog.pipelines.dag import Dag
 
 
+# @ray.remote(resources={'worker_size_small': 1, 'instance_on_demand': 1})
 @ray.remote
 class Scheduler:
 

@@ -7,6 +7,7 @@ from data_catalog.common.utils.sql.client import MysqlClient
 from data_catalog.common.utils.sql.models import DataCatalog
 
 
+# @ray.remote(resources={'worker_size_small': 1, 'instance_on_demand': 1})
 @ray.remote
 class DbActor:
     def __init__(self, db_config: Optional[Dict] = None):

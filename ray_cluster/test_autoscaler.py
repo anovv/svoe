@@ -22,7 +22,7 @@ class TestCatalogCryptotickPipeline(unittest.TestCase):
     def test_autoscaler(self):
 
         with ray.init(address='ray://127.0.0.1:10003'):
-            for _ in range(2):
+            for _ in range(10):
                 large = LargeSpotActor.remote()
                 large.run.remote()
                 # small = SmallOnDemandActor.remote()

@@ -47,6 +47,8 @@ GRAPH_NAME_CLUSTER_NUM_WORKERS = 'GRAPH_NAME_CLUSTER_NUM_WORKERS'
 CLUSTER_NUM_WORKERS = 'CLUSTER_NUM_WORKERS'
 
 
+
+# @ray.remote(resources={'worker_size_small': 1, 'instance_on_demand': 1})
 @ray.remote
 class Stats:
     def __init__(self):

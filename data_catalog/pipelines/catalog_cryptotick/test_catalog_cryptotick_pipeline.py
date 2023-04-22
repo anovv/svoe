@@ -34,21 +34,21 @@ class TestCatalogCryptotickPipeline(unittest.TestCase):
 
 
     def test_pipeline(self):
-        with ray.init(address='auto', ignore_reinit_error=True):
-        # with ray.init(
-        #         address='ray://127.0.0.1:10001',
-        #         runtime_env={
-        #             'py_modules': [featurizer, ray_cluster, data_catalog, utils],
-        #             'excludes': ['*s3_svoe.test.1_inventory*']
-        #         }):
+        # with ray.init(address='auto', ignore_reinit_error=True):
+        with ray.init(
+                address='ray://127.0.0.1:10003',
+                runtime_env={
+                    'py_modules': [featurizer, ray_cluster, data_catalog, utils],
+                    'excludes': ['*s3_svoe.test.1_inventory*']
+                }):
             batch_size = 1
             num_batches = 1
             runner = PipelineRunner()
             runner.run(CatalogCryptotickDag())
             print('Inited runner')
             # raw_files = list_files_and_sizes_kb(CRYPTOTICK_RAW_BUCKET_NAME)
-            # raw_files_and_sizes = [('limitbook_full/20230201/BINANCE_SPOT_BTC_USDT.csv.gz', 252 * 1024)]
-            raw_files_and_sizes = [('s3://svoe-cryptotick-data/testing/small_df.parquet.gz', 470)]
+            raw_files_and_sizes = [('limitbook_full/20230201/BINANCE_SPOT_BTC_USDT.csv.gz', 252 * 1024)]
+            # raw_files_and_sizes = [('s3://svoe-cryptotick-data/testing/small_df.parquet.gz', 470)]
             batches = cryptotick_input_items(raw_files_and_sizes, batch_size)
             print('Queueing batch...')
             inputs = []
@@ -62,8 +62,7 @@ class TestCatalogCryptotickPipeline(unittest.TestCase):
 
             # wait for everything to process
             runner.wait_to_finish()
-
-            # TODO assert index was written to db and
+            # TODO assert index was written to db
 
     def test_split_l2_inc_df_and_pad_with_snapshot(self):
         # TODO merge this with stuff in test_calculator

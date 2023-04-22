@@ -28,15 +28,13 @@ class PipelineRunner:
 
     def run(self, dag):
         # TODO init throughput
-        #  workflow.init(max_running_workflows=10, max_pending_workflows=50)
 
-        # TODO for workflow stats (per task) - workflow metadata
-        # https://docs.ray.io/en/latest/workflows/metadata.html
+        # TODO use named actors and with get_if_exists: a = Greeter.options(name="g1", get_if_exists=True)
         # run stats
         self.stats = Stats.remote()
         self.stats.run.remote()
 
-        # TODO make this an actor pool
+        # TODO make db an actor pool if lots of connections
         # db actor
         self.db_actor = DbActor.remote()
 

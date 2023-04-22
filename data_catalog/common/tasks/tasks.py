@@ -83,7 +83,12 @@ def store_df(df: pd.DataFrame, catalog_item: DataCatalog, stats: 'Stats', task_i
 @ray.remote
 @report_stats_decor([EventType.STARTED, EventType.FINISHED])
 def split_l2_inc_df(raw_df: pd.DataFrame, chunk_size_kb: int, date_str: str, stats: 'Stats', task_id: str) -> List[pd.DataFrame]:
+    print('Split started')
     # TODO make it a separate task?
+    print('Preproc started')
     processed_df = preprocess_l2_inc_df(raw_df, date_str)
-    return split_l2_inc_df_and_pad_with_snapshot(processed_df, chunk_size_kb)
+    print('Preproc finished')
+    res = split_l2_inc_df_and_pad_with_snapshot(processed_df, chunk_size_kb)
+    print('Split finished')
+    return res
 
