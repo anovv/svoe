@@ -10,3 +10,4 @@ s3:
   accessKeyId: {{ .Values | get "awsKey" }}
   secretAccessKey: {{ .Values | get "awsSecret" }}
   region: {{ .Values | get "awsDefaultRegion" }}
+clusterName: {{ .Values| get "clusterName"}}

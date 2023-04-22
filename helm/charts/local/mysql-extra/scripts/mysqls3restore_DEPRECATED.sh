@@ -16,17 +16,9 @@ else
   db_name_prefix=${MYSQL_DATABASE}
 fi
 
-if [ -z "$CLUSTER_NAME" ]; then
-  cluster_name="local"
-else
-  cluster_name="${CLUSTER_NAME}"
-fi
-
-echo "[$(date -Iseconds)] Restoring for cluster ${cluster_name}"
-
-s3filename="${cluster_name}_${db_name_prefix}_mysqldump.sql.gz"
-s3filename_unzip="${cluster_name}_${db_name_prefix}_mysqldump.sql"
-aws s3api head-object --bucket ${AWS_S3_MYSQL_BUCKET} --key ${s3filename} || not_exist=true
+s3filename_latest="${db_name_prefix}_mysqldump_latest.sql.gz"
+s3filename_latest_unzip="${db_name_prefix}_mysqldump_latest.sql"
+aws s3api head-object --bucket ${AWS_S3_MYSQL_BUCKET} --key ${s3filename_latest} || not_exist=true
 if [ $not_exist ]; then
   echo "[$(date -Iseconds)] No backup file in s3, exiting"
   set +e
@@ -45,9 +37,9 @@ if [ $not_exist ]; then
   return 0
 else
   echo "[$(date -Iseconds)] Started downloading..."
-  aws s3 cp "s3://${AWS_S3_MYSQL_BUCKET}/${s3filename}" "${s3filename}"
+  aws s3 cp "s3://${AWS_S3_MYSQL_BUCKET}/${s3filename_latest}" "${s3filename_latest}"
   echo "[$(date -Iseconds)] Backup downloaded. Unzipping..."
-  gzip -d -f "${s3filename}"
+  gzip -d -f "${s3filename_latest}"
   echo "[$(date -Iseconds)] Unzip finished. Restoring mysql..."
   set +e
   SUCCESS=false
@@ -55,7 +47,7 @@ else
   do
     echo "[$(date -Iseconds)] Restoring dump file..."
     # https://stackoverflow.com/questions/14011968/user-cant-access-a-database
-    mysql -h "${MYSQL_HOST}" -P "${MYSQL_PORT}" -u root  -p"${MYSQL_ROOT_PASSWORD}" < "${s3filename_unzip}"
+    mysql -h "${MYSQL_HOST}" -P "${MYSQL_PORT}" -u root  -p"${MYSQL_ROOT_PASSWORD}" < "${s3filename_latest_unzip}"
     if [ $? -eq 0 ]; then
       SUCCESS=true
     else
@@ -63,7 +55,7 @@ else
       sleep 5
     fi
   done
-  rm -rf "${s3filename_unzip}"
+  rm -rf "${s3filename_latest_unzip}"
 fi
 echo "[$(date -Iseconds)] Done."
 

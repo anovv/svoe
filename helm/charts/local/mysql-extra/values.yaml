@@ -1,5 +1,6 @@
 isMysqlHost: true
 backupSchedule: "0 0 0 0 0"
+clusterName: testCluster
 mysql:
   rootPassword: password
   database: database
