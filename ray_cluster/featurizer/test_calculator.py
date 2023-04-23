@@ -10,6 +10,7 @@ from portion import Interval, closed
 from ray.util.dask import enable_dask_on_ray
 
 import calculator as C
+from data_catalog.api.api import Api
 from featurizer.features.data.data_source_definition import DataSourceDefinition
 from featurizer.features.data.l2_book_incremental.cryptofeed.cryptofeed_l2_book_incremental import CryptofeedL2BookIncrementalData
 from featurizer.features.data.l2_book_incremental.cryptotick.cryptotick_l2_book_incremental import CryptotickL2BookIncrementalData
@@ -270,7 +271,7 @@ class TestFeatureCalculator(unittest.TestCase):
         print(f'Avg Trades split size:{np.mean(trades_split_sizes)}')
 
     # TODO assertions
-    def test_cryptotick_l2_snap_feature(self):
+    def test_cryptotick_l2_snap_feature_online(self):
         data_params = {}
         feature_params = [{'dep_schema': 'cryptotick'}]
         feature = construct_feature_tree(L2SnapshotFD, data_params, feature_params)
@@ -286,6 +287,23 @@ class TestFeatureCalculator(unittest.TestCase):
         print(online_res)
 
 
+    def test_cryptotick_l2_snap_feature_offline(self):
+        api = Api()
+        l2_data_ranges_meta = api.get_meta('BINANCE', 'l2_book', 'spot', 'BTC-USDT')
+        # limit fo testing
+        l2_data_ranges_meta = l2_data_ranges_meta[0][:5]
+
+        data_def = Feature([], 0, CryptotickL2BookIncrementalData, {})
+
+        feature_params = [{'dep_schema': 'cryptotick'}]
+        feature = construct_feature_tree(L2SnapshotFD, {}, feature_params)
+        print(RenderTree(feature))
+        task_graph = C.build_feature_task_graph({}, feature, {data_def: l2_data_ranges_meta})
+        print(task_graph)
+        res_blocks = C.execute_task_graph(task_graph, feature)
+        print(res_blocks)
+
+
 if __name__ == '__main__':
     # unittest.main()
     t = TestFeatureCalculator()
@@ -295,8 +313,9 @@ if __name__ == '__main__':
     # t.test_merge_asof()
     # t.test_feature_label_set()
     # t.test_cryptofeed_df_split()
-    t.test_cryptotick_df_split()
-    # t.test_cryptotick_l2_snap_feature()
+    # t.test_cryptotick_df_split()
+    # t.test_cryptotick_l2_snap_feature_online()
+    t.test_cryptotick_l2_snap_feature_offline()
 
 
     # TODO figure out if we need to use lookahead_shift as a label

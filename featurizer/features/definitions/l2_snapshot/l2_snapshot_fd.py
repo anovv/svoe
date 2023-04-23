@@ -107,21 +107,22 @@ class L2SnapshotFD(FeatureDefinition):
         start_ts, end_ts = None, None
         found_snapshot = False
         cur_ranges = []
-        for meta in ranges:
+        for r in ranges:
+            meta = r['meta']
             if meta_key in meta:
                 found_snapshot = True
             if found_snapshot:
-                cur_ranges.append(meta)
+                cur_ranges.append(r)
             if meta_key in meta:
                 if start_ts is None:
-                    start_ts = meta[meta_key]
+                    start_ts = meta[meta_key][0]
                 else:
                     # TODO there will be a 1ts overlap between partitioned groups
                     #  do we need to handle this?
-                    end_ts = meta[meta_key]
-                    res[closed(start_ts, end_ts)] = cur_ranges
-                    start_ts = meta[meta_key]
-                    cur_ranges = [meta]
+                    end_ts = meta[meta_key][0]
+                    res[closed(float(start_ts), float(end_ts))] = cur_ranges
+                    start_ts = meta[meta_key][0]
+                    cur_ranges = [r]
 
         if not found_snapshot:
             # no snapshots, return empty
@@ -129,7 +130,7 @@ class L2SnapshotFD(FeatureDefinition):
 
         # append trailing deltas, last block
         end_ts = ranges[-1]['end_ts']
-        interval = closed(start_ts, end_ts)
+        interval = closed(float(start_ts), float(end_ts))
         if len(cur_ranges) != 0 and interval not in res:
             res[interval] = cur_ranges
 

@@ -124,7 +124,13 @@ def calculate_feature(
     merged = merge_blocks(deps)
     # construct upstreams
     upstreams = {dep_named_feature: Stream() for dep_named_feature in deps.keys()}
-    out_stream = feature.feature_definition.stream(upstreams, feature.params)
+    s = feature.feature_definition.stream(upstreams, feature.params)
+    if isinstance(s, Tuple):
+        out_stream = s[0]
+        state = s[1]
+    else:
+        out_stream = s
+
     df = run_stream(merged, upstreams, out_stream, interval)
     if not is_ts_sorted(df):
         raise ValueError(f'Feature df is not ts sorted {feature, interval}')
@@ -262,14 +268,15 @@ def build_feature_task_graph(
 
 def execute_task_graph(dag: Dict, feature: Feature) -> List[Block]:
     root_nodes = list(dag[feature].values())
-    workflow_results_refs = []
+    results_refs = []
     with ray.init(address='auto'):
         # TODO launch single workflow for this?
         for node in root_nodes:
-            r = workflow.run_async(node)
-            workflow_results_refs.append(r)
+            # r = workflow.run_async(node)
+            r = node.execute()
+            results_refs.append(r)
 
-        return ray.get(workflow_results_refs)
+        return ray.get(results_refs)
 
 
 def build_feature_set_task_graph(

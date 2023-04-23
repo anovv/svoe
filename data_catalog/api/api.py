@@ -21,10 +21,9 @@ class Api:
         symbol: str,
         start_date: Optional[str] = None,
         end_date: Optional[str] = None
-    ) -> List:
-        meta = self.client.select(exchange, data_type, instrument_type, symbol, start_date, end_date)
-        print(len(meta))
-        return self._make_ranges(meta)
+    ) -> List[List]:
+        raw_data = self.client.select(exchange, data_type, instrument_type, symbol, start_date, end_date)
+        return self._make_ranges(raw_data)
 
     # TODO sync typing with featurizer
     # TODO util this
@@ -32,18 +31,18 @@ class Api:
         # if conseq files differ no more than this, they are in the same range
         # TODO should this be const per data_type?
         SAME_RANGE_DIFF_S = 1
-        res = []
+        ranges = []
         cur_range = []
         for i in range(len(data)):
             cur_range.append(data[i])
             if i < len(data) - 1 and float(data[i + 1]['start_ts']) - float(data[i]['end_ts']) > SAME_RANGE_DIFF_S:
-                res.append(cur_range)
+                ranges.append(cur_range)
                 cur_range = []
 
         if len(cur_range) != 0:
-            res.append(cur_range)
+            ranges.append(cur_range)
 
-        return res
+        return ranges
 
     # TODO util this
     def ranges_to_intervals_df(self, ranges: List):
