@@ -289,9 +289,7 @@ class TestFeatureCalculator(unittest.TestCase):
 
     def test_cryptotick_l2_snap_feature_offline(self):
         api = Api()
-        l2_data_ranges_meta = api.get_meta('BINANCE', 'l2_book', 'spot', 'BTC-USDT')
-        # limit fo testing
-        l2_data_ranges_meta = l2_data_ranges_meta[0][:5]
+        l2_data_ranges_meta = api.get_meta('BINANCE', 'l2_book', 'spot', 'BTC-USDT')[0]
 
         data_def = Feature([], 0, CryptotickL2BookIncrementalData, {})
 

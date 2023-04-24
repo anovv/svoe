@@ -1,4 +1,5 @@
 import itertools
+import time
 from typing import Dict, List, Any, Tuple, Optional
 
 
@@ -70,19 +71,18 @@ def get_overlaps(intervaled_values_per_feature: Dict[Feature, IntervalDict]) -> 
 # s3/data lake aux methods
 # TODO move to separate class
 # TODO add cpu/mem budget
-@ray.remote
+@ray.remote(num_cpus=0.001)
 def load_if_needed(
     block_meta: BlockMeta,
 ) -> Block:
     # TODO if using Ray's Plasma, check shared obj store first, if empty - load from s3
     # TODO figure out how to split BlockRange -> Block and cache if needed
     # TODO sync keys
+    print('Load started')
+    t = time.time()
     path = block_meta['path']
     df = load_df(path)
-
-    # TODO move this check to loading logic
-    if not is_ts_sorted(df):
-        raise ValueError(f'Data df is not ts sorted {path}')
+    print(f'Load finished {time.time() - t}s')
     return df
 
 
@@ -100,12 +100,14 @@ def load_if_needed(
 # https://github.com/topics/discrete-event-simulation?l=python&o=desc&s=forks
 # https://docs.python.org/3/library/tkinter.html
 # TODO this should be in Feature class
-@ray.remote
+@ray.remote(num_cpus=0.9)
 def calculate_feature(
     feature: Feature,
     dep_refs: Dict[Feature, List[ObjectRef[Block]]], # maps dep feature to BlockRange # TODO List[BlockRange] when using 'holes'
     interval: Interval
 ) -> Block:
+    print('Calc feature started')
+    t = time.time()
     # TODO add mem tracking
     # this loads blocks for all dep features from shared object store to workers heap
     # hence we need to reserve a lot of mem here
@@ -132,8 +134,7 @@ def calculate_feature(
         out_stream = s
 
     df = run_stream(merged, upstreams, out_stream, interval)
-    if not is_ts_sorted(df):
-        raise ValueError(f'Feature df is not ts sorted {feature, interval}')
+    print(f'Calc feature finished {time.time() - t}s')
     return df
 
 
@@ -210,8 +211,6 @@ def build_feature_task_graph(
     # TODO decouple derived feature_ranges_meta and input data ranges meta
     ranges_meta: Dict[Feature, List]  # TODO typehint when decide on BlockRangeMeta/BlockMeta
 ):
-    # TODO pass this as a param
-
     # bottom up/postorder traversal
     def tree_traversal_callback(feature: Feature):
         if feature.feature_definition.is_data_source():
@@ -269,12 +268,25 @@ def build_feature_task_graph(
 def execute_task_graph(dag: Dict, feature: Feature) -> List[Block]:
     root_nodes = list(dag[feature].values())
     results_refs = []
+    executing_refs = []
+    max_concurrent_dags = 12 # num_cpus
+    i = 0
     with ray.init(address='auto'):
-        # TODO launch single workflow for this?
-        for node in root_nodes:
-            # r = workflow.run_async(node)
-            r = node.execute()
-            results_refs.append(r)
+        # TODO merge this with Scheduler in PipelineRunner
+        while i < len(root_nodes):
+            if len(executing_refs) < max_concurrent_dags:
+                print(f'Scheduled {i + 1}/{len(root_nodes)} dags')
+                executing_refs.append(root_nodes[i].execute())
+                i += 1
+            ready, remaining = ray.wait(executing_refs, num_returns=len(executing_refs), fetch_local=False, timeout=0.001)
+            results_refs.extend(ready)
+            executing_refs = remaining
+
+        # all scheduled, wait for completion
+        while len(executing_refs) > 0:
+            ready, remaining = ray.wait(executing_refs, num_returns=len(executing_refs), fetch_local=False, timeout=30)
+            results_refs.extend(ready)
+            executing_refs = remaining
 
         return ray.get(results_refs)
 
