@@ -29,7 +29,12 @@ def build_stream_graph(feature: Feature) -> Dict[Feature, Stream]:
         for dep_feature in feature.children:
             dep_upstreams[dep_feature] = stream_graph[dep_feature]
         # TODO this should be part of Feature class
-        stream = feature.feature_definition.stream(dep_upstreams, feature.params)
+        s = feature.feature_definition.stream(dep_upstreams, feature.params)
+        if isinstance(s, Tuple):
+            stream = s[0]
+            state = s[1]
+        else:
+            stream = s
         stream_graph[feature] = stream
 
     postorder(feature, callback)

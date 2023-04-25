@@ -279,12 +279,15 @@ class TestFeatureCalculator(unittest.TestCase):
         stream = stream_graph[feature]
         data = Feature([], 0, CryptotickL2BookIncrementalData, data_params)
         sources = {data: stream_graph[data]}
-        # df = get_cached_df(self._cache_key_for_big_cryptotick_df_split(0))
-        df = None # TODO api for loading small testing cryptotick dfs
-        # merged_events = C.merge_blocks({data: [df]})
-        merged_events = []
+        path = 's3://svoe-cataloged-data/l2_book/BINANCE/spot/BTC-USDT/2023-02-01/cryptotick/100.0mb/1675216068-40f26fdc1fafb2c056fc77f76609049ce0a47944.parquet.gz'
+        df = load_df(path)
+        merged_events = C.merge_blocks({data: [df]})
         online_res = C.run_stream(merged_events, sources, stream)
         print(online_res)
+        print(online_res['asks'].iloc[1000])
+        print(len(online_res['asks'].iloc[1000]))
+        print(online_res['bids'].iloc[1000])
+        print(len(online_res['bids'].iloc[1000]))
 
 
     def test_cryptotick_l2_snap_feature_offline(self):
@@ -301,6 +304,11 @@ class TestFeatureCalculator(unittest.TestCase):
         res_blocks = C.execute_task_graph(task_graph, feature)
         print(res_blocks)
 
+    def test_l2_cryptotick_data(self):
+        path = 's3://svoe-cataloged-data/l2_book/BINANCE/spot/BTC-USDT/2023-02-01/cryptotick/100.0mb/1675216068-40f26fdc1fafb2c056fc77f76609049ce0a47944.parquet.gz'
+        df = load_df(path)
+        print(df)
+
 
 if __name__ == '__main__':
     # unittest.main()
@@ -312,8 +320,9 @@ if __name__ == '__main__':
     # t.test_feature_label_set()
     # t.test_cryptofeed_df_split()
     # t.test_cryptotick_df_split()
-    # t.test_cryptotick_l2_snap_feature_online()
-    t.test_cryptotick_l2_snap_feature_offline()
+    t.test_cryptotick_l2_snap_feature_online()
+    # t.test_cryptotick_l2_snap_feature_offline()
+    # t.test_l2_cryptotick_data()
 
 
     # TODO figure out if we need to use lookahead_shift as a label

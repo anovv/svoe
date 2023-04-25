@@ -19,7 +19,6 @@ class _State:
 
 def cryptotick_update_state(state: _State, event: Event, depth: Optional[int] = None) -> Tuple[_State, bool]:
     # see https://www.cryptotick.com/Faq
-    i = 0
     update_type = event['update_type']
     if update_type != 'SNAPSHOT' and not state.inited:
         # bool indicates skip event
@@ -38,6 +37,8 @@ def cryptotick_update_state(state: _State, event: Event, depth: Optional[int] = 
     elif update_type == 'SET':
         for side, price, size in event['orders']:
             state.order_book[side][price] = size
+            if state.order_book[side][price] == 0.0:
+                del state.order_book[side][price]
     elif update_type == 'SUB':
         # TODO proper log data inconsistency
         no_keys_for_sub_event = 0
@@ -46,6 +47,8 @@ def cryptotick_update_state(state: _State, event: Event, depth: Optional[int] = 
                 no_keys_for_sub_event += 1
             else:
                 state.order_book[side][price] -= size
+                if state.order_book[side][price] == 0.0:
+                    del state.order_book[side][price]
 
         # TODO proper log data inconsistency
         if no_keys_for_sub_event > 0:
