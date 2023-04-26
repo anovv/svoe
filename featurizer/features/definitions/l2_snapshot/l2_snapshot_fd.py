@@ -16,6 +16,8 @@ from featurizer.features.blocks.blocks import BlockMeta
 import functools
 import toolz
 
+from utils.time.utils import convert_str_to_seconds
+
 
 # TODO good data 'l2_book', 'BINANCE', 'spot', 'BTC-USDT', '2022-09-29', '2022-09-29'
 # TODO remove malformed files
@@ -68,7 +70,12 @@ class L2SnapshotFD(FeatureDefinition):
         elif sampling == 'skip_all':
             return state, None
         else:
-            raise ValueError(f'Unknown sampling strategy: {sampling}')
+            sampling_s = convert_str_to_seconds(sampling)
+            if (state.last_emitted_ts < 0 or state.timestamp - state.last_emitted_ts > sampling_s) and not skip_event:
+                state.last_emitted_ts = state.timestamp
+                return state, cls._state_snapshot(state, depth)
+            else:
+                return state, None
 
     @classmethod
     def _state_snapshot(cls, state: _State, depth: int) -> Event:

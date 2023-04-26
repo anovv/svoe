@@ -15,6 +15,7 @@ class _State:
     depth: Optional[int] = None
     inited: bool = False
     ob_count: int = 0
+    last_emitted_ts: float = -1
 
 
 def cryptotick_update_state(state: _State, event: Event, depth: Optional[int] = None) -> Tuple[_State, bool]:

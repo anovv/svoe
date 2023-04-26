@@ -291,7 +291,8 @@ class TestFeatureCalculator(unittest.TestCase):
         print(task_graph)
         root_nodes = list(task_graph[feature].values())
         res_blocks = C.execute_graph_nodes(root_nodes)
-        print(res_blocks)
+        res = concat(res_blocks)
+        print(res)
 
     def test_cryptotick_midprice_feature_offline(self):
         api = Api()
@@ -299,49 +300,68 @@ class TestFeatureCalculator(unittest.TestCase):
 
         data_def = Feature([], 0, CryptotickL2BookIncrementalData, {})
 
-        feature_params = {1: {'dep_schema': 'cryptotick'}}
-        feature = construct_feature_tree(MidPriceFD, {}, feature_params)
-        print(RenderTree(feature))
-        task_graph = C.build_feature_task_graph({}, feature, {data_def: l2_data_ranges_meta})
-        print(task_graph)
-        root_nodes = list(task_graph[feature].values())
-        res_blocks = C.execute_graph_nodes(root_nodes)
-        res = concat(res_blocks)
-        res = res.reset_index(drop=True)
+        feature_params0 = {1: {'dep_schema': 'cryptotick'}}
+        feature_params1 = {1: {'dep_schema': 'cryptotick', 'sampling': '1s'}}
+        feature_params2 = {1: {'dep_schema': 'cryptotick', 'sampling': '5s'}}
+        feature_params3 = {1: {'dep_schema': 'cryptotick', 'sampling': '10s'}}
+        feature0 = construct_feature_tree(MidPriceFD, {}, feature_params0)
+        feature1 = construct_feature_tree(MidPriceFD, {}, feature_params1)
+        feature2 = construct_feature_tree(MidPriceFD, {}, feature_params2)
+        feature3 = construct_feature_tree(MidPriceFD, {}, feature_params3)
+        task_graph0 = C.build_feature_task_graph({}, feature0, {data_def: l2_data_ranges_meta})
+        task_graph1 = C.build_feature_task_graph({}, feature1, {data_def: l2_data_ranges_meta})
+        task_graph2 = C.build_feature_task_graph({}, feature2, {data_def: l2_data_ranges_meta})
+        task_graph3 = C.build_feature_task_graph({}, feature3, {data_def: l2_data_ranges_meta})
+        root_nodes0 = list(task_graph0[feature0].values())
+        root_nodes1 = list(task_graph1[feature1].values())
+        root_nodes2 = list(task_graph2[feature2].values())
+        root_nodes3 = list(task_graph3[feature3].values())
+        res_blocks0 = C.execute_graph_nodes(root_nodes0)
+        res_blocks1 = C.execute_graph_nodes(root_nodes1)
+        res_blocks2 = C.execute_graph_nodes(root_nodes2)
+        res_blocks3 = C.execute_graph_nodes(root_nodes3)
+        res0 = concat(res_blocks0)
+        res1 = concat(res_blocks1)
+        res2 = concat(res_blocks2)
+        res3 = concat(res_blocks3)
+        print(len(res0), len(res1), len(res2), len(res3))
 
         # cache_df_if_needed(res, 'test-1-df')
         # res = get_cached_df('test-1-df')
 
         # TODO why is this not sorted?
-        res = res.sort_values(by=['timestamp'], ignore_index=True)
+        # res = res.sort_values(by=['timestamp'], ignore_index=True)
 
-        fig, axes = plt.subplots(nrows=2, ncols=1)
-        res.plot(x='timestamp', y='mid_price', ax=axes[0])
+        fig, axes = plt.subplots(nrows=4, ncols=1)
+        res0.plot(x='timestamp', y='mid_price', ax=axes[0])
+        res1.plot(x='timestamp', y='mid_price', ax=axes[1])
+        res2.plot(x='timestamp', y='mid_price', ax=axes[2])
+        res3.plot(x='timestamp', y='mid_price', ax=axes[3])
 
         # compare to cryptotick quotes
-        mdf = load_df('s3://svoe-cryptotick-data/quotes/20230201/BINANCE_SPOT_BTC_USDT.csv.gz', extension='csv')
-
-        def _to_ts(s):
-            return ciso8601.parse_datetime(f'{s}Z').timestamp()
-
-        mdf['timestamp'] = mdf['time_exchange'].map(lambda x: _to_ts(x))
-        mdf['receipt_timestamp'] = mdf['time_coinapi'].map(lambda x: _to_ts(x))
-
-        # for some reason raw cryptotick dates are not sorted
-        # don't use inplace=True as it harms perf https://sourcery.ai/blog/pandas-inplace/
-        mdf = mdf.sort_values(by=['timestamp'], ignore_index=True)
-
-        mdf = mdf.drop(columns=['time_exchange', 'time_coinapi'])
-
-        last_ts = res.iloc[len(res) - 1]['timestamp']
-        first_ts = res.iloc[0]['timestamp']
-
-        mdf = mdf[(mdf['timestamp'] <= last_ts) & (mdf['timestamp'] >= first_ts)]
-        mdf['mid_price'] = (mdf['ask_px'] + mdf['bid_px'])/2
-
-        print(len(res), len(mdf))
-        mdf.plot(x='timestamp', y='mid_price', ax=axes[1])
-
+        # mdf = load_df('s3://svoe-cryptotick-data/quotes/20230201/BINANCE_SPOT_BTC_USDT.csv.gz', extension='csv')
+        #
+        # def _to_ts(s):
+        #     return ciso8601.parse_datetime(f'{s}Z').timestamp()
+        #
+        # mdf['timestamp'] = mdf['time_exchange'].map(lambda x: _to_ts(x))
+        # mdf['receipt_timestamp'] = mdf['time_coinapi'].map(lambda x: _to_ts(x))
+        #
+        # # for some reason raw cryptotick dates are not sorted
+        # # don't use inplace=True as it harms perf https://sourcery.ai/blog/pandas-inplace/
+        # mdf = mdf.sort_values(by=['timestamp'], ignore_index=True)
+        #
+        # mdf = mdf.drop(columns=['time_exchange', 'time_coinapi'])
+        #
+        # last_ts = res.iloc[len(res) - 1]['timestamp']
+        # first_ts = res.iloc[0]['timestamp']
+        #
+        # mdf = mdf[(mdf['timestamp'] <= last_ts) & (mdf['timestamp'] >= first_ts)]
+        # mdf['mid_price'] = (mdf['ask_px'] + mdf['bid_px'])/2
+        #
+        # print(len(res), len(mdf))
+        # mdf.plot(x='timestamp', y='mid_price', ax=axes[1])
+        #
         plt.show()
 
     def test_l2_cryptotick_data(self):
@@ -397,8 +417,8 @@ if __name__ == '__main__':
     # t.test_cryptotick_l2_snap_feature_online()
     # t.test_cryptotick_l2_snap_feature_offline()
     # t.test_l2_cryptotick_data()
-    # t.test_cryptotick_midprice_feature_offline()
-    t.test_feature_label_set_cryptotick()
+    t.test_cryptotick_midprice_feature_offline()
+    # t.test_feature_label_set_cryptotick()
 
 
     # TODO figure out if we need to use lookahead_shift as a label
