@@ -5,6 +5,7 @@ from typing import Dict, List, Any, Tuple, Optional
 
 import ray
 from ray import workflow
+from ray.dag import DAGNode
 from ray.types import ObjectRef
 
 from featurizer.features.data.data_definition import Event
@@ -270,18 +271,18 @@ def build_feature_task_graph(
     return dag
 
 
-def execute_task_graph(dag: Dict, feature: Feature) -> List[Block]:
-    root_nodes = list(dag[feature].values())
+def execute_graph_nodes(nodes: List[DAGNode]) -> List[Block]:
+    # root_nodes = list(dag[feature].values())
     results_refs = []
     executing_refs = []
     max_concurrent_dags = 12 # num_cpus
     i = 0
     with ray.init(address='auto'):
         # TODO merge this with Scheduler in PipelineRunner
-        while i < len(root_nodes):
+        while i < len(nodes):
             if len(executing_refs) < max_concurrent_dags:
-                print(f'Scheduled {i + 1}/{len(root_nodes)} dags')
-                executing_refs.append(root_nodes[i].execute())
+                print(f'Scheduled {i + 1}/{len(nodes)} dags')
+                executing_refs.append(nodes[i].execute())
                 i += 1
             ready, remaining = ray.wait(executing_refs, num_returns=len(executing_refs), fetch_local=False, timeout=0.001)
             results_refs.extend(ready)
@@ -302,13 +303,14 @@ def build_feature_set_task_graph(
     ranges_meta: Dict[Feature, List]
 ):
     for feature in features:
-        # TODO check if feature is already in dag and skip?
+        if feature in dag:
+            continue
         dag = build_feature_task_graph(dag, feature, ranges_meta)
 
     return dag
 
 
-def point_in_time_join(dag: Dict, features_to_join: List[Feature], label_feature: Feature) -> List:
+def point_in_time_join_dag(dag: Dict, features_to_join: List[Feature], label_feature: Feature) -> List:
     # TODO can we use IntervalDict directly in dag?
     nodes_per_feature_per_interval = {}
     for feature in features_to_join:
@@ -360,6 +362,8 @@ def _point_in_time_join_block(
 ) -> pd.DataFrame:
     # TODO this loads all dfs at once,
     # TODO can we do it iteratively so gc has time to collect old dfs to reduce mem footprint? (tradeoff speed/memory)
+    print('Join started')
+    t = time.time()
     concated = {}
     for feature in blocks_refs_per_feature:
         block_refs = [prev_block_ref_per_feature[feature]] if feature in prev_block_ref_per_feature else []
@@ -377,6 +381,8 @@ def _point_in_time_join_block(
         dfs.append(concated[feature])
 
     merged = merge_asof_multi(dfs)
+
+    print(f'Join finished {time.time() - t}s')
     return sub_df_ts(merged, interval.lower, interval.upper)
 
 
@@ -392,6 +398,6 @@ def build_feature_label_set_task_graph(
     dag = {}
     dag = build_feature_set_task_graph(dag, features, ranges_meta)
 
-    return point_in_time_join(dag, features, label)
+    return point_in_time_join_dag(dag, features, label)
 
 

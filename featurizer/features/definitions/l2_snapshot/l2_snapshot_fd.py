@@ -16,6 +16,7 @@ from featurizer.features.blocks.blocks import BlockMeta
 import functools
 import toolz
 
+
 # TODO good data 'l2_book', 'BINANCE', 'spot', 'BTC-USDT', '2022-09-29', '2022-09-29'
 # TODO remove malformed files
 class L2SnapshotFD(FeatureDefinition):
@@ -74,7 +75,9 @@ class L2SnapshotFD(FeatureDefinition):
         bids = FrozenList()
         asks = FrozenList()
         if depth == -1: # indicates full book
-            depth = max(len(state.order_book.bids), len(state.order_book.asks))
+            depth = min(len(state.order_book.bids), len(state.order_book.asks))
+        else:
+            depth = min(depth, min(len(state.order_book.bids), len(state.order_book.asks)))
 
         for level in range(depth):
             for side in ['bid', 'ask']:
@@ -145,3 +148,4 @@ class L2SnapshotFD(FeatureDefinition):
             return [CryptotickL2BookIncrementalData]
 
         raise ValueError(f'Unknown dep_schema: {dep_schema}')
+

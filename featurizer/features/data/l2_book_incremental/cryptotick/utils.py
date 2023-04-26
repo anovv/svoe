@@ -18,9 +18,26 @@ import pandas as pd
 # see https://www.cryptotick.com/Faq
 # this is a heavy compute operation, 5Gb df takes 4-5 mins
 def preprocess_l2_inc_df(df: pd.DataFrame, date_str: str) -> pd.DataFrame:
-    # raw_date_str = '20230201' # TODO this is old, delete
-    # datetime_str = f'{raw_date_str[0:4]}-{raw_date_str[4:6]}-{raw_date_str[6:8]}T'  # yyyy-mm-dd + 'T'
+    df = process_cryptotick_timestamps(df, date_str)
 
+    # cryptotick l2_inc should not contain any order_id info
+    if 'order_id' in df and pd.notna(df['order_id']).sum() != 0:
+        raise ValueError('Cryptotick l2_inc df should not contain order_id values')
+
+    if 'order_id' in df:
+        df = df.drop(columns=['order_id'])
+
+    # rename is_buy -> side, entry_px -> price, entry_sx -> size
+    df['side'] = df['is_buy'].map(lambda x: 'bid' if x == 1 else 'ask')
+    df = df.drop(columns=['is_buy'])
+    df = df.rename(columns={'entry_px': 'price', 'entry_sx': 'size'})
+
+    df = df.reset_index(drop=True)
+
+    return df
+
+
+def process_cryptotick_timestamps(df: pd.DataFrame, date_str: str) -> pd.DataFrame:
     # date_str = dd-mm-yyyy '01-02-2023'
     datetime_str = f'{date_str[6:10]}-{date_str[3:5]}-{date_str[0:2]}T'  # yyyy-mm-dd + 'T'
 
@@ -37,20 +54,6 @@ def preprocess_l2_inc_df(df: pd.DataFrame, date_str: str) -> pd.DataFrame:
         raise ValueError('Unable to sort df by timestamp')
 
     df = df.drop(columns=['time_exchange', 'time_coinapi'])
-
-    # cryptotick l2_inc should not contain any order_id info
-    if 'order_id' in df and pd.notna(df['order_id']).sum() != 0:
-        raise ValueError('Cryptotick l2_inc df should not contain order_id values')
-
-    if 'order_id' in df:
-        df = df.drop(columns=['order_id'])
-
-    # rename is_buy -> side, entry_px -> price, entry_sx -> size
-    df['side'] = df['is_buy'].map(lambda x: 'bid' if x == 1 else 'ask')
-    df = df.drop(columns=['is_buy'])
-    df = df.rename(columns={'entry_px': 'price', 'entry_sx': 'size'})
-
-    df = df.reset_index(drop=True)
 
     return df
 

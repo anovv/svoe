@@ -1,6 +1,7 @@
 import shutil
 import time
 
+import ciso8601
 import numpy as np
 import ray
 from bokeh.io import show
@@ -8,13 +9,15 @@ from bokeh.models import ColumnDataSource, Range1d, LinearAxis
 from bokeh.plotting import figure
 from portion import Interval, closed
 from ray.util.dask import enable_dask_on_ray
+import matplotlib.pyplot as plt
 
 import calculator as C
 from data_catalog.api.api import Api
 from featurizer.features.data.data_source_definition import DataSourceDefinition
 from featurizer.features.data.l2_book_incremental.cryptofeed.cryptofeed_l2_book_incremental import CryptofeedL2BookIncrementalData
 from featurizer.features.data.l2_book_incremental.cryptotick.cryptotick_l2_book_incremental import CryptotickL2BookIncrementalData
-from featurizer.features.data.l2_book_incremental.cryptotick.utils import preprocess_l2_inc_df
+from featurizer.features.data.l2_book_incremental.cryptotick.utils import preprocess_l2_inc_df, \
+    process_cryptotick_timestamps
 from featurizer.features.data.trades.trades import TradesData
 from featurizer.features.definitions.l2_snapshot.l2_snapshot_fd import L2SnapshotFD
 from featurizer.features.definitions.mid_price.mid_price_fd import MidPriceFD
@@ -145,7 +148,7 @@ class TestFeatureCalculator(unittest.TestCase):
             pass
 
         # distributed
-        nodes = C.point_in_time_join(dag, list(dag.keys()), label_feature)
+        nodes = C.point_in_time_join_dag(dag, list(dag.keys()), label_feature)
         with ray.init(address='auto'):
             # execute dag
             nodes_res_dfs = ray.get([ray.workflow.run_async(dag=node, workflow_id=f'{time.time_ns()}') for node in nodes])
@@ -180,9 +183,7 @@ class TestFeatureCalculator(unittest.TestCase):
         # with ray.init(address='auto', runtime_env={'pip': ['pyarrow==6.0.1']}):
         with ray.init(address='auto'):
             # execute dag
-            refs = [ray.workflow.run_async(dag=node, workflow_id=f'{time.time_ns()}') for node in flset]
-            # nodes_res_dfs = ray.get(refs)
-            # res = concat(nodes_res_dfs)
+            refs = [node.execute() for node in flset]
             ray.wait(refs, num_returns=len(refs))
             dataset = ray.data.from_pandas_refs(refs)
             with enable_dask_on_ray():
@@ -190,19 +191,6 @@ class TestFeatureCalculator(unittest.TestCase):
                 ddf = dataset.to_dask()
                 res = ddf.sample(frac=0.5).compute()
             print(res)
-
-        # res.plot(x='timestamp', y=['mid_price', 'volatility'])
-
-        source = ColumnDataSource(res)
-        p = figure(x_axis_type="datetime", plot_width=800, plot_height=350)
-        p.line('timestamp', 'mid_price', source=source)
-        p.y_range = Range1d(start=19000, end=20000)
-        p.extra_y_ranges = {'volatility': Range1d(start=0, end=10)}
-        p.add_layout(LinearAxis(y_range_name='volatility'), 'right')
-        p.line('timestamp', 'volatility', source=source, y_range_name='volatility')
-
-        # output_file("ts.html")
-        show(p)
 
     def test_cryptotick_df_split(self):
         path = 's3://svoe-junk/27606-BITSTAMP_SPOT_BTC_EUR.csv.gz'
@@ -301,13 +289,99 @@ class TestFeatureCalculator(unittest.TestCase):
         print(RenderTree(feature))
         task_graph = C.build_feature_task_graph({}, feature, {data_def: l2_data_ranges_meta})
         print(task_graph)
-        res_blocks = C.execute_task_graph(task_graph, feature)
+        root_nodes = list(task_graph[feature].values())
+        res_blocks = C.execute_graph_nodes(root_nodes)
         print(res_blocks)
+
+    def test_cryptotick_midprice_feature_offline(self):
+        api = Api()
+        l2_data_ranges_meta = api.get_meta('BINANCE', 'l2_book', 'spot', 'BTC-USDT')[0][:10]
+
+        data_def = Feature([], 0, CryptotickL2BookIncrementalData, {})
+
+        feature_params = {1: {'dep_schema': 'cryptotick'}}
+        feature = construct_feature_tree(MidPriceFD, {}, feature_params)
+        print(RenderTree(feature))
+        task_graph = C.build_feature_task_graph({}, feature, {data_def: l2_data_ranges_meta})
+        print(task_graph)
+        root_nodes = list(task_graph[feature].values())
+        res_blocks = C.execute_graph_nodes(root_nodes)
+        res = concat(res_blocks)
+        res = res.reset_index(drop=True)
+
+        # cache_df_if_needed(res, 'test-1-df')
+        # res = get_cached_df('test-1-df')
+
+        # TODO why is this not sorted?
+        res = res.sort_values(by=['timestamp'], ignore_index=True)
+
+        fig, axes = plt.subplots(nrows=2, ncols=1)
+        res.plot(x='timestamp', y='mid_price', ax=axes[0])
+
+        # compare to cryptotick quotes
+        mdf = load_df('s3://svoe-cryptotick-data/quotes/20230201/BINANCE_SPOT_BTC_USDT.csv.gz', extension='csv')
+
+        def _to_ts(s):
+            return ciso8601.parse_datetime(f'{s}Z').timestamp()
+
+        mdf['timestamp'] = mdf['time_exchange'].map(lambda x: _to_ts(x))
+        mdf['receipt_timestamp'] = mdf['time_coinapi'].map(lambda x: _to_ts(x))
+
+        # for some reason raw cryptotick dates are not sorted
+        # don't use inplace=True as it harms perf https://sourcery.ai/blog/pandas-inplace/
+        mdf = mdf.sort_values(by=['timestamp'], ignore_index=True)
+
+        mdf = mdf.drop(columns=['time_exchange', 'time_coinapi'])
+
+        last_ts = res.iloc[len(res) - 1]['timestamp']
+        first_ts = res.iloc[0]['timestamp']
+
+        mdf = mdf[(mdf['timestamp'] <= last_ts) & (mdf['timestamp'] >= first_ts)]
+        mdf['mid_price'] = (mdf['ask_px'] + mdf['bid_px'])/2
+
+        print(len(res), len(mdf))
+        mdf.plot(x='timestamp', y='mid_price', ax=axes[1])
+
+        plt.show()
 
     def test_l2_cryptotick_data(self):
         path = 's3://svoe-cataloged-data/l2_book/BINANCE/spot/BTC-USDT/2023-02-01/cryptotick/100.0mb/1675216068-40f26fdc1fafb2c056fc77f76609049ce0a47944.parquet.gz'
         df = load_df(path)
         print(df)
+
+
+    def test_feature_label_set_cryptotick(self):
+        api = Api()
+        l2_data_ranges_meta = api.get_meta('BINANCE', 'l2_book', 'spot', 'BTC-USDT')[0][:10]
+
+        # data_def = Feature([], 0, CryptotickL2BookIncrementalData, {})
+        # feature_mid_price = construct_feature_tree(MidPriceFD, {}, {1: {'dep_schema': 'cryptotick'}})
+        # feature_volatility = construct_feature_tree(VolatilityStddevFD, {}, {2: {'dep_schema': 'cryptotick'}})
+        # flset = C.build_feature_label_set_task_graph([feature_mid_price, feature_volatility], {data_def: l2_data_ranges_meta}, feature_mid_price)
+        # res = C.execute_graph_nodes(flset)
+
+        # cache_df_if_needed(concat(res), 'test-2-df')
+        res = get_cached_df('test-2-df')
+
+        # TODO why is this not ts sorted? Some values are out of order
+        res = res.sort_values(by=['timestamp'], ignore_index=True)
+
+        print(res)
+        fig, axes = plt.subplots(nrows=2, ncols=1)
+        res.plot(x='timestamp', y='mid_price', ax=axes[0])
+        res.plot(x='timestamp', y='volatility', ax=axes[1])
+        # plt.show()
+        with ray.init(address='auto'):
+            # execute dag
+            refs = [node.execute() for node in flset]
+            ray.wait(refs, num_returns=len(refs))
+            dataset = ray.data.from_pandas_refs(refs)
+            with enable_dask_on_ray():
+                # ddf = dd.from_delayed([ref_to_df([ref]) for ref in refs])
+                ddf = dataset.to_dask()
+                res = ddf.sample(frac=0.5).compute()
+            print(res)
+
 
 
 if __name__ == '__main__':
@@ -320,9 +394,11 @@ if __name__ == '__main__':
     # t.test_feature_label_set()
     # t.test_cryptofeed_df_split()
     # t.test_cryptotick_df_split()
-    t.test_cryptotick_l2_snap_feature_online()
+    # t.test_cryptotick_l2_snap_feature_online()
     # t.test_cryptotick_l2_snap_feature_offline()
     # t.test_l2_cryptotick_data()
+    # t.test_cryptotick_midprice_feature_offline()
+    t.test_feature_label_set_cryptotick()
 
 
     # TODO figure out if we need to use lookahead_shift as a label
