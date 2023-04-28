@@ -1,9 +1,8 @@
 from ray import workflow
 
 from data_catalog.common.actors.db import DbActor
-from data_catalog.common.actors.stats import Stats
 from data_catalog.common.data_models.models import InputItemBatch
-from data_catalog.common.tasks.tasks import filter_existing, load_df, catalog_df, gather_and_wait, write_batch, chain_no_ret
+from data_catalog.common.tasks.tasks_DEPRECATED import filter_existing, load_df, catalog_df, gather_and_wait, write_batch, chain_no_ret
 from data_catalog.common.utils.register import ray_task_name, EventType, send_events_to_stats
 from data_catalog.common.utils.sql.models import DataCatalog
 from data_catalog.pipelines.dag import Dag
@@ -11,7 +10,8 @@ from data_catalog.pipelines.dag import Dag
 
 class CatalogCryptofeedDag(Dag):
 
-    def get(self, dag_id: str, input_batch: InputItemBatch, stats: Stats, db_actor: DbActor):
+    def get(self, dag_id: str, input_batch: InputItemBatch, db_actor: DbActor):
+        stats = None # TODO we deprecate/upgrade Stats actor
         filter_task_id = f'{dag_id}_{ray_task_name(filter_existing)}'
 
         # construct DAG

@@ -127,10 +127,10 @@ def _construct_s3_path(item: DataCatalog) -> str:
         DataCatalog.instrument_type.name,
         DataCatalog.instrument_extra.name,
         DataCatalog.symbol.name,
-        DataCatalog.date.name,
         DataCatalog.source.name,
         DataCatalog.compaction.name,
         DataCatalog.version.name,
+        DataCatalog.date.name, # date should be last so we can identify all data by prefix in s3
     ]:
         v = item.__dict__[field]
         if v is not None and len(v) > 0:

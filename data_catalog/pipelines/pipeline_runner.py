@@ -22,7 +22,6 @@ from data_catalog.common.data_models.models import InputItemBatch
 
 
 class PipelineRunner:
-    stats: Stats
     db_actor: DbActor
     scheduler: Scheduler
 
@@ -30,16 +29,17 @@ class PipelineRunner:
         # TODO init throughput
 
         # TODO use named actors and with get_if_exists: a = Greeter.options(name="g1", get_if_exists=True)
+        # TODO uncomment when Stats refactoring is done
         # run stats
-        self.stats = Stats.remote()
-        self.stats.run.remote()
+        # self.stats = Stats.remote()
+        # self.stats.run.remote()
 
         # TODO make db an actor pool if lots of connections
         # db actor
         self.db_actor = DbActor.remote()
 
         # run scheduler
-        self.scheduler = Scheduler.remote(self.stats, self.db_actor)
+        self.scheduler = Scheduler.remote(self.db_actor)
         self.scheduler.run.remote(dag)
         print('PipelineRunner started')
 

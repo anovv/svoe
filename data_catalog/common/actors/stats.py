@@ -17,7 +17,7 @@ from bokeh.plotting import figure
 import ray.experimental.state.api as ray_state_api
 
 from data_catalog.common.utils.register import TASK_NAMES, EVENT_NAMES, EventType, get_event_name, ray_task_name
-from data_catalog.common.tasks.tasks import load_df
+from data_catalog.common.tasks.tasks_DEPRECATED import load_df
 
 
 import ray

@@ -16,12 +16,12 @@ from data_catalog.pipelines.dag import Dag
 @ray.remote
 class Scheduler:
 
-    def __init__(self, stats: Stats, db_actor: DbActor):
+    def __init__(self, db_actor: DbActor):
         self.read_queue = asyncio.Queue()
         self.input_queue = asyncio.Queue()
 
         self.is_running = True
-        self.stats = stats
+        # self.stats = stats
         self.db_actor = db_actor
         self.result_refs = []
 
@@ -50,7 +50,7 @@ class Scheduler:
             input_batch = await self.input_queue.get()
             batch_id = input_batch[0]['batch_id']
             dag_id = f'dag_{self.run_id}_{batch_id}'
-            _dag = dag.get(dag_id, input_batch, self.stats, self.db_actor)
+            _dag = dag.get(dag_id, input_batch, self.db_actor)
 
             # TODO figure out what to do with result_refs
             self.result_refs.append(_dag.execute())
