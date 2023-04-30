@@ -19,11 +19,10 @@ def store_df(path: str, df: pd.DataFrame, cache_dir: str = CACHE_DIR):
     wr.s3.to_parquet(df, path=path, dataset=False, compression='gzip', boto3_session=session)
 
 
-def load_df(path: str, use_cache: bool = True, cache_dir: str = CACHE_DIR, extension: str = 'parquet') -> pd.DataFrame:
+def load_df(path: str, use_cache: bool = True, cache_dir: str = CACHE_DIR) -> pd.DataFrame:
     # caching first
     cache_key = joblib.hash(path) # can't use s3:// strings as keys, cache_df lib flips out
     if use_cache:
-        # TODO use joblib.Memory instead ?
         df = get_cached_df(cache_key, cache_dir=cache_dir)
         if df is not None:
             return df
@@ -42,12 +41,12 @@ def load_df(path: str, use_cache: bool = True, cache_dir: str = CACHE_DIR, exten
     suffix = split[len(split) - 1]
     prefix = remove_suffix(path, suffix)
     session = get_session()
-    if extension == 'parquet':
-        df = wr.s3.read_parquet(path=prefix, path_suffix=suffix, dataset=False, boto3_session=session)
-    elif extension == 'csv':
+    if '.csv' in path:
         df = wr.s3.read_csv(path=prefix, path_suffix=suffix, dataset=False, boto3_session=session, delimiter=';')
+    elif '.parquet' in path:
+        df = wr.s3.read_parquet(path=prefix, path_suffix=suffix, dataset=False, boto3_session=session)
     else:
-        raise ValueError(f'Unsupported file extension: {extension}')
+        raise ValueError(f'Unknown file extension: {path}')
 
     if use_cache:
         cache_df_if_needed(df, cache_key, cache_dir=cache_dir)

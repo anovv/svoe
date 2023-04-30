@@ -29,14 +29,7 @@ def chain_no_ret(*args):
 def load_df(input_item: InputItem, stats: 'Stats', task_id: str, stats_extra: Optional[Dict] = None) -> pd.DataFrame:
     print('load started')
     path = input_item[DataCatalog.path.name]
-    if '.csv' in path:
-        extension = 'csv'
-    elif '.parquet' in path:
-        extension = 'parquet'
-    else:
-        raise ValueError(f'Unknown file extension: {path}')
-
-    df = df_utils.load_df(path, extension=extension)
+    df = df_utils.load_df(path)
     print('load finished')
     return df
 

@@ -5,8 +5,8 @@ import unittest
 import ray
 
 from data_catalog.common.utils.sql.models import make_catalog_item
-from data_catalog.pipelines.catalog_cryptofeed.dag import CatalogCryptofeedDag
-from data_catalog.pipelines.pipeline_runner import PipelineRunner
+from data_catalog.pipelines.catalog_cryptofeed_DEPRECATED.dag import CatalogCryptofeedDag
+from data_catalog.pipelines.pipeline_runner_DEPRECATED import PipelineRunner
 from data_catalog.common.utils.sql.client import MysqlClient
 from data_catalog.common.utils.cryptofeed.utils import generate_cryptofeed_input_items
 from utils.pandas.df_utils import load_dfs

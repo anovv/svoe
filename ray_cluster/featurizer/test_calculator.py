@@ -196,7 +196,7 @@ class TestFeatureCalculator(unittest.TestCase):
         path = 's3://svoe-junk/27606-BITSTAMP_SPOT_BTC_EUR.csv.gz'
         date_str = '20230201'
         print('Started loading')
-        df = load_df(path, extension='csv')
+        df = load_df(path)
         print('Finished loading, started processing')
         df = preprocess_l2_inc_df(df, date_str)
         print('Finished loading, started preprocessing')

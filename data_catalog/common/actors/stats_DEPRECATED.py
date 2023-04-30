@@ -47,7 +47,7 @@ GRAPH_NAME_CLUSTER_NUM_WORKERS = 'GRAPH_NAME_CLUSTER_NUM_WORKERS'
 CLUSTER_NUM_WORKERS = 'CLUSTER_NUM_WORKERS'
 
 
-
+# TODO use max_concurrency=n instead of threads
 # @ray.remote(resources={'worker_size_small': 1, 'instance_on_demand': 1})
 @ray.remote
 class Stats:

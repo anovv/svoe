@@ -5,7 +5,7 @@ from data_catalog.common.data_models.models import InputItemBatch
 from data_catalog.common.tasks.tasks_DEPRECATED import filter_existing, load_df, catalog_df, gather_and_wait, write_batch, chain_no_ret
 from data_catalog.common.utils.register import ray_task_name, EventType, send_events_to_stats
 from data_catalog.common.utils.sql.models import DataCatalog
-from data_catalog.pipelines.dag import Dag
+from data_catalog.pipelines.dag_DEPRECATED import Dag
 
 
 class CatalogCryptofeedDag(Dag):

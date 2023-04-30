@@ -1,5 +1,5 @@
 import time
-from typing import Optional, List, Tuple, Any
+from typing import Optional, List, Tuple, Any, Generator
 
 import joblib
 from streamz import Stream
@@ -61,12 +61,11 @@ def process_cryptotick_timestamps(df: pd.DataFrame, date_str: str) -> pd.DataFra
 #  same for 512
 #  smaller splits seem to also work (1*1024 works)
 # splits big L2 inc df into chunks, adding full snapshot to the beginning of each chunk
-def split_l2_inc_df_and_pad_with_snapshot(processed_df: pd.DataFrame, split_size_kb: int) -> List[pd.DataFrame]:
+def gen_split_l2_inc_df_and_pad_with_snapshot(processed_df: pd.DataFrame, split_size_kb: int) -> Generator:
     if split_size_kb < 0:
         return [processed_df]
 
     gen = gen_split_df_by_mem(processed_df, split_size_kb)
-    res = []
     prev_snap = None
     i = 0
     t = time.time()
@@ -75,14 +74,12 @@ def split_l2_inc_df_and_pad_with_snapshot(processed_df: pd.DataFrame, split_size
         if i > 0:
             split = prepend_snap(split, prev_snap)
         snap = run_l2_snapshot_stream(split)
-        res.append(split)
+        yield split
         prev_snap = snap
         print(f'split {i} finished: {time.time() - t_s}')
         i += 1
 
     print(f'split finished: {time.time() - t}')
-
-    return res
 
 
 # TODO typing
@@ -141,7 +138,7 @@ def mock_processed_cryptotick_df(
     if proc_df is not None:
         print('Mock cryptotick df cached')
         return proc_df
-    raw_df = load_df(path, extension='csv')
+    raw_df = load_df(path)
     proc_df = preprocess_l2_inc_df(raw_df, date_str)
     if split_size_kb < 0:
         split = proc_df

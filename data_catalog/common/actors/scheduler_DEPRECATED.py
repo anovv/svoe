@@ -12,6 +12,7 @@ from data_catalog.common.actors.stats import Stats
 from data_catalog.pipelines.dag import Dag
 
 
+# TODO use max_concurrency=n instead of threads
 # @ray.remote(resources={'worker_size_small': 1, 'instance_on_demand': 1})
 @ray.remote
 class Scheduler:
@@ -27,7 +28,7 @@ class Scheduler:
 
     async def pipe_input(self, input_item_batch: InputItemBatch):
         if not self.is_running:
-            raise ValueError('Runner is marked as stopped, no more input is accepeted')
+            raise ValueError('Runner is marked as stopped, no more input is accepted')
         await self.read_queue.put(input_item_batch)
 
     async def read_loop(self):
@@ -51,8 +52,6 @@ class Scheduler:
             batch_id = input_batch[0]['batch_id']
             dag_id = f'dag_{self.run_id}_{batch_id}'
             _dag = dag.get(dag_id, input_batch, self.db_actor)
-
-            # TODO figure out what to do with result_refs
             self.result_refs.append(_dag.execute())
 
 

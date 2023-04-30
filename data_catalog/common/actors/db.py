@@ -7,6 +7,7 @@ from data_catalog.common.utils.sql.client import MysqlClient
 from data_catalog.common.utils.sql.models import DataCatalog
 
 
+# TODO use max_concurrency=n instead of threads
 # @ray.remote(resources={'worker_size_small': 1, 'instance_on_demand': 1})
 @ray.remote
 class DbActor:

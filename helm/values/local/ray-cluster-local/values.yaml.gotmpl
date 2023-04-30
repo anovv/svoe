@@ -31,7 +31,7 @@ head:
     block: 'true'
   # rayVersion determines the autoscaler's image version.
   rayVersion: 2.3.1
-  enableInTreeAutoscaling: true
+  enableInTreeAutoscaling: false # TODO
   # TODO set autoscaler resources
   autoscalerOptions:
     upscalingMode: Default
@@ -93,7 +93,7 @@ head:
 worker:
   # If you want to disable the default workergroup
   # uncomment the line below
-  # disabled: true
+  disabled: true
   groupName: small-on-demand
   replicas: 0
   minReplicas: 0
@@ -180,8 +180,8 @@ worker:
 # will be used as the groupName
 additionalWorkerGroups:
   large-spot:
-    replicas: 0
-    minReplicas: 0
+    replicas: 3
+    minReplicas: 3
     maxReplicas: 1000
     type: worker-large-spot
     labels:

@@ -11,8 +11,8 @@ from data_catalog.common.actors.db import DbActor
 
 # implement workflows (for checkpointing/persistence):
 # https://docs.ray.io/en/latest/workflows/key-concepts.html
-from data_catalog.common.actors.scheduler import Scheduler
-from data_catalog.common.actors.stats import Stats
+from data_catalog.common.actors.scheduler_DEPRECATED import Scheduler
+from data_catalog.common.actors.stats_DEPRECATED import Stats
 from data_catalog.common.data_models.models import InputItemBatch
 
 # TODO workflow exception handling
