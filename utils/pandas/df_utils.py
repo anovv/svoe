@@ -27,6 +27,7 @@ def load_df(path: str, use_cache: bool = True, cache_dir: str = CACHE_DIR) -> pd
         if df is not None:
             return df
 
+
     # split path into prefix and suffix
     # this is needed because if dataset=True data wrangler handles input path as a glob pattern,
     # hence messing up special characters
@@ -61,9 +62,14 @@ def cache_df_if_needed(df: pd.DataFrame, cache_key: str, cache_dir: str = CACHE_
 
 
 def get_cached_df(cache_key: str, cache_dir: str = CACHE_DIR) -> Optional[pd.DataFrame]:
-    cache = CacheDF(cache_dir=cache_dir)
-    if cache.is_cached(cache_key):
-        return cache.read(cache_key)
+    try:
+        cache = CacheDF(cache_dir=cache_dir)
+        if cache.is_cached(cache_key):
+            return cache.read(cache_key)
+    except:
+        print('Exception reading df from cache, clearing...')
+        # corrupt cache most likely
+        delete_cached_df(cache_key, cache_dir=cache_dir)
     return None
 
 

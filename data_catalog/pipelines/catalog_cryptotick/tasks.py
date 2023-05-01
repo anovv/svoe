@@ -1,6 +1,7 @@
 import concurrent
 import functools
-from typing import List, Tuple, Dict
+import time
+from typing import List, Tuple, Dict, Callable, Optional
 
 import pandas as pd
 import ray
@@ -14,23 +15,25 @@ from utils.pandas import df_utils
 
 
 @ray.remote(num_cpus=0.9, resources={'worker_size_large': 1, 'instance_spot': 1})
-def load_split_catalog_store_l2_inc_df(input_item: InputItem, chunk_size_kb: int, date_str: str, db_actor: DbActor) -> Dict:
-    print('Load started')
+def load_split_catalog_store_l2_inc_df(input_item: InputItem, chunk_size_kb: int, date_str: str, db_actor: DbActor, callback: Optional[Callable] = None) -> Dict:
     path = input_item[DataCatalog.path.name]
+    t = time.time()
     df = df_utils.load_df(path)
-    print('Load finished')
-    print('Preproc started')
+    callback({'name': 'load_finished', 'time': time.time() - t})
+    t = time.time()
     processed_df = preprocess_l2_inc_df(df, date_str)
-    print('Preproc finished')
-    gen = gen_split_l2_inc_df_and_pad_with_snapshot(processed_df, chunk_size_kb)
+    callback({'name': 'preproc_finished', 'time': time.time() - t})
+
+    def split_callback(i, t):
+        callback({'name': 'split_finished', 'time': t})
+
+    gen = gen_split_l2_inc_df_and_pad_with_snapshot(processed_df, chunk_size_kb, split_callback)
     catalog_items = []
     split_id = 0
     num_splits = 0
 
     executor = concurrent.futures.ThreadPoolExecutor(max_workers=10)
     store_futures = []
-
-    print('Split started')
     for split in gen:
         item_split = input_item.copy()
 
@@ -48,7 +51,7 @@ def load_split_catalog_store_l2_inc_df(input_item: InputItem, chunk_size_kb: int
 
         catalog_item = make_catalog_item(split, item_split)
         store_futures.append(
-            executor.submit(functools.partial(store_df, df=split, path=catalog_item.path))
+            executor.submit(functools.partial(store_df, df=split, path=catalog_item.path, callback=callback))
         )
 
         catalog_items.append(catalog_item)
@@ -58,15 +61,13 @@ def load_split_catalog_store_l2_inc_df(input_item: InputItem, chunk_size_kb: int
     for catalog_item in catalog_items:
         catalog_item.extras['num_splits'] = num_splits
 
-    print('Split finished')
     concurrent.futures.wait(store_futures)
-    print('Store finished')
     res = ray.get(db_actor.write_batch.remote(catalog_items))
-    print('Write db finished')
+    callback({'name': 'write_finished'})
     return res
 
 
-def store_df(df: pd.DataFrame, path: str):
-    print('Store started')
+def store_df(df: pd.DataFrame, path: str, callback: Callable):
+    t = time.time()
     df_utils.store_df(path, df)
-    print(f'Store finished {path}')
+    callback({'name': 'store_finished', 'time': time.time() - t})

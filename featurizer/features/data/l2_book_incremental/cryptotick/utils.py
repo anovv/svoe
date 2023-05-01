@@ -1,5 +1,5 @@
 import time
-from typing import Optional, List, Tuple, Any, Generator
+from typing import Optional, List, Tuple, Any, Generator, Callable
 
 import joblib
 from streamz import Stream
@@ -61,25 +61,27 @@ def process_cryptotick_timestamps(df: pd.DataFrame, date_str: str) -> pd.DataFra
 #  same for 512
 #  smaller splits seem to also work (1*1024 works)
 # splits big L2 inc df into chunks, adding full snapshot to the beginning of each chunk
-def gen_split_l2_inc_df_and_pad_with_snapshot(processed_df: pd.DataFrame, split_size_kb: int) -> Generator:
+def gen_split_l2_inc_df_and_pad_with_snapshot(processed_df: pd.DataFrame, split_size_kb: int, callback: Optional[Callable] = None) -> Generator:
     if split_size_kb < 0:
         return [processed_df]
+
+    if callback is None:
+        def p(i, t):
+            print(f'split {i} finished: {t}s')
+        callback = p
 
     gen = gen_split_df_by_mem(processed_df, split_size_kb)
     prev_snap = None
     i = 0
-    t = time.time()
     for split in gen:
-        t_s = time.time()
+        t = time.time()
         if i > 0:
             split = prepend_snap(split, prev_snap)
         snap = run_l2_snapshot_stream(split)
         yield split
         prev_snap = snap
-        print(f'split {i} finished: {time.time() - t_s}')
+        callback(i, time.time() - t)
         i += 1
-
-    print(f'split finished: {time.time() - t}')
 
 
 # TODO typing
@@ -117,9 +119,6 @@ def prepend_snap(df: pd.DataFrame, snap) -> pd.DataFrame:
     df_snap['update_type'] = 'SNAPSHOT'
     df_snap['timestamp'] = ts
     df_snap['receipt_timestamp'] = receipt_ts
-
-    print(f'Split size: {get_size_kb(df)}')
-    print(f'Snap size: {get_size_kb(df_snap)}')
 
     return concat([df_snap, df])
 
