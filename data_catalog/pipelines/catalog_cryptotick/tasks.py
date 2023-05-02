@@ -62,6 +62,7 @@ def load_split_catalog_store_l2_inc_df(input_item: InputItem, chunk_size_kb: int
         catalog_item.extras['num_splits'] = num_splits
 
     concurrent.futures.wait(store_futures)
+    t = time.time()
     res = ray.get(db_actor.write_batch.remote(catalog_items))
     callback({'name': 'write_finished'})
     return res
@@ -71,3 +72,21 @@ def store_df(df: pd.DataFrame, path: str, callback: Callable):
     t = time.time()
     df_utils.store_df(path, df)
     callback({'name': 'store_finished', 'time': time.time() - t})
+
+@ray.remote(num_cpus=0.9, resources={'worker_size_large': 1, 'instance_spot': 1})
+def mock_split(callback, wait=1):
+    t = time.time()
+    time.sleep(1)
+    callback({'name': 'load_finished', 'time': time.time() - t})
+    t = time.time()
+    time.sleep(1)
+    callback({'name': 'preproc_finished', 'time': time.time() - t})
+    for _ in range(10):
+        t = time.time()
+        time.sleep(wait)
+        callback({'name': 'split_finished', 'time': time.time() - t})
+        time.sleep(0.5)
+        callback({'name': 'store_finished', 'time': time.time() - t})
+    time.sleep(1)
+    callback({'name': 'write_finished', 'time': time.time() - t})
+    return {}
