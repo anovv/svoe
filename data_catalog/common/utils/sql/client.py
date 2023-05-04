@@ -1,4 +1,4 @@
-from typing import Optional, Dict, List
+from typing import Optional, Dict, List, Tuple, Any
 
 from sqlalchemy import create_engine, func
 from sqlalchemy.orm import sessionmaker
@@ -98,13 +98,12 @@ class MysqlClient:
         return meta, non_exist
 
     # api methods
-    # TODO typing
     def select(
         self,
-        exchange: str,
-        data_type: str,
-        instrument_type: str,
-        symbol: str,
+        exchanges: List[str],
+        data_types: List[str],
+        instrument_types: List[str],
+        symbols: List[str],
         instrument_extra: Optional[str] = None,
         compaction: Optional[str] = None,
         source: Optional[str] = None,
@@ -112,13 +111,13 @@ class MysqlClient:
         extras: Optional[str] = None,
         start_date: Optional[str] = None,
         end_date: Optional[str] = None
-    ) -> List:
+    ) -> List[Any]:
         # TODO instrument_extra
         args = {
-            DataCatalog.exchange.name: exchange,
-            DataCatalog.data_type.name: data_type,
-            DataCatalog.instrument_type.name: instrument_type,
-            DataCatalog.symbol.name: symbol
+            DataCatalog.exchange.name: exchanges,
+            DataCatalog.data_type.name: data_types,
+            DataCatalog.instrument_type.name: instrument_types,
+            DataCatalog.symbol.name: symbols
         }
         if compaction is not None:
             args[DataCatalog.compaction.name] = compaction
@@ -130,7 +129,13 @@ class MysqlClient:
             args[DataCatalog.extras.name] = extras
 
         session = Session()
-        res = session.query(DataCatalog).filter_by(**args).order_by(DataCatalog.start_ts).all()
+        f = session.query(DataCatalog).filter_by(**args)
+        if start_date is not None:
+            f = f.filter(DataCatalog.date >= start_date)
+        if end_date is not None:
+            f = f.filter(DataCatalog.date <= end_date)
+        res = f.order_by(DataCatalog.start_ts).all()
+
         # TODO this adds unnecessary sqlalchemy fields, remove to reduce memory footprint
         return [r.__dict__ for r in res]
 

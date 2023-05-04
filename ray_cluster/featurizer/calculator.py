@@ -4,18 +4,17 @@ from typing import Dict, List, Any, Tuple, Optional
 
 
 import ray
-from ray import workflow
 from ray.dag import DAGNode
 from ray.types import ObjectRef
 
 from featurizer.features.data.data_definition import Event
 from featurizer.features.feature_tree.feature_tree import Feature, postorder
-from featurizer.features.blocks.blocks import Block, BlockRange, BlockMeta, BlockRangeMeta, get_interval, DataParams
+from data_catalog.blocks.blocks import Block, BlockRange, BlockMeta, get_interval
 from portion import Interval, IntervalDict, closed
 import pandas as pd
 from streamz import Stream
 import heapq
-from utils.pandas.df_utils import load_df, concat, sub_df_ts, merge_asof_multi, is_ts_sorted
+from utils.pandas.df_utils import load_df, concat, sub_df_ts, merge_asof_multi
 
 
 # TODO move this to FeatureDefinition package

@@ -1,11 +1,11 @@
-from typing import List, Type, Union, Dict, Optional
+from typing import List, Type, Dict, Optional
 from streamz import Stream
 from featurizer.features.definitions.feature_definition import FeatureDefinition
-from featurizer.features.data.data_definition import DataDefinition, Event, EventSchema
+from featurizer.features.data.data_definition import DataDefinition, EventSchema
 from featurizer.features.definitions.l2_snapshot.l2_snapshot_fd import L2SnapshotFD
 from featurizer.features.feature_tree.feature_tree import Feature
-from featurizer.features.blocks.blocks import BlockMeta
-from featurizer.features.blocks.utils import identity_grouping
+from data_catalog.blocks.blocks import BlockMeta
+from data_catalog.blocks import identity_grouping
 from portion import IntervalDict
 import toolz
 

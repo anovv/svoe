@@ -3,7 +3,7 @@ from typing import Dict, List, Tuple, Optional
 import pandas as pd
 import ray
 
-from featurizer.features.blocks.blocks import BlockRangeMeta, BlockRange
+from data_catalog.blocks.blocks import BlockRangeMeta, BlockRange
 from featurizer.features.data.l2_book_incremental.cryptofeed.cryptofeed_l2_book_incremental import CryptofeedL2BookIncrementalData
 from featurizer.features.data.trades.trades import TradesData
 from featurizer.features.definitions.feature_definition import FeatureDefinition

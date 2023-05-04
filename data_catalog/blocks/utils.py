@@ -1,6 +1,6 @@
-from typing import List, Dict
+from typing import List
 from portion import IntervalDict
-from featurizer.features.blocks.blocks import BlockMeta, get_interval
+from data_catalog.blocks.blocks import BlockMeta, get_interval
 
 
 # TODO change to List[BlockRangeMeta] when use holes

@@ -3,7 +3,7 @@ from typing import List, Dict, Optional, Tuple, Type
 from portion import IntervalDict, closed
 from streamz import Stream
 
-from featurizer.features.blocks.blocks import BlockMeta
+from data_catalog.blocks.blocks import BlockMeta
 from featurizer.features.data.data_definition import EventSchema, DataDefinition, Event
 from featurizer.features.data.trades.trades import TradesData
 from featurizer.features.definitions.feature_definition import FeatureDefinition

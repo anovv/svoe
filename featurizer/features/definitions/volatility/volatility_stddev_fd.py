@@ -4,7 +4,7 @@ from featurizer.features.definitions.feature_definition import FeatureDefinition
 from featurizer.features.data.data_definition import DataDefinition, Event, EventSchema
 from featurizer.features.definitions.mid_price.mid_price_fd import MidPriceFD
 from featurizer.features.feature_tree.feature_tree import Feature
-from featurizer.features.blocks.blocks import BlockMeta, get_interval
+from data_catalog.blocks.blocks import BlockMeta, get_interval
 from utils.streamz.stream_utils import lookback_apply
 from utils.time.utils import convert_str_to_seconds
 from portion import IntervalDict

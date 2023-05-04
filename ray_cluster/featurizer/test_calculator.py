@@ -297,7 +297,7 @@ class TestFeatureCalculator(unittest.TestCase):
     def test_cryptotick_midprice_feature_offline(self):
         api = Api()
         # l2_data_ranges_meta = api.get_meta('BINANCE', 'l2_book', 'spot', 'BTC-USDT')[0][:10]
-        l2_data_ranges_meta = api.get_meta('BINANCE', 'l2_book', 'spot', 'BTC-USDT')
+        l2_data_ranges_meta = api.get_meta(['BINANCE'], ['l2_book'], ['spot'], ['BTC-USDT'])
         diffs = []
         dates = []
         for i in range(len(l2_data_ranges_meta)):
