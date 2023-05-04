@@ -6,6 +6,7 @@ from portion import Interval, closed
 # catalog methods
 BlockMeta = Dict # TODO represents s3 file metadata: name, time range, size, etc.
 def get_interval(meta: BlockMeta) -> Interval:
+    print(meta)
     start = meta['start_ts']
     end = meta['end_ts']
     if start > end:

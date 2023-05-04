@@ -14,8 +14,7 @@ class DbActor:
     def __init__(self, db_config: Optional[Dict] = None):
         self.client = MysqlClient(db_config)
 
-    # TODO asyncify this
-    def filter_batch(self, input_batch: InputItemBatch) -> InputItemBatch:
+    async def filter_batch(self, input_batch: InputItemBatch) -> InputItemBatch:
         self.client.create_tables()
         items = input_batch[1]
         if len(items) == 0:
@@ -28,8 +27,7 @@ class DbActor:
         else:
             raise ValueError(f'Unsupported source:{ source}')
 
-    # TODO asyncify this
-    def write_batch(self, batch: List[DataCatalog]) -> Dict:
+    async def write_batch(self, batch: List[DataCatalog]) -> Dict:
         self.client.create_tables()
         self.client.write_catalog_item_batch(batch)
         # TODO return status to pass to stats actor

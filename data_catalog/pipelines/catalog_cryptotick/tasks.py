@@ -14,7 +14,9 @@ from featurizer.features.data.l2_book_incremental.cryptotick.utils import prepro
 from utils.pandas import df_utils
 
 
-@ray.remote(num_cpus=0.9, resources={'worker_size_large': 1, 'instance_spot': 1})
+
+# TODO set cpu separately when running on aws kuber cluster
+@ray.remote(num_cpus=2, resources={'worker_size_large': 1, 'instance_spot': 1})
 def load_split_catalog_store_l2_inc_df(input_item: InputItem, chunk_size_kb: int, date_str: str, db_actor: DbActor, callback: Optional[Callable] = None) -> Dict:
     path = input_item[DataCatalog.path.name]
     t = time.time()
@@ -64,7 +66,7 @@ def load_split_catalog_store_l2_inc_df(input_item: InputItem, chunk_size_kb: int
     concurrent.futures.wait(store_futures)
     t = time.time()
     res = ray.get(db_actor.write_batch.remote(catalog_items))
-    callback({'name': 'write_finished'})
+    callback({'name': 'write_finished', 'time': time.time() - t})
     return res
 
 
@@ -87,6 +89,7 @@ def mock_split(callback, wait=1):
         callback({'name': 'split_finished', 'time': time.time() - t})
         time.sleep(0.5)
         callback({'name': 'store_finished', 'time': time.time() - t})
+    t = time.time()
     time.sleep(1)
     callback({'name': 'write_finished', 'time': time.time() - t})
     return {}

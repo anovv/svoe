@@ -4,14 +4,20 @@ import unittest
 from threading import Thread
 
 import ray
+
+import data_catalog
+import featurizer
+import ray_cluster
+import utils
 from data_catalog.common.actors.db import DbActor
-from data_catalog.common.utils.cryptotick.utils import cryptotick_input_items
+from data_catalog.common.utils.cryptotick.utils import cryptotick_input_items, CRYPTOTICK_RAW_BUCKET_NAME
 from data_catalog.common.utils.sql.client import MysqlClient
 from data_catalog.pipelines.catalog_cryptotick.pipeline import CatalogCryptotickPipeline, poll_to_tqdm
 from featurizer.features.data.l2_book_incremental.cryptotick.utils import starts_with_snapshot, remove_snap, \
     get_snapshot_depth, mock_processed_cryptotick_df, \
     gen_split_l2_inc_df_and_pad_with_snapshot
 from utils.pandas.df_utils import concat, load_df, store_df
+from utils.s3.s3_utils import list_files_and_sizes_kb
 
 
 class TestCatalogCryptotickPipeline(unittest.TestCase):
@@ -23,26 +29,27 @@ class TestCatalogCryptotickPipeline(unittest.TestCase):
         store_df(path=small_df_path, df=small_df)
 
     def test_pipeline(self):
-        with ray.init(address='auto', ignore_reinit_error=True):
-        # with ray.init(
-        #         address='ray://127.0.0.1:10003',
-        #         runtime_env={
-        #             'py_modules': [featurizer, ray_cluster, data_catalog, utils],
-        #             'excludes': ['*s3_svoe.test.1_inventory*']
-        #         }):
+        # with ray.init(address='auto', ignore_reinit_error=True):
+        with ray.init(
+                address='ray://127.0.0.1:10003',
+                runtime_env={
+                    'py_modules': [featurizer, ray_cluster, data_catalog, utils],
+                    'excludes': ['*s3_svoe.test.1_inventory*']
+                }):
             db_actor = DbActor.remote()
-            batch_size = 1
-            num_batches = 4
-            # raw_files_and_sizes = list_files_and_sizes_kb(CRYPTOTICK_RAW_BUCKET_NAME)
-            raw_files_and_sizes = [
-                ('limitbook_full/20230201/BINANCE_SPOT_BTC_USDT.csv.gz', 252 * 1024),
-                ('limitbook_full/20230202/BINANCE_SPOT_BTC_USDT.csv.gz', 252 * 1024),
-                ('limitbook_full/20230203/BINANCE_SPOT_BTC_USDT.csv.gz', 252 * 1024),
-                ('limitbook_full/20230204/BINANCE_SPOT_BTC_USDT.csv.gz', 252 * 1024),
-            ]
+            batch_size = 30
+            num_batches = 1
+            raw_files_and_sizes = list_files_and_sizes_kb(CRYPTOTICK_RAW_BUCKET_NAME)
+            raw_files_and_sizes = list(filter(lambda e: 'limitbook_full' in e[0], raw_files_and_sizes))
+            # raw_files_and_sizes = [
+            #     ('limitbook_full/20230201/BINANCE_SPOT_BTC_USDT.csv.gz', 252 * 1024),
+            #     ('limitbook_full/20230202/BINANCE_SPOT_BTC_USDT.csv.gz', 252 * 1024),
+            #     ('limitbook_full/20230203/BINANCE_SPOT_BTC_USDT.csv.gz', 252 * 1024),
+            #     ('limitbook_full/20230204/BINANCE_SPOT_BTC_USDT.csv.gz', 252 * 1024),
+            # ]
             # raw_files_and_sizes = [('s3://svoe-cryptotick-data/testing/small_df.parquet.gz', 470)]
             batches = cryptotick_input_items(raw_files_and_sizes, batch_size)
-            max_executing_tasks = 4
+            max_executing_tasks = 30
             pipeline = CatalogCryptotickPipeline.options(name='CatalogCryptotickPipeline').remote(max_executing_tasks=max_executing_tasks, db_actor=db_actor)
 
             Thread(target=functools.partial(poll_to_tqdm, total_files=len(raw_files_and_sizes), chunk_size=100 * 1024)).start()

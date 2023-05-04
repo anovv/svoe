@@ -63,7 +63,9 @@ def poll_to_tqdm(total_files, chunk_size, max_bars=10):
                 bar_id = get_first_empty_bar_id()
                 if bar_id is not None:
                     # occupy
+                    pbars[bar_id][0].n = 0
                     pbars[bar_id][1] = task_id
+                    pbars[bar_id][2] = {}
                 else:
                     continue
             pbar = pbars[bar_id][0]

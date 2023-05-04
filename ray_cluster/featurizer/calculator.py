@@ -220,7 +220,7 @@ def build_feature_task_graph(
     # bottom up/postorder traversal
     def tree_traversal_callback(feature: Feature):
         if feature.feature_definition.is_data_source():
-            # leaves
+            # leafs
             # TODO decouple derived feature_ranges_meta and input data ranges meta
             ranges = ranges_meta[feature]  # this is already populated for Data in load_data_ranges above
             for block_meta in ranges:

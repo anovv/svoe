@@ -209,10 +209,10 @@ spec:
   cloudLabels:
     k8s.io/cluster-autoscaler/enabled: ""
     k8s.io/cluster-autoscaler/{{.cluster_name}}: ""
-  machineType: r6g.large # arm64 graviton proc
-  maxPrice: "0.04"
-  maxSize: 50
-  minSize: 1
+  machineType: r6g.xlarge # arm64 graviton proc
+  maxPrice: "0.08"
+  maxSize: 2
+  minSize: 2
   securityGroupOverride: {{.security_group_override}}
   nodeLabels:
     kops.k8s.io/instancegroup: nodes-ray-spot

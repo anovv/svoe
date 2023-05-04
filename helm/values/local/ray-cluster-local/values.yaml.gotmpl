@@ -180,9 +180,9 @@ worker:
 # will be used as the groupName
 additionalWorkerGroups:
   large-spot:
-    replicas: 3
-    minReplicas: 3
-    maxReplicas: 1000
+    replicas: 2
+    minReplicas: 2
+    maxReplicas: 100
     type: worker-large-spot
     labels:
       worker-size: large
@@ -219,10 +219,10 @@ additionalWorkerGroups:
     resources:
       limits:
         cpu: 2
-        memory: 15Gi
+        memory: 28Gi # TODO 15Gi
       requests:
         cpu: 1800m
-        memory: 15Gi
+        memory: 28Gi # TODO 15Gi
     nodeSelector: {}
     {{ if (eq .Values.clusterType "minikube") }}
     affinity: {}
