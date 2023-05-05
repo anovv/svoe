@@ -1,7 +1,7 @@
-from typing import List, Dict, Optional, Any, Tuple, Type
+from typing import List, Dict, Optional, Type
 from streamz import Stream
 from featurizer.features.definitions.feature_definition import FeatureDefinition
-from featurizer.features.data.data_definition import DataDefinition, EventSchema
+from featurizer.data import DataDefinition, EventSchema
 from featurizer.features.definitions.l2_snapshot.l2_snapshot_fd import L2SnapshotFD
 from featurizer.features.feature_tree.feature_tree import Feature
 

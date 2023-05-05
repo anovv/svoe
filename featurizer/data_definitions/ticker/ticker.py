@@ -1,4 +1,4 @@
-from featurizer.features.data.data_source_definition import DataSourceDefinition
+from featurizer.data.data_source_definition import DataSourceDefinition
 
 
 class TickerData(DataSourceDefinition):

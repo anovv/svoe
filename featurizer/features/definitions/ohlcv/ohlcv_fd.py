@@ -4,8 +4,8 @@ from portion import IntervalDict, closed
 from streamz import Stream
 
 from featurizer.blocks.blocks import BlockMeta
-from featurizer.features.data.data_definition import EventSchema, DataDefinition, Event
-from featurizer.features.data.trades.trades import TradesData
+from featurizer.data import EventSchema, DataDefinition, Event
+from featurizer.data.trades.trades import TradesData
 from featurizer.features.definitions.feature_definition import FeatureDefinition
 from featurizer.features.feature_tree.feature_tree import Feature
 from utils.time.utils import convert_str_to_seconds

@@ -1,10 +1,10 @@
 from typing import List, Dict, Type, Deque, Optional
 from streamz import Stream
 from featurizer.features.definitions.feature_definition import FeatureDefinition
-from featurizer.features.data.data_definition import DataDefinition, Event, EventSchema
+from featurizer.data import DataDefinition, Event, EventSchema
 from featurizer.features.definitions.mid_price.mid_price_fd import MidPriceFD
 from featurizer.features.feature_tree.feature_tree import Feature
-from featurizer.blocks.blocks import BlockMeta, get_interval
+from featurizer.blocks.blocks import BlockMeta, meta_to_interval
 from utils.streamz.stream_utils import lookback_apply
 from utils.time.utils import convert_str_to_seconds
 from portion import IntervalDict
@@ -50,7 +50,7 @@ class VolatilityStddevFD(FeatureDefinition):
             while j >= 0 and ranges[i]['start_ts'] - ranges[j]['end_ts'] <= convert_str_to_seconds(window):
                 windowed_blocks.append(ranges[j])
                 j -= 1
-            res[get_interval(ranges[i])] = windowed_blocks
+            res[meta_to_interval(ranges[i])] = windowed_blocks
 
         return res
 

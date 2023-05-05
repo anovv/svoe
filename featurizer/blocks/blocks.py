@@ -11,13 +11,29 @@ Block = pd.DataFrame
 BlockRange = List[Block] # represents consecutive blocks
 
 
-def get_interval(meta: BlockMeta) -> Interval:
-    start = meta[DataCatalog.start_ts.name]
-    end = meta[DataCatalog.end_ts.name]
+def meta_to_interval(meta: BlockMeta) -> Interval:
+    start = float(meta[DataCatalog.start_ts.name])
+    end = float(meta[DataCatalog.end_ts.name])
     if start > end:
         raise ValueError('start_ts cannot be greater than end_ts')
     return closed(meta[DataCatalog.start_ts.name], meta[DataCatalog.end_ts.name])
 
+
+def interval_to_meta(interval: Interval) -> BlockMeta:
+    return {
+        DataCatalog.start_ts.name: interval.lower,
+        DataCatalog.end_ts.name: interval.upper,
+    }
+
+def mock_meta(start_ts, end_ts, extra=None) -> BlockMeta:
+    res = {
+        DataCatalog.start_ts.name: float(start_ts),
+        DataCatalog.end_ts.name: float(end_ts)
+    }
+
+    if extra:
+        res.update(extra)
+    return res
 
 def make_ranges(data: List[BlockMeta]) -> List[BlockRangeMeta]:
     # if consecuitive files differ no more than this, they are in the same range
@@ -42,15 +58,8 @@ def identity_grouping(ranges: List[BlockMeta]) -> IntervalDict:
     res = IntervalDict()
     # TODO assuming no 'holes' in data
     for meta in ranges:
-        res[get_interval(meta)] = [meta]
+        res[meta_to_interval(meta)] = [meta]
     return res
-
-
-def interval_meta(interval: Interval) -> BlockMeta:
-    return {
-        DataCatalog.start_ts.name: interval.lower,
-        DataCatalog.end_ts.name: interval.upper,
-    }
 
 
 def get_overlaps(key_intervaled_value: Dict[Any, IntervalDict]) -> Dict[Interval, Dict]:
@@ -84,8 +93,18 @@ def get_overlaps(key_intervaled_value: Dict[Any, IntervalDict]) -> Dict[Interval
     return res
 
 
-def mock_meta(start_ts, end_ts, extra=None):
-    res = {DataCatalog.start_ts.name: start_ts, DataCatalog.end_ts.name: end_ts}
-    if extra:
-        res.update(extra)
-    return res
+# TODO test this
+def prune_overlaps(overlaps: Dict[Interval, Dict[Any, List]]) -> Dict[Interval, Dict[Any, List]]:
+    for interval in overlaps:
+        ranges = overlaps[interval]
+        for key in ranges:
+            range = ranges[key]
+            pruned = []
+            for meta in range:
+                if interval.overlaps(meta_to_interval(meta)):
+                    pruned.append(meta)
+            if len(pruned) == 0:
+                raise ValueError(f'Unable to prune key {key}')
+            ranges[key] = pruned
+    return overlaps
+

@@ -1,4 +1,4 @@
-from featurizer.features.data.data_definition import DataDefinition
+from featurizer.data_definitions.data_definition import DataDefinition
 
 # TODO remove this and DataDefinition, keep only FeatureDefinition?
 # represents raw datasource

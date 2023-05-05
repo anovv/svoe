@@ -1,15 +1,19 @@
 import concurrent
 import functools
 import time
+from datetime import datetime
 from typing import Dict, Callable, Optional
 
 import pandas as pd
+import pytz
 import ray
 
 from featurizer.data_catalog.common.actors.db import DbActor
 from featurizer.data_catalog.common.data_models.models import InputItem
-from featurizer.data_catalog.common.utils.sql.models import DataCatalog, make_catalog_item
-from featurizer.features.data.l2_book_incremental.cryptotick.utils import preprocess_l2_inc_df, \
+from featurizer.data_catalog.common.utils.sql.models import DataCatalog, _construct_s3_path
+from featurizer.data_definitions.l2_book_incremental.cryptofeed import utils as cryptofeed_l2_utils
+from featurizer.data_definitions.l2_book_incremental.cryptotick import utils as cryptotick_l2_utils
+from featurizer.data_definitions.l2_book_incremental.cryptotick.utils import preprocess_l2_inc_df, \
     gen_split_l2_inc_df_and_pad_with_snapshot
 from utils.pandas import df_utils
 
@@ -93,3 +97,49 @@ def mock_split(callback, wait=1):
     time.sleep(1)
     callback({'name': 'write_finished', 'time': time.time() - t})
     return {}
+
+
+def make_catalog_item(df: pd.DataFrame, input_item: InputItem) -> DataCatalog:
+    source = input_item[DataCatalog.source.name]
+    if source not in ['cryptofeed', 'cryptotick']:
+        raise ValueError(f'Unknown source: {source}')
+
+    catalog_item_params = input_item.copy()
+    _time_range = df_utils.time_range(df)
+
+    date_str = datetime.fromtimestamp(_time_range[1], tz=pytz.utc).strftime('%Y-%m-%d')
+    # check if end_ts is also same date:
+    date_str_end = datetime.fromtimestamp(_time_range[2], tz=pytz.utc).strftime('%Y-%m-%d')
+    if date_str != date_str_end:
+        raise ValueError(f'start_ts and end_ts belong to different dates: {date_str}, {date_str_end}')
+
+    catalog_item_params.update({
+        DataCatalog.start_ts.name: _time_range[1],
+        DataCatalog.end_ts.name: _time_range[2],
+        DataCatalog.size_in_memory_kb.name: df_utils.get_size_kb(df),
+        DataCatalog.num_rows.name: df_utils.get_num_rows(df),
+        DataCatalog.date.name: date_str,
+    })
+
+    # TODO l2_book -> l2_inc
+    if catalog_item_params[DataCatalog.data_type.name] == 'l2_book':
+        if source == 'cryptofeed':
+            snapshot_ts = cryptofeed_l2_utils.get_snapshot_ts(df)
+        else:
+            snapshot_ts = cryptotick_l2_utils.get_snapshot_ts(df)
+        if snapshot_ts is not None:
+            meta = {
+                'snapshot_ts': snapshot_ts
+            }
+            catalog_item_params[DataCatalog.meta.name] = meta
+
+    df_hash = df_utils.hash_df(df)
+    catalog_item_params[DataCatalog.hash.name] = df_hash
+
+    res = DataCatalog(**catalog_item_params)
+    if res.path is None:
+        if source != 'cryptotick':
+            raise ValueError(f'Empty path only allowed for cryptotick')
+        res.path = _construct_s3_path(res)
+
+    return res

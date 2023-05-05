@@ -6,9 +6,9 @@ import ray
 from ray.dag import DAGNode
 from ray.types import ObjectRef
 
-from featurizer.features.data.data_definition import Event
+from featurizer.data.data_definition import Event
 from featurizer.features.feature_tree.feature_tree import Feature, postorder
-from featurizer.blocks.blocks import Block, BlockRange, get_interval, interval_meta, get_overlaps
+from featurizer.blocks.blocks import Block, BlockRange, meta_to_interval, interval_to_meta, get_overlaps
 from portion import Interval, IntervalDict
 import pandas as pd
 from streamz import Stream
@@ -116,7 +116,7 @@ def build_feature_task_graph(
             ranges = ranges_meta[feature]  # this is already populated for Data in load_data_ranges above
             for block_meta in ranges:
                 # TODO we assume no 'holes' in data here
-                interval = get_interval(block_meta)
+                interval = meta_to_interval(block_meta)
                 if feature not in dag:
                     dag[feature] = {}
                 node = load_if_needed.bind(block_meta)
@@ -135,7 +135,7 @@ def build_feature_task_graph(
         ranges = []
         for interval, overlap in overlaps.items():
             # TODO add size_kb/memory_size_kb to proper size memory usage for aggregate tasks downstream
-            result_meta = interval_meta(interval)
+            result_meta = interval_to_meta(interval)
             ranges.append(result_meta)
             if feature not in dag:
                 dag[feature] = {}
@@ -145,7 +145,7 @@ def build_feature_task_graph(
             for dep_feature in overlap:
                 ds = []
                 for dep_block_meta in overlap[dep_feature]:
-                    dep_interval = get_interval(dep_block_meta)
+                    dep_interval = meta_to_interval(dep_block_meta)
                     dep_node = dag[dep_feature][dep_interval]
                     ds.append(dep_node)
                 dep_nodes[dep_feature] = ds

@@ -1,5 +1,5 @@
 
-from featurizer.features.data.data_source_definition import DataSourceDefinition
+from featurizer.data_definitions.data_source_definition import DataSourceDefinition
 from featurizer.features.definitions.feature_definition import FeatureDefinition
 from typing import Type, Dict, List, Callable, Union
 from anytree import NodeMixin

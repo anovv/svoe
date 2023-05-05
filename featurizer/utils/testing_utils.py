@@ -4,12 +4,12 @@ import pandas as pd
 import ray
 
 from featurizer.blocks.blocks import BlockRangeMeta, BlockRange, mock_meta
-from featurizer.features.data.l2_book_incremental.cryptofeed.cryptofeed_l2_book_incremental import CryptofeedL2BookIncrementalData
-from featurizer.features.data.trades.trades import TradesData
+from featurizer.data.l2_book_incremental.cryptofeed.cryptofeed_l2_book_incremental import CryptofeedL2BookIncrementalData
+from featurizer.data.trades.trades import TradesData
 from featurizer.features.definitions.feature_definition import FeatureDefinition
 from featurizer.features.feature_tree.feature_tree import Feature
 from utils.pandas.df_utils import load_dfs, time_range, get_size_kb, get_num_rows
-import featurizer.features.data.l2_book_incremental.cryptofeed.utils as cryptofeed_l2_utils
+import featurizer.data.l2_book_incremental.cryptofeed.utils as cryptofeed_l2_utils
 
 
 def mock_feature(position: int):

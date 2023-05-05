@@ -3,8 +3,8 @@ from typing import Tuple, List
 
 from pandas import DataFrame
 
-from featurizer.features.data.data_definition import EventSchema, Event
-from featurizer.features.data.data_source_definition import DataSourceDefinition
+from featurizer.data.data_definition import EventSchema, Event
+from featurizer.data.data_source_definition import DataSourceDefinition
 
 
 class TradesData(DataSourceDefinition):

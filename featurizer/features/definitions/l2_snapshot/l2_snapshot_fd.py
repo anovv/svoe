@@ -4,14 +4,14 @@ from portion import IntervalDict, closed
 from streamz import Stream
 from order_book import OrderBook
 from frozenlist import FrozenList
-from featurizer.features.data.data_definition import DataDefinition, Event, EventSchema
-from featurizer.features.data.l2_book_incremental.cryptotick.cryptotick_l2_book_incremental import \
+from featurizer.data_definitions.data_definition import DataDefinition, Event, EventSchema
+from featurizer.data_definitions.l2_book_incremental.cryptotick.cryptotick_l2_book_incremental import \
     CryptotickL2BookIncrementalData
 from featurizer.features.definitions.l2_snapshot.utils import _State, cryptofeed_update_state, cryptotick_update_state
 from featurizer.features.feature_tree.feature_tree import Feature
 from featurizer.features.definitions.feature_definition import FeatureDefinition
 import utils.streamz.stream_utils as su
-from featurizer.features.data.l2_book_incremental.cryptofeed.cryptofeed_l2_book_incremental import CryptofeedL2BookIncrementalData
+from featurizer.data_definitions.l2_book_incremental.cryptofeed.cryptofeed_l2_book_incremental import CryptofeedL2BookIncrementalData
 from featurizer.blocks.blocks import BlockMeta
 import functools
 import toolz

@@ -1,9 +1,9 @@
 from dataclasses import dataclass
-from typing import Type, Dict, Optional, Callable, Tuple
+from typing import Dict, Optional, Tuple
 
 from order_book import OrderBook
 
-from featurizer.features.data.data_definition import Event
+from featurizer.data_definitions.data_definition import Event
 
 
 @dataclass

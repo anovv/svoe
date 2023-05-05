@@ -9,11 +9,11 @@ import matplotlib.pyplot as plt
 
 import calculator as C
 from featurizer.data_catalog.api.api import Api
-from featurizer.features.data.data_source_definition import DataSourceDefinition
-from featurizer.features.data.l2_book_incremental.cryptofeed.cryptofeed_l2_book_incremental import CryptofeedL2BookIncrementalData
-from featurizer.features.data.l2_book_incremental.cryptotick.cryptotick_l2_book_incremental import CryptotickL2BookIncrementalData
-from featurizer.features.data.l2_book_incremental.cryptotick.utils import preprocess_l2_inc_df
-from featurizer.features.data.trades.trades import TradesData
+from featurizer.data.data_source_definition import DataSourceDefinition
+from featurizer.data.l2_book_incremental.cryptofeed.cryptofeed_l2_book_incremental import CryptofeedL2BookIncrementalData
+from featurizer.data.l2_book_incremental.cryptotick.cryptotick_l2_book_incremental import CryptotickL2BookIncrementalData
+from featurizer.data.l2_book_incremental.cryptotick.utils import preprocess_l2_inc_df
+from featurizer.data.trades.trades import TradesData
 from featurizer.features.definitions.l2_snapshot.l2_snapshot_fd import L2SnapshotFD
 from featurizer.features.definitions.mid_price.mid_price_fd import MidPriceFD
 from featurizer.features.definitions.volatility.volatility_stddev_fd import VolatilityStddevFD

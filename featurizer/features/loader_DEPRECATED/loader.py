@@ -1,5 +1,5 @@
 import utils.pandas.df_utils as dfu
-import featurizer.features.data.l2_book_incremental.cryptofeed.l2_snapshot_utils as l2u
+import featurizer.data.l2_book_incremental.cryptofeed.l2_snapshot_utils as l2u
 import featurizer.features.loader.catalog as catalog
 import pandas as pd
 import dask

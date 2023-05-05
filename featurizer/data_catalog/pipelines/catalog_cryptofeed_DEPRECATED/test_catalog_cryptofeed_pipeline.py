@@ -4,7 +4,7 @@ import unittest
 
 import ray
 
-from featurizer.data_catalog.common.utils.sql.models import make_catalog_item
+from featurizer.data_catalog.pipelines.catalog_cryptotick.tasks import make_catalog_item
 from featurizer.data_catalog import CatalogCryptofeedDag
 from featurizer.data_catalog import PipelineRunner
 from featurizer.data_catalog.common.utils.sql.client import MysqlClient
