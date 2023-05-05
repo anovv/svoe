@@ -4,8 +4,7 @@ from featurizer.features.definitions.feature_definition import FeatureDefinition
 from featurizer.features.data.data_definition import DataDefinition, EventSchema
 from featurizer.features.definitions.l2_snapshot.l2_snapshot_fd import L2SnapshotFD
 from featurizer.features.feature_tree.feature_tree import Feature
-from data_catalog.blocks.blocks import BlockMeta
-from data_catalog.blocks import identity_grouping
+from featurizer.blocks.blocks import BlockMeta, identity_grouping
 from portion import IntervalDict
 import toolz
 

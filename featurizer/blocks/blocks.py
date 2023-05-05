@@ -1,0 +1,91 @@
+from typing import Dict, List, Any
+import pandas as pd
+from portion import Interval, closed, IntervalDict
+
+from featurizer.data_catalog.common.utils.sql.models import DataCatalog
+
+BlockMeta = Dict # represents s3 file metadata: name, time range, size, etc.
+BlockRangeMeta = List[BlockMeta] # represents metadata of consecutive blocks
+
+Block = pd.DataFrame
+BlockRange = List[Block] # represents consecutive blocks
+
+
+def get_interval(meta: BlockMeta) -> Interval:
+    start = meta[DataCatalog.start_ts.name]
+    end = meta[DataCatalog.end_ts.name]
+    if start > end:
+        raise ValueError('start_ts cannot be greater than end_ts')
+    return closed(meta[DataCatalog.start_ts.name], meta[DataCatalog.end_ts.name])
+
+
+def make_ranges(data: List[BlockMeta]) -> List[BlockRangeMeta]:
+    # if consecuitive files differ no more than this, they are in the same range
+    # TODO should this be const per data_type?
+    SAME_RANGE_DIFF_S = 1
+    ranges = []
+    cur_range = []
+    for i in range(len(data)):
+        cur_range.append(data[i])
+        if i < len(data) - 1 and float(data[i + 1][DataCatalog.start_ts.name]) - float(data[i][DataCatalog.end_ts.name]) > SAME_RANGE_DIFF_S:
+            ranges.append(cur_range)
+            cur_range = []
+
+    if len(cur_range) != 0:
+        ranges.append(cur_range)
+
+    return ranges
+
+
+def identity_grouping(ranges: List[BlockMeta]) -> IntervalDict:
+    # groups blocks 1 to 1
+    res = IntervalDict()
+    # TODO assuming no 'holes' in data
+    for meta in ranges:
+        res[get_interval(meta)] = [meta]
+    return res
+
+
+def interval_meta(interval: Interval) -> BlockMeta:
+    return {
+        DataCatalog.start_ts.name: interval.lower,
+        DataCatalog.end_ts.name: interval.upper,
+    }
+
+
+def get_overlaps(key_intervaled_value: Dict[Any, IntervalDict]) -> Dict[Interval, Dict]:
+    # TODO add visualization?
+    # https://github.com/AlexandreDecan/portion
+    # https://stackoverflow.com/questions/40367461/intersection-of-two-lists-of-ranges-in-python
+    d = IntervalDict()
+    first_key = list(key_intervaled_value.keys())[0]
+    for interval, values in key_intervaled_value[first_key].items():
+        d[interval] = {first_key: values}  # named_intervaled_values_dict
+
+    # join intervaled_values_dict for each key with first to find all possible intersecting intervals
+    # and their corresponding values
+    for key, intervaled_values_dict in key_intervaled_value.items():
+        if key == first_key:
+            continue
+
+        def concat(named_intervaled_values_dict, values):
+            # TODO copy.deepcopy?
+            res = named_intervaled_values_dict.copy()
+            res[key] = values
+            return res
+
+        combined = d.combine(intervaled_values_dict, how=concat)  # outer join
+        d = combined[d.domain() & intervaled_values_dict.domain()]  # inner join
+
+    # make sure all intervals are closed
+    res = {}
+    for interval, value in d.items():
+        res[closed(interval.lower, interval.upper)] = value
+    return res
+
+
+def mock_meta(start_ts, end_ts, extra=None):
+    res = {DataCatalog.start_ts.name: start_ts, DataCatalog.end_ts.name: end_ts}
+    if extra:
+        res.update(extra)
+    return res

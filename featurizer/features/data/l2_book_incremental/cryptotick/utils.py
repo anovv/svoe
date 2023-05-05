@@ -7,8 +7,8 @@ from streamz import Stream
 from featurizer.features.data.l2_book_incremental.cryptotick.cryptotick_l2_book_incremental import \
     CryptotickL2BookIncrementalData
 from featurizer.features.definitions.l2_snapshot.l2_snapshot_fd import L2SnapshotFD
-from ray_cluster.testing_utils import mock_feature
-from utils.pandas.df_utils import is_ts_sorted, concat, gen_split_df_by_mem, get_size_kb, get_cached_df, load_df, \
+from featurizer.utils.testing_utils import mock_feature
+from utils.pandas.df_utils import is_ts_sorted, concat, gen_split_df_by_mem, get_cached_df, load_df, \
     cache_df_if_needed
 
 import ciso8601

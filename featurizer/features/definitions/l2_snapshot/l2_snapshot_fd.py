@@ -12,7 +12,7 @@ from featurizer.features.feature_tree.feature_tree import Feature
 from featurizer.features.definitions.feature_definition import FeatureDefinition
 import utils.streamz.stream_utils as su
 from featurizer.features.data.l2_book_incremental.cryptofeed.cryptofeed_l2_book_incremental import CryptofeedL2BookIncrementalData
-from data_catalog.blocks.blocks import BlockMeta
+from featurizer.blocks.blocks import BlockMeta
 import functools
 import toolz
 

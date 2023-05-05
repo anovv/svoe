@@ -2,9 +2,9 @@ from __future__ import annotations
 from streamz import Stream
 from typing import Dict, List, Tuple, Union, Type, Any, Optional
 from portion import IntervalDict
+
+from featurizer.blocks.blocks import BlockMeta
 from featurizer.features.data.data_definition import DataDefinition
-# from featurizer.features.feature_tree.feature_tree import FeatureTreeNode
-from data_catalog.blocks.blocks import BlockMeta
 
 
 # TODO figure out relationship between Feature and FeatureDefinition (i.e. common interface, subclassing?)

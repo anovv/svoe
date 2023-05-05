@@ -1,6 +1,3 @@
-from datetime import datetime
-
-import numpy as np
 import pandas as pd
 
 from featurizer.features.data.data_source_definition import DataSourceDefinition
