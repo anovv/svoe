@@ -27,9 +27,9 @@ class Api:
         end_date: Optional[str] = None
     ) -> Dict[Interval, Dict[DataKey, List[BlockRangeMeta]]]:
         exchanges = [d[0] for d in data_keys]
-        data_types = [d[0] for d in data_keys]
-        instrument_types = [d[0] for d in data_keys]
-        symbols = [d[0] for d in data_keys]
+        data_types = [d[1] for d in data_keys]
+        instrument_types = [d[2] for d in data_keys]
+        symbols = [d[3] for d in data_keys]
         return self.get_meta(exchanges, data_types, instrument_types, symbols, start_date, end_date)
 
     def get_meta(
@@ -42,7 +42,7 @@ class Api:
         end_date: Optional[str] = None
     ) -> Dict[Interval, Dict[DataKey, List[BlockRangeMeta]]]:
         raw_data = self.client.select(exchanges, data_types, instrument_types, symbols, start_date, end_date)
-
+        print(len(raw_data))
         # group data by data key
         groups = {}
         for r in raw_data:
@@ -51,6 +51,7 @@ class Api:
                 groups[key].append(r)
             else:
                 groups[key] = [r]
+
 
         # make overlaps
         grouped_ranges = {}
