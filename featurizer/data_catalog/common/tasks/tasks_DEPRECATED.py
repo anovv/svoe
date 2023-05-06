@@ -7,7 +7,7 @@ import pandas as pd
 from featurizer.data_catalog.common.actors.db import DbActor
 from featurizer.data_catalog.common.data_models.models import InputItem, InputItemBatch
 from featurizer.data_catalog.common.utils.register import report_stats_decor, EventType
-from featurizer.data_catalog.common.utils.sql.models import DataCatalog
+from featurizer.data_catalog.common.sql.models import DataCatalog
 from featurizer.data_catalog.pipelines.catalog_cryptotick.tasks import make_catalog_item
 from utils.pandas import df_utils
 

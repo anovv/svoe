@@ -10,7 +10,7 @@ import ray_cluster
 import utils
 from featurizer.data_catalog.common.actors.db import DbActor
 from featurizer.data_catalog.common.utils.cryptotick.utils import cryptotick_input_items, CRYPTOTICK_RAW_BUCKET_NAME
-from featurizer.data_catalog.common.utils.sql.client import MysqlClient
+from featurizer.data_catalog.common.sql.client import MysqlClient
 from featurizer.data_catalog.pipelines.catalog_cryptotick.pipeline import CatalogCryptotickPipeline, poll_to_tqdm
 from featurizer.data_definitions.l2_book_incremental.cryptotick.utils import starts_with_snapshot, remove_snap, \
     get_snapshot_depth, mock_processed_cryptotick_df, \

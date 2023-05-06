@@ -1,6 +1,6 @@
 from typing import Generator, Optional, Tuple, Dict
 from featurizer.data_catalog.common.data_models.models import InputItemBatch
-from featurizer.data_catalog.common.utils.sql.models import DataCatalog
+from featurizer.data_catalog.common.sql.models import DataCatalog
 from utils.s3.s3_utils import inventory
 
 S3_BUCKET = 'svoe.test.1'

@@ -128,8 +128,8 @@ def _ob_to_snap(ob: OrderBook, timestamp: float) -> dict:
 
 def l2_snaps(deltas: pd.DataFrame) -> tuple[list[tuple[float, dict]], int]:
     # for reverse trnasform snap->delta see https://github.com/bmoscon/cryptofeed/blob/master/cryptofeed/util/book.py
-    if not _validate_l2_deltas_df(deltas):
-        raise Exception('Dataframe is not valid')
+    # if not _validate_l2_deltas_df(deltas):
+    #     raise Exception('Dataframe is not valid')
     snapshots = []
     current_timestamp = 0.0
     found_first_snapshot = False
@@ -214,27 +214,7 @@ def l2_hist(snaps: list[tuple[float, dict]]) -> tuple[dict, dict]:
     return hist_ask, hist_bid
 
 
-def _validate_l2_deltas_df(deltas: pd.DataFrame) -> bool:
-    # TODO
-    # 1. Make sure delta==False groups have the same timestamp in group
-    # 2. Make sure delta==False groups have the same number of unique price levels (depth) in group (bids and asks)
-    # 3. Make sure delta==False groups are sorted by price (bids and asks)
-    # 4. Check overlap of best bid/ask prices
-    return True
-
-
-def load_df(exchange: str, symbol: str, channel: str, start: date, end: date) -> pd.DataFrame:
-    # TODO
-    return None
-
-
-def get_available_time_range(exchange: str, symbol: str, channel: str) -> list[tuple[date, date]]:
-    # TODO
-    return None
-
-
 # TODO move away
-
 @jit((float64[:], int64), nopython=True, nogil=True)
 def ewma(arr_in, window):
     r"""Exponentialy weighted moving average specified by a decay ``window``

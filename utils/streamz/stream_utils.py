@@ -1,5 +1,10 @@
-from typing import List, Optional, Any, Callable, Deque
+from typing import List, Optional, Any, Callable, Deque, Tuple, Dict
+
+import pandas as pd
+from portion import Interval
 from streamz import Stream
+
+from featurizer.data_definitions.data_definition import Event
 from utils.time.utils import convert_str_to_seconds
 from collections import deque
 
@@ -35,4 +40,30 @@ def lookback_apply(upstream: Stream, window: str, apply: Callable) -> Stream:
     return upstream.accumulate(_deque_and_apply, returns_state=True, start=deque())
 
 
+def run_named_events_stream(
+    named_events: List[Tuple[Any, Event]],
+    sources: Dict[Any, Stream],
+    out: Stream,
+    interval: Optional[Interval] = None
+) -> pd.DataFrame:
+    res = []
 
+    # TODO make it a Streamz object?
+    def append(elem: Any):
+        # if interval is not specified, append everything
+        if interval is None:
+            res.append(elem)
+            return
+
+        # if interval is specified, append only if timestamp is within the interval
+        if interval.lower <= elem['timestamp'] <= interval.upper:
+            res.append(elem)
+
+    out.sink(append)
+
+    # TODO time this
+    for named_event in named_events:
+        key = named_event[0]
+        sources[key].emit(named_event[1])
+
+    return pd.DataFrame(res)  # TODO set column names properly, using FeatureDefinition schema method?

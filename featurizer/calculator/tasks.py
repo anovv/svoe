@@ -1,3 +1,4 @@
+import heapq
 import itertools
 import time
 from typing import Dict, List, Tuple
@@ -7,9 +8,10 @@ from portion import Interval
 from ray.types import ObjectRef
 from streamz import Stream
 
-from featurizer.blocks.blocks import Block, BlockMeta
+from featurizer.blocks.blocks import Block, BlockMeta, BlockRange
+from featurizer.data_definitions.data_definition import Event
 from featurizer.features.feature_tree.feature_tree import Feature
-from ray_cluster.featurizer.calculator import merge_blocks, run_stream
+from utils.streamz.stream_utils import run_named_events_stream
 from utils.pandas.df_utils import load_df
 
 
@@ -60,10 +62,37 @@ def calculate_feature(
     else:
         out_stream = s
 
-    df = run_stream(merged, upstreams, out_stream, interval)
+    df = run_named_events_stream(merged, upstreams, out_stream, interval)
     print(f'Calc feature finished {time.time() - t}s')
     return df
 
+
+# TODO util this
+# TODO we assume no 'holes' here
+# TODO can we use pandas merge_asof here or some other merge functionality?
+def merge_blocks(
+    blocks: Dict[Feature, BlockRange]
+) -> List[Tuple[Feature, Event]]:
+    merged = None
+    features = list(blocks.keys())
+    for i in range(0, len(features)):
+        feature = features[i]
+        block_range = blocks[feature]
+        named_events = []
+        for block in block_range:
+            parsed = feature.feature_definition.parse_events(block)
+            named = []
+            for e in parsed:
+                named.append((feature, e))
+            named_events = list(heapq.merge(named_events, named, key=lambda named_event: named_event[1]['timestamp']))
+
+        if i == 0:
+            merged = named_events
+        else:
+            # TODO explore heapdict
+            merged = list(heapq.merge(merged, named_events, key=lambda named_event: named_event[1]['timestamp']))
+
+    return merged
 
 @ray.remote(num_cpus=0.001)
 def load_if_needed(

@@ -2,7 +2,7 @@ from typing import Optional, Dict, List, Any
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from featurizer.data_catalog.common.utils.sql.models import DataCatalog, Base
+from featurizer.data_catalog.common.sql.models import DataCatalog, Base
 from featurizer.data_catalog.common.data_models.models import InputItemBatch
 
 import os
@@ -110,7 +110,7 @@ class MysqlClient:
         extras: Optional[str] = None,
         start_date: Optional[str] = None,
         end_date: Optional[str] = None
-    ) -> List[Any]:
+    ) -> List[Dict]:
         # TODO instrument_extra
         args = {
             DataCatalog.exchange.name: exchanges,

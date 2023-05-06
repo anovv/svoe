@@ -1,104 +1,18 @@
 import time
-from typing import Dict, List, Any, Tuple, Optional
+from typing import Dict, List, Tuple, Optional
 
 
 import ray
 from ray.dag import DAGNode
 from ray.types import ObjectRef
 
-from featurizer.data.data_definition import Event
 from featurizer.features.feature_tree.feature_tree import Feature, postorder
-from featurizer.blocks.blocks import Block, BlockRange, meta_to_interval, interval_to_meta, get_overlaps
+from featurizer.blocks.blocks import Block, meta_to_interval, interval_to_meta, get_overlaps, BlockRangeMeta
 from portion import Interval, IntervalDict
 import pandas as pd
-from streamz import Stream
-import heapq
 
-from ray_cluster.featurizer.tasks import calculate_feature, load_if_needed
+from featurizer.calculator.tasks import calculate_feature, load_if_needed
 from utils.pandas.df_utils import concat, sub_df_ts, merge_asof_multi
-
-
-# TODO move this to FeatureDefinition package
-def build_stream_graph(feature: Feature) -> Dict[Feature, Stream]:
-    stream_graph = {}
-
-    def callback(feature: Feature):
-        if feature.feature_definition.is_data_source():
-            stream_graph[feature] = Stream()
-            return
-        dep_upstreams = {}
-        for dep_feature in feature.children:
-            dep_upstreams[dep_feature] = stream_graph[dep_feature]
-        # TODO this should be part of Feature class
-        s = feature.feature_definition.stream(dep_upstreams, feature.params)
-        if isinstance(s, Tuple):
-            stream = s[0]
-            state = s[1]
-        else:
-            stream = s
-        stream_graph[feature] = stream
-
-    postorder(feature, callback)
-    return stream_graph
-
-
-# TODO util this
-# TODO we assume no 'holes' here
-# TODO can we use pandas merge_asof here or some other merge functionality?
-def merge_blocks(
-    blocks: Dict[Feature, BlockRange]
-) -> List[Tuple[Feature, Event]]:
-    merged = None
-    features = list(blocks.keys())
-    for i in range(0, len(features)):
-        feature = features[i]
-        block_range = blocks[feature]
-        named_events = []
-        for block in block_range:
-            parsed = feature.feature_definition.parse_events(block)
-            named = []
-            for e in parsed:
-                named.append((feature, e))
-            named_events = list(heapq.merge(named_events, named, key=lambda named_event: named_event[1]['timestamp']))
-
-        if i == 0:
-            merged = named_events
-        else:
-            # TODO explore heapdict
-            merged = list(heapq.merge(merged, named_events, key=lambda named_event: named_event[1]['timestamp']))
-
-    return merged
-
-
-# TODO util this
-def run_stream(
-    named_events: List[Tuple[Feature, Event]],
-    sources: Dict[Feature, Stream],
-    out: Stream,
-    interval: Optional[Interval] = None
-) -> Block:
-    res = []
-
-    # TODO make it a Streamz object?
-    def append(elem: Any):
-        # if interval is not specified, append everything
-        if interval is None:
-            res.append(elem)
-            return
-
-        # if interval is specified, append only if timestamp is within the interval
-        if interval.lower <= elem['timestamp'] <= interval.upper:
-            res.append(elem)
-
-    out.sink(append)
-
-    # TODO time this
-    for named_event in named_events:
-        feature = named_event[0]
-        sources[feature].emit(named_event[1])
-
-    return pd.DataFrame(res)  # TODO set column names properly, using FeatureDefinition schema method?
-
 
 # graph construction
 # TODO make 3d visualization with networkx/graphviz
@@ -106,7 +20,7 @@ def build_feature_task_graph(
     dag: Dict, # DAGNode per feature per range
     feature: Feature,
     # TODO decouple derived feature_ranges_meta and input data ranges meta
-    ranges_meta: Dict[Feature, List]  # TODO typehint when decide on BlockRangeMeta/BlockMeta
+    ranges_meta: Dict[Feature, BlockRangeMeta]
 ):
     # bottom up/postorder traversal
     def tree_traversal_callback(feature: Feature):

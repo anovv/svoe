@@ -7,7 +7,7 @@ from featurizer.data_catalog.common.tasks.tasks import gather_and_wait, load_df,
     write_batch, store_df, filter_existing
 # from data_catalog.pipelines.catalog_cryptotick.tasks import split_l2_inc_df
 from featurizer.data_catalog.common.utils.register import ray_task_name, send_events_to_stats, EventType
-from featurizer.data_catalog.common.utils.sql.models import DataCatalog
+from featurizer.data_catalog.common.sql.models import DataCatalog
 from featurizer.data_catalog import Dag
 
 SPLIT_CHUNK_SIZE_KB = 100 * 1024

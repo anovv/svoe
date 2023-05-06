@@ -1,7 +1,9 @@
+from streamz import Stream
 
+from featurizer.data_catalog.api.api import DataKey, data_key
 from featurizer.data_definitions.data_source_definition import DataSourceDefinition
 from featurizer.features.definitions.feature_definition import FeatureDefinition
-from typing import Type, Dict, List, Callable, Union
+from typing import Type, Dict, List, Callable, Union, Tuple
 from anytree import NodeMixin
 
 
@@ -28,6 +30,39 @@ class Feature(NodeMixin):
             return f'data-source-{self.feature_definition.__name__}-{self.position}'
         else:
             return f'feature-{self.feature_definition.__name__}-{self.position}'
+
+    def get_data_deps(self) -> List['Feature']:
+        data_leafs = []
+        def callback(node):
+            if node.feature_definition.is_data_source():
+                data_leafs.append(node)
+
+        postorder(self, callback)
+        return data_leafs
+
+    # TODO move this to FeatureDefinition package
+    def build_stream_graph(self) -> Dict['Feature', Stream]:
+        stream_graph = {}
+
+        def callback(feature: Feature):
+            if feature.feature_definition.is_data_source():
+                stream_graph[feature] = Stream()
+                return
+            dep_upstreams = {}
+            for dep_feature in feature.children:
+                dep_upstreams[dep_feature] = stream_graph[dep_feature]
+            # TODO this should be part of Feature class
+            s = feature.feature_definition.stream(dep_upstreams, feature.params)
+            if isinstance(s, Tuple):
+                stream = s[0]
+                state = s[1]
+            else:
+                stream = s
+            stream_graph[feature] = stream
+
+        postorder(self, callback)
+        return stream_graph
+
 
 
 def construct_feature_tree(

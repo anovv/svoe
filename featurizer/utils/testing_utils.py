@@ -4,12 +4,12 @@ import pandas as pd
 import ray
 
 from featurizer.blocks.blocks import BlockRangeMeta, BlockRange, mock_meta
-from featurizer.data.l2_book_incremental.cryptofeed.cryptofeed_l2_book_incremental import CryptofeedL2BookIncrementalData
-from featurizer.data.trades.trades import TradesData
+from featurizer.data_definitions.l2_book_incremental.cryptofeed.cryptofeed_l2_book_incremental import CryptofeedL2BookIncrementalData
+from featurizer.data_definitions.trades.trades import TradesData
 from featurizer.features.definitions.feature_definition import FeatureDefinition
 from featurizer.features.feature_tree.feature_tree import Feature
 from utils.pandas.df_utils import load_dfs, time_range, get_size_kb, get_num_rows
-import featurizer.data.l2_book_incremental.cryptofeed.utils as cryptofeed_l2_utils
+import featurizer.data_definitions.l2_book_incremental.cryptofeed.utils as cryptofeed_l2_utils
 
 
 def mock_feature(position: int):
@@ -52,7 +52,7 @@ def mock_l2_book_deltas_data_ranges_meta(
     res[data] = ranges
     return res
 
-
+# TODO deprecate this
 def mock_trades_data_and_meta() -> Tuple[Dict[Feature, BlockRange], Dict[Feature, BlockRangeMeta]]:
     consec_athena_files_BINANCE_FUTURES_ETH_USD_PERP = [
         's3://svoe.test.1/parquet/BINANCE_FUTURES/trades/ETH-USDT/BINANCE_FUTURES-trades-ETH-USDT-1622120235.parquet',

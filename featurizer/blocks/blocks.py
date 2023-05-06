@@ -2,7 +2,7 @@ from typing import Dict, List, Any
 import pandas as pd
 from portion import Interval, closed, IntervalDict
 
-from featurizer.data_catalog.common.utils.sql.models import DataCatalog
+from featurizer.data_catalog.common.sql.models import DataCatalog
 
 BlockMeta = Dict # represents s3 file metadata: name, time range, size, etc.
 BlockRangeMeta = List[BlockMeta] # represents metadata of consecutive blocks
