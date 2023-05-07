@@ -33,7 +33,8 @@ class MysqlClient:
         port = os.getenv('MYSQL_PORT', self.config.get('mysql_port'))
         db = os.getenv('MYSQL_DATABASE', self.config.get('mysql_database'))
         url = f'mysql+pymysql://{user}:{password}@{host}:{port}/{db}'
-        engine = create_engine(url, echo=False)
+        # engine = create_engine(url, echo=False, query_cache_size=0, isolation_level="READ UNCOMMITTED")
+        engine = create_engine(url, echo=False, query_cache_size=0)
         Session.configure(bind=engine)
         return engine
 
@@ -134,7 +135,6 @@ class MysqlClient:
         if end_date is not None:
             f = f.filter(DataCatalog.date <= end_date)
         res = f.order_by(DataCatalog.start_ts).all()
-
         # TODO this adds unnecessary sqlalchemy fields, remove to reduce memory footprint
         return [r.__dict__ for r in res]
 

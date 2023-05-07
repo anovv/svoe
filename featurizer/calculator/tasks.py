@@ -14,6 +14,19 @@ from featurizer.features.feature_tree.feature_tree import Feature
 from utils.streamz.stream_utils import run_named_events_stream
 from utils.pandas.df_utils import load_df
 
+@ray.remote(num_cpus=0.001)
+def load_if_needed(
+    block_meta: BlockMeta,
+) -> Block:
+    # TODO if using Ray's Plasma, check shared obj store first, if empty - load from s3
+    # TODO figure out how to split BlockRange -> Block and cache if needed
+    # TODO sync keys
+    print('Load started')
+    t = time.time()
+    path = block_meta['path']
+    df = load_df(path)
+    print(f'Load finished {time.time() - t}s')
+    return df
 
 # TODO for Virtual clock
 # https://stackoverflow.com/questions/53829383/mocking-the-internal-clock-of-asyncio-event-loop
@@ -94,16 +107,8 @@ def merge_blocks(
 
     return merged
 
+
 @ray.remote(num_cpus=0.001)
-def load_if_needed(
-    block_meta: BlockMeta,
-) -> Block:
-    # TODO if using Ray's Plasma, check shared obj store first, if empty - load from s3
-    # TODO figure out how to split BlockRange -> Block and cache if needed
-    # TODO sync keys
-    print('Load started')
-    t = time.time()
-    path = block_meta['path']
-    df = load_df(path)
-    print(f'Load finished {time.time() - t}s')
-    return df
+def store_day(feature: Feature, refs: List[ObjectRef[Block]], day: str) -> Dict:
+    # TODO
+    return {}

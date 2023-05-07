@@ -42,7 +42,6 @@ class Api:
         end_date: Optional[str] = None
     ) -> Dict[Interval, Dict[DataKey, List[BlockRangeMeta]]]:
         raw_data = self.client.select(exchanges, data_types, instrument_types, symbols, start_date, end_date)
-        print(len(raw_data))
         # group data by data key
         groups = {}
         for r in raw_data:
@@ -51,7 +50,6 @@ class Api:
                 groups[key].append(r)
             else:
                 groups[key] = [r]
-
 
         # make overlaps
         grouped_ranges = {}

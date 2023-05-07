@@ -11,8 +11,10 @@ from featurizer.blocks.blocks import Block, meta_to_interval, interval_to_meta, 
 from portion import Interval, IntervalDict
 import pandas as pd
 
-from featurizer.calculator.tasks import calculate_feature, load_if_needed
+from featurizer.calculator.tasks import calculate_feature, load_if_needed, store_day
 from utils.pandas.df_utils import concat, sub_df_ts, merge_asof_multi
+from utils.time.utils import date_str_from_ts, days_diff_str
+
 
 # graph construction
 # TODO make 3d visualization with networkx/graphviz
@@ -75,6 +77,28 @@ def build_feature_task_graph(
 
     return dag
 
+# add caching tasks to graph
+def build_store_nodes(dag: Dict, to_store: List[Feature]):
+    nodes_per_feature = {}
+    for feature in to_store:
+        if feature not in dag:
+            raise ValueError(f'Cannot find feature {feature} in dag')
+        nodes_by_day = {}
+        for interval in dag[feature]:
+            # group into day-sized chunks
+            start_day = date_str_from_ts(interval.lower)
+            end_day = date_str_from_ts(interval.upper)
+            if start_day != end_day:
+                raise ValueError('Cannot store intervals with different days')
+            if start_day in nodes_by_day:
+                nodes_by_day[start_day].append(dag[feature][interval])
+            else:
+                nodes_by_day[start_day] = [dag[feature][interval]]
+        store_nodes = []
+        for day in nodes_by_day:
+            store_nodes.append(store_day.bind(feature, nodes_by_day[day], day))
+        nodes_per_feature[feature] = store_nodes
+    return nodes_per_feature
 
 def execute_graph_nodes(nodes: List[DAGNode]) -> List[Block]:
     # root_nodes = list(dag[feature].values())

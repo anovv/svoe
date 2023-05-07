@@ -90,16 +90,6 @@ class TestFeatureCalculator(unittest.TestCase):
         # TODO assert
         print(res_ray.equals(res_seq))
 
-    def test_feature_label_set(self):
-        block_range, block_range_meta = mock_l2_book_delta_data_and_meta()
-        data_params = {}
-        feature_params = {}
-        feature_mid_price = construct_feature_tree(MidPriceFD, data_params, feature_params)
-        feature_volatility = construct_feature_tree(VolatilityStddevFD, data_params, feature_params)
-        flset = C.build_feature_label_set_task_graph([feature_mid_price, feature_volatility], block_range_meta, feature_mid_price)
-        # TODO execute
-
-
     # TODO assertions
     def test_cryptotick_l2_snap_feature_online(self):
         data_params = {}
@@ -136,7 +126,8 @@ class TestFeatureCalculator(unittest.TestCase):
         feature = construct_feature_tree(MidPriceFD, data_params, feature_params)
         data_deps = feature.get_data_deps()
         data_keys = [data_key(d.params) for d in data_deps]
-        ranges_meta = api.get_meta_from_data_keys(data_keys)
+        ranges_meta = api.get_meta_from_data_keys(data_keys, start_date='2023-02-01', end_date='2023-02-01')
+        # ranges_meta = api.get_meta_from_data_keys(data_keys, None, None)
         data_ranges_meta = {}
         for interval in ranges_meta:
             range_meta = ranges_meta[interval]
@@ -188,6 +179,15 @@ class TestFeatureCalculator(unittest.TestCase):
         #
         # plt.show()
 
+
+    # def test_feature_label_set(self):
+    #     block_range, block_range_meta = mock_l2_book_delta_data_and_meta()
+    #     data_params = {}
+    #     feature_params = {}
+    #     feature_mid_price = construct_feature_tree(MidPriceFD, data_params, feature_params)
+    #     feature_volatility = construct_feature_tree(VolatilityStddevFD, data_params, feature_params)
+    #     flset = C.build_feature_label_set_task_graph([feature_mid_price, feature_volatility], block_range_meta, feature_mid_price)
+    #     # TODO execute
 
     # TODO deprecate this
     def test_featurization_DEPRECATED(self, feature_def: Type[FeatureDefinition], data_def: Type[DataSourceDefinition]):
