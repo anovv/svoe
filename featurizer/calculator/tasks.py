@@ -1,6 +1,9 @@
+import concurrent
+import functools
 import heapq
 import itertools
 import time
+from concurrent.futures import as_completed
 from typing import Dict, List, Tuple
 
 import ray
@@ -12,7 +15,8 @@ from featurizer.blocks.blocks import Block, BlockMeta, BlockRange
 from featurizer.data_definitions.data_definition import Event
 from featurizer.features.feature_tree.feature_tree import Feature
 from utils.streamz.stream_utils import run_named_events_stream
-from utils.pandas.df_utils import load_df
+from utils.pandas.df_utils import load_df, store_df
+
 
 @ray.remote(num_cpus=0.001)
 def load_if_needed(
@@ -109,6 +113,23 @@ def merge_blocks(
 
 
 @ray.remote(num_cpus=0.001)
-def store_day(feature: Feature, refs: List[ObjectRef[Block]], day: str) -> Dict:
-    # TODO
+def store_feature_blocks(feature: Feature, refs: List[ObjectRef[Block]]) -> Dict:
+    STORE_PARALLELISM = 10
+    executor = concurrent.futures.ThreadPoolExecutor(max_workers=STORE_PARALLELISM)
+
+    def store_and_catalogue_block(ref: ObjectRef[Block]) -> Dict:
+        block = ray.get(ref)
+        catalog_item = catalog_feature_block(feature, block)
+        store_df(catalog_item['path'], block)
+        return catalog_item
+
+    store_futures = [executor.submit(functools.partial(store_and_catalogue_block, ref=ref)) for ref in refs]
+    catalog_items = [f.result() for f in as_completed(store_futures)]
+    db_actor = ray.get_actor('DbActor') # TODO global handle
+
+    # TODO make DataCatalog db actor shared and implement storage for features meta
+
+    return {}
+
+def catalog_feature_block(feature: Feature, block: Block) -> Dict:
     return {}

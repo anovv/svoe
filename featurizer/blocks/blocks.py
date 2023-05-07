@@ -56,7 +56,6 @@ def make_ranges(data: List[BlockMeta]) -> List[BlockRangeMeta]:
 def identity_grouping(ranges: List[BlockMeta]) -> IntervalDict:
     # groups blocks 1 to 1
     res = IntervalDict()
-    # TODO assuming no 'holes' in data
     for meta in ranges:
         res[meta_to_interval(meta)] = [meta]
     return res

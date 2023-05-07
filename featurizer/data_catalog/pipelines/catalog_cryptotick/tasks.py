@@ -38,8 +38,10 @@ def load_split_catalog_store_l2_inc_df(input_item: InputItem, chunk_size_kb: int
     split_id = 0
     num_splits = 0
 
-    executor = concurrent.futures.ThreadPoolExecutor(max_workers=10)
+    STORE_PARALLELISM = 10
+    executor = concurrent.futures.ThreadPoolExecutor(max_workers=STORE_PARALLELISM)
     store_futures = []
+
     for split in gen:
         item_split = input_item.copy()
 
