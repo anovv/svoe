@@ -1,7 +1,7 @@
 from typing import List, Tuple
 
 from featurizer.data_catalog.common.data_models.models import InputItemBatch, InputItem
-from featurizer.data_catalog.common.sql.models import DataCatalog
+from featurizer.sql.data_catalog.models import DataCatalog
 
 CRYPTOTICK_RAW_BUCKET_NAME = 'svoe-cryptotick-data'
 

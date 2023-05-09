@@ -10,7 +10,7 @@ import ray
 
 from featurizer.data_catalog.common.actors.db import DbActor
 from featurizer.data_catalog.common.data_models.models import InputItem
-from featurizer.data_catalog.common.sql.models import DataCatalog, _construct_s3_path
+from featurizer.sql.data_catalog.models import DataCatalog, _construct_s3_path
 from featurizer.data_definitions.l2_book_incremental.cryptofeed import utils as cryptofeed_l2_utils
 from featurizer.data_definitions.l2_book_incremental.cryptotick import utils as cryptotick_l2_utils
 from featurizer.data_definitions.l2_book_incremental.cryptotick.utils import preprocess_l2_inc_df, \

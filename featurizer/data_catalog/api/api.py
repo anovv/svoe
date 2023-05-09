@@ -4,8 +4,8 @@ from portion import Interval, closed, IntervalDict
 from typing import Optional, Dict, List, Tuple
 
 from featurizer.blocks.blocks import BlockRangeMeta, make_ranges, prune_overlaps, get_overlaps
-from featurizer.data_catalog.common.sql.client import MysqlClient
-from featurizer.data_catalog.common.sql.models import DataCatalog
+from featurizer.sql.client import MysqlClient
+from featurizer.sql.data_catalog.models import DataCatalog
 
 # TODO this should be synced with DataDef somehow?
 DataKey = Tuple[str, str, str, str]

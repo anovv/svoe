@@ -3,8 +3,8 @@ from typing import Optional, Dict, List
 import ray
 
 from featurizer.data_catalog.common.data_models.models import InputItemBatch
-from featurizer.data_catalog.common.sql.client import MysqlClient
-from featurizer.data_catalog.common.sql.models import DataCatalog
+from featurizer.sql.client import MysqlClient
+from featurizer.sql.data_catalog.models import DataCatalog
 
 
 # TODO use max_concurrency=n instead of threads

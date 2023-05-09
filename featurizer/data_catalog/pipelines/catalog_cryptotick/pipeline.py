@@ -9,7 +9,7 @@ from tqdm import tqdm
 
 from featurizer.data_catalog.common.actors.db import DbActor
 from featurizer.data_catalog.common.data_models.models import InputItemBatch
-from featurizer.data_catalog.common.sql.models import DataCatalog
+from featurizer.sql.data_catalog.models import DataCatalog
 from featurizer.data_catalog import load_split_catalog_store_l2_inc_df
 
 SPLIT_CHUNK_SIZE_KB = 100 * 1024

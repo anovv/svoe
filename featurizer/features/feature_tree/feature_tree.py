@@ -1,6 +1,6 @@
+import joblib
 from streamz import Stream
 
-from featurizer.data_catalog.api.api import DataKey, data_key
 from featurizer.data_definitions.data_source_definition import DataSourceDefinition
 from featurizer.features.definitions.feature_definition import FeatureDefinition
 from typing import Type, Dict, List, Callable, Union, Tuple
@@ -13,23 +13,31 @@ class Feature(NodeMixin):
         self.position = position
         self.feature_definition = feature_definition
         self.params = params
-        self.feature_id = self._feature_id()
+        self.feature_key = self._feature_key()
 
     def __hash__(self):
-        return hash(self.feature_id)
+        return hash(self.feature_key)
 
     def __eq__(self, other):
-        return self.feature_id == other.feature_id
+        return self.feature_key == other.feature_key
 
     def __repr__(self):
-        return self.feature_id
-
-    def _feature_id(self) -> str:
-        # TODO figure out how to pass data_params dependencies to features to get unique id
+        short_key = self.feature_key[:8]
         if self.feature_definition.is_data_source():
-            return f'data-source-{self.feature_definition.__name__}-{self.position}'
+            return f'data-source-{self.feature_definition.__name__}-{self.position}-{short_key}'
         else:
-            return f'feature-{self.feature_definition.__name__}-{self.position}'
+            return f'feature-{self.feature_definition.__name__}-{self.position}-{short_key}'
+
+    def _feature_key(self) -> str:
+        data_deps = self.get_data_deps()
+        feature_deps = self.get_inorder_feature_deps()
+        dep_data_params = [d.params for d in data_deps]
+        dep_feature_params = [f.params for f in feature_deps]
+
+        # TODO add feature_defenition version to hash
+
+        return joblib.hash([dep_data_params, dep_feature_params])
+
 
     def get_data_deps(self) -> List['Feature']:
         data_leafs = []
@@ -39,6 +47,15 @@ class Feature(NodeMixin):
 
         postorder(self, callback)
         return data_leafs
+
+    def get_inorder_feature_deps(self) -> List['Feature']:
+        deps = []
+        def callback(node):
+            if not node.feature_definition.is_data_source():
+                deps.append(node)
+        inorder(self, callback)
+        return deps
+
 
     # TODO move this to FeatureDefinition package
     def build_stream_graph(self) -> Dict['Feature', Stream]:
@@ -62,7 +79,6 @@ class Feature(NodeMixin):
 
         postorder(self, callback)
         return stream_graph
-
 
 
 def construct_feature_tree(
@@ -137,3 +153,11 @@ def postorder(node: Feature, callback: Callable):
     for child in node.children:
         postorder(child, callback)
     callback(node)
+
+def inorder(node: Feature, callback: Callable):
+    if node.children is None or len(node.children) == 0:
+        callback(node)
+        return
+    callback(node)
+    for child in node.children:
+        postorder(child, callback)

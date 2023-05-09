@@ -7,7 +7,7 @@ import ray
 from featurizer.data_catalog.pipelines.catalog_cryptotick.tasks import make_catalog_item
 from featurizer.data_catalog import CatalogCryptofeedDag
 from featurizer.data_catalog import PipelineRunner
-from featurizer.data_catalog.common.sql.client import MysqlClient
+from featurizer.sql.client import MysqlClient
 from featurizer.data_catalog.common.utils.cryptofeed.utils import generate_cryptofeed_input_items
 from utils.pandas.df_utils import load_dfs
 

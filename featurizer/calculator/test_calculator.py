@@ -1,11 +1,8 @@
 import shutil
 import time
 
-import numpy as np
 import ray
 from portion import closed
-from ray.util.dask import enable_dask_on_ray
-import matplotlib.pyplot as plt
 
 import calculator as C
 import utils.streamz.stream_utils
@@ -16,10 +13,9 @@ from featurizer.data_definitions.l2_book_incremental.cryptofeed.cryptofeed_l2_bo
 from featurizer.data_definitions.l2_book_incremental.cryptotick.cryptotick_l2_book_incremental import CryptotickL2BookIncrementalData
 from featurizer.data_definitions.trades.trades import TradesData
 
-from featurizer.data_catalog.common.sql.models import DataCatalog
+from featurizer.sql.data_catalog.models import DataCatalog
 from featurizer.features.definitions.l2_snapshot.l2_snapshot_fd import L2SnapshotFD
 from featurizer.features.definitions.mid_price.mid_price_fd import MidPriceFD
-from featurizer.features.definitions.volatility.volatility_stddev_fd import VolatilityStddevFD
 from featurizer.features.definitions.feature_definition import FeatureDefinition
 from featurizer.features.feature_tree.feature_tree import construct_feature_tree, Feature
 
@@ -28,7 +24,7 @@ import pandas as pd
 from typing import Type
 from anytree import RenderTree
 from featurizer.utils.testing_utils import mock_feature, mock_trades_data_and_meta, mock_l2_book_delta_data_and_meta, mock_ts_df, mock_ts_df_remote
-from utils.pandas.df_utils import concat, load_df, get_size_kb, gen_split_df_by_mem, get_cached_df
+from utils.pandas.df_utils import concat, load_df
 
 
 class TestFeatureCalculator(unittest.TestCase):

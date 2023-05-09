@@ -1,8 +1,8 @@
-from typing import Optional, Dict, List, Any
+from typing import Optional, Dict, List
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from featurizer.data_catalog.common.sql.models import DataCatalog, Base
+from featurizer.sql.data_catalog.models import DataCatalog, Base
 from featurizer.data_catalog.common.data_models.models import InputItemBatch
 
 import os
