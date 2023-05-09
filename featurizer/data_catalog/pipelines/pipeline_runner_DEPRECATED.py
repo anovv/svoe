@@ -1,5 +1,5 @@
 import ray
-from featurizer.data_catalog.common.actors.db import DbActor
+from featurizer.sql.db import DbActor
 
 # for pipelined queue https://docs.ray.io/en/latest/ray-core/patterns/pipelining.html
 # for backpressure https://docs.ray.io/en/latest/ray-core/patterns/limit-pending-tasks.html

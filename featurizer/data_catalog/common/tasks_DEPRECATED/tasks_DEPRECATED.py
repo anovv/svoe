@@ -4,7 +4,7 @@ import ray
 
 import pandas as pd
 
-from featurizer.data_catalog.common.actors.db import DbActor
+from featurizer.sql.db import DbActor
 from featurizer.data_catalog.common.data_models.models import InputItem, InputItemBatch
 from featurizer.data_catalog.common.utils.register import report_stats_decor, EventType
 from featurizer.sql.data_catalog.models import DataCatalog

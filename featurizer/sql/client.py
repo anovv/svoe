@@ -7,6 +7,8 @@ from featurizer.data_catalog.common.data_models.models import InputItemBatch
 
 import os
 
+from featurizer.sql.feature_catalog.models import FeatureCatalog
+
 Session = sessionmaker()
 
 
@@ -43,9 +45,7 @@ class MysqlClient:
         Base.metadata.create_all(self.engine)
 
     # TODO separate api methods and pipeline methods
-    # see 2nd comment in https://stackoverflow.com/questions/3659142/bulk-insert-with-sqlalchemy-orm
-    # RE: bulk insert perf
-    def write_catalog_item_batch(self, batch: List[DataCatalog]):
+    def write_catalog_item_batch(self, batch: List[DataCatalog | FeatureCatalog]):
         # TODO figure out insert_or_update logic
         session = Session()
         session.bulk_save_objects(batch)

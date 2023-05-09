@@ -1,6 +1,6 @@
 from ray import workflow
 
-from featurizer.data_catalog.common.actors.db import DbActor
+from featurizer.sql.db import DbActor
 from featurizer.data_catalog.common.data_models.models import InputItemBatch
 from featurizer.data_catalog.common.tasks.tasks_DEPRECATED import filter_existing, load_df, catalog_df, gather_and_wait, write_batch, chain_no_ret
 from featurizer.data_catalog.common.utils.register import ray_task_name, EventType, send_events_to_stats

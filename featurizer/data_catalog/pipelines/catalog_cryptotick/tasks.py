@@ -8,7 +8,7 @@ import pandas as pd
 import pytz
 import ray
 
-from featurizer.data_catalog.common.actors.db import DbActor
+from featurizer.sql.db import DbActor
 from featurizer.data_catalog.common.data_models.models import InputItem
 from featurizer.sql.data_catalog.models import DataCatalog, _construct_s3_path
 from featurizer.data_definitions.l2_book_incremental.cryptofeed import utils as cryptofeed_l2_utils

@@ -5,9 +5,9 @@ import ray
 from featurizer.data_catalog.common.data_models.models import InputItemBatch
 from featurizer.sql.client import MysqlClient
 from featurizer.sql.data_catalog.models import DataCatalog
+from featurizer.sql.feature_catalog.models import FeatureCatalog
 
 
-# TODO use max_concurrency=n instead of threads
 # @ray.remote(resources={'worker_size_small': 1, 'instance_on_demand': 1})
 @ray.remote
 class DbActor:
@@ -27,7 +27,7 @@ class DbActor:
         else:
             raise ValueError(f'Unsupported source:{ source}')
 
-    async def write_batch(self, batch: List[DataCatalog]) -> Dict:
+    async def write_batch(self, batch: List[DataCatalog | FeatureCatalog]) -> Dict:
         self.client.create_tables()
         self.client.write_catalog_item_batch(batch)
         # TODO return status to pass to stats actor

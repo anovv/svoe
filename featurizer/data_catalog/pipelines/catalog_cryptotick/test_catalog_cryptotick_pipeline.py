@@ -8,7 +8,7 @@ from featurizer import data_catalog
 import featurizer
 import ray_cluster
 import utils
-from featurizer.data_catalog.common.actors.db import DbActor
+from featurizer.sql.db import DbActor
 from featurizer.data_catalog.common.utils.cryptotick.utils import cryptotick_input_items, CRYPTOTICK_RAW_BUCKET_NAME
 from featurizer.sql.client import MysqlClient
 from featurizer.data_catalog.pipelines.catalog_cryptotick.pipeline import CatalogCryptotickPipeline, poll_to_tqdm

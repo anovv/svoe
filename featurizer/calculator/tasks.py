@@ -131,8 +131,7 @@ def store_feature_blocks(feature: Feature, refs: List[ObjectRef[Block]]) -> Dict
     store_futures = [executor.submit(functools.partial(store_and_catalogue_block, ref=ref)) for ref in refs]
     catalog_items = [f.result() for f in as_completed(store_futures)]
     db_actor = ray.get_actor('DbActor') # TODO global handle
-
-    # TODO make DataCatalog db actor shared and implement storage for features meta
+    res = ray.get(db_actor.write_batch(catalog_items))
 
     return {}
 
@@ -150,8 +149,9 @@ def catalog_feature_block(feature: Feature, df: pd.DataFrame) -> FeatureCatalog:
     # TODO window, sampling, feature_params, data_params, tags
     catalog_item_params.update({
         FeatureCatalog.owner_id.name: '0',
-        FeatureCatalog.feature_def.name: feature.feature_definition.__class__.__name__,
+        FeatureCatalog.feature_def.name: feature.feature_definition.__name__,
         FeatureCatalog.feature_key.name: feature.feature_key,
+        # TODO pass interval directly instead of start, end? or keep both?
         FeatureCatalog.start_ts.name: _time_range[1],
         FeatureCatalog.end_ts.name: _time_range[2],
         FeatureCatalog.size_in_memory_kb.name: df_utils.get_size_kb(df),
