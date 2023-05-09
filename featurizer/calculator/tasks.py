@@ -4,8 +4,11 @@ import heapq
 import itertools
 import time
 from concurrent.futures import as_completed
+from datetime import datetime
 from typing import Dict, List, Tuple
 
+import pandas as pd
+import pytz
 import ray
 from portion import Interval
 from ray.types import ObjectRef
@@ -14,6 +17,8 @@ from streamz import Stream
 from featurizer.blocks.blocks import Block, BlockMeta, BlockRange
 from featurizer.data_definitions.data_definition import Event
 from featurizer.features.feature_tree.feature_tree import Feature
+from featurizer.sql.feature_catalog.models import FeatureCatalog, _construct_feature_catalog_s3_path
+from utils.pandas import df_utils
 from utils.streamz.stream_utils import run_named_events_stream
 from utils.pandas.df_utils import load_df, store_df
 
@@ -117,10 +122,10 @@ def store_feature_blocks(feature: Feature, refs: List[ObjectRef[Block]]) -> Dict
     STORE_PARALLELISM = 10
     executor = concurrent.futures.ThreadPoolExecutor(max_workers=STORE_PARALLELISM)
 
-    def store_and_catalogue_block(ref: ObjectRef[Block]) -> Dict:
+    def store_and_catalogue_block(ref: ObjectRef[Block]) -> FeatureCatalog:
         block = ray.get(ref)
         catalog_item = catalog_feature_block(feature, block)
-        store_df(catalog_item['path'], block)
+        store_df(catalog_item[FeatureCatalog.path.name], block)
         return catalog_item
 
     store_futures = [executor.submit(functools.partial(store_and_catalogue_block, ref=ref)) for ref in refs]
@@ -131,5 +136,32 @@ def store_feature_blocks(feature: Feature, refs: List[ObjectRef[Block]]) -> Dict
 
     return {}
 
-def catalog_feature_block(feature: Feature, block: Block) -> Dict:
-    return {}
+def catalog_feature_block(feature: Feature, df: pd.DataFrame) -> FeatureCatalog:
+    _time_range = df_utils.time_range(df)
+
+    date_str = datetime.fromtimestamp(_time_range[1], tz=pytz.utc).strftime('%Y-%m-%d')
+    # check if end_ts is also same date:
+    date_str_end = datetime.fromtimestamp(_time_range[2], tz=pytz.utc).strftime('%Y-%m-%d')
+    if date_str != date_str_end:
+        raise ValueError(f'start_ts and end_ts belong to different dates: {date_str}, {date_str_end}')
+
+    catalog_item_params = {}
+
+    # TODO window, sampling, feature_params, data_params, tags
+    catalog_item_params.update({
+        FeatureCatalog.owner_id.name: '0',
+        FeatureCatalog.feature_def.name: feature.feature_definition.__class__.__name__,
+        FeatureCatalog.feature_key.name: feature.feature_key,
+        FeatureCatalog.start_ts.name: _time_range[1],
+        FeatureCatalog.end_ts.name: _time_range[2],
+        FeatureCatalog.size_in_memory_kb.name: df_utils.get_size_kb(df),
+        FeatureCatalog.num_rows.name: df_utils.get_num_rows(df),
+        FeatureCatalog.date.name: date_str,
+    })
+    df_hash = df_utils.hash_df(df)
+    catalog_item_params[FeatureCatalog.hash.name] = df_hash
+
+    res = FeatureCatalog(**catalog_item_params)
+    if res.path is None:
+        res.path = _construct_feature_catalog_s3_path(res)
+    return res

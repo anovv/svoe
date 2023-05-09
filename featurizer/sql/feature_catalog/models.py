@@ -20,7 +20,7 @@ class FeatureCatalog(Base):
     # composite primary key cols
     owner_id = Column(String(32), primary_key=True)
     feature_def = Column(String(32), primary_key=True)
-    feature_key = Column(String(32), primary_key=True)
+    feature_key = Column(String(256), primary_key=True)
 
     start_ts = Column(String(32), primary_key=True)
     end_ts = Column(String(32), primary_key=True)
@@ -56,7 +56,7 @@ class FeatureCatalog(Base):
             setattr(self, FeatureCatalog.version.name, DEFAULT_VERSION)
 
 
-def _construct_s3_path(item: FeatureCatalog) -> str:
+def _construct_feature_catalog_s3_path(item: FeatureCatalog) -> str:
     res = f's3://{SVOE_S3_FEATURE_CATALOG_BUCKET}/'
     for field in [
         FeatureCatalog.feature_def.name,
