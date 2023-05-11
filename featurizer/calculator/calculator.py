@@ -16,6 +16,7 @@ from featurizer.calculator.tasks import calculate_feature, load_if_needed, store
 from utils.pandas.df_utils import concat, sub_df_ts, merge_asof_multi
 from utils.time.utils import date_str_from_ts
 
+
 def build_feature_task_graph(
     dag: Dict[Feature, Dict[Interval, Dict[Interval, DAGNode]]], # DAGNodes per feature per range
     feature: Feature,
@@ -37,18 +38,18 @@ def build_feature_task_graph(
 
                     node = load_if_needed.bind(block_meta)
 
-                    # TODO validate no overlaping intervals here
+                    # TODO validate no overlapping intervals here
                     nodes[interval] = node
 
                 # TODO check if duplicate feature/interval
                 dag[feature][range_interval] = nodes
             return
 
-        dep_ranges = {}
+        ranges_per_dep_feature = {}
         for dep_feature in feature.children:
-            dep_ranges[dep_feature] = ranges_to_interval_dict(ranges_meta[dep_feature])
+            ranges_per_dep_feature[dep_feature] = ranges_to_interval_dict(ranges_meta[dep_feature])
 
-        range_intervals = prune_overlaps(get_overlaps(dep_ranges))
+        range_intervals = prune_overlaps(get_overlaps(ranges_per_dep_feature))
         for range_interval in range_intervals:
             range_meta_per_dep_feature = range_intervals[range_interval]
 
@@ -78,6 +79,8 @@ def build_feature_task_graph(
                         ds.append(dep_node)
                     dep_nodes[dep_feature] = ds
                 node = calculate_feature.bind(feature, dep_nodes, interval)
+
+                # TODO validate interval is withtin range_interval
                 nodes[interval] = node
 
             # TODO check if range_interval intersects with existing keys/intervals"
@@ -92,66 +95,6 @@ def build_feature_task_graph(
 
     return dag
 
-# graph construction
-# TODO make 3d visualization with networkx/graphviz
-def build_feature_task_graph_DEPRECATED_SINGLE_RANGE(
-    dag: Dict, # DAGNode per feature per range
-    feature: Feature,
-    # TODO decouple derived feature_ranges_meta and input data ranges meta
-    ranges_meta: Dict[Feature, BlockRangeMeta]
-):
-    # bottom up/postorder traversal
-    def tree_traversal_callback(feature: Feature):
-        if feature.feature_definition.is_data_source():
-            # leafs
-            # TODO decouple derived feature_ranges_meta and input data ranges meta
-            ranges = ranges_meta[feature]  # this is already populated for Data in load_data_ranges above
-            for block_meta in ranges:
-                # TODO we assume no 'holes' in data here
-                interval = meta_to_interval(block_meta)
-                if feature not in dag:
-                    dag[feature] = {}
-                node = load_if_needed.bind(block_meta)
-
-                # TODO check if duplicate feature/interval
-                dag[feature][interval] = node
-            return
-
-        grouped_ranges_by_dep_feature = {}
-        for dep_feature in feature.children:
-            dep_ranges = ranges_meta[dep_feature]
-            # TODO this should be in Feature class
-            grouped_ranges_by_dep_feature[dep_feature] = feature.feature_definition.group_dep_ranges(dep_ranges, feature, dep_feature)
-
-        overlaps = get_overlaps(grouped_ranges_by_dep_feature)
-        ranges = []
-        for interval, overlap in overlaps.items():
-            # TODO add size_kb/memory_size_kb to proper size memory usage for aggregate tasks downstream
-            result_meta = interval_to_meta(interval)
-            ranges.append(result_meta)
-            if feature not in dag:
-                dag[feature] = {}
-
-            # TODO use overlap to fetch results of dep delayed funcs
-            dep_nodes = {}
-            for dep_feature in overlap:
-                ds = []
-                for dep_block_meta in overlap[dep_feature]:
-                    dep_interval = meta_to_interval(dep_block_meta)
-                    dep_node = dag[dep_feature][dep_interval]
-                    ds.append(dep_node)
-                dep_nodes[dep_feature] = ds
-            node = calculate_feature.bind(feature, dep_nodes, interval)
-
-            # TODO check if duplicate feature/interval
-            dag[feature][interval] = node
-
-        # TODO check if duplicate feature
-        ranges_meta[feature] = ranges
-
-    postorder(feature, tree_traversal_callback)
-
-    return dag
 
 # add caching tasks to graph
 def build_store_nodes(dag: Dict, to_store: List[Feature]):
@@ -306,5 +249,67 @@ def build_feature_label_set_task_graph(
     dag = build_feature_set_task_graph(dag, features, ranges_meta)
 
     return point_in_time_join_dag(dag, features, label)
+
+
+# graph construction
+# TODO make 3d visualization with networkx/graphviz
+def build_feature_task_graph_DEPRECATED_SINGLE_RANGE(
+    dag: Dict, # DAGNode per feature per range
+    feature: Feature,
+    # TODO decouple derived feature_ranges_meta and input data ranges meta
+    ranges_meta: Dict[Feature, BlockRangeMeta]
+):
+    # bottom up/postorder traversal
+    def tree_traversal_callback(feature: Feature):
+        if feature.feature_definition.is_data_source():
+            # leafs
+            # TODO decouple derived feature_ranges_meta and input data ranges meta
+            ranges = ranges_meta[feature]  # this is already populated for Data in load_data_ranges above
+            for block_meta in ranges:
+                # TODO we assume no 'holes' in data here
+                interval = meta_to_interval(block_meta)
+                if feature not in dag:
+                    dag[feature] = {}
+                node = load_if_needed.bind(block_meta)
+
+                # TODO check if duplicate feature/interval
+                dag[feature][interval] = node
+            return
+
+        grouped_ranges_by_dep_feature = {}
+        for dep_feature in feature.children:
+            dep_ranges = ranges_meta[dep_feature]
+            # TODO this should be in Feature class
+            grouped_ranges_by_dep_feature[dep_feature] = feature.feature_definition.group_dep_ranges(dep_ranges, feature, dep_feature)
+
+        overlaps = get_overlaps(grouped_ranges_by_dep_feature)
+        ranges = []
+        for interval, overlap in overlaps.items():
+            # TODO add size_kb/memory_size_kb to proper size memory usage for aggregate tasks downstream
+            result_meta = interval_to_meta(interval)
+            ranges.append(result_meta)
+            if feature not in dag:
+                dag[feature] = {}
+
+            # TODO use overlap to fetch results of dep delayed funcs
+            dep_nodes = {}
+            for dep_feature in overlap:
+                ds = []
+                for dep_block_meta in overlap[dep_feature]:
+                    dep_interval = meta_to_interval(dep_block_meta)
+                    dep_node = dag[dep_feature][dep_interval]
+                    ds.append(dep_node)
+                dep_nodes[dep_feature] = ds
+            node = calculate_feature.bind(feature, dep_nodes, interval)
+
+            # TODO check if duplicate feature/interval
+            dag[feature][interval] = node
+
+        # TODO check if duplicate feature
+        ranges_meta[feature] = ranges
+
+    postorder(feature, tree_traversal_callback)
+
+    return dag
 
 

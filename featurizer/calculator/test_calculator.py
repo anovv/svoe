@@ -12,6 +12,7 @@ from featurizer.data_definitions.data_source_definition import DataSourceDefinit
 from featurizer.data_definitions.l2_book_incremental.cryptofeed.cryptofeed_l2_book_incremental import CryptofeedL2BookIncrementalData
 from featurizer.data_definitions.l2_book_incremental.cryptotick.cryptotick_l2_book_incremental import CryptotickL2BookIncrementalData
 from featurizer.data_definitions.trades.trades import TradesData
+from featurizer.features.definitions.volatility.volatility_stddev_fd import VolatilityStddevFD
 
 from featurizer.sql.data_catalog.models import DataCatalog
 from featurizer.features.definitions.l2_snapshot.l2_snapshot_fd import L2SnapshotFD
@@ -112,14 +113,14 @@ class TestFeatureCalculator(unittest.TestCase):
 
         # data_def = Feature([], 0, CryptotickL2BookIncrementalData, {})
 
-        feature_params = {1: {'dep_schema': 'cryptotick'}}
+        feature_params = {2: {'dep_schema': 'cryptotick'}}
         data_params = {
             0: {DataCatalog.exchange.name: 'BINANCE',
                 DataCatalog.data_type.name: 'l2_book',
                 DataCatalog.instrument_type.name: 'spot',
                 DataCatalog.symbol.name: 'BTC-USDT'}}
         # feature_params1 = {1: {'dep_schema': 'cryptotick', 'sampling': '1s'}}
-        feature = construct_feature_tree(MidPriceFD, data_params, feature_params)
+        feature = construct_feature_tree(VolatilityStddevFD, data_params, feature_params)
         data_deps = feature.get_data_deps()
         data_keys = [data_key(d.params) for d in data_deps]
         ranges_meta_per_data_key = api.get_meta_from_data_keys(data_keys, start_date='2023-02-01', end_date='2023-02-01')
@@ -129,13 +130,14 @@ class TestFeatureCalculator(unittest.TestCase):
         root_nodes_per_interval = task_graph[feature]
         num_intervals = len(root_nodes_per_interval.keys())
         results = []
-        i = 0
+        i = 1
         for interval in root_nodes_per_interval:
             # TODO are they ts sorted??
             root_nodes = list(root_nodes_per_interval[interval].values())
             print(f'Executing interval {i}/{num_intervals} {interval}')
             res_blocks = C.execute_graph_nodes(root_nodes)
             results.append(res_blocks)
+            i += 1
 
         print(results)
 

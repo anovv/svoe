@@ -35,9 +35,9 @@ class MysqlClient:
         port = os.getenv('MYSQL_PORT', self.config.get('mysql_port'))
         db = os.getenv('MYSQL_DATABASE', self.config.get('mysql_database'))
         url = f'mysql+pymysql://{user}:{password}@{host}:{port}/{db}'
-        # engine = create_engine(url, echo=False, query_cache_size=0, isolation_level="READ UNCOMMITTED")
-        engine = create_engine(url, echo=False, query_cache_size=0)
-        Session.configure(bind=engine)
+        engine = create_engine(url, echo=False, query_cache_size=0, isolation_level="READ UNCOMMITTED")
+        # engine = create_engine(url, echo=False, query_cache_size=0)
+        Session.configure(bind=engine, autocommit=True)
         return engine
 
     def create_tables(self):

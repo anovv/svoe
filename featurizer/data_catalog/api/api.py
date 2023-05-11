@@ -30,7 +30,7 @@ class Api:
         data_types = [d[1] for d in data_keys]
         instrument_types = [d[2] for d in data_keys]
         symbols = [d[3] for d in data_keys]
-        return self.get_meta(exchanges, data_types, instrument_types, symbols, start_date, end_date)
+        return self.get_meta(exchanges, data_types, instrument_types, symbols, start_date=start_date, end_date=end_date)
 
     def get_meta(
         self,
@@ -41,7 +41,7 @@ class Api:
         start_date: Optional[str] = None,
         end_date: Optional[str] = None
     ) -> Dict[DataKey, List[BlockRangeMeta]]:
-        raw_data = self.client.select(exchanges, data_types, instrument_types, symbols, start_date, end_date)
+        raw_data = self.client.select(exchanges, data_types, instrument_types, symbols, start_date=start_date, end_date=end_date)
         # group data by data key
         groups = {}
         for r in raw_data:
