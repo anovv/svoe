@@ -3,7 +3,7 @@ from portion import Interval, closed, IntervalDict
 
 from typing import Optional, Dict, List, Tuple
 
-from featurizer.blocks.blocks import BlockRangeMeta, make_ranges, prune_overlaps, get_overlaps
+from featurizer.blocks.blocks import BlockRangeMeta, make_ranges, prune_overlaps, get_overlaps, ranges_to_interval_dict
 from featurizer.sql.client import MysqlClient
 from featurizer.sql.data_catalog.models import DataCatalog
 
@@ -25,7 +25,7 @@ class Api:
         data_keys: List[DataKey],
         start_date: Optional[str] = None,
         end_date: Optional[str] = None
-    ) -> Dict[Interval, Dict[DataKey, List[BlockRangeMeta]]]:
+    ) -> Dict[DataKey, List[BlockRangeMeta]]:
         exchanges = [d[0] for d in data_keys]
         data_types = [d[1] for d in data_keys]
         instrument_types = [d[2] for d in data_keys]
@@ -33,6 +33,32 @@ class Api:
         return self.get_meta(exchanges, data_types, instrument_types, symbols, start_date, end_date)
 
     def get_meta(
+        self,
+        exchanges: List[str],
+        data_types: List[str],
+        instrument_types: List[str],
+        symbols: List[str],
+        start_date: Optional[str] = None,
+        end_date: Optional[str] = None
+    ) -> Dict[DataKey, List[BlockRangeMeta]]:
+        raw_data = self.client.select(exchanges, data_types, instrument_types, symbols, start_date, end_date)
+        # group data by data key
+        groups = {}
+        for r in raw_data:
+            key = data_key(r)
+            if key in groups:
+                groups[key].append(r)
+            else:
+                groups[key] = [r]
+
+        # make overlaps
+        grouped_ranges = {}
+        for k in groups:
+            ranges = make_ranges(groups[k])
+            grouped_ranges[k] = ranges
+        return grouped_ranges
+
+    def get_meta_DEPRECATED(
         self,
         exchanges: List[str],
         data_types: List[str],
@@ -55,11 +81,12 @@ class Api:
         grouped_ranges = {}
         for k in groups:
             ranges = make_ranges(groups[k])
-            ranges_dict = IntervalDict()
-            for r in ranges:
-                start_ts = r[0][DataCatalog.start_ts.name]
-                end_ts = r[-1][DataCatalog.end_ts.name]
-                ranges_dict[closed(start_ts, end_ts)] = r
+            # ranges_dict = IntervalDict()
+            # for r in ranges:
+            #     start_ts = r[0][DataCatalog.start_ts.name]
+            #     end_ts = r[-1][DataCatalog.end_ts.name]
+            #     ranges_dict[closed(start_ts, end_ts)] = r
+            ranges_dict = ranges_to_interval_dict(ranges)
             grouped_ranges[k] = ranges_dict
 
         overlaped_ranges = prune_overlaps(get_overlaps(grouped_ranges))

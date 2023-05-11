@@ -122,20 +122,18 @@ class TestFeatureCalculator(unittest.TestCase):
         feature = construct_feature_tree(MidPriceFD, data_params, feature_params)
         data_deps = feature.get_data_deps()
         data_keys = [data_key(d.params) for d in data_deps]
-        ranges_meta = api.get_meta_from_data_keys(data_keys, start_date='2023-02-01', end_date='2023-02-01')
-        # ranges_meta = api.get_meta_from_data_keys(data_keys, None, None)
-        data_ranges_meta = {}
-        for interval in ranges_meta:
-            range_meta = ranges_meta[interval]
-            data_ranges_meta[interval] = {data: range_meta[data_key(data.params)] for data in data_deps}
+        ranges_meta_per_data_key = api.get_meta_from_data_keys(data_keys, start_date='2023-02-01', end_date='2023-02-01')
+        ranges_meta = {data: ranges_meta_per_data_key[data_key(data.params)] for data in data_deps}
 
+        task_graph = C.build_feature_task_graph({}, feature, ranges_meta)
+        root_nodes_per_interval = task_graph[feature]
+        num_intervals = len(root_nodes_per_interval.keys())
         results = []
         i = 0
-        for interval in data_ranges_meta:
-            task_graph = C.build_feature_task_graph({}, feature, data_ranges_meta[interval])
-            root_nodes = list(task_graph[feature].values())
-            i += 1
-            print(f'Executing interval {i}/{len(data_ranges_meta)} {interval}')
+        for interval in root_nodes_per_interval:
+            # TODO are they ts sorted??
+            root_nodes = list(root_nodes_per_interval[interval].values())
+            print(f'Executing interval {i}/{num_intervals} {interval}')
             res_blocks = C.execute_graph_nodes(root_nodes)
             results.append(res_blocks)
 

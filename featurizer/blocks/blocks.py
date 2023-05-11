@@ -10,13 +10,23 @@ BlockRangeMeta = List[BlockMeta] # represents metadata of consecutive blocks
 Block = pd.DataFrame
 BlockRange = List[Block] # represents consecutive blocks
 
+# TODO common consts for start_ts, end_ts, etc
+
 
 def meta_to_interval(meta: BlockMeta) -> Interval:
     start = float(meta[DataCatalog.start_ts.name])
     end = float(meta[DataCatalog.end_ts.name])
     if start > end:
         raise ValueError('start_ts cannot be greater than end_ts')
-    return closed(meta[DataCatalog.start_ts.name], meta[DataCatalog.end_ts.name])
+    return closed(start, end)
+
+
+def range_meta_to_interval(range_meta: BlockRangeMeta) -> Interval:
+    start = float(range_meta[0][DataCatalog.start_ts.name])
+    end = float(range_meta[-1][DataCatalog.end_ts.name])
+    if start > end:
+        raise ValueError('start_ts cannot be greater than end_ts')
+    return closed(start, end)
 
 
 def interval_to_meta(interval: Interval) -> BlockMeta:
@@ -24,6 +34,21 @@ def interval_to_meta(interval: Interval) -> BlockMeta:
         DataCatalog.start_ts.name: interval.lower,
         DataCatalog.end_ts.name: interval.upper,
     }
+
+
+def ranges_to_interval_dict(ranges: List[BlockRangeMeta]) -> IntervalDict:
+    res = IntervalDict()
+    for range in ranges:
+        interval = range_meta_to_interval(range)
+        keys = list(res.keys())
+        for i in keys:
+            if i.overlaps(interval):
+                raise ValueError(f'Overlapping intervals: {i} and {interval}')
+
+        res[interval] = range
+
+    return res
+
 
 def mock_meta(start_ts, end_ts, extra=None) -> BlockMeta:
     res = {
@@ -36,6 +61,8 @@ def mock_meta(start_ts, end_ts, extra=None) -> BlockMeta:
     return res
 
 def make_ranges(data: List[BlockMeta]) -> List[BlockRangeMeta]:
+    # TODO validate ts sorting
+
     # if consecuitive files differ no more than this, they are in the same range
     # TODO should this be const per data_type?
     SAME_RANGE_DIFF_S = 1
