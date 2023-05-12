@@ -80,8 +80,8 @@ class Api:
 
         for r in raw_data:
             feature_key = r[FeatureCatalog.feature_key.name]
-            start_ts = r[FeatureCatalog.start_ts.name]
-            end_ts = r[FeatureCatalog.end_ts.name]
+            start_ts = float(r[FeatureCatalog.start_ts.name])
+            end_ts = float(r[FeatureCatalog.end_ts.name])
             interval = closed(start_ts, end_ts)
             feature = _feature_by_key(feature_key)
             if feature in groups:

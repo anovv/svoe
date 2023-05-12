@@ -80,6 +80,7 @@ def build_feature_task_graph(
                         dep_node = dag[dep_feature][range_interval][dep_interval]
                         ds.append(dep_node)
                     dep_nodes[dep_feature] = ds
+
                 if cached_feature_blocks_meta is not None and feature in cached_feature_blocks_meta and interval in cached_feature_blocks_meta[feature]:
                     path = cached_feature_blocks_meta[feature][interval]['path']
                     node = load_if_needed.bind(path, True)
