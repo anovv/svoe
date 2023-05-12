@@ -146,4 +146,24 @@ class MysqlClient:
             return False
         return res[0][0]
 
+    def select_feature_catalog(
+        self,
+        feature_keys: List[str],
+        start_date: Optional[str] = None,
+        end_date: Optional[str] = None
+    ) -> List[Dict]:
+        args = {
+            FeatureCatalog.feature_key.name: feature_keys,
+        }
+
+        session = Session()
+        f = session.query(FeatureCatalog).filter_by(**args)
+        if start_date is not None:
+            f = f.filter(FeatureCatalog.date >= start_date)
+        if end_date is not None:
+            f = f.filter(FeatureCatalog.date <= end_date)
+        res = f.order_by(FeatureCatalog.start_ts).all()
+        # TODO this adds unnecessary sqlalchemy fields, remove to reduce memory footprint
+        return [r.__dict__ for r in res]
+
 

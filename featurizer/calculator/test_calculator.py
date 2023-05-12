@@ -7,12 +7,11 @@ from portion import closed
 import calculator as C
 import utils.streamz.stream_utils
 from featurizer.calculator.tasks import merge_blocks
-from featurizer.data_catalog.api.api import Api, data_key
+from featurizer.api.api import Api, data_key
 from featurizer.data_definitions.data_source_definition import DataSourceDefinition
 from featurizer.data_definitions.l2_book_incremental.cryptofeed.cryptofeed_l2_book_incremental import CryptofeedL2BookIncrementalData
 from featurizer.data_definitions.l2_book_incremental.cryptotick.cryptotick_l2_book_incremental import CryptotickL2BookIncrementalData
 from featurizer.data_definitions.trades.trades import TradesData
-from featurizer.features.definitions.volatility.volatility_stddev_fd import VolatilityStddevFD
 
 from featurizer.sql.data_catalog.models import DataCatalog
 from featurizer.features.definitions.l2_snapshot.l2_snapshot_fd import L2SnapshotFD
@@ -123,11 +122,15 @@ class TestFeatureCalculator(unittest.TestCase):
         feature = construct_feature_tree(MidPriceFD, data_params, feature_params)
         data_deps = feature.get_data_deps()
         data_keys = [data_key(d.params) for d in data_deps]
-        ranges_meta_per_data_key = api.get_meta_from_data_keys(data_keys, start_date='2023-02-01', end_date='2023-02-01')
+        start_date = '2023-02-01'
+        end_date = '2023-02-01'
+        ranges_meta_per_data_key = api.get_data_meta(data_keys, start_date=start_date, end_date=end_date)
         ranges_meta = {data: ranges_meta_per_data_key[data_key(data.params)] for data in data_deps}
 
+        cached_features_meta = api.get_features_meta([feature], start_date=start_date, end_date=end_date)
+
         to_store = [feature]
-        task_graph = C.build_feature_task_graph({}, feature, ranges_meta, to_store)
+        task_graph = C.build_feature_task_graph({}, feature, ranges_meta, to_store, cached_features_meta)
         root_nodes_per_interval = task_graph[feature]
         num_intervals = len(root_nodes_per_interval.keys())
         results = []

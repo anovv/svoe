@@ -8,7 +8,7 @@ from ray.types import ObjectRef
 
 from featurizer.features.feature_tree.feature_tree import Feature, postorder
 from featurizer.blocks.blocks import Block, meta_to_interval, interval_to_meta, get_overlaps, BlockRangeMeta, \
-    prune_overlaps, range_meta_to_interval, ranges_to_interval_dict
+    prune_overlaps, range_meta_to_interval, ranges_to_interval_dict, BlockMeta
 from portion import Interval, IntervalDict
 import pandas as pd
 
@@ -22,7 +22,8 @@ def build_feature_task_graph(
     feature: Feature,
     # TODO decouple derived feature_ranges_meta and input data ranges meta
     ranges_meta: Dict[Feature, List[BlockRangeMeta]],
-    to_store: Optional[List[Feature]] = None
+    to_store: Optional[List[Feature]] = None,
+    cached_feature_blocks_meta: Optional[Dict[Feature, Dict[Interval, BlockMeta]]] = None,
 ) -> Dict[Feature, Dict[Interval, Dict[Interval, DAGNode]]]:
     def tree_traversal_callback(feature: Feature):
         if feature.feature_definition.is_data_source():
@@ -36,8 +37,8 @@ def build_feature_task_graph(
                 nodes = {}
                 for block_meta in block_range_meta:
                     interval = meta_to_interval(block_meta)
-
-                    node = load_if_needed.bind(block_meta)
+                    path = block_meta['path']
+                    node = load_if_needed.bind(path, False)
 
                     # TODO validate no overlapping intervals here
                     nodes[interval] = node
@@ -79,8 +80,12 @@ def build_feature_task_graph(
                         dep_node = dag[dep_feature][range_interval][dep_interval]
                         ds.append(dep_node)
                     dep_nodes[dep_feature] = ds
-                store = to_store is not None and feature in to_store
-                node = calculate_feature.bind(feature, dep_nodes, interval, store)
+                if cached_feature_blocks_meta is not None and feature in cached_feature_blocks_meta and interval in cached_feature_blocks_meta[feature]:
+                    path = cached_feature_blocks_meta[feature][interval]['path']
+                    node = load_if_needed.bind(path, True)
+                else:
+                    store = to_store is not None and feature in to_store
+                    node = calculate_feature.bind(feature, dep_nodes, interval, store)
 
                 # TODO validate interval is withtin range_interval
                 nodes[interval] = node
