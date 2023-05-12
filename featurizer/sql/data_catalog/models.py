@@ -1,7 +1,10 @@
 from sqlalchemy import Column, String, JSON, DateTime, func, Integer
-from sqlalchemy.orm import declarative_base
 
-Base = declarative_base()
+from featurizer.sql.base import Base
+
+# from sqlalchemy.orm import declarative_base
+
+# Base = declarative_base()
 
 # defaults
 DEFAULT_SOURCE = 'cryptofeed'

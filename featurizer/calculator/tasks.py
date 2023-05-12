@@ -17,6 +17,8 @@ from streamz import Stream
 from featurizer.blocks.blocks import Block, BlockMeta, BlockRange
 from featurizer.data_definitions.data_definition import Event
 from featurizer.features.feature_tree.feature_tree import Feature
+from featurizer.sql import db_actor
+from featurizer.sql.db_actor import DbActor
 from featurizer.sql.feature_catalog.models import FeatureCatalog, _construct_feature_catalog_s3_path
 from utils.pandas import df_utils
 from utils.streamz.stream_utils import run_named_events_stream
@@ -55,9 +57,10 @@ def load_if_needed(
 def calculate_feature(
     feature: Feature,
     dep_refs: Dict[Feature, List[ObjectRef[Block]]], # maps dep feature to BlockRange # TODO List[BlockRange] when using 'holes'
-    interval: Interval
+    interval: Interval,
+    store: bool
 ) -> Block:
-    print('Calc feature started')
+    print('Calc feature block started')
     t = time.time()
     # TODO add mem tracking
     # this loads blocks for all dep features from shared object store to workers heap
@@ -85,7 +88,20 @@ def calculate_feature(
         out_stream = s
 
     df = run_named_events_stream(merged, upstreams, out_stream, interval)
-    print(f'Calc feature finished {time.time() - t}s')
+    print(f'Calc feature block finished {time.time() - t}s')
+    if store:
+        # TODO make a separate actor pool for S3 IO and batchify store operation
+        t = time.time()
+        db_actor = DbActor.options(name='DbActor', get_if_exists=True).remote()
+        catalog_item = catalog_feature_block(feature, df, interval)
+        exists = ray.get(db_actor.in_feature_catalog.remote(catalog_item))
+        if not exists:
+            store_df(catalog_item.path, df)
+            write_res = ray.get(db_actor.write_batch.remote([catalog_item]))
+            print(f'Store feature block finished {time.time() - t}s')
+        else:
+            print(f'Feature block already stored')
+
     return df
 
 
@@ -117,25 +133,25 @@ def merge_blocks(
     return merged
 
 
-@ray.remote(num_cpus=0.001)
-def store_feature_blocks(feature: Feature, refs: List[ObjectRef[Block]]) -> Dict:
-    STORE_PARALLELISM = 10
-    executor = concurrent.futures.ThreadPoolExecutor(max_workers=STORE_PARALLELISM)
+# @ray.remote(num_cpus=0.001)
+# def store_feature_blocks(feature: Feature, refs: Dict[Interval, ObjectRef[Block]]) -> Dict[Interval, ObjectRef[Block]]:
+#     STORE_PARALLELISM = 10
+#     executor = concurrent.futures.ThreadPoolExecutor(max_workers=STORE_PARALLELISM)
+#
+#     def store_and_catalogue_block(ref: ObjectRef[Block]) -> FeatureCatalog:
+#         block = ray.get(ref)
+#         catalog_item = catalog_feature_block(feature, block)
+#         store_df(catalog_item[FeatureCatalog.path.name], block)
+#         return catalog_item
+#
+#     store_futures = [executor.submit(functools.partial(store_and_catalogue_block, ref=refs[interval])) for interval in refs]
+#     catalog_items = [f.result() for f in as_completed(store_futures)]
+#     db_actor = ray.get_actor('DbActor') # TODO global handle
+#     write_res = ray.get(db_actor.write_batch(catalog_items))
+#
+#     return refs
 
-    def store_and_catalogue_block(ref: ObjectRef[Block]) -> FeatureCatalog:
-        block = ray.get(ref)
-        catalog_item = catalog_feature_block(feature, block)
-        store_df(catalog_item[FeatureCatalog.path.name], block)
-        return catalog_item
-
-    store_futures = [executor.submit(functools.partial(store_and_catalogue_block, ref=ref)) for ref in refs]
-    catalog_items = [f.result() for f in as_completed(store_futures)]
-    db_actor = ray.get_actor('DbActor') # TODO global handle
-    res = ray.get(db_actor.write_batch(catalog_items))
-
-    return {}
-
-def catalog_feature_block(feature: Feature, df: pd.DataFrame) -> FeatureCatalog:
+def catalog_feature_block(feature: Feature, df: pd.DataFrame, interval: Interval) -> FeatureCatalog:
     _time_range = df_utils.time_range(df)
 
     date_str = datetime.fromtimestamp(_time_range[1], tz=pytz.utc).strftime('%Y-%m-%d')
@@ -152,8 +168,10 @@ def catalog_feature_block(feature: Feature, df: pd.DataFrame) -> FeatureCatalog:
         FeatureCatalog.feature_def.name: feature.feature_definition.__name__,
         FeatureCatalog.feature_key.name: feature.feature_key,
         # TODO pass interval directly instead of start, end? or keep both?
-        FeatureCatalog.start_ts.name: _time_range[1],
-        FeatureCatalog.end_ts.name: _time_range[2],
+        FeatureCatalog.start_ts.name: interval.lower,
+        FeatureCatalog.end_ts.name: interval.upper,
+        # FeatureCatalog.start_ts.name: _time_range[1],
+        # FeatureCatalog.end_ts.name: _time_range[2],
         FeatureCatalog.size_in_memory_kb.name: df_utils.get_size_kb(df),
         FeatureCatalog.num_rows.name: df_utils.get_num_rows(df),
         FeatureCatalog.date.name: date_str,

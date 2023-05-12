@@ -113,20 +113,21 @@ class TestFeatureCalculator(unittest.TestCase):
 
         # data_def = Feature([], 0, CryptotickL2BookIncrementalData, {})
 
-        feature_params = {2: {'dep_schema': 'cryptotick'}}
+        feature_params = {1: {'dep_schema': 'cryptotick'}}
         data_params = {
             0: {DataCatalog.exchange.name: 'BINANCE',
                 DataCatalog.data_type.name: 'l2_book',
                 DataCatalog.instrument_type.name: 'spot',
                 DataCatalog.symbol.name: 'BTC-USDT'}}
         # feature_params1 = {1: {'dep_schema': 'cryptotick', 'sampling': '1s'}}
-        feature = construct_feature_tree(VolatilityStddevFD, data_params, feature_params)
+        feature = construct_feature_tree(MidPriceFD, data_params, feature_params)
         data_deps = feature.get_data_deps()
         data_keys = [data_key(d.params) for d in data_deps]
         ranges_meta_per_data_key = api.get_meta_from_data_keys(data_keys, start_date='2023-02-01', end_date='2023-02-01')
         ranges_meta = {data: ranges_meta_per_data_key[data_key(data.params)] for data in data_deps}
 
-        task_graph = C.build_feature_task_graph({}, feature, ranges_meta)
+        to_store = [feature]
+        task_graph = C.build_feature_task_graph({}, feature, ranges_meta, to_store)
         root_nodes_per_interval = task_graph[feature]
         num_intervals = len(root_nodes_per_interval.keys())
         results = []

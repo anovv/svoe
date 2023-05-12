@@ -2,12 +2,13 @@ from typing import Optional, Dict, List
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from featurizer.sql.data_catalog.models import DataCatalog, Base
+
+from featurizer.sql.base import Base
+from featurizer.sql.data_catalog.models import DataCatalog
+from featurizer.sql.feature_catalog.models import FeatureCatalog
 from featurizer.data_catalog.common.data_models.models import InputItemBatch
 
 import os
-
-from featurizer.sql.feature_catalog.models import FeatureCatalog
 
 Session = sessionmaker()
 
@@ -35,9 +36,8 @@ class MysqlClient:
         port = os.getenv('MYSQL_PORT', self.config.get('mysql_port'))
         db = os.getenv('MYSQL_DATABASE', self.config.get('mysql_database'))
         url = f'mysql+pymysql://{user}:{password}@{host}:{port}/{db}'
-        engine = create_engine(url, echo=False, query_cache_size=0, isolation_level="READ UNCOMMITTED")
-        # engine = create_engine(url, echo=False, query_cache_size=0)
-        Session.configure(bind=engine, autocommit=True)
+        engine = create_engine(url, echo=False)
+        Session.configure(bind=engine)
         return engine
 
     def create_tables(self):
@@ -98,7 +98,7 @@ class MysqlClient:
         return meta, non_exist
 
     # api methods
-    def select(
+    def select_data_catalog(
         self,
         exchanges: List[str],
         data_types: List[str],
@@ -137,4 +137,13 @@ class MysqlClient:
         res = f.order_by(DataCatalog.start_ts).all()
         # TODO this adds unnecessary sqlalchemy fields, remove to reduce memory footprint
         return [r.__dict__ for r in res]
+
+    def in_feature_catalog(self, item: FeatureCatalog) -> bool:
+        session = Session()
+        q = session.query(FeatureCatalog).filter(FeatureCatalog.hash == item.hash)
+        res = session.query(q.exists()).all()
+        if len(res) == 0:
+            return False
+        return res[0][0]
+
 

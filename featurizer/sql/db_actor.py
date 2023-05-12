@@ -33,4 +33,9 @@ class DbActor:
         # TODO return status to pass to stats actor
         return {}
 
+    async def in_feature_catalog(self, item: FeatureCatalog) -> bool:
+        self.client.create_tables()
+        return self.client.in_feature_catalog(item)
+
+
 

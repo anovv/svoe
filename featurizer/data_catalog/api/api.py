@@ -41,7 +41,8 @@ class Api:
         start_date: Optional[str] = None,
         end_date: Optional[str] = None
     ) -> Dict[DataKey, List[BlockRangeMeta]]:
-        raw_data = self.client.select(exchanges, data_types, instrument_types, symbols, start_date=start_date, end_date=end_date)
+        raw_data = self.client.select_data_catalog(exchanges, data_types, instrument_types, symbols, start_date=start_date, end_date=end_date)
+        raw_data = raw_data[:2] # TODO this is for debug
         # group data by data key
         groups = {}
         for r in raw_data:
@@ -67,7 +68,7 @@ class Api:
         start_date: Optional[str] = None,
         end_date: Optional[str] = None
     ) -> Dict[Interval, Dict[DataKey, List[BlockRangeMeta]]]:
-        raw_data = self.client.select(exchanges, data_types, instrument_types, symbols, start_date, end_date)
+        raw_data = self.client.select_data_catalog(exchanges, data_types, instrument_types, symbols, start_date, end_date)
         # group data by data key
         groups = {}
         for r in raw_data:

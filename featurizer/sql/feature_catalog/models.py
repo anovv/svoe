@@ -1,7 +1,9 @@
 from sqlalchemy import Column, String, JSON, DateTime, func, Integer
-from sqlalchemy.orm import declarative_base
 
-Base = declarative_base()
+from featurizer.sql.base import Base
+
+# from sqlalchemy.orm import declarative_base
+
 
 # defaults
 DEFAULT_VERSION = ''
@@ -60,7 +62,7 @@ def _construct_feature_catalog_s3_path(item: FeatureCatalog) -> str:
     res = f's3://{SVOE_S3_FEATURE_CATALOG_BUCKET}/'
     for field in [
         FeatureCatalog.feature_def.name,
-        FeatureCatalog.feature_key.name.
+        FeatureCatalog.feature_key.name,
         FeatureCatalog.version.name,
         FeatureCatalog.compaction.name,
         FeatureCatalog.date.name, # date should be last so we can identify all data by prefix in s3

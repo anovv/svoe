@@ -12,7 +12,7 @@ from featurizer.blocks.blocks import Block, meta_to_interval, interval_to_meta, 
 from portion import Interval, IntervalDict
 import pandas as pd
 
-from featurizer.calculator.tasks import calculate_feature, load_if_needed, store_feature_blocks
+from featurizer.calculator.tasks import calculate_feature, load_if_needed
 from utils.pandas.df_utils import concat, sub_df_ts, merge_asof_multi
 from utils.time.utils import date_str_from_ts
 
@@ -21,7 +21,8 @@ def build_feature_task_graph(
     dag: Dict[Feature, Dict[Interval, Dict[Interval, DAGNode]]], # DAGNodes per feature per range
     feature: Feature,
     # TODO decouple derived feature_ranges_meta and input data ranges meta
-    ranges_meta: Dict[Feature, List[BlockRangeMeta]]
+    ranges_meta: Dict[Feature, List[BlockRangeMeta]],
+    to_store: Optional[List[Feature]] = None
 ) -> Dict[Feature, Dict[Interval, Dict[Interval, DAGNode]]]:
     def tree_traversal_callback(feature: Feature):
         if feature.feature_definition.is_data_source():
@@ -78,7 +79,8 @@ def build_feature_task_graph(
                         dep_node = dag[dep_feature][range_interval][dep_interval]
                         ds.append(dep_node)
                     dep_nodes[dep_feature] = ds
-                node = calculate_feature.bind(feature, dep_nodes, interval)
+                store = to_store is not None and feature in to_store
+                node = calculate_feature.bind(feature, dep_nodes, interval, store)
 
                 # TODO validate interval is withtin range_interval
                 nodes[interval] = node
@@ -94,31 +96,6 @@ def build_feature_task_graph(
     postorder(feature, tree_traversal_callback)
 
     return dag
-
-
-# add caching tasks to graph
-def build_store_nodes(dag: Dict, to_store: List[Feature]):
-    nodes_per_feature = {}
-    for feature in to_store:
-        if feature not in dag:
-            raise ValueError(f'Cannot find feature {feature} in dag')
-
-        # group into day-sized chunks for atomic store
-        nodes_by_day = {}
-        for interval in dag[feature]:
-            start_day = date_str_from_ts(interval.lower)
-            end_day = date_str_from_ts(interval.upper)
-            if start_day != end_day:
-                raise ValueError('Cannot store intervals with different days')
-            if start_day in nodes_by_day:
-                nodes_by_day[start_day].append(dag[feature][interval])
-            else:
-                nodes_by_day[start_day] = [dag[feature][interval]]
-        store_nodes = []
-        for day in nodes_by_day:
-            store_nodes.append(store_feature_blocks.bind(feature, nodes_by_day[day], day))
-        nodes_per_feature[feature] = store_nodes
-    return nodes_per_feature
 
 
 def execute_graph_nodes(nodes: List[DAGNode]) -> List[Block]:
