@@ -8,7 +8,7 @@ from ray.types import ObjectRef
 
 from featurizer.features.feature_tree.feature_tree import Feature, postorder
 from featurizer.blocks.blocks import Block, meta_to_interval, interval_to_meta, get_overlaps, BlockRangeMeta, \
-    prune_overlaps, range_meta_to_interval, ranges_to_interval_dict, BlockMeta
+    prune_overlaps, range_meta_to_interval, ranges_to_interval_dict, BlockMeta, overlaps_keys
 from portion import Interval, IntervalDict
 import pandas as pd
 
@@ -143,46 +143,76 @@ def build_feature_set_task_graph(
     return dag
 
 
-def point_in_time_join_dag(dag: Dict, features_to_join: List[Feature], label_feature: Feature) -> List:
-    # TODO can we use IntervalDict directly in dag?
-    nodes_per_feature_per_interval = {}
+def point_in_time_join_dag(
+    dag: Dict[Feature, Dict[Interval, Dict[Interval, DAGNode]]],
+    features_to_join: List[Feature],
+    label_feature: Feature
+) -> Dict[Interval, Dict[Interval, DAGNode]]:
+    # get range overlaps first
+    ranges_per_feature = {}
     for feature in features_to_join:
         if feature not in dag:
             raise ValueError(f'Feature {feature} not found in dag')
-        nodes_per_interval = IntervalDict()
-        for interval in dag[feature]:
-            nodes_per_interval[interval] = dag[feature][interval]
-        nodes_per_feature_per_interval[feature] = nodes_per_interval
+        ranges_dict = IntervalDict()
+        for range_interval in dag[feature]:
+            range_and_node_list = []
+            range_dict = dag[feature][range_interval]
 
-    overlaps = get_overlaps(nodes_per_feature_per_interval)
+            # TODO make sure range_list is ts sorted
+            for interval in range_dict:
+                range_and_node_list.append((interval, range_dict[interval]))
+            if overlaps_keys(range_interval, ranges_dict):
+                raise ValueError(f'Overlapping intervals: for {range_interval}')
+            ranges_dict[range_interval] = range_and_node_list
+        ranges_per_feature[feature] = ranges_dict
 
-    def get_prev_nodes(cur_nodes_per_feature: Dict[Feature, ObjectRef]) -> Dict[Feature, ObjectRef]:
-        res = {}
-        for feature in cur_nodes_per_feature:
-            # TODO here we assume they are ts sorted
-            nodes = list(nodes_per_feature_per_interval[feature].values())
-            prev_node = None
-            cur_node = cur_nodes_per_feature[feature]
-            for i in range(len(nodes)):
-                if nodes[i] == cur_node and i > 0:
-                    prev_node = nodes[i - 1]
+    overlapped_range_intervals = prune_overlaps(get_overlaps(ranges_per_feature))
 
-            if prev_node is not None:
-                res[feature] = prev_node
+    res = {}
 
-        return res
+    for range_interval in overlapped_range_intervals:
+        nodes_per_feature = overlapped_range_intervals[range_interval]
 
-    joined_nodes = []
-    for overlap in overlaps:
-        nodes_per_feature = overlaps[overlap]
-        # we need to know prev values for join
-        # in case one value is at the start of current block and another is in the end of prev block
-        prev_interval_nodes = get_prev_nodes(nodes_per_feature)
-        # TODO set resource spec here
-        join_node = _point_in_time_join_block.bind(overlap, nodes_per_feature, prev_interval_nodes, label_feature)
-        joined_nodes.append(join_node)
+        nodes_per_feature_per_interval = {}
+        for feature in nodes_per_feature:
+            nodes_per_interval = IntervalDict()
+            for interval_node_tuple in nodes_per_feature[feature]:
+                interval = interval_node_tuple[0]
+                node = interval_node_tuple[1]
+                nodes_per_interval[interval] = node
+            nodes_per_feature_per_interval[feature] = nodes_per_interval
 
-    return joined_nodes
+        overlaps = get_overlaps(nodes_per_feature_per_interval)
+
+        def get_prev_nodes(cur_nodes_per_feature: Dict[Feature, ObjectRef]) -> Dict[Feature, ObjectRef]:
+            res = {}
+            for feature in cur_nodes_per_feature:
+                # TODO here we assume they are ts sorted
+                nodes = list(nodes_per_feature_per_interval[feature].values())
+                prev_node = None
+                cur_node = cur_nodes_per_feature[feature]
+                for i in range(len(nodes)):
+                    if nodes[i] == cur_node and i > 0:
+                        prev_node = nodes[i - 1]
+
+                if prev_node is not None:
+                    res[feature] = prev_node
+
+            return res
+
+        joined_nodes = {}
+        for interval in overlaps:
+            nodes_per_feature = overlaps[interval]
+            # we need to know prev values for join
+            # in case one value is at the start of current block and another is in the end of prev block
+            prev_interval_nodes = get_prev_nodes(nodes_per_feature)
+            # TODO set resource spec here
+            join_node = _point_in_time_join_block.bind(interval, nodes_per_feature, prev_interval_nodes, label_feature)
+            joined_nodes[interval] = join_node
+
+        res[range_interval] = joined_nodes
+
+    return res
 
 
 # TODO set memory consumption
@@ -232,67 +262,3 @@ def build_feature_label_set_task_graph(
     dag = build_feature_set_task_graph(dag, features, ranges_meta)
 
     return point_in_time_join_dag(dag, features, label)
-
-
-# graph construction
-# TODO make 3d visualization with networkx/graphviz
-def build_feature_task_graph_DEPRECATED_SINGLE_RANGE(
-    dag: Dict, # DAGNode per feature per range
-    feature: Feature,
-    # TODO decouple derived feature_ranges_meta and input data ranges meta
-    ranges_meta: Dict[Feature, BlockRangeMeta]
-):
-    # bottom up/postorder traversal
-    def tree_traversal_callback(feature: Feature):
-        if feature.feature_definition.is_data_source():
-            # leafs
-            # TODO decouple derived feature_ranges_meta and input data ranges meta
-            ranges = ranges_meta[feature]  # this is already populated for Data in load_data_ranges above
-            for block_meta in ranges:
-                # TODO we assume no 'holes' in data here
-                interval = meta_to_interval(block_meta)
-                if feature not in dag:
-                    dag[feature] = {}
-                node = load_if_needed.bind(block_meta)
-
-                # TODO check if duplicate feature/interval
-                dag[feature][interval] = node
-            return
-
-        grouped_ranges_by_dep_feature = {}
-        for dep_feature in feature.children:
-            dep_ranges = ranges_meta[dep_feature]
-            # TODO this should be in Feature class
-            grouped_ranges_by_dep_feature[dep_feature] = feature.feature_definition.group_dep_ranges(dep_ranges, feature, dep_feature)
-
-        overlaps = get_overlaps(grouped_ranges_by_dep_feature)
-        ranges = []
-        for interval, overlap in overlaps.items():
-            # TODO add size_kb/memory_size_kb to proper size memory usage for aggregate tasks downstream
-            result_meta = interval_to_meta(interval)
-            ranges.append(result_meta)
-            if feature not in dag:
-                dag[feature] = {}
-
-            # TODO use overlap to fetch results of dep delayed funcs
-            dep_nodes = {}
-            for dep_feature in overlap:
-                ds = []
-                for dep_block_meta in overlap[dep_feature]:
-                    dep_interval = meta_to_interval(dep_block_meta)
-                    dep_node = dag[dep_feature][dep_interval]
-                    ds.append(dep_node)
-                dep_nodes[dep_feature] = ds
-            node = calculate_feature.bind(feature, dep_nodes, interval)
-
-            # TODO check if duplicate feature/interval
-            dag[feature][interval] = node
-
-        # TODO check if duplicate feature
-        ranges_meta[feature] = ranges
-
-    postorder(feature, tree_traversal_callback)
-
-    return dag
-
-

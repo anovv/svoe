@@ -1,4 +1,4 @@
-from typing import Dict, List, Any
+from typing import Dict, List, Any, Tuple
 import pandas as pd
 from portion import Interval, closed, IntervalDict
 
@@ -40,14 +40,20 @@ def ranges_to_interval_dict(ranges: List[BlockRangeMeta]) -> IntervalDict:
     res = IntervalDict()
     for range in ranges:
         interval = range_meta_to_interval(range)
-        keys = list(res.keys())
-        for i in keys:
-            if i.overlaps(interval):
-                raise ValueError(f'Overlapping intervals: {i} and {interval}')
+        if overlaps_keys(interval, res):
+            raise ValueError(f'Overlapping intervals for {interval}')
 
         res[interval] = range
 
     return res
+
+
+def overlaps_keys(interval: Interval, d: IntervalDict) -> bool:
+    keys = list(d.keys())
+    for i in keys:
+        if i.overlaps(interval):
+            return True
+    return False
 
 
 def mock_meta(start_ts, end_ts, extra=None) -> BlockMeta:
@@ -126,9 +132,16 @@ def prune_overlaps(overlaps: Dict[Interval, Dict[Any, List]]) -> Dict[Interval, 
         for key in ranges:
             range = ranges[key]
             pruned = []
-            for meta in range:
-                if interval.overlaps(meta_to_interval(meta)):
-                    pruned.append(meta)
+            for e in range:
+                if isinstance(e, Tuple):
+                    if interval.overlaps(e[0]):
+                        pruned.append(e)
+                elif isinstance(e, BlockMeta):
+                    if interval.overlaps(meta_to_interval(e)):
+                        pruned.append(e)
+                else:
+                    raise ValueError(f'Unknown element type {type(e)}')
+
             if len(pruned) == 0:
                 raise ValueError(f'Unable to prune key {key}')
             ranges[key] = pruned

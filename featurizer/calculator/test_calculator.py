@@ -24,7 +24,7 @@ import pandas as pd
 from typing import Type
 from anytree import RenderTree
 from featurizer.utils.testing_utils import mock_feature, mock_trades_data_and_meta, mock_l2_book_delta_data_and_meta, mock_ts_df, mock_ts_df_remote
-from utils.pandas.df_utils import concat, load_df
+from utils.pandas.df_utils import concat, load_df, merge_asof_multi
 
 
 class TestFeatureCalculator(unittest.TestCase):
@@ -42,45 +42,51 @@ class TestFeatureCalculator(unittest.TestCase):
         label_feature = mock_feature(1)
         dag = {
             label_feature: {
-                closed(0, 5.01): mock_ts_df_remote.bind([4], 'a', ['a0']),
-                closed(5.02, 11.01): mock_ts_df_remote.bind([7, 10], 'a', ['a1', 'a2']),
-                closed(11.02, 15.01): mock_ts_df_remote.bind([14], 'a', ['a3']),
-                closed(15.02, 18.01): mock_ts_df_remote.bind([16], 'a', ['a4']),
-                closed(18.02, 21.01): mock_ts_df_remote.bind([20], 'a', ['a5']),
+                closed(0, 21.01): {
+                    closed(0, 5.01): mock_ts_df_remote.bind([4], 'a', ['a0']),
+                    closed(5.02, 11.01): mock_ts_df_remote.bind([7, 10], 'a', ['a1', 'a2']),
+                    closed(11.02, 15.01): mock_ts_df_remote.bind([14], 'a', ['a3']),
+                    closed(15.02, 18.01): mock_ts_df_remote.bind([16], 'a', ['a4']),
+                    closed(18.02, 21.01): mock_ts_df_remote.bind([20], 'a', ['a5']),
+                }
             },
             mock_feature(2): {
-                closed(0, 9.01): mock_ts_df_remote.bind([2, 5, 6, 8], 'b', ['b0', 'b1', 'b2', 'b3']),
-                closed(9.02, 17.01): mock_ts_df_remote.bind([11, 12], 'b', ['b4', 'b5']),
-                closed(17.02, 21.01): mock_ts_df_remote.bind([18], 'b', ['b6'])
+                closed(0, 21.01): {
+                    closed(0, 9.01): mock_ts_df_remote.bind([2, 5, 6, 8], 'b', ['b0', 'b1', 'b2', 'b3']),
+                    closed(9.02, 17.01): mock_ts_df_remote.bind([11, 12], 'b', ['b4', 'b5']),
+                    closed(17.02, 21.01): mock_ts_df_remote.bind([18], 'b', ['b6'])
+                }
             },
             mock_feature(3): {
-                closed(0, 4.01): mock_ts_df_remote.bind([1, 3], 'c', ['c0', 'c1']),
-                closed(4.02, 21.01): mock_ts_df_remote.bind([7, 10, 19], 'c', ['c2', 'c3', 'c4']),
+                closed(0, 21.01): {
+                    closed(0, 4.01): mock_ts_df_remote.bind([1, 3], 'c', ['c0', 'c1']),
+                    closed(4.02, 21.01): mock_ts_df_remote.bind([7, 10, 19], 'c', ['c2', 'c3', 'c4']),
+                }
             },
         }
-
-        # purge workflows storage
-        path = '/tmp/ray/workflows_data/workflows/'
-        try:
-            shutil.rmtree(path)
-        except:
-            pass
 
         # distributed
         nodes = C.point_in_time_join_dag(dag, list(dag.keys()), label_feature)
         with ray.init(address='auto'):
             # execute dag
-            nodes_res_dfs = ray.get([ray.workflow.run_async(dag=node, workflow_id=f'{time.time_ns()}') for node in nodes])
-            res_ray = concat(nodes_res_dfs)
+            nodes_flattened = []
+            for range_interval in nodes:
+                nodes_flattened.extend(list(nodes[range_interval].values()))
+            res = ray.get([node.execute() for node in nodes_flattened])
+            res_ray = concat(res)
             print(res_ray)
 
         # sequential
         with ray.init(address='auto'):
             dfs = []
             for feature in dag:
-                nodes_res_dfs = ray.get([ray.workflow.run_async(node) for node in list(dag[feature].values())])
+                nodes_flattened = []
+                # TODO is this correct for different/many range_intervals?
+                for range_interval in dag[feature]:
+                    nodes_flattened.extend(list(dag[feature][range_interval].values()))
+                nodes_res_dfs = ray.get([node.execute() for node in nodes_flattened])
                 dfs.append(concat(nodes_res_dfs))
-            res_seq = C.merge_asof_multi(dfs)
+            res_seq = merge_asof_multi(dfs)
             print(res_seq)
 
         # TODO assert
@@ -232,13 +238,13 @@ if __name__ == '__main__':
     t = TestFeatureCalculator()
     # t.test_featurization(L2BookSnapshotFeatureDefinition, L2BookDeltasData)
     # t.test_featurization(OHLCVFeatureDefinition, TradesData)
-    # t.test_point_in_time_join()
+    t.test_point_in_time_join()
     # t.test_merge_asof()
     # t.test_feature_label_set()
     # t.test_cryptotick_l2_snap_feature_online()
     # t.test_cryptotick_l2_snap_feature_offline()
     # t.test_l2_cryptotick_data()
-    t.test_cryptotick_midprice_feature_offline()
+    # t.test_cryptotick_midprice_feature_offline()
     # t.test_feature_label_set_cryptotick()
 
 
