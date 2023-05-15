@@ -89,8 +89,8 @@ class TestFeatureCalculator(unittest.TestCase):
             res_seq = merge_asof_multi(dfs)
             print(res_seq)
 
-        # TODO assert
-        print(res_ray.equals(res_seq))
+        assert res_ray.equals(res_seq)
+        # TODO add tests for different ranges per feature
 
     # TODO assertions
     def test_cryptotick_l2_snap_feature_online(self):
@@ -114,29 +114,36 @@ class TestFeatureCalculator(unittest.TestCase):
 
     def test_cryptotick_midprice_feature_offline(self):
         api = Api()
-        # l2_data_ranges_meta = api.get_meta('BINANCE', 'l2_book', 'spot', 'BTC-USDT')[0][:10]
-
-        # data_def = Feature([], 0, CryptotickL2BookIncrementalData, {})
-
-        feature_params = {1: {'dep_schema': 'cryptotick'}}
-        data_params = {
-            0: {DataCatalog.exchange.name: 'BINANCE',
-                DataCatalog.data_type.name: 'l2_book',
-                DataCatalog.instrument_type.name: 'spot',
-                DataCatalog.symbol.name: 'BTC-USDT'}}
-        # feature_params1 = {1: {'dep_schema': 'cryptotick', 'sampling': '1s'}}
-        feature = construct_feature_tree(MidPriceFD, data_params, feature_params)
-        data_deps = feature.get_data_deps()
+        # feature_params = {1: {'dep_schema': 'cryptotick'}}
+        feature_params = {1: {'dep_schema': 'cryptotick', 'sampling': '1s'}}
+        data_params = [
+            {DataCatalog.exchange.name: 'BINANCE',
+            DataCatalog.data_type.name: 'l2_book',
+            DataCatalog.instrument_type.name: 'spot',
+            DataCatalog.symbol.name: 'BTC-USDT'}
+        ]
+        feature_l2_snap = construct_feature_tree(L2SnapshotFD, data_params, feature_params)
+        # feature_mid_price = construct_feature_tree(MidPriceFD, data_params, feature_params)
+        # feature_volatility = construct_feature_tree(MidPriceFD, data_params, feature_params)
+        # features = [feature_l2_snap, feature_mid_price, feature_volatility]
+        features = [feature_l2_snap]
+        data_deps = []
+        for feature in features:
+            data_deps.extend(feature.get_data_deps())
         data_keys = [data_key(d.params) for d in data_deps]
         start_date = '2023-02-01'
         end_date = '2023-02-01'
         ranges_meta_per_data_key = api.get_data_meta(data_keys, start_date=start_date, end_date=end_date)
         ranges_meta = {data: ranges_meta_per_data_key[data_key(data.params)] for data in data_deps}
 
-        cached_features_meta = api.get_features_meta([feature], start_date=start_date, end_date=end_date)
+        stored_features_meta = api.get_features_meta(features, start_date=start_date, end_date=end_date)
 
-        to_store = [feature]
-        task_graph = C.build_feature_task_graph({}, feature, ranges_meta, to_store, cached_features_meta)
+        # TODO start cache actor
+        cache = {}
+        features_to_store = [] # TODO
+        # task_graph = C.build_feature_task_graph({}, feature, ranges_meta, cache, features_to_store, stored_features_meta)
+        task_graph = C.build_feature_set_task_graph({}, features, ranges_meta, cache, features_to_store, stored_features_meta)
+
         root_nodes_per_interval = task_graph[feature]
         num_intervals = len(root_nodes_per_interval.keys())
         results = []
@@ -150,6 +157,11 @@ class TestFeatureCalculator(unittest.TestCase):
             i += 1
 
         print(results)
+
+    def test_pij(self):
+
+        flset_dag = C.build_feature_label_set_task_graph()
+
 
 
         # TODO why is this not sorted?
@@ -186,14 +198,6 @@ class TestFeatureCalculator(unittest.TestCase):
         # plt.show()
 
 
-    # def test_feature_label_set(self):
-    #     block_range, block_range_meta = mock_l2_book_delta_data_and_meta()
-    #     data_params = {}
-    #     feature_params = {}
-    #     feature_mid_price = construct_feature_tree(MidPriceFD, data_params, feature_params)
-    #     feature_volatility = construct_feature_tree(VolatilityStddevFD, data_params, feature_params)
-    #     flset = C.build_feature_label_set_task_graph([feature_mid_price, feature_volatility], block_range_meta, feature_mid_price)
-    #     # TODO execute
 
     # TODO deprecate this
     def test_featurization_DEPRECATED(self, feature_def: Type[FeatureDefinition], data_def: Type[DataSourceDefinition]):

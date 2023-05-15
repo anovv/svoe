@@ -5,15 +5,17 @@ import itertools
 import time
 from concurrent.futures import as_completed
 from datetime import datetime
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Any, Optional
 
 import pandas as pd
 import pytz
 import ray
 from portion import Interval
+from ray.dag import DAGNode
 from ray.types import ObjectRef
 from streamz import Stream
 
+from featurizer.actors.cache_actor import CACHE_ACTOR_NAME
 from featurizer.blocks.blocks import Block, BlockMeta, BlockRange
 from featurizer.data_definitions.data_definition import Event
 from featurizer.features.feature_tree.feature_tree import Feature
@@ -25,18 +27,68 @@ from utils.streamz.stream_utils import run_named_events_stream
 from utils.pandas.df_utils import load_df, store_df
 
 
+def context(feature_key: str, interval: Interval) -> Dict[str, Any]:
+    return {'feature_key': feature_key, 'interval': interval}
+
+
+def bind_and_cache(
+    func: ray.remote_function.RemoteFunction,
+    cache: Dict[str, Dict[Interval, Tuple[int, Optional[ObjectRef]]]],
+    context: Dict[str, Any],
+    **kwargs
+) -> DAGNode:
+    feature_key = context['feature_key']
+    interval = context['interval']
+    node = func.bind(context, kwargs)
+    if feature_key not in cache:
+        cache[feature_key] = {interval: (1, None)}
+    else:
+        if interval in cache[feature_key]:
+            ref_count = cache[feature_key][interval][0]
+            ref = cache[feature_key][interval][1]
+            cache[feature_key][interval] = (ref_count + 1, ref)
+        else:
+            cache[feature_key][interval] = (1, None)
+
+    return node
+
+
+def _get_from_cache(context: Dict[str, Any]) -> Tuple[Optional[pd.DataFrame], bool]:
+    cache_actor = ray.get_actor(CACHE_ACTOR_NAME)
+
+    # this call decreases obj ref counter
+    obj_ref, should_cache = ray.get(cache_actor.check_cache.remote(context))
+    if obj_ref is None:
+        return None, should_cache
+    try:
+        return ray.get(obj_ref), should_cache
+    except Exception as e:
+        # we may have ownership problems
+        print(f'Unable to get cached obj by ref: {e}')
+        return None, should_cache
+
+def _cache(obj: Any, context: Dict[str, Any]):
+    cache_actor = ray.get_actor(CACHE_ACTOR_NAME)
+    obj_ref = ray.put(obj, _owner=cache_actor)
+    ray.get(cache_actor.cache_obj_ref.remote(obj_ref, context))
+
+
 @ray.remote(num_cpus=0.001)
 def load_if_needed(
+    context: Dict[str, Any],
     path: str,
     is_feature: bool = False,
 ) -> Block:
-    # TODO if using Ray's Plasma, check shared obj store first, if empty - load from s3
-    # TODO figure out how to split BlockRange -> Block and cache if needed
-    # TODO sync keys
     s = 'feature' if is_feature else 'data'
+    df, should_cache = _get_from_cache(context)
+    if df is not None:
+        print(f'[Cached] Loading {s} block started')
+        return df
     print(f'Loading {s} block started')
     t = time.time()
     df = load_df(path)
+    if should_cache:
+        _cache(df, context)
     print(f'Loading {s} block finished {time.time() - t}s')
     return df
 
@@ -56,11 +108,16 @@ def load_if_needed(
 # TODO this should be in Feature class ?
 @ray.remote(num_cpus=0.9)
 def calculate_feature(
+    context: Dict[str, Any],
     feature: Feature,
     dep_refs: Dict[Feature, List[ObjectRef[Block]]], # maps dep feature to BlockRange # TODO List[BlockRange] when using 'holes'
     interval: Interval,
     store: bool
 ) -> Block:
+    df = _get_from_cache(context)
+    if df is not None:
+        print(f'[Cached] Calc feature finished')
+        return df
     print('Calc feature block started')
     t = time.time()
     # TODO add mem tracking

@@ -1,6 +1,5 @@
 import time
-from typing import Dict, List, Tuple, Optional
-
+from typing import Dict, List, Tuple, Optional, Any, Callable
 
 import ray
 from ray.dag import DAGNode
@@ -12,9 +11,13 @@ from featurizer.blocks.blocks import Block, meta_to_interval, interval_to_meta, 
 from portion import Interval, IntervalDict
 import pandas as pd
 
-from featurizer.calculator.tasks import calculate_feature, load_if_needed
+from featurizer.calculator.tasks import calculate_feature, load_if_needed, bind_and_cache, context
 from utils.pandas.df_utils import concat, sub_df_ts, merge_asof_multi
 from utils.time.utils import date_str_from_ts
+
+
+# TODO re: cache https://discuss.ray.io/t/best-way-to-share-memory-for-ray-tasks/3759
+# https://sourcegraph.com/github.com/ray-project/ray@master/-/blob/python/ray/tests/test_object_assign_owner.py?subtree=true
 
 
 def build_feature_task_graph(
@@ -22,8 +25,9 @@ def build_feature_task_graph(
     feature: Feature,
     # TODO decouple derived feature_ranges_meta and input data ranges meta
     ranges_meta: Dict[Feature, List[BlockRangeMeta]],
-    to_store: Optional[List[Feature]] = None,
-    cached_feature_blocks_meta: Optional[Dict[Feature, Dict[Interval, BlockMeta]]] = None,
+    obj_ref_cache: Dict[str, Dict[Interval, Tuple[int, Optional[ObjectRef]]]],
+    features_to_store: Optional[List[Feature]] = None,
+    stored_feature_blocks_meta: Optional[Dict[Feature, Dict[Interval, BlockMeta]]] = None,
 ) -> Dict[Feature, Dict[Interval, Dict[Interval, DAGNode]]]:
     def tree_traversal_callback(feature: Feature):
         if feature.feature_definition.is_data_source():
@@ -38,7 +42,9 @@ def build_feature_task_graph(
                 for block_meta in block_range_meta:
                     interval = meta_to_interval(block_meta)
                     path = block_meta['path']
-                    node = load_if_needed.bind(path, False)
+                    # node = load_if_needed.bind(path, False)
+                    ctx = context(feature.feature_key, interval)
+                    node = bind_and_cache(load_if_needed, obj_ref_cache, ctx, path=path, is_feature=False)
 
                     # TODO validate no overlapping intervals here
                     nodes[interval] = node
@@ -81,12 +87,15 @@ def build_feature_task_graph(
                         ds.append(dep_node)
                     dep_nodes[dep_feature] = ds
 
-                if cached_feature_blocks_meta is not None and feature in cached_feature_blocks_meta and interval in cached_feature_blocks_meta[feature]:
-                    path = cached_feature_blocks_meta[feature][interval]['path']
-                    node = load_if_needed.bind(path, True)
+                ctx = context(feature.feature_key, interval)
+                if stored_feature_blocks_meta is not None and feature in stored_feature_blocks_meta and interval in stored_feature_blocks_meta[feature]:
+                    path = stored_feature_blocks_meta[feature][interval]['path']
+                    # node = load_if_needed.bind(path, True)
+                    node = bind_and_cache(load_if_needed, obj_ref_cache, ctx, path=path, is_feature=True)
                 else:
-                    store = to_store is not None and feature in to_store
-                    node = calculate_feature.bind(feature, dep_nodes, interval, store)
+                    store = features_to_store is not None and feature in features_to_store
+                    # node = calculate_feature.bind(feature, dep_nodes, interval, store)
+                    node = bind_and_cache(calculate_feature, obj_ref_cache, ctx, feature=feature, dep_nodes=dep_nodes, interval=interval, store=store)
 
                 # TODO validate interval is withtin range_interval
                 nodes[interval] = node
@@ -100,6 +109,24 @@ def build_feature_task_graph(
                 ranges_meta[feature].append(block_range_meta)
 
     postorder(feature, tree_traversal_callback)
+
+    return dag
+
+
+def build_feature_set_task_graph(
+    features: List[Feature],
+    ranges_meta: Dict[Feature, List[BlockRangeMeta]],
+    cache: Dict,
+    features_to_store: Optional[List[Feature]] = None,
+    stored_feature_blocks_meta: Optional[Dict[Feature, Dict[Interval, BlockMeta]]] = None,
+) -> Dict[Feature, Dict[Interval, Dict[Interval, DAGNode]]]:
+    dag = {}
+    for feature in features:
+        dag = build_feature_task_graph(
+            dag, feature, ranges_meta, cache,
+            features_to_store=features_to_store,
+            stored_feature_blocks_meta=stored_feature_blocks_meta
+        )
 
     return dag
 
@@ -128,19 +155,6 @@ def execute_graph_nodes(nodes: List[DAGNode]) -> List[Block]:
             executing_refs = remaining
 
         return ray.get(results_refs)
-
-
-def build_feature_set_task_graph(
-    dag: Dict,
-    features: List[Feature],
-    ranges_meta: Dict[Feature, List]
-):
-    for feature in features:
-        if feature in dag:
-            continue
-        dag = build_feature_task_graph(dag, feature, ranges_meta)
-
-    return dag
 
 
 def point_in_time_join_dag(
