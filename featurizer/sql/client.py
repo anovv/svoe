@@ -152,12 +152,8 @@ class MysqlClient:
         start_date: Optional[str] = None,
         end_date: Optional[str] = None
     ) -> List[Dict]:
-        args = {
-            FeatureCatalog.feature_key.name: feature_keys,
-        }
-
         session = Session()
-        f = session.query(FeatureCatalog).filter_by(**args)
+        f = session.query(FeatureCatalog).filter(FeatureCatalog.feature_key.in_(feature_keys))
         if start_date is not None:
             f = f.filter(FeatureCatalog.date >= start_date)
         if end_date is not None:
