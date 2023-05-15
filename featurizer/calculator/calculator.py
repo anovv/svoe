@@ -1,5 +1,5 @@
 import time
-from typing import Dict, List, Tuple, Optional, Any, Callable
+from typing import Dict, List, Tuple, Optional
 
 import ray
 from ray.dag import DAGNode
@@ -13,7 +13,6 @@ import pandas as pd
 
 from featurizer.calculator.tasks import calculate_feature, load_if_needed, bind_and_cache, context
 from utils.pandas.df_utils import concat, sub_df_ts, merge_asof_multi
-from utils.time.utils import date_str_from_ts
 
 
 # TODO re: cache https://discuss.ray.io/t/best-way-to-share-memory-for-ray-tasks/3759
@@ -23,17 +22,18 @@ from utils.time.utils import date_str_from_ts
 def build_feature_task_graph(
     dag: Dict[Feature, Dict[Interval, Dict[Interval, DAGNode]]], # DAGNodes per feature per range
     feature: Feature,
-    # TODO decouple derived feature_ranges_meta and input data ranges meta
-    ranges_meta: Dict[Feature, List[BlockRangeMeta]],
+    data_ranges_meta: Dict[Feature, List[BlockRangeMeta]],
     obj_ref_cache: Dict[str, Dict[Interval, Tuple[int, Optional[ObjectRef]]]],
     features_to_store: Optional[List[Feature]] = None,
     stored_feature_blocks_meta: Optional[Dict[Feature, Dict[Interval, BlockMeta]]] = None,
 ) -> Dict[Feature, Dict[Interval, Dict[Interval, DAGNode]]]:
+    features_ranges_meta = {}
+
     def tree_traversal_callback(feature: Feature):
         if feature.feature_definition.is_data_source():
             # leafs
             # TODO decouple derived feature_ranges_meta and input data ranges meta
-            ranges = ranges_meta[feature]  # this is already populated for Data in load_data_ranges above
+            ranges = data_ranges_meta[feature]  # this is already populated for Data in load_data_ranges above
             for block_range_meta in ranges:
                 if feature not in dag:
                     dag[feature] = {}
@@ -55,7 +55,8 @@ def build_feature_task_graph(
 
         ranges_per_dep_feature = {}
         for dep_feature in feature.children:
-            ranges_per_dep_feature[dep_feature] = ranges_to_interval_dict(ranges_meta[dep_feature])
+            meta = data_ranges_meta[dep_feature] if dep_feature.feature_definition.is_data_source() else features_ranges_meta[dep_feature]
+            ranges_per_dep_feature[dep_feature] = ranges_to_interval_dict(meta)
 
         range_intervals = prune_overlaps(get_overlaps(ranges_per_dep_feature))
         for range_interval in range_intervals:
@@ -103,10 +104,10 @@ def build_feature_task_graph(
             # TODO check if range_interval intersects with existing keys/intervals"
             dag[feature][range_interval] = nodes
             # TODO check if duplicate feature
-            if feature not in ranges_meta:
-                ranges_meta[feature] = [block_range_meta]
+            if feature not in features_ranges_meta:
+                features_ranges_meta[feature] = [block_range_meta]
             else:
-                ranges_meta[feature].append(block_range_meta)
+                features_ranges_meta[feature].append(block_range_meta)
 
     postorder(feature, tree_traversal_callback)
 
@@ -115,15 +116,15 @@ def build_feature_task_graph(
 
 def build_feature_set_task_graph(
     features: List[Feature],
-    ranges_meta: Dict[Feature, List[BlockRangeMeta]],
-    cache: Dict,
+    data_ranges_meta: Dict[Feature, List[BlockRangeMeta]],
+    obj_ref_cache: Dict[str, Dict[Interval, Tuple[int, Optional[ObjectRef]]]],
     features_to_store: Optional[List[Feature]] = None,
     stored_feature_blocks_meta: Optional[Dict[Feature, Dict[Interval, BlockMeta]]] = None,
 ) -> Dict[Feature, Dict[Interval, Dict[Interval, DAGNode]]]:
     dag = {}
     for feature in features:
         dag = build_feature_task_graph(
-            dag, feature, ranges_meta, cache,
+            dag, feature, data_ranges_meta, obj_ref_cache,
             features_to_store=features_to_store,
             stored_feature_blocks_meta=stored_feature_blocks_meta
         )
@@ -132,7 +133,6 @@ def build_feature_set_task_graph(
 
 
 def execute_graph_nodes(nodes: List[DAGNode]) -> List[Block]:
-    # root_nodes = list(dag[feature].values())
     results_refs = []
     executing_refs = []
     max_concurrent_dags = 12 # num_cpus
@@ -264,15 +264,15 @@ def _point_in_time_join_block(
 
 
 # TODO type hint
-# TODO for scaling https://github.com/online-ml/river/blob/main/river/preprocessing/scale.py
-def build_feature_label_set_task_graph(
-    features: List[Feature],
-    ranges_meta: Dict[Feature, List],
-    label: Feature,
-    label_lookahead: Optional[str] = None,
-):
-    # TODO implement label lookahead
-    dag = {}
-    dag = build_feature_set_task_graph(dag, features, ranges_meta)
-
-    return point_in_time_join_dag(dag, features, label)
+# TODO for feature scaling https://github.com/online-ml/river/blob/main/river/preprocessing/scale.py
+# def build_feature_label_set_task_graph(
+#     features: List[Feature],
+#     ranges_meta: Dict[Feature, List],
+#     label: Feature,
+#     label_lookahead: Optional[str] = None,
+# ):
+#     # TODO implement label lookahead
+#     dag = {}
+#     dag = build_feature_set_task_graph(dag, features, ranges_meta)
+#
+#     return point_in_time_join_dag(dag, features, label)

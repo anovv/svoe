@@ -1,9 +1,6 @@
-import concurrent
-import functools
 import heapq
 import itertools
 import time
-from concurrent.futures import as_completed
 from datetime import datetime
 from typing import Dict, List, Tuple, Any, Optional
 
@@ -16,10 +13,9 @@ from ray.types import ObjectRef
 from streamz import Stream
 
 from featurizer.actors.cache_actor import CACHE_ACTOR_NAME
-from featurizer.blocks.blocks import Block, BlockMeta, BlockRange
+from featurizer.blocks.blocks import Block, BlockRange
 from featurizer.data_definitions.data_definition import Event
 from featurizer.features.feature_tree.feature_tree import Feature
-from featurizer.sql import db_actor
 from featurizer.sql.db_actor import DbActor
 from featurizer.sql.feature_catalog.models import FeatureCatalog, _construct_feature_catalog_s3_path
 from utils.pandas import df_utils
@@ -66,6 +62,7 @@ def _get_from_cache(context: Dict[str, Any]) -> Tuple[Optional[pd.DataFrame], bo
         # we may have ownership problems
         print(f'Unable to get cached obj by ref: {e}')
         return None, should_cache
+
 
 def _cache(obj: Any, context: Dict[str, Any]):
     cache_actor = ray.get_actor(CACHE_ACTOR_NAME)
@@ -114,7 +111,7 @@ def calculate_feature(
     interval: Interval,
     store: bool
 ) -> Block:
-    df = _get_from_cache(context)
+    df, should_cache = _get_from_cache(context)
     if df is not None:
         print(f'[Cached] Calc feature finished')
         return df
@@ -146,6 +143,8 @@ def calculate_feature(
         out_stream = s
 
     df = run_named_events_stream(merged, upstreams, out_stream, interval)
+    if should_cache:
+        _cache(df, context)
     print(f'Calc feature block finished {time.time() - t}s')
     if store:
         # TODO make a separate actor pool for S3 IO and batchify store operation

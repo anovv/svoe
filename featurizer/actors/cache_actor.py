@@ -26,7 +26,8 @@ class CacheActor:
                 # decrease ref counter
                 self.cache[feature_key][interval] = (ref_counter - 1, obj_ref)
 
-        should_cache = ref_counter > 1 # only use Plasma Store as cache if this block is referenced by more than 1 feature
+        # use Plasma Store as cache only if this block is referenced by more than 1 feature
+        should_cache = ref_counter > 1 and obj_ref is None
         return obj_ref, should_cache
 
     def cache_obj_ref(self, obj_ref: ObjectRef, context: Dict[str, Any]):
@@ -37,8 +38,4 @@ class CacheActor:
             self.cache[feature_key][interval] = (ref_counter, obj_ref)
         else:
             raise ValueError(f'Unable to locate cache key for {feature_key} {interval}')
-
-
-
-
 

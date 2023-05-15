@@ -6,12 +6,14 @@ from portion import closed
 
 import calculator as C
 import utils.streamz.stream_utils
+from featurizer.actors.cache_actor import CacheActor, CACHE_ACTOR_NAME
 from featurizer.calculator.tasks import merge_blocks
 from featurizer.api.api import Api, data_key
 from featurizer.data_definitions.data_source_definition import DataSourceDefinition
 from featurizer.data_definitions.l2_book_incremental.cryptofeed.cryptofeed_l2_book_incremental import CryptofeedL2BookIncrementalData
 from featurizer.data_definitions.l2_book_incremental.cryptotick.cryptotick_l2_book_incremental import CryptotickL2BookIncrementalData
 from featurizer.data_definitions.trades.trades import TradesData
+from featurizer.features.definitions.volatility.volatility_stddev_fd import VolatilityStddevFD
 
 from featurizer.sql.data_catalog.models import DataCatalog
 from featurizer.features.definitions.l2_snapshot.l2_snapshot_fd import L2SnapshotFD
@@ -114,36 +116,37 @@ class TestFeatureCalculator(unittest.TestCase):
 
     def test_cryptotick_midprice_feature_offline(self):
         api = Api()
-        # feature_params = {1: {'dep_schema': 'cryptotick'}}
-        feature_params = {1: {'dep_schema': 'cryptotick', 'sampling': '1s'}}
+        feature_params1 = {0: {'dep_schema': 'cryptotick', 'sampling': '1s'}}
+        feature_params2 = {1: {'dep_schema': 'cryptotick', 'sampling': '1s'}}
+        feature_params3 = {2: {'dep_schema': 'cryptotick', 'sampling': '1s'}}
         data_params = [
             {DataCatalog.exchange.name: 'BINANCE',
             DataCatalog.data_type.name: 'l2_book',
             DataCatalog.instrument_type.name: 'spot',
             DataCatalog.symbol.name: 'BTC-USDT'}
         ]
-        feature_l2_snap = construct_feature_tree(L2SnapshotFD, data_params, feature_params)
-        # feature_mid_price = construct_feature_tree(MidPriceFD, data_params, feature_params)
-        # feature_volatility = construct_feature_tree(MidPriceFD, data_params, feature_params)
-        # features = [feature_l2_snap, feature_mid_price, feature_volatility]
-        features = [feature_l2_snap]
-        data_deps = []
+        feature_l2_snap = construct_feature_tree(L2SnapshotFD, data_params, feature_params1)
+        feature_mid_price = construct_feature_tree(MidPriceFD, data_params, feature_params2)
+        feature_volatility = construct_feature_tree(VolatilityStddevFD, data_params, feature_params3)
+        features = [feature_l2_snap, feature_mid_price, feature_volatility]
+        data_deps = set()
         for feature in features:
-            data_deps.extend(feature.get_data_deps())
+            for d in feature.get_data_deps():
+                data_deps.add(d)
         data_keys = [data_key(d.params) for d in data_deps]
         start_date = '2023-02-01'
         end_date = '2023-02-01'
         ranges_meta_per_data_key = api.get_data_meta(data_keys, start_date=start_date, end_date=end_date)
-        ranges_meta = {data: ranges_meta_per_data_key[data_key(data.params)] for data in data_deps}
+        data_ranges_meta = {data: ranges_meta_per_data_key[data_key(data.params)] for data in data_deps}
 
         stored_features_meta = api.get_features_meta(features, start_date=start_date, end_date=end_date)
 
-        # TODO start cache actor
         cache = {}
         features_to_store = [] # TODO
-        # task_graph = C.build_feature_task_graph({}, feature, ranges_meta, cache, features_to_store, stored_features_meta)
-        task_graph = C.build_feature_set_task_graph({}, features, ranges_meta, cache, features_to_store, stored_features_meta)
-
+        # task_graph = C.build_feature_task_graph({}, feature, data_ranges_meta, cache, features_to_store, stored_features_meta)
+        task_graph = C.build_feature_set_task_graph(features, data_ranges_meta, cache, features_to_store, stored_features_meta)
+        CacheActor.options(name=CACHE_ACTOR_NAME).remote(cache)
+        raise
         root_nodes_per_interval = task_graph[feature]
         num_intervals = len(root_nodes_per_interval.keys())
         results = []
@@ -157,12 +160,6 @@ class TestFeatureCalculator(unittest.TestCase):
             i += 1
 
         print(results)
-
-    def test_pij(self):
-
-        flset_dag = C.build_feature_label_set_task_graph()
-
-
 
         # TODO why is this not sorted?
         # res = res.sort_values(by=['timestamp'], ignore_index=True)
@@ -198,57 +195,18 @@ class TestFeatureCalculator(unittest.TestCase):
         # plt.show()
 
 
-
-    # TODO deprecate this
-    def test_featurization_DEPRECATED(self, feature_def: Type[FeatureDefinition], data_def: Type[DataSourceDefinition]):
-        # mock consecutive l2 delta blocks
-        if data_def == CryptofeedL2BookIncrementalData:
-            block_range, block_range_meta = mock_l2_book_delta_data_and_meta()
-        elif data_def == TradesData:
-            block_range, block_range_meta = mock_trades_data_and_meta()
-        else:
-            raise ValueError(f'Unsupported data_def for mocking: {data_def}')
-
-        # build feature tree
-        # TODO populate these
-        data_params = {}
-        feature_params = {}
-        feature = construct_feature_tree(feature_def, data_params, feature_params)
-        print(RenderTree(feature))
-        # calculate in offline/distributed way
-        task_graph = C.build_feature_task_graph({}, feature, block_range_meta)
-        print(task_graph)
-        # dask.visualize(*task_graph)
-        # res_blocks = dask.compute(task_graph)
-        # res_blocks = C.execute_task_graph(task_graph, feature)
-        res_blocks = [] # TODO execute
-        offline_res = pd.concat(res_blocks)
-        print(offline_res)
-
-        # calculate online
-        stream_graph = feature.build_stream_graph()
-        stream = stream_graph[feature]
-        sources = {data: stream_graph[data] for data in block_range_meta.keys()}
-        merged_events = merge_blocks(block_range)
-        online_res = utils.streamz.stream_utils.run_named_events_stream(merged_events, sources, stream)
-        print(online_res)
-
-        # TODO we may have 1ts duplicate entry (due to snapshot_ts based block partition of l2_delta data source)
-        # assert_frame_equal(offline_res, online_res)
-
-
 if __name__ == '__main__':
     # unittest.main()
     t = TestFeatureCalculator()
     # t.test_featurization(L2BookSnapshotFeatureDefinition, L2BookDeltasData)
     # t.test_featurization(OHLCVFeatureDefinition, TradesData)
-    t.test_point_in_time_join()
+    # t.test_point_in_time_join()
     # t.test_merge_asof()
     # t.test_feature_label_set()
     # t.test_cryptotick_l2_snap_feature_online()
     # t.test_cryptotick_l2_snap_feature_offline()
     # t.test_l2_cryptotick_data()
-    # t.test_cryptotick_midprice_feature_offline()
+    t.test_cryptotick_midprice_feature_offline()
     # t.test_feature_label_set_cryptotick()
 
 
