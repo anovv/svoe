@@ -129,6 +129,7 @@ class TestFeatureCalculator(unittest.TestCase):
         feature_mid_price = construct_feature_tree(MidPriceFD, data_params, feature_params2)
         feature_volatility = construct_feature_tree(VolatilityStddevFD, data_params, feature_params3)
         features = [feature_l2_snap, feature_mid_price, feature_volatility]
+        # features = [feature_mid_price]
         data_deps = set()
         for feature in features:
             for d in feature.get_data_deps():
@@ -145,21 +146,20 @@ class TestFeatureCalculator(unittest.TestCase):
         features_to_store = [] # TODO
         # task_graph = C.build_feature_task_graph({}, feature, data_ranges_meta, cache, features_to_store, stored_features_meta)
         task_graph = C.build_feature_set_task_graph(features, data_ranges_meta, cache, features_to_store, stored_features_meta)
-        CacheActor.options(name=CACHE_ACTOR_NAME).remote(cache)
-        raise
-        root_nodes_per_interval = task_graph[feature]
-        num_intervals = len(root_nodes_per_interval.keys())
-        results = []
-        i = 1
-        for interval in root_nodes_per_interval:
-            # TODO are they ts sorted??
-            root_nodes = list(root_nodes_per_interval[interval].values())
-            print(f'Executing interval {i}/{num_intervals} {interval}')
-            res_blocks = C.execute_graph_nodes(root_nodes)
-            results.append(res_blocks)
-            i += 1
+        flattened_task_graph = C.flatten_feature_set_task_graph(features, task_graph)
+        res = {}
 
-        print(results)
+        with ray.init(address='auto', ignore_reinit_error=True):
+            c = CacheActor.options(name=CACHE_ACTOR_NAME).remote(cache)
+            # res = C.execute_graph_nodes(flattened_task_graph)
+            for feature in features:
+                nodes = []
+                for range_interval in task_graph[feature]:
+                    for interval in task_graph[feature][range_interval]:
+                        nodes.append((feature, task_graph[feature][range_interval][interval]))
+                r = C.execute_graph_nodes(nodes)
+                res[feature] = r[feature]
+            print(res)
 
         # TODO why is this not sorted?
         # res = res.sort_values(by=['timestamp'], ignore_index=True)

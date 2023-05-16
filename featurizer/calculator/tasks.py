@@ -35,7 +35,7 @@ def bind_and_cache(
 ) -> DAGNode:
     feature_key = context['feature_key']
     interval = context['interval']
-    node = func.bind(context, kwargs)
+    node = func.bind(context, **kwargs)
     if feature_key not in cache:
         cache[feature_key] = {interval: (1, None)}
     else:
@@ -56,6 +56,7 @@ def _get_from_cache(context: Dict[str, Any]) -> Tuple[Optional[pd.DataFrame], bo
     obj_ref, should_cache = ray.get(cache_actor.check_cache.remote(context))
     if obj_ref is None:
         return None, should_cache
+
     try:
         return ray.get(obj_ref), should_cache
     except Exception as e:
@@ -67,7 +68,9 @@ def _get_from_cache(context: Dict[str, Any]) -> Tuple[Optional[pd.DataFrame], bo
 def _cache(obj: Any, context: Dict[str, Any]):
     cache_actor = ray.get_actor(CACHE_ACTOR_NAME)
     obj_ref = ray.put(obj, _owner=cache_actor)
-    ray.get(cache_actor.cache_obj_ref.remote(obj_ref, context))
+    # pass obj_ref wrapped in list to avoid de-referencing
+    ray.get(cache_actor.cache_obj_ref.remote([obj_ref], context))
+    print('Cached obj')
 
 
 @ray.remote(num_cpus=0.001)
@@ -107,7 +110,7 @@ def load_if_needed(
 def calculate_feature(
     context: Dict[str, Any],
     feature: Feature,
-    dep_refs: Dict[Feature, List[ObjectRef[Block]]], # maps dep feature to BlockRange # TODO List[BlockRange] when using 'holes'
+    dep_refs: Dict[Feature, List[ObjectRef[Block]]],
     interval: Interval,
     store: bool
 ) -> Block:

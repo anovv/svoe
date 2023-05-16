@@ -1,4 +1,4 @@
-from typing import Dict, Optional, Tuple, Any
+from typing import Dict, Optional, Tuple, Any, List
 
 import ray
 from intervaltree import Interval
@@ -30,12 +30,12 @@ class CacheActor:
         should_cache = ref_counter > 1 and obj_ref is None
         return obj_ref, should_cache
 
-    def cache_obj_ref(self, obj_ref: ObjectRef, context: Dict[str, Any]):
+    def cache_obj_ref(self, obj_ref_list: List[ObjectRef], context: Dict[str, Any]):
         feature_key = context['feature_key']
         interval = context['interval']
         if feature_key in self.cache and interval in self.cache[feature_key]:
             ref_counter, _ = self.cache[feature_key][interval]
-            self.cache[feature_key][interval] = (ref_counter, obj_ref)
+            self.cache[feature_key][interval] = (ref_counter, obj_ref_list[0])
         else:
             raise ValueError(f'Unable to locate cache key for {feature_key} {interval}')
 
