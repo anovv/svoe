@@ -125,6 +125,7 @@ def get_time_diff(df1: pd.DataFrame, df2: pd.DataFrame) -> float:
 
 
 def merge_asof_multi(dfs: List[pd.DataFrame]) -> pd.DataFrame:
+    # TODO fix  FutureWarning: Passing 'suffixes' which cause duplicate columns {'receipt_timestamp_x'} in the result is deprecated and will raise a MergeError in a future version.
     res = dfs[0]
     for i in range(1, len(dfs)):
         res = pd.merge_asof(res, dfs[i], on='timestamp', direction='backward')
@@ -147,7 +148,6 @@ def plot_multi(col_names: List[str], df: pd.DataFrame):
     for i in range(len(col_names)):
         df.plot(x='timestamp', y=col_names[i], ax=axes[i])
     plt.show()
-
 
 
 # TODO typing
@@ -177,6 +177,7 @@ def gen_split_df_by_mem(df: pd.DataFrame, chunk_size_kb: int) -> Generator:
         start = end
 
         # TODO return num splits?
+
 
 def hash_df(df: pd.DataFrame) -> str:
     return hashlib.sha1(pd.util.hash_pandas_object(df).values).hexdigest()

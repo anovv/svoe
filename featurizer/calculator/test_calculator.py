@@ -15,6 +15,7 @@ from featurizer.data_definitions.data_source_definition import DataSourceDefinit
 from featurizer.data_definitions.l2_book_incremental.cryptofeed.cryptofeed_l2_book_incremental import CryptofeedL2BookIncrementalData
 from featurizer.data_definitions.l2_book_incremental.cryptotick.cryptotick_l2_book_incremental import CryptotickL2BookIncrementalData
 from featurizer.data_definitions.trades.trades import TradesData
+from featurizer.features.definitions.spread.relative_bid_ask_spread_fd import RelativeBidAskSpreadFD
 from featurizer.features.definitions.volatility.volatility_stddev_fd import VolatilityStddevFD
 
 from featurizer.sql.data_catalog.models import DataCatalog
@@ -121,6 +122,7 @@ class TestFeatureCalculator(unittest.TestCase):
         feature_params1 = {0: {'dep_schema': 'cryptotick', 'sampling': '1s'}}
         feature_params2 = {1: {'dep_schema': 'cryptotick', 'sampling': '1s'}}
         feature_params3 = {2: {'dep_schema': 'cryptotick', 'sampling': '1s'}}
+        feature_params4 = {1: {'dep_schema': 'cryptotick', 'sampling': '1s'}}
         data_params = [
             {DataCatalog.exchange.name: 'BINANCE',
             DataCatalog.data_type.name: 'l2_book',
@@ -130,7 +132,8 @@ class TestFeatureCalculator(unittest.TestCase):
         feature_l2_snap = construct_feature_tree(L2SnapshotFD, data_params, feature_params1)
         feature_mid_price = construct_feature_tree(MidPriceFD, data_params, feature_params2)
         feature_volatility = construct_feature_tree(VolatilityStddevFD, data_params, feature_params3)
-        features = [feature_l2_snap, feature_mid_price, feature_volatility]
+        feature_spread = construct_feature_tree(RelativeBidAskSpreadFD, data_params, feature_params4)
+        features = [feature_l2_snap, feature_mid_price, feature_volatility, feature_spread]
         # features = [feature_mid_price]
         data_deps = set()
         for feature in features:
@@ -179,7 +182,10 @@ class TestFeatureCalculator(unittest.TestCase):
                 i += 1
             df = concat(sort_dfs(res))
 
-        plot_multi(['mid_price', 'volatility'], df)
+            # TODO first two values are weird outliers for some reason, why?
+            df = df.tail(-2)
+
+        plot_multi(['mid_price', 'volatility', 'spread'], df)
 
         # compare to cryptotick quotes
         # mdf = load_df('s3://svoe-cryptotick-data/quotes/20230201/BINANCE_SPOT_BTC_USDT.csv.gz', extension='csv')

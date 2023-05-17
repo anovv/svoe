@@ -19,8 +19,6 @@ import toolz
 from utils.time.utils import convert_str_to_seconds
 
 
-# TODO good data 'l2_book', 'BINANCE', 'spot', 'BTC-USDT', '2022-09-29', '2022-09-29'
-# TODO remove malformed files
 class L2SnapshotFD(FeatureDefinition):
 
     DEFAULT_DEPTH = 25

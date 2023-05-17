@@ -1,7 +1,11 @@
 from typing import List, Dict, Optional, Type
+
+from portion import IntervalDict
 from streamz import Stream
+
+from featurizer.blocks.blocks import BlockMeta, identity_grouping
 from featurizer.features.definitions.feature_definition import FeatureDefinition
-from featurizer.data import DataDefinition, EventSchema
+from featurizer.data_definitions.data_definition import DataDefinition, EventSchema
 from featurizer.features.definitions.l2_snapshot.l2_snapshot_fd import L2SnapshotFD
 from featurizer.features.feature_tree.feature_tree import Feature
 
@@ -32,4 +36,6 @@ class RelativeBidAskSpreadFD(FeatureDefinition):
     def dep_upstream_schema(cls, dep_schema: str = Optional[None]) -> List[Type[DataDefinition]]:
         return [L2SnapshotFD]
 
-    # TODO grouping
+    @classmethod
+    def group_dep_ranges(cls, ranges: List[BlockMeta], feature: Feature, dep_feature: Feature) -> IntervalDict:
+        return identity_grouping(ranges)

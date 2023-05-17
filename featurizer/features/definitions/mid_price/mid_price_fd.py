@@ -35,5 +35,5 @@ class MidPriceFD(FeatureDefinition):
         return [L2SnapshotFD]
 
     @classmethod
-    def group_dep_ranges(cls, ranges: List[BlockMeta], feature: Feature, dep_feature: Feature) -> IntervalDict:  # TODO typehint Block/BlockRange/BlockMeta/BlockRangeMeta
+    def group_dep_ranges(cls, ranges: List[BlockMeta], feature: Feature, dep_feature: Feature) -> IntervalDict:
         return identity_grouping(ranges)

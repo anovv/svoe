@@ -35,11 +35,12 @@ class Feature(NodeMixin):
         dep_feature_params = [f.params for f in feature_deps]
 
         # TODO add feature_defenition version to hash
+        # TODO prev feature/data dep keys should also be a part of the key
         return joblib.hash([self.feature_definition.__name__, dep_data_params, dep_feature_params])
-
 
     def get_data_deps(self) -> List['Feature']:
         data_leafs = []
+
         def callback(node):
             if node.feature_definition.is_data_source():
                 data_leafs.append(node)
@@ -54,7 +55,6 @@ class Feature(NodeMixin):
                 deps.append(node)
         inorder(self, callback)
         return deps
-
 
     # TODO move this to FeatureDefinition package
     def build_stream_graph(self) -> Dict['Feature', Stream]:
@@ -143,7 +143,6 @@ def _parse_params(params: Union[Dict, List], position: int):
     raise ValueError(f'Unsupported params type: {type(params)}')
 
 
-
 # TODO use anytree api
 def postorder(node: Feature, callback: Callable):
     if node.children is None or len(node.children) == 0:
@@ -152,6 +151,7 @@ def postorder(node: Feature, callback: Callable):
     for child in node.children:
         postorder(child, callback)
     callback(node)
+
 
 def inorder(node: Feature, callback: Callable):
     if node.children is None or len(node.children) == 0:
