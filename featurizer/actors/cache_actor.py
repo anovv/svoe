@@ -21,7 +21,10 @@ class CacheActor:
             ref_counter, obj_ref = self.cache[feature_key][interval]
             if ref_counter == 1:
                 # release obj_ref so it can be GCed
-                del self.cache[feature_key][interval]
+                # if obj_ref is not None:
+                #     del self.cache[feature_key][interval]
+                # TODO figure out cache invalidation
+                pass
             else:
                 # decrease ref counter
                 self.cache[feature_key][interval] = (ref_counter - 1, obj_ref)
@@ -38,4 +41,7 @@ class CacheActor:
             self.cache[feature_key][interval] = (ref_counter, obj_ref_list[0])
         else:
             raise ValueError(f'Unable to locate cache key for {feature_key} {interval}')
+
+    def get_cache(self):
+        return self.cache
 

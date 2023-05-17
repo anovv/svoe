@@ -2,6 +2,8 @@ import shutil
 import time
 
 import ray
+import toolz
+from matplotlib import pyplot as plt
 from portion import closed
 
 import calculator as C
@@ -26,7 +28,7 @@ import pandas as pd
 from typing import Type
 from anytree import RenderTree
 from featurizer.utils.testing_utils import mock_feature, mock_trades_data_and_meta, mock_l2_book_delta_data_and_meta, mock_ts_df, mock_ts_df_remote
-from utils.pandas.df_utils import concat, load_df, merge_asof_multi
+from utils.pandas.df_utils import concat, load_df, merge_asof_multi, is_ts_sorted, sort_dfs, plot_multi
 
 
 class TestFeatureCalculator(unittest.TestCase):
@@ -143,30 +145,41 @@ class TestFeatureCalculator(unittest.TestCase):
         stored_features_meta = api.get_features_meta(features, start_date=start_date, end_date=end_date)
 
         cache = {}
-        features_to_store = [] # TODO
-        # task_graph = C.build_feature_task_graph({}, feature, data_ranges_meta, cache, features_to_store, stored_features_meta)
+        features_to_store = []
         task_graph = C.build_feature_set_task_graph(features, data_ranges_meta, cache, features_to_store, stored_features_meta)
-        flattened_task_graph = C.flatten_feature_set_task_graph(features, task_graph)
-        res = {}
-
+        # flattened_task_graph = C.flatten_feature_set_task_graph(features, task_graph)
+        # res = {}
+        #
+        # with ray.init(address='auto', ignore_reinit_error=True):
+        #     c = CacheActor.options(name=CACHE_ACTOR_NAME).remote(cache)
+        #     # res = C.execute_graph_nodes(flattened_task_graph)
+        #     for feature in features:
+        #         nodes = []
+        #         for range_interval in task_graph[feature]:
+        #             for interval in task_graph[feature][range_interval]:
+        #                 nodes.append((feature, task_graph[feature][range_interval][interval]))
+        #         r = C.execute_graph_nodes(nodes)
+        #         res[feature] = r[feature]
+        #     print(res)
+        label_feature = feature_mid_price
+        joined_task_graph = C.point_in_time_join_dag(task_graph, features, label_feature)
+        res = []
         with ray.init(address='auto', ignore_reinit_error=True):
-            c = CacheActor.options(name=CACHE_ACTOR_NAME).remote(cache)
-            # res = C.execute_graph_nodes(flattened_task_graph)
-            for feature in features:
+            c = CacheActor.options(name=CACHE_ACTOR_NAME).remote(cache) # assign to unused var so it stays in Ray's scope
+            num_ranges = len(joined_task_graph)
+            i = 0
+            for range_interval in joined_task_graph:
                 nodes = []
-                for range_interval in task_graph[feature]:
-                    for interval in task_graph[feature][range_interval]:
-                        nodes.append((feature, task_graph[feature][range_interval][interval]))
+                for interval in joined_task_graph[range_interval]:
+                    nodes.append((label_feature, joined_task_graph[range_interval][interval]))
+                print(f'Executing {i + 1}/{num_ranges} range: {range_interval}')
                 r = C.execute_graph_nodes(nodes)
-                res[feature] = r[feature]
-            print(res)
+                dfs = toolz.first(r.values())
+                res.extend(dfs)
+                i += 1
+            df = concat(sort_dfs(res))
 
-        # TODO why is this not sorted?
-        # res = res.sort_values(by=['timestamp'], ignore_index=True)
-
-        # fig, axes = plt.subplots(nrows=4, ncols=1)
-        # res.plot(x='timestamp', y='mid_price', ax=axes[0])
-        # res.plot(x='timestamp', y='mid_price')
+        plot_multi(['mid_price', 'volatility'], df)
 
         # compare to cryptotick quotes
         # mdf = load_df('s3://svoe-cryptotick-data/quotes/20230201/BINANCE_SPOT_BTC_USDT.csv.gz', extension='csv')
@@ -192,7 +205,6 @@ class TestFeatureCalculator(unittest.TestCase):
         # print(len(res), len(mdf))
         # mdf.plot(x='timestamp', y='mid_price', ax=axes[1])
         #
-        # plt.show()
 
 
 if __name__ == '__main__':

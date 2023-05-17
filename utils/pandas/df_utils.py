@@ -7,6 +7,9 @@ import pandas as pd
 from cache_df import CacheDF
 import functools
 from typing import List, Tuple, Generator, Optional
+
+from matplotlib import pyplot as plt
+
 import utils.concurrency.concurrency_utils as cu
 from utils.s3.s3_utils import get_session
 
@@ -130,6 +133,21 @@ def merge_asof_multi(dfs: List[pd.DataFrame]) -> pd.DataFrame:
 
 def is_ts_sorted(df: pd.DataFrame) -> bool:
     return df['timestamp'].is_monotonic_increasing
+
+
+def sort_dfs(dfs: List[pd.DataFrame]) -> List[pd.DataFrame]:
+    def compare(df1, df2):
+        return int(float(df1.iloc[0]['timestamp']) - float(df2.iloc[0]['timestamp']))
+
+    return sorted(dfs, key=functools.cmp_to_key(compare))
+
+
+def plot_multi(col_names: List[str], df: pd.DataFrame):
+    fig, axes = plt.subplots(nrows=len(col_names), ncols=1)
+    for i in range(len(col_names)):
+        df.plot(x='timestamp', y=col_names[i], ax=axes[i])
+    plt.show()
+
 
 
 # TODO typing

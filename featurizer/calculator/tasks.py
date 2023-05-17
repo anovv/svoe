@@ -20,7 +20,7 @@ from featurizer.sql.db_actor import DbActor
 from featurizer.sql.feature_catalog.models import FeatureCatalog, _construct_feature_catalog_s3_path
 from utils.pandas import df_utils
 from utils.streamz.stream_utils import run_named_events_stream
-from utils.pandas.df_utils import load_df, store_df
+from utils.pandas.df_utils import load_df, store_df, is_ts_sorted
 
 
 def context(feature_key: str, interval: Interval) -> Dict[str, Any]:
@@ -56,7 +56,6 @@ def _get_from_cache(context: Dict[str, Any]) -> Tuple[Optional[pd.DataFrame], bo
     obj_ref, should_cache = ray.get(cache_actor.check_cache.remote(context))
     if obj_ref is None:
         return None, should_cache
-
     try:
         return ray.get(obj_ref), should_cache
     except Exception as e:
@@ -87,6 +86,8 @@ def load_if_needed(
     print(f'Loading {s} block started')
     t = time.time()
     df = load_df(path)
+    if not is_ts_sorted(df):
+        raise ValueError('[Data] df is not ts sorted')
     if should_cache:
         _cache(df, context)
     print(f'Loading {s} block finished {time.time() - t}s')
@@ -146,6 +147,9 @@ def calculate_feature(
         out_stream = s
 
     df = run_named_events_stream(merged, upstreams, out_stream, interval)
+
+    if not is_ts_sorted(df):
+        raise ValueError('[Feature] df is not ts sorted')
     if should_cache:
         _cache(df, context)
     print(f'Calc feature block finished {time.time() - t}s')
