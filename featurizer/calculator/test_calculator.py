@@ -1,9 +1,5 @@
-import shutil
-import time
-
 import ray
 import toolz
-from matplotlib import pyplot as plt
 from portion import closed
 
 import calculator as C
@@ -11,17 +7,13 @@ import utils.streamz.stream_utils
 from featurizer.actors.cache_actor import CacheActor, CACHE_ACTOR_NAME
 from featurizer.calculator.tasks import merge_blocks
 from featurizer.api.api import Api, data_key
-from featurizer.data_definitions.data_source_definition import DataSourceDefinition
-from featurizer.data_definitions.l2_book_incremental.cryptofeed.cryptofeed_l2_book_incremental import CryptofeedL2BookIncrementalData
 from featurizer.data_definitions.l2_book_incremental.cryptotick.cryptotick_l2_book_incremental import CryptotickL2BookIncrementalData
-from featurizer.data_definitions.trades.trades import TradesData
 from featurizer.features.definitions.spread.relative_bid_ask_spread_fd import RelativeBidAskSpreadFD
 from featurizer.features.definitions.volatility.volatility_stddev_fd import VolatilityStddevFD
 
 from featurizer.sql.data_catalog.models import DataCatalog
 from featurizer.features.definitions.l2_snapshot.l2_snapshot_fd import L2SnapshotFD
 from featurizer.features.definitions.mid_price.mid_price_fd import MidPriceFD
-from featurizer.features.definitions.feature_definition import FeatureDefinition
 from featurizer.features.feature_tree.feature_tree import construct_feature_tree, Feature
 
 import unittest
