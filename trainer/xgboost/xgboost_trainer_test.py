@@ -1,9 +1,10 @@
 import unittest
 import ray
 import toolz
-from portion import closed
+from matplotlib import pyplot as plt
 from ray.air import ScalingConfig
-from ray.train.xgboost import XGBoostTrainer
+from ray.train.batch_predictor import BatchPredictor
+from ray.train.xgboost import XGBoostTrainer, XGBoostPredictor
 
 import featurizer.calculator.calculator as C
 from featurizer.actors.cache_actor import CacheActor, CACHE_ACTOR_NAME
@@ -16,6 +17,8 @@ from featurizer.features.definitions.l2_snapshot.l2_snapshot_fd import L2Snapsho
 from featurizer.features.definitions.mid_price.mid_price_fd import MidPriceFD
 from featurizer.features.feature_tree.feature_tree import construct_feature_tree
 from utils.pandas.df_utils import sort_dfs, concat, get_cached_df, cache_df_if_needed
+
+from sklearn.metrics import r2_score
 
 
 class TestXGBoostTrainer(unittest.TestCase):
@@ -61,7 +64,7 @@ class TestXGBoostTrainer(unittest.TestCase):
         joined_task_graph = C.point_in_time_join_dag(task_graph, features, label_feature)
         res = []
         with ray.init(address='auto', ignore_reinit_error=True):
-            local_cache_key = 'test_df_1'
+            local_cache_key = 'test_df_2'
             df = get_cached_df(local_cache_key)
             if df is None:
                 c = CacheActor.options(name=CACHE_ACTOR_NAME).remote(cache) # assign to unused var so it stays in Ray's scope
@@ -79,25 +82,26 @@ class TestXGBoostTrainer(unittest.TestCase):
                 df = concat(sort_dfs(res))
                 # TODO proper remove duplicate columns during merge
                 df = df.loc[:, ~df.columns.duplicated()]
-                # TODO proper strip timestamp col and other non-feature cols
-                df = df[['volatility', 'mid_price', 'spread']]
+                df = df[['volatility', 'mid_price', 'spread', 'timestamp']]
                 cache_df_if_needed(df, local_cache_key)
             else:
                 print('Test df is cached')
 
             # TODO first two values are weird outliers for some reason, why?
             df = df.tail(-2)
-            split_id = int(0.7 * len(df))
-            train_df = df.iloc[:split_id]
-            valid_df = df.iloc[split_id:]
 
-            # print(train_df.head())
-            # print(valid_df.head())
-            # raise
+            df_with_timestamp = df.copy(deep=True)
+            df = df.drop(columns=['timestamp'])
+            train, valid, test = 0.5, 0.2, 0.3 # weights
+            train_df = df.iloc[:int(train*len(df))]
+            valid_df = df.iloc[int(train*len(df)): int((train+valid)*len(df))]
+            test_df_with_labels = df.iloc[int((train+valid)*len(df)):]
+            test_df = test_df_with_labels[['volatility', 'spread']]
 
             # TODO pass objecs refs instead of copying data between client and cluster
             train_dataset = ray.data.from_pandas(train_df)
             valid_dataset = ray.data.from_pandas(valid_df)
+            test_dataset = ray.data.from_pandas(test_df)
 
             params = {
                 'tree_method': 'approx',
@@ -113,10 +117,32 @@ class TestXGBoostTrainer(unittest.TestCase):
                 # https://www.kaggle.com/questions-and-answers/61835
                 datasets={'train': train_dataset, 'valid': valid_dataset},
                 # preprocessor=preprocessor, # TODO scale features?
-                num_boost_round=100,
+                num_boost_round=500,
             )
             result = trainer.fit()
             print(result.metrics)
+
+            # predict
+            batch_predictor = BatchPredictor.from_checkpoint(
+                result.checkpoint, XGBoostPredictor
+            )
+
+            predicted_labels = batch_predictor.predict(test_dataset)
+            predicted = list(map(lambda e: e['predictions'], predicted_labels.take_all()))
+            actual = test_df_with_labels['mid_price'].values.tolist()
+            test_df_with_labels['predicted_mid_price'] = predicted
+            test_df_with_labels['timestamp'] = df_with_timestamp['timestamp']
+            r2 = r2_score(actual, predicted)
+            print(r2)
+
+            # fig, axes = plt.subplots(nrows=1, ncols=1)
+            test_df_with_labels.plot(x='timestamp', y=['mid_price', 'predicted_mid_price'])
+            plt.show()
+            # predicted_labels.show()
+
+            # shap_values = batch_predictor.predict(test_dataset, pred_contribs=True)
+            # print(f'SHAP VALUES')
+            # shap_values.show()
 
 
 if __name__ == '__main__':
