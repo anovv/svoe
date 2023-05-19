@@ -1,3 +1,4 @@
+import time
 import unittest
 import ray
 import toolz
@@ -122,12 +123,18 @@ class TestXGBoostTrainer(unittest.TestCase):
             result = trainer.fit()
             print(result.metrics)
 
-            # predict
+            predictor = XGBoostPredictor.from_checkpoint(result.checkpoint)
+            t = time.time()
+            predicted_one = predictor.predict(test_df.head(1))
+            print(f'Predict one in {time.time() - t}s')
+
             batch_predictor = BatchPredictor.from_checkpoint(
                 result.checkpoint, XGBoostPredictor
             )
-
+            t = time.time()
             predicted_labels = batch_predictor.predict(test_dataset)
+            print(f'Predict in {time.time() - t}s')
+
             predicted = list(map(lambda e: e['predictions'], predicted_labels.take_all()))
             actual = test_df_with_labels['mid_price'].values.tolist()
             test_df_with_labels['predicted_mid_price'] = predicted
