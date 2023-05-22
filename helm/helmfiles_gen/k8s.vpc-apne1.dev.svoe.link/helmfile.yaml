@@ -130,6 +130,11 @@ releases:
     namespace: ray-system
     values:
       - ../../values/local/ray-cluster-local/values.yaml.gotmpl
+  - chart: apache-airflow/airflow
+    name: airflow
+    namespace: airflow
+    values:
+      - ../../values/apache-airflow/airflow/values.yaml.gotmpl
 repositories:
   - name: metrics-server
     url: https://kubernetes-sigs.github.io/metrics-server/
@@ -149,3 +154,5 @@ repositories:
     url: https://helm-charts.bitpoke.io
   - name: kuberay
     url: https://ray-project.github.io/kuberay-helm/
+  - name: apache-airflow
+    url: https://airflow.apache.org
