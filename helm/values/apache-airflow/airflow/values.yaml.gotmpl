@@ -1,3 +1,27 @@
 extraEnv: |
   - name: AIRFLOW__CORE__LOAD_EXAMPLE
     value: 'True'
+
+config:
+  core:
+    dag_dir_list_interval: 5
+    in_file_process_interval: 0
+    dag_discovery_safe_mode: true
+    dags_folder: '/opt/airflow/dags/'
+
+#redis:
+#  enabled: false
+
+flower:
+  enabled: false
+
+statsd:
+  enabled: false
+
+triggerer:
+  enabled: false
+
+dagProcessor:
+  enabled: false
+
+# todo use exisitng mysql and disable postgres
