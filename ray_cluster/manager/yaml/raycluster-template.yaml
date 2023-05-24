@@ -1,0 +1,179 @@
+apiVersion: ray.io/v1alpha1
+kind: RayCluster
+metadata:
+  labels:
+    ray-cluster-name: {{ cluster_name }}
+    user-id: {{ user_id }}
+  name: {{ cluster_name }}
+spec:
+  rayVersion: 2.3.1
+  enableInTreeAutoscaling: {{ enable_autoscaling }}
+  autoscalerOptions:
+    upscalingMode: Default
+    idleTimeoutSeconds: 60
+  headGroupSpec:
+    serviceType: ClusterIP
+    rayStartParams:
+      num-cpus: '0' # to disable task scheduling on head node
+      port: '6379'
+      dashboard-host: '0.0.0.0'
+      block: 'true'
+    template:
+      spec:
+        containers:
+          - volumeMounts:
+              - mountPath: /tmp/ray
+                name: log-volume
+            name: ray-head
+            {%- if is_minikube %}
+            image: ray-with-svoe-deps:ray2.3.1-py310-aarch64-1
+            imagePullPolicy: Never
+            {%- else %}
+            image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/ray-with-svoe-deps:ray2.3.1-py310-aarch64-1
+            imagePullPolicy: IfNotPresent
+            {%- endif %}
+            resources:
+              limits:
+                cpu: {{ head_cpu }}
+                memory: {{ head_memory }}
+              requests:
+                cpu: {{ head_cpu }}
+                memory: {{ head_memory }}
+            env:
+              - name: MY_POD_IP
+                valueFrom:
+                  fieldRef:
+                    fieldPath: status.podIP
+            envFrom:
+              - secretRef:
+                  name: ray-mysql-secret
+              - secretRef:
+                  name: ray-aws-creds-secret
+            ports:
+              - containerPort: 80
+                protocol: TCP
+        volumes:
+          - name: log-volume
+            emptyDir: {}
+        {%- if is_minikube %}
+        affinity: {}
+        tolerations: []
+        {%- else %}
+        affinity:
+          nodeAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+              nodeSelectorTerms:
+                - matchExpressions:
+                    - key: workload-type
+                      operator: In
+                      values:
+                        - ray
+                    - key: instance-type
+                      operator: In
+                      values:
+                        - on-demand
+        tolerations:
+          - key: workload-type
+            operator: Equal
+            value: ray
+            effect: NoSchedule
+          - key: instance-type
+            operator: Equal
+            value: on-demand
+            effect: NoSchedule
+        {%- endif %}
+      metadata:
+        labels:
+          ray-cluster-name: {{ cluster_name }}
+          user-id: {{ user_id }}
+  workerGroupSpecs:
+  {%- for worker_group in worker_groups %}
+  - rayStartParams:
+      resources: {{ worker_group['ray_resources'] }}
+      node-ip-address: $MY_POD_IP
+      redis-password: LetMeInRay
+      block: 'true'
+    replicas: {{ worker_group['replicas'] }}
+    minReplicas: {{ worker_group['min_replicas'] }}
+    maxReplicas: {{ worker_group['max_replicas'] }}
+    groupName: {{ worker_group['group_name'] }}
+    template:
+      spec:
+        containers:
+          - volumeMounts:
+              - mountPath: /tmp/ray
+                name: log-volume
+            name: ray-worker
+            {%- if is_minikube %}
+            image: ray-with-svoe-deps:ray2.3.1-py310-aarch64-1
+            imagePullPolicy: Never
+            {%- else %}
+            image: 050011372339.dkr.ecr.ap-northeast-1.amazonaws.com/anov/ray-with-svoe-deps:ray2.3.1-py310-aarch64-1
+            imagePullPolicy: IfNotPresent
+            {%- endif %}
+            resources:
+              limits:
+                cpu: {{ worker_group['cpu'] }}
+                memory: {{ worker_group['memory'] }}
+              requests:
+                cpu: {{ worker_group['cpu'] }}
+                memory: {{ worker_group['memory'] }}
+            env:
+              - name: MY_POD_IP
+                valueFrom:
+                  fieldRef:
+                    fieldPath: status.podIP
+              - name: RAY_DISABLE_DOCKER_CPU_WARNING
+                value: '1'
+              - name: CPU_REQUEST
+                valueFrom:
+                  resourceFieldRef:
+                    containerName: ray-worker
+                    resource: requests.cpu
+              - name: MY_POD_NAME
+                valueFrom:
+                  fieldRef:
+                    fieldPath: metadata.name
+            envFrom:
+              - secretRef:
+                  name: ray-mysql-secret
+              - secretRef:
+                  name: ray-aws-creds-secret
+            ports:
+              - containerPort: 80
+                protocol: TCP
+        volumes:
+          - name: log-volume
+            emptyDir: {}
+        {%- if is_minikube %}
+        affinity: {}
+        tolerations: []
+        {%- else %}
+        affinity:
+          nodeAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+              nodeSelectorTerms:
+                - matchExpressions:
+                    - key: workload-type
+                      operator: In
+                      values:
+                        - ray
+                    - key: instance-type
+                      operator: In
+                      values:
+                        - on-demand
+        tolerations:
+          - key: workload-type
+            operator: Equal
+            value: ray
+            effect: NoSchedule
+          - key: instance-type
+            operator: Equal
+            value: on-demand
+            effect: NoSchedule
+        {%- endif %}
+      metadata:
+        labels:
+          ray-cluster-name: {{ cluster_name }}
+          user-id: {{ user_id }}
+  {% endfor %}

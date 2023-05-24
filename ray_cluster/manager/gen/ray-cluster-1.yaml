@@ -1,0 +1,118 @@
+apiVersion: ray.io/v1alpha1
+kind: RayCluster
+metadata:
+  labels:
+    ray-cluster-name: test-ray-cluster
+    user-id: 1
+  name: test-ray-cluster
+spec:
+  rayVersion: 2.3.1
+  enableInTreeAutoscaling: False
+  autoscalerOptions:
+    upscalingMode: Default
+    idleTimeoutSeconds: 60
+  headGroupSpec:
+    serviceType: ClusterIP
+    rayStartParams:
+      num-cpus: '0' # to disable task scheduling on head node
+      port: '6379'
+      dashboard-host: '0.0.0.0'
+      block: 'true'
+    template:
+      spec:
+        containers:
+          - volumeMounts:
+              - mountPath: /tmp/ray
+                name: log-volume
+            name: ray-head
+            image: ray-with-svoe-deps:ray2.3.1-py310-aarch64-1
+            imagePullPolicy: Never
+            resources:
+              limits:
+                cpu: 1
+                memory: 3Gi
+              requests:
+                cpu: 1
+                memory: 3Gi
+            env:
+              - name: MY_POD_IP
+                valueFrom:
+                  fieldRef:
+                    fieldPath: status.podIP
+            envFrom:
+              - secretRef:
+                  name: ray-mysql-secret
+              - secretRef:
+                  name: ray-aws-creds-secret
+            ports:
+              - containerPort: 80
+                protocol: TCP
+        volumes:
+          - name: log-volume
+            emptyDir: {}
+        affinity: {}
+        tolerations: []
+      metadata:
+        labels:
+          ray-cluster-name: test-ray-cluster
+          user-id: 1
+  workerGroupSpecs:
+  - rayStartParams:
+      resources: '"{"worker_size_small": 9999999, "instance_on_demand": 9999999}"'
+      node-ip-address: $MY_POD_IP
+      redis-password: LetMeInRay
+      block: 'true'
+    replicas: 3
+    minReplicas: 0
+    maxReplicas: 3
+    groupName: workers
+    template:
+      spec:
+        containers:
+          - volumeMounts:
+              - mountPath: /tmp/ray
+                name: log-volume
+            name: ray-worker
+            image: ray-with-svoe-deps:ray2.3.1-py310-aarch64-1
+            imagePullPolicy: Never
+            resources:
+              limits:
+                cpu: 1
+                memory: 3Gi
+              requests:
+                cpu: 1
+                memory: 3Gi
+            env:
+              - name: MY_POD_IP
+                valueFrom:
+                  fieldRef:
+                    fieldPath: status.podIP
+              - name: RAY_DISABLE_DOCKER_CPU_WARNING
+                value: '1'
+              - name: CPU_REQUEST
+                valueFrom:
+                  resourceFieldRef:
+                    containerName: ray-worker
+                    resource: requests.cpu
+              - name: MY_POD_NAME
+                valueFrom:
+                  fieldRef:
+                    fieldPath: metadata.name
+            envFrom:
+              - secretRef:
+                  name: ray-mysql-secret
+              - secretRef:
+                  name: ray-aws-creds-secret
+            ports:
+              - containerPort: 80
+                protocol: TCP
+        volumes:
+          - name: log-volume
+            emptyDir: {}
+        affinity: {}
+        tolerations: []
+      metadata:
+        labels:
+          ray-cluster-name: test-ray-cluster
+          user-id: 1
+  
