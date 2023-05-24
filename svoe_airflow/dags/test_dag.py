@@ -3,7 +3,7 @@ from airflow import DAG
 from airflow.operators.python import PythonOperator
 
 def print_hello():
-    return 'Hello world from first Airflow DAG!'
+    return 'Hello world from frst Airflow DAG!'
 
 dag = DAG('hello_world', description='Hello World DAG',
           schedule_interval='0 12 * * *',

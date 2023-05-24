@@ -13,15 +13,10 @@ image:
   pullPolicy: IfNotPresent
   {{ end }}
 
-nameOverride: "kuberay"
-headServiceSuffix: "ray-operator.svc"
 service:
   type: ClusterIP
-  port: 8080
 
 head:
-  groupName: headgroup
-  replicas: 1
   labels:
     key: value
   rayStartParams:
