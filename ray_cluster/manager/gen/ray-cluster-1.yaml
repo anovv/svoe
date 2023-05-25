@@ -3,7 +3,7 @@ kind: RayCluster
 metadata:
   labels:
     ray-cluster-name: test-ray-cluster
-    user-id: 1
+    user-id: '1'
   name: test-ray-cluster
 spec:
   rayVersion: 2.3.1
@@ -45,8 +45,16 @@ spec:
               - secretRef:
                   name: ray-aws-creds-secret
             ports:
-              - containerPort: 80
-                protocol: TCP
+              - containerPort: 6379
+                name: gcs
+              - containerPort: 8265
+                name: dashboard
+              - containerPort: 10001
+                name: client
+            lifecycle:
+              preStop:
+                exec:
+                  command: [ "/bin/sh","-c","ray stop" ]
         volumes:
           - name: log-volume
             emptyDir: {}
@@ -55,10 +63,10 @@ spec:
       metadata:
         labels:
           ray-cluster-name: test-ray-cluster
-          user-id: 1
+          user-id: '1'
   workerGroupSpecs:
   - rayStartParams:
-      resources: '"{"worker_size_small": 9999999, "instance_on_demand": 9999999}"'
+      resources: '"{\"worker_size_small\": 9999999, \"instance_on_demand\": 9999999}"'
       node-ip-address: $MY_POD_IP
       redis-password: LetMeInRay
       block: 'true'
@@ -103,9 +111,10 @@ spec:
                   name: ray-mysql-secret
               - secretRef:
                   name: ray-aws-creds-secret
-            ports:
-              - containerPort: 80
-                protocol: TCP
+            lifecycle:
+              preStop:
+                exec:
+                  command: [ "/bin/sh","-c","ray stop" ]
         volumes:
           - name: log-volume
             emptyDir: {}
@@ -114,5 +123,5 @@ spec:
       metadata:
         labels:
           ray-cluster-name: test-ray-cluster
-          user-id: 1
+          user-id: '1'
   

@@ -17,8 +17,6 @@ service:
   type: ClusterIP
 
 head:
-  labels:
-    key: value
   rayStartParams:
     num-cpus: '0' # to disable task scheduling on head node
     port: '6379'
@@ -132,9 +130,6 @@ worker:
     requests:
       cpu: 800m
       memory: 3Gi
-  annotations:
-    key: value
-  nodeSelector: {}
   {{ if (eq .Values.clusterType "minikube") }}
   affinity: {}
   tolerations: []
@@ -218,7 +213,6 @@ additionalWorkerGroups:
       requests:
         cpu: 800m
         memory: 7Gi
-    nodeSelector: {}
     {{ if (eq .Values.clusterType "minikube") }}
     affinity: {}
     tolerations: []

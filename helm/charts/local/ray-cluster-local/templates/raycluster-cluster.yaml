@@ -98,7 +98,7 @@ spec:
         {{ $key }}: {{ $val | quote }}
       {{- end }}
     {{- end }}
-    replicas: {{ $values.replicas }}
+      replicas: {{ $values.replicas }}
     minReplicas: {{ $values.minReplicas | default (default 1 $values.miniReplicas) }}
     maxReplicas: {{ $values.maxReplicas | default (default 2147483647 $values.maxiReplicas) }}
     groupName: {{ $groupName }}

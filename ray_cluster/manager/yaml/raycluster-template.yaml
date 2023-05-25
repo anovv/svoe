@@ -50,8 +50,16 @@ spec:
               - secretRef:
                   name: ray-aws-creds-secret
             ports:
-              - containerPort: 80
-                protocol: TCP
+              - containerPort: 6379
+                name: gcs
+              - containerPort: 8265
+                name: dashboard
+              - containerPort: 10001
+                name: client
+            lifecycle:
+              preStop:
+                exec:
+                  command: [ "/bin/sh","-c","ray stop" ]
         volumes:
           - name: log-volume
             emptyDir: {}
@@ -139,9 +147,10 @@ spec:
                   name: ray-mysql-secret
               - secretRef:
                   name: ray-aws-creds-secret
-            ports:
-              - containerPort: 80
-                protocol: TCP
+            lifecycle:
+              preStop:
+                exec:
+                  command: [ "/bin/sh","-c","ray stop" ]
         volumes:
           - name: log-volume
             emptyDir: {}
