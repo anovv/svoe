@@ -3,7 +3,7 @@ import uvicorn
 import json, typing
 from starlette.responses import Response
 
-from ray_cluster.manager.manager import RayClusterManager
+from manager import RayClusterManager, RayClusterConfig
 
 
 class PrettyJSONResponse(Response):
@@ -40,6 +40,11 @@ def delete_cluster(name: str):
     deleted = ray_cluster_manager.delete_ray_cluster(name)
     return {'result': deleted}
 
+
+@app.post('/cluster/',  response_class=PrettyJSONResponse)
+def create_cluster(config: RayClusterConfig):
+    created = ray_cluster_manager.create_ray_cluster(config)
+    return {'result': created}
 
 if __name__ == '__main__':
     uvicorn.run(app, host='0.0.0.0', port=1228, log_level='info')

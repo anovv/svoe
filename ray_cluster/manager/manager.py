@@ -1,6 +1,6 @@
 import logging
 import time
-from typing import Dict, Tuple, List, Any
+from typing import Dict, List, Any
 
 import kubernetes
 import yaml
@@ -40,14 +40,43 @@ class RayClusterConfig(BaseModel):
 
 class RayClusterManager:
 
-    # TODO kuberay/clients/python-client/python_client/kuberay_cluster_api.py has similar stuff but not packaged
-    # https://github.com/ray-project/kuberay/blob/master/clients/python-client/python_client_test/test_api.py
+    # kuberay/clients/python-client/python_client/kuberay_cluster_api.py has similar stuff but not packaged
 
     def __init__(self, kube_ctx: str):
         kubernetes.config.load_kube_config(context=kube_ctx)
         self.custom_objects_api = kubernetes.client.CustomObjectsApi()
 
-    def template_ray_cluster_crd(
+    def ray_cluster_crd(self, config: RayClusterConfig):
+        worker_groups_dicts = [c.dict() for c in config.worker_groups]
+        # make ray_resources str representation from dict
+        for w in worker_groups_dicts:
+            ray_resources_dict = w['ray_resources']
+            # '"{\"worker_size_small\": 9999999, \"instance_on_demand\": 9999999}"'
+            ray_resources_str = '\'"{\\"'
+            for k in ray_resources_dict:
+                v = ray_resources_dict[k]
+                ray_resources_str += str(k)
+                ray_resources_str += '\\":'
+                ray_resources_str += str(v)
+                ray_resources_str += ', \\"'
+
+            # remove last ', \"'
+            ray_resources_str = ray_resources_str[:-4]
+            ray_resources_str += '}"\''
+            w['ray_resources'] = ray_resources_str
+            # w['ray_resources'] = '\'"{\\"worker_size_small\\": 9999999, \\"instance_on_demand\\": 9999999}"\''
+
+        return self._template_ray_cluster_crd(
+            user_id=config.user_id,
+            cluster_name=config.cluster_name,
+            is_minikube=config.is_minikube, # TODO should this be part of config?
+            enable_autoscaling=config.enable_autoscaling,
+            head_cpu=config.head_cpu,
+            head_memory=config.head_memory,
+            worker_groups=worker_groups_dicts
+        )
+
+    def _template_ray_cluster_crd(
         self,
         user_id: str,
         cluster_name: str,
@@ -56,7 +85,7 @@ class RayClusterManager:
         head_cpu: float,
         head_memory: str,
         worker_groups: List[Dict],
-    ):
+    ) -> Dict:
         crd = Template(open(RAYCLUSTER_TEMPLATE_PATH, 'r').read()).render(
             user_id=f'\'{user_id}\'',
             cluster_name=cluster_name,

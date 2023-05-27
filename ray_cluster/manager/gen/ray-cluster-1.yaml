@@ -29,10 +29,10 @@ spec:
             imagePullPolicy: Never
             resources:
               limits:
-                cpu: 1
+                cpu: 1.0
                 memory: 3Gi
               requests:
-                cpu: 1
+                cpu: 1.0
                 memory: 3Gi
             env:
               - name: MY_POD_IP
@@ -66,7 +66,7 @@ spec:
           user-id: '1'
   workerGroupSpecs:
   - rayStartParams:
-      resources: '"{\"worker_size_small\": 9999999, \"instance_on_demand\": 9999999}"'
+      resources: '"{\"worker_size_small\":9999999, \"instance_on_demand\":9999999}"'
       node-ip-address: $MY_POD_IP
       redis-password: LetMeInRay
       block: 'true'
@@ -85,10 +85,10 @@ spec:
             imagePullPolicy: Never
             resources:
               limits:
-                cpu: 1
+                cpu: 1.0
                 memory: 3Gi
               requests:
-                cpu: 1
+                cpu: 1.0
                 memory: 3Gi
             env:
               - name: MY_POD_IP
