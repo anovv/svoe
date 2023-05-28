@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: apiserver-deployment
+spec:
+  selector:
+    matchLabels:
+      app: apiserver
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: apiserver
+    spec:
+      containers:
+      - name: apiserver
+        image: nginx:1.14.2 # TODO this is for debug
+        ports:
+        - containerPort: 1228

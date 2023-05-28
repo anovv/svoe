@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: apiserver-svc
+  labels:
+    name: apiserver-svc
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      protocol: TCP
+      port: 1228
+      targetPort: 1228
+  selector:
+    app: apiserver

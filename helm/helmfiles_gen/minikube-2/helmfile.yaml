@@ -135,6 +135,11 @@ releases:
     namespace: airflow
     values:
       - ../../values/apache-airflow/airflow/values.yaml.gotmpl
+  - chart: ../../charts/local/apiserver
+    name: apiserver
+    namespace: apiserver
+    values:
+      - ../../values/local/apiserver/values.yaml.gotmpl
 repositories:
   - name: metrics-server
     url: https://kubernetes-sigs.github.io/metrics-server/
