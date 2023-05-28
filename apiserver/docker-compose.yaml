@@ -1,0 +1,17 @@
+services:
+  apiserver:
+    image: apiserver_dev:latest
+    container_name: apiserver
+    build:
+      context: .
+      dockerfile: Dockerfile-dev
+    volumes:
+      - ~/IdeaProjects/svoe/apiserver:/code/apiserver/
+      - ~/IdeaProjects/svoe/ray_cluster/manager/:/code/ray_cluster/manager/
+      - ~/.kube/config:/root/.kube/config
+      - /Users/anov/.minikube/:/Users/anov/.minikube/
+    network_mode: "host"
+    ports:
+      - '1228:1228'
+    expose:
+      - 1228

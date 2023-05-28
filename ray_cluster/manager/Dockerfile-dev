@@ -1,8 +1,0 @@
-FROM python:3.10
-WORKDIR /code
-COPY ./requirements.txt /code/requirements.txt
-RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
-
-# we assume all app code is in mounted volume
-# hence this image should be run with docker run -v $(pwd):/code -it apiserver_dev:latest
-CMD ["python", "apiserver.py"]

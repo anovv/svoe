@@ -2,8 +2,9 @@ from fastapi import FastAPI
 import uvicorn
 import json, typing
 from starlette.responses import Response
+import requests
 
-from manager import RayClusterManager, RayClusterConfig
+from ray_cluster.manager.manager import RayClusterManager, RayClusterConfig
 
 
 class PrettyJSONResponse(Response):
@@ -19,8 +20,10 @@ class PrettyJSONResponse(Response):
         ).encode("utf-8")
 
 
+# print(requests.get('https://kubernetes.default'))
+
 app = FastAPI()
-ray_cluster_manager = RayClusterManager('minikube-1')
+ray_cluster_manager = RayClusterManager()
 
 
 @app.get('/clusters', response_class=PrettyJSONResponse)

@@ -1,0 +1,10 @@
+FROM python:3.10
+WORKDIR /code/apiserver/
+COPY requirements.txt /code/apiserver/requirements.txt
+RUN pip install --no-cache-dir --upgrade -r /code/apiserver/requirements.txt
+WORKDIR /code
+
+ENV PYTHONPATH "${PYTHONPATH}:/code/ray_cluster/manager/"
+
+# we assume all app code is in mounted volume, see docker-compose.yaml
+CMD ["python", "apiserver/apiserver.py"]

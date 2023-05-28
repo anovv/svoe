@@ -1,4 +1,5 @@
 import logging
+import os
 import time
 from typing import Dict, List, Any
 
@@ -42,8 +43,17 @@ class RayClusterManager:
 
     # kuberay/clients/python-client/python_client/kuberay_cluster_api.py has similar stuff but not packaged
 
-    def __init__(self, kube_ctx: str):
-        kubernetes.config.load_kube_config(context=kube_ctx)
+    def __init__(self):
+        if os.getenv('KUBERNETES_SERVICE_HOST'):
+            # running inside kubernetes
+            kubernetes.config.load_incluster_config()
+        else:
+            kubernetes.config.load_kube_config()
+
+        configuration = kubernetes.client.Configuration()
+        configuration.verify_ssl = False
+        # print(configuration)
+        # raise
         self.custom_objects_api = kubernetes.client.CustomObjectsApi()
 
     def ray_cluster_crd(self, config: RayClusterConfig):
