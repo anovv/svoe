@@ -1,6 +1,7 @@
 import unittest
 
-from ray_cluster.manager.manager import RayClusterManager, RayClusterConfig, RayClusterWorkerGroupConfig
+from apiserver.apiserver import RayClusterWorkerGroupConfig, RayClusterConfig
+from ray_cluster.manager.manager import RayClusterManager
 
 
 class TestRayClusterManager(unittest.TestCase):
@@ -10,7 +11,7 @@ class TestRayClusterManager(unittest.TestCase):
     # https://github.com/ray-project/kuberay/pull/1060/files
 
     def test(self):
-        manager = RayClusterManager('minikube-1')
+        manager = RayClusterManager()
         config = RayClusterConfig(
             user_id='1',
             cluster_name='test-ray-cluster',
@@ -28,11 +29,10 @@ class TestRayClusterManager(unittest.TestCase):
                 ray_resources={'worker_size_small': 9999999, 'instance_on_demand': 9999999}
             )]
         )
-        crd = manager.ray_cluster_crd(config)
-        res = manager.create_ray_cluster(crd)
+        res, err = manager.create_ray_cluster(config)
         # res = manager.delete_ray_cluster('test-ray-cluster')
         # res = manager.list_ray_clusters()
-        print(res)
+        print(res, err)
 
         # print(api.get_cluster_info('test-ray-cluster'))
 

@@ -1,42 +1,26 @@
 import logging
 import os
 import time
-from typing import Dict, List, Any
+from typing import Dict, List, Any, Tuple, Optional
 
 import kubernetes
 import yaml
 from jinja2 import Template
 from kubernetes.client import ApiException
-from pydantic import BaseModel
+
+from apiserver.apiserver import RayClusterConfig
+
+__location__ = os.path.realpath(
+    os.path.join(os.getcwd(), os.path.dirname(__file__)))
 
 GROUP = "ray.io"
 VERSION = "v1alpha1"
 PLURAL = "rayclusters"
 KIND = "RayCluster"
-RAYCLUSTER_TEMPLATE_PATH = 'yaml/raycluster-template.yaml'
+RAYCLUSTER_TEMPLATE_PATH = f'{__location__}/yaml/raycluster-template.yaml'
 RAY_NAMESPACE = 'ray-system' # TODO separate namespace for clusters?
 
 log = logging.getLogger(__name__)
-
-
-class RayClusterWorkerGroupConfig(BaseModel):
-    group_name: str
-    replicas: int
-    min_replicas: int
-    max_replicas: int
-    cpu: float
-    memory: str
-    ray_resources: Dict
-
-
-class RayClusterConfig(BaseModel):
-    user_id: str
-    cluster_name: str
-    is_minikube: bool
-    enable_autoscaling: bool
-    head_cpu: float
-    head_memory: str
-    worker_groups: List[RayClusterWorkerGroupConfig]
 
 
 class RayClusterManager:
@@ -56,7 +40,7 @@ class RayClusterManager:
         # raise
         self.custom_objects_api = kubernetes.client.CustomObjectsApi()
 
-    def ray_cluster_crd(self, config: RayClusterConfig):
+    def _ray_cluster_crd(self, config: RayClusterConfig):
         worker_groups_dicts = [c.dict() for c in config.worker_groups]
         # make ray_resources str representation from dict
         for w in worker_groups_dicts:
@@ -112,7 +96,7 @@ class RayClusterManager:
         #     outfile.write(crd)
         return yaml.safe_load(crd)
 
-    def list_ray_clusters(self, label_selector: str = '') -> Any:
+    def list_ray_clusters(self, label_selector: str = '') -> Tuple[Any, Optional[str]]:
         try:
             resource: Any = self.custom_objects_api.list_namespaced_custom_object(
                 group=GROUP,
@@ -122,17 +106,19 @@ class RayClusterManager:
                 label_selector=label_selector,
             )
             if "items" in resource:
-                return resource
-            return None
+                return resource, None
+            return None, '"items" field is not in response'
         except ApiException as e:
             if e.status == 404:
-                log.error("raycluster resource is not found. error = {}".format(e))
-                return None
+                err = "raycluster resource is not found. error = {}".format(e)
+                log.error(err)
+                return None, err
             else:
-                log.error("error fetching custom resource: {}".format(e))
-                return None
+                err = "error fetching custom resource: {}".format(e)
+                log.error(err)
+                return None, err
 
-    def get_ray_cluster(self, name: str) -> Any:
+    def get_ray_cluster(self, name: str) -> Tuple[Any, Optional[str]]:
         try:
             resource: Any = self.custom_objects_api.get_namespaced_custom_object(
                 group=GROUP,
@@ -141,16 +127,18 @@ class RayClusterManager:
                 name=name,
                 namespace=RAY_NAMESPACE,
             )
-            return resource
+            return resource, None
         except ApiException as e:
             if e.status == 404:
-                log.error("raycluster resource is not found. error = {}".format(e))
-                return None
+                err = "raycluster resource is not found. error = {}".format(e)
+                log.error(err)
+                return None, err
             else:
-                log.error("error fetching custom resource: {}".format(e))
-                return None
+                err = "error fetching custom resource: {}".format(e)
+                log.error(err)
+                return None, err
 
-    def get_ray_cluster_status(self, name: str, timeout: int = 60, delay_between_attempts: int = 5) -> Any:
+    def get_ray_cluster_status(self, name: str, timeout: int = 60, delay_between_attempts: int = 5) -> Tuple[Any, Optional[str]]:
         while timeout > 0:
             try:
                 resource: Any = self.custom_objects_api.get_namespaced_custom_object_status(
@@ -162,22 +150,25 @@ class RayClusterManager:
                 )
             except ApiException as e:
                 if e.status == 404:
-                    log.error("raycluster resource is not found. error = {}".format(e))
-                    return None
+                    err = "raycluster resource is not found. error = {}".format(e)
+                    log.error(err)
+                    return None, err
                 else:
-                    log.error("error fetching custom resource: {}".format(e))
-                    return None
+                    err = "error fetching custom resource: {}".format(e)
+                    log.error(err)
+                    return None, err
 
             if resource["status"]:
-                return resource["status"]
+                return resource["status"], None
             else:
 
                 log.info("raycluster {} status not set yet, waiting...".format(name))
                 time.sleep(delay_between_attempts)
                 timeout -= delay_between_attempts
 
-        log.info("raycluster {} status not set yet, timing out...".format(name))
-        return None
+        err = "raycluster {} status not set yet, timing out...".format(name)
+        log.info(err)
+        return None, err
 
     def wait_until_ray_cluster_running(self, name: str, timeout: int = 60, delay_between_attempts: int = 5) -> bool:
         status = self.get_ray_cluster_status(name, timeout, delay_between_attempts)
@@ -190,27 +181,33 @@ class RayClusterManager:
             "state"] if status else "unknown"))
         return False
 
-    def create_ray_cluster(self, body: Any) -> bool:
+    def create_ray_cluster(self, config: RayClusterConfig) -> Tuple[bool, Optional[str]]:
+        try:
+            crd = self._ray_cluster_crd(config)
+        except Exception as e:
+            err = f'Unable to create crd from given RayClusterConfig: {e}'
+            log.error(err)
+            return False, err
         try:
             self.custom_objects_api.create_namespaced_custom_object(
                 group=GROUP,
                 version=VERSION,
                 plural=PLURAL,
-                body=body,
+                body=crd,
                 namespace=RAY_NAMESPACE,
             )
-            return True
+            return True, None
         except ApiException as e:
             if e.status == 409:
-                log.error(
-                    "raycluster resource already exists. error = {}".format(e.reason)
-                )
-                return False
+                err = "raycluster resource already exists. error = {}".format(e.reason)
+                log.error(err)
+                return False, err
             else:
-                log.error("error creating custom resource: {}".format(e))
-                return False
+                err = "error creating custom resource: {}".format(e)
+                log.error(err)
+                return False, err
 
-    def delete_ray_cluster(self, name: str) -> bool:
+    def delete_ray_cluster(self, name: str) -> Tuple[bool, Optional[str]]:
         try:
             self.custom_objects_api.delete_namespaced_custom_object(
                 group=GROUP,
@@ -219,24 +216,19 @@ class RayClusterManager:
                 name=name,
                 namespace=RAY_NAMESPACE,
             )
-            return True
+            return True, None
         except ApiException as e:
             if e.status == 404:
-                log.error(
-                    "raycluster custom resource is not found. error = {}".format(
-                        e.reason
-                    )
-                )
-                return False
+                err = "raycluster custom resource is not found. error = {}".format(e.reason)
+                log.error(err)
+                return False, err
             else:
-                log.error(
-                    "error deleting the raycluster custom resource: {}".format(e.reason)
-                )
-                return False
+                err = "error deleting the raycluster custom resource: {}".format(e.reason)
+                log.error(err)
+                return False, err
 
-    def patch_ray_cluster(self, name: str, ray_patch: Any) -> bool:
+    def patch_ray_cluster(self, name: str, ray_patch: Any) -> Tuple[bool, Optional[str]]:
         try:
-            # we patch the existing raycluster with the new config
             self.custom_objects_api.patch_namespaced_custom_object(
                 group=GROUP,
                 version=VERSION,
@@ -246,9 +238,8 @@ class RayClusterManager:
                 namespace=RAY_NAMESPACE,
             )
         except ApiException as e:
-            log.error("raycluster `{}` failed to patch, with error: {}".format(name, e))
-            return False
-        else:
-            log.info("raycluster `%s` is patched successfully", name)
+            err = "raycluster `{}` failed to patch, with error: {}".format(name, e)
+            log.error(err)
+            return False, err
 
-        return True
+        return True, None
