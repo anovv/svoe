@@ -1,7 +1,5 @@
 #!/bin/bash
 
-# TODO this script is invoked from python and expects single json string output hence no extra echoes
-
 if ! [[ -n "$1" ]]; then
   echo "Need to pass dag name"
   exit 0
