@@ -8,8 +8,6 @@ import yaml
 from jinja2 import Template
 from kubernetes.client import ApiException
 
-from apiserver.apiserver import RayClusterConfig
-
 __location__ = os.path.realpath(
     os.path.join(os.getcwd(), os.path.dirname(__file__)))
 
@@ -34,13 +32,9 @@ class RayClusterManager:
         else:
             kubernetes.config.load_kube_config()
 
-        configuration = kubernetes.client.Configuration()
-        configuration.verify_ssl = False
-        # print(configuration)
-        # raise
         self.custom_objects_api = kubernetes.client.CustomObjectsApi()
 
-    def _ray_cluster_crd(self, config: RayClusterConfig):
+    def _ray_cluster_crd(self, config: 'RayClusterConfig'):
         worker_groups_dicts = [c.dict() for c in config.worker_groups]
         # make ray_resources str representation from dict
         for w in worker_groups_dicts:
@@ -170,18 +164,18 @@ class RayClusterManager:
         log.info(err)
         return None, err
 
-    def wait_until_ray_cluster_running(self, name: str, timeout: int = 60, delay_between_attempts: int = 5) -> bool:
-        status = self.get_ray_cluster_status(name, timeout, delay_between_attempts)
+    # def wait_until_ray_cluster_running(self, name: str, timeout: int = 60, delay_between_attempts: int = 5) -> bool:
+    #     status = self.get_ray_cluster_status(name, timeout, delay_between_attempts)
+    #
+    #     # TODO: once we add State to Status, we should check for that as well  <if status and status["state"] == "Running":>
+    #     if status and status["head"] and status["head"]["serviceIP"]:
+    #         return True
+    #
+    #     log.info("raycluster {} status is not running yet, current status is {}".format(name, status[
+    #         "state"] if status else "unknown"))
+    #     return False
 
-        # TODO: once we add State to Status, we should check for that as well  <if status and status["state"] == "Running":>
-        if status and status["head"] and status["head"]["serviceIP"]:
-            return True
-
-        log.info("raycluster {} status is not running yet, current status is {}".format(name, status[
-            "state"] if status else "unknown"))
-        return False
-
-    def create_ray_cluster(self, config: RayClusterConfig) -> Tuple[bool, Optional[str]]:
+    def create_ray_cluster(self, config: 'RayClusterConfig') -> Tuple[bool, Optional[str]]:
         try:
             crd = self._ray_cluster_crd(config)
         except Exception as e:

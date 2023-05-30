@@ -4,6 +4,9 @@ INTERNAL_BASE_URL = 'http://apiserver-svc.apiserver:1228'
 
 log = logging.getLogger(__name__)
 
+# for OpenAPI client codegen:
+# https://github.com/openapi-generators/openapi-python-client
+
 
 class BaseClient:
 

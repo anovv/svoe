@@ -1,15 +1,12 @@
-import logging
+import time
 from typing import Any
 
 from client.base_client import BaseClient
 from client.ray_cluster_manager.fast_api_client import Client
 from client.ray_cluster_manager.fast_api_client.api.default import create_cluster_cluster_post, \
-    delete_cluster_cluster_name_delete
+    delete_cluster_cluster_name_delete, list_clusters_clusters_get, get_cluster_status_cluster_status_name_get
 from client.ray_cluster_manager.fast_api_client.models import RayClusterConfig, RayClusterWorkerGroupConfig, \
-    RayClusterWorkerGroupConfigRayResources
-
-
-log = logging.getLogger(__name__)
+    RayClusterWorkerGroupConfigRayResources, Resp
 
 
 class RayClusterManagerClient(BaseClient):
@@ -25,33 +22,50 @@ class RayClusterManagerClient(BaseClient):
         )
 
     def create_ray_cluster(self, config: RayClusterConfig) -> bool:
-        resp = create_cluster_cluster_post.sync(client=self.client, json_body=config)
-        if resp['result']:
-            return True
-        else:
-            log.info(resp['error'])
-            return False
+        return bool(self._parse_and_log_error(Resp.from_dict(
+            create_cluster_cluster_post.sync(client=self.client, json_body=config)
+        )))
 
     def delete_ray_cluster(self, name: str) -> bool:
-        resp = delete_cluster_cluster_name_delete.sync(client=self.client, name=name)
-        if resp['result']:
-            return True
-        else:
-            log.info(resp['error'])
-            return False
+        return bool(self._parse_and_log_error(Resp.from_dict(
+            delete_cluster_cluster_name_delete.sync(client=self.client, name=name)
+        )))
 
     # TODO pass label_selector
     def list_ray_clusters(self) -> Any:
-        # TODO
-        return None
+        return self._parse_and_log_error(Resp.from_dict(
+            list_clusters_clusters_get.sync(client=self.client)
+        ))
 
     def get_ray_cluster_status(self, name: str) -> Any:
-        # TODO
-        return None
+        return self._parse_and_log_error(Resp.from_dict(
+            get_cluster_status_cluster_status_name_get.sync(client=self.client, name=name)
+        ))
 
-    def wait_for_cluster_ready(self, name: str, timeout_s: 30) -> Any:
-        # TODO
-        return None
+    def wait_until_ray_cluster_running(self, name: str, timeout: int = 60, delay_between_attempts: int = 1) -> bool:
+        status = None
+        while timeout > 0:
+            try:
+                status = self.get_ray_cluster_status(name)
+
+                # TODO: once we add State to Status, we should check for that as well  <if status and status["state"] == "Running":>
+                if status and status["head"] and status["head"]["serviceIP"]:
+                    return True
+            except:
+                print("raycluster {} status not set yet, waiting...".format(name))
+                time.sleep(delay_between_attempts)
+                timeout -= delay_between_attempts
+
+        # TODO log properly
+        print("raycluster {} status is not running yet, current status is {}".format(name, status[
+            "state"] if status else "unknown"))
+        return False
+
+    def _parse_and_log_error(self, resp: Resp) -> Any:
+        if resp.result is None or resp.error is not None:
+            print(resp.error) # TODO log properly
+            return None
+        return resp.result
 
 
 if __name__ == '__main__':
@@ -73,5 +87,9 @@ if __name__ == '__main__':
             ray_resources=RayClusterWorkerGroupConfigRayResources.from_dict({'worker_size_small': 9999999, 'instance_on_demand': 9999999})
         )]
     )
-    # client.create_ray_cluster(config)
+    print(client.delete_ray_cluster('test-ray-cluster'))
+    print(client.create_ray_cluster(config))
+    print(client.wait_until_ray_cluster_running('test-ray-cluster'))
+    print(client.get_ray_cluster_status('test-ray-cluster'))
+    print(client.list_ray_clusters())
     print(client.delete_ray_cluster('test-ray-cluster'))
