@@ -8,6 +8,7 @@ import pandas as pd
 import pytz
 import ray
 
+from featurizer.data_definitions.trades.cryptotick.utils import preprocess_trades_df
 from featurizer.sql.db_actor import DbActor
 from featurizer.data_catalog.common.data_models.models import InputItem
 from featurizer.sql.data_catalog.models import DataCatalog, _construct_s3_path
@@ -36,7 +37,7 @@ def load_split_catalog_store_df(input_item: InputItem, chunk_size_kb: int, date_
         processed_df = preprocess_l2_inc_df(df, date_str)
         gen = gen_split_l2_inc_df_and_pad_with_snapshot(processed_df, chunk_size_kb, split_callback)
     elif data_type == 'trades':
-        processed_df = preprocess_l2_inc_df(df, date_str)
+        processed_df = preprocess_trades_df(df)
         gen = gen_split_df_by_mem(processed_df, chunk_size_kb, split_callback)
     # elif data_type == 'quotes':
     #     processed_df = preprocess_l2_inc_df(df, date_str)

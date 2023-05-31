@@ -6,10 +6,6 @@ import awswrangler as wr
 import boto3.session
 import ray
 
-from featurizer import data_catalog
-import featurizer
-import ray_cluster
-import utils
 from featurizer.data_catalog.pipelines.catalog_cryptotick.util import process_cryptotick_timestamps
 from featurizer.sql.db_actor import DbActor
 from featurizer.data_catalog.common.utils.cryptotick_utils import cryptotick_input_items, CRYPTOTICK_RAW_BUCKET_NAME
@@ -49,8 +45,9 @@ class TestCatalogCryptotickPipeline(unittest.TestCase):
             #     ('limitbook_full/20230203/BINANCE_SPOT_BTC_USDT.csv.gz', 252 * 1024),
             #     ('limitbook_full/20230204/BINANCE_SPOT_BTC_USDT.csv.gz', 252 * 1024),
             # ]
-            # raw_files_and_sizes = [('s3://svoe-cryptotick-data/testing/small_df.parquet.gz', 470)]
-            raw_files_and_sizes = [('trades/20230201/BINANCE_SPOT_BTC_USDT.csv.gz', 228)]
+            # raw_files_and_sizes = [('limitbook_full/20230201/BINANCE_SPOT_BTC_USDT.csv.gz', 252 * 1024))]
+            # raw_files_and_sizes = [('trades/20230201/BINANCE_SPOT_BTC_USDT.csv.gz', 228 * 1024)]
+            raw_files_and_sizes = [('trades/20230202/BINANCE_SPOT_BTC_USDT.csv.gz', 330 * 1024)]
             batches = cryptotick_input_items(raw_files_and_sizes, batch_size)
             max_executing_tasks = 30
             pipeline = CatalogCryptotickPipeline.options(name='CatalogCryptotickPipeline').remote(max_executing_tasks=max_executing_tasks, db_actor=db_actor)
@@ -115,8 +112,8 @@ class TestCatalogCryptotickPipeline(unittest.TestCase):
 
 if __name__ == '__main__':
     t = TestCatalogCryptotickPipeline()
-    # t.test_pipeline()
-    t.test_split_trades_df()
+    t.test_pipeline()
+    # t.test_split_trades_df()
     # t._store_test_df_to_s3()
     # t.test_split_l2_inc_df_and_pad_with_snapshot()
     # t.test_db_client()
