@@ -8,7 +8,7 @@ import pandas as pd
 import pytz
 import ray
 
-from featurizer.sql.db import DbActor
+from featurizer.sql.db_actor import DbActor
 from featurizer.data_catalog.common.data_models.models import InputItem
 from featurizer.sql.data_catalog.models import DataCatalog, _construct_s3_path
 from featurizer.data_definitions.l2_book_incremental.cryptofeed import utils as cryptofeed_l2_utils
@@ -16,24 +16,34 @@ from featurizer.data_definitions.l2_book_incremental.cryptotick import utils as 
 from featurizer.data_definitions.l2_book_incremental.cryptotick.utils import preprocess_l2_inc_df, \
     gen_split_l2_inc_df_and_pad_with_snapshot
 from utils.pandas import df_utils
-
+from utils.pandas.df_utils import gen_split_df_by_mem
 
 
 # TODO set cpu separately when running on aws kuber cluster
 @ray.remote(num_cpus=2, resources={'worker_size_large': 1, 'instance_spot': 1})
-def load_split_catalog_store_l2_inc_df(input_item: InputItem, chunk_size_kb: int, date_str: str, db_actor: DbActor, callback: Optional[Callable] = None) -> Dict:
+def load_split_catalog_store_df(input_item: InputItem, chunk_size_kb: int, date_str: str, db_actor: DbActor, callback: Optional[Callable] = None) -> Dict:
     path = input_item[DataCatalog.path.name]
+    data_type = input_item[DataCatalog.data_type.name]
     t = time.time()
     df = df_utils.load_df(path)
     callback({'name': 'load_finished', 'time': time.time() - t})
     t = time.time()
-    processed_df = preprocess_l2_inc_df(df, date_str)
-    callback({'name': 'preproc_finished', 'time': time.time() - t})
 
     def split_callback(i, t):
         callback({'name': 'split_finished', 'time': t})
 
-    gen = gen_split_l2_inc_df_and_pad_with_snapshot(processed_df, chunk_size_kb, split_callback)
+    if data_type == 'l2_book':
+        processed_df = preprocess_l2_inc_df(df, date_str)
+        gen = gen_split_l2_inc_df_and_pad_with_snapshot(processed_df, chunk_size_kb, split_callback)
+    elif data_type == 'trades':
+        processed_df = preprocess_l2_inc_df(df, date_str)
+        gen = gen_split_df_by_mem(processed_df, chunk_size_kb, split_callback)
+    # elif data_type == 'quotes':
+    #     processed_df = preprocess_l2_inc_df(df, date_str)
+    else:
+        raise ValueError(f'Unknown data_type: {data_type}')
+
+    callback({'name': 'preproc_finished', 'time': time.time() - t})
     catalog_items = []
     split_id = 0
     num_splits = 0

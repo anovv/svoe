@@ -7,10 +7,10 @@ from typing import Dict
 import ray
 from tqdm import tqdm
 
-from featurizer.sql.db import DbActor
+from featurizer.sql.db_actor import DbActor
 from featurizer.data_catalog.common.data_models.models import InputItemBatch
 from featurizer.sql.data_catalog.models import DataCatalog
-from featurizer.data_catalog import load_split_catalog_store_l2_inc_df
+from featurizer.data_catalog.pipelines.catalog_cryptotick.tasks import load_split_catalog_store_df
 
 SPLIT_CHUNK_SIZE_KB = 100 * 1024
 
@@ -156,7 +156,7 @@ class CatalogCryptotickPipeline:
                     actor.update_stats.remote(event, task_id)
 
                 self.results_refs.append(
-                    load_split_catalog_store_l2_inc_df.remote(
+                    load_split_catalog_store_df.remote(
                         item, self.split_chunk_size_kb, item['date'], self.db_actor, functools.partial(callback, task_id=task_id)
                     )
                 )

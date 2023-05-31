@@ -4,14 +4,14 @@ from typing import Optional, List, Tuple, Any, Generator, Callable
 import joblib
 from streamz import Stream
 
+from featurizer.data_catalog.pipelines.catalog_cryptotick.util import process_cryptotick_timestamps
 from featurizer.data_definitions.l2_book_incremental.cryptotick.cryptotick_l2_book_incremental import \
     CryptotickL2BookIncrementalData
 from featurizer.features.definitions.l2_snapshot.l2_snapshot_fd import L2SnapshotFD
 from featurizer.utils.testing_utils import mock_feature
-from utils.pandas.df_utils import is_ts_sorted, concat, gen_split_df_by_mem, get_cached_df, load_df, \
+from utils.pandas.df_utils import concat, gen_split_df_by_mem, get_cached_df, load_df, \
     cache_df_if_needed
 
-import ciso8601
 import pandas as pd
 
 
@@ -36,26 +36,6 @@ def preprocess_l2_inc_df(df: pd.DataFrame, date_str: str) -> pd.DataFrame:
 
     return df
 
-
-def process_cryptotick_timestamps(df: pd.DataFrame, date_str: str) -> pd.DataFrame:
-    # date_str = dd-mm-yyyy '01-02-2023'
-    datetime_str = f'{date_str[6:10]}-{date_str[3:5]}-{date_str[0:2]}T'  # yyyy-mm-dd + 'T'
-
-    def _to_ts(s):
-        return ciso8601.parse_datetime(f'{datetime_str}{s}Z').timestamp()
-
-    df['timestamp'] = df['time_exchange'].map(lambda x: _to_ts(x))
-    df['receipt_timestamp'] = df['time_coinapi'].map(lambda x: _to_ts(x))
-
-    # for some reason raw cryptotick dates are not sorted
-    # don't use inplace=True as it harms perf https://sourcery.ai/blog/pandas-inplace/
-    df = df.sort_values(by=['timestamp'], ignore_index=True)
-    if not is_ts_sorted(df):
-        raise ValueError('Unable to sort df by timestamp')
-
-    df = df.drop(columns=['time_exchange', 'time_coinapi'])
-
-    return df
 
 # TODO split_size_kb == 2*1024 results in update_type == SUB not finding price level in a book?
 #  same for 512

@@ -1,4 +1,5 @@
 import hashlib
+import time
 from pathlib import Path
 
 import awswrangler as wr
@@ -6,7 +7,7 @@ import joblib
 import pandas as pd
 from cache_df import CacheDF
 import functools
-from typing import List, Tuple, Generator, Optional
+from typing import List, Tuple, Generator, Optional, Callable
 
 from matplotlib import pyplot as plt
 
@@ -36,14 +37,15 @@ def load_df(path: str, use_cache: bool = True, cache_dir: str = CACHE_DIR) -> pd
     # hence messing up special characters
 
     # for Python < 3.9
-    def remove_suffix(input_string, suffix):
-        if suffix and input_string.endswith(suffix):
-            return input_string[:-len(suffix)]
-        return input_string
+    # def remove_suffix(input_string, suffix):
+    #     if suffix and input_string.endswith(suffix):
+    #         return input_string[:-len(suffix)]
+    #     return input_string
 
     split = path.split('/')
     suffix = split[len(split) - 1]
-    prefix = remove_suffix(path, suffix)
+    # prefix = remove_suffix(path, suffix)
+    prefix = path.removesuffix(suffix)
     session = get_session()
     if '.csv' in path:
         df = wr.s3.read_csv(path=prefix, path_suffix=suffix, dataset=False, boto3_session=session, delimiter=';')
@@ -151,7 +153,7 @@ def plot_multi(col_names: List[str], df: pd.DataFrame):
 
 
 # TODO typing
-def gen_split_df_by_mem(df: pd.DataFrame, chunk_size_kb: int) -> Generator:
+def gen_split_df_by_mem(df: pd.DataFrame, chunk_size_kb: int, callback: Optional[Callable] = None) -> Generator:
     # split only ts sorted dfs
     if not is_ts_sorted(df):
         raise ValueError('Only ts-sorted dfs can be split')
@@ -168,12 +170,14 @@ def gen_split_df_by_mem(df: pd.DataFrame, chunk_size_kb: int) -> Generator:
 
     start = 0
     while start < num_rows:
+        t = time.time()
         end = min(start + chunk_num_rows, num_rows) - 1
         # move end while we have same ts to make sure we don't split it
         end_ts = df.iloc[end]['timestamp']
         while end < num_rows and df.iloc[end]['timestamp'] == end_ts:
             end += 1
         yield df.iloc[start: end]
+        callback(None, time.time() - t)
         start = end
 
         # TODO return num splits?

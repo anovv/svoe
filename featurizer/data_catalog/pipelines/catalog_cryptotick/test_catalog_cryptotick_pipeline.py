@@ -2,14 +2,17 @@ import functools
 import unittest
 from threading import Thread
 
+import awswrangler as wr
+import boto3.session
 import ray
 
 from featurizer import data_catalog
 import featurizer
 import ray_cluster
 import utils
-from featurizer.sql.db import DbActor
-from featurizer.data_catalog.common.utils.cryptotick.utils import cryptotick_input_items, CRYPTOTICK_RAW_BUCKET_NAME
+from featurizer.data_catalog.pipelines.catalog_cryptotick.util import process_cryptotick_timestamps
+from featurizer.sql.db_actor import DbActor
+from featurizer.data_catalog.common.utils.cryptotick_utils import cryptotick_input_items, CRYPTOTICK_RAW_BUCKET_NAME
 from featurizer.sql.client import MysqlClient
 from featurizer.data_catalog.pipelines.catalog_cryptotick.pipeline import CatalogCryptotickPipeline, poll_to_tqdm
 from featurizer.data_definitions.l2_book_incremental.cryptotick.utils import starts_with_snapshot, remove_snap, \
@@ -28,18 +31,18 @@ class TestCatalogCryptotickPipeline(unittest.TestCase):
         store_df(path=small_df_path, df=small_df)
 
     def test_pipeline(self):
-        # with ray.init(address='auto', ignore_reinit_error=True):
-        with ray.init(
-                address='ray://127.0.0.1:10003',
-                runtime_env={
-                    'py_modules': [featurizer, ray_cluster, data_catalog, utils],
-                    'excludes': ['*s3_svoe.test.1_inventory*']
-                }):
+        with ray.init(address='auto', ignore_reinit_error=True):
+        # with ray.init(
+        #         address='ray://127.0.0.1:10003',
+        #         runtime_env={
+        #             'py_modules': [featurizer, ray_cluster, data_catalog, utils],
+        #             'excludes': ['*s3_svoe.test.1_inventory*']
+        #         }):
             db_actor = DbActor.remote()
             batch_size = 30
             num_batches = 1
-            raw_files_and_sizes = list_files_and_sizes_kb(CRYPTOTICK_RAW_BUCKET_NAME)
-            raw_files_and_sizes = list(filter(lambda e: 'limitbook_full' in e[0], raw_files_and_sizes))
+            # raw_files_and_sizes = list_files_and_sizes_kb(CRYPTOTICK_RAW_BUCKET_NAME)
+            # raw_files_and_sizes = list(filter(lambda e: 'limitbook_full' in e[0], raw_files_and_sizes))
             # raw_files_and_sizes = [
             #     ('limitbook_full/20230201/BINANCE_SPOT_BTC_USDT.csv.gz', 252 * 1024),
             #     ('limitbook_full/20230202/BINANCE_SPOT_BTC_USDT.csv.gz', 252 * 1024),
@@ -47,6 +50,7 @@ class TestCatalogCryptotickPipeline(unittest.TestCase):
             #     ('limitbook_full/20230204/BINANCE_SPOT_BTC_USDT.csv.gz', 252 * 1024),
             # ]
             # raw_files_and_sizes = [('s3://svoe-cryptotick-data/testing/small_df.parquet.gz', 470)]
+            raw_files_and_sizes = [('trades/20230201/BINANCE_SPOT_BTC_USDT.csv.gz', 228)]
             batches = cryptotick_input_items(raw_files_and_sizes, batch_size)
             max_executing_tasks = 30
             pipeline = CatalogCryptotickPipeline.options(name='CatalogCryptotickPipeline').remote(max_executing_tasks=max_executing_tasks, db_actor=db_actor)
@@ -61,6 +65,20 @@ class TestCatalogCryptotickPipeline(unittest.TestCase):
             # wait for everything to process
             ray.get(pipeline.wait_to_finish.remote())
             # TODO assert index was written to db
+
+    def test_split_trades_df(self):
+        path = 's3://svoe-cryptotick-data/trades/20230201/BINANCE_SPOT_BTC_USDT.csv.gz'
+        split = path.split('/')
+        suffix = split[len(split) - 1]
+        # prefix = remove_suffix(path, suffix)
+        prefix = path.removesuffix(suffix)
+        session = boto3.session.Session()
+        gen = wr.s3.read_csv(path=prefix, path_suffix=suffix, dataset=False, boto3_session=session, delimiter=';', chunksize=1024)
+        df = next(gen)
+        print(df.iloc[0])
+        print(df.dtypes)
+        df = process_cryptotick_timestamps(df)
+        print(df.iloc[0])
 
     def test_split_l2_inc_df_and_pad_with_snapshot(self):
         # TODO merge this with stuff in test_calculator
@@ -97,7 +115,8 @@ class TestCatalogCryptotickPipeline(unittest.TestCase):
 
 if __name__ == '__main__':
     t = TestCatalogCryptotickPipeline()
-    t.test_pipeline()
+    # t.test_pipeline()
+    t.test_split_trades_df()
     # t._store_test_df_to_s3()
     # t.test_split_l2_inc_df_and_pad_with_snapshot()
     # t.test_db_client()
