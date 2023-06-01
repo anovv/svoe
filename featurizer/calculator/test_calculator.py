@@ -9,6 +9,7 @@ from featurizer.calculator.tasks import merge_blocks
 from featurizer.api.api import Api, data_key
 from featurizer.data_definitions.l2_book_incremental.cryptotick.cryptotick_l2_book_incremental import CryptotickL2BookIncrementalData
 from featurizer.features.definitions.spread.relative_bid_ask_spread_fd import RelativeBidAskSpreadFD
+from featurizer.features.definitions.tvi.trade_volume_imb_fd import TradeVolumeImbFD
 from featurizer.features.definitions.volatility.volatility_stddev_fd import VolatilityStddevFD
 
 from featurizer.sql.data_catalog.models import DataCatalog
@@ -204,6 +205,55 @@ class TestFeatureCalculator(unittest.TestCase):
         # mdf.plot(x='timestamp', y='mid_price', ax=axes[1])
         #
 
+    def test_tvi(self):
+
+        # df = load_df('s3://svoe-cataloged-data/trades/BINANCE/spot/BTC-USDT/cryptotick/100.0mb/2023-02-01/1675209965-4ea8eeea78da2f99f312377c643e6b491579f852.parquet.gz')
+        # print(df.head())
+        # raise
+
+        api = Api()
+        feature_params = {0: {'window': '1m', 'sampling': '1s'}}
+        data_params = [
+            {DataCatalog.exchange.name: 'BINANCE',
+             DataCatalog.data_type.name: 'trades',
+             DataCatalog.instrument_type.name: 'spot',
+             DataCatalog.symbol.name: 'BTC-USDT'}
+        ]
+        feature_tvi = construct_feature_tree(TradeVolumeImbFD, data_params, feature_params)
+        print(RenderTree(feature_tvi))
+        features = [feature_tvi]
+        data_deps = set()
+        for feature in features:
+            for d in feature.get_data_deps():
+                data_deps.add(d)
+        data_keys = [data_key(d.params) for d in data_deps]
+        start_date = '2023-02-01'
+        end_date = '2023-02-01'
+        ranges_meta_per_data_key = api.get_data_meta(data_keys, start_date=start_date, end_date=end_date)
+        data_ranges_meta = {data: ranges_meta_per_data_key[data_key(data.params)] for data in data_deps}
+
+        stored_features_meta = api.get_features_meta(features, start_date=start_date, end_date=end_date)
+
+        cache = {}
+        features_to_store = []
+        task_graph = C.build_feature_set_task_graph(features, data_ranges_meta, cache, features_to_store,
+                                                    stored_features_meta)
+
+        print(task_graph)
+        res = {}
+
+        with ray.init(address='auto', ignore_reinit_error=True):
+            c = CacheActor.options(name=CACHE_ACTOR_NAME).remote(cache)
+            # res = C.execute_graph_nodes(flattened_task_graph)
+            for feature in features:
+                nodes = []
+                for range_interval in task_graph[feature]:
+                    for interval in task_graph[feature][range_interval]:
+                        nodes.append((feature, task_graph[feature][range_interval][interval]))
+                r = C.execute_graph_nodes(nodes)
+                res[feature] = r[feature]
+            print(res)
+
 
 if __name__ == '__main__':
     # unittest.main()
@@ -216,7 +266,8 @@ if __name__ == '__main__':
     # t.test_cryptotick_l2_snap_feature_online()
     # t.test_cryptotick_l2_snap_feature_offline()
     # t.test_l2_cryptotick_data()
-    t.test_cryptotick_midprice_feature_offline()
+    # t.test_cryptotick_midprice_feature_offline()
+    t.test_tvi()
     # t.test_feature_label_set_cryptotick()
 
 

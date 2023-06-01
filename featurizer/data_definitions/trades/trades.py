@@ -1,5 +1,5 @@
 from collections import OrderedDict
-from typing import Tuple, List
+from typing import Tuple, List, Dict
 
 from pandas import DataFrame
 
@@ -15,8 +15,8 @@ class TradesData(DataSourceDefinition):
         return {
             'timestamp': float,
             'receipt_timestamp': float,
-            # TODO make it a list of dicts
-            'trades': List[Tuple[str, float, float, str, str]]# side, amount, price, order_type, id
+            # TODO make it a list of dataclasses?
+            'trades': List[Dict] # side, amount, price, id
         }
 
     @classmethod
@@ -33,7 +33,7 @@ class TradesData(DataSourceDefinition):
             df_dict = df.to_dict(orient='index', into=OrderedDict)  # TODO use df.values.tolist() instead and check perf?
             trades = []
             for v in df_dict.values():
-                trades.append((v['side'], v['amount'], v['price'], v['order_type'], v['id']))
+                trades.append({k: v[k] for k in ['side', 'amount', 'price', 'id']})
             events.append(cls.construct_event(timestamp, receipt_timestamp, trades))
 
         return events

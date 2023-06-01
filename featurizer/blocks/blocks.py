@@ -101,7 +101,7 @@ def windowed_grouping(ranges: List[BlockMeta], window: str) -> IntervalDict:
         windowed_blocks = [ranges[i]]
         # look back until window limit is reached
         j = i - 1
-        while j >= 0 and ranges[i]['start_ts'] - ranges[j]['end_ts'] <= convert_str_to_seconds(window):
+        while j >= 0 and float(ranges[i]['start_ts']) - float(ranges[j]['end_ts']) <= convert_str_to_seconds(window):
             windowed_blocks.append(ranges[j])
             j -= 1
         res[meta_to_interval(ranges[i])] = windowed_blocks
