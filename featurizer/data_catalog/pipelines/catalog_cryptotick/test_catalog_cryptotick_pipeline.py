@@ -37,8 +37,12 @@ class TestCatalogCryptotickPipeline(unittest.TestCase):
             db_actor = DbActor.remote()
             batch_size = 30
             num_batches = 1
-            # raw_files_and_sizes = list_files_and_sizes_kb(CRYPTOTICK_RAW_BUCKET_NAME)
+            raw_files_and_sizes = list_files_and_sizes_kb(CRYPTOTICK_RAW_BUCKET_NAME)
             # raw_files_and_sizes = list(filter(lambda e: 'limitbook_full' in e[0], raw_files_and_sizes))
+            # print([e[1] for e in raw_files_and_sizes])
+            raw_files_and_sizes = list(filter(lambda e: 'quotes' in e[0] and e[1] < 100 * 1024, raw_files_and_sizes))
+            print(len(raw_files_and_sizes))
+            raise
             # raw_files_and_sizes = [
             #     ('limitbook_full/20230201/BINANCE_SPOT_BTC_USDT.csv.gz', 252 * 1024),
             #     ('limitbook_full/20230202/BINANCE_SPOT_BTC_USDT.csv.gz', 252 * 1024),
@@ -64,7 +68,7 @@ class TestCatalogCryptotickPipeline(unittest.TestCase):
             # TODO assert index was written to db
 
     def test_split_trades_df(self):
-        path = 's3://svoe-cryptotick-data/trades/20230201/BINANCE_SPOT_BTC_USDT.csv.gz'
+        path = 's3://svoe-cryptotick-data/quotes/20230201/BINANCE_SPOT_BTC_USDT.csv.gz'
         split = path.split('/')
         suffix = split[len(split) - 1]
         # prefix = remove_suffix(path, suffix)
@@ -112,8 +116,8 @@ class TestCatalogCryptotickPipeline(unittest.TestCase):
 
 if __name__ == '__main__':
     t = TestCatalogCryptotickPipeline()
-    t.test_pipeline()
-    # t.test_split_trades_df()
+    # t.test_pipeline()
+    t.test_split_trades_df()
     # t._store_test_df_to_s3()
     # t.test_split_l2_inc_df_and_pad_with_snapshot()
     # t.test_db_client()

@@ -3,6 +3,7 @@ import pandas as pd
 from portion import Interval, closed, IntervalDict
 
 from featurizer.sql.data_catalog.models import DataCatalog
+from utils.time.utils import convert_str_to_seconds
 
 BlockMeta = Dict # represents s3 file metadata: name, time range, size, etc.
 BlockRangeMeta = List[BlockMeta] # represents metadata of consecutive blocks
@@ -92,6 +93,21 @@ def identity_grouping(ranges: List[BlockMeta]) -> IntervalDict:
     for meta in ranges:
         res[meta_to_interval(meta)] = [meta]
     return res
+
+
+def windowed_grouping(ranges: List[BlockMeta], window: str) -> IntervalDict:
+    res = IntervalDict()
+    for i in range(len(ranges)):
+        windowed_blocks = [ranges[i]]
+        # look back until window limit is reached
+        j = i - 1
+        while j >= 0 and ranges[i]['start_ts'] - ranges[j]['end_ts'] <= convert_str_to_seconds(window):
+            windowed_blocks.append(ranges[j])
+            j -= 1
+        res[meta_to_interval(ranges[i])] = windowed_blocks
+
+    return res
+
 
 
 def get_overlaps(key_intervaled_value: Dict[Any, IntervalDict]) -> Dict[Interval, Dict]:

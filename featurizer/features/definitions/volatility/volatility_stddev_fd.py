@@ -4,7 +4,7 @@ from featurizer.features.definitions.feature_definition import FeatureDefinition
 from featurizer.data_definitions.data_definition import DataDefinition, Event, EventSchema
 from featurizer.features.definitions.mid_price.mid_price_fd import MidPriceFD
 from featurizer.features.feature_tree.feature_tree import Feature
-from featurizer.blocks.blocks import BlockMeta, meta_to_interval
+from featurizer.blocks.blocks import BlockMeta, meta_to_interval, windowed_grouping
 from utils.streamz.stream_utils import lookback_apply
 from utils.time.utils import convert_str_to_seconds
 from portion import IntervalDict
@@ -33,26 +33,16 @@ class VolatilityStddevFD(FeatureDefinition):
         window = '1m' # TODO figure out default setting
         if feature_params is not None and 'window' in feature_params:
             window = feature_params['window']
+        # TODO this runs stddev on a whole window on each new event, can we come up with incremental stddev?
+        # TODO sampling
         return lookback_apply(mid_price_upstream, window, cls._prices_to_volatility)
 
     @classmethod
     def group_dep_ranges(cls, ranges: List[BlockMeta], feature: Feature, dep_feature: Feature) -> IntervalDict:
-        # TODO util this
-        res = IntervalDict()
-        # TODO assuming no 'holes' in data
         window = '1m'  # TODO figure out default setting
         if feature.params is not None and 'window' in feature.params:
             window = feature.params['window']
-        for i in range(len(ranges)):
-            windowed_blocks = [ranges[i]]
-            # look back until window limit is reached
-            j = i - 1
-            while j >= 0 and ranges[i]['start_ts'] - ranges[j]['end_ts'] <= convert_str_to_seconds(window):
-                windowed_blocks.append(ranges[j])
-                j -= 1
-            res[meta_to_interval(ranges[i])] = windowed_blocks
-
-        return res
+        return windowed_grouping(ranges, window)
 
     @classmethod
     def _prices_to_volatility(cls, prices: Deque) -> Event:

@@ -36,5 +36,4 @@ class TradesData(DataSourceDefinition):
                 trades.append((v['side'], v['amount'], v['price'], v['order_type'], v['id']))
             events.append(cls.construct_event(timestamp, receipt_timestamp, trades))
 
-
         return events

@@ -61,7 +61,7 @@ class L2SnapshotFD(FeatureDefinition):
             state, skip_event = cryptotick_update_state(state, event, depth)
         else:
             raise ValueError(f'Unsupported dep_schema: {dep_schema}')
-        # calling cls._state_snapshot(state, depth) on every events is very heavy,
+        # calling cls._state_snapshot(state, depth) on every event is very heavy,
         # 300x slowdown (383.938503742218s vs 1.4724829196929932s for run_stream on 5Gb dataframe)
         if sampling == 'raw':
             return state, None if skip_event else cls._state_snapshot(state, depth)
