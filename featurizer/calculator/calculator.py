@@ -310,7 +310,6 @@ def _point_in_time_join_block(
     # TODO this loads all dfs at once,
     # TODO can we do it iteratively so gc has time to collect old dfs to reduce mem footprint? (tradeoff speed/memory)
     print('Join started')
-    t = time.time()
     concated = {}
     for feature in blocks_refs_per_feature:
         block_refs = [prev_block_ref_per_feature[feature]] if feature in prev_block_ref_per_feature else []
@@ -327,9 +326,10 @@ def _point_in_time_join_block(
             continue
         dfs.append(concated[feature])
 
+    t = time.time()
     merged = merge_asof_multi(dfs)
 
-    print(f'Join finished {time.time() - t}s')
+    print(f'Join finished, merged in {time.time() - t}s')
     return sub_df_ts(merged, interval.lower, interval.upper)
 
 

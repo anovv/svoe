@@ -1,3 +1,4 @@
+import matplotlib.pyplot as plt
 import ray
 import toolz
 from portion import closed
@@ -175,8 +176,8 @@ class TestFeatureCalculator(unittest.TestCase):
                 i += 1
             df = concat(sort_dfs(res))
 
-            # TODO first two values are weird outliers for some reason, why?
-            df = df.tail(-2)
+            # TODO first value (or two) is weird outlier for some reason, why?
+            df = df.tail(-1)
 
         plot_multi(['mid_price', 'volatility', 'spread'], df)
 
@@ -212,21 +213,33 @@ class TestFeatureCalculator(unittest.TestCase):
         # raise
 
         api = Api()
-        feature_params = {0: {'window': '1m', 'sampling': '1s'}}
-        data_params = [
+        feature_params1 = {0: {'window': '1m', 'sampling': '1s'}}
+        feature_params2 = {1: {'dep_schema': 'cryptotick', 'sampling': '1s'}}
+        feature_params3 = {2: {'dep_schema': 'cryptotick', 'sampling': '1s'}}
+        data_params1 = [
             {DataCatalog.exchange.name: 'BINANCE',
              DataCatalog.data_type.name: 'trades',
              DataCatalog.instrument_type.name: 'spot',
              DataCatalog.symbol.name: 'BTC-USDT'}
         ]
-        feature_tvi = construct_feature_tree(TradeVolumeImbFD, data_params, feature_params)
-        print(RenderTree(feature_tvi))
-        features = [feature_tvi]
+        data_params2 = [
+            {DataCatalog.exchange.name: 'BINANCE',
+             DataCatalog.data_type.name: 'l2_book',
+             DataCatalog.instrument_type.name: 'spot',
+             DataCatalog.symbol.name: 'BTC-USDT'}
+        ]
+        feature_mid_price = construct_feature_tree(MidPriceFD, data_params2, feature_params2)
+        feature_volatility = construct_feature_tree(VolatilityStddevFD, data_params2, feature_params3)
+        feature_tvi = construct_feature_tree(TradeVolumeImbFD, data_params1, feature_params1)
+        # print(RenderTree(feature_tvi))
+        # features = [feature_mid_price, feature_tvi, feature_volatility]
+        features = [feature_mid_price, feature_tvi]
         data_deps = set()
         for feature in features:
             for d in feature.get_data_deps():
                 data_deps.add(d)
         data_keys = [data_key(d.params) for d in data_deps]
+        print(data_keys)
         start_date = '2023-02-01'
         end_date = '2023-02-01'
         ranges_meta_per_data_key = api.get_data_meta(data_keys, start_date=start_date, end_date=end_date)
@@ -235,24 +248,54 @@ class TestFeatureCalculator(unittest.TestCase):
         stored_features_meta = api.get_features_meta(features, start_date=start_date, end_date=end_date)
 
         cache = {}
-        features_to_store = []
+        features_to_store = [feature_tvi]
         task_graph = C.build_feature_set_task_graph(features, data_ranges_meta, cache, features_to_store,
                                                     stored_features_meta)
 
-        print(task_graph)
-        res = {}
+        # print(task_graph)
+        # res = {}
+        #
+        # with ray.init(address='auto', ignore_reinit_error=True):
+        #     c = CacheActor.options(name=CACHE_ACTOR_NAME).remote(cache)
+        #     # res = C.execute_graph_nodes(flattened_task_graph)
+        #     for feature in features:
+        #         nodes = []
+        #         for range_interval in task_graph[feature]:
+        #             for interval in task_graph[feature][range_interval]:
+        #                 nodes.append((feature, task_graph[feature][range_interval][interval]))
+        #         r = C.execute_graph_nodes(nodes)
+        #         res[feature] = r[feature]
+        #
+        #
+        # df = concat(list(res.values())[0])
+        # df = df.tail(-1)
+        # df.plot(x='timestamp', y='tvi')
+        #
+        # plt.show()
 
+        label_feature = feature_mid_price
+        joined_task_graph = C.point_in_time_join_dag(task_graph, features, label_feature)
+        res = []
         with ray.init(address='auto', ignore_reinit_error=True):
-            c = CacheActor.options(name=CACHE_ACTOR_NAME).remote(cache)
-            # res = C.execute_graph_nodes(flattened_task_graph)
-            for feature in features:
+            c = CacheActor.options(name=CACHE_ACTOR_NAME).remote(cache)  # assign to unused var so it stays in Ray's scope
+            num_ranges = len(joined_task_graph)
+            i = 0
+            for range_interval in joined_task_graph:
                 nodes = []
-                for range_interval in task_graph[feature]:
-                    for interval in task_graph[feature][range_interval]:
-                        nodes.append((feature, task_graph[feature][range_interval][interval]))
+                for interval in joined_task_graph[range_interval]:
+                    nodes.append((label_feature, joined_task_graph[range_interval][interval]))
+                print(f'Executing {i + 1}/{num_ranges} range: {range_interval}')
                 r = C.execute_graph_nodes(nodes)
-                res[feature] = r[feature]
-            print(res)
+                dfs = toolz.first(r.values())
+                res.extend(dfs)
+                i += 1
+            df = concat(sort_dfs(res))
+
+            # TODO first two values are weird outliers for some reason, why?
+            df = df.tail(-2)
+
+        plot_multi(['mid_price', 'tvi'], df)
+
 
 
 if __name__ == '__main__':

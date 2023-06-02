@@ -136,8 +136,9 @@ def calculate_feature(
         dep_blocks = all_objs[start: start + len(dep_block_refs[i])]
         deps[dep_feature] = dep_blocks
         start = start + len(dep_block_refs[i])
-
+    t = time.time()
     merged = merge_blocks(deps)
+    print(f'Merged in {time.time() - t}s')
     # construct upstreams
     upstreams = {dep_named_feature: Stream() for dep_named_feature in deps.keys()}
     s = feature.feature_definition.stream(upstreams, feature.params)
@@ -147,7 +148,9 @@ def calculate_feature(
     else:
         out_stream = s
 
+    t = time.time()
     df = run_named_events_stream(merged, upstreams, out_stream, interval)
+    print(f'Events run in {time.time() - t}s')
 
     if not is_ts_sorted(df):
         raise ValueError('[Feature] df is not ts sorted')
@@ -173,6 +176,7 @@ def calculate_feature(
 # TODO util this
 # TODO we assume no 'holes' here
 # TODO can we use pandas merge_asof here or some other merge functionality?
+# TODO this is slow
 def merge_blocks(
     blocks: Dict[Feature, BlockRange]
 ) -> List[Tuple[Feature, Event]]:

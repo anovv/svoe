@@ -113,12 +113,13 @@ class MysqlClient:
         end_date: Optional[str] = None
     ) -> List[Dict]:
         # TODO instrument_extra
-        args = {
-            DataCatalog.exchange.name: exchanges,
-            DataCatalog.data_type.name: data_types,
-            DataCatalog.instrument_type.name: instrument_types,
-            DataCatalog.symbol.name: symbols
-        }
+        # args = {
+        #     DataCatalog.exchange.name: exchanges,
+        #     DataCatalog.data_type.name: data_types,
+        #     DataCatalog.instrument_type.name: instrument_types,
+        #     DataCatalog.symbol.name: symbols
+        # }
+        args = {}
         if compaction is not None:
             args[DataCatalog.compaction.name] = compaction
         if source is not None:
@@ -129,12 +130,16 @@ class MysqlClient:
             args[DataCatalog.extras.name] = extras
 
         session = Session()
-        f = session.query(DataCatalog).filter_by(**args)
+        q = session.query(DataCatalog).filter(DataCatalog.exchange.in_(exchanges))\
+            .filter(DataCatalog.data_type.in_(data_types))\
+            .filter(DataCatalog.instrument_type.in_(instrument_types))\
+            .filter(DataCatalog.symbol.in_(symbols))\
+            .filter_by(**args)
         if start_date is not None:
-            f = f.filter(DataCatalog.date >= start_date)
+            q = q.filter(DataCatalog.date >= start_date)
         if end_date is not None:
-            f = f.filter(DataCatalog.date <= end_date)
-        res = f.order_by(DataCatalog.start_ts).all()
+            q = q.filter(DataCatalog.date <= end_date)
+        res = q.order_by(DataCatalog.start_ts).all()
         # TODO this adds unnecessary sqlalchemy fields, remove to reduce memory footprint
         return [r.__dict__ for r in res]
 
