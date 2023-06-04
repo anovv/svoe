@@ -45,3 +45,4 @@ featurizer/notebooks
 utils/s3/s3_svoe.test.1_inventory
 ray_cluster/featurizer/cached_dfs
 
+featurizer/perf/rust/target

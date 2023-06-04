@@ -65,6 +65,8 @@ class TradeVolumeImbFD(FeatureDefinition):
         # TODO abstraction for time bound queue (similar to lookback_apply)
         state.queue.append(event)
         first_ts = state.queue[0]['timestamp']
+
+        # TODO should be while
         if ts - first_ts > convert_str_to_seconds(window):
             state.queue.popleft()
 

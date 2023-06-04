@@ -121,7 +121,6 @@ def calculate_feature(
         print(f'[Cached] Calc feature finished')
         return df
     print('Calc feature block started')
-    t = time.time()
     # TODO add mem tracking
     # this loads blocks for all dep features from shared object store to workers heap
     # hence we need to reserve a lot of mem here
@@ -140,7 +139,7 @@ def calculate_feature(
     merged = merge_blocks(deps)
     print(f'Merged in {time.time() - t}s')
     # construct upstreams
-    upstreams = {dep_named_feature: Stream() for dep_named_feature in deps.keys()}
+    upstreams = {dep_feature: Stream() for dep_feature in deps.keys()}
     s = feature.feature_definition.stream(upstreams, feature.params)
     if isinstance(s, Tuple):
         out_stream = s[0]
