@@ -8,7 +8,7 @@ from featurizer.data_definitions.data_definition import EventSchema, DataDefinit
 from featurizer.data_definitions.trades.trades import TradesData
 from featurizer.features.definitions.feature_definition import FeatureDefinition
 from featurizer.features.feature_tree.feature_tree import Feature
-from utils.time.utils import convert_str_to_seconds
+from utils.time.utils import convert_str_to_seconds, get_sampling_bucket_ts
 
 from dataclasses import dataclass
 
@@ -64,7 +64,7 @@ class OHLCVFD(FeatureDefinition):
         # for idempotency, skip events before window-based starting point
         if state.start_ts is None:
             # first event
-            state.start_ts = cls._get_closest_start_ts(timestamp, window, before=False)
+            state.start_ts = get_sampling_bucket_ts(timestamp, window, return_bucket_start=False)
 
         if timestamp < state.start_ts:
             # skip
@@ -119,7 +119,7 @@ class OHLCVFD(FeatureDefinition):
         res = IntervalDict()
         first_block_start_ts = ranges[0]['start_ts']
         last_block_end_ts = ranges[-1]['end_ts']
-        group_start_ts = cls._get_closest_start_ts(first_block_start_ts, window, before=True)
+        group_start_ts = get_sampling_bucket_ts(first_block_start_ts, window, return_bucket_start=True)
         # TODO we assume block_size is smaller than window, what if otherwise?
         while group_start_ts <= last_block_end_ts:
             group_end_ts = group_start_ts + num_grouped_windows * convert_str_to_seconds(window)
@@ -141,18 +141,6 @@ class OHLCVFD(FeatureDefinition):
 
         return res
 
-    # TODO this is for windows no higher then 'h' time_unit, assert that here
-    @classmethod
-    def _get_closest_start_ts(cls, timestamp: float, window: str, before: bool) -> float:
-        dt = datetime.fromtimestamp(timestamp)
-        # for idempotency, we assume 00-00:00.00 of the current day as a starting point for splitting data into blocks
-        start_dt = dt.replace(hour=0, minute=0, second=0, microsecond=0)
-        start_ts = start_dt.timestamp()
-        window_s = convert_str_to_seconds(window)
-        while start_ts + window_s < timestamp:
-            start_ts += window_s
-        return start_ts if before else start_ts + window_s
-
     # TODO move this to separate class
     @classmethod
     def _test_grouping(cls):
@@ -169,7 +157,7 @@ class OHLCVFD(FeatureDefinition):
         num_grouped_windows = 1
 
         first_block_start_ts = ranges[0]['start_ts']
-        group_start_ts = cls._get_closest_start_ts(first_block_start_ts, window, before=False)
+        group_start_ts = get_sampling_bucket_ts(first_block_start_ts, window, return_bucket_start=False)
         grouped = cls._group_by_fixed_window(ranges, window, num_grouped_windows)
         assert group_start_ts == 8.0
         assert grouped == IntervalDict({

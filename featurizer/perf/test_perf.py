@@ -10,7 +10,7 @@ from featurizer.calculator.tasks import merge_blocks
 from featurizer.data_definitions.trades.trades import TradesData
 from featurizer.features.definitions.tvi.trade_volume_imb_fd import TradeVolumeImbFD
 from featurizer.features.feature_tree.feature_tree import construct_feature_tree
-from utils.pandas.df_utils import load_df, time_range
+from utils.pandas.df_utils import load_df, time_range, is_ts_sorted
 from utils.streamz.stream_utils import run_named_events_stream
 
 
@@ -59,7 +59,7 @@ def test_vectorized_tvi():
 
     ddd['tvi'] = 2 * (ddd[b_key] - ddd[s_key])/(ddd[b_key] + ddd[s_key])
     ddd = ddd[['tvi', 'timestamp']]
-    ddd = ddd.groupby('dt').first()
+    # ddd = ddd.groupby('dt').first()
     ddd = ddd.resample('1s').first()
     print(ddd.head())
     print(len(ddd))
@@ -124,7 +124,32 @@ def test_rust_tvi():
     print(diff[:5])
     # print(df.head())
 
+def test_t():
+    df = load_df(
+        's3://svoe-cataloged-data/trades/BINANCE/spot/BTC-USDT/cryptotick/100.0mb/2023-02-01/1675209965-4ea8eeea78da2f99f312377c643e6b491579f852.parquet.gz'
+    )
+    # rust expects tuples (id, timestamp, amount, price, side)
+    df = df[['id', 'timestamp', 'amount', 'price', 'side']]
 
-test_rust_tvi()
-# test_vectorized_tvi()
-# test_streaming_tvi()s
+    t1 = time.time()
+    l = list(df.itertuples(index=False, name=None))
+    print(f'Step1: {time.time() - t1}s')
+    t2 = time.time()
+    ll = list(map(lambda e: {'timestamp': e[1], 'amount': e[2], 'price': e[3], 'side': e[4]}, l))
+    print(f'Step2: {time.time() - t2}s')
+
+def test_tt():
+    df = load_df(
+        's3://svoe-cataloged-data/trades/BINANCE/spot/BTC-USDT/cryptotick/100.0mb/2023-02-01/1675209965-4ea8eeea78da2f99f312377c643e6b491579f852.parquet.gz'
+    )
+    # TradesData.parse_events(df)
+    print(is_ts_sorted(df))
+
+
+
+
+# test_rust_tvi()
+test_vectorized_tvi()
+# test_streaming_tvi()
+# test_t()
+# test_tt()

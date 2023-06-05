@@ -109,7 +109,6 @@ def _construct_feature_tree(
     position = feature_position_ref[0]
     params = _parse_params(feature_params, position)
     dep_schema = params.get('dep_schema', None)
-    print(dep_schema)
     deps = root_def.dep_upstream_schema(dep_schema)
     children = []
     for dep_fd in deps:

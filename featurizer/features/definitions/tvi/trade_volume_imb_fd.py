@@ -15,13 +15,16 @@ from featurizer.features.feature_tree.feature_tree import Feature
 
 import toolz
 
-from utils.time.utils import convert_str_to_seconds
+from utils.time.utils import convert_str_to_seconds, get_sampling_bucket_ts
 
 
 @dataclass
 class _State:
-    last_emitted_ts: float = -1
+    # last_emitted_ts: float = -1
+    last_sampling_bucket_ts = -1
     queue = deque()
+    sell_vol = 0
+    buy_vol = 0
 
 
 class TradeVolumeImbFD(FeatureDefinition):
@@ -42,7 +45,8 @@ class TradeVolumeImbFD(FeatureDefinition):
             window = feature_params['window']
         sampling = feature_params.get('sampling', 'raw')
         state = _State()
-        update = functools.partial(cls._update_state, sampling=sampling, window=window)
+        window_s = convert_str_to_seconds(window)
+        update = functools.partial(cls._update_state, sampling=sampling, window_s=window_s)
         acc = trades_upstream.accumulate(update, returns_state=True, start=state)
         return su.filter_none(acc).unique(maxsize=1)
 
@@ -58,38 +62,55 @@ class TradeVolumeImbFD(FeatureDefinition):
         return windowed_grouping(ranges, window)
 
     @classmethod
-    def _update_state(cls, state: _State, event: Event, sampling: str, window: str) -> Tuple[_State, Optional[Event]]:
+    def _update_state(cls, state: _State, event: Event, sampling: str, window_s: float) -> Tuple[_State, Optional[Event]]:
         ts = event['timestamp']
         receipt_ts = event['receipt_timestamp']
 
         # TODO abstraction for time bound queue (similar to lookback_apply)
         state.queue.append(event)
-        first_ts = state.queue[0]['timestamp']
-
-        # TODO should be while
-        if ts - first_ts > convert_str_to_seconds(window):
-            state.queue.popleft()
-
-        buy_vol = 0
-        sell_vol = 0
-        for e in state.queue:
+        while ts - state.queue[0]['timestamp'] > window_s:
+            e = state.queue.popleft()
             for trade in e['trades']:
                 if trade['side'] == 'BUY':
-                    buy_vol += trade['price'] * trade['amount']
+                    state.buy_vol -= trade['price'] * trade['amount']
                 else:
-                    sell_vol += trade['price'] * trade['amount']
+                    state.sell_vol -= trade['price'] * trade['amount']
 
-        avg_vol = (buy_vol + sell_vol)/2
-        tvi = (buy_vol - sell_vol)/avg_vol
+        for trade in event['trades']:
+            if trade['side'] == 'BUY':
+                state.buy_vol += trade['price'] * trade['amount']
+            else:
+                state.sell_vol += trade['price'] * trade['amount']
+
+        tvi = 2 * (state.buy_vol - state.sell_vol) / (state.buy_vol + state.sell_vol)
+
+        # buy_vol = 0
+        # sell_vol = 0
+        # for e in state.queue:
+        #     for trade in e['trades']:
+        #         if trade['side'] == 'BUY':
+        #             buy_vol += trade['price'] * trade['amount']
+        #         else:
+        #             sell_vol += trade['price'] * trade['amount']
+        #
+        # avg_vol = (buy_vol + sell_vol)/2
+        # tvi = (buy_vol - sell_vol)/avg_vol
 
         # TODO sampling and event construction should be abstracted out
         if sampling == 'raw':
             return state, cls.construct_event(ts, receipt_ts, tvi)
         else:
-            sampling_s = convert_str_to_seconds(sampling)
-            if state.last_emitted_ts < 0 or ts - state.last_emitted_ts > sampling_s:
-                state.last_emitted_ts = ts
+            # sampling_s = convert_str_to_seconds(sampling)
+            # if state.last_emitted_ts < 0 or ts - state.last_emitted_ts > sampling_s:
+            #     state.last_emitted_ts = ts
+            #     return state, cls.construct_event(ts, receipt_ts, tvi)
+            # else:
+            #     return state, None
+            sampling_bucket_ts = get_sampling_bucket_ts(ts, sampling)
+            if state.last_sampling_bucket_ts != sampling_bucket_ts:
+                state.last_sampling_bucket_ts = sampling_bucket_ts
                 return state, cls.construct_event(ts, receipt_ts, tvi)
             else:
                 return state, None
+
 

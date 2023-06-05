@@ -174,8 +174,8 @@ def calculate_feature(
 
 # TODO util this
 # TODO we assume no 'holes' here
-# TODO can we use pandas merge_asof here or some other merge functionality?
-# TODO this is slow
+# TODO use merge_ordered
+# TODO this is slow due to parse_events being slow
 def merge_blocks(
     blocks: Dict[Feature, BlockRange]
 ) -> List[Tuple[Feature, Event]]:
@@ -186,7 +186,9 @@ def merge_blocks(
         block_range = blocks[feature]
         named_events = []
         for block in block_range:
+            t = time.time()
             parsed = feature.feature_definition.parse_events(block)
+            print(f'Parsed block in {time.time() - t}s')
             named = []
             for e in parsed:
                 named.append((feature, e))

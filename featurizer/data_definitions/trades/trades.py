@@ -1,3 +1,4 @@
+import time
 from collections import OrderedDict
 from typing import Tuple, List, Dict
 
@@ -22,9 +23,16 @@ class TradesData(DataSourceDefinition):
     @classmethod
     def parse_events(cls, df: DataFrame, **kwargs) -> List[Event]:
         # TODO merge this logic with L2BookDeltaData parse_events
+        t = time.time()
         grouped = df.groupby(['timestamp'])
+        print(f'Step1: {time.time() - t}s')
+        t = time.time()
         dfs = [grouped.get_group(x) for x in grouped.groups]
+        print(f'Step2: {time.time() - t}s')
+        t = time.time()
         dfs = sorted(dfs, key=lambda df: df['timestamp'].iloc[0], reverse=False)
+        print(f'Step3: {time.time() - t}s')
+        t = time.time()
         events = []
         for i in range(len(dfs)):
             df = dfs[i]
@@ -35,5 +43,7 @@ class TradesData(DataSourceDefinition):
             for v in df_dict.values():
                 trades.append({k: v[k] for k in ['side', 'amount', 'price', 'id']})
             events.append(cls.construct_event(timestamp, receipt_timestamp, trades))
+        print(f'Step4: {time.time() - t}s')
+        t = time.time()
 
         return events
