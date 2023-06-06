@@ -2,6 +2,8 @@ from typing import Tuple, Type, List, Dict, Any
 from pandas import DataFrame
 from frozendict import frozendict
 
+from utils.pandas.df_utils import is_ts_sorted
+
 Event = Dict[str, Any] # note that this corresponds to raw grouped events by timestamp
 EventSchema = Dict[str, Type]
 
@@ -29,6 +31,8 @@ class DataDefinition:
     @classmethod
     def parse_events(cls, df: DataFrame, **kwargs) -> List[Event]:
         # TODO validate schema here?
+        if not is_ts_sorted(df):
+            raise ValueError('Unable to parse df with unsorted timestamps')
         return df.to_dict('records')
 
     @classmethod

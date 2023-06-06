@@ -32,8 +32,7 @@ def lookback_apply(upstream: Stream, window: str, apply: Callable) -> Stream:
     def _deque_and_apply(events_deque: Deque, event: Any) -> Any:
         ts = event['timestamp']
         events_deque.append(event)
-        first_ts = events_deque[0]['timestamp']
-        if ts - first_ts > convert_str_to_seconds(window):
+        while ts - events_deque[0]['timestamp'] > convert_str_to_seconds(window):
             events_deque.popleft()
         return events_deque, apply(events_deque)
 

@@ -167,4 +167,12 @@ class MysqlClient:
         # TODO this adds unnecessary sqlalchemy fields, remove to reduce memory footprint
         return [r.__dict__ for r in res]
 
+    def delete_feature_catalog(
+        self,
+        feature_keys: List[str]
+    ):
+        session = Session()
+        session.query(FeatureCatalog).filter(FeatureCatalog.feature_key.in_(feature_keys)).delete()
+        session.commit()
+
 

@@ -118,9 +118,9 @@ def calculate_feature(
 ) -> Block:
     df, should_cache = _get_from_cache(context)
     if df is not None:
-        print(f'[Cached] Calc feature finished')
+        print(f'[{feature}][Cached] Calc feature finished')
         return df
-    print('Calc feature block started')
+    print(f'[{feature}] Calc feature block started')
     # TODO add mem tracking
     # this loads blocks for all dep features from shared object store to workers heap
     # hence we need to reserve a lot of mem here
@@ -137,7 +137,7 @@ def calculate_feature(
         start = start + len(dep_block_refs[i])
     t = time.time()
     merged = merge_blocks(deps)
-    print(f'Merged in {time.time() - t}s')
+    print(f'[{feature}] Merged in {time.time() - t}s')
     # construct upstreams
     upstreams = {dep_feature: Stream() for dep_feature in deps.keys()}
     s = feature.feature_definition.stream(upstreams, feature.params)
@@ -149,13 +149,13 @@ def calculate_feature(
 
     t = time.time()
     df = run_named_events_stream(merged, upstreams, out_stream, interval)
-    print(f'Events run in {time.time() - t}s')
+    print(f'[{feature}] Events run in {time.time() - t}s')
 
     if not is_ts_sorted(df):
         raise ValueError('[Feature] df is not ts sorted')
     if should_cache:
         _cache(df, context)
-    print(f'Calc feature block finished {time.time() - t}s')
+    print(f'[{feature}] Calc feature block finished {time.time() - t}s')
     if store:
         # TODO make a separate actor pool for S3 IO and batchify store operation
         t = time.time()
@@ -165,9 +165,9 @@ def calculate_feature(
         if not exists:
             store_df(catalog_item.path, df)
             write_res = ray.get(db_actor.write_batch.remote([catalog_item]))
-            print(f'Store feature block finished {time.time() - t}s')
+            print(f'[{feature}] Store feature block finished {time.time() - t}s')
         else:
-            print(f'Feature block already stored')
+            print(f'[{feature}] Feature block already stored')
 
     return df
 
@@ -175,7 +175,7 @@ def calculate_feature(
 # TODO util this
 # TODO we assume no 'holes' here
 # TODO use merge_ordered
-# TODO this is slow due to parse_events being slow
+# TODO this is slow
 def merge_blocks(
     blocks: Dict[Feature, BlockRange]
 ) -> List[Tuple[Feature, Event]]:
@@ -188,7 +188,7 @@ def merge_blocks(
         for block in block_range:
             t = time.time()
             parsed = feature.feature_definition.parse_events(block)
-            print(f'Parsed block in {time.time() - t}s')
+            print(f'[{feature}] Parsed block in {time.time() - t}s')
             named = []
             for e in parsed:
                 named.append((feature, e))
@@ -202,24 +202,6 @@ def merge_blocks(
 
     return merged
 
-
-# @ray.remote(num_cpus=0.001)
-# def store_feature_blocks(feature: Feature, refs: Dict[Interval, ObjectRef[Block]]) -> Dict[Interval, ObjectRef[Block]]:
-#     STORE_PARALLELISM = 10
-#     executor = concurrent.futures.ThreadPoolExecutor(max_workers=STORE_PARALLELISM)
-#
-#     def store_and_catalogue_block(ref: ObjectRef[Block]) -> FeatureCatalog:
-#         block = ray.get(ref)
-#         catalog_item = catalog_feature_block(feature, block)
-#         store_df(catalog_item[FeatureCatalog.path.name], block)
-#         return catalog_item
-#
-#     store_futures = [executor.submit(functools.partial(store_and_catalogue_block, ref=refs[interval])) for interval in refs]
-#     catalog_items = [f.result() for f in as_completed(store_futures)]
-#     db_actor = ray.get_actor('DbActor') # TODO global handle
-#     write_res = ray.get(db_actor.write_batch(catalog_items))
-#
-#     return refs
 
 def catalog_feature_block(feature: Feature, df: pd.DataFrame, interval: Interval) -> FeatureCatalog:
     _time_range = df_utils.time_range(df)

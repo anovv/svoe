@@ -77,6 +77,20 @@ def list_files_and_sizes_kb(bucket_name: str, prefix: str = '', page_size: int =
     return res
 
 
+def delete_files(bucket_name: str, paths: List[str]):
+    if len(paths) > 1000:
+        # TODO implemet concurrent delete if > 1000 objects
+        # https://boto3.amazonaws.com/v1/documentation/api/1.19.0/guide/clients.html#general-example
+        raise ValueError('Can not delete more than 1000 objects from S3, make concurrent requests')
+
+    session = get_session()
+    client = session.client('s3')
+    client.delete_objects(
+        Bucket=bucket_name,
+        Delete={'Objects': list(map(lambda path: {'Key': to_bucket_and_key(path)[1]}, paths))}
+    )
+
+
 def inventory() -> Generator[pd.DataFrame, None, None]:
     # TODO implement large files download with progress callback and fetch directly from s3
     inventory_files_folder = '/Users/anov/IdeaProjects/svoe/utils/s3/s3_svoe.test.1_inventory'

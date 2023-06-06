@@ -70,22 +70,19 @@ class OHLCVFD(FeatureDefinition):
             # skip
             return state, None
 
-        for trade in event['trades']:
-            # TODO make trade a dict
-            side, amount, price, order_type, trade_id = trade
-            # TODO can we make use of order_type and trade_id in OHLCV?
-            if state.ohlcv is None:
-                state.ohlcv = dict(zip(cls.event_schema().keys(), [timestamp, receipt_timestamp, price, price, price, price, 0, 0, 0]))
-            if state.last_ts is None:
-                state.last_ts = timestamp
+        side, amount, price, trade_id = event['side'], event['amount'], event['price'], event['trade_id']
+        if state.ohlcv is None:
+            state.ohlcv = dict(zip(cls.event_schema().keys(), [timestamp, receipt_timestamp, price, price, price, price, 0, 0, 0]))
+        if state.last_ts is None:
+            state.last_ts = timestamp
 
-            state.ohlcv['close'] = price
-            state.ohlcv['volume'] += amount
-            if price > state.ohlcv['high']:
-                state.ohlcv['high'] = price
-            if price < state.ohlcv['low']:
-                state.ohlcv['low'] = price
-            state.ohlcv['vwap'] += price * amount
+        state.ohlcv['close'] = price
+        state.ohlcv['volume'] += amount
+        if price > state.ohlcv['high']:
+            state.ohlcv['high'] = price
+        if price < state.ohlcv['low']:
+            state.ohlcv['low'] = price
+        state.ohlcv['vwap'] += price * amount
 
         state.ohlcv['num_trades'] += len(event['trades'])
 

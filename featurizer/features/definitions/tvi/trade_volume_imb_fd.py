@@ -20,7 +20,6 @@ from utils.time.utils import convert_str_to_seconds, get_sampling_bucket_ts
 
 @dataclass
 class _State:
-    # last_emitted_ts: float = -1
     last_sampling_bucket_ts = -1
     queue = deque()
     sell_vol = 0
@@ -32,9 +31,10 @@ class TradeVolumeImbFD(FeatureDefinition):
     @classmethod
     def event_schema(cls) -> EventSchema:
         return {
-           'timestamp': float,
-           'receipt_timestamp': float,
-           'tvi': float
+            'timestamp': float,
+            'receipt_timestamp': float,
+            'tvi': float,
+            'dt_ts': float,
         }
 
     @classmethod
@@ -70,17 +70,15 @@ class TradeVolumeImbFD(FeatureDefinition):
         state.queue.append(event)
         while ts - state.queue[0]['timestamp'] > window_s:
             e = state.queue.popleft()
-            for trade in e['trades']:
-                if trade['side'] == 'BUY':
-                    state.buy_vol -= trade['price'] * trade['amount']
-                else:
-                    state.sell_vol -= trade['price'] * trade['amount']
-
-        for trade in event['trades']:
-            if trade['side'] == 'BUY':
-                state.buy_vol += trade['price'] * trade['amount']
+            if e['side'] == 'BUY':
+                state.buy_vol -= e['price'] * e['amount']
             else:
-                state.sell_vol += trade['price'] * trade['amount']
+                state.sell_vol -= e['price'] * e['amount']
+
+        if event['side'] == 'BUY':
+            state.buy_vol += event['price'] * event['amount']
+        else:
+            state.sell_vol += event['price'] * event['amount']
 
         tvi = 2 * (state.buy_vol - state.sell_vol) / (state.buy_vol + state.sell_vol)
 
@@ -95,10 +93,9 @@ class TradeVolumeImbFD(FeatureDefinition):
         #
         # avg_vol = (buy_vol + sell_vol)/2
         # tvi = (buy_vol - sell_vol)/avg_vol
-
         # TODO sampling and event construction should be abstracted out
         if sampling == 'raw':
-            return state, cls.construct_event(ts, receipt_ts, tvi)
+            return state, cls.construct_event(ts, receipt_ts, tvi, state.last_sampling_bucket_ts)
         else:
             # sampling_s = convert_str_to_seconds(sampling)
             # if state.last_emitted_ts < 0 or ts - state.last_emitted_ts > sampling_s:
@@ -109,7 +106,7 @@ class TradeVolumeImbFD(FeatureDefinition):
             sampling_bucket_ts = get_sampling_bucket_ts(ts, sampling)
             if state.last_sampling_bucket_ts != sampling_bucket_ts:
                 state.last_sampling_bucket_ts = sampling_bucket_ts
-                return state, cls.construct_event(ts, receipt_ts, tvi)
+                return state, cls.construct_event(ts, receipt_ts, tvi, sampling_bucket_ts)
             else:
                 return state, None
 

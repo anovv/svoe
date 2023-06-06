@@ -8,7 +8,8 @@ from featurizer.blocks.blocks import BlockRangeMeta, make_ranges, prune_overlaps
 from featurizer.features.feature_tree.feature_tree import Feature
 from featurizer.sql.client import MysqlClient
 from featurizer.sql.data_catalog.models import DataCatalog
-from featurizer.sql.feature_catalog.models import FeatureCatalog
+from featurizer.sql.feature_catalog.models import FeatureCatalog, SVOE_S3_FEATURE_CATALOG_BUCKET
+from utils.s3.s3_utils import delete_files
 
 # TODO this should be synced with DataDef somehow?
 DataKey = Tuple[str, str, str, str]
@@ -92,3 +93,13 @@ class Api:
                 groups[feature] = {interval: r}
 
         return groups
+
+    # TODO verify consistency + retries in case of failures
+    def delete_features(self, features: List[Feature]):
+        feature_keys = [f.feature_key for f in features]
+        raw_data = self.client.select_feature_catalog(feature_keys)
+        paths = [r['path'] for r in raw_data]
+        delete_files(SVOE_S3_FEATURE_CATALOG_BUCKET, paths)
+        self.client.delete_feature_catalog(feature_keys)
+
+
