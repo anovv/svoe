@@ -1,8 +1,9 @@
 import unittest
 
+import pandas as pd
 import portion as P
 
-from featurizer.blocks.blocks import get_overlaps, mock_meta, prune_overlaps
+from featurizer.blocks.blocks import get_overlaps, mock_meta, prune_overlaps, lookahead_shift
 
 
 class TestBlocks(unittest.TestCase):
@@ -77,9 +78,25 @@ class TestBlocks(unittest.TestCase):
         pruned_overlaps = prune_overlaps(get_overlaps(grouped_range))
         self.assertEqual(pruned_overlaps, expected)
 
+    def test_look_ahead_shift(self):
+        lookahead = '3s'
+        a_ts = [1, 2, 3, 5, 8, 9, 20, 21, 22, 23, 28, 31, 32, 33, 34, 40, 41, 42, 46]
+        a_vals = [f'val{ts}' for ts in a_ts]
+        df = pd.DataFrame({'timestamp': a_ts, 'vals': a_vals})
+
+        b_ts = [3, 5, 5, 8, 9, 9, 23, 23, 23, 23, 31, 34, 34, 34, 34, 42, 42, 42]
+        b_vals = [f'val{ts}' for ts in b_ts]
+        expected_df = pd.DataFrame({'timestamp': b_ts, 'vals': b_vals})
+
+        res = lookahead_shift(df, lookahead)
+        print(res)
+
+        assert expected_df.equals(res)
+
 
 if __name__ == '__main__':
     t = TestBlocks()
 
-    t.test_overlaps()
-    t.test_pruned_overlaps()
+    # t.test_overlaps()
+    # t.test_pruned_overlaps()
+    t.test_look_ahead_shift()

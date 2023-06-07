@@ -3,6 +3,7 @@ import pandas as pd
 from portion import Interval, closed, IntervalDict
 
 from featurizer.sql.data_catalog.models import DataCatalog
+from utils.pandas.df_utils import is_ts_sorted, sub_df, sub_df_ts
 from utils.time.utils import convert_str_to_seconds
 
 BlockMeta = Dict # represents s3 file metadata: name, time range, size, etc.
@@ -109,7 +110,6 @@ def windowed_grouping(ranges: List[BlockMeta], window: str) -> IntervalDict:
     return res
 
 
-
 def get_overlaps(key_intervaled_value: Dict[Any, IntervalDict]) -> Dict[Interval, Dict]:
     # TODO add visualization?
     # https://github.com/AlexandreDecan/portion
@@ -163,3 +163,26 @@ def prune_overlaps(overlaps: Dict[Interval, Dict[Any, List]]) -> Dict[Interval, 
             ranges[key] = pruned
     return overlaps
 
+
+def lookahead_shift(df: pd.DataFrame, lookahead: str) -> pd.DataFrame:
+    if not is_ts_sorted(df):
+        raise ValueError('Can not lookahead shift not sorted df')
+    lookahead_s = convert_str_to_seconds(lookahead)
+    if lookahead_s < 1:
+        raise ValueError('Lookahead interval should be more than 1s')
+    cols = list(df.columns)
+    df['lookahead_timestamp'] = df['timestamp'] + lookahead_s
+    shifted = pd.merge_asof(df, df, left_on='lookahead_timestamp', right_on='timestamp', direction='backward')
+    cols_new = [f'{c}_y' for c in cols]
+    res_df = shifted[cols_new]
+    res_df = res_df.rename(columns=dict(zip(cols_new, cols)))
+    start_ts = df.iloc[0]['timestamp']
+    end_ts = df.iloc[-1]['timestamp'] - lookahead_s
+    return sub_df_ts(res_df, start_ts, end_ts)
+
+
+def is_sorted_intervals(intervals: List[Interval]) -> bool:
+    for i in range(1, len(intervals)):
+        if intervals[i - 1].upper > intervals[i].lower:
+            return False
+    return True

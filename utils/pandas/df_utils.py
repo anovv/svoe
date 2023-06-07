@@ -140,6 +140,10 @@ def is_ts_sorted(df: pd.DataFrame) -> bool:
 
 def sort_dfs(dfs: List[pd.DataFrame]) -> List[pd.DataFrame]:
     def compare(df1, df2):
+        if len(df1) == 0:
+            return -1
+        if len(df2) == 0:
+            return 1
         return int(float(df1.iloc[0]['timestamp']) - float(df2.iloc[0]['timestamp']))
 
     return sorted(dfs, key=functools.cmp_to_key(compare))

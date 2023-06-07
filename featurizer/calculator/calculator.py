@@ -7,12 +7,14 @@ from ray.types import ObjectRef
 
 from featurizer.features.feature_tree.feature_tree import Feature, postorder
 from featurizer.blocks.blocks import Block, meta_to_interval, interval_to_meta, get_overlaps, BlockRangeMeta, \
-    prune_overlaps, range_meta_to_interval, ranges_to_interval_dict, BlockMeta, overlaps_keys
-from portion import Interval, IntervalDict
+    prune_overlaps, range_meta_to_interval, ranges_to_interval_dict, BlockMeta, overlaps_keys, is_sorted_intervals, \
+    lookahead_shift
+from portion import Interval, IntervalDict, closed
 import pandas as pd
 
 from featurizer.calculator.tasks import calculate_feature, load_if_needed, bind_and_cache, context
 from utils.pandas.df_utils import concat, sub_df_ts, merge_asof_multi
+from utils.time.utils import convert_str_to_seconds
 
 
 # TODO re: cache https://discuss.ray.io/t/best-way-to-share-memory-for-ray-tasks/3759
@@ -132,6 +134,67 @@ def build_feature_set_task_graph(
     return dag
 
 
+@ray.remote
+def _lookahead_shift_blocks(block_refs: List[ObjectRef[Block]], interval: Interval, lookahead: str):
+    blocks = ray.get(block_refs)
+    concated = concat(blocks)
+    shifted_concated = lookahead_shift(concated, lookahead)
+    shifted = sub_df_ts(shifted_concated, interval.lower, interval.upper)
+    return shifted
+
+
+def build_lookahead_graph(feature_graph: Dict[Interval, Dict[Interval, DAGNode]], lookahead: str) -> Dict[Interval, Dict[Interval, DAGNode]]:
+    lookahead_s = convert_str_to_seconds(lookahead)
+    res = {}
+    for range_interval in feature_graph:
+        shifted_nodes = {}
+        intervals = []
+        nodes = []
+        for interval in feature_graph[range_interval]:
+            intervals.append(interval)
+            nodes.append(feature_graph[range_interval][interval])
+        if not is_sorted_intervals(intervals):
+            raise ValueError('Intervals should be sorted')
+
+        prev_end = None # end of the prev group
+
+        for i in range(len(intervals)):
+            interval = intervals[i]
+            group = [nodes[i]]
+            end = min(interval.upper + lookahead_s, intervals[len(intervals) - 1].upper)
+            for j in range(i + 1, len(intervals)):
+                if intervals[j].upper <= end or (intervals[j].lower <= end <= intervals[j].upper):
+                    group.append(nodes[j])
+                else:
+                    break
+
+            # since we don't know exact first and last ts of shifted df without actually running it
+            # we use this heuristic to split shifted concated blocks
+            if i == 0:
+                # we may lose some data here, but it's negligible
+                start = interval.lower + lookahead_s
+            else:
+                start = prev_end + 0.001
+
+            if start >= end:
+                raise ValueError(f'Bam: start: {start}, end: {end}')
+
+            shifted_interval = closed(start, end)
+            print(shifted_interval)
+            prev_end = end
+
+            shifted_node = _lookahead_shift_blocks.bind(group, shifted_interval, lookahead)
+            shifted_nodes[shifted_interval] = shifted_node
+
+        shifted_intervals = list(shifted_nodes.keys())
+        if not is_sorted_intervals(shifted_intervals):
+            raise ValueError('Shifted intervals should be sorted')
+        shifted_range_interval = closed(shifted_intervals[0].lower, shifted_intervals[-1].upper)
+        res[shifted_range_interval] = shifted_nodes
+
+    return res
+
+
 def flatten_feature_set_task_graph(
     features: List[Feature],
     dag: Dict[Feature, Dict[Interval, Dict[Interval, DAGNode]]]
@@ -163,7 +226,7 @@ def flatten_feature_set_task_graph(
         else:
             res.append((cur_feature, flattened_dag[cur_feature][cur_block_index]))
             cur_block_index_per_feature[cur_feature] = cur_block_index + 1
-            cur_feature_pos = (cur_feature_pos + 1)%(len(features))
+            cur_feature_pos = (cur_feature_pos + 1) % (len(features))
 
     return res
 
@@ -253,7 +316,6 @@ def point_in_time_join_dag(
     overlapped_range_intervals = prune_overlaps(get_overlaps(ranges_per_feature))
 
     res = {}
-
     for range_interval in overlapped_range_intervals:
         nodes_per_feature = overlapped_range_intervals[range_interval]
 
@@ -300,6 +362,7 @@ def point_in_time_join_dag(
 
 
 # TODO set memory consumption
+# TODO move to tasks?
 @ray.remote
 def _point_in_time_join_block(
     interval: Interval,

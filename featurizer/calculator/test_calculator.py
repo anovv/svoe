@@ -20,7 +20,7 @@ from featurizer.features.feature_tree.feature_tree import construct_feature_tree
 
 import unittest
 import pandas as pd
-from typing import Type
+from typing import Type, List
 from anytree import RenderTree
 from featurizer.utils.testing_utils import mock_feature, mock_trades_data_and_meta, mock_l2_book_delta_data_and_meta, mock_ts_df, mock_ts_df_remote
 from utils.pandas.df_utils import concat, load_df, merge_asof_multi, is_ts_sorted, sort_dfs, plot_multi
@@ -296,40 +296,66 @@ class TestFeatureCalculator(unittest.TestCase):
 
         plot_multi(['mid_price', 'tvi'], df)
 
+    def test_lookahead_shift(self):
+        lookahead = '3s'
+
+        def _mock_df(ts: List[float]):
+            vals = [f'val{t}' for t in ts]
+            df = pd.DataFrame({'timestamp': ts, 'vals': vals})
+            return df
+
+        @ray.remote
+        def mock_df(ts: List[float]):
+            return _mock_df(ts)
+
+        data = [[1, 2, 3, 5], [8, 9, 20, 21], [22, 23, 28], [31, 32, 33, 34, 40], [41, 42, 46], [47, 48]]
+
+        expected_res = [_mock_df([5, 5, 8]), _mock_df([9, 9, 23, 23, 23, 23]),  _mock_df([31]),  _mock_df([34, 34, 34, 34, 42, 42, 42])]
+
+        input_dag = {}
+        range_interval = closed(data[0][0], data[-1][-1])
+        nodes = {}
+        for ts in data:
+            interval = closed(ts[0], ts[-1])
+            node = mock_df.bind(ts)
+            nodes[interval] = node
+
+        input_dag[range_interval] = nodes
+
+        lookahead_graph = C.build_lookahead_graph(input_dag, lookahead)
+
+        with ray.init(address='auto', ignore_reinit_error=True):
+            res = []
+            f = mock_feature(0)
+            for range_interval in lookahead_graph:
+                nodes = []
+
+                for interval in lookahead_graph[range_interval]:
+                    nodes.append((f, lookahead_graph[range_interval][interval]))
+                r = C.execute_graph_nodes(nodes)
+                dfs = toolz.first(r.values())
+                res.extend(dfs)
+
+            # TODO why empty frames?
+            res = sort_dfs(res)
+            
+            print(len(res))
+            print(len(expected_res))
+            print(res)
+            print(expected_res)
+            assert len(res) == len(expected_res)
+            for i in range(len(res)):
+                assert res[i].reset_index(drop=True).equals(expected_res[i].reset_index(drop=True))
+            # assert res == expected_res
 
 
-if __name__ == '__main__':
-    # unittest.main()
-    t = TestFeatureCalculator()
-    # t.test_featurization(L2BookSnapshotFeatureDefinition, L2BookDeltasData)
-    # t.test_featurization(OHLCVFeatureDefinition, TradesData)
-    # t.test_point_in_time_join()
-    # t.test_merge_asof()
-    # t.test_feature_label_set()
-    # t.test_cryptotick_l2_snap_feature_online()
-    # t.test_cryptotick_l2_snap_feature_offline()
-    # t.test_l2_cryptotick_data()
-    # t.test_cryptotick_midprice_feature_offline()
-    t.test_tvi()
-    # t.test_feature_label_set_cryptotick()
 
 
-    # TODO figure out if we need to use lookahead_shift as a label
-    # TODO (since all the features are autoregressive and already imply past values,
-    # TODO we may use just current values as labels?)
-    # def test_look_ahead_merge(self):
-    #     look_ahead = 3
-    #     a = [1, 2, 3, 5, 8, 9, 20, 21, 22, 23, 28, 31, 32, 33, 34, 40, 41, 42, 46]
-    #
-    #     b = [3, 5, 5, 8, 9, 9, 23, 23, 23, 23, 31, 34, 34, 34, 34, 42, 42, 42, 46]
-    #
-    #     df = pd.DataFrame(a, columns=['ts'])
-    #     df['ahead_timestamp'] = df['timestamp'] + look_ahead
-    #     shifted = pd.merge_asof(df, df, left_on='ahead_timestamp', right_on='ts', direction='backward')
-    #     print(shifted)
     #
     # def test_look_ahead_merge_multi(self):
     #     a = [[1, 2, 3, 5], [8, 9, 20, 21], [22, 23, 28], [31, 32, 33, 34, 40], [41, 42, 46], [47, 48]]
+    #     b = [3, 5, 5, 8, 9, 9, 23, 23, 23, 23, 31, 34, 34, 34, 34, 42, 42, 42] # 46
+    #     b = [[3, 5, 5], [8, 9, 9], [23, 23, 23, 23], [31, 34, 34, 34, 34], [42, 42, 42]]
     #     metas = [{'start_ts': l[0], 'end_ts': l[-1]} for l in a]
     #     look_ahead = 3
     #
@@ -387,3 +413,19 @@ if __name__ == '__main__':
     #         # todo put this in task graph
     #         results.append(result)
     #         res_metas.append(res_meta)
+
+if __name__ == '__main__':
+    # unittest.main()
+    t = TestFeatureCalculator()
+    # t.test_featurization(L2BookSnapshotFeatureDefinition, L2BookDeltasData)
+    # t.test_featurization(OHLCVFeatureDefinition, TradesData)
+    # t.test_point_in_time_join()
+    # t.test_merge_asof()
+    # t.test_feature_label_set()
+    # t.test_cryptotick_l2_snap_feature_online()
+    # t.test_cryptotick_l2_snap_feature_offline()
+    # t.test_l2_cryptotick_data()
+    # t.test_cryptotick_midprice_feature_offline()
+    # t.test_tvi()
+    # t.test_feature_label_set_cryptotick()
+    t.test_lookahead_shift()
