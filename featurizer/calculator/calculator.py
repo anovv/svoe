@@ -161,30 +161,31 @@ def build_lookahead_graph(feature_graph: Dict[Interval, Dict[Interval, DAGNode]]
         for i in range(len(intervals)):
             interval = intervals[i]
             group = [nodes[i]]
-            end = min(interval.upper + lookahead_s, intervals[len(intervals) - 1].upper)
+            end = min(interval.upper + lookahead_s, intervals[-1].upper)
             for j in range(i + 1, len(intervals)):
                 if intervals[j].upper <= end or (intervals[j].lower <= end <= intervals[j].upper):
                     group.append(nodes[j])
                 else:
                     break
 
-            # since we don't know exact first and last ts of shifted df without actually running it
+            # since we don't know the exact first and last ts of shifted df without actually running it
             # we use this heuristic to split shifted concated blocks
             if i == 0:
-                # we may lose some data here, but it's negligible
+                # we may lose some data here in the beginning, but it's negligible
                 start = interval.lower + lookahead_s
             else:
                 start = prev_end + 0.001
 
-            if start >= end:
-                raise ValueError(f'Bam: start: {start}, end: {end}')
+            shifted_range_end = intervals[-1].upper - lookahead_s
+            # we skip last interval, since it is already included as concated part of the prev block
+            if i < len(intervals) - 1:
+                shifted_interval = closed(start, end)
 
-            shifted_interval = closed(start, end)
-            print(shifted_interval)
+                # make sure shifted_interval does not go out of bounds of the whole range
+                if shifted_range_end > shifted_interval.upper:
+                    shifted_node = _lookahead_shift_blocks.bind(group, shifted_interval, lookahead)
+                    shifted_nodes[shifted_interval] = shifted_node
             prev_end = end
-
-            shifted_node = _lookahead_shift_blocks.bind(group, shifted_interval, lookahead)
-            shifted_nodes[shifted_interval] = shifted_node
 
         shifted_intervals = list(shifted_nodes.keys())
         if not is_sorted_intervals(shifted_intervals):

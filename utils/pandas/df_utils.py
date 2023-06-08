@@ -94,7 +94,10 @@ def sub_df(df: pd.DataFrame, start: int, end: int) -> pd.DataFrame:
 
 
 def sub_df_ts(df: pd.DataFrame, start_ts: float, end_ts: float) -> pd.DataFrame:
-    return df[df['timestamp'].between(start_ts, end_ts,inclusive='both')]
+    res = df[df['timestamp'].between(start_ts, end_ts, inclusive='both')]
+    if len(res) == 0:
+        raise ValueError(f'Can not find intersection: {start_ts}, {end_ts}, {df}')
+    return res
 
 
 def concat(dfs: List[pd.DataFrame]) -> pd.DataFrame:
