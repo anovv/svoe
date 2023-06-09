@@ -171,10 +171,17 @@ def lookahead_shift(df: pd.DataFrame, lookahead: str) -> pd.DataFrame:
     if lookahead_s < 1:
         raise ValueError('Lookahead interval should be more than 1s')
     cols = list(df.columns)
+    cols.remove('timestamp')
+    if 'receipt_timestamp' in cols:
+        cols.remove('receipt_timestamp')
     df['lookahead_timestamp'] = df['timestamp'] + lookahead_s
     shifted = pd.merge_asof(df, df, left_on='lookahead_timestamp', right_on='timestamp', direction='backward')
+    print(shifted)
     cols_new = [f'{c}_y' for c in cols]
     res_df = shifted[cols_new]
+    res_df.insert(0, 'timestamp', shifted['timestamp_x'])
+    if 'receipt_timestamp' in shifted:
+        res_df.insert(0, 'receipt_timestamp', shifted['receipt_timestamp_x'])
     res_df = res_df.rename(columns=dict(zip(cols_new, cols)))
     start_ts = df.iloc[0]['timestamp']
     end_ts = df.iloc[-1]['timestamp'] - lookahead_s

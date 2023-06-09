@@ -86,13 +86,13 @@ class TestBlocks(unittest.TestCase):
 
         b_ts = [3, 5, 5, 8, 9, 9, 23, 23, 23, 23, 31, 34, 34, 34, 34, 42, 42, 42]
         b_vals = [f'val{ts}' for ts in b_ts]
-        expected_df = pd.DataFrame({'timestamp': b_ts, 'vals': b_vals})
+        expected_df = pd.DataFrame({'timestamp': a_ts[:len(b_ts)], 'vals': b_vals})
 
         res = lookahead_shift(df, lookahead)
         print(res)
-
+        print(expected_df)
+        # assert expected_df.sort_index(axis=1).equals(res.sort_index(axis=1))
         assert expected_df.equals(res)
-
 
 if __name__ == '__main__':
     t = TestBlocks()

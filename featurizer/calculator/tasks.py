@@ -149,6 +149,9 @@ def calculate_feature(
 
     t = time.time()
     df = run_named_events_stream(merged, upstreams, out_stream, interval)
+
+    # TODO add proper column naming here
+
     print(f'[{feature}] Events run in {time.time() - t}s')
 
     if not is_ts_sorted(df):

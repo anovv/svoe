@@ -113,12 +113,6 @@ class MysqlClient:
         end_date: Optional[str] = None
     ) -> List[Dict]:
         # TODO instrument_extra
-        # args = {
-        #     DataCatalog.exchange.name: exchanges,
-        #     DataCatalog.data_type.name: data_types,
-        #     DataCatalog.instrument_type.name: instrument_types,
-        #     DataCatalog.symbol.name: symbols
-        # }
         args = {}
         if compaction is not None:
             args[DataCatalog.compaction.name] = compaction

@@ -136,10 +136,20 @@ def build_feature_set_task_graph(
 
 @ray.remote
 def _lookahead_shift_blocks(block_refs: List[ObjectRef[Block]], interval: Interval, lookahead: str):
+    print('Lookahead shift block started')
     blocks = ray.get(block_refs)
     concated = concat(blocks)
     shifted_concated = lookahead_shift(concated, lookahead)
     shifted = sub_df_ts(shifted_concated, interval.lower, interval.upper)
+    # add label_ prefix
+    cols = list(shifted.columns)
+    cols.remove('timestamp')
+    if 'receipt_timestamp' in cols:
+        cols.remove('receipt_timestamp')
+    cols_new = [f'label_{c}' for c in cols]
+    shifted = shifted.rename(columns=dict(zip(cols, cols_new)))
+
+    print('Lookahead shift block finished')
     return shifted
 
 
@@ -156,8 +166,6 @@ def build_lookahead_graph(feature_graph: Dict[Interval, Dict[Interval, DAGNode]]
         if not is_sorted_intervals(intervals):
             raise ValueError('Intervals should be sorted')
 
-        prev_end = None # end of the prev group
-
         for i in range(len(intervals)):
             interval = intervals[i]
             group = [nodes[i]]
@@ -167,31 +175,16 @@ def build_lookahead_graph(feature_graph: Dict[Interval, Dict[Interval, DAGNode]]
                     group.append(nodes[j])
                 else:
                     break
-
-            # since we don't know the exact first and last ts of shifted df without actually running it
-            # we use this heuristic to split shifted concated blocks
-            if i == 0:
-                # we may lose some data here in the beginning, but it's negligible
-                start = interval.lower + lookahead_s
-            else:
-                start = prev_end + 0.001
-
-            shifted_range_end = intervals[-1].upper - lookahead_s
-            # we skip last interval, since it is already included as concated part of the prev block
             if i < len(intervals) - 1:
-                shifted_interval = closed(start, end)
-
-                # make sure shifted_interval does not go out of bounds of the whole range
-                if shifted_range_end > shifted_interval.upper:
-                    shifted_node = _lookahead_shift_blocks.bind(group, shifted_interval, lookahead)
-                    shifted_nodes[shifted_interval] = shifted_node
-            prev_end = end
-
-        shifted_intervals = list(shifted_nodes.keys())
-        if not is_sorted_intervals(shifted_intervals):
-            raise ValueError('Shifted intervals should be sorted')
-        shifted_range_interval = closed(shifted_intervals[0].lower, shifted_intervals[-1].upper)
-        res[shifted_range_interval] = shifted_nodes
+                shifted_node = _lookahead_shift_blocks.bind(group, interval, lookahead)
+                shifted_nodes[interval] = shifted_node
+            else:
+                # truncate last interval
+                if interval.upper - lookahead_s > interval.lower:
+                    interval = closed(interval.lower, interval.upper - lookahead_s)
+                    shifted_node = _lookahead_shift_blocks.bind(group, interval, lookahead)
+                    shifted_nodes[interval] = shifted_node
+        res[range_interval] = shifted_nodes
 
     return res
 
@@ -296,6 +289,7 @@ def point_in_time_join_dag(
     features_to_join: List[Feature],
     label_feature: Feature
 ) -> Dict[Interval, Dict[Interval, DAGNode]]:
+    print(features_to_join)
     # get range overlaps first
     ranges_per_feature = {}
     for feature in features_to_join:
@@ -383,7 +377,7 @@ def _point_in_time_join_block(
         blocks = ray.get(block_refs)
         concated[feature] = concat(blocks)
 
-    dfs = [concated[label_feature]] # make sure label is first so we use it's ts as join keys
+    dfs = [concated[label_feature]] # make sure label is first so that we can use it's ts as join keys
     for feature in concated:
         if feature == label_feature:
             # it's already there
@@ -397,16 +391,31 @@ def _point_in_time_join_block(
     return sub_df_ts(merged, interval.lower, interval.upper)
 
 
-# TODO type hint
 # TODO for feature scaling https://github.com/online-ml/river/blob/main/river/preprocessing/scale.py
-# def build_feature_label_set_task_graph(
-#     features: List[Feature],
-#     ranges_meta: Dict[Feature, List],
-#     label: Feature,
-#     label_lookahead: Optional[str] = None,
-# ):
-#     # TODO implement label lookahead
-#     dag = {}
-#     dag = build_feature_set_task_graph(dag, features, ranges_meta)
-#
-#     return point_in_time_join_dag(dag, features, label)
+def build_feature_label_set_task_graph(
+    features: List[Feature],
+    label: Feature,
+    label_lookahead: str,
+    data_ranges_meta: Dict[Feature, List[BlockRangeMeta]],
+    obj_ref_cache: Dict[str, Dict[Interval, Tuple[int, Optional[ObjectRef]]]],
+    features_to_store: Optional[List[Feature]] = None,
+    stored_feature_blocks_meta: Optional[Dict[Feature, Dict[Interval, BlockMeta]]] = None,
+):
+    dag = build_feature_set_task_graph(
+        features=features,
+        data_ranges_meta=data_ranges_meta,
+        obj_ref_cache=obj_ref_cache,
+        features_to_store=features_to_store,
+        stored_feature_blocks_meta=stored_feature_blocks_meta
+    )
+
+    lookahead_dag = build_lookahead_graph(dag[label], label_lookahead)
+    label_feature = Feature.make_label(label)
+    print(label_feature.is_label())
+    dag[label_feature] = lookahead_dag
+    # for f in dag:
+    #     print(list(dag[f].keys()))
+    # raise
+    # features_to_join = features.copy().append(label_feature)
+    features.append(label_feature)
+    return point_in_time_join_dag(dag, features, label_feature)

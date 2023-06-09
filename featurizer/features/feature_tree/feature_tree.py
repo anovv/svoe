@@ -5,6 +5,7 @@ from featurizer.data_definitions.data_source_definition import DataSourceDefinit
 from featurizer.features.definitions.feature_definition import FeatureDefinition
 from typing import Type, Dict, List, Callable, Union, Tuple
 from anytree import NodeMixin
+from copy import deepcopy
 
 
 class Feature(NodeMixin):
@@ -13,6 +14,7 @@ class Feature(NodeMixin):
         self.position = position
         self.feature_definition = feature_definition
         self.params = params
+        self._is_label = False
         self.feature_key = self._feature_key()
 
     def __hash__(self):
@@ -23,7 +25,9 @@ class Feature(NodeMixin):
 
     def __repr__(self):
         short_key = self.feature_key[:8]
-        if self.feature_definition.is_data_source():
+        if self._is_label:
+            return f'label-{self.feature_definition.__name__}-{self.position}-{short_key}'
+        elif self.feature_definition.is_data_source():
             return f'data-source-{self.feature_definition.__name__}-{self.position}-{short_key}'
         else:
             return f'feature-{self.feature_definition.__name__}-{self.position}-{short_key}'
@@ -34,9 +38,9 @@ class Feature(NodeMixin):
         dep_data_params = [d.params for d in data_deps]
         dep_feature_params = [f.params for f in feature_deps]
 
-        # TODO add feature_defenition version to hash
+        # TODO add current and dep feature_defenition version to hash
         # TODO prev feature/data dep keys should also be a part of the key
-        return joblib.hash([self.feature_definition.__name__, dep_data_params, dep_feature_params])
+        return joblib.hash([self._is_label, self.feature_definition.__name__, dep_data_params, dep_feature_params])
 
     def get_data_deps(self) -> List['Feature']:
         data_leafs = []
@@ -78,6 +82,17 @@ class Feature(NodeMixin):
 
         postorder(self, callback)
         return stream_graph
+
+    def is_label(self) -> bool:
+        return self._is_label
+
+    @classmethod
+    def make_label(cls, feature: 'Feature') -> 'Feature':
+        c = deepcopy(feature)
+        c._is_label = True
+        # recalc feature key
+        c.feature_key = c._feature_key()
+        return c
 
 
 def construct_feature_tree(

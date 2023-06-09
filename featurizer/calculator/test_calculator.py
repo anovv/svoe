@@ -299,25 +299,30 @@ class TestFeatureCalculator(unittest.TestCase):
     def test_lookahead_shift(self):
         lookahead = '3s'
 
-        def _mock_df(ts: List[float]):
-            vals = [f'val{t}' for t in ts]
-            df = pd.DataFrame({'timestamp': ts, 'vals': vals})
-            return df
+        def _mock_df(ts: List[float], vals: List[float], col_name: str):
+            return pd.DataFrame({'timestamp': ts, col_name: vals})
 
         @ray.remote
-        def mock_df(ts: List[float]):
-            return _mock_df(ts)
+        def mock_df(ts: List[float], vals: List[float], col_name: str):
+            return _mock_df(ts, vals, col_name)
 
         data = [[1, 2, 3, 5], [8, 9, 20, 21], [22, 23, 28], [31, 32, 33, 34, 40], [41, 42, 46], [47, 48]]
 
-        expected_res = [_mock_df([5, 5, 8]), _mock_df([9, 9, 23, 23, 23, 23]),  _mock_df([31]),  _mock_df([34, 34, 34, 34, 42, 42, 42])]
+
+        expected_res = [
+            _mock_df(data[0], [3, 5, 5, 8], 'label_vals'),
+            _mock_df(data[1], [9, 9, 23, 23], 'label_vals'),
+            _mock_df(data[2], [23, 23, 31], 'label_vals'),
+            _mock_df(data[3], [34, 34, 34, 34, 42], 'label_vals'),
+            _mock_df([41, 42], [42, 42], 'label_vals')
+        ]
 
         input_dag = {}
         range_interval = closed(data[0][0], data[-1][-1])
         nodes = {}
         for ts in data:
             interval = closed(ts[0], ts[-1])
-            node = mock_df.bind(ts)
+            node = mock_df.bind(ts, ts, 'vals')
             nodes[interval] = node
 
         input_dag[range_interval] = nodes
@@ -336,9 +341,8 @@ class TestFeatureCalculator(unittest.TestCase):
                 dfs = toolz.first(r.values())
                 res.extend(dfs)
 
-            # TODO why empty frames?
             res = sort_dfs(res)
-            
+
             print(len(res))
             print(len(expected_res))
             print(res)
@@ -346,73 +350,70 @@ class TestFeatureCalculator(unittest.TestCase):
             assert len(res) == len(expected_res)
             for i in range(len(res)):
                 assert res[i].reset_index(drop=True).equals(expected_res[i].reset_index(drop=True))
-            # assert res == expected_res
 
+    def test_feature_label_set(self):
 
+        api = Api()
 
+        feature_params1 = {1: {'dep_schema': 'cryptotick', 'sampling': '1s'}}
+        feature_params2 = {2: {'dep_schema': 'cryptotick', 'sampling': '1s'}}
+        data_params = [
+            {DataCatalog.exchange.name: 'BINANCE',
+             DataCatalog.data_type.name: 'l2_book',
+             DataCatalog.instrument_type.name: 'spot',
+             DataCatalog.symbol.name: 'BTC-USDT'}
+        ]
 
-    #
-    # def test_look_ahead_merge_multi(self):
-    #     a = [[1, 2, 3, 5], [8, 9, 20, 21], [22, 23, 28], [31, 32, 33, 34, 40], [41, 42, 46], [47, 48]]
-    #     b = [3, 5, 5, 8, 9, 9, 23, 23, 23, 23, 31, 34, 34, 34, 34, 42, 42, 42] # 46
-    #     b = [[3, 5, 5], [8, 9, 9], [23, 23, 23, 23], [31, 34, 34, 34, 34], [42, 42, 42]]
-    #     metas = [{'start_ts': l[0], 'end_ts': l[-1]} for l in a]
-    #     look_ahead = 3
-    #
-    #     groups = []
-    #
-    #     # groups
-    #     for i in range(len(metas)):
-    #         meta = metas[i]
-    #         group = [meta]
-    #         end = meta['end_ts'] + look_ahead
-    #         for j in range(i + 1, len(metas)):
-    #             if metas[j]['end_ts'] <= end or (metas[j]['start_ts'] <= end <= metas[j]['end_ts']):
-    #                 group.append(metas[j])
-    #             else:
-    #                 break
-    #         groups.append(group)
-    #
-    #     res_metas = []
-    #     results = []
-    #     for i in range(len(metas)):
-    #         meta = metas[i]
-    #         group = groups[i]
-    #         start = meta['start_ts'] + look_ahead
-    #         if start > group[-1]['end_ts']:
-    #             # no data in lookahead window for this block
-    #             continue
-    #
-    #         # TODO overlap with groups end?
-    #         end = meta['end_ts'] + look_ahead
-    #
-    #         # TODO
-    #         def concat(group):
-    #             return
-    #
-    #         # TODO
-    #         def sub_df(*args):
-    #             return
-    #
-    #         # TODO
-    #         def to_res(*args):
-    #             return
-    #
-    #         # TODO
-    #         dfs = []
-    #
-    #         df = dfs[i]
-    #         df['ahead_ts'] = df['ts'] + look_ahead
-    #         grouped = concat(group)
-    #         shifted = pd.merge_asof(df, grouped, left_on='ahead_timestamp', right_on='ts', direction='backward')
-    #         result = sub_df(to_res(shifted), start, end)
-    #
-    #         # TODO overlap with groups end?
-    #         res_meta = {'start_ts': start, 'end_ts': end}
-    #
-    #         # todo put this in task graph
-    #         results.append(result)
-    #         res_metas.append(res_meta)
+        feature_mid_price = construct_feature_tree(MidPriceFD, data_params, feature_params1)
+        feature_volatility = construct_feature_tree(VolatilityStddevFD, data_params, feature_params2)
+
+        features = [feature_mid_price, feature_volatility]
+        data_deps = set()
+        for feature in features:
+            for d in feature.get_data_deps():
+                data_deps.add(d)
+        data_keys = [data_key(d.params) for d in data_deps]
+        print(data_keys)
+        start_date = '2023-02-01'
+        end_date = '2023-02-01'
+        ranges_meta_per_data_key = api.get_data_meta(data_keys, start_date=start_date, end_date=end_date)
+        data_ranges_meta = {data: ranges_meta_per_data_key[data_key(data.params)] for data in data_deps}
+
+        # stored_features_meta = api.get_features_meta(features, start_date=start_date, end_date=end_date)
+
+        cache = {}
+        label_feature = feature_mid_price
+        dag = C.build_feature_label_set_task_graph(
+            features=features,
+            label=label_feature,
+            label_lookahead='2s',
+            data_ranges_meta=data_ranges_meta,
+            obj_ref_cache={}
+        )
+
+        res = []
+        with ray.init(address='auto', ignore_reinit_error=True):
+            c = CacheActor.options(name=CACHE_ACTOR_NAME).remote(
+                cache)  # assign to unused var, so it stays in Ray's scope
+            num_ranges = len(dag)
+            i = 0
+            for range_interval in dag:
+                nodes = []
+                for interval in dag[range_interval]:
+                    nodes.append((label_feature, dag[range_interval][interval]))
+                print(f'Executing {i + 1}/{num_ranges} range: {range_interval}')
+                r = C.execute_graph_nodes(nodes)
+                dfs = toolz.first(r.values())
+                res.extend(dfs)
+                i += 1
+            df = concat(sort_dfs(res))
+
+            print(df.head())
+            print(df.tail())
+            # for name in ['mid_price', 'label_mid_price', 'volatility']:
+            #     df.plot('timestamp', name, label=name)
+            #
+            # plt.show()
 
 if __name__ == '__main__':
     # unittest.main()
@@ -428,4 +429,5 @@ if __name__ == '__main__':
     # t.test_cryptotick_midprice_feature_offline()
     # t.test_tvi()
     # t.test_feature_label_set_cryptotick()
-    t.test_lookahead_shift()
+    # t.test_lookahead_shift()
+    t.test_feature_label_set()
