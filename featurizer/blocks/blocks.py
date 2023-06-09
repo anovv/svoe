@@ -193,3 +193,13 @@ def is_sorted_intervals(intervals: List[Interval]) -> bool:
         if intervals[i - 1].upper > intervals[i].lower:
             return False
     return True
+
+
+def merge_asof_multi(dfs: List[pd.DataFrame]) -> pd.DataFrame:
+    res = dfs[0]
+    for i in range(1, len(dfs)):
+        res = pd.merge_asof(res, dfs[i], on='timestamp', direction='backward')
+        if 'receipt_timestamp_x' in res:
+            res.insert(1, 'receipt_timestamp', res['receipt_timestamp_x'])
+            res = res.drop(columns=['receipt_timestamp_x', 'receipt_timestamp_y'])
+    return res

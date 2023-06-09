@@ -3,7 +3,8 @@ import unittest
 import pandas as pd
 import portion as P
 
-from featurizer.blocks.blocks import get_overlaps, mock_meta, prune_overlaps, lookahead_shift
+from featurizer.blocks.blocks import get_overlaps, mock_meta, prune_overlaps, lookahead_shift, merge_asof_multi
+from featurizer.utils.testing_utils import mock_ts_df
 
 
 class TestBlocks(unittest.TestCase):
@@ -78,6 +79,23 @@ class TestBlocks(unittest.TestCase):
         pruned_overlaps = prune_overlaps(get_overlaps(grouped_range))
         self.assertEqual(pruned_overlaps, expected)
 
+    def test_merge_asof(self):
+        dfs = [
+            mock_ts_df([4, 7, 9, 14, 16, 20], 'a'),
+            mock_ts_df([2, 5, 6, 8, 10, 11, 12, 18], 'b'),
+            mock_ts_df([1, 3, 7, 10, 19], 'c'),
+        ]
+        res = merge_asof_multi(dfs)
+        print(res)
+        expected = pd.DataFrame({
+            'timestamp': [4, 7, 9, 14, 16, 20],
+            'a': ['a0', 'a1', 'a2', 'a3', 'a4', 'a5'],
+            'b': ['b0', 'b2', 'b3', 'b6', 'b6', 'b7'],
+            'c': ['c1', 'c2', 'c2', 'c3', 'c3', 'c4']
+        })
+        assert res.equals(expected)
+
+
     def test_look_ahead_shift(self):
         lookahead = '3s'
         a_ts = [1, 2, 3, 5, 8, 9, 20, 21, 22, 23, 28, 31, 32, 33, 34, 40, 41, 42, 46]
@@ -91,7 +109,6 @@ class TestBlocks(unittest.TestCase):
         res = lookahead_shift(df, lookahead)
         print(res)
         print(expected_df)
-        # assert expected_df.sort_index(axis=1).equals(res.sort_index(axis=1))
         assert expected_df.equals(res)
 
 if __name__ == '__main__':
@@ -99,4 +116,5 @@ if __name__ == '__main__':
 
     # t.test_overlaps()
     # t.test_pruned_overlaps()
-    t.test_look_ahead_shift()
+    # t.test_look_ahead_shift()
+    t.test_merge_asof()

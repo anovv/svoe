@@ -1,4 +1,3 @@
-import matplotlib.pyplot as plt
 import ray
 import toolz
 from portion import closed
@@ -22,20 +21,12 @@ import unittest
 import pandas as pd
 from typing import Type, List
 from anytree import RenderTree
-from featurizer.utils.testing_utils import mock_feature, mock_trades_data_and_meta, mock_l2_book_delta_data_and_meta, mock_ts_df, mock_ts_df_remote
-from utils.pandas.df_utils import concat, load_df, merge_asof_multi, is_ts_sorted, sort_dfs, plot_multi
+from featurizer.utils.testing_utils import mock_feature, mock_ts_df, mock_ts_df_remote
+from utils.pandas.df_utils import concat, load_df, is_ts_sorted, sort_dfs, plot_multi
+from featurizer.blocks.blocks import merge_asof_multi
 
 
 class TestFeatureCalculator(unittest.TestCase):
-
-    def test_merge_asof(self):
-        dfs = [
-            mock_ts_df([4, 7, 9, 14, 16, 20], 'a'),
-            mock_ts_df([2, 5, 6, 8, 10, 11, 12, 18], 'b'),
-            mock_ts_df([1, 3, 7, 10, 19], 'c'),
-        ]
-        res = C.merge_asof_multi(dfs)
-        print(res)
 
     def test_point_in_time_join(self):
         label_feature = mock_feature(1)
@@ -386,7 +377,7 @@ class TestFeatureCalculator(unittest.TestCase):
         dag = C.build_feature_label_set_task_graph(
             features=features,
             label=label_feature,
-            label_lookahead='2s',
+            label_lookahead='4s',
             data_ranges_meta=data_ranges_meta,
             obj_ref_cache={}
         )

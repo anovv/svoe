@@ -8,12 +8,12 @@ from ray.types import ObjectRef
 from featurizer.features.feature_tree.feature_tree import Feature, postorder
 from featurizer.blocks.blocks import Block, meta_to_interval, interval_to_meta, get_overlaps, BlockRangeMeta, \
     prune_overlaps, range_meta_to_interval, ranges_to_interval_dict, BlockMeta, overlaps_keys, is_sorted_intervals, \
-    lookahead_shift
+    lookahead_shift, merge_asof_multi
 from portion import Interval, IntervalDict, closed
 import pandas as pd
 
 from featurizer.calculator.tasks import calculate_feature, load_if_needed, bind_and_cache, context
-from utils.pandas.df_utils import concat, sub_df_ts, merge_asof_multi
+from utils.pandas.df_utils import concat, sub_df_ts
 from utils.time.utils import convert_str_to_seconds
 
 
