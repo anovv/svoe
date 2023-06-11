@@ -1,12 +1,13 @@
 from typing import Dict, List
 
-from fastapi import FastAPI
+from fastapi import FastAPI, UploadFile
 import uvicorn
 import json, typing
 
 from pydantic import BaseModel
 from starlette.responses import Response
 
+import featurizer.api.api
 from ray_cluster.manager.manager import RayClusterManager
 
 
@@ -50,6 +51,7 @@ class PrettyJSONResponse(Response):
 
 app = FastAPI()
 ray_cluster_manager = RayClusterManager()
+featurizer_api = featurizer.api.api.Api()
 
 
 @app.get('/clusters', response_model=Resp, response_class=PrettyJSONResponse)
@@ -80,6 +82,26 @@ def create_cluster(config: RayClusterConfig):
 def get_cluster_status(name: str):
     status, err = ray_cluster_manager.get_ray_cluster_status(name=name)
     return Resp(result=status, error=err)
+
+
+@app.post('/feature_definition/', response_model=Resp, response_class=PrettyJSONResponse)
+def upload_feature_definition(
+    owner_id: str,
+    feature_group: str,
+    feature_definition: str,
+    version: str,
+    tags: List[Dict],
+    files: List[UploadFile]
+):
+    res, err = featurizer_api.store_feature_def(
+        owner_id=owner_id,
+        feature_group=feature_group,
+        feature_definition=feature_definition,
+        version=version,
+        tags=tags,
+        files=files
+    )
+    return Resp(result=res, error=err)
 
 
 if __name__ == '__main__':

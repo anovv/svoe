@@ -1,4 +1,7 @@
+import tempfile
 
+import aiofiles
+from fastapi import UploadFile
 from portion import Interval, closed, IntervalDict
 
 from typing import Optional, Dict, List, Tuple
@@ -9,7 +12,8 @@ from featurizer.features.feature_tree.feature_tree import Feature
 from featurizer.sql.client import MysqlClient
 from featurizer.sql.data_catalog.models import DataCatalog
 from featurizer.sql.feature_catalog.models import FeatureCatalog, SVOE_S3_FEATURE_CATALOG_BUCKET
-from utils.s3.s3_utils import delete_files
+from featurizer.sql.feature_def.models import construct_feature_def_s3_path, FeatureDefinitionDB
+from utils.s3.s3_utils import delete_files, upload_dir
 
 # TODO this should be synced with DataDef somehow?
 DataKey = Tuple[str, str, str, str]
@@ -101,5 +105,46 @@ class Api:
         paths = [r['path'] for r in raw_data]
         delete_files(SVOE_S3_FEATURE_CATALOG_BUCKET, paths)
         self.client.delete_feature_catalog(feature_keys)
+
+    # TODO verify consistency + retries in case of failures
+    def store_feature_def(
+        self,
+        owner_id: str,
+        feature_group: str,
+        feature_definition: str,
+        version: str,
+        tags: List[Dict],
+        files: List[UploadFile]
+    ) -> Tuple[bool, Optional[str]]:
+        # TODO do wee need to set hash?
+        item = FeatureDefinitionDB(
+            owner_id=owner_id,
+            feature_group=feature_group,
+            feature_definition=feature_definition,
+            version=version,
+            tags=tags
+        )
+        s3_path = construct_feature_def_s3_path(item)
+        item.path = s3_path
+        temp_dir = None
+        try:
+            temp_dir = tempfile.TemporaryDirectory()
+            for file in files:
+                file_path = f'{temp_dir.name}/{file.filename}'
+                async with aiofiles.open(file_path, 'wb') as out_file:
+                    while content := await file.read(1024):  # async read file chunk
+                        await out_file.write(content)  # async write file chunk
+
+            # upload to s3
+            upload_dir(s3_path=s3_path, local_path=f'{temp_dir.name}/')
+
+            # TODO update MySQL only on S3 success
+            self.client.write_feature_def(item)
+            return True, None
+        except Exception as e:
+            return False, f'Failed to store feature def: {e}'
+        finally:
+            if temp_dir:
+                temp_dir.cleanup()
 
 

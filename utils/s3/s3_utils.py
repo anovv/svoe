@@ -1,4 +1,5 @@
 import awswrangler as wr
+import s3fs
 
 import utils.concurrency.concurrency_utils as cu
 import boto3
@@ -89,6 +90,13 @@ def delete_files(bucket_name: str, paths: List[str]):
         Bucket=bucket_name,
         Delete={'Objects': list(map(lambda path: {'Key': to_bucket_and_key(path)[1]}, paths))}
     )
+
+
+def upload_dir(s3_path: str, local_path: str):
+    if not local_path[-1] == '/':
+        raise ValueError('Local path should end with /')
+    s3 = s3fs.S3FileSystem() # TODO init in container?
+    s3.put(local_path, s3_path, recursive=True)
 
 
 def inventory() -> Generator[pd.DataFrame, None, None]:

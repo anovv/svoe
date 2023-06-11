@@ -10,6 +10,8 @@ from featurizer.data_catalog.common.data_models.models import InputItemBatch
 
 import os
 
+from featurizer.sql.feature_def.models import FeatureDefinitionDB, construct_feature_def_s3_path
+
 Session = sessionmaker()
 
 
@@ -168,5 +170,14 @@ class MysqlClient:
         session = Session()
         session.query(FeatureCatalog).filter(FeatureCatalog.feature_key.in_(feature_keys)).delete()
         session.commit()
+
+    def write_feature_def(
+        self,
+        item: FeatureDefinitionDB
+    ):
+        session = Session()
+        session.add(item)
+        session.commit()
+
 
 
