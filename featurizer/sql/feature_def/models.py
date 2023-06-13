@@ -28,10 +28,10 @@ class FeatureDefinitionDB(Base):
 def construct_feature_def_s3_path(item: FeatureDefinitionDB) -> str:
     res = f's3://{SVOE_S3_FEATURE_DEFINITIONS_BUCKET}/'
     for field in [
-        FeatureDefinitionDB.owner_id,
-        FeatureDefinitionDB.feature_group,
-        FeatureDefinitionDB.feature_definition,
-        FeatureDefinitionDB.version
+        FeatureDefinitionDB.owner_id.name,
+        FeatureDefinitionDB.feature_group.name,
+        FeatureDefinitionDB.feature_definition.name,
+        FeatureDefinitionDB.version.name
     ]:
         v = item.__dict__[field]
         res += f'{v}/'

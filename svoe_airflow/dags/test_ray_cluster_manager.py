@@ -3,7 +3,7 @@ from datetime import datetime
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 
-from client.ray_cluster_manager.fast_api_client.models import RayClusterWorkerGroupConfigRayResources, RayClusterConfig, RayClusterWorkerGroupConfig
+from client.fast_api_client.models import RayClusterWorkerGroupConfigRayResources, RayClusterConfig, RayClusterWorkerGroupConfig
 from client.ray_cluster_manager.ray_cluster_manager_client import RayClusterManagerClient
 
 

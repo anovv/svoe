@@ -1,13 +1,11 @@
 import tempfile
 
-import aiofiles
 from fastapi import UploadFile
-from portion import Interval, closed, IntervalDict
+from portion import Interval, closed
 
 from typing import Optional, Dict, List, Tuple
 
-from featurizer.blocks.blocks import BlockRangeMeta, make_ranges, prune_overlaps, get_overlaps, ranges_to_interval_dict, \
-    BlockMeta
+from featurizer.blocks.blocks import BlockRangeMeta, make_ranges, BlockMeta
 from featurizer.features.feature_tree.feature_tree import Feature
 from featurizer.sql.client import MysqlClient
 from featurizer.sql.data_catalog.models import DataCatalog
@@ -113,9 +111,11 @@ class Api:
         feature_group: str,
         feature_definition: str,
         version: str,
-        tags: List[Dict],
+        tags: Optional[List[Dict]],
         files: List[UploadFile]
     ) -> Tuple[bool, Optional[str]]:
+        if len(files) == 0:
+            return False, 'No files are received'
         # TODO do wee need to set hash?
         item = FeatureDefinitionDB(
             owner_id=owner_id,
@@ -127,18 +127,24 @@ class Api:
         s3_path = construct_feature_def_s3_path(item)
         item.path = s3_path
         temp_dir = None
+        # TODO first check if feature def exists, clean up s3 if it does
+
         try:
             temp_dir = tempfile.TemporaryDirectory()
+            print('bam')
             for file in files:
+                # TODO verify file size/content/number of files
+                # TODO asyncify
                 file_path = f'{temp_dir.name}/{file.filename}'
-                async with aiofiles.open(file_path, 'wb') as out_file:
-                    while content := await file.read(1024):  # async read file chunk
-                        await out_file.write(content)  # async write file chunk
+                with open(file_path, 'wb') as out_file:
+                    while content := file.file.read(1024 * 1024):
+                        out_file.write(content)
 
             # upload to s3
             upload_dir(s3_path=s3_path, local_path=f'{temp_dir.name}/')
 
-            # TODO update MySQL only on S3 success
+            # TODO update DB only on S3 success
+            self.client.create_tables()
             self.client.write_feature_def(item)
             return True, None
         except Exception as e:

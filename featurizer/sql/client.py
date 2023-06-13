@@ -42,6 +42,7 @@ class MysqlClient:
         Session.configure(bind=engine)
         return engine
 
+    # TODO this should not be used, migrate table management to Alembic
     def create_tables(self):
         # creates if not exists
         Base.metadata.create_all(self.engine)

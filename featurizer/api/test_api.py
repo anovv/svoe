@@ -26,6 +26,12 @@ class TestDataCatalogApi(unittest.TestCase):
         api = Api()
         api.delete_features([feature_tvi])
 
+    def test_store_feature_def(self):
+        # TODO
+        pass
+
+
+
 
 if __name__ == '__main__':
     t = TestDataCatalogApi()

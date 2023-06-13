@@ -1,4 +1,4 @@
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 from fastapi import FastAPI, UploadFile
 import uvicorn
@@ -84,15 +84,18 @@ def get_cluster_status(name: str):
     return Resp(result=status, error=err)
 
 
+# TODO pass param indicating if we want to override existing feature_def
 @app.post('/feature_definition/', response_model=Resp, response_class=PrettyJSONResponse)
 def upload_feature_definition(
     owner_id: str,
     feature_group: str,
     feature_definition: str,
     version: str,
-    tags: List[Dict],
+    tags: Optional[List[Dict]],
     files: List[UploadFile]
 ):
+    if tags is not None and len(tags) == 0:
+        tags = None
     res, err = featurizer_api.store_feature_def(
         owner_id=owner_id,
         feature_group=feature_group,

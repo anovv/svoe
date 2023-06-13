@@ -26,4 +26,4 @@ xgboost==1.7.5
 xgboost_ray==0.1.16
 aiofiles
 fastapi
-
+python-multipart

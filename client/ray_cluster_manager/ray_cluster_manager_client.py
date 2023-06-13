@@ -2,10 +2,9 @@ import time
 from typing import Any
 
 from client.base_client import BaseClient
-from client.ray_cluster_manager.fast_api_client import Client
-from client.ray_cluster_manager.fast_api_client.api.default import create_cluster_cluster_post, \
-    delete_cluster_cluster_name_delete, list_clusters_clusters_get, get_cluster_status_cluster_status_name_get
-from client.ray_cluster_manager.fast_api_client.models import RayClusterConfig, RayClusterWorkerGroupConfig, \
+from client.fast_api_client.api.default import create_cluster_cluster_post, list_clusters_clusters_get, \
+    delete_cluster_cluster_name_delete, get_cluster_status_cluster_status_name_get
+from client.fast_api_client.models import RayClusterConfig, RayClusterWorkerGroupConfig, \
     RayClusterWorkerGroupConfigRayResources, Resp
 
 
@@ -13,13 +12,6 @@ class RayClusterManagerClient(BaseClient):
 
     def __init__(self):
         super(RayClusterManagerClient, self).__init__()
-        self.client = Client(
-            base_url=self.base_url,
-            follow_redirects=True,
-            raise_on_unexpected_status=True,
-            timeout=120,
-            verify_ssl=False
-        )
 
     def create_ray_cluster(self, config: RayClusterConfig) -> bool:
         return bool(self._parse_and_log_error(Resp.from_dict(
@@ -60,12 +52,6 @@ class RayClusterManagerClient(BaseClient):
         print("raycluster {} status is not running yet, current status is {}".format(name, status[
             "state"] if status else "unknown"))
         return False
-
-    def _parse_and_log_error(self, resp: Resp) -> Any:
-        if resp.result is None or resp.error is not None:
-            print(resp.error) # TODO log properly
-            return None
-        return resp.result
 
 
 if __name__ == '__main__':
