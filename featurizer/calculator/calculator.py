@@ -411,11 +411,6 @@ def build_feature_label_set_task_graph(
 
     lookahead_dag = build_lookahead_graph(dag[label], label_lookahead)
     label_feature = Feature.make_label(label)
-    print(label_feature.is_label())
     dag[label_feature] = lookahead_dag
-    # for f in dag:
-    #     print(list(dag[f].keys()))
-    # raise
-    # features_to_join = features.copy().append(label_feature)
     features.append(label_feature)
     return point_in_time_join_dag(dag, features, label_feature)

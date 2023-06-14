@@ -1,4 +1,7 @@
+import os
 import tempfile
+import zipfile
+from io import BytesIO
 
 from fastapi import UploadFile
 from portion import Interval, closed
@@ -11,7 +14,7 @@ from featurizer.sql.client import MysqlClient
 from featurizer.sql.data_catalog.models import DataCatalog
 from featurizer.sql.feature_catalog.models import FeatureCatalog, SVOE_S3_FEATURE_CATALOG_BUCKET
 from featurizer.sql.feature_def.models import construct_feature_def_s3_path, FeatureDefinitionDB
-from utils.s3.s3_utils import delete_files, upload_dir
+from utils.s3.s3_utils import delete_files, upload_dir, download_dir
 
 # TODO this should be synced with DataDef somehow?
 DataKey = Tuple[str, str, str, str]
@@ -131,8 +134,8 @@ class Api:
 
         try:
             temp_dir = tempfile.TemporaryDirectory()
-            print('bam')
             for file in files:
+                # TODO file.filename does not include subdirs
                 # TODO verify file size/content/number of files
                 # TODO asyncify
                 file_path = f'{temp_dir.name}/{file.filename}'
@@ -152,5 +155,42 @@ class Api:
         finally:
             if temp_dir:
                 temp_dir.cleanup()
+
+    def get_feature_def_files_zipped(
+        self,
+        owner_id: str,
+        feature_group: str,
+        feature_definition: str,
+        version: str
+    ) -> Tuple[Optional[bytes], Optional[str]]:
+        temp_dir = None
+        try:
+            fd_db = self.client.get_feature_def(
+                owner_id=owner_id,
+                feature_group=feature_group,
+                feature_definition=feature_definition,
+                version=version
+            )
+            if not fd_db:
+                return None, 'Unable to find feature def in DB'
+            s3_path = fd_db.path
+            temp_dir, local_files = download_dir(s3_path)
+
+            buf = BytesIO()
+            zf = zipfile.ZipFile(buf, "w")
+            for fpath in local_files:
+                fdir, fname = os.path.split(fpath)
+                zf.write(fpath, fname)
+
+            zf.close()
+            return buf.getvalue(), None
+
+        except Exception as e:
+            return None, f'Failed to get feature def: {e}'
+        finally:
+            if temp_dir:
+                temp_dir.cleanup()
+
+
 
 

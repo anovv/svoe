@@ -22,6 +22,7 @@ class FeaturizerClient(BaseClient):
         tags: Optional[List[Dict]] = None
     ) -> bool:
         file_set = set()
+        # TODO forbid subdirs
         for _dir, _, files in os.walk(local_path):
             for file_name in files:
                 rel_dir = os.path.relpath(_dir, local_path)

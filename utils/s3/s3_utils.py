@@ -1,10 +1,13 @@
+import tempfile
+from io import BytesIO
+
 import awswrangler as wr
 import s3fs
 
 import utils.concurrency.concurrency_utils as cu
 import boto3
 import functools
-from typing import Tuple, List, Any, Optional, Generator
+from typing import Tuple, List, Any, Optional, Generator, Dict
 import pandas as pd
 import os
 
@@ -97,6 +100,20 @@ def upload_dir(s3_path: str, local_path: str):
         raise ValueError('Local path should end with /')
     s3 = s3fs.S3FileSystem() # TODO init in container?
     s3.put(local_path, s3_path, recursive=True)
+
+
+def download_dir(s3_path: str) -> Tuple[tempfile.TemporaryDirectory, List[str]]:
+    s3 = s3fs.S3FileSystem()  # TODO init in container?
+    files = s3.ls(s3_path) # removes 's3://' prefix
+    s3_path_no_pref = s3_path.removeprefix('s3://')
+
+    temp_dir = tempfile.TemporaryDirectory()
+    paths = [f'{temp_dir.name}/{f.removeprefix(s3_path_no_pref)}' for f in files]
+    # TODO asyncify/multithread
+    for i in range(len(files)):
+        s3.download(files[i], paths[i])
+
+    return temp_dir, paths
 
 
 def inventory() -> Generator[pd.DataFrame, None, None]:

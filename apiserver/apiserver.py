@@ -1,11 +1,12 @@
 from typing import Dict, List, Optional
 
-from fastapi import FastAPI, UploadFile
+from fastapi import FastAPI, UploadFile, Response
+from fastapi.responses import FileResponse
 import uvicorn
 import json, typing
 
 from pydantic import BaseModel
-from starlette.responses import Response
+# from starlette.responses import Response
 
 import featurizer.api.api
 from ray_cluster.manager.manager import RayClusterManager
@@ -105,6 +106,32 @@ def upload_feature_definition(
         files=files
     )
     return Resp(result=res, error=err)
+
+
+@app.get('/feature_definition/')
+def get_feature_definition_files(
+    owner_id: str,
+    feature_group: str,
+    feature_definition: str,
+    version: str,
+):
+    zipped_bytes, err = featurizer_api.get_feature_def_files_zipped(
+        owner_id=owner_id,
+        feature_group=feature_group,
+        feature_definition=feature_definition,
+        version=version,
+    )
+
+    if zipped_bytes is not None:
+        zip_filename = f'{owner_id}-{feature_group}-{feature_definition}-{version}.zip'
+        return Response(zipped_bytes, media_type="application/x-zip-compressed", headers={
+            'Content-Disposition': f'attachment;filename={zip_filename}'
+        })
+    else:
+        return {
+            'res': None,
+            'err': err,
+        }
 
 
 if __name__ == '__main__':

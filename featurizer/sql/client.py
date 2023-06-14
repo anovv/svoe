@@ -180,5 +180,19 @@ class MysqlClient:
         session.add(item)
         session.commit()
 
+    def get_feature_def(
+        self,
+        owner_id: str,
+        feature_group: str,
+        feature_definition: str,
+        version: str,
+    ) -> FeatureDefinitionDB:
+
+        session = Session()
+        return session.query(FeatureDefinitionDB).get((owner_id, feature_group, feature_definition, version))
+
+
+
+
 
 

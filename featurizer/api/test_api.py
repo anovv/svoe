@@ -1,4 +1,8 @@
 import unittest
+import zipfile
+import io
+
+import requests
 
 from featurizer.api.api import Api
 from featurizer.features.definitions.tvi.trade_volume_imb_fd import TradeVolumeImbFD
@@ -30,9 +34,28 @@ class TestDataCatalogApi(unittest.TestCase):
         # TODO
         pass
 
+    def test_get_feature_def_files(self):
+        # f = api.client.get_feature_def(
+        #     owner_id='0',
+        #     feature_group='test_feature_group',
+        #     feature_definition='test_feature_definition',
+        #     version='1'
+        # )
+
+        res = requests.get('http://localhost:1228/feature_definition/', params={
+            'owner_id': '0',
+            'feature_group': 'test_feature_group',
+            'feature_definition': 'test_feature_definition',
+            'version': '1'
+        })
+        extract_path = '//Users/anov/IdeaProjects/svoe/featurizer/features/definitions/test_feature_group' # TODO
+        z = zipfile.ZipFile(io.BytesIO(res.content))
+        z.extractall(path=extract_path)
+        print(z.infolist())
+
 
 
 
 if __name__ == '__main__':
     t = TestDataCatalogApi()
-    t.test_delete_feature()
+    t.test_get_feature_def_files()
