@@ -1,7 +1,7 @@
 import joblib
 from streamz import Stream
 
-from typing import Dict, List, Callable, Union, Tuple
+from typing import Dict, List, Callable, Union, Tuple, Type
 from anytree import NodeMixin
 from copy import deepcopy
 
@@ -10,7 +10,7 @@ from featurizer.utils.definitions_loader import DefinitionsLoader
 
 
 class Feature(NodeMixin):
-    def __init__(self, children: List['Feature'], position: int, feature_definition: DataDefinition, params: Dict):
+    def __init__(self, children: List['Feature'], position: int, feature_definition: Type[DataDefinition], params: Dict):
         self.children = children
         self.position = position
         self.feature_definition = feature_definition
@@ -97,7 +97,7 @@ class Feature(NodeMixin):
 
 
 def construct_feature_tree(
-    root_def_name: str,
+    root_def_name: Union[str, Type[DataDefinition]],
     data_params: Union[Dict, List],
     feature_params: Union[Dict, List]
 ) -> Feature:
@@ -106,13 +106,16 @@ def construct_feature_tree(
 
 # traverse DataDefinition tree to construct parametrized FeatureTree
 def _construct_feature_tree(
-    root_def_name: str,
+    root_def_name: Union[str, Type[DataDefinition]],
     feature_position_ref: List[int],
     data_position_ref: List[int],
     data_params: Union[Dict, List],
     feature_params: Union[Dict, List]
 ) -> Feature:
-    root_def = Loader.load_definition(root_def_name)
+    if isinstance(root_def_name, str):
+        root_def = DefinitionsLoader.load(root_def_name)
+    else:
+        root_def = root_def_name
     # TODO deprecate is_data_source, us isinstance
     if root_def.is_data_source():
         position = data_position_ref[0]
@@ -120,7 +123,7 @@ def _construct_feature_tree(
         return Feature(
             children=[],
             position=position,
-            feature_definition_name=root_def_name,
+            feature_definition=root_def,
             params=_parse_params(data_params, position)
         )
 
@@ -138,7 +141,7 @@ def _construct_feature_tree(
     feature = Feature(
         children=children,
         position=position,
-        feature_definition_name=root_def_name,
+        feature_definition=root_def,
         params=params
     )
     feature_position_ref[0] -= 1

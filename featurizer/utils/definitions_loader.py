@@ -26,7 +26,7 @@ class DefinitionsLoader:
         s = fd_name.split('.')
         return s[0], s[1], '1'
 
-    def _load_definitions(self, fd_names: List[str]) -> List[Type[DataDefinition]]:
+    def _load_many(self, fd_names: List[str]) -> List[Type[DataDefinition]]:
         res = []
         for fd_name in fd_names:
             if fd_name not in self.futures:
@@ -46,13 +46,11 @@ class DefinitionsLoader:
                 self.futures[fd_name] = self.executor.submit(_load_remote)
 
         for fd_name in fd_names:
-
             path = self.futures[fd_name].result()
             if path is None:
                 raise ValueError(f'Unable to load {fd_name}')
 
             group, definition, version = self._parse_definition_name(fd_name)
-
             # TODO version
             # first {definition} for module, second {definition} for .py file
             module_name = f'{group}.{definition}.{definition}'
@@ -76,21 +74,22 @@ class DefinitionsLoader:
         DefinitionsLoader.LOADER = DefinitionsLoader()
         return DefinitionsLoader.LOADER
 
-    # TODO figure out how to handle local defs
     @staticmethod
-    def load_definition(fd_name: str) -> Type[DataDefinition]:
-        return DefinitionsLoader.load_definitions([fd_name])[0]
+    def load(fd_name: str) -> Type[DataDefinition]:
+        return DefinitionsLoader.load_many([fd_name])[0]
 
     @staticmethod
-    def load_definitions(fd_names: List[str]) -> List[Type[DataDefinition]]:
+    def load_many(fd_names: List[str]) -> List[Type[DataDefinition]]:
         loader = DefinitionsLoader.instance()
-        return loader._load_definitions(fd_names)
+        return loader._load_many(fd_names)
 
 
 
 if __name__ == '__main__':
-    defs = DefinitionsLoader.load_definition('feature_group.feature_definition_fd')
-    print(defs)
+    defs1 = DefinitionsLoader.load('feature_group.feature_definition_fd')
+    print(defs1)
+    defs2 = DefinitionsLoader.load('feature_group.feature_definition_fd')
+    print(defs2)
 
 
 

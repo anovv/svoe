@@ -24,13 +24,37 @@ class FeatureDefinition(DataDefinition):
 
     # TODO make dep_schema part of feature_params
     @classmethod
-    def dep_upstream_schema(cls, dep_schema: str = Optional[None]) -> List[str]:
+    def dep_upstream_schema(cls, dep_schema: str = Optional[None]) -> List[Union[str, Type[DataDefinition]]]:
         # upstream dependencies
         raise NotImplemented
 
     @classmethod
     def dep_upstream_definitions(cls, dep_schema: str = Optional[None]) -> List[Type[DataDefinition]]:
-        return Loader.load_definitions(cls.dep_upstream_schema(dep_schema=dep_schema))
+        defs = cls.dep_upstream_schema(dep_schema=dep_schema)
+
+        # we need to keep track of indices so we can preserve order when merging later
+        local_defs_indices = []
+        remote_defs_indices = []
+        local_defs = []
+        remote_defs_names = []
+        for i in range(len(defs)):
+            if isinstance(defs[i], str):
+                remote_defs_indices.append(i)
+                remote_defs_names.append(defs[i])
+            else:
+                local_defs_indices.append(i)
+                local_defs.append(defs[i])
+
+        remote_defs = DefinitionsLoader.load_many(remote_defs_names)
+
+        res = [DataDefinition] * len(defs)
+        for i, d in zip(local_defs_indices, local_defs):
+            res[i] = d
+
+        for i, d in zip(remote_defs_indices, remote_defs):
+            res[i] = d
+
+        return res
 
     # TODO we assume no 'holes' in data, use ranges: List[BlockRangeMeta] with holes
     @classmethod
