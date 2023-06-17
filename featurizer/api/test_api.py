@@ -30,32 +30,7 @@ class TestDataCatalogApi(unittest.TestCase):
         api = Api()
         api.delete_features([feature_tvi])
 
-    def test_store_feature_def(self):
-        # TODO
-        pass
-
-    def test_get_feature_def_files(self):
-        # f = api.client.get_feature_def(
-        #     owner_id='0',
-        #     feature_group='test_feature_group',
-        #     feature_definition='test_feature_definition',
-        #     version='1'
-        # )
-
-        res = requests.get('http://localhost:1228/feature_definition/', params={
-            'owner_id': '0',
-            'feature_group': 'test_feature_group',
-            'feature_definition': 'test_feature_definition',
-            'version': '1'
-        })
-        extract_path = '//Users/anov/IdeaProjects/svoe/featurizer/features/definitions/test_feature_group' # TODO
-        z = zipfile.ZipFile(io.BytesIO(res.content))
-        z.extractall(path=extract_path)
-        print(z.infolist())
-
-
-
 
 if __name__ == '__main__':
     t = TestDataCatalogApi()
-    t.test_get_feature_def_files()
+    t.test_get_meta()

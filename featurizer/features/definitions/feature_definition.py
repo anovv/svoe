@@ -5,6 +5,7 @@ from portion import IntervalDict
 
 from featurizer.blocks.blocks import BlockMeta
 from featurizer.data_definitions.data_definition import DataDefinition
+from featurizer.utils.definitions_loader import DefinitionsLoader
 
 
 # TODO figure out relationship between Feature and FeatureDefinition (i.e. common interface, subclassing?)
@@ -21,11 +22,15 @@ class FeatureDefinition(DataDefinition):
     def stream(cls, dep_upstreams: Dict['Feature', Stream], feature_params: Dict) -> Union[Stream, Tuple[Stream, Any]]:
         raise NotImplemented
 
-    # TODO dep_schema -> source
+    # TODO make dep_schema part of feature_params
     @classmethod
-    def dep_upstream_schema(cls, dep_schema: str = Optional[None]) -> List[Type[DataDefinition]]:
+    def dep_upstream_schema(cls, dep_schema: str = Optional[None]) -> List[str]:
         # upstream dependencies
         raise NotImplemented
+
+    @classmethod
+    def dep_upstream_definitions(cls, dep_schema: str = Optional[None]) -> List[Type[DataDefinition]]:
+        return Loader.load_definitions(cls.dep_upstream_schema(dep_schema=dep_schema))
 
     # TODO we assume no 'holes' in data, use ranges: List[BlockRangeMeta] with holes
     @classmethod

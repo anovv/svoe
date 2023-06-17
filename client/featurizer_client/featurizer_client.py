@@ -1,4 +1,6 @@
+import io
 import os
+import zipfile
 from typing import Optional, List, Dict
 
 import requests
@@ -22,15 +24,11 @@ class FeaturizerClient(BaseClient):
         tags: Optional[List[Dict]] = None
     ) -> bool:
         file_set = set()
-        # TODO forbid subdirs
-        for _dir, _, files in os.walk(local_path):
-            for file_name in files:
-                rel_dir = os.path.relpath(_dir, local_path)
-                if rel_dir != dir:
-                    rel_file = os.path.join(rel_dir, file_name)
-                else:
-                    rel_file = file_name
-                file_set.add(rel_file)
+        for file in os.listdir(local_path):
+            if not os.path.isfile(os.path.join(local_path, file)):
+                raise ValueError('Feature definition dir should contain only files')
+            file_set.add(os.path.join(local_path, file))
+
         file_names = list(file_set)
         if len(file_names) > 10:
             raise ValueError('Can not upload more than 10 files')
@@ -55,12 +53,47 @@ class FeaturizerClient(BaseClient):
         print(r.json())
         return r.json()['result']
 
+    def load_feature_definition(
+        self,
+        feature_group: str,
+        feature_definition: str,
+        version: str,
+        extract_path: str,
+    ) -> Optional[str]:
+        # TODO generated OpenAPI cli is not able to parse bytes properly, hence we use raw requests
+        resp = requests.get(f'{self.base_url}/feature_definition/', params={
+            'owner_id': '0', # TODO
+            'feature_group': feature_group,
+            'feature_definition': feature_definition,
+            'version': version
+        })
+        try:
+            # if we can convert to json then endpoint returned dict obj, which means it an error
+            res = resp.json()
+            err = res['err']
+            print(f'Error loading feature definition: {err}')
+            return None
+        except Exception as e:
+            pass
+
+        # response is array of bytes
+        z = zipfile.ZipFile(io.BytesIO(resp.content))
+        z.extractall(path=extract_path)
+        return extract_path
+
+
 
 if __name__ == '__main__':
     client = FeaturizerClient()
     client.register_feature_definition(
-        feature_group='test_feature_group',
-        feature_definition='test_feature_definition',
+        feature_group='feature_group',
+        feature_definition='feature_definition_fd',
         version='1',
-        local_path='.'
+        local_path='/Users/anov/IdeaProjects/svoe/featurizer/features/definitions/feature_group'
     )
+    # client.load_feature_definition(
+    #     feature_group='test_feature_group',
+    #     feature_definition='test_feature_definition',
+    #     version='1',
+    #     extract_path='./dd'
+    # )

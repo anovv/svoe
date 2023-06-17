@@ -1,8 +1,8 @@
 import logging
 from typing import Optional, Any
 
-from apiserver.apiserver import Resp
 from client.fast_api_client import Client
+from client.fast_api_client.models import Resp
 
 INTERNAL_BASE_URL = 'http://apiserver-svc.apiserver:1228'
 

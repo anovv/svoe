@@ -4,7 +4,7 @@ from frozendict import frozendict
 
 from utils.pandas.df_utils import is_ts_sorted
 
-Event = Dict[str, Any] # note that this corresponds to raw grouped events by timestamp
+Event = Dict[str, Any] # note that this corresponds to raw grouped events by timestamp (only for some data_types, e.g. l2_book_inc)
 EventSchema = Dict[str, Type]
 
 
@@ -14,6 +14,8 @@ class DataDefinition:
 
     # TODO params schema
 
+
+    # TODO deprecate is_data_source, us isinstance
     # this is a hacky way to discern between types in Union[FeatureDefinition, DataSource]
     # without isinstance (due to python bug)
     @classmethod
@@ -39,8 +41,3 @@ class DataDefinition:
     def construct_event(cls, *args) -> Event:
         # TODO validate schema here?
         return frozendict(dict(zip(list(cls.event_schema().keys()), list(args))))
-
-
-# TODO come up with a proper base type
-# types to represent 'materialized' DataDef/FeatureDef
-# NamedData = NamedFeature = Tuple[str, Type[DataDefinition]]
