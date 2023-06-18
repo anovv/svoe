@@ -25,7 +25,10 @@ class FeaturizerClient(BaseClient):
     ) -> bool:
         file_set = set()
         for file in os.listdir(local_path):
+            if file == '__pycache__':
+                continue
             if not os.path.isfile(os.path.join(local_path, file)):
+                print(file)
                 raise ValueError('Feature definition dir should contain only files')
             file_set.add(os.path.join(local_path, file))
 
@@ -86,10 +89,10 @@ class FeaturizerClient(BaseClient):
 if __name__ == '__main__':
     client = FeaturizerClient()
     client.register_feature_definition(
-        feature_group='feature_group',
-        feature_definition='feature_definition_fd',
+        feature_group='tvi',
+        feature_definition='trade_volume_imb_fd',
         version='1',
-        local_path='/Users/anov/IdeaProjects/svoe/featurizer/features/definitions/feature_group'
+        local_path='/Users/anov/IdeaProjects/svoe/featurizer/features/definitions/tvi/'
     )
     # client.load_feature_definition(
     #     feature_group='test_feature_group',

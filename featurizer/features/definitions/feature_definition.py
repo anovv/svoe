@@ -45,7 +45,10 @@ class FeatureDefinition(DataDefinition):
                 local_defs_indices.append(i)
                 local_defs.append(defs[i])
 
-        remote_defs = DefinitionsLoader.load_many(remote_defs_names)
+        if len(remote_defs_names) != 0:
+            remote_defs = DefinitionsLoader.load_many(remote_defs_names)
+        else:
+            remote_defs = []
 
         res = [DataDefinition] * len(defs)
         for i, d in zip(local_defs_indices, local_defs):

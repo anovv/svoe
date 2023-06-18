@@ -405,6 +405,39 @@ class TestFeatureCalculator(unittest.TestCase):
             #     df.plot('timestamp', name, label=name)
             #
             # plt.show()
+    def test_remote_tvi(self):
+        api = Api()
+        feature_params1 = {0: {'window': '1m', 'sampling': '1s'}}
+        data_params1 = [
+            {DataCatalog.exchange.name: 'BINANCE',
+             DataCatalog.data_type.name: 'trades',
+             DataCatalog.instrument_type.name: 'spot',
+             DataCatalog.symbol.name: 'BTC-USDT'}
+        ]
+        feature_tvi = construct_feature_tree('tvi.trade_volume_imb_fd', data_params1, feature_params1)
+        # print(RenderTree(feature_tvi))
+        # features = [feature_mid_price, feature_tvi, feature_volatility]
+        features = [feature_tvi]
+        data_deps = set()
+        for feature in features:
+            for d in feature.get_data_deps():
+                data_deps.add(d)
+        data_keys = [data_key(d.params) for d in data_deps]
+        print(data_keys)
+        start_date = '2023-02-01'
+        end_date = '2023-02-01'
+        ranges_meta_per_data_key = api.get_data_meta(data_keys, start_date=start_date, end_date=end_date)
+        data_ranges_meta = {data: ranges_meta_per_data_key[data_key(data.params)] for data in data_deps}
+
+        stored_features_meta = api.get_features_meta(features, start_date=start_date, end_date=end_date)
+
+        cache = {}
+        # features_to_store = [feature_tvi]
+        features_to_store = []
+        task_graph = C.build_feature_set_task_graph(features, data_ranges_meta, cache, features_to_store,
+                                                    stored_features_meta)
+        print(task_graph)
+
 
 if __name__ == '__main__':
     # unittest.main()
@@ -421,4 +454,5 @@ if __name__ == '__main__':
     # t.test_tvi()
     # t.test_feature_label_set_cryptotick()
     # t.test_lookahead_shift()
-    t.test_feature_label_set()
+    # t.test_feature_label_set()
+    t.test_remote_tvi()

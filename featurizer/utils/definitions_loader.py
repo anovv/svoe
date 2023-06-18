@@ -80,16 +80,17 @@ class DefinitionsLoader:
 
     @staticmethod
     def load_many(fd_names: List[str]) -> List[Type[DataDefinition]]:
+        print(f'Loading definitions {fd_names}...')
         loader = DefinitionsLoader.instance()
-        return loader._load_many(fd_names)
+        res = loader._load_many(fd_names)
+        print(f'Finished loading definitions')
+        return res
 
 
 
 if __name__ == '__main__':
-    defs1 = DefinitionsLoader.load('feature_group.feature_definition_fd')
+    defs1 = DefinitionsLoader.load('tvi.trade_volume_imb_fd')
     print(defs1)
-    defs2 = DefinitionsLoader.load('feature_group.feature_definition_fd')
-    print(defs2)
 
 
 
