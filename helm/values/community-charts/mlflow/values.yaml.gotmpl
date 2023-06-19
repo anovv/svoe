@@ -1,0 +1,35 @@
+replicaCount: 1
+image:
+  repository: burakince/mlflow
+  pullPolicy: IfNotPresent
+  tag: ""
+
+backendStore:
+  databaseMigration: false
+  databaseConnectionCheck: true
+  mysql:
+    enabled: true
+    host: 'mysql.mysql.svc.cluster.local'
+    port: 3306
+    database: 'mlflow'
+    user: 'root'
+    password: {{ .Values.mysql.rootPassword | quote }}
+    driver: 'pymysql'
+
+artifactRoot:
+  proxiedArtifactStorage: false
+  s3:
+    enabled: false
+    bucket: "" # required
+    # -- S3 bucket folder. If you want to use root level, please don't set anything.
+    path: "" # optional
+    awsAccessKeyId: "" # (awsAccessKeyId and awsSecretAccessKey) or roleArn serviceaccount annotation required
+    awsSecretAccessKey: "" # (awsAccessKeyId and awsSecretAccessKey) or roleArn serviceaccount annotation required
+
+resources: {}
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi

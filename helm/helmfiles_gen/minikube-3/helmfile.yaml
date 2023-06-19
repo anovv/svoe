@@ -140,6 +140,11 @@ releases:
     namespace: apiserver
     values:
       - ../../values/local/apiserver/values.yaml.gotmpl
+  - chart: community-charts/mlflow
+    name: mlflow
+    namespace: mlflow
+    values:
+      - ../../values/community-charts/mlflow/values.yaml.gotmpl
 repositories:
   - name: metrics-server
     url: https://kubernetes-sigs.github.io/metrics-server/
@@ -161,3 +166,5 @@ repositories:
     url: https://ray-project.github.io/kuberay-helm/
   - name: apache-airflow
     url: https://airflow.apache.org
+  - name: community-charts
+    url: https://community-charts.github.io/helm-charts
