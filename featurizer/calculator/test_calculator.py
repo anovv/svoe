@@ -5,6 +5,7 @@ from portion import closed
 import calculator as C
 import utils.streamz.stream_utils
 from featurizer.actors.cache_actor import CacheActor, CACHE_ACTOR_NAME
+from featurizer.calculator.executor import execute_graph_nodes
 from featurizer.calculator.tasks import merge_blocks
 from featurizer.api.api import Api, data_key
 from featurizer.data_definitions.l2_book_incremental.cryptotick.cryptotick_l2_book_incremental import CryptotickL2BookIncrementalData
@@ -19,10 +20,9 @@ from featurizer.features.feature_tree.feature_tree import construct_feature_tree
 
 import unittest
 import pandas as pd
-from typing import Type, List
-from anytree import RenderTree
-from featurizer.utils.testing_utils import mock_feature, mock_ts_df, mock_ts_df_remote
-from utils.pandas.df_utils import concat, load_df, is_ts_sorted, sort_dfs, plot_multi
+from typing import List
+from featurizer.utils.testing_utils import mock_feature, mock_ts_df_remote
+from utils.pandas.df_utils import concat, load_df, sort_dfs, plot_multi
 from featurizer.blocks.blocks import merge_asof_multi
 
 
@@ -161,7 +161,7 @@ class TestFeatureCalculator(unittest.TestCase):
                 for interval in joined_task_graph[range_interval]:
                     nodes.append((label_feature, joined_task_graph[range_interval][interval]))
                 print(f'Executing {i + 1}/{num_ranges} range: {range_interval}')
-                r = C.execute_graph_nodes(nodes)
+                r = execute_graph_nodes(nodes)
                 dfs = toolz.first(r.values())
                 res.extend(dfs)
                 i += 1
@@ -328,7 +328,7 @@ class TestFeatureCalculator(unittest.TestCase):
 
                 for interval in lookahead_graph[range_interval]:
                     nodes.append((f, lookahead_graph[range_interval][interval]))
-                r = C.execute_graph_nodes(nodes)
+                r = execute_graph_nodes(nodes)
                 dfs = toolz.first(r.values())
                 res.extend(dfs)
 
@@ -393,7 +393,7 @@ class TestFeatureCalculator(unittest.TestCase):
                 for interval in dag[range_interval]:
                     nodes.append((label_feature, dag[range_interval][interval]))
                 print(f'Executing {i + 1}/{num_ranges} range: {range_interval}')
-                r = C.execute_graph_nodes(nodes)
+                r = execute_graph_nodes(nodes)
                 dfs = toolz.first(r.values())
                 res.extend(dfs)
                 i += 1

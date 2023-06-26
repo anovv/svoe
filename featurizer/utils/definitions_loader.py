@@ -33,6 +33,7 @@ class DefinitionsLoader:
                 group, definition, version = self._parse_definition_name(fd_name)
 
                 # TODO version
+                # TODO check if extract path exists and load from there
                 extract_path = f'{DEFINITIONS_PATH}/{group}/{definition}'
 
                 def _load_remote() -> Optional[str]:

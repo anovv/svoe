@@ -13,14 +13,14 @@ from ray.types import ObjectRef
 from streamz import Stream
 
 from featurizer.actors.cache_actor import CACHE_ACTOR_NAME
-from featurizer.blocks.blocks import Block, BlockRange
+from featurizer.blocks.blocks import Block, BlockRange, lookahead_shift
 from featurizer.data_definitions.data_definition import Event
 from featurizer.features.feature_tree.feature_tree import Feature
 from featurizer.sql.db_actor import DbActor
 from featurizer.sql.feature_catalog.models import FeatureCatalog, _construct_feature_catalog_s3_path
 from utils.pandas import df_utils
 from utils.streamz.stream_utils import run_named_events_stream
-from utils.pandas.df_utils import load_df, store_df, is_ts_sorted
+from utils.pandas.df_utils import load_df, store_df, is_ts_sorted, concat, sub_df_ts
 
 
 def context(feature_key: str, interval: Interval) -> Dict[str, Any]:
@@ -173,6 +173,60 @@ def calculate_feature(
             print(f'[{feature}] Feature block already stored')
 
     return df
+
+
+# TODO set memory consumption
+# TODO move to tasks?
+@ray.remote
+def point_in_time_join_block(
+    interval: Interval,
+    blocks_refs_per_feature: Dict[Feature, ObjectRef[Block]],
+    prev_block_ref_per_feature: Dict[Feature, ObjectRef[Block]],
+    label_feature: Feature,
+) -> pd.DataFrame:
+    # TODO this loads all dfs at once,
+    # TODO can we do it iteratively so gc has time to collect old dfs to reduce mem footprint? (tradeoff speed/memory)
+    print('Join started')
+    concated = {}
+    for feature in blocks_refs_per_feature:
+        block_refs = [prev_block_ref_per_feature[feature]] if feature in prev_block_ref_per_feature else []
+        block_refs.append(blocks_refs_per_feature[feature])
+
+        # TODO have single ray.get
+        blocks = ray.get(block_refs)
+        concated[feature] = concat(blocks)
+
+    dfs = [concated[label_feature]] # make sure label is first so that we can use it's ts as join keys
+    for feature in concated:
+        if feature == label_feature:
+            # it's already there
+            continue
+        dfs.append(concated[feature])
+
+    t = time.time()
+    merged = merge_asof_multi(dfs)
+
+    print(f'Join finished, merged in {time.time() - t}s')
+    return sub_df_ts(merged, interval.lower, interval.upper)
+
+
+@ray.remote
+def lookahead_shift_blocks(block_refs: List[ObjectRef[Block]], interval: Interval, lookahead: str):
+    print('Lookahead shift block started')
+    blocks = ray.get(block_refs)
+    concated = concat(blocks)
+    shifted_concated = lookahead_shift(concated, lookahead)
+    shifted = sub_df_ts(shifted_concated, interval.lower, interval.upper)
+    # add label_ prefix
+    cols = list(shifted.columns)
+    cols.remove('timestamp')
+    if 'receipt_timestamp' in cols:
+        cols.remove('receipt_timestamp')
+    cols_new = [f'label_{c}' for c in cols]
+    shifted = shifted.rename(columns=dict(zip(cols, cols_new)))
+
+    print('Lookahead shift block finished')
+    return shifted
 
 
 # TODO util this
