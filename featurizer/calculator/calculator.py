@@ -4,7 +4,7 @@ from ray.dag import DAGNode
 from ray.types import ObjectRef
 
 from featurizer.features.feature_tree.feature_tree import Feature, postorder
-from featurizer.blocks.blocks import Block, meta_to_interval, interval_to_meta, get_overlaps, BlockRangeMeta, \
+from featurizer.blocks.blocks import meta_to_interval, interval_to_meta, get_overlaps, BlockRangeMeta, \
     prune_overlaps, range_meta_to_interval, ranges_to_interval_dict, BlockMeta, overlaps_keys, is_sorted_intervals
 from portion import Interval, IntervalDict, closed
 
@@ -247,7 +247,7 @@ def build_feature_label_set_task_graph(
     obj_ref_cache: Dict[str, Dict[Interval, Tuple[int, Optional[ObjectRef]]]],
     features_to_store: Optional[List[Feature]] = None,
     stored_feature_blocks_meta: Optional[Dict[Feature, Dict[Interval, BlockMeta]]] = None,
-):
+) -> Dict[Interval, Dict[Interval, DAGNode]]:
     dag = build_feature_set_task_graph(
         features=features,
         data_ranges_meta=data_ranges_meta,

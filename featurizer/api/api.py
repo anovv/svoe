@@ -25,6 +25,7 @@ def data_key(e: Dict) -> DataKey:
             e[DataCatalog.symbol.name])
 
 
+# TODO rename to Db
 class Api:
     def __init__(self, db_config: Optional[Dict] = None):
         self.client = MysqlClient(db_config)
@@ -190,7 +191,3 @@ class Api:
         finally:
             if temp_dir:
                 temp_dir.cleanup()
-
-
-
-

@@ -5,7 +5,7 @@ from portion import closed
 import calculator as C
 import utils.streamz.stream_utils
 from featurizer.actors.cache_actor import CacheActor, CACHE_ACTOR_NAME
-from featurizer.calculator.executor import execute_graph_nodes
+from featurizer.calculator.executor import execute_graph
 from featurizer.calculator.tasks import merge_blocks
 from featurizer.api.api import Api, data_key
 from featurizer.data_definitions.l2_book_incremental.cryptotick.cryptotick_l2_book_incremental import CryptotickL2BookIncrementalData
@@ -135,37 +135,12 @@ class TestFeatureCalculator(unittest.TestCase):
         cache = {}
         features_to_store = []
         task_graph = C.build_feature_set_task_graph(features, data_ranges_meta, cache, features_to_store, stored_features_meta)
-        # flattened_task_graph = C.flatten_feature_set_task_graph(features, task_graph)
-        # res = {}
-        #
-        # with ray.init(address='auto', ignore_reinit_error=True):
-        #     c = CacheActor.options(name=CACHE_ACTOR_NAME).remote(cache)
-        #     # res = C.execute_graph_nodes(flattened_task_graph)
-        #     for feature in features:
-        #         nodes = []
-        #         for range_interval in task_graph[feature]:
-        #             for interval in task_graph[feature][range_interval]:
-        #                 nodes.append((feature, task_graph[feature][range_interval][interval]))
-        #         r = C.execute_graph_nodes(nodes)
-        #         res[feature] = r[feature]
-        #     print(res)
         label_feature = feature_mid_price
         joined_task_graph = C.point_in_time_join_dag(task_graph, features, label_feature)
-        res = []
         with ray.init(address='auto', ignore_reinit_error=True):
             c = CacheActor.options(name=CACHE_ACTOR_NAME).remote(cache) # assign to unused var so it stays in Ray's scope
-            num_ranges = len(joined_task_graph)
-            i = 0
-            for range_interval in joined_task_graph:
-                nodes = []
-                for interval in joined_task_graph[range_interval]:
-                    nodes.append((label_feature, joined_task_graph[range_interval][interval]))
-                print(f'Executing {i + 1}/{num_ranges} range: {range_interval}')
-                r = execute_graph_nodes(nodes)
-                dfs = toolz.first(r.values())
-                res.extend(dfs)
-                i += 1
-            df = concat(sort_dfs(res))
+            refs = execute_graph(joined_task_graph)
+            df = concat(ray.get(refs))
 
             # TODO first value (or two) is weird outlier for some reason, why?
             df = df.tail(-1)
@@ -243,44 +218,12 @@ class TestFeatureCalculator(unittest.TestCase):
         task_graph = C.build_feature_set_task_graph(features, data_ranges_meta, cache, features_to_store,
                                                     stored_features_meta)
 
-        # print(task_graph)
-        # res = {}
-        #
-        # with ray.init(address='auto', ignore_reinit_error=True):
-        #     c = CacheActor.options(name=CACHE_ACTOR_NAME).remote(cache)
-        #     # res = C.execute_graph_nodes(flattened_task_graph)
-        #     for feature in features:
-        #         nodes = []
-        #         for range_interval in task_graph[feature]:
-        #             for interval in task_graph[feature][range_interval]:
-        #                 nodes.append((feature, task_graph[feature][range_interval][interval]))
-        #         r = C.execute_graph_nodes(nodes)
-        #         res[feature] = r[feature]
-        #
-        #
-        # df = concat(list(res.values())[0])
-        # df = df.tail(-1)
-        # df.plot(x='timestamp', y='tvi')
-        #
-        # plt.show()
-
         label_feature = feature_mid_price
         joined_task_graph = C.point_in_time_join_dag(task_graph, features, label_feature)
-        res = []
         with ray.init(address='auto', ignore_reinit_error=True):
             c = CacheActor.options(name=CACHE_ACTOR_NAME).remote(cache)  # assign to unused var so it stays in Ray's scope
-            num_ranges = len(joined_task_graph)
-            i = 0
-            for range_interval in joined_task_graph:
-                nodes = []
-                for interval in joined_task_graph[range_interval]:
-                    nodes.append((label_feature, joined_task_graph[range_interval][interval]))
-                print(f'Executing {i + 1}/{num_ranges} range: {range_interval}')
-                r = C.execute_graph_nodes(nodes)
-                dfs = toolz.first(r.values())
-                res.extend(dfs)
-                i += 1
-            df = concat(sort_dfs(res))
+            refs = execute_graph(joined_task_graph)
+            df = concat(ray.get(refs))
 
             # TODO first two values are weird outliers for some reason, why?
             df = df.tail(-2)
@@ -321,18 +264,8 @@ class TestFeatureCalculator(unittest.TestCase):
         lookahead_graph = C.build_lookahead_graph(input_dag, lookahead)
 
         with ray.init(address='auto', ignore_reinit_error=True):
-            res = []
-            f = mock_feature(0)
-            for range_interval in lookahead_graph:
-                nodes = []
-
-                for interval in lookahead_graph[range_interval]:
-                    nodes.append((f, lookahead_graph[range_interval][interval]))
-                r = execute_graph_nodes(nodes)
-                dfs = toolz.first(r.values())
-                res.extend(dfs)
-
-            res = sort_dfs(res)
+            refs = execute_graph(lookahead_graph)
+            res = ray.get(refs)
 
             print(len(res))
             print(len(expected_res))
@@ -382,29 +315,17 @@ class TestFeatureCalculator(unittest.TestCase):
             obj_ref_cache={}
         )
 
-        res = []
         with ray.init(address='auto', ignore_reinit_error=True):
-            c = CacheActor.options(name=CACHE_ACTOR_NAME).remote(
-                cache)  # assign to unused var, so it stays in Ray's scope
-            num_ranges = len(dag)
-            i = 0
-            for range_interval in dag:
-                nodes = []
-                for interval in dag[range_interval]:
-                    nodes.append((label_feature, dag[range_interval][interval]))
-                print(f'Executing {i + 1}/{num_ranges} range: {range_interval}')
-                r = execute_graph_nodes(nodes)
-                dfs = toolz.first(r.values())
-                res.extend(dfs)
-                i += 1
-            df = concat(sort_dfs(res))
-
+            c = CacheActor.options(name=CACHE_ACTOR_NAME).remote(cache)  # assign to unused var, so it stays in Ray's scope
+            refs = execute_graph(dag)
+            df = concat(ray.get(refs))
             print(df.head())
             print(df.tail())
             # for name in ['mid_price', 'label_mid_price', 'volatility']:
             #     df.plot('timestamp', name, label=name)
             #
             # plt.show()
+
     def test_remote_tvi(self):
         api = Api()
         feature_params1 = {0: {'window': '1m', 'sampling': '1s'}}
