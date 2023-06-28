@@ -116,7 +116,7 @@ def _construct_feature_tree(
         root_def = DefinitionsLoader.load(root_def_name)
     else:
         root_def = root_def_name
-    # TODO deprecate is_data_source, us isinstance
+    # TODO deprecate is_data_source, use isinstance
     if root_def.is_data_source():
         position = data_position_ref[0]
         data_position_ref[0] += 1

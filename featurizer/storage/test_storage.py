@@ -4,7 +4,7 @@ import io
 
 import requests
 
-from featurizer.api.api import Api
+from featurizer.api.api import FeaturizerStorage
 from featurizer.features.definitions.tvi.trade_volume_imb_fd import TradeVolumeImbFD
 from featurizer.features.feature_tree.feature_tree import construct_feature_tree
 from featurizer.sql.data_catalog.models import DataCatalog
@@ -13,7 +13,7 @@ from featurizer.sql.data_catalog.models import DataCatalog
 class TestDataCatalogApi(unittest.TestCase):
 
     def test_get_meta(self):
-        api = Api()
+        api = FeaturizerStorage()
         l2_data_ranges = api._get_data_meta(['BINANCE'], ['l2_book'], ['spot'], ['BTC-USDT'])
         k = list(l2_data_ranges.keys())[0]
         print(l2_data_ranges[k])
@@ -27,7 +27,7 @@ class TestDataCatalogApi(unittest.TestCase):
              DataCatalog.symbol.name: 'BTC-USDT'}
         ]
         feature_tvi = construct_feature_tree(TradeVolumeImbFD, data_params1, feature_params1)
-        api = Api()
+        api = FeaturizerStorage()
         api.delete_features([feature_tvi])
 
 

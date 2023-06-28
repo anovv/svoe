@@ -28,3 +28,4 @@ aiofiles
 fastapi
 python-multipart
 pyhumps
+pydantic_yaml

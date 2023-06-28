@@ -7,7 +7,7 @@ import utils.streamz.stream_utils
 from featurizer.actors.cache_actor import CacheActor, CACHE_ACTOR_NAME
 from featurizer.calculator.executor import execute_graph
 from featurizer.calculator.tasks import merge_blocks
-from featurizer.api.api import Api, data_key
+from featurizer.storage.featurizer_storage import FeaturizerStorage, data_key
 from featurizer.data_definitions.l2_book_incremental.cryptotick.cryptotick_l2_book_incremental import CryptotickL2BookIncrementalData
 from featurizer.features.definitions.spread.relative_bid_ask_spread_fd import RelativeBidAskSpreadFD
 from featurizer.features.definitions.tvi.trade_volume_imb_fd import TradeVolumeImbFD
@@ -103,7 +103,7 @@ class TestFeatureCalculator(unittest.TestCase):
 
 
     def test_cryptotick_midprice_feature_offline(self):
-        api = Api()
+        storage = FeaturizerStorage()
         feature_params1 = {0: {'dep_schema': 'cryptotick', 'sampling': '1s'}}
         feature_params2 = {1: {'dep_schema': 'cryptotick', 'sampling': '1s'}}
         feature_params3 = {2: {'dep_schema': 'cryptotick', 'sampling': '1s'}}
@@ -127,10 +127,10 @@ class TestFeatureCalculator(unittest.TestCase):
         data_keys = [data_key(d.params) for d in data_deps]
         start_date = '2023-02-01'
         end_date = '2023-02-01'
-        ranges_meta_per_data_key = api.get_data_meta(data_keys, start_date=start_date, end_date=end_date)
+        ranges_meta_per_data_key = storage.get_data_meta(data_keys, start_date=start_date, end_date=end_date)
         data_ranges_meta = {data: ranges_meta_per_data_key[data_key(data.params)] for data in data_deps}
 
-        stored_features_meta = api.get_features_meta(features, start_date=start_date, end_date=end_date)
+        stored_features_meta = storage.get_features_meta(features, start_date=start_date, end_date=end_date)
 
         cache = {}
         features_to_store = []
@@ -178,7 +178,7 @@ class TestFeatureCalculator(unittest.TestCase):
         # print(df.head())
         # raise
 
-        api = Api()
+        storage = FeaturizerStorage()
         feature_params1 = {0: {'window': '1m', 'sampling': '1s'}}
         feature_params2 = {1: {'dep_schema': 'cryptotick', 'sampling': '1s'}}
         feature_params3 = {2: {'dep_schema': 'cryptotick', 'sampling': '1s'}}
@@ -208,10 +208,10 @@ class TestFeatureCalculator(unittest.TestCase):
         print(data_keys)
         start_date = '2023-02-01'
         end_date = '2023-02-01'
-        ranges_meta_per_data_key = api.get_data_meta(data_keys, start_date=start_date, end_date=end_date)
+        ranges_meta_per_data_key = storage.get_data_meta(data_keys, start_date=start_date, end_date=end_date)
         data_ranges_meta = {data: ranges_meta_per_data_key[data_key(data.params)] for data in data_deps}
 
-        stored_features_meta = api.get_features_meta(features, start_date=start_date, end_date=end_date)
+        stored_features_meta = storage.get_features_meta(features, start_date=start_date, end_date=end_date)
 
         cache = {}
         features_to_store = [feature_tvi]
@@ -277,7 +277,7 @@ class TestFeatureCalculator(unittest.TestCase):
 
     def test_feature_label_set(self):
 
-        api = Api()
+        storage = FeaturizerStorage()
 
         feature_params1 = {1: {'dep_schema': 'cryptotick', 'sampling': '1s'}}
         feature_params2 = {2: {'dep_schema': 'cryptotick', 'sampling': '1s'}}
@@ -300,7 +300,7 @@ class TestFeatureCalculator(unittest.TestCase):
         print(data_keys)
         start_date = '2023-02-01'
         end_date = '2023-02-01'
-        ranges_meta_per_data_key = api.get_data_meta(data_keys, start_date=start_date, end_date=end_date)
+        ranges_meta_per_data_key = storage.get_data_meta(data_keys, start_date=start_date, end_date=end_date)
         data_ranges_meta = {data: ranges_meta_per_data_key[data_key(data.params)] for data in data_deps}
 
         # stored_features_meta = api.get_features_meta(features, start_date=start_date, end_date=end_date)
@@ -327,7 +327,7 @@ class TestFeatureCalculator(unittest.TestCase):
             # plt.show()
 
     def test_remote_tvi(self):
-        api = Api()
+        storage = FeaturizerStorage()
         feature_params1 = {0: {'window': '1m', 'sampling': '1s'}}
         data_params1 = [
             {DataCatalog.exchange.name: 'BINANCE',
@@ -347,10 +347,10 @@ class TestFeatureCalculator(unittest.TestCase):
         print(data_keys)
         start_date = '2023-02-01'
         end_date = '2023-02-01'
-        ranges_meta_per_data_key = api.get_data_meta(data_keys, start_date=start_date, end_date=end_date)
+        ranges_meta_per_data_key = storage.get_data_meta(data_keys, start_date=start_date, end_date=end_date)
         data_ranges_meta = {data: ranges_meta_per_data_key[data_key(data.params)] for data in data_deps}
 
-        stored_features_meta = api.get_features_meta(features, start_date=start_date, end_date=end_date)
+        stored_features_meta = storage.get_features_meta(features, start_date=start_date, end_date=end_date)
 
         cache = {}
         # features_to_store = [feature_tvi]

@@ -25,8 +25,7 @@ def data_key(e: Dict) -> DataKey:
             e[DataCatalog.symbol.name])
 
 
-# TODO rename to Db
-class Api:
+class FeaturizerStorage:
     def __init__(self, db_config: Optional[Dict] = None):
         self.client = MysqlClient(db_config)
 

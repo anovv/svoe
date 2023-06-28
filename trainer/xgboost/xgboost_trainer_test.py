@@ -9,7 +9,7 @@ from ray.train.xgboost import XGBoostTrainer, XGBoostPredictor
 
 import featurizer.calculator.calculator as C
 from featurizer.actors.cache_actor import CacheActor, CACHE_ACTOR_NAME
-from featurizer.api.api import Api, data_key
+from featurizer.api.api import FeaturizerStorage, data_key
 from featurizer.features.definitions.spread.relative_bid_ask_spread_fd import RelativeBidAskSpreadFD
 from featurizer.features.definitions.volatility.volatility_stddev_fd import VolatilityStddevFD
 
@@ -26,7 +26,7 @@ class TestXGBoostTrainer(unittest.TestCase):
 
     def test_xgboost(self):
 
-        api = Api()
+        api = FeaturizerStorage()
         feature_params1 = {0: {'dep_schema': 'cryptotick', 'sampling': '1s'}}
         feature_params2 = {1: {'dep_schema': 'cryptotick', 'sampling': '1s'}}
         feature_params3 = {2: {'dep_schema': 'cryptotick', 'sampling': '1s'}}
