@@ -35,11 +35,12 @@ def test_ray_cluster_manager():
     print(client.delete_ray_cluster('test-ray-cluster'))
 
 
-dag = DAG('test_ray_cluster_manager_dag', description='Test Ray Cluster Manager DAG',
-          schedule_interval='0 12 * * *',
-          start_date=datetime(2017, 3, 20),
-          catchup=False)
+dag = DAG(
+    'test_ray_cluster_manager_dag',
+    description='Test Ray Cluster Manager DAG',
+    catchup=False
+)
 
-operator = PythonOperator(task_id='test_ray_cluster_manager', python_callable=test_ray_cluster_manager, dag=dag)
+operator = PythonOperator(task_id='test_ray_cluster_manager_task', python_callable=test_ray_cluster_manager, dag=dag)
 
 operator

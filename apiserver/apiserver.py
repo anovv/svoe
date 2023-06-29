@@ -1,5 +1,10 @@
+import base64
+from datetime import datetime
 from typing import Dict, List, Optional
 
+from airflow_client.client import ApiClient, Configuration, ApiException
+from airflow_client.client.api.dag_run_api import DAGRunApi
+from airflow_client.client.model.dag_run import DAGRun
 from fastapi import FastAPI, UploadFile, Response
 import uvicorn
 import json, typing
@@ -51,6 +56,12 @@ class PrettyJSONResponse(Response):
 app = FastAPI()
 ray_cluster_manager = RayClusterManager()
 featurizer_storage = FeaturizerStorage()
+
+# TODO pass via env vars/config
+airflow_api_client = ApiClient(Configuration(
+    username='admin',
+    password='admin'
+))
 
 
 @app.get('/clusters', response_model=Resp, response_class=PrettyJSONResponse)
@@ -130,6 +141,40 @@ def get_feature_definition_files(
             'res': None,
             'err': err,
         }
+
+
+@app.post('/run_dag/', response_model=Resp, response_class=PrettyJSONResponse)
+def run_dag(
+    user_id: str,
+    dag_id: str,
+    conf_encoded: str
+):
+    try:
+        conf = base64.b64decode(conf_encoded).decode('utf-8')
+    except Exception as e:
+        return Resp(result=None, error=f'Unable to decode base64 dag config: {e}')
+
+    api_instance = DAGRunApi(airflow_api_client)
+    now = datetime.now()
+    now_ts = int(round(now.timestamp()))
+
+    dag_run_id = f'dag-run-{user_id}-{now_ts}'
+
+    # TODO add meta (user_id, env, etc.)
+    dag_run = DAGRun(
+        dag_run_id=dag_run_id,
+        logical_date=now,
+        execution_date=now,
+        conf=conf,
+    )
+
+    # TODO check if user has existing dags running and set limit?
+
+    try:
+        api_response = api_instance.post_dag_run(dag_id, dag_run)
+        return Resp(result=api_response, error=None)
+    except ApiException as e:
+        return Resp(result=None, error=str(e))
 
 
 if __name__ == '__main__':
