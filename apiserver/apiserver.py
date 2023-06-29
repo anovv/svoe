@@ -1,14 +1,12 @@
 from typing import Dict, List, Optional
 
 from fastapi import FastAPI, UploadFile, Response
-from fastapi.responses import FileResponse
 import uvicorn
 import json, typing
 
 from pydantic import BaseModel
-# from starlette.responses import Response
 
-import featurizer.api.api
+from featurizer.storage.featurizer_storage import FeaturizerStorage
 from ray_cluster.manager.manager import RayClusterManager
 
 
@@ -52,7 +50,7 @@ class PrettyJSONResponse(Response):
 
 app = FastAPI()
 ray_cluster_manager = RayClusterManager()
-featurizer_api = featurizer.api.api.Api()
+featurizer_storage = FeaturizerStorage()
 
 
 @app.get('/clusters', response_model=Resp, response_class=PrettyJSONResponse)
@@ -97,7 +95,7 @@ def upload_feature_definition(
 ):
     if tags is not None and len(tags) == 0:
         tags = None
-    res, err = featurizer_api.store_feature_def(
+    res, err = featurizer_storage.store_feature_def(
         owner_id=owner_id,
         feature_group=feature_group,
         feature_definition=feature_definition,
@@ -115,7 +113,7 @@ def get_feature_definition_files(
     feature_definition: str,
     version: str,
 ):
-    zipped_bytes, err = featurizer_api.get_feature_def_files_zipped(
+    zipped_bytes, err = featurizer_storage.get_feature_def_files_zipped(
         owner_id=owner_id,
         feature_group=feature_group,
         feature_definition=feature_definition,

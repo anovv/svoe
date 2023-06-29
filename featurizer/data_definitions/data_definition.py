@@ -14,7 +14,6 @@ class DataDefinition:
 
     # TODO params schema
 
-
     # TODO deprecate is_data_source, us isinstance
     # this is a hacky way to discern between types in Union[FeatureDefinition, DataSource]
     # without isinstance (due to python bug)

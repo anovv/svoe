@@ -5,3 +5,4 @@ kubernetes
 jinja2
 pydantic
 pyhumps
+pydantic_yaml

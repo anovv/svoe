@@ -1,0 +1,29 @@
+start_date: '2023-02-01'
+end_date: '2023-02-01'
+feature_configs:
+  - feature_definition: TradeVolumeImbFD
+    data_params:
+      - exchange: BINANCE
+        data_type: trades
+        instrument_type: spot
+        symbol: BTC-USDT
+    feature_params:
+      0:
+        window: 1m
+        sampling: 1s
+  - feature_definition: MidPriceFD
+    data_params: &id001
+      - exchange: BINANCE
+        data_type: l2_book
+        instrument_type: spot
+        symbol: BTC-USDT
+    feature_params:
+      1:
+        dep_schema: cryptotick
+        sampling: 1s
+  - feature_definition: VolatilityStddevFD
+    data_params: *id001
+    feature_params:
+      1:
+        dep_schema: cryptotick
+        sampling: 1s

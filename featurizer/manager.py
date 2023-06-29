@@ -3,7 +3,8 @@ from typing import List
 from ray.types import ObjectRef
 
 from featurizer.actors.cache_actor import CacheActor, CACHE_ACTOR_NAME
-from featurizer.calculator.calculator import build_feature_set_task_graph, point_in_time_join_dag
+from featurizer.calculator.calculator import build_feature_set_task_graph, point_in_time_join_dag, \
+    build_feature_label_set_task_graph
 from featurizer.calculator.executor import execute_graph
 from featurizer.storage.featurizer_storage import FeaturizerStorage, data_key
 from featurizer.config import FeaturizerConfig
@@ -35,15 +36,23 @@ class FeaturizerManager:
 
         stored_features_meta = storage.get_features_meta(features, start_date=config.start_date, end_date=config.end_date)
 
+        label_feature = features[config.label_feature_index]
+
         cache = {}
-        features_to_store = [] # TODO read from config
-        task_graph = build_feature_set_task_graph(features, data_ranges_meta, cache, features_to_store, stored_features_meta)
-        label_feature = None # TODO read from config
-        joined_task_graph = point_in_time_join_dag(task_graph, features, label_feature)
+        features_to_store = [features[i] for i in config.features_to_store]
+        dag = build_feature_label_set_task_graph(
+            features=features,
+            label=label_feature,
+            label_lookahead=config.label_lookahead,
+            data_ranges_meta=data_ranges_meta,
+            obj_ref_cache=cache,
+            features_to_store=features_to_store,
+            stored_feature_blocks_meta=stored_features_meta
+        )
 
         # TODO pass cluster address in config?
         with ray.init(address='auto', ignore_reinit_error=True):
             # assign to unused var so it stays in Ray's scope
             c = CacheActor.options(name=CACHE_ACTOR_NAME).remote(cache)
-            refs = execute_graph(joined_task_graph)
+            refs = execute_graph(dag)
             return refs

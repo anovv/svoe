@@ -14,10 +14,9 @@ class FeaturizerConfig(BaseModel, YamlModelMixin):
     feature_configs: List[FeatureConfig]
     start_date: Optional[str] = None
     end_date: Optional[str] = None
-    join: Optional[bool] = True
-    lookahead_shift: Optional[str] = None
-    label_feature: Optional[str] = None
-    feature_to_store: Optional[List[str]] = []
+    label_lookahead: Optional[str] = None
+    label_feature_index: Optional[int] = None
+    features_to_store: Optional[List[int]] = []
 
     @classmethod
     def load_config(cls, path: str) -> 'FeaturizerConfig':
