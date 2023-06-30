@@ -6,12 +6,16 @@ extraEnv: |
   - name: AIRFLOW__CORE__LOAD_EXAMPLE
     value: 'True'
 
+# TODO configure [core] executor, parallelism, max_active_tasks_per_dag, max_active_runs_per_dag, task_runner
+
 config:
   core:
     dag_dir_list_interval: 5
-    in_file_process_interval: 0
-    dag_discovery_safe_mode: true
+    min_file_process_interval: 5
+    dag_discovery_safe_mode: False
     dags_folder: '/opt/airflow/dags/'
+  api:
+    auth_backends: airflow.api.auth.backend.session,airflow.api.auth.backend.basic_auth
 
 #redis:
 #  enabled: false

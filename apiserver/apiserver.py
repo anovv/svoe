@@ -59,6 +59,7 @@ featurizer_storage = FeaturizerStorage()
 
 # TODO pass via env vars/config
 airflow_api_client = ApiClient(Configuration(
+    host='airflow-webserver.airflow.svc.cluster.local:8080/api/v1',
     username='admin',
     password='admin'
 ))
