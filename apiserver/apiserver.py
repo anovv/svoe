@@ -1,5 +1,6 @@
+import ast
 import base64
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict, List, Optional
 
 from airflow_client.client import ApiClient, Configuration, ApiException
@@ -148,15 +149,18 @@ def get_feature_definition_files(
 def run_dag(
     user_id: str,
     dag_id: str,
-    conf_encoded: str
+    conf_encoded: Optional[str] = None
 ):
+    conf = {}
+    # for encode decode https://gist.github.com/khornberg/b87e4a72532a342e1e5ebb16b5739e8f
     try:
-        conf = base64.b64decode(conf_encoded).decode('utf-8')
+        if conf_encoded is not None:
+            conf = json.loads(base64.urlsafe_b64decode(conf_encoded.encode()).decode())
     except Exception as e:
         return Resp(result=None, error=f'Unable to decode base64 dag config: {e}')
 
     api_instance = DAGRunApi(airflow_api_client)
-    now = datetime.now()
+    now = datetime.now().astimezone(tz=timezone.utc)
     now_ts = int(round(now.timestamp()))
 
     dag_run_id = f'dag-run-{user_id}-{now_ts}'
@@ -172,8 +176,9 @@ def run_dag(
     # TODO check if user has existing dags running and set limit?
 
     try:
+        # TODO parse api_response
         api_response = api_instance.post_dag_run(dag_id, dag_run)
-        return Resp(result=api_response, error=None)
+        return Resp(result=True, error=None)
     except ApiException as e:
         return Resp(result=None, error=str(e))
 
