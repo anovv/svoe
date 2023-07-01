@@ -5,5 +5,4 @@ kubernetes
 jinja2
 pydantic
 pyhumps
-pydantic_yaml
 apache-airflow-client

@@ -1,7 +1,8 @@
 from typing import List, Union, Dict, Optional
 
 from pydantic import BaseModel
-from pydantic_yaml import YamlModelMixin
+
+import yaml
 
 
 class FeatureConfig(BaseModel):
@@ -10,7 +11,7 @@ class FeatureConfig(BaseModel):
     feature_params: Union[List[Dict], Dict]
 
 
-class FeaturizerConfig(BaseModel, YamlModelMixin):
+class FeaturizerConfig(BaseModel):
     feature_configs: List[FeatureConfig]
     start_date: Optional[str] = None
     end_date: Optional[str] = None
@@ -20,5 +21,8 @@ class FeaturizerConfig(BaseModel, YamlModelMixin):
 
     @classmethod
     def load_config(cls, path: str) -> 'FeaturizerConfig':
-        return FeaturizerConfig.parse_file(path=path)
+        with open(path, 'r') as stream:
+            d = yaml.safe_load(stream)
+            return FeaturizerConfig.parse_obj(d)
+
 

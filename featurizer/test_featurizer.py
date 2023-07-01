@@ -9,6 +9,7 @@ class TestFeaturizer(unittest.TestCase):
 
     def test_fl_set(self):
         config_path = 'test_configs/feature-label-set.yaml'
+        # config_path = 'test_configs/test.yaml'
         refs = FeaturizerManager.run(config_path)
 
         df = concat(ray.get(refs))

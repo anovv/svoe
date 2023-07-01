@@ -2,11 +2,10 @@ from typing import List, Dict, Type, Deque, Optional
 from streamz import Stream
 from featurizer.features.definitions.feature_definition import FeatureDefinition
 from featurizer.data_definitions.data_definition import DataDefinition, Event, EventSchema
-from featurizer.features.definitions.mid_price.mid_price_fd import MidPriceFD
+from featurizer.features.definitions.mid_price.mid_price_fd.mid_price_fd import MidPriceFD
 from featurizer.features.feature_tree.feature_tree import Feature
-from featurizer.blocks.blocks import BlockMeta, meta_to_interval, windowed_grouping
+from featurizer.blocks.blocks import BlockMeta, windowed_grouping
 from utils.streamz.stream_utils import lookback_apply
-from utils.time.utils import convert_str_to_seconds
 from portion import IntervalDict
 
 import numpy as np

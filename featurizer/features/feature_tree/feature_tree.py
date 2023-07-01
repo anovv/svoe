@@ -6,7 +6,7 @@ from anytree import NodeMixin
 from copy import deepcopy
 
 from featurizer.data_definitions.data_definition import DataDefinition
-from featurizer.utils.definitions_loader import DefinitionsLoader
+from featurizer.featurizer_utils.definitions_loader import DefinitionsLoader
 
 
 class Feature(NodeMixin):

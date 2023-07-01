@@ -153,6 +153,7 @@ def run_dag(
 ):
     conf = {}
     # for encode decode https://gist.github.com/khornberg/b87e4a72532a342e1e5ebb16b5739e8f
+    # to encode conf_encoded = base64.urlsafe_b64encode(json.dumps(conf).encode()).decode()
     try:
         if conf_encoded is not None:
             conf = json.loads(base64.urlsafe_b64decode(conf_encoded.encode()).decode())

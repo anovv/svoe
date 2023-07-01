@@ -5,7 +5,7 @@ from portion import IntervalDict
 
 from featurizer.blocks.blocks import BlockMeta
 from featurizer.data_definitions.data_definition import DataDefinition
-from featurizer.utils.definitions_loader import DefinitionsLoader
+from featurizer.featurizer_utils.definitions_loader import DefinitionsLoader
 
 
 # TODO figure out relationship between Feature and FeatureDefinition (i.e. common interface, subclassing?)
