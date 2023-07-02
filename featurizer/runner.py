@@ -2,7 +2,7 @@ from typing import List
 
 from ray.types import ObjectRef
 
-from featurizer.actors.cache_actor import CacheActor, CACHE_ACTOR_NAME
+from featurizer.actors.cache_actor import get_cache_actor, create_cache_actor
 from featurizer.calculator.calculator import build_feature_set_task_graph, point_in_time_join_dag, \
     build_feature_label_set_task_graph
 from featurizer.calculator.executor import execute_graph
@@ -12,7 +12,8 @@ from featurizer.features.feature_tree.feature_tree import construct_feature_tree
 
 import ray
 
-class FeaturizerManager:
+
+class Featurizer:
 
     @classmethod
     def run(cls, config_path: str) -> List[ObjectRef]:
@@ -40,6 +41,9 @@ class FeaturizerManager:
 
         cache = {}
         features_to_store = [features[i] for i in config.features_to_store]
+
+        # TODO pass params indicating if user doesn't want to join/lookahead and build/execute graph accordingly
+
         dag = build_feature_label_set_task_graph(
             features=features,
             label=label_feature,
@@ -52,7 +56,15 @@ class FeaturizerManager:
 
         # TODO pass cluster address in config?
         with ray.init(address='auto', ignore_reinit_error=True):
-            # assign to unused var so it stays in Ray's scope
-            c = CacheActor.options(name=CACHE_ACTOR_NAME).remote(cache)
+            # ray.init(address='auto', ignore_reinit_error=True)
+
+            # remove old actor from prev session
+            try:
+                cache_actor = get_cache_actor()
+                ray.kill(cache_actor)
+            except ValueError:
+                pass
+
+            create_cache_actor(cache)
             refs = execute_graph(dag)
             return refs

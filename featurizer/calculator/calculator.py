@@ -171,7 +171,6 @@ def point_in_time_join_dag(
     features_to_join: List[Feature],
     label_feature: Feature
 ) -> Dict[Interval, Dict[Interval, DAGNode]]:
-    print(features_to_join)
     # get range overlaps first
     ranges_per_feature = {}
     for feature in features_to_join:

@@ -5,6 +5,7 @@ from intervaltree import Interval
 from ray import ObjectRef
 
 CACHE_ACTOR_NAME = 'CacheActor'
+CACHE_ACTOR_NAMESPACE = 'cache'
 
 
 @ray.remote
@@ -44,4 +45,11 @@ class CacheActor:
 
     def get_cache(self):
         return self.cache
+
+
+def get_cache_actor() -> ray.actor.ActorHandle:
+    return ray.get_actor(name=CACHE_ACTOR_NAME, namespace=CACHE_ACTOR_NAMESPACE)
+
+def create_cache_actor(cache: Dict[str, Dict[Interval, Tuple[int, Optional[ObjectRef]]]]):
+    CacheActor.options(name=CACHE_ACTOR_NAME, namespace=CACHE_ACTOR_NAMESPACE, lifetime="detached").remote(cache)
 

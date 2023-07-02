@@ -4,24 +4,24 @@ from portion import closed
 
 import calculator as C
 import utils.streamz.stream_utils
-from featurizer.actors.cache_actor import CacheActor, CACHE_ACTOR_NAME
+from featurizer.actors.cache_actor import create_cache_actor
 from featurizer.calculator.executor import execute_graph
 from featurizer.calculator.tasks import merge_blocks
 from featurizer.storage.featurizer_storage import FeaturizerStorage, data_key
 from featurizer.data_definitions.l2_book_incremental.cryptotick.cryptotick_l2_book_incremental import CryptotickL2BookIncrementalData
-from featurizer.features.definitions.spread.relative_bid_ask_spread_fd import RelativeBidAskSpreadFD
-from featurizer.features.definitions.tvi.trade_volume_imb_fd import TradeVolumeImbFD
-from featurizer.features.definitions.volatility.volatility_stddev_fd import VolatilityStddevFD
+from featurizer.features.definitions.spread.relative_bid_ask_spread_fd.relative_bid_ask_spread_fd import RelativeBidAskSpreadFD
+from featurizer.features.definitions.tvi.trade_volume_imb_fd.trade_volume_imb_fd import TradeVolumeImbFD
+from featurizer.features.definitions.volatility.volatility_stddev_fd.volatility_stddev_fd import VolatilityStddevFD
 
 from featurizer.sql.data_catalog.models import DataCatalog
-from featurizer.features.definitions.l2_snapshot.l2_snapshot_fd import L2SnapshotFD
-from featurizer.features.definitions.mid_price.mid_price_fd import MidPriceFD
+from featurizer.features.definitions.l2_book.l2_snapshot_fd.l2_snapshot_fd import L2SnapshotFD
+from featurizer.features.definitions.mid_price.mid_price_fd.mid_price_fd import MidPriceFD
 from featurizer.features.feature_tree.feature_tree import construct_feature_tree, Feature
 
 import unittest
 import pandas as pd
 from typing import List
-from featurizer.utils.testing_utils import mock_feature, mock_ts_df_remote
+from featurizer.featurizer_utils.testing_utils import mock_feature, mock_ts_df_remote
 from utils.pandas.df_utils import concat, load_df, sort_dfs, plot_multi
 from featurizer.blocks.blocks import merge_asof_multi
 
@@ -138,7 +138,7 @@ class TestFeatureCalculator(unittest.TestCase):
         label_feature = feature_mid_price
         joined_task_graph = C.point_in_time_join_dag(task_graph, features, label_feature)
         with ray.init(address='auto', ignore_reinit_error=True):
-            c = CacheActor.options(name=CACHE_ACTOR_NAME).remote(cache) # assign to unused var so it stays in Ray's scope
+            create_cache_actor(cache)
             refs = execute_graph(joined_task_graph)
             df = concat(ray.get(refs))
 
@@ -221,7 +221,7 @@ class TestFeatureCalculator(unittest.TestCase):
         label_feature = feature_mid_price
         joined_task_graph = C.point_in_time_join_dag(task_graph, features, label_feature)
         with ray.init(address='auto', ignore_reinit_error=True):
-            c = CacheActor.options(name=CACHE_ACTOR_NAME).remote(cache)  # assign to unused var so it stays in Ray's scope
+            create_cache_actor(cache)  # assign to unused var so it stays in Ray's scope
             refs = execute_graph(joined_task_graph)
             df = concat(ray.get(refs))
 
@@ -316,7 +316,7 @@ class TestFeatureCalculator(unittest.TestCase):
         )
 
         with ray.init(address='auto', ignore_reinit_error=True):
-            c = CacheActor.options(name=CACHE_ACTOR_NAME).remote(cache)  # assign to unused var, so it stays in Ray's scope
+            create_cache_actor(cache)  # assign to unused var, so it stays in Ray's scope
             refs = execute_graph(dag)
             df = concat(ray.get(refs))
             print(df.head())

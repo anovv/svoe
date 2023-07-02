@@ -12,8 +12,8 @@ from ray.dag import DAGNode
 from ray.types import ObjectRef
 from streamz import Stream
 
-from featurizer.actors.cache_actor import CACHE_ACTOR_NAME
-from featurizer.blocks.blocks import Block, BlockRange, lookahead_shift
+from featurizer.actors.cache_actor import get_cache_actor
+from featurizer.blocks.blocks import Block, BlockRange, lookahead_shift, merge_asof_multi
 from featurizer.data_definitions.data_definition import Event
 from featurizer.features.feature_tree.feature_tree import Feature
 from featurizer.sql.db_actor import DbActor
@@ -50,7 +50,7 @@ def bind_and_cache(
 
 
 def _get_from_cache(context: Dict[str, Any]) -> Tuple[Optional[pd.DataFrame], bool]:
-    cache_actor = ray.get_actor(CACHE_ACTOR_NAME)
+    cache_actor = get_cache_actor()
 
     # this call decreases obj ref counter
     obj_ref, should_cache = ray.get(cache_actor.check_cache.remote(context))
@@ -66,7 +66,7 @@ def _get_from_cache(context: Dict[str, Any]) -> Tuple[Optional[pd.DataFrame], bo
 
 # TODO cache task ref rather than obj itself so we dont't wait for it to be ready and avoid re-calculating same task
 def _cache(obj: Any, context: Dict[str, Any]):
-    cache_actor = ray.get_actor(CACHE_ACTOR_NAME)
+    cache_actor = get_cache_actor()
     obj_ref = ray.put(obj, _owner=cache_actor)
     # pass obj_ref wrapped in list to avoid de-referencing
     ray.get(cache_actor.cache_obj_ref.remote([obj_ref], context))
