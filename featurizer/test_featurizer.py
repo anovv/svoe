@@ -10,17 +10,14 @@ class TestFeaturizer(unittest.TestCase):
 
     def test_fl_set(self):
         config_path = 'test_configs/feature-label-set.yaml'
-        refs = Featurizer.run(config_path)
+        Featurizer.run(config_path)
 
         with ray.init(address='auto', ignore_reinit_error=True):
             cache_actor = get_cache_actor()
-            print(ray.get(cache_actor.get_cache.remote()))
-
-            # TODO we are note able to access objrefs from prev session
-            # TODO figure out how to share data between sessions
+            refs = ray.get(cache_actor.get_featurizer_result_refs.remote())
             df = concat(ray.get(refs))
-        # print(df.head())
-        # print(df.tail())
+            print(df.head())
+            print(df.tail())
 
 
 if __name__ == '__main__':

@@ -12,6 +12,7 @@ CACHE_ACTOR_NAMESPACE = 'cache'
 class CacheActor:
     def __init__(self, cache: Dict[str, Dict[Interval, Tuple[int, Optional[ObjectRef]]]]):
         self.cache = cache
+        self.featurizer_result_refs = None
 
     def check_cache(self, context: Dict[str, Any]) -> Tuple[Optional[ObjectRef], bool]:
         feature_key = context['feature_key']
@@ -46,10 +47,16 @@ class CacheActor:
     def get_cache(self):
         return self.cache
 
+    def record_featurizer_result_refs(self, refs: List[ObjectRef]):
+        self.featurizer_result_refs = refs
+
+    def get_featurizer_result_refs(self):
+        return self.featurizer_result_refs
+
 
 def get_cache_actor() -> ray.actor.ActorHandle:
     return ray.get_actor(name=CACHE_ACTOR_NAME, namespace=CACHE_ACTOR_NAMESPACE)
 
-def create_cache_actor(cache: Dict[str, Dict[Interval, Tuple[int, Optional[ObjectRef]]]]):
-    CacheActor.options(name=CACHE_ACTOR_NAME, namespace=CACHE_ACTOR_NAMESPACE, lifetime="detached").remote(cache)
+def create_cache_actor(cache: Dict[str, Dict[Interval, Tuple[int, Optional[ObjectRef]]]]) -> ray.actor.ActorHandle:
+    return CacheActor.options(name=CACHE_ACTOR_NAME, namespace=CACHE_ACTOR_NAMESPACE, lifetime="detached").remote(cache)
 

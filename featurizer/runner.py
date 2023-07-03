@@ -16,7 +16,7 @@ import ray
 class Featurizer:
 
     @classmethod
-    def run(cls, config_path: str) -> List[ObjectRef]:
+    def run(cls, config_path: str):
         config = FeaturizerConfig.load_config(path=config_path)
         features = []
         for feature_config in config.feature_configs:
@@ -58,13 +58,13 @@ class Featurizer:
         with ray.init(address='auto', ignore_reinit_error=True):
             # ray.init(address='auto', ignore_reinit_error=True)
 
-            # remove old actor from prev session
+            # remove old actor from prev session if it exists
             try:
                 cache_actor = get_cache_actor()
                 ray.kill(cache_actor)
             except ValueError:
                 pass
 
-            create_cache_actor(cache)
+            cache_actor = create_cache_actor(cache)
             refs = execute_graph(dag)
-            return refs
+            ray.get(cache_actor.record_featurizer_result_refs.remote(refs))
