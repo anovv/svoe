@@ -13,8 +13,7 @@ class TestFeaturizer(unittest.TestCase):
         Featurizer.run(config_path)
 
         with ray.init(address='auto', ignore_reinit_error=True):
-            cache_actor = get_cache_actor()
-            refs = ray.get(cache_actor.get_featurizer_result_refs.remote())
+            refs = Featurizer.get_result_refs()
             df = concat(ray.get(refs))
             print(df.head())
             print(df.tail())

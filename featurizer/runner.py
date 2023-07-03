@@ -54,6 +54,9 @@ class Featurizer:
             stored_feature_blocks_meta=stored_features_meta
         )
 
+        # TODO first two values are weird outliers for some reason, why?
+        # df = df.tail(-2)
+
         # TODO pass cluster address in config?
         with ray.init(address='auto', ignore_reinit_error=True):
             # ray.init(address='auto', ignore_reinit_error=True)
@@ -68,3 +71,9 @@ class Featurizer:
             cache_actor = create_cache_actor(cache)
             refs = execute_graph(dag)
             ray.get(cache_actor.record_featurizer_result_refs.remote(refs))
+
+
+    @classmethod
+    def get_result_refs(cls):
+        cache_actor = get_cache_actor()
+        return ray.get(cache_actor.get_featurizer_result_refs.remote())
