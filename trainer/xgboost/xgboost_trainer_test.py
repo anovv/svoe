@@ -1,20 +1,36 @@
 import time
 import unittest
+from typing import Dict, Any
 
-import pandas as pd
+import numpy as np
 import ray
-import toolz
 from matplotlib import pyplot as plt
-from ray.air import ScalingConfig
+from ray.air import ScalingConfig, RunConfig
 from ray.train.batch_predictor import BatchPredictor
 from ray.train.xgboost import XGBoostTrainer, XGBoostPredictor
+from ray.tune import Tuner, TuneConfig
 
-from featurizer.actors.cache_actor import get_cache_actor
-from featurizer.features.feature_tree.feature_tree import construct_feature_tree
 from featurizer.runner import Featurizer
-from utils.pandas.df_utils import sort_dfs, concat, get_cached_df, cache_df_if_needed
 
-from sklearn.metrics import r2_score
+from sklearn.metrics import mean_squared_error, mean_absolute_error
+
+def _xgboost_trainer(label: str, datesets: Dict[str, Any]) -> XGBoostTrainer:
+    num_workers = 1
+    trainer = XGBoostTrainer(
+        scaling_config=ScalingConfig(num_workers=num_workers, use_gpu=False),
+        label_column=label,
+        params={
+            'tree_method': 'approx',
+            'objective': 'reg:linear',
+            'eval_metric': ['logloss', 'error'],
+        },
+        # TODO re what valid is used for
+        # https://www.kaggle.com/questions-and-answers/61835
+        datasets=datesets,
+        # preprocessor=preprocessor, # XGBoost does not need feature scaling
+        num_boost_round = 100,
+    )
+    return trainer
 
 
 class TestXGBoostTrainer(unittest.TestCase):
@@ -26,31 +42,16 @@ class TestXGBoostTrainer(unittest.TestCase):
 
         with ray.init(address='auto', ignore_reinit_error=True):
             refs = Featurizer.get_result_refs()
-            # TODO first two values are weird outliers for some reason, why?
-            # df = df.tail(-2)
 
             train_ds, valid_ds, test_ds = ray.data.from_pandas_refs(refs).split_proportionately([0.5, 0.2])
-            params = {
-                'tree_method': 'approx',
-                'objective': 'reg:linear',
-                'eval_metric': ['logloss', 'error'],
+
+            xgboost_datasets = {
+                'train': train_ds.drop_columns(cols=['timestamp', 'receipt_timestamp']),
+                'valid': valid_ds.drop_columns(cols=['timestamp', 'receipt_timestamp'])
             }
 
             label_column = 'label_mid_price' # TODO get dynamically
-            num_workers = 10
-            trainer = XGBoostTrainer(
-                scaling_config=ScalingConfig(num_workers=num_workers, use_gpu=False),
-                label_column=label_column,
-                params=params,
-                # TODO re what valid is used for
-                # https://www.kaggle.com/questions-and-answers/61835
-                datasets={
-                    'train': train_ds.drop_columns(cols=['timestamp', 'receipt_timestamp']),
-                    'valid': valid_ds.drop_columns(cols=['timestamp', 'receipt_timestamp'])
-                },
-                # preprocessor=preprocessor, # TODO scale features? XGBoost does not need scaling
-                num_boost_round=100,
-            )
+            trainer = _xgboost_trainer(label_column, xgboost_datasets)
             result = trainer.fit()
             print(result.metrics)
 
@@ -70,39 +71,55 @@ class TestXGBoostTrainer(unittest.TestCase):
             print(f'Predict in {time.time() - t}s')
 
             p = test_ds.zip(predicted_labels).to_pandas()
+            # TODO first two values are weird outliers for some reason, why?
             p = p.tail(-2)
-            p = p.head(10)
-            p.plot(x='timestamp', y=['mid_price', 'label_mid_price', 'predictions'])
+
+            mse = mean_squared_error(p['label_mid_price'], p['predictions'])
+            rmse = np.sqrt(mse)
+            mae = mean_absolute_error(p['label_mid_price'], p['predictions'])
+            print(f'MSE: {mse}, RMSE: {rmse}, MAE: {mae}')
+
+            p = p.head(200)
+            # p.plot(x='timestamp', y=['mid_price', 'label_mid_price', 'predictions'])
+            p.plot(x='timestamp', y=['label_mid_price', 'predictions'])
             plt.show()
-            # print(predicted_labels)
-            # print(test_ds)
-            # actual = test_ds.take_all()
-            # print(actual)
-            #
-            # predicted = list(map(lambda e: e['predictions'], predicted_labels.take_all()))
-            # print(predicted)
-            # actual['predicted'] = predicted
-            #
-            # print(actual)
 
-            # print(predicted)
-            # actual = test_df_with_labels['mid_price'].values.tolist()
-            # test_df_with_labels['predicted_mid_price'] = predicted
-            # test_df_with_labels['timestamp'] = df_with_timestamp['timestamp']
-            # r2 = r2_score(actual, predicted)
-            # print(r2)
+    def test_tuner(self):
+        config_path = '/Users/anov/IdeaProjects/svoe/featurizer/test_configs/feature-label-set.yaml'
+        # Featurizer.run(config_path)
 
-            # fig, axes = plt.subplots(nrows=1, ncols=1)
-            # test_df_with_labels.plot(x='timestamp', y=['mid_price', 'predicted_mid_price'])
-            # plt.show()
-            # predicted_labels.show()
+        with ray.init(address='auto', ignore_reinit_error=True):
+            refs = Featurizer.get_result_refs()
 
-            # shap_values = batch_predictor.predict(test_dataset, pred_contribs=True)
-            # print(f'SHAP VALUES')
-            # shap_values.show()
+            train_ds, valid_ds, test_ds = ray.data.from_pandas_refs(refs).split_proportionately([0.5, 0.2])
+
+            xgboost_datasets = {
+                'train': train_ds.drop_columns(cols=['timestamp', 'receipt_timestamp']),
+                'valid': valid_ds.drop_columns(cols=['timestamp', 'receipt_timestamp'])
+            }
+
+            label_column = 'label_mid_price' # TODO get dynamically
+            trainer = _xgboost_trainer(label_column, xgboost_datasets)
+
+            tuner = Tuner(
+                trainer,
+                run_config=RunConfig(verbose=1),
+                param_space={
+                    'params': {
+                        'max_depth': ray.tune.randint(2, 8),
+                        'min_child_weight': ray.tune.randint(1, 10),
+                    },
+                },
+                tune_config=TuneConfig(num_samples=8, metric='train-logloss', mode='min'),
+            )
+
+            results = tuner.fit()
+            best_result = results.get_best_result()
+            print('Best result error rate', best_result.metrics['train-error'])
+            df = results.get_dataframe()
+            print(df)
 
 
 if __name__ == '__main__':
-    # unittest.main()
     t = TestXGBoostTrainer()
-    t.test_xgboost()
+    t.test_tuner()
