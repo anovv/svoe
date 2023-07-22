@@ -68,6 +68,7 @@ def mock_meta(start_ts, end_ts, extra=None) -> BlockMeta:
         res.update(extra)
     return res
 
+
 def make_ranges(data: List[BlockMeta]) -> List[BlockRangeMeta]:
     # TODO validate ts sorting
 

@@ -1,6 +1,7 @@
 from queue import Queue
 from typing import Dict, Type
 
+from featurizer.config import FeaturizerConfig
 from simulation.data.data_generator import DataGenerator
 from simulation.events.events import DataEvent, SignalEvent, OrderEvent, FillEvent
 from simulation.execution.default_execution_simulator import DefaultExecutionSimulator
@@ -12,8 +13,8 @@ from simulation.strategy.base import BaseStrategy
 
 class Loop:
 
-    def __init__(self, data_config: Dict, portfolio_config: Dict, strategy_class: Type[BaseStrategy]):
-        self.data_generator = DataGenerator(data_config)
+    def __init__(self, featurizer_config: FeaturizerConfig, portfolio_config: Dict, strategy_class: Type[BaseStrategy]):
+        self.data_generator = DataGenerator(featurizer_config)
         self.strategy = strategy_class(portfolio_config)
         self.execution_simulator = ExecutionSimulator()
         self.is_running = False
