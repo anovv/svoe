@@ -3,10 +3,6 @@ from typing import Dict, Type
 
 from featurizer.config import FeaturizerConfig
 from simulation.data.data_generator import DataGenerator
-from simulation.events.events import DataEvent, SignalEvent, OrderEvent, FillEvent
-from simulation.execution.default_execution_simulator import DefaultExecutionSimulator
-from simulation.portfolio.default_portfolio import DefaultPortfolio
-
 from simulation.execution.execution_simulator import ExecutionSimulator
 from simulation.strategy.base import BaseStrategy
 

@@ -180,4 +180,28 @@ def inorder(node: Feature, callback: Callable):
         return
     callback(node)
     for child in node.children:
-        postorder(child, callback)
+        inorder(child, callback)
+
+
+def construct_stream_tree(feature: Feature) -> Tuple[Stream, Dict[Feature, Stream]]:
+    data_streams = {}
+    _, s = _construct_stream_tree(feature, data_streams)
+    return s, data_streams
+
+
+def _construct_stream_tree(feature: Feature, data_streams: Dict[Feature, Stream]) -> Tuple[Feature, Stream]:
+    if feature.children is None or len(feature.children) == 0:
+        # data node
+        s = Stream()
+        if feature in data_streams:
+            raise ValueError('[Stream Tree] Duplicate data streams')
+        data_streams[feature] = s
+        return feature, s
+
+    # upstreams = {dep_feature: Stream() for dep_feature in deps.keys()}
+    upstreams = {}
+    for child in feature.children:
+        upstreams[child] = _construct_stream_tree(child, data_streams)
+
+    s = feature.feature_definition.stream(upstreams, feature.params)
+    return feature, s

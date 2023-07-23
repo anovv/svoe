@@ -14,8 +14,8 @@ from streamz import Stream
 
 from featurizer.actors.cache_actor import get_cache_actor
 from featurizer.blocks.blocks import Block, BlockRange, lookahead_shift, merge_asof_multi
-from featurizer.data_definitions.data_definition import Event
 from featurizer.features.feature_tree.feature_tree import Feature
+from featurizer.featurizer_utils.featurizer_utils import merge_blocks
 from featurizer.sql.db_actor import DbActor
 from featurizer.sql.feature_catalog.models import FeatureCatalog, _construct_feature_catalog_s3_path
 from utils.pandas import df_utils
@@ -138,6 +138,8 @@ def calculate_feature(
     t = time.time()
     merged = merge_blocks(deps)
     print(f'[{feature}] Merged in {time.time() - t}s')
+
+    # TODO use construct_stream_tree in Feature class
     # construct upstreams
     upstreams = {dep_feature: Stream() for dep_feature in deps.keys()}
     s = feature.feature_definition.stream(upstreams, feature.params)
@@ -227,37 +229,6 @@ def lookahead_shift_blocks(block_refs: List[ObjectRef[Block]], interval: Interva
 
     print('Lookahead shift block finished')
     return shifted
-
-
-# TODO util this
-# TODO we assume no 'holes' here
-# TODO use merge_ordered
-# TODO this is slow
-def merge_blocks(
-    blocks: Dict[Feature, BlockRange]
-) -> List[Tuple[Feature, Event]]:
-    merged = None
-    features = list(blocks.keys())
-    for i in range(0, len(features)):
-        feature = features[i]
-        block_range = blocks[feature]
-        named_events = []
-        for block in block_range:
-            t = time.time()
-            parsed = feature.feature_definition.parse_events(block)
-            print(f'[{feature}] Parsed block in {time.time() - t}s')
-            named = []
-            for e in parsed:
-                named.append((feature, e))
-            named_events = list(heapq.merge(named_events, named, key=lambda named_event: named_event[1]['timestamp']))
-
-        if i == 0:
-            merged = named_events
-        else:
-            # TODO explore heapdict
-            merged = list(heapq.merge(merged, named_events, key=lambda named_event: named_event[1]['timestamp']))
-
-    return merged
 
 
 def catalog_feature_block(feature: Feature, df: pd.DataFrame, interval: Interval) -> FeatureCatalog:
