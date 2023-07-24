@@ -1,4 +1,4 @@
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Any
 
 from intervaltree import Interval
 
@@ -29,6 +29,33 @@ class DataGenerator:
             out, data_streams = construct_stream_tree(f)
             self.data_streams_per_feature[f] = out, data_streams
 
+        # constructed unified out stream
+        first_feature = self.features[0]
+        first_out_stream, _ = self.data_streams_per_feature[first_feature]
+        unified_out_stream = first_out_stream.map(lambda e: [first_feature, e])
+        for i in range(1, len(self.features)):
+            feature = self.features[i]
+            out_stream, _ = self.data_streams_per_feature[feature]
+            out_stream = out_stream.map(lambda e: [feature, e])
+            unified_out_stream = unified_out_stream.combine_latest(out_stream)
+
+        self.unified_out_stream = unified_out_stream
+        self.cur_out_event = None
+
+        # sink function for unified out stream
+        def _unified_out_stream(e: Any):
+            if e is None:
+                raise ValueError('Stream returned None event')
+            feature = e[0]
+            if self.cur_out_event is None:
+                self.cur_out_event = {}
+            if feature in self.cur_out_event:
+                raise ValueError('Feature is already in output event, possible duplicate')
+            event = e[1]
+            self.cur_out_event[feature] = event
+
+        self.unified_out_stream.sink(_unified_out_stream)
+
         storage = FeaturizerStorage()
         data_deps = set()
         for feature in self.features:
@@ -51,7 +78,7 @@ class DataGenerator:
     def merge_data_ranges(self, data_ranges: Dict[Interval, Dict[Feature, BlockRange]]) -> Dict[Interval, List[Tuple[Feature, f.Event]]]:
         return {i: merge_blocks(b) for i, b in data_ranges}
 
-    def next(self) -> DataEvent:
+    def _pop_input_events(self) -> List[Tuple[Feature, f.Event]]:
         # move interval if necessary
         if self.cur_interval_id >= len(self.input_data_events.keys()):
             raise ValueError('DataGenerator out of bounds')
@@ -63,12 +90,29 @@ class DataGenerator:
             interval = list(self.input_data_events.keys())[self.cur_interval_id]
             input_events = self.input_data_events[interval]
 
-        data, input_event = input_events[self.cur_input_event_index] # Tuple[Feature, f.Event]
+        res = []
+        data, input_event = input_events[self.cur_input_event_index]
+        timestamp = input_event['timestamp']
+        res.append((data, input_event))
         self.cur_input_event_index += 1
 
-        # TODO loop through self.data_streams_per_feature and emit new event for each data key, record emitted state, create feature snapshot
+        # group events with same ts
+        while self.cur_input_event_index < len(input_events):
+            next_data, next_input_event = input_events[self.cur_input_event_index]
+            # TODO float comparison
+            if timestamp == next_input_event['timestamp']:
+                res.append((next_data, next_input_event))
+                self.cur_input_event_index += 1
+            else:
+                break
+
+        return res
+
+    def next(self) -> DataEvent:
+        grouped_input_events = self._pop_input_events()
+        out_event = self.cur_out_event
+        self.cur_out_event = None
+        return out_event
 
     def should_stop(self) -> bool:
         return self.cur_interval_id >= len(self.input_data_events.keys())
-
-

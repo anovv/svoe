@@ -47,13 +47,13 @@ if __name__ == '__main__':
         l.append(r)
 
 
-    # d = a.combine_latest(b).combine_latest(c).sink(appnd)
-    d = a.zip(b).zip(c).sink(appnd)
+    d = a.map(lambda e: ['a', e]).combine_latest(b.map(lambda e: ['b', e])).combine_latest(c.map(lambda e: ['c', e])).sink(appnd)
+    # d = a.zip(b).zip(c).sink(appnd)
     a.emit(1)
     b.emit(2)
     c.emit(3)
-    a.emit(4)
-    b.emit(5)
-    c.emit(6)
+    # a.emit(4)
+    # b.emit(5)
+    # c.emit(6)
 
     print(l)
