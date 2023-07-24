@@ -2,7 +2,8 @@ from typing import Dict, List, Tuple, Any
 
 from intervaltree import Interval
 
-from featurizer.blocks.blocks import BlockRangeMeta, Block, BlockRange
+from featurizer.blocks.blocks import BlockRangeMeta, Block, BlockRange, ranges_to_interval_dict, get_overlaps, \
+    prune_overlaps
 from featurizer.calculator.tasks import merge_blocks
 from featurizer.config import FeaturizerConfig
 from featurizer.features.feature_tree.feature_tree import construct_feature_tree, Feature, construct_stream_tree
@@ -10,8 +11,14 @@ from featurizer.storage.featurizer_storage import FeaturizerStorage, data_key
 from simulation.events.events import DataEvent
 import featurizer.data_definitions.data_definition as f
 
+import concurrent.futures
+
+from utils.pandas.df_utils import load_df
+
 
 class DataGenerator:
+
+    NUM_IO_THREADS = 16
 
     def __init__(self, featurizer_config: FeaturizerConfig):
         # TODO this logic is duplicated in featurizer/runner.py, util it?
@@ -44,14 +51,20 @@ class DataGenerator:
 
         # sink function for unified out stream
         def _unified_out_stream(e: Any):
+            cur_interval =
             if e is None:
                 raise ValueError('Stream returned None event')
             feature = e[0]
+            event = e[1]
+            interval = list(self.input_data_events.keys())[self.cur_interval_id]
+            if interval.lower > event['timestamp'] or event['timestamp'] > interval.upper:
+                # skip if event is outside of current interval
+                return
+
             if self.cur_out_event is None:
                 self.cur_out_event = {}
             if feature in self.cur_out_event:
                 raise ValueError('Feature is already in output event, possible duplicate')
-            event = e[1]
             self.cur_out_event[feature] = event
 
         self.unified_out_stream.sink(_unified_out_stream)
@@ -64,16 +77,64 @@ class DataGenerator:
         data_keys = [data_key(d.params) for d in data_deps]
         ranges_meta_per_data_key = storage.get_data_meta(data_keys, start_date=featurizer_config.start_date,
                                                          end_date=featurizer_config.end_date)
-        data_ranges_meta = {data: ranges_meta_per_data_key[data_key(data.params)] for data in data_deps} # Dict[Feature, List[BlockRangeMeta]]
-        data_ranges = self.load_data_ranges(data_ranges_meta)
+        ranges_meta_per_data = {data: ranges_meta_per_data_key[data_key(data.params)] for data in data_deps} # Dict[Feature, List[BlockRangeMeta]]
+        data_ranges = self.load_data_ranges(ranges_meta_per_data)
         self.input_data_events = self.merge_data_ranges(data_ranges)
         self.cur_interval_id = 0
         self.cur_input_event_index = 0
 
 
     # TODO util this?
-    def load_data_ranges(self, data_ranges_meta: Dict[Feature, List[BlockRangeMeta]]) -> Dict[Interval, Dict[Feature, BlockRange]]:
-        return {} # TODO
+    def load_data_ranges(self, ranges_meta_per_data: Dict[Feature, List[BlockRangeMeta]]) -> Dict[Interval, Dict[Feature, BlockRange]]:
+        ranges_meta_dict_per_data = {}
+        for data in ranges_meta_per_data:
+            meta = ranges_meta_per_data[data]
+            ranges_meta_dict_per_data[data] = ranges_to_interval_dict(meta)
+
+        range_meta_intervals = prune_overlaps(get_overlaps(ranges_meta_dict_per_data)) # Dict[Interval, Dict[Feature, BlockRangeMeta]]
+
+        # count number of blocks
+        num_blocks = 0
+        for interval in range_meta_intervals:
+            for feature in range_meta_intervals[interval]:
+                num_blocks += len(range_meta_intervals[interval][feature])
+
+
+        # init data_ranges with empty lists. They will be populated later
+        data_ranges = {}
+        for interval in range_meta_intervals:
+            for feature in range_meta_intervals[interval]:
+                if interval not in data_ranges:
+                    data_ranges[interval] = {}
+                data_ranges[interval][feature] = [None] * len(range_meta_intervals[interval][feature])
+
+        executor_futures = {}
+        def _load_and_store_block(cur_block_id: int, path: str):
+            print(f'Started loading block {cur_block_id}/{num_blocks}')
+            df = load_df(path)
+            print(f'Finished loading block {cur_block_id}/{num_blocks}')
+            return df
+
+        with concurrent.futures.ThreadPoolExecutor(max_workers=self.NUM_IO_THREADS) as executor:
+            block_id = 1
+            for interval in range_meta_intervals:
+                for feature in range_meta_intervals[interval]:
+                    for block_position in range(len(range_meta_intervals[interval][feature])):
+                        block_meta = range_meta_intervals[interval][feature][block_position]
+                        path = block_meta['path']
+                        key = (interval, feature, block_position)
+                        executor_futures[key] = executor.submit(_load_and_store_block, cur_block_id=block_id, path=path)
+                        block_id += 1
+
+        for key in executor_futures:
+            executor_future = executor_futures[key]
+            interval, feature, block_position = key
+            block = executor_future.result()
+
+            # data_ranges dict already constructed above
+            data_ranges[interval][feature][block_position] = block
+
+        return data_ranges
 
     def merge_data_ranges(self, data_ranges: Dict[Interval, Dict[Feature, BlockRange]]) -> Dict[Interval, List[Tuple[Feature, f.Event]]]:
         return {i: merge_blocks(b) for i, b in data_ranges}
