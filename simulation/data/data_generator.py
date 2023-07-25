@@ -13,6 +13,7 @@ import featurizer.data_definitions.data_definition as f
 
 import concurrent.futures
 
+from utils.common_utils import flatten_tuples
 from utils.pandas.df_utils import load_df
 
 
@@ -50,22 +51,31 @@ class DataGenerator:
         self.cur_out_event = None
 
         # sink function for unified out stream
-        def _unified_out_stream(e: Any):
-            cur_interval =
-            if e is None:
+        def _unified_out_stream(elems: Tuple):
+            if elems is None:
                 raise ValueError('Stream returned None event')
-            feature = e[0]
-            event = e[1]
-            interval = list(self.input_data_events.keys())[self.cur_interval_id]
-            if interval.lower > event['timestamp'] or event['timestamp'] > interval.upper:
-                # skip if event is outside of current interval
-                return
+            elems = flatten_tuples(elems)
+            # (
+            #   [feature-MidPriceFD-0-4f83d18e, frozendict.frozendict(
+            #       {'timestamp': 1675216068.340869,
+            #       'receipt_timestamp': 1675216068.340869,
+            #       'mid_price': 23169.260000000002})],
+            #   [feature-VolatilityStddevFD-0-ad30ace5, frozendict.frozendict(
+            #       {'timestamp': 1675216068.340869,
+            #       'receipt_timestamp': 1675216068.340869,
+            #       'volatility': 0.00023437500931322575})]
+            #  )
+            for l in elems:
+                feature = l[0]
+                event = l[1]
+                interval = list(self.input_data_events.keys())[self.cur_interval_id]
+                if interval.lower > event['timestamp'] or event['timestamp'] > interval.upper:
+                    # skip if event is outside of current interval
+                    return
 
-            if self.cur_out_event is None:
-                self.cur_out_event = {}
-            if feature in self.cur_out_event:
-                raise ValueError('Feature is already in output event, possible duplicate')
-            self.cur_out_event[feature] = event
+                if self.cur_out_event is None:
+                    self.cur_out_event = {}
+                self.cur_out_event[feature] = event
 
         self.unified_out_stream.sink(_unified_out_stream)
 
@@ -109,6 +119,7 @@ class DataGenerator:
                 data_ranges[interval][feature] = [None] * len(range_meta_intervals[interval][feature])
 
         executor_futures = {}
+
         def _load_and_store_block(cur_block_id: int, path: str):
             print(f'Started loading block {cur_block_id}/{num_blocks}')
             df = load_df(path)
@@ -137,7 +148,11 @@ class DataGenerator:
         return data_ranges
 
     def merge_data_ranges(self, data_ranges: Dict[Interval, Dict[Feature, BlockRange]]) -> Dict[Interval, List[Tuple[Feature, f.Event]]]:
-        return {i: merge_blocks(b) for i, b in data_ranges}
+        # return {i: merge_blocks(b) for (i, b) in data_ranges}
+        res = {}
+        for interval in data_ranges:
+            res[interval] = merge_blocks(data_ranges[interval])
+        return res
 
     def _pop_input_events(self) -> List[Tuple[Feature, f.Event]]:
         # move interval if necessary
@@ -147,6 +162,8 @@ class DataGenerator:
         input_events = self.input_data_events[interval]
         if self.cur_input_event_index >= len(input_events):
             self.cur_interval_id += 1
+            if self.cur_interval_id >= len(self.input_data_events.keys()):
+                raise ValueError('DataGenerator out of bounds')
             self.cur_input_event_index = 0
             interval = list(self.input_data_events.keys())[self.cur_interval_id]
             input_events = self.input_data_events[interval]
@@ -169,11 +186,28 @@ class DataGenerator:
 
         return res
 
-    def next(self) -> DataEvent:
+    # TODO typing
+    def next(self) -> Dict:
         grouped_input_events = self._pop_input_events()
+        for (data, input_event) in grouped_input_events:
+            for feature in self.data_streams_per_feature:
+                _, data_streams = self.data_streams_per_feature[feature]
+                if data in data_streams:
+                    data_streams[data].emit(input_event)
+
         out_event = self.cur_out_event
         self.cur_out_event = None
         return out_event
 
-    def should_stop(self) -> bool:
-        return self.cur_interval_id >= len(self.input_data_events.keys())
+    def has_next(self) -> bool:
+        if self.cur_interval_id >= len(self.input_data_events.keys()):
+            return False
+
+        # last elem
+        if self.cur_interval_id == len(self.input_data_events.keys()) - 1:
+            interval = list(self.input_data_events.keys())[self.cur_interval_id]
+            input_events = self.input_data_events[interval]
+            if self.cur_input_event_index == len(input_events) - 1:
+                return False
+
+        return True

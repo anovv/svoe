@@ -1,0 +1,21 @@
+start_date: '2023-02-01'
+end_date: '2023-02-01'
+label_feature_index: 0
+label_lookahead: '5100ms'
+feature_configs:
+  - feature_definition: mid_price.mid_price_fd
+    data_params: &id001
+      - exchange: BINANCE
+        data_type: l2_book
+        instrument_type: spot
+        symbol: BTC-USDT
+    feature_params:
+      1:
+        dep_schema: cryptotick
+        sampling: 1s
+  - feature_definition: volatility.volatility_stddev_fd
+    data_params: *id001
+    feature_params:
+      2:
+        dep_schema: cryptotick
+        sampling: 1s

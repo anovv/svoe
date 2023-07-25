@@ -142,6 +142,8 @@ def calculate_feature(
     # TODO use construct_stream_tree in Feature class
     # construct upstreams
     upstreams = {dep_feature: Stream() for dep_feature in deps.keys()}
+
+    # TODO unify feature_definition.stream return type
     s = feature.feature_definition.stream(upstreams, feature.params)
     if isinstance(s, Tuple):
         out_stream = s[0]

@@ -33,17 +33,17 @@ if __name__ == '__main__':
 
     l = []
 
-    def flatten(data):
+    def flatten_tuples(data):
         if isinstance(data, tuple):
             if len(data) == 0:
                 return ()
             else:
-                return flatten(data[0]) + flatten(data[1:])
+                return flatten_tuples(data[0]) + flatten_tuples(data[1:])
         else:
             return (data,)
 
     def appnd(t):
-        r = flatten(t)
+        r = flatten_tuples(t)
         l.append(r)
 
 

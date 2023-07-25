@@ -201,7 +201,14 @@ def _construct_stream_tree(feature: Feature, data_streams: Dict[Feature, Stream]
     # upstreams = {dep_feature: Stream() for dep_feature in deps.keys()}
     upstreams = {}
     for child in feature.children:
-        upstreams[child] = _construct_stream_tree(child, data_streams)
+        _, stream = _construct_stream_tree(child, data_streams)
+        upstreams[child] = stream
 
+    # TODO unify feature_definition.stream return type
     s = feature.feature_definition.stream(upstreams, feature.params)
-    return feature, s
+    if isinstance(s, Tuple):
+        out_stream = s[0]
+        state = s[1]
+    else:
+        out_stream = s
+    return feature, out_stream
