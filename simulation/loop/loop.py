@@ -22,9 +22,10 @@ class Loop:
     # TODO add global clock
     def run(self):
         self.is_running = True
-        while self.is_running and not self.data_generator.should_stop():
+        while self.is_running and self.data_generator.has_next():
             data_event = self.data_generator.next()
-            orders = self.strategy.on_data(data_event)
-            self.execution_simulator.execute(orders)
+            if data_event is not None:
+                orders = self.strategy.on_data(data_event)
+                self.execution_simulator.execute(orders)
 
 
