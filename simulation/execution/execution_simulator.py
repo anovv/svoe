@@ -1,10 +1,13 @@
-from typing import List, Dict
+import uuid
+from typing import List, Dict, Optional, Tuple
 
 from simulation.data.data_generator import DataGenerator
-from simulation.models.instrument import Instrument
+from simulation.models.instrument import Instrument, AssetInstrument
 from simulation.models.order import Order, OrderStatus, OrderType, OrderSide
 from simulation.models.portfolio import Portfolio
+from simulation.models.trade import Trade
 
+COMMISSION = 0.005 # TODO make dynamic
 
 class ExecutionSimulator:
 
@@ -18,20 +21,27 @@ class ExecutionSimulator:
 
     def update_state(self, data_event: Dict):
         self.cur_mid_prices = DataGenerator.get_cur_mid_prices(data_event)
-        self._execute_staged_orders()
+        trades = self._execute_staged_orders()
+        if len(trades) > 0:
+            # TODO report trades to ledger
+            pass
+
+        # TODO snapshot portfolio on each trade/update step?
 
     # here we assume there is always liquidity for execution
     # in future we need to plug current order book snapshot and use it for execution
-    def _execute_staged_orders(self):
+    def _execute_staged_orders(self) -> List[Trade]:
+        res = []
         for order in self.orders:
             if order.status == OrderStatus.CANCELLED or order.status == OrderStatus.FILLED:
                 continue
 
             # TODO add slippage
             # TODO add latency
+            # TODO add commission
             if order.type == OrderType.MARKET:
                 # immediate execution
-                self._execute_order(order)
+                res.append(self._execute_order(order))
 
             if order.type == OrderType.LIMIT:
                 if order.instrument not in self.cur_mid_prices:
@@ -39,14 +49,93 @@ class ExecutionSimulator:
                 if order.side == OrderSide.BUY:
                     # execute only if it is below mid price
                     if order.price <= self.cur_mid_prices[order.instrument]:
-                        self._execute_order(order)
+                        res.append(self._execute_order(order))
                 else:
                     # execute only if it is above mid price
                     if order.price >= self.cur_mid_prices[order.instrument]:
-                        self._execute_order(order)
+                        res.append(self._execute_order(order))
 
-    def _execute_order(self, order: Order):
-        pass
+        return res
+
+    def _execute_order(self, order: Order) -> Trade:
+        symbol = order.instrument.symbol
+        price = self.cur_mid_prices[order.instrument]
+
+        base, quote = ExecutionSimulator._parse_symbol(symbol)
+
+        trade_id = str(uuid.uuid4())
+
+        if order.side == OrderSide.BUY:
+            # quote -> base
+            asset_instr_from = AssetInstrument(
+                exchange=order.instrument.exchange,
+                instrument_type=order.instrument.instrument_type,
+                asset=quote
+            )
+            asset_instr_to = AssetInstrument(
+                exchange=order.instrument.exchange,
+                instrument_type=order.instrument.instrument_type,
+                asset=base
+            )
+            wallet_from = self.portfolio.get_wallet(asset_instr_from)
+            wallet_to = self.portfolio.get_wallet(asset_instr_to)
+
+            # we assume qty  was already locked, so no deduction here
+            quote_qty = wallet_from.unlock(order.order_id)
+            # TODO slippage
+            commission = quote_qty * price * COMMISSION
+            base_qty = quote_qty * price - commission
+            wallet_to.deposit(base_qty)
+            trade = Trade(
+                trade_id=trade_id,
+                order_id=order.order_id,
+                instrument=order.instrument,
+                side=order.side,
+                trade_type=order.type,
+                quantity=base_qty,
+                price=price,
+                commission=commission
+            )
+        else:
+            # base -> quote
+            asset_instr_from = AssetInstrument(
+                exchange=order.instrument.exchange,
+                instrument_type=order.instrument.instrument_type,
+                asset=base
+            )
+            asset_instr_to = AssetInstrument(
+                exchange=order.instrument.exchange,
+                instrument_type=order.instrument.instrument_type,
+                asset=quote
+            )
+            wallet_from = self.portfolio.get_wallet(asset_instr_from)
+            wallet_to = self.portfolio.get_wallet(asset_instr_to)
+
+            # we assume qty  was already locked, so no deduction here
+            base_qty = wallet_from.unlock(order.order_id)
+            # TODO  slippage
+            commission = (base_qty / price) * COMMISSION
+            quote_qty = (base_qty / price) - commission
+            wallet_to.deposit(quote_qty)
+            trade = Trade(
+                trade_id=trade_id,
+                order_id=order.order_id,
+                instrument=order.instrument,
+                side=order.side,
+                trade_type=order.type,
+                quantity=base_qty,
+                price=price,
+                commission=commission
+            )
+
+        order.status = OrderStatus.FILLED # TODO is it by ref? does it update self.orders?
+        return trade
+
+    # TODO util this
+    @classmethod
+    def _parse_symbol(cls, symbol: str) -> Tuple[str, str]:
+        s = symbol.split('/')
+        return s[0], s[1]
 
 
 

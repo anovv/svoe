@@ -23,7 +23,7 @@ class OrderSide(Enum):
 
 @dataclass
 class Order:
-    id: str
+    order_id: str
     type: OrderType
     side: OrderSide
     instrument: Instrument
