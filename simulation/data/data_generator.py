@@ -8,11 +8,11 @@ from featurizer.calculator.tasks import merge_blocks
 from featurizer.config import FeaturizerConfig
 from featurizer.features.feature_tree.feature_tree import construct_feature_tree, Feature, construct_stream_tree
 from featurizer.storage.featurizer_storage import FeaturizerStorage, data_key
-from simulation.events.events import DataEvent
 import featurizer.data_definitions.data_definition as f
 
 import concurrent.futures
 
+from simulation.models.instrument import Instrument
 from utils.common_utils import flatten_tuples
 from utils.pandas.df_utils import load_df
 
@@ -84,6 +84,8 @@ class DataGenerator:
         for feature in self.features:
             for d in feature.get_data_deps():
                 data_deps.add(d)
+
+        # TODO infer Instrument objects from this
         data_keys = [data_key(d.params) for d in data_deps]
         ranges_meta_per_data_key = storage.get_data_meta(data_keys, start_date=featurizer_config.start_date,
                                                          end_date=featurizer_config.end_date)
@@ -211,3 +213,9 @@ class DataGenerator:
                 return False
 
         return True
+
+    @classmethod
+    def get_cur_mid_prices(cls, data_event: Dict) -> Dict[Instrument, float]:
+        # TODO
+
+        return {Instrument('BINANCE', 'spot', 'BTC-USDT'): data_event['mid_price']}
