@@ -13,8 +13,8 @@ from utils.time.utils import convert_str_to_seconds
 
 class BaseStrategy:
 
-    def __init__(self, portfolio_config: Dict, predictor_config: Dict):
-        self.portfolio = Portfolio.from_config(portfolio_config)
+    def __init__(self, portfolio: Portfolio, predictor_config: Dict):
+        self.portfolio = portfolio
         self.prediction_latency = predictor_config['prediction_latency']
         self.predictor = self._predictor(predictor_config)
         self.latest_prediction = None
