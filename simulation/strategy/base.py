@@ -1,3 +1,4 @@
+import uuid
 from typing import Dict, List, Optional, Any
 
 from ray.air import Checkpoint
@@ -7,7 +8,7 @@ from ray.train.torch import TorchPredictor
 from ray.train.xgboost import XGBoostPredictor
 
 from simulation.models.instrument import Instrument
-from simulation.models.order import Order, OrderSide, OrderType
+from simulation.models.order import Order, OrderSide, OrderType, OrderStatus
 from simulation.models.portfolio import Portfolio
 from utils.time.utils import convert_str_to_seconds
 
@@ -54,7 +55,26 @@ class BaseStrategy:
     def on_data_udf(self, data_event: Dict) -> Optional[List[Order]]:
         raise NotImplementedError
 
-    def make_order(self, side: OrderSide, type: OrderType, instrument: Instrument, qty: float) -> Order:
-        # TODO lock value and return Order instance
-        # wallet = self.portfolio.get_wallet()
-        raise NotImplementedError
+    def make_order(self, side: OrderSide, type: OrderType, instrument: Instrument, qty: float, price: float) -> Order:
+        order_id = str(uuid.uuid4())
+        # lock quantities
+        base_instr, quote_instr = instrument.to_asset_instruments()
+        base_wallet = self.portfolio.get_wallet(base_instr)
+        quote_wallet = self.portfolio.get_wallet(quote_instr)
+        # qty is base_qty
+        if side == OrderSide.BUY:
+            # we lock quote
+            qoute_qty = price * qty
+            quote_wallet.lock_from_balance(order_id=order_id, qty=qoute_qty)
+        else:
+            base_wallet.lock_from_balance(order_id=order_id, qty=qty)
+
+        return Order(
+            order_id=order_id,
+            type=type,
+            side=side,
+            instrument=instrument,
+            price=price,
+            quantity=qty,
+            status=OrderStatus.OPEN
+        )

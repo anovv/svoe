@@ -58,25 +58,16 @@ class ExecutionSimulator:
         return res
 
     def _execute_order(self, order: Order) -> Trade:
-        symbol = order.instrument.symbol
         price = self.cur_mid_prices[order.instrument]
 
-        base, quote = ExecutionSimulator._parse_symbol(symbol)
+        base_asset_instr, quote_asset_instr = order.instrument.to_asset_instruments()
 
         trade_id = str(uuid.uuid4())
 
         if order.side == OrderSide.BUY:
             # quote -> base
-            asset_instr_from = AssetInstrument(
-                exchange=order.instrument.exchange,
-                instrument_type=order.instrument.instrument_type,
-                asset=quote
-            )
-            asset_instr_to = AssetInstrument(
-                exchange=order.instrument.exchange,
-                instrument_type=order.instrument.instrument_type,
-                asset=base
-            )
+            asset_instr_from = quote_asset_instr
+            asset_instr_to = base_asset_instr
             wallet_from = self.portfolio.get_wallet(asset_instr_from)
             wallet_to = self.portfolio.get_wallet(asset_instr_to)
 
@@ -98,16 +89,8 @@ class ExecutionSimulator:
             )
         else:
             # base -> quote
-            asset_instr_from = AssetInstrument(
-                exchange=order.instrument.exchange,
-                instrument_type=order.instrument.instrument_type,
-                asset=base
-            )
-            asset_instr_to = AssetInstrument(
-                exchange=order.instrument.exchange,
-                instrument_type=order.instrument.instrument_type,
-                asset=quote
-            )
+            asset_instr_from = base_asset_instr
+            asset_instr_to = quote_asset_instr
             wallet_from = self.portfolio.get_wallet(asset_instr_from)
             wallet_to = self.portfolio.get_wallet(asset_instr_to)
 
@@ -130,16 +113,3 @@ class ExecutionSimulator:
 
         order.status = OrderStatus.FILLED # TODO is it by ref? does it update self.orders?
         return trade
-
-    # TODO util this
-    @classmethod
-    def _parse_symbol(cls, symbol: str) -> Tuple[str, str]:
-        s = symbol.split('/')
-        return s[0], s[1]
-
-
-
-
-
-
-

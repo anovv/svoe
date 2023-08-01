@@ -11,7 +11,7 @@ class SineDataGenerator(DataGenerator):
 
         num_samples = int((end_ts - start_ts)/step)
         timesteps = np.linspace(start_ts, end_ts, num_samples, endpoint=True)
-        amplitude = 1000
+        amplitude = 2000
         mean = 10000
         frequency = int(num_samples/5000)
         mid_prices = amplitude * np.sin(2 * np.pi * frequency * timesteps) + mean
