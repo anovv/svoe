@@ -4,13 +4,15 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 from simulation.data.sine.sine_data_generator import SineDataGenerator
+from simulation.models.instrument import Instrument
 from utils.pandas.df_utils import plot_multi
 
 
 class TestSineDataGenerator(unittest.TestCase):
 
     def test_gen(self):
-        g = SineDataGenerator(0, 100000, 1)
+        instrument = Instrument('BINANCE', 'spot', 'BTC-USDT')
+        g = SineDataGenerator(instrument, 0, 100000, 1)
 
         events = []
         # for _ in range(10000):

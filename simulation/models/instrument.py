@@ -4,7 +4,7 @@ from typing import Tuple
 
 # TODO util this
 def _parse_symbol(symbol: str) -> Tuple[str, str]:
-    s = symbol.split('/')
+    s = symbol.split('-')
     return s[0], s[1]
 
 

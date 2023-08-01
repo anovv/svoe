@@ -3,11 +3,12 @@ from typing import Dict
 import numpy as np
 
 from simulation.data.data_generator import DataGenerator
+from simulation.models.instrument import Instrument
 
 
 class SineDataGenerator(DataGenerator):
 
-    def __init__(self, start_ts: float, end_ts: float, step: float):
+    def __init__(self, instrument: Instrument, start_ts: float, end_ts: float, step: float):
 
         num_samples = int((end_ts - start_ts)/step)
         timesteps = np.linspace(start_ts, end_ts, num_samples, endpoint=True)
@@ -16,6 +17,7 @@ class SineDataGenerator(DataGenerator):
         frequency = int(num_samples/5000)
         mid_prices = amplitude * np.sin(2 * np.pi * frequency * timesteps) + mean
 
+        self.instrument = instrument
         self.data = [{
             'timestamp': timesteps[i],
             'mid_price': mid_prices[i]
@@ -32,3 +34,8 @@ class SineDataGenerator(DataGenerator):
 
     def has_next(self) -> bool:
         return self.cur_position < len(self.data) - 1
+
+    def get_cur_mid_prices(self) -> Dict[Instrument, float]:
+        if self.cur_position < 0:
+            raise ValueError('Call next before getting mid_prices')
+        return {self.instrument: self.data[self.cur_position]['mid_price']}

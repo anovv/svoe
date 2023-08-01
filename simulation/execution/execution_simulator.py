@@ -1,6 +1,8 @@
+import copy
 import uuid
 from typing import List, Dict, Optional, Tuple
 
+from simulation.clock import Clock
 from simulation.data.data_generator import DataGenerator
 from simulation.models.instrument import Instrument, AssetInstrument
 from simulation.models.order import Order, OrderStatus, OrderType, OrderSide
@@ -11,22 +13,27 @@ COMMISSION = 0.005 # TODO make dynamic
 
 class ExecutionSimulator:
 
-    def __init__(self, portfolio: Portfolio):
+    def __init__(self, clock: Clock, portfolio: Portfolio, data_generator: DataGenerator):
+        self.clock = clock
         self.orders: List[Order] = []
         self.portfolio: Portfolio = portfolio
+        self.data_generator = data_generator
         self.cur_mid_prices: Dict[Instrument, float] = {}
+        self.portfolio_snapshots: List[Tuple[float, Portfolio]] = []
+        self.executed_trades: List[Tuple[float, Trade]] = []
 
     def stage_for_execution(self, orders: List[Order]):
         self.orders.extend(orders)
+        self._record_portfolio_snapshot()
 
-    def update_state(self, data_event: Dict):
-        self.cur_mid_prices = DataGenerator.get_cur_mid_prices(data_event)
+    def update_state(self):
+        self.cur_mid_prices = self.data_generator.get_cur_mid_prices()
         trades = self._execute_staged_orders()
         if len(trades) > 0:
-            # TODO report trades to ledger
-            pass
-
-        # TODO snapshot portfolio on each trade/update step?
+            ts = self.clock.now
+            trades_with_ts = list(map(lambda t: (ts, t), trades))
+            self.executed_trades.extend(trades_with_ts)
+            self._record_portfolio_snapshot()
 
     # here we assume there is always liquidity for execution
     # in future we need to plug current order book snapshot and use it for execution
@@ -113,3 +120,8 @@ class ExecutionSimulator:
 
         order.status = OrderStatus.FILLED # TODO is it by ref? does it update self.orders?
         return trade
+
+
+    def _record_portfolio_snapshot(self):
+        snapshot = (self.clock.now, copy.deepcopy(self.portfolio))
+        self.portfolio_snapshots.append(snapshot)

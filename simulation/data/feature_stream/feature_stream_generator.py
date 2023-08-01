@@ -50,6 +50,7 @@ class FeatureStreamGenerator(DataGenerator):
 
         self.unified_out_stream = unified_out_stream
         self.cur_out_event = None
+        self.should_construct_new_out_event = True
 
         # sink function for unified out stream
         def _unified_out_stream(elems: Tuple):
@@ -74,8 +75,9 @@ class FeatureStreamGenerator(DataGenerator):
                     # skip if event is outside of current interval
                     return
 
-                if self.cur_out_event is None:
+                if self.should_construct_new_out_event:
                     self.cur_out_event = {}
+                    self.should_construct_new_out_event = False
                 self.cur_out_event[feature] = event
 
         self.unified_out_stream.sink(_unified_out_stream)
@@ -198,9 +200,8 @@ class FeatureStreamGenerator(DataGenerator):
                 if data in data_streams:
                     data_streams[data].emit(input_event)
 
-        out_event = self.cur_out_event
-        self.cur_out_event = None
-        return out_event
+        self.should_construct_new_out_event = True
+        return self.cur_out_event
 
     def has_next(self) -> bool:
         if self.cur_interval_id >= len(self.input_data_events.keys()):
@@ -215,8 +216,14 @@ class FeatureStreamGenerator(DataGenerator):
 
         return True
 
-    @classmethod
-    def get_cur_mid_prices(cls, data_event: Dict) -> Dict[Instrument, float]:
-        # TODO
-
-        return {Instrument('BINANCE', 'spot', 'BTC-USDT'): data_event['mid_price']}
+    def get_cur_mid_prices(self) -> Dict[Instrument, float]:
+        # TODO this is hacky, we need to map feature (really data in this case) to instrument properly
+        mid_price = None
+        for feature in self.cur_out_event:
+            for key in self.cur_out_event[feature]:
+                if key == 'mid_price':
+                    mid_price = self.cur_out_event[feature][key]
+                    break
+        if mid_price is None:
+            raise ValueError('DataGenerator should provide mid_price stream for all data/instrument inputs')
+        return {Instrument('BINANCE', 'spot', 'BTC-USDT'): mid_price}
