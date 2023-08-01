@@ -6,7 +6,8 @@ from ray.train.sklearn import SklearnPredictor
 from ray.train.torch import TorchPredictor
 from ray.train.xgboost import XGBoostPredictor
 
-from simulation.models.order import Order
+from simulation.models.instrument import Instrument
+from simulation.models.order import Order, OrderSide, OrderType
 from simulation.models.portfolio import Portfolio
 from utils.time.utils import convert_str_to_seconds
 
@@ -51,4 +52,9 @@ class BaseStrategy:
         return self.on_data_udf(data_event)
 
     def on_data_udf(self, data_event: Dict) -> Optional[List[Order]]:
+        raise NotImplementedError
+
+    def make_order(self, side: OrderSide, type: OrderType, instrument: Instrument, qty: float) -> Order:
+        # TODO lock value and return Order instance
+        # wallet = self.portfolio.get_wallet()
         raise NotImplementedError
