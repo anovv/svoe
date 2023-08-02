@@ -13,22 +13,21 @@ class Loop:
 
     def __init__(
             self,
-            featurizer_config: FeaturizerConfig,
-            portfolio_config: Dict,
-            strategy_class: Type[BaseStrategy],
-            predictor_config: Dict):
-        self.clock = Clock(-1)
-        self.data_generator = DataGenerator(featurizer_config) # TODO parametrize DataGenerator class
-        self.portfolio = Portfolio.from_config(portfolio_config)
-        self.strategy = strategy_class(self.portfolio, predictor_config)
-        self.execution_simulator = ExecutionSimulator(self.clock, self.portfolio, self.data_generator)
+            clock: Clock,
+            data_generator: DataGenerator,
+            portfolio: Portfolio,
+            strategy: BaseStrategy,
+            execution_simulator: ExecutionSimulator):
+        self.clock = clock
+        self.data_generator = data_generator
+        self.portfolio = portfolio
+        self.strategy = strategy
+        self.execution_simulator = execution_simulator
         self.is_running = False
 
     def set_is_running(self, running):
         self.is_running = running
 
-
-    # TODO add global clock
     def run(self):
         self.is_running = True
         while self.is_running and self.data_generator.has_next():
@@ -40,6 +39,8 @@ class Loop:
                 if orders is not None and len(orders) > 0:
                     self.execution_simulator.stage_for_execution(orders)
                 self.execution_simulator.update_state()
+        self.is_running = False
+        print(self.execution_simulator.balances_df().tail())
 
 
 

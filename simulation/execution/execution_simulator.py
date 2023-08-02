@@ -1,6 +1,9 @@
 import copy
 import uuid
+from dataclasses import dataclass
 from typing import List, Dict, Optional, Tuple
+
+import pandas as pd
 
 from simulation.clock import Clock
 from simulation.data.data_generator import DataGenerator
@@ -11,7 +14,14 @@ from simulation.models.trade import Trade
 
 COMMISSION = 0.005 # TODO make dynamic
 
+
 class ExecutionSimulator:
+    @dataclass
+    class _State:
+        portfolio: Portfolio
+        mid_prices: Dict[Instrument, float]
+        timestamp: float
+        total_balance: float
 
     def __init__(self, clock: Clock, portfolio: Portfolio, data_generator: DataGenerator):
         self.clock = clock
@@ -19,12 +29,12 @@ class ExecutionSimulator:
         self.portfolio: Portfolio = portfolio
         self.data_generator = data_generator
         self.cur_mid_prices: Dict[Instrument, float] = {}
-        self.portfolio_snapshots: List[Tuple[float, Portfolio]] = []
+        self.state_snapshots: List[ExecutionSimulator._State] = []
         self.executed_trades: List[Tuple[float, Trade]] = []
 
     def stage_for_execution(self, orders: List[Order]):
         self.orders.extend(orders)
-        self._record_portfolio_snapshot()
+        self._record_state_snapshot()
 
     def update_state(self):
         self.cur_mid_prices = self.data_generator.get_cur_mid_prices()
@@ -33,7 +43,7 @@ class ExecutionSimulator:
             ts = self.clock.now
             trades_with_ts = list(map(lambda t: (ts, t), trades))
             self.executed_trades.extend(trades_with_ts)
-            self._record_portfolio_snapshot()
+            self._record_state_snapshot()
 
     # here we assume there is always liquidity for execution
     # in future we need to plug current order book snapshot and use it for execution
@@ -121,7 +131,52 @@ class ExecutionSimulator:
         order.status = OrderStatus.FILLED # TODO is it by ref? does it update self.orders?
         return trade
 
+    def _record_state_snapshot(self):
+        quote_wallet = self.portfolio.get_wallet(self.portfolio.quote)
+        total_balance = quote_wallet.total_balance()
 
-    def _record_portfolio_snapshot(self):
-        snapshot = (self.clock.now, copy.deepcopy(self.portfolio))
-        self.portfolio_snapshots.append(snapshot)
+        for asset_instrument in self.portfolio.wallets:
+            if asset_instrument == self.portfolio.quote:
+                continue
+            instrument = Instrument.from_asset_instruments(base=asset_instrument, quote=self.portfolio.quote)
+            if instrument not in self.cur_mid_prices:
+                raise ValueError(f'Can not find mid_price for {instrument}')
+            mid_price = self.cur_mid_prices[instrument]
+            wallet = self.portfolio.wallets[asset_instrument]
+            total_balance += (wallet.total_balance() / mid_price)
+
+        snapshot = ExecutionSimulator._State(
+            portfolio=copy.deepcopy(self.portfolio),
+            mid_prices=copy.deepcopy(self.cur_mid_prices),
+            timestamp=self.clock.now,
+            total_balance=total_balance
+        )
+        self.state_snapshots.append(snapshot)
+
+    def balances_df(self) -> pd.DataFrame:
+        res = pd.DataFrame()
+        for s in self.state_snapshots:
+            record = {
+                'timestamp': s.timestamp
+            }
+            for asset_inst in s.portfolio.wallets:
+                wallet = s.portfolio.wallets[asset_inst]
+                record[asset_inst.asset] = wallet.balance
+            record['total'] = s.total_balance
+            res = res.append(record)
+        return res
+
+    def prices_df(self) -> pd.DataFrame:
+        res = pd.DataFrame()
+        for s in self.state_snapshots:
+            record = {
+                'timestamp': s.timestamp
+            }
+            for inst in s.mid_prices:
+                record[inst.symbol] = s.mid_prices[inst]
+            res = res.append(record)
+        return res
+
+    def trades_df(self) -> pd.DataFrame:
+        raise NotImplementedError
+

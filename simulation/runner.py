@@ -1,59 +1,29 @@
-from streamz import Stream
-
+from simulation.clock import Clock
+from simulation.data.feature_stream.feature_stream_generator import FeatureStreamGenerator
+from simulation.data.sine.sine_data_generator import SineDataGenerator
+from simulation.execution.execution_simulator import ExecutionSimulator
 from simulation.loop.loop import Loop
+from simulation.models.instrument import Instrument
+from simulation.models.portfolio import Portfolio
 from simulation.strategy.buy_and_hold import BuyAndHoldStrategy
 
 if __name__ == '__main__':
-    # loop = Loop(featurizer_config=None, portfolio_config={}, strategy_class=BuyAndHoldStrategy)
-    #
-    # try:
-    #     loop.run()
-    # except KeyboardInterrupt:
-    #     loop.set_is_running(False)
+    clock = Clock(-1)
+    # generator = FeatureStreamGenerator(featurizer_config=None)
+    instrument = Instrument('BINANCE', 'spot', 'BTC-USDT')
+    generator = SineDataGenerator(instrument, 0, 100000, 1)
+    portfolio = Portfolio.load_config('portfolio-config.yaml')
+    strategy = BuyAndHoldStrategy(portfolio=portfolio, predictor_config={})
+    execution_simulator = ExecutionSimulator(clock, portfolio, generator)
+    loop = Loop(
+        clock=clock,
+        data_generator=generator,
+        portfolio=portfolio,
+        strategy=strategy,
+        execution_simulator=execution_simulator
+    )
 
-    def increment(x):
-        return x + 1
-
-
-    def decrement(x):
-        return x - 1
-
-
-    # source = Stream()
-    # a = source.map(increment)
-    # b = source.map(decrement)
-    # c = a.zip(b).sink(print)
-    #
-    # source.emit(1)
-    # source.emit(2)
-
-    a = Stream()
-    b = Stream()
-    c = Stream()
-
-    l = []
-
-    def flatten_tuples(data):
-        if isinstance(data, tuple):
-            if len(data) == 0:
-                return ()
-            else:
-                return flatten_tuples(data[0]) + flatten_tuples(data[1:])
-        else:
-            return (data,)
-
-    def appnd(t):
-        r = flatten_tuples(t)
-        l.append(r)
-
-
-    d = a.map(lambda e: ['a', e]).combine_latest(b.map(lambda e: ['b', e])).combine_latest(c.map(lambda e: ['c', e])).sink(appnd)
-    # d = a.zip(b).zip(c).sink(appnd)
-    a.emit(1)
-    b.emit(2)
-    c.emit(3)
-    # a.emit(4)
-    # b.emit(5)
-    # c.emit(6)
-
-    print(l)
+    try:
+        loop.run()
+    except KeyboardInterrupt:
+        loop.set_is_running(False)

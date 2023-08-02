@@ -21,6 +21,7 @@ class OrderSide(Enum):
     BUY = 'BUY'
     SELL = 'SELL'
 
+
 @dataclass
 class Order:
     order_id: str

@@ -1,11 +1,16 @@
-from dataclasses import dataclass
+from pydantic.dataclasses import dataclass
 from typing import Tuple
+
+from tensortrade.oms.instruments import Instrument
 
 
 # TODO util this
 def _parse_symbol(symbol: str) -> Tuple[str, str]:
     s = symbol.split('-')
     return s[0], s[1]
+
+def _compose_symbol(base: str, quote: str) -> str:
+    return base + '-' + quote
 
 
 # instead of symbol (pair of assets) it has single asset. Used in walltes
@@ -34,3 +39,9 @@ class Instrument:
             asset=quote
         )
 
+    def from_asset_instruments(self, base: AssetInstrument, quote: AssetInstrument) -> Instrument:
+        return Instrument(
+            exchange=self.exchange,
+            instrument_type=self.instrument_type,
+            symbol=_compose_symbol(base.asset, quote.asset)
+        )
