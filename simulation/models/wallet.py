@@ -1,4 +1,4 @@
-from pydantic.dataclasses import dataclass
+from pydantic.dataclasses import dataclass, Field
 from typing import Dict
 
 from simulation.models.instrument import AssetInstrument
@@ -9,7 +9,7 @@ from simulation.models.instrument import AssetInstrument
 class Wallet:
     asset_instrument: AssetInstrument
     balance: float
-    locked: Dict[str, float] = {}
+    locked: Dict[str, float] = Field(default_factory=dict)
 
     def lock_from_balance(self, order_id: str, qty: float):
         if qty > self.balance:

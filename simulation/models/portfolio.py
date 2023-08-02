@@ -10,7 +10,7 @@ from simulation.models.wallet import Wallet
 @dataclass
 class Portfolio:
     # TODO make it a List[Wallet]
-    wallets: Dict[AssetInstrument, Wallet]
+    wallets: List[Wallet]
     quote: AssetInstrument
 
     # @classmethod
@@ -25,6 +25,12 @@ class Portfolio:
             return Portfolio(d)
 
     def get_wallet(self, asset_instrument: AssetInstrument) -> Wallet:
-        if asset_instrument not in self.wallets:
-            raise ValueError(f'No wallet for {asset_instrument}')
-        return self.wallets[asset_instrument]
+        wallet = None
+        for w in self.wallets:
+            if w.asset_instrument == asset_instrument:
+                if wallet is not None:
+                    raise ValueError(f'Duplicate wallets for {asset_instrument}')
+                wallet = w
+        if wallet is None:
+            raise ValueError(f'Can not find wallet for {asset_instrument}')
+        return wallet

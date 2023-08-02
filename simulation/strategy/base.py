@@ -2,7 +2,6 @@ import uuid
 from typing import Dict, List, Optional, Any
 
 from ray.air import Checkpoint
-from ray.train.rl import RLPredictor
 from ray.train.sklearn import SklearnPredictor
 from ray.train.torch import TorchPredictor
 from ray.train.xgboost import XGBoostPredictor
@@ -33,8 +32,8 @@ class BaseStrategy:
             predictor = TorchPredictor.from_checkpoint(checkpoint)
         elif model_type == 'sklearn':
             predictor = SklearnPredictor.from_checkpoint(checkpoint)
-        elif model_type == 'rl':
-            predictor = RLPredictor.from_checkpoint(checkpoint)
+        # elif model_type == 'rl':
+            # predictor = RLPredictor.from_checkpoint(checkpoint)
         else:
             raise ValueError(f'Unknown model type: {model_type}')
 

@@ -135,14 +135,15 @@ class ExecutionSimulator:
         quote_wallet = self.portfolio.get_wallet(self.portfolio.quote)
         total_balance = quote_wallet.total_balance()
 
-        for asset_instrument in self.portfolio.wallets:
+        for wallet in self.portfolio.wallets:
+            asset_instrument = wallet.asset_instrument
             if asset_instrument == self.portfolio.quote:
                 continue
             instrument = Instrument.from_asset_instruments(base=asset_instrument, quote=self.portfolio.quote)
             if instrument not in self.cur_mid_prices:
                 raise ValueError(f'Can not find mid_price for {instrument}')
             mid_price = self.cur_mid_prices[instrument]
-            wallet = self.portfolio.wallets[asset_instrument]
+            wallet = self.portfolio.get_wallet(asset_instrument)
             total_balance += (wallet.total_balance() / mid_price)
 
         snapshot = ExecutionSimulator._State(
@@ -159,9 +160,8 @@ class ExecutionSimulator:
             record = {
                 'timestamp': s.timestamp
             }
-            for asset_inst in s.portfolio.wallets:
-                wallet = s.portfolio.wallets[asset_inst]
-                record[asset_inst.asset] = wallet.balance
+            for wallet in s.portfolio.wallets:
+                record[wallet.asset_instrument.asset] = wallet.balance
             record['total'] = s.total_balance
             res = res.append(record)
         return res

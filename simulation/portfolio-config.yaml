@@ -3,6 +3,5 @@ quote: &id001
   instrument_type: 'spot'
   asset: 'USDT'
 wallets:
-  *id001:
-    asset_instrument: *id001
+  - asset_instrument: *id001
     balance: 10000
