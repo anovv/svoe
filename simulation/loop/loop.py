@@ -44,11 +44,10 @@ class Loop:
             if len(self.execution_simulator.executed_trades) > 1:
                 self.is_running = False
         self.is_running = False
-        # print(self.execution_simulator.balances_df())
+        print(self.execution_simulator.balances_df())
         # df = pd.merge(self.execution_simulator.prices_df(), self.execution_simulator.balances_df(), how='outer', on='timestamp')
         # print(df)
-        # print(self.execution_simulator.prices_df())
-        print(self.execution_simulator.orders)
+        print(self.execution_simulator.prices_df())
 
 
 

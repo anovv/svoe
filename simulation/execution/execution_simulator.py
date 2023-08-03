@@ -28,7 +28,7 @@ class ExecutionSimulator:
         self.orders: List[Order] = []
         self.portfolio: Portfolio = portfolio
         self.data_generator = data_generator
-        self.cur_mid_prices: Dict[Instrument, float] = {}
+        # self.cur_mid_prices: Dict[Instrument, float] = {}
         self.state_snapshots: List[ExecutionSimulator._State] = []
         self.executed_trades: List[Tuple[float, Trade]] = []
 
@@ -38,7 +38,7 @@ class ExecutionSimulator:
             self._record_state_snapshot()
 
     def update_state(self):
-        self.cur_mid_prices = self.data_generator.get_cur_mid_prices()
+        # self.cur_mid_prices = self.data_generator.get_cur_mid_prices()
         trades = self._execute_staged_orders()
         if len(trades) > 0:
             ts = self.clock.now
@@ -61,22 +61,24 @@ class ExecutionSimulator:
                 # immediate execution
                 res.append(self._execute_order(order))
 
+            mid_prices = self.data_generator.get_cur_mid_prices()
             if order.type == OrderType.LIMIT:
-                if order.instrument not in self.cur_mid_prices:
-                    raise ValueError(f'Instrument {order.instrument} not in cur_mid_prices')
+                if order.instrument not in mid_prices:
+                    raise ValueError(f'Instrument {order.instrument} not in mid_prices')
                 if order.side == OrderSide.BUY:
                     # execute only if it is below mid price
-                    if order.price <= self.cur_mid_prices[order.instrument]:
+                    if order.price <= mid_prices[order.instrument]:
                         res.append(self._execute_order(order))
                 else:
                     # execute only if it is above mid price
-                    if order.price >= self.cur_mid_prices[order.instrument]:
+                    if order.price >= mid_prices[order.instrument]:
                         res.append(self._execute_order(order))
 
         return res
 
     def _execute_order(self, order: Order) -> Trade:
-        price = self.cur_mid_prices[order.instrument]
+        mid_prices = self.data_generator.get_cur_mid_prices()
+        price = mid_prices[order.instrument]
 
         base_asset_instr, quote_asset_instr = order.instrument.to_asset_instruments()
 
@@ -136,21 +138,22 @@ class ExecutionSimulator:
         quote_wallet = self.portfolio.get_wallet(self.portfolio.quote)
         total_balance = quote_wallet.total_balance()
 
+        mid_prices = self.data_generator.get_cur_mid_prices()
         for wallet in self.portfolio.wallets:
             asset_instrument = wallet.asset_instrument
             if asset_instrument == self.portfolio.quote:
                 continue
             instrument = Instrument.from_asset_instruments(base=asset_instrument, quote=self.portfolio.quote)
-            if instrument not in self.cur_mid_prices:
+            if instrument not in mid_prices:
                 raise ValueError(f'Can not find mid_price for {instrument}')
-            mid_price = self.cur_mid_prices[instrument]
+            mid_price = mid_prices[instrument]
             wallet = self.portfolio.get_wallet(asset_instrument)
             total_balance += (wallet.total_balance() * mid_price)
 
         snapshot = ExecutionSimulator._State(
             portfolio=copy.deepcopy(self.portfolio),
             # TODO this records different mid_price for same ts, why?
-            mid_prices=copy.deepcopy(self.cur_mid_prices),
+            mid_prices=copy.deepcopy(mid_prices),
             timestamp=self.clock.now,
             total_balance=total_balance
         )
