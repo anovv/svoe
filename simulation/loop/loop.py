@@ -1,6 +1,8 @@
 from queue import Queue
 from typing import Dict, Type
 
+import pandas as pd
+
 from featurizer.config import FeaturizerConfig
 from simulation.clock import Clock
 from simulation.data.data_generator import DataGenerator
@@ -39,8 +41,15 @@ class Loop:
                 if orders is not None and len(orders) > 0:
                     self.execution_simulator.stage_for_execution(orders)
                 self.execution_simulator.update_state()
+            if len(self.execution_simulator.executed_trades) > 1:
+                self.is_running = False
         self.is_running = False
-        print(self.execution_simulator.balances_df().tail())
+        # print(self.execution_simulator.balances_df())
+        # df = pd.merge(self.execution_simulator.prices_df(), self.execution_simulator.balances_df(), how='outer', on='timestamp')
+        # print(df)
+        # print(self.execution_simulator.prices_df())
+        print(self.execution_simulator.orders)
+
 
 
 

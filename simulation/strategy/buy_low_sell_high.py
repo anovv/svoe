@@ -8,8 +8,8 @@ from simulation.strategy.base import BaseStrategy
 
 class BuyLowSellHighStrategy(BaseStrategy):
 
-    def __init__(self, instrument: Instrument, portfolio: Portfolio, predictor_config: Dict):
-        super(BuyLowSellHighStrategy, self).__init__(portfolio, predictor_config)
+    def __init__(self, instrument: Instrument, portfolio: Portfolio):
+        super(BuyLowSellHighStrategy, self).__init__(portfolio)
         self.instrument = instrument
         base, quote = self.instrument.to_asset_instruments()
         self.base_wallet = self.portfolio.get_wallet(base)
@@ -43,7 +43,7 @@ class BuyLowSellHighStrategy(BaseStrategy):
                     side=OrderSide.BUY,
                     type=OrderType.MARKET,
                     instrument=self.instrument,
-                    qty=0.9 * self.quote_wallet.balance * mid_price,
+                    qty=0.9 * self.quote_wallet.free_balance() / mid_price,
                     price=mid_price
                 )]
         else:
@@ -53,12 +53,16 @@ class BuyLowSellHighStrategy(BaseStrategy):
                     side=OrderSide.SELL,
                     type=OrderType.MARKET,
                     instrument=self.instrument,
-                    qty=0.9 * self.base_wallet.balance,
+                    qty=0.9 * self.base_wallet.free_balance(),
                     price=mid_price
                 )]
 
     def _is_local_min(self) -> bool:
+        if len(self.three_vals) < 3:
+            return False
         return self.three_vals[0] > self.three_vals[1] and self.three_vals[2] > self.three_vals[1]
 
     def _is_local_max(self) -> bool:
+        if len(self.three_vals) < 3:
+            return False
         return self.three_vals[0] < self.three_vals[1] and self.three_vals[2] < self.three_vals[1]

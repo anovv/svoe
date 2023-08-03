@@ -22,7 +22,7 @@ class Portfolio:
     def load_config(cls, path: str) -> 'Portfolio':
         with open(path, 'r') as stream:
             d = yaml.safe_load(stream)
-            return Portfolio(d)
+            return Portfolio(**d)
 
     def get_wallet(self, asset_instrument: AssetInstrument) -> Wallet:
         wallet = None

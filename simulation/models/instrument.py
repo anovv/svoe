@@ -14,14 +14,14 @@ def _compose_symbol(base: str, quote: str) -> str:
 
 
 # instead of symbol (pair of assets) it has single asset. Used in walltes
-@dataclass
+@dataclass(frozen=True, eq=True)
 class AssetInstrument:
     exchange: str
     instrument_type: str
     asset: str
 
 
-@dataclass
+@dataclass(frozen=True, eq=True)
 class Instrument:
     exchange: str
     instrument_type: str
@@ -39,9 +39,14 @@ class Instrument:
             asset=quote
         )
 
-    def from_asset_instruments(self, base: AssetInstrument, quote: AssetInstrument) -> Instrument:
+    @classmethod
+    def from_asset_instruments(cls, base: AssetInstrument, quote: AssetInstrument) -> Instrument:
+        if base.exchange != quote.exchange:
+            raise ValueError('instruments should be of same exchange')
+        if base.instrument_type != quote.instrument_type:
+            raise ValueError('instruments should be of same instrument_type')
         return Instrument(
-            exchange=self.exchange,
-            instrument_type=self.instrument_type,
+            exchange=base.exchange,
+            instrument_type=base.instrument_type,
             symbol=_compose_symbol(base.asset, quote.asset)
         )

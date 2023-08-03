@@ -48,3 +48,6 @@ class Wallet:
     # includes locked
     def total_balance(self):
         return self.balance + self.locked_balance()
+
+    def free_balance(self):
+        return self.balance

@@ -5,7 +5,7 @@ from simulation.execution.execution_simulator import ExecutionSimulator
 from simulation.loop.loop import Loop
 from simulation.models.instrument import Instrument
 from simulation.models.portfolio import Portfolio
-from simulation.strategy.buy_and_hold import BuyAndHoldStrategy
+from simulation.strategy.buy_low_sell_high import BuyLowSellHighStrategy
 
 if __name__ == '__main__':
     clock = Clock(-1)
@@ -13,7 +13,7 @@ if __name__ == '__main__':
     instrument = Instrument('BINANCE', 'spot', 'BTC-USDT')
     generator = SineDataGenerator(instrument, 0, 100000, 1)
     portfolio = Portfolio.load_config('portfolio-config.yaml')
-    strategy = BuyAndHoldStrategy(portfolio=portfolio, predictor_config={})
+    strategy = BuyLowSellHighStrategy(instrument=instrument, portfolio=portfolio)
     execution_simulator = ExecutionSimulator(clock, portfolio, generator)
     loop = Loop(
         clock=clock,

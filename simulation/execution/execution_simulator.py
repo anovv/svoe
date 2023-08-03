@@ -33,8 +33,9 @@ class ExecutionSimulator:
         self.executed_trades: List[Tuple[float, Trade]] = []
 
     def stage_for_execution(self, orders: List[Order]):
-        self.orders.extend(orders)
-        self._record_state_snapshot()
+        if len(orders) > 0:
+            self.orders.extend(orders)
+            self._record_state_snapshot()
 
     def update_state(self):
         self.cur_mid_prices = self.data_generator.get_cur_mid_prices()
@@ -91,8 +92,8 @@ class ExecutionSimulator:
             # we assume qty  was already locked, so no deduction here
             quote_qty = wallet_from.unlock(order.order_id)
             # TODO slippage
-            commission = quote_qty * price * COMMISSION
-            base_qty = quote_qty * price - commission
+            commission = (quote_qty / price) * COMMISSION
+            base_qty = (quote_qty / price) - commission
             wallet_to.deposit(base_qty)
             trade = Trade(
                 trade_id=trade_id,
@@ -114,8 +115,8 @@ class ExecutionSimulator:
             # we assume qty  was already locked, so no deduction here
             base_qty = wallet_from.unlock(order.order_id)
             # TODO  slippage
-            commission = (base_qty / price) * COMMISSION
-            quote_qty = (base_qty / price) - commission
+            commission = (base_qty * price) * COMMISSION
+            quote_qty = (base_qty * price) - commission
             wallet_to.deposit(quote_qty)
             trade = Trade(
                 trade_id=trade_id,
@@ -144,10 +145,11 @@ class ExecutionSimulator:
                 raise ValueError(f'Can not find mid_price for {instrument}')
             mid_price = self.cur_mid_prices[instrument]
             wallet = self.portfolio.get_wallet(asset_instrument)
-            total_balance += (wallet.total_balance() / mid_price)
+            total_balance += (wallet.total_balance() * mid_price)
 
         snapshot = ExecutionSimulator._State(
             portfolio=copy.deepcopy(self.portfolio),
+            # TODO this records different mid_price for same ts, why?
             mid_prices=copy.deepcopy(self.cur_mid_prices),
             timestamp=self.clock.now,
             total_balance=total_balance
@@ -161,11 +163,13 @@ class ExecutionSimulator:
                 'timestamp': s.timestamp
             }
             for wallet in s.portfolio.wallets:
-                record[wallet.asset_instrument.asset] = wallet.balance
+                record[wallet.asset_instrument.asset + '_free'] = wallet.free_balance()
+                record[wallet.asset_instrument.asset + '_locked'] = wallet.locked_balance()
             record['total'] = s.total_balance
-            res = res.append(record)
+            res = res.append(record, ignore_index=True)
         return res
 
+    # TODO this should be on data_generator
     def prices_df(self) -> pd.DataFrame:
         res = pd.DataFrame()
         for s in self.state_snapshots:
@@ -174,7 +178,7 @@ class ExecutionSimulator:
             }
             for inst in s.mid_prices:
                 record[inst.symbol] = s.mid_prices[inst]
-            res = res.append(record)
+            res = res.append(record, ignore_index=True)
         return res
 
     def trades_df(self) -> pd.DataFrame:

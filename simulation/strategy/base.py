@@ -2,6 +2,7 @@ import uuid
 from typing import Dict, List, Optional, Any
 
 from ray.air import Checkpoint
+from ray.train.predictor import Predictor
 from ray.train.sklearn import SklearnPredictor
 from ray.train.torch import TorchPredictor
 from ray.train.xgboost import XGBoostPredictor
@@ -14,14 +15,19 @@ from utils.time.utils import convert_str_to_seconds
 
 class BaseStrategy:
 
-    def __init__(self, portfolio: Portfolio, predictor_config: Dict):
+    def __init__(self, portfolio: Portfolio, predictor_config: Optional[Dict] = None):
         self.portfolio = portfolio
-        self.prediction_latency = predictor_config['prediction_latency']
-        self.predictor = self._predictor(predictor_config)
+        if predictor_config is not None:
+            self.prediction_latency = predictor_config['prediction_latency']
+            self.predictor = self._predictor(predictor_config)
+        else:
+            self.prediction_latency = None
+            self.predictor = None
+
         self.latest_prediction = None
         self.latest_prediction_ts = None
 
-    def _predictor(self, predictor_config: Dict):
+    def _predictor(self, predictor_config: Dict) -> Predictor:
         model_type = predictor_config['model_type']
         checkpoint_uri = predictor_config['checkpoint_uri']
         checkpoint = Checkpoint.from_uri(checkpoint_uri)
@@ -44,11 +50,12 @@ class BaseStrategy:
 
     def on_data(self, data_event: Dict) -> Optional[List[Order]]:
         ts = data_event['timestamp']
-        if self.latest_prediction_ts is None or \
-                ts - self.latest_prediction_ts > convert_str_to_seconds(self.prediction_latency):
-            req = self._event_to_predictor_request(data_event)
-            self.latest_prediction = self.predictor.predict(req)
-            self.latest_prediction_ts = ts
+        if self.predictor is not None:
+            if self.latest_prediction_ts is None or \
+                    ts - self.latest_prediction_ts > convert_str_to_seconds(self.prediction_latency):
+                req = self._event_to_predictor_request(data_event)
+                self.latest_prediction = self.predictor.predict(req)
+                self.latest_prediction_ts = ts
         return self.on_data_udf(data_event)
 
     def on_data_udf(self, data_event: Dict) -> Optional[List[Order]]:

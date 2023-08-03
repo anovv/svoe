@@ -5,3 +5,8 @@ quote: &id001
 wallets:
   - asset_instrument: *id001
     balance: 10000
+  - asset_instrument:
+      exchange: 'BINANCE'
+      instrument_type: 'spot'
+      asset: 'BTC'
+    balance: 0
