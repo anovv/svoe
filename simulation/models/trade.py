@@ -8,6 +8,7 @@ from simulation.models.order import OrderSide, OrderType
 class Trade:
     trade_id: str
     order_id: str
+    timestamp: float
     instrument: Instrument
     side: OrderSide
     trade_type: OrderType

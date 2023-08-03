@@ -41,14 +41,23 @@ class Loop:
                 if orders is not None and len(orders) > 0:
                     self.execution_simulator.stage_for_execution(orders)
                 self.execution_simulator.update_state()
+
+            # TODO remove
             if len(self.execution_simulator.executed_trades) > 1:
                 self.is_running = False
         self.is_running = False
-        print(self.execution_simulator.balances_df())
+        # print(self.execution_simulator.balances_df())
         # df = pd.merge(self.execution_simulator.prices_df(), self.execution_simulator.balances_df(), how='outer', on='timestamp')
-        # print(df)
-        print(self.execution_simulator.prices_df())
 
+        prices = self.execution_simulator.prices_df()
+        prices = prices.drop_duplicates()
+
+        df = pd.merge(prices, self.execution_simulator.balances_df(), on='timestamp')
+        print(df)
+
+        trades = self.execution_simulator.trades_df()
+        trades = trades[trades.symbol == 'BTC-USDT']
+        print(trades)
 
 
 

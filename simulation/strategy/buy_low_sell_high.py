@@ -17,8 +17,8 @@ class BuyLowSellHighStrategy(BaseStrategy):
         self.local_min = None
         self.local_max = None
 
-        self.buy_signal_thresh = 0.1
-        self.sell_signal_thresh = 0.1
+        self.buy_signal_thresh = 0.05
+        self.sell_signal_thresh = 0.05
 
         self.three_vals = []
 
@@ -37,7 +37,7 @@ class BuyLowSellHighStrategy(BaseStrategy):
             self.local_max = self.three_vals[1]
 
         if self.is_buying:
-            if self.local_max is not None and self.local_max - mid_price > self.buy_signal_thresh * mid_price:
+            if self.local_min is not None and mid_price - self.local_min > self.sell_signal_thresh * self.local_min:
                 self.is_buying = False
                 return [self.make_order(
                     side=OrderSide.BUY,
@@ -47,7 +47,7 @@ class BuyLowSellHighStrategy(BaseStrategy):
                     price=mid_price
                 )]
         else:
-            if self.local_min is not None and mid_price - self.local_min > self.sell_signal_thresh * mid_price:
+            if self.local_max is not None and self.local_max - mid_price > self.buy_signal_thresh * self.local_max:
                 self.is_buying = True
                 return [self.make_order(
                     side=OrderSide.SELL,

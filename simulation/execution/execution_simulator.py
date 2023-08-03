@@ -28,9 +28,8 @@ class ExecutionSimulator:
         self.orders: List[Order] = []
         self.portfolio: Portfolio = portfolio
         self.data_generator = data_generator
-        # self.cur_mid_prices: Dict[Instrument, float] = {}
         self.state_snapshots: List[ExecutionSimulator._State] = []
-        self.executed_trades: List[Tuple[float, Trade]] = []
+        self.executed_trades: List[Trade] = []
 
     def stage_for_execution(self, orders: List[Order]):
         if len(orders) > 0:
@@ -38,12 +37,9 @@ class ExecutionSimulator:
             self._record_state_snapshot()
 
     def update_state(self):
-        # self.cur_mid_prices = self.data_generator.get_cur_mid_prices()
         trades = self._execute_staged_orders()
         if len(trades) > 0:
-            ts = self.clock.now
-            trades_with_ts = list(map(lambda t: (ts, t), trades))
-            self.executed_trades.extend(trades_with_ts)
+            self.executed_trades.extend(trades)
             self._record_state_snapshot()
 
     # here we assume there is always liquidity for execution
@@ -100,6 +96,7 @@ class ExecutionSimulator:
             trade = Trade(
                 trade_id=trade_id,
                 order_id=order.order_id,
+                timestamp=self.clock.now,
                 instrument=order.instrument,
                 side=order.side,
                 trade_type=order.type,
@@ -123,6 +120,7 @@ class ExecutionSimulator:
             trade = Trade(
                 trade_id=trade_id,
                 order_id=order.order_id,
+                timestamp=self.clock.now,
                 instrument=order.instrument,
                 side=order.side,
                 trade_type=order.type,
@@ -160,7 +158,7 @@ class ExecutionSimulator:
         self.state_snapshots.append(snapshot)
 
     def balances_df(self) -> pd.DataFrame:
-        res = pd.DataFrame()
+        records = []
         for s in self.state_snapshots:
             record = {
                 'timestamp': s.timestamp
@@ -169,21 +167,31 @@ class ExecutionSimulator:
                 record[wallet.asset_instrument.asset + '_free'] = wallet.free_balance()
                 record[wallet.asset_instrument.asset + '_locked'] = wallet.locked_balance()
             record['total'] = s.total_balance
-            res = res.append(record, ignore_index=True)
-        return res
+            records.append(record)
+        return pd.DataFrame(records)
 
     # TODO this should be on data_generator
     def prices_df(self) -> pd.DataFrame:
-        res = pd.DataFrame()
+        records = []
         for s in self.state_snapshots:
             record = {
                 'timestamp': s.timestamp
             }
             for inst in s.mid_prices:
                 record[inst.symbol] = s.mid_prices[inst]
-            res = res.append(record, ignore_index=True)
-        return res
+            records.append(record)
+        return pd.DataFrame(records)
 
+    # TODO this does not take in accout full instrument info
     def trades_df(self) -> pd.DataFrame:
-        raise NotImplementedError
-
+        records = []
+        for t in self.executed_trades:
+            record = {
+                'timestamp': t.timestamp,
+                'side': t.side,
+                'price': t.price,
+                'qty': t.quantity,
+                'symbol': t.instrument.symbol
+            }
+            records.append(record)
+        return pd.DataFrame(records)
