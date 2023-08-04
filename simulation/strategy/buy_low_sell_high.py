@@ -1,5 +1,6 @@
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Tuple
 
+from simulation.clock import Clock
 from simulation.models.instrument import Instrument
 from simulation.models.order import Order, OrderSide, OrderType
 from simulation.models.portfolio import Portfolio
@@ -8,8 +9,8 @@ from simulation.strategy.base import BaseStrategy
 
 class BuyLowSellHighStrategy(BaseStrategy):
 
-    def __init__(self, instrument: Instrument, portfolio: Portfolio):
-        super(BuyLowSellHighStrategy, self).__init__(portfolio)
+    def __init__(self, instrument: Instrument, clock: Clock, portfolio: Portfolio):
+        super(BuyLowSellHighStrategy, self).__init__(clock, portfolio)
         self.instrument = instrument
         base, quote = self.instrument.to_asset_instruments()
         self.base_wallet = self.portfolio.get_wallet(base)
@@ -25,7 +26,7 @@ class BuyLowSellHighStrategy(BaseStrategy):
         self.is_buying = True
 
     def on_data_udf(self, data_event: Dict) -> Optional[List[Order]]:
-        mid_price = data_event['mid_price']
+        mid_price = data_event['mid_price'] # TODO query data_generator?
         self.three_vals.append(mid_price)
         if len(self.three_vals) > 3:
             self.three_vals.pop(0)
@@ -39,6 +40,9 @@ class BuyLowSellHighStrategy(BaseStrategy):
         if self.is_buying:
             if self.local_min is not None and mid_price - self.local_min > self.sell_signal_thresh * self.local_min:
                 self.is_buying = False
+                # reset old vals
+                self.local_min = None
+                self.local_max = None
                 return [self.make_order(
                     side=OrderSide.BUY,
                     type=OrderType.MARKET,
@@ -49,6 +53,9 @@ class BuyLowSellHighStrategy(BaseStrategy):
         else:
             if self.local_max is not None and self.local_max - mid_price > self.buy_signal_thresh * self.local_max:
                 self.is_buying = True
+                # reset old vals
+                self.local_min = None
+                self.local_max = None
                 return [self.make_order(
                     side=OrderSide.SELL,
                     type=OrderType.MARKET,

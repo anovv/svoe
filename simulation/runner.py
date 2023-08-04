@@ -13,7 +13,7 @@ if __name__ == '__main__':
     instrument = Instrument('BINANCE', 'spot', 'BTC-USDT')
     generator = SineDataGenerator(instrument, 0, 100000, 1)
     portfolio = Portfolio.load_config('portfolio-config.yaml')
-    strategy = BuyLowSellHighStrategy(instrument=instrument, portfolio=portfolio)
+    strategy = BuyLowSellHighStrategy(instrument=instrument, clock=clock, portfolio=portfolio)
     execution_simulator = ExecutionSimulator(clock, portfolio, generator)
     loop = Loop(
         clock=clock,

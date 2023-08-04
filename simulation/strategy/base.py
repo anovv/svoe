@@ -7,6 +7,7 @@ from ray.train.sklearn import SklearnPredictor
 from ray.train.torch import TorchPredictor
 from ray.train.xgboost import XGBoostPredictor
 
+from simulation.clock import Clock
 from simulation.models.instrument import Instrument
 from simulation.models.order import Order, OrderSide, OrderType, OrderStatus
 from simulation.models.portfolio import Portfolio
@@ -15,7 +16,8 @@ from utils.time.utils import convert_str_to_seconds
 
 class BaseStrategy:
 
-    def __init__(self, portfolio: Portfolio, predictor_config: Optional[Dict] = None):
+    def __init__(self, clock: Clock, portfolio: Portfolio, predictor_config: Optional[Dict] = None):
+        self.clock = clock
         self.portfolio = portfolio
         if predictor_config is not None:
             self.prediction_latency = predictor_config['prediction_latency']
