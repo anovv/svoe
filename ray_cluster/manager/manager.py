@@ -162,6 +162,9 @@ class RayClusterManager:
 
         err = "raycluster {} status not set yet, timing out...".format(name)
         log.info(err)
+
+        # TODO this does not take into account pod statuses
+
         return None, err
 
     # def wait_until_ray_cluster_running(self, name: str, timeout: int = 60, delay_between_attempts: int = 5) -> bool:

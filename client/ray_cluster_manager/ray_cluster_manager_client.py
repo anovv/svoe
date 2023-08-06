@@ -3,7 +3,7 @@ from typing import Any
 
 from client.base_client import BaseClient
 from client.fast_api_client.api.default import create_cluster_cluster_post, list_clusters_clusters_get, \
-    delete_cluster_cluster_name_delete, get_cluster_status_cluster_status_name_get
+    delete_cluster_cluster_name_delete, get_cluster_status_cluster_status_name_get, get_cluster_cluster_name_get
 from client.fast_api_client.models import RayClusterConfig, RayClusterWorkerGroupConfig, \
     RayClusterWorkerGroupConfigRayResources, Resp
 
@@ -34,6 +34,11 @@ class RayClusterManagerClient(BaseClient):
             get_cluster_status_cluster_status_name_get.sync(client=self.client, name=name)
         ))
 
+    def get_ray_cluster(self, name: str) -> Any:
+        return self._parse_and_log_error(Resp.from_dict(
+            get_cluster_cluster_name_get.sync(client=self.client, name=name)
+        ))
+
     def wait_until_ray_cluster_running(self, name: str, timeout: int = 60, delay_between_attempts: int = 1) -> bool:
         status = None
         while timeout > 0:
@@ -51,6 +56,9 @@ class RayClusterManagerClient(BaseClient):
         # TODO log properly
         print("raycluster {} status is not running yet, current status is {}".format(name, status[
             "state"] if status else "unknown"))
+
+        # TODO this does not take into account pod statuses
+
         return False
 
 
@@ -74,8 +82,9 @@ if __name__ == '__main__':
         )]
     )
     # print(client.delete_ray_cluster('test-ray-cluster'))
-    print(client.create_ray_cluster(config))
-    # print(client.wait_until_ray_cluster_running('test-ray-cluster'))
+    # print(client.get_ray_cluster('test-ray-cluster'))
+    # print(client.create_ray_cluster(config))
+    print(client.wait_until_ray_cluster_running('test-ray-cluster'))
     # print(client.get_ray_cluster_status('test-ray-cluster'))
     # print(client.list_ray_clusters())
     # print(client.delete_ray_cluster('test-ray-cluster'))
