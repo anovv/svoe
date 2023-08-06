@@ -1,10 +1,5 @@
-from typing import List
-
-from ray.types import ObjectRef
-
 from featurizer.actors.cache_actor import get_cache_actor, create_cache_actor
-from featurizer.calculator.calculator import build_feature_set_task_graph, point_in_time_join_dag, \
-    build_feature_label_set_task_graph
+from featurizer.calculator.calculator import build_feature_label_set_task_graph
 from featurizer.calculator.executor import execute_graph
 from featurizer.storage.featurizer_storage import FeaturizerStorage, data_key
 from featurizer.config import FeaturizerConfig
@@ -16,8 +11,7 @@ import ray
 class Featurizer:
 
     @classmethod
-    def run(cls, config_path: str):
-        config = FeaturizerConfig.load_config(path=config_path)
+    def run(cls, config: FeaturizerConfig, ray_address: str = 'auto'):
         features = []
         for feature_config in config.feature_configs:
             features.append(construct_feature_tree(
@@ -58,7 +52,7 @@ class Featurizer:
         # df = df.tail(-2)
 
         # TODO pass cluster address in config?
-        with ray.init(address='auto', ignore_reinit_error=True):
+        with ray.init(address=ray_address, ignore_reinit_error=True):
             # ray.init(address='auto', ignore_reinit_error=True)
 
             # remove old actor from prev session if it exists

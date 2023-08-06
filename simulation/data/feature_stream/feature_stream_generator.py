@@ -1,8 +1,8 @@
-from typing import Dict, List, Tuple, Any
+from typing import Dict, List, Tuple
 
 from intervaltree import Interval
 
-from featurizer.blocks.blocks import BlockRangeMeta, Block, BlockRange, ranges_to_interval_dict, get_overlaps, \
+from featurizer.blocks.blocks import BlockRangeMeta, BlockRange, ranges_to_interval_dict, get_overlaps, \
     prune_overlaps
 from featurizer.calculator.tasks import merge_blocks
 from featurizer.config import FeaturizerConfig

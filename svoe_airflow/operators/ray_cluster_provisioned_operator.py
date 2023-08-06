@@ -9,6 +9,7 @@ RAY_CLUSTER_NAMESPACE = 'ray-system'
 RAY_HEAD_SVC_SUFFIX = 'head-svc'
 RAY_HEAD_PORT = '10001'
 
+
 class RayClusterProvisionedOperator(BaseOperator):
 
     def __init__(self, cluster_config: Optional[RayClusterConfig], cluster_name: Optional[str], **kwargs):
@@ -34,4 +35,4 @@ class RayClusterProvisionedOperator(BaseOperator):
         is_running = self.cluster_manager_client.wait_until_ray_cluster_running(self.cluster_name, timeout=timeout)
         if not is_running:
             raise ValueError(f'Can not connect to existing cluster {cluster_name} after {timeout}s')
-        self.head_address = f'{self.cluster_name}-{RAY_HEAD_SVC_SUFFIX}.{RAY_CLUSTER_NAMESPACE}:{RAY_HEAD_PORT}'
+        self.ray_head_address = f'{self.cluster_name}-{RAY_HEAD_SVC_SUFFIX}.{RAY_CLUSTER_NAMESPACE}:{RAY_HEAD_PORT}'

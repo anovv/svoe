@@ -1,9 +1,5 @@
-from queue import Queue
-from typing import Dict, Type
-
 import pandas as pd
 
-from featurizer.config import FeaturizerConfig
 from simulation.clock import Clock
 from simulation.data.data_generator import DataGenerator
 from simulation.execution.execution_simulator import ExecutionSimulator

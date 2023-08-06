@@ -2,6 +2,7 @@ import unittest
 import ray
 
 from featurizer.actors.cache_actor import get_cache_actor
+from featurizer.config import FeaturizerConfig
 from featurizer.runner import Featurizer
 from utils.pandas.df_utils import concat
 
@@ -10,7 +11,8 @@ class TestFeaturizer(unittest.TestCase):
 
     def test_fl_set(self):
         config_path = 'test_configs/feature-label-set.yaml'
-        Featurizer.run(config_path)
+        config = FeaturizerConfig.load_config(path=config_path)
+        Featurizer.run(config)
 
         with ray.init(address='auto', ignore_reinit_error=True):
             refs = Featurizer.get_result_refs()
