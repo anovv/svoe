@@ -3,7 +3,8 @@ mysql:
   database: {{ .Values | get "mysqlDefaultSvoeDb" }}
   port: 3306
 #  host: svoe-mysql-cluster-mysql.mysql.svc.cluster.local
-  host: mysql.mysql.svc.cluster.local
+#  host: mysql.mysql.svc.cluster.local
+  host: svoe-test-db-1.cwqgytk2i2uv.ap-northeast-1.rds.amazonaws.com
   user: root
 s3:
   accessKeyId: {{ .Values | get "awsKey" }}
