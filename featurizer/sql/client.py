@@ -1,35 +1,21 @@
 from typing import Optional, Dict, List
 
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
 
-from featurizer.sql.base import Base
+from common.db.base import Base
+from common.db.mysql_client import MysqlClient, Session
 from featurizer.sql.data_catalog.models import DataCatalog
 from featurizer.sql.feature_catalog.models import FeatureCatalog
 from featurizer.data_catalog.common.data_models.models import InputItemBatch
 
 import os
 
-from featurizer.sql.feature_def.models import FeatureDefinitionDB, construct_feature_def_s3_path
-
-Session = sessionmaker()
+from featurizer.sql.feature_def.models import FeatureDefinitionDB
 
 
-DEFAULT_CONFIG = {
-    'mysql_user': 'root',
-    'mysql_password': '',
-    'mysql_host': '127.0.0.1',
-    'mysql_port': '3306',
-    'mysql_database': 'svoe_db',
-}
-
-
-class MysqlClient:
+class FeaturizerMysqlClient(MysqlClient):
     def __init__(self, config: Optional[Dict] = None):
-        self.config = config
-        if self.config is None:
-            self.config = DEFAULT_CONFIG
-        self.engine = self._init_engine()
+        super(FeaturizerMysqlClient, self).__init__(config=config)
 
     def _init_engine(self):
         user = os.getenv('MYSQL_USER', self.config.get('mysql_user'))

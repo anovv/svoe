@@ -10,7 +10,7 @@ from typing import Optional, Dict, List, Tuple
 
 from featurizer.blocks.blocks import BlockRangeMeta, make_ranges, BlockMeta
 from featurizer.features.feature_tree.feature_tree import Feature
-from featurizer.sql.client import MysqlClient
+from featurizer.sql.client import FeaturizerMysqlClient
 from featurizer.sql.data_catalog.models import DataCatalog
 from featurizer.sql.feature_catalog.models import FeatureCatalog, SVOE_S3_FEATURE_CATALOG_BUCKET
 from featurizer.sql.feature_def.models import construct_feature_def_s3_path, FeatureDefinitionDB
@@ -27,7 +27,7 @@ def data_key(e: Dict) -> DataKey:
 
 class FeaturizerStorage:
     def __init__(self, db_config: Optional[Dict] = None):
-        self.client = MysqlClient(db_config)
+        self.client = FeaturizerMysqlClient(db_config)
 
     def get_data_meta(
         self,

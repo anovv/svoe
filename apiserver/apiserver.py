@@ -1,5 +1,3 @@
-import ast
-import base64
 from datetime import datetime, timezone
 from typing import Dict, List, Optional
 
@@ -14,6 +12,7 @@ from pydantic import BaseModel
 
 from featurizer.storage.featurizer_storage import FeaturizerStorage
 from ray_cluster.manager.manager import RayClusterManager
+from utils.common_utils import base64_decode
 
 
 class RayClusterWorkerGroupConfig(BaseModel):
@@ -156,9 +155,12 @@ def run_dag(
     # to encode conf_encoded = base64.urlsafe_b64encode(json.dumps(conf).encode()).decode()
     try:
         if conf_encoded is not None:
-            conf = json.loads(base64.urlsafe_b64decode(conf_encoded.encode()).decode())
+            conf = base64_decode(conf_encoded)
     except Exception as e:
         return Resp(result=None, error=f'Unable to decode base64 dag config: {e}')
+
+    # TODO copy dag_conf to all Airflow workers and scheduler
+    # https://devpress.csdn.net/k8s/62fcf588c677032930802646.html
 
     api_instance = DAGRunApi(airflow_api_client)
     now = datetime.now().astimezone(tz=timezone.utc)

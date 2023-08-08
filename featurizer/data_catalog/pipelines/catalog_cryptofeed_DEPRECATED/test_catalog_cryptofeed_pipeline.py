@@ -7,7 +7,7 @@ import ray
 from featurizer.data_catalog.pipelines.catalog_cryptotick.tasks import make_catalog_item
 from featurizer.data_catalog import CatalogCryptofeedDag
 from featurizer.data_catalog import PipelineRunner
-from featurizer.sql.client import MysqlClient
+from featurizer.sql.client import FeaturizerMysqlClient
 from featurizer.data_catalog.common.utils.cryptofeed.utils import generate_cryptofeed_input_items
 from utils.pandas.df_utils import load_dfs
 
@@ -75,7 +75,7 @@ class TestCatalogCryptofeedPipeline(unittest.TestCase):
             time.sleep(720)
 
             # check if index was written to db
-            client = MysqlClient()
+            client = FeaturizerMysqlClient()
             not_exist = client.filter_cryptofeed_batch(list(itertools.chain(*inputs)))
             # TODO should be 0
             print(len(not_exist))

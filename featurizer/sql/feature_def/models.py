@@ -1,6 +1,6 @@
-from sqlalchemy import Column, String, JSON, DateTime, func, Integer
+from sqlalchemy import Column, String, JSON, DateTime, func
 
-from featurizer.sql.base import Base
+from common.db.base import Base
 
 SVOE_S3_FEATURE_DEFINITIONS_BUCKET = 'svoe-feature-definitions'
 

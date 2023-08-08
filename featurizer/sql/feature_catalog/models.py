@@ -1,6 +1,6 @@
 from sqlalchemy import Column, String, JSON, DateTime, func, Integer
 
-from featurizer.sql.base import Base
+from common.db.base import Base
 
 # from sqlalchemy.orm import declarative_base
 
