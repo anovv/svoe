@@ -2,7 +2,7 @@ from typing import Optional, Dict, Tuple, List
 
 from common.db.mysql_client import MysqlClient, Session
 from svoe_airflow.db.models import DagConfigEncoded
-from utils.common_utils import base64_decode
+from common.common_utils import base64_decode
 
 
 class DagsMysqlClient(MysqlClient):

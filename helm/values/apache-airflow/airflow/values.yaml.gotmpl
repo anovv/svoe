@@ -1,10 +1,18 @@
 # TODO configure CeleryExecutor
 # https://blog.damavis.com/en/deploying-airflow-celeryexecutor-on-kubernetes/
 # https://github.com/damavis/airflow-dags/blob/master/airflow-celery.yaml
-
+defaultAirflowRepository: svoe_airflow
+defaultAirflowTag: 1.0.0
 images:
   airflow:
-    tag: latest-python3.10
+    pullPolicy: Never
+#images:
+#  pod_template:
+#    repository: svoe_airflow
+#    tag: 1.0.0
+#    pullPolicy: Never
+#  airflow:
+#    tag: latest-python3.10
 
 extraEnv: |
   - name: AIRFLOW__CORE__LOAD_EXAMPLE

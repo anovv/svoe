@@ -14,7 +14,7 @@ import concurrent.futures
 
 from simulation.data.data_generator import DataGenerator
 from simulation.models.instrument import Instrument
-from utils.common_utils import flatten_tuples
+from common.common_utils import flatten_tuples
 from utils.pandas.df_utils import load_df
 
 

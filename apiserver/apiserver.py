@@ -12,7 +12,7 @@ from pydantic import BaseModel
 
 from featurizer.storage.featurizer_storage import FeaturizerStorage
 from ray_cluster.manager.manager import RayClusterManager
-from utils.common_utils import base64_decode
+from common.common_utils import base64_decode
 
 
 class RayClusterWorkerGroupConfig(BaseModel):
