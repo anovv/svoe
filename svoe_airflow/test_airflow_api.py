@@ -68,8 +68,8 @@ def test_get_logs(dag_id: str, dag_run_id: str, task_id: str, task_try_number: i
     print(api_response)
 
 
-# test_delete_dag('example_dag3')
-test_list_dags()
+test_delete_dag('sample_dag')
+# test_list_dags()
 # test_get_import_errors()
 # test_list_dag_runs('hello_world')
 # test_run_dag('hello_world')
