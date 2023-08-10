@@ -2,21 +2,39 @@
 # https://blog.damavis.com/en/deploying-airflow-celeryexecutor-on-kubernetes/
 # https://github.com/damavis/airflow-dags/blob/master/airflow-celery.yaml
 defaultAirflowRepository: svoe_airflow
-defaultAirflowTag: 1.0.0
+defaultAirflowTag: 1.0.2
 images:
   airflow:
     pullPolicy: Never
 #images:
-#  pod_template:
-#    repository: svoe_airflow
-#    tag: 1.0.0
-#    pullPolicy: Never
 #  airflow:
 #    tag: latest-python3.10
 
 extraEnv: |
   - name: AIRFLOW__CORE__LOAD_EXAMPLE
     value: 'True'
+
+extraEnvFrom: |
+  - secretRef:
+      name: airflow-aws-secret
+  - secretRef:
+      name: airflow-mysql-secret
+
+extraSecrets:
+  airflow-aws-secret:
+    type: 'Opaque'
+    stringData: |
+      AWS_ACCESS_KEY_ID: '{{ .Values | get "awsKey" }}'
+      AWS_SECRET_ACCESS_KEY: '{{ .Values | get "awsSecret" }}'
+      AWS_DEFAULT_REGION: '{{ .Values | get "awsDefaultRegion" }}'
+  airflow-mysql-secret:
+    type: 'Opaque'
+    stringData: |
+      MYSQL_PASSWORD: '{{ .Values | get "mysqlRootPassword" }}'
+      MYSQL_DATABASE: '{{ .Values | get "mysqlDefaultSvoeDb" }}'
+      MYSQL_USER: 'root'
+      MYSQL_HOST: 'svoe-test-db-1.cwqgytk2i2uv.ap-northeast-1.rds.amazonaws.com'
+      MYSQL_PORT: '3306'
 
 # TODO configure [core] executor, parallelism, max_active_tasks_per_dag, max_active_runs_per_dag, task_runner
 
