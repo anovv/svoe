@@ -9,7 +9,7 @@ USER airflow
 ENV SLUGIFY_USES_TEXT_UNIDECODE=yes
 RUN pip install -r /opt/svoe/reqs.txt
 RUN pip install dag-factory --no-deps apache-airflow
-COPY svoe_airflow/gen_dag.py /opt/airflow/dags/gen_dag.py
+COPY svoe_airflow/gen_dags.py /opt/airflow/dags/gen_dags.py
 
 # copy local packages
 # TODO package it in a better way

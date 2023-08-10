@@ -1,6 +1,7 @@
 from sqlalchemy import Column, String, Text, DateTime, func
 from common.db.base import Base
 
+
 class DagConfigEncoded(Base):
     __tablename__ = 'dag_configs'
     created_at = Column(DateTime(timezone=True), server_default=func.now())
@@ -10,4 +11,4 @@ class DagConfigEncoded(Base):
     owner_id = Column(String(32), primary_key=True)
     dag_name = Column(String(32), primary_key=True)
 
-    dag_config_encoded = Column(Text(), unique=True)
+    dag_config_encoded = Column(Text())

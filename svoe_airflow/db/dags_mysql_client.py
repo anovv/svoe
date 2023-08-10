@@ -2,7 +2,6 @@ from typing import Optional, Dict, Tuple, List
 
 from common.db.mysql_client import MysqlClient, Session
 from svoe_airflow.db.models import DagConfigEncoded
-from common.common_utils import base64_decode
 
 
 class DagsMysqlClient(MysqlClient):
@@ -15,6 +14,7 @@ class DagsMysqlClient(MysqlClient):
         dag_name: str,
         dag_config_encoded: str
     ):
+        self.create_tables() # TODO remove this
         item = DagConfigEncoded(
             owner_id=owner_id,
             dag_name=dag_name,
@@ -24,12 +24,6 @@ class DagsMysqlClient(MysqlClient):
         session.add(item)
         session.commit()
 
-    def select_all_configs(self) -> List[Tuple[str, str, Dict]]:# owner_id, dag_name, decoded_config
-        records: List[DagConfigEncoded] = DagConfigEncoded.query.all()
-        res = []
-        for r in records:
-            res.append(r.owner_id)
-            res.append(r.dag_name)
-            res.append(base64_decode(r.dag_config_encoded))
-
-        return res
+    def select_all_configs(self) -> List[DagConfigEncoded]:
+        session = Session()
+        return session.query(DagConfigEncoded).all()
