@@ -9,14 +9,20 @@ from svoe_airflow.operators.ray_provisioned_base_operator import RayProvisionedB
 
 class FeaturizerOperator(RayProvisionedBaseOperator):
 
-    def __init__(self, dag_args: Dict, **kwargs):
-        super().__init__(dag_args=dag_args, **kwargs)
-        self.featurizer_config = self.parse_featurizer_args(dag_args)
+    def __init__(self, args: Dict, **kwargs):
+        super().__init__(args=args, **kwargs)
+        self.featurizer_config = self.parse_featurizer_args()
 
-    def parse_featurizer_args(self, dag_args) -> FeaturizerConfig:
-        raise NotImplementedError # TODO
+    def parse_featurizer_args(self) -> FeaturizerConfig:
+        print(self.args)
+        featurizer_config_raw = self.args.get('featurizer_config', None)
+        if featurizer_config_raw is None:
+            raise ValueError('No featurizer_config is provided')
+        return FeaturizerConfig(**featurizer_config_raw)
 
     def execute(self, context: Context) -> Any:
         ray_head_address = self.ray_hook.connect_or_create_cluster()
         Featurizer.run(config=self.featurizer_config, ray_address=ray_head_address)
+        if self.cleanup_cluster:
+            self.ray_hook.delete_cluster()
 

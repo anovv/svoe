@@ -27,7 +27,7 @@ class TestDagsMysqlClient(unittest.TestCase):
     def save(self):
         client = DagsMysqlClient()
         owner_id = '1'
-        dag_name = 'sample_dag'
+        dag_name = 'sample_dag_2' # TODO infer from yaml
         dag_yaml_path = './sample_dag.yaml'
         with open(dag_yaml_path, 'r') as stream:
             dag_conf = yaml.safe_load(stream)

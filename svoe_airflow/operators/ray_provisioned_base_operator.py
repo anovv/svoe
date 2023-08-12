@@ -7,10 +7,20 @@ from client.fast_api_client.models import RayClusterConfig
 
 
 class RayProvisionedBaseOperator(BaseOperator):
-    def __init__(self, dag_args: Dict, **kwargs):
+
+    template_fields = ('args',)
+
+    def __init__(self, args: Dict, **kwargs):
         super().__init__(**kwargs)
-        cluster_config, cluster_name = self.parse_cluster_args(dag_args)
+        self.args = args
+        cluster_config, cluster_name, cleanup_cluster = self.parse_cluster_args()
+        self.cleanup_cluster = cleanup_cluster
         self.ray_hook = RayHook(cluster_config=cluster_config, cluster_name=cluster_name)
 
-    def parse_cluster_args(self, dag_args: Dict) -> Tuple[Optional[RayClusterConfig], Optional[str]]:
-        raise NotImplementedError # TODO
+    def parse_cluster_args(self) -> Tuple[Optional[RayClusterConfig], Optional[str], bool]:
+        cluster_config = None
+        cluster_config_raw = self.args.get('cluster_config', None)
+        if cluster_config_raw is not None:
+            cluster_config = RayClusterConfig.from_dict(cluster_config_raw)
+
+        return cluster_config, self.args.get('cluster_name', None), self.args.get('cleanup_cluster', False)
