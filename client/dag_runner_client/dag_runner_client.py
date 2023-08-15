@@ -21,3 +21,9 @@ class DagRunnerClient(BaseClient):
                 run_dag_run_dag_post.sync(client=self.client, user_id=user_id, dag_conf_encoded=dag_conf_encoded)
             )))
 
+
+if __name__ == '__main__':
+    client = DagRunnerClient()
+    client.run_dag(dag_yaml_path='./sample_dag.yaml')
+
+

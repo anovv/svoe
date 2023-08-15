@@ -7,7 +7,7 @@ dags_folder = airflow_conf.get('core', 'dags_folder')
 suffix = DEFAULT_DAG_YAML_SUFFIX # '.yaml'
 
 client = DagsMysqlClient()
-confs = client.select_all_configs()
+confs = client.select_configs()
 
 sync_configs(confs=confs, dags_folder=dags_folder, suffix=suffix)
 
