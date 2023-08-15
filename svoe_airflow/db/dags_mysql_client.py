@@ -27,3 +27,9 @@ class DagsMysqlClient(MysqlClient):
     def select_all_configs(self) -> List[DagConfigEncoded]:
         session = Session()
         return session.query(DagConfigEncoded).all()
+
+    def delete_dags_for_user(self, user_id: str):
+        session = Session()
+        session.query(DagConfigEncoded).filter(DagConfigEncoded.owner_id == user_id).delete()
+        session.commit()
+

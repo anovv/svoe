@@ -23,4 +23,5 @@ class RayProvisionedBaseOperator(BaseOperator):
         if cluster_config_raw is not None:
             cluster_config = RayClusterConfig.from_dict(cluster_config_raw)
 
+        # TODO cluster_name should be appended with user_id for isolation per user
         return cluster_config, self.args.get('cluster_name', None), self.args.get('cleanup_cluster', False)

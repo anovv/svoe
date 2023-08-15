@@ -1,7 +1,9 @@
 import os
+import time
+from datetime import datetime, timezone
 
 import yaml
-from typing import List, Tuple
+from typing import List, Tuple, Dict
 
 from common.common_utils import base64_decode
 from svoe_airflow.db.models import DagConfigEncoded
@@ -62,3 +64,14 @@ def sync_configs(confs: List[DagConfigEncoded], dags_folder: str, suffix: str):
 
 def construct_dag_yaml_path(dags_folder: str, owner_id: str, dag_name: str, suffix: str) -> str:
     return f'{dags_folder}/{owner_id}-{dag_name}{suffix}'
+
+
+# translates user defined dag config to proper Airflow format, generates unqiue name
+def user_dag_conf_to_airflow_dag_conf(svoe_dag_conf: Dict, owner_id: str) -> Tuple[str, Dict]:
+    now = datetime.now().astimezone(tz=timezone.utc)
+    now_ts = int(round(now.timestamp()))
+    dag_name = f'dag-{owner_id}-{now_ts}'
+    airflow_dag_conf = {
+        dag_name: svoe_dag_conf
+    }
+    return dag_name, airflow_dag_conf

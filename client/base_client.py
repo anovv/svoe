@@ -8,7 +8,8 @@ INTERNAL_BASE_URL = 'http://apiserver-svc.apiserver:1228'
 
 log = logging.getLogger(__name__)
 
-# for OpenAPI client codegen:
+# for OpenAPI client codegen launch apiserver.py and run:
+# openapi-python-client generate --url http://0.0.0.0:1228/openapi.json
 # https://github.com/openapi-generators/openapi-python-client
 
 
