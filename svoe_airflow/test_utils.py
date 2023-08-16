@@ -20,7 +20,6 @@ class TestSvoeAirflowUtils(unittest.TestCase):
         with tempfile.TemporaryDirectory() as dags_folder:
             expected_file_path = construct_dag_yaml_path(
                 dags_folder=dags_folder,
-                owner_id=owner_id,
                 dag_name=dag_name,
                 suffix=DEFAULT_DAG_YAML_SUFFIX
             )
@@ -44,14 +43,12 @@ class TestSvoeAirflowUtils(unittest.TestCase):
         with tempfile.TemporaryDirectory() as dags_folder:
             expected_file_path_to_add = construct_dag_yaml_path(
                 dags_folder=dags_folder,
-                owner_id=owner_id,
                 dag_name=dag_name_to_add,
                 suffix=DEFAULT_DAG_YAML_SUFFIX
             )
 
             expected_file_path_to_delete = construct_dag_yaml_path(
                 dags_folder=dags_folder,
-                owner_id=owner_id,
                 dag_name=dag_name_to_delete,
                 suffix=DEFAULT_DAG_YAML_SUFFIX
             )

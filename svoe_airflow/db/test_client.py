@@ -1,4 +1,5 @@
 import os
+import time
 import unittest
 
 import yaml
@@ -22,6 +23,11 @@ class TestDagsMysqlClient(unittest.TestCase):
         assert confs[0].owner_id == owner_id
         assert confs[0].dag_name == dag_name
         assert confs[0].dag_config_encoded == dag_config_encoded
+
+        error = 'test_error'
+        client.report_compilation_error(dag_name=dag_name, error=error)
+        err = client.get_compilation_error(dag_name=dag_name)
+        assert err == error
 
 
 if __name__ == '__main__':

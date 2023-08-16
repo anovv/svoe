@@ -12,3 +12,4 @@ class DagConfigEncoded(Base):
     dag_name = Column(String(32), primary_key=True)
 
     dag_config_encoded = Column(Text())
+    compilation_error = Column(Text())

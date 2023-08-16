@@ -62,15 +62,22 @@ def test_get_import_errors():
     print(api_response)
 
 
+def test_get_import_error(error_id: str):
+    api_instance = ImportErrorApi(airflow_api_client)
+    api_response = api_instance.get_import_error(import_error_id=error_id)
+    print(api_response)
+
+
 def test_get_logs(dag_id: str, dag_run_id: str, task_id: str, task_try_number: int = 1):
     api_instance = TaskInstanceApi(airflow_api_client)
     api_response = api_instance.get_log(dag_id, dag_run_id, task_id, task_try_number)
     print(api_response)
 
 
-test_delete_dag('sample_dag')
+# test_delete_dag('sample_dag')
 # test_list_dags()
 # test_get_import_errors()
+test_get_import_error(205)
 # test_list_dag_runs('hello_world')
 # test_run_dag('hello_world')
 # test_get_logs('hello_world', 'dag-run-0-1688128457', 'hello_task')
