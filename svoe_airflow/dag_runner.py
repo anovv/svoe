@@ -1,6 +1,6 @@
 import time
 from datetime import datetime, timezone
-from typing import Dict
+from typing import Dict, Callable, Optional
 
 import yaml
 from airflow_client.client import ApiClient, Configuration
@@ -14,6 +14,7 @@ from svoe_airflow.utils import user_dag_conf_to_airflow_dag_conf
 
 # AIRFLOW_HOST = 'airflow-webserver.airflow.svc.cluster.local:8080/api/v1'
 AIRFLOW_HOST = 'http://localhost:8080/api/v1'
+DAG_RUN_ID_PREFIX = 'dag-run'
 
 class DagRunner:
 
@@ -47,8 +48,6 @@ class DagRunner:
         if len(confs) > 1:
             raise RuntimeError(f'User {user_id} has more than 1 conf stored ({len(confs)})')
 
-        print(len(confs))
-
         # delete previous dag_config in db
         if len(confs) != 0:
             prev_dag_name = confs[0].dag_name
@@ -60,7 +59,7 @@ class DagRunner:
         self.db_client.save_db_config_encoded(owner_id=user_id, dag_name=dag_name, dag_config_encoded=dag_config_encoded)
 
         # wait for Airflow to pick up dag_config from db
-        timeout = 180
+        timeout = 30
         dag = None
         start = time.time()
         last_exception = None
@@ -89,7 +88,7 @@ class DagRunner:
         now = datetime.now().astimezone(tz=timezone.utc)
         now_ts = int(round(now.timestamp()))
 
-        dag_run_id = f'dag-run-{user_id}-{now_ts}'
+        dag_run_id = f'{DAG_RUN_ID_PREFIX}-{user_id}-{now_ts}'
 
         # TODO add meta (user_id, env, etc.)
         dag_run = DAGRun(
@@ -103,6 +102,29 @@ class DagRunner:
         # TODO parse api_response?
         api_response = self.airflow_dag_run_api_instance.post_dag_run(dag_id=dag_name, dag_run=dag_run)
         return api_response
+
+    def watch_dag(self, user_id: str, dag_name: Optional[str] = None, dag_run_id: Optional[str] = None, callback: Callable = print):
+        # get current dag for user if not provided:
+        if dag_name is None:
+            confs = self.db_client.select_configs(owner_id=user_id)
+            if len(confs) == 0:
+                raise RuntimeError(f'User {user_id} has no running dags')
+            dag_name = confs[0].dag_name
+
+        # get latest dag_run for user if not provided:
+        if dag_run_id is None:
+            dag_runs = self.airflow_dag_run_api_instance.get_dag_runs(dag_id=dag_name)['dag_runs']
+
+            # only consider runs with specific naming
+            dag_runs = list(filter(lambda r: r['dag_run_id'].startswith(DAG_RUN_ID_PREFIX), dag_runs))
+            if len(dag_runs) == 0:
+                raise RuntimeError(f'User {user_id} has no dag runs')
+            dag_run_id = dag_runs[0]['dag_run_id']
+
+        # TODO loop api calls and trigger callback
+
+
+
 
 # TODO remove after testing
 if __name__ == '__main__':

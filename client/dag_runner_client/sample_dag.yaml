@@ -21,6 +21,7 @@ tasks:
             max_replicas: 4
             cpu: 1
             memory: '500m'
+            ray_resources: {}
       cleanup_cluster: True
       featurizer_config:
         start_date: '2023-02-01'
