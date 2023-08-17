@@ -1,11 +1,13 @@
+import codecs
 import time
 from datetime import datetime, timezone
-from typing import Dict, Callable, Optional
+from typing import Dict, Callable, Optional, Generator, Tuple
 
 import yaml
 from airflow_client.client import ApiClient, Configuration
 from airflow_client.client.api.dag_api import DAGApi
 from airflow_client.client.api.dag_run_api import DAGRunApi
+from airflow_client.client.api.task_instance_api import TaskInstanceApi
 from airflow_client.client.model.dag_run import DAGRun
 
 from common.common_utils import base64_encode
@@ -27,13 +29,14 @@ class DagRunner:
             username='admin',
             password='GGWM68cT7gRZXvNP'
         ))
-        self.airflow_dag_api_instance = DAGApi(self.airflow_api_client)
-        self.airflow_dag_run_api_instance = DAGRunApi(self.airflow_api_client)
+        self.airflow_dag_api = DAGApi(self.airflow_api_client)
+        self.airflow_dag_run_api = DAGRunApi(self.airflow_api_client)
+        self.airflow_task_instance_api = TaskInstanceApi(self.airflow_api_client)
 
     def _delete_dag_config_and_metadata(self, user_id: str, dag_name: str):
         # delete dag metadata from Airflow
         try:
-            self.airflow_dag_api_instance.delete_dag(dag_id=dag_name)
+            self.airflow_dag_api.delete_dag(dag_id=dag_name)
             print('deleted meta')
         except:
             # can happen if DAG is not synced to webserver yet
@@ -65,7 +68,7 @@ class DagRunner:
         last_exception = None
         while dag is None and (time.time() - start < timeout):
             try:
-                dag = self.airflow_dag_api_instance.get_dag(dag_id=dag_name)
+                dag = self.airflow_dag_api.get_dag(dag_id=dag_name)
             except Exception as e:
                 print('Dag is none')
                 # check if there were compilation errors
@@ -100,10 +103,11 @@ class DagRunner:
 
         # TODO check if user has existing dags running and set limit?
         # TODO parse api_response?
-        api_response = self.airflow_dag_run_api_instance.post_dag_run(dag_id=dag_name, dag_run=dag_run)
+        api_response = self.airflow_dag_run_api.post_dag_run(dag_id=dag_name, dag_run=dag_run)
         return api_response
 
-    def watch_dag(self, user_id: str, dag_name: Optional[str] = None, dag_run_id: Optional[str] = None, callback: Callable = print):
+    def _get_dag_name_and_run_id_if_needed(self, user_id: str, dag_name: Optional[str] = None, dag_run_id: Optional[str] = None) -> Tuple[str, str]:
+        # TODO asyncify
         # get current dag for user if not provided:
         if dag_name is None:
             confs = self.db_client.select_configs(owner_id=user_id)
@@ -113,7 +117,7 @@ class DagRunner:
 
         # get latest dag_run for user if not provided:
         if dag_run_id is None:
-            dag_runs = self.airflow_dag_run_api_instance.get_dag_runs(dag_id=dag_name)['dag_runs']
+            dag_runs = self.airflow_dag_run_api.get_dag_runs(dag_id=dag_name)['dag_runs']
 
             # only consider runs with specific naming
             dag_runs = list(filter(lambda r: r['dag_run_id'].startswith(DAG_RUN_ID_PREFIX), dag_runs))
@@ -121,17 +125,60 @@ class DagRunner:
                 raise RuntimeError(f'User {user_id} has no dag runs')
             dag_run_id = dag_runs[0]['dag_run_id']
 
-        # TODO loop api calls and trigger callback
+        return dag_name, dag_run_id
 
+    def watch_dag(self, user_id: str, dag_name: Optional[str] = None, dag_run_id: Optional[str] = None) -> Generator:
+        dag_name, dag_run_id = self._get_dag_name_and_run_id_if_needed(user_id=user_id, dag_name=dag_name, dag_run_id=dag_run_id)
+        while True:
+            # TODO asyncify
+            dag_run = self.airflow_dag_run_api.get_dag_run(dag_id=dag_name, dag_run_id=dag_run_id)
+            task_instances = self.airflow_task_instance_api.get_task_instances(dag_id=dag_name, dag_run_id=dag_run_id, _check_return_type=False)
 
+            # TODO model for dag state
+            res = {k: dag_run[k] for k in ['state', 'start_date', 'end_date', 'execution_date', 'dag_id', 'dag_run_id']}
+            res['tasks'] = []
+            for t in task_instances['task_instances']:
+                res['tasks'].append({k: t[k] for k in ['task_id', 'state', 'start_date', 'end_date', 'execution_date', 'duration']})
+
+            yield res
+
+            time.sleep(1)
+
+    def watch_task_logs(self, user_id: str, task_name: str, dag_name: Optional[str] = None, dag_run_id: Optional[str] = None) -> Generator:
+        dag_name, dag_run_id = self._get_dag_name_and_run_id_if_needed(user_id=user_id, dag_name=dag_name, dag_run_id=dag_run_id)
+        continuation_token = None
+        while True:
+            kwargs = {
+                'full_content': continuation_token is None,
+            }
+            if continuation_token is not None:
+                kwargs['token'] = continuation_token
+
+            logs = self.airflow_task_instance_api.get_log(
+                dag_id=dag_name,
+                dag_run_id=dag_run_id,
+                task_id=task_name,
+                task_try_number=1,
+                **kwargs
+            )
+            content, continuation_token = logs['content'], logs['continuation_token']
+            decoded = codecs.escape_decode(bytes(content, 'utf-8'))[0].decode('utf-8')
+
+            yield decoded
+
+            time.sleep(1)
 
 
 # TODO remove after testing
 if __name__ == '__main__':
     runner = DagRunner()
-    user_id = '1'
-    dag_yaml_path = '../client/dag_runner_client/sample_dag.yaml'
-    with open(dag_yaml_path, 'r') as stream:
-        dag_conf = yaml.safe_load(stream)
-        res = runner.run_dag(user_id=user_id, user_defined_dag_config=dag_conf)
-        print(res)
+    # user_id = '1'
+    # dag_yaml_path = '../client/dag_runner_client/sample_dag.yaml'
+    # with open(dag_yaml_path, 'r') as stream:
+    #     dag_conf = yaml.safe_load(stream)
+    #     res = runner.run_dag(user_id=user_id, user_defined_dag_config=dag_conf)
+    #     print(res)
+    # w = runner.watch_dag(user_id='1', dag_name='dag-1-1692167919')
+    w = runner.watch_task_logs(user_id='1', task_name='task_1', dag_name='dag-1-1692167919')
+    print(next(w))
+    print(next(w))
