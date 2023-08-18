@@ -74,6 +74,13 @@ def dag_name_from_yaml_path(path: str, suffix: str) -> str:
 
 # translates user defined dag config to proper Airflow format, generates unqiue name
 def user_dag_conf_to_airflow_dag_conf(svoe_dag_conf: Dict, owner_id: str) -> Tuple[str, Dict]:
+    # add required by Airflow default_args
+    svoe_dag_conf['default_args'] = {
+        'owner': 'default',
+        'start_date': '1992-09-02' # TODO what is this for ?
+    }
+    svoe_dag_conf['schedule_interval'] = '@once'
+    svoe_dag_conf['catchup'] = False # TODO is this needed? catchup or catch_up
     now = datetime.now().astimezone(tz=timezone.utc)
     now_ts = int(round(now.timestamp()))
     dag_name = f'dag-{owner_id}-{now_ts}'

@@ -1,3 +1,4 @@
+import datetime
 import traceback
 
 from dagfactory import load_yaml_dags, DagFactory
@@ -5,9 +6,8 @@ from airflow.configuration import conf as airflow_conf
 from svoe_airflow.db.dags_mysql_client import DagsMysqlClient
 from svoe_airflow.utils import DEFAULT_DAG_YAML_SUFFIX, sync_configs, dag_name_from_yaml_path
 from pathlib import Path
-from datetime import date
 
-print(f'[gen_dags.py] Called at {date.today()}')
+print(f'[gen_dags.py] Called at {datetime.datetime.now()}')
 dags_folder = airflow_conf.get('core', 'dags_folder')
 suffix = DEFAULT_DAG_YAML_SUFFIX # '.yaml'
 
@@ -38,5 +38,5 @@ for config_file_path in candidate_dag_files:
             # in case path is not parsable, nothing we can do with this dag, it is a zombie
             # TODO possibly parse yaml itself and derive dag_name from there? Too much work at the moment
             pass
-print(f'[gen_dags.py] Sync done at {date.today()}')
+print(f'[gen_dags.py] Sync done at {datetime.datetime.now()}')
 

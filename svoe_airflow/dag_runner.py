@@ -34,6 +34,7 @@ class DagRunner:
         self.airflow_task_instance_api = TaskInstanceApi(self.airflow_api_client)
 
     def _delete_dag_config_and_metadata(self, user_id: str, dag_name: str):
+        # TODO stop associated dag run
         # delete dag metadata from Airflow
         try:
             self.airflow_dag_api.delete_dag(dag_id=dag_name)
@@ -45,7 +46,7 @@ class DagRunner:
         self.db_client.delete_configs(user_id)
         print('deleted db')
 
-    def run_dag(self, user_id: str, user_defined_dag_config: Dict):
+    def run_dag(self, user_id: str, user_defined_dag_config: Dict) -> Tuple[str, str]:
         # get prev configs for this user
         confs = self.db_client.select_configs(owner_id=user_id)
         if len(confs) > 1:
@@ -102,9 +103,8 @@ class DagRunner:
         )
 
         # TODO check if user has existing dags running and set limit?
-        # TODO parse api_response?
         api_response = self.airflow_dag_run_api.post_dag_run(dag_id=dag_name, dag_run=dag_run)
-        return api_response
+        return api_response['dag_id'], api_response['dag_run_id']
 
     def _get_dag_name_and_run_id_if_needed(self, user_id: str, dag_name: Optional[str] = None, dag_run_id: Optional[str] = None) -> Tuple[str, str]:
         # TODO asyncify
@@ -129,18 +129,28 @@ class DagRunner:
 
     def watch_dag(self, user_id: str, dag_name: Optional[str] = None, dag_run_id: Optional[str] = None) -> Generator:
         dag_name, dag_run_id = self._get_dag_name_and_run_id_if_needed(user_id=user_id, dag_name=dag_name, dag_run_id=dag_run_id)
+        prev_dag_run = None
+        prev_task_instances = None
         while True:
             # TODO asyncify
             dag_run = self.airflow_dag_run_api.get_dag_run(dag_id=dag_name, dag_run_id=dag_run_id)
             task_instances = self.airflow_task_instance_api.get_task_instances(dag_id=dag_name, dag_run_id=dag_run_id, _check_return_type=False)
 
-            # TODO model for dag state
-            res = {k: dag_run[k] for k in ['state', 'start_date', 'end_date', 'execution_date', 'dag_id', 'dag_run_id']}
-            res['tasks'] = []
-            for t in task_instances['task_instances']:
-                res['tasks'].append({k: t[k] for k in ['task_id', 'state', 'start_date', 'end_date', 'execution_date', 'duration']})
+            # yield only on difference
+            if prev_dag_run != dag_run or prev_task_instances != task_instances:
+                prev_dag_run = dag_run
+                prev_task_instances = task_instances
+                # TODO model for dag state
+                res = {k: dag_run[k] for k in ['state', 'start_date', 'end_date', 'execution_date', 'dag_id', 'dag_run_id']}
+                res['tasks'] = []
+                for t in task_instances['task_instances']:
+                    res['tasks'].append({k: t[k] for k in ['task_id', 'state', 'start_date', 'end_date', 'execution_date', 'duration']})
 
-            yield res
+                # terminal state
+                if res['state'] == 'success' or res['state'] == 'failed':
+                    break
+
+                yield res
 
             time.sleep(1)
 
@@ -148,6 +158,11 @@ class DagRunner:
         dag_name, dag_run_id = self._get_dag_name_and_run_id_if_needed(user_id=user_id, dag_name=dag_name, dag_run_id=dag_run_id)
         continuation_token = None
         while True:
+            # TODO asyncify
+            # get task state to check if we should continue fetching logs
+            task_instance = self.airflow_task_instance_api.get_task_instance(dag_id=dag_name, dag_run_id=dag_run_id, task_id=task_name, _check_return_type=False)
+            task_state = task_instance['state']
+
             kwargs = {
                 'full_content': continuation_token is None,
             }
@@ -161,10 +176,17 @@ class DagRunner:
                 task_try_number=1,
                 **kwargs
             )
-            content, continuation_token = logs['content'], logs['continuation_token']
+            content, new_continuation_token = logs['content'], logs['continuation_token']
             decoded = codecs.escape_decode(bytes(content, 'utf-8'))[0].decode('utf-8')
 
-            yield decoded
+            if len(decoded) != 0 and continuation_token != new_continuation_token:
+                continuation_token = new_continuation_token
+                yield decoded
+
+            # terminal states
+            if task_state in ['success', 'failed', 'upstream_failed', 'shutdown']:
+                yield f'Task finished with state {task_state}'
+                break
 
             time.sleep(1)
 
@@ -172,13 +194,18 @@ class DagRunner:
 # TODO remove after testing
 if __name__ == '__main__':
     runner = DagRunner()
-    # user_id = '1'
-    # dag_yaml_path = '../client/dag_runner_client/sample_dag.yaml'
-    # with open(dag_yaml_path, 'r') as stream:
-    #     dag_conf = yaml.safe_load(stream)
-    #     res = runner.run_dag(user_id=user_id, user_defined_dag_config=dag_conf)
-    #     print(res)
-    # w = runner.watch_dag(user_id='1', dag_name='dag-1-1692167919')
-    w = runner.watch_task_logs(user_id='1', task_name='task_1', dag_name='dag-1-1692167919')
-    print(next(w))
-    print(next(w))
+    user_id = '1'
+    dag_yaml_path = '../client/dag_runner_client/sample_dag.yaml'
+    with open(dag_yaml_path, 'r') as stream:
+        dag_conf = yaml.safe_load(stream)
+        dag_name, dag_run_id = runner.run_dag(user_id=user_id, user_defined_dag_config=dag_conf)
+        w1 = runner.watch_dag(user_id=user_id, dag_name=dag_name, dag_run_id=dag_run_id)
+        w2 = runner.watch_task_logs(user_id=user_id, task_name='task_1', dag_name=dag_name, dag_run_id=dag_run_id)
+        print(next(w1))
+        # time.sleep(3)
+        print(next(w2))
+        # print(next(w2))
+        # print(next(w2))
+    # w = runner.watch_task_logs(user_id='1', task_name='task_1', dag_name='dag-1-1692167919')
+    # print(next(w))
+    # print(next(w))

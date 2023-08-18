@@ -1,8 +1,3 @@
-default_args:
-  owner: "custom_owner"
-  start_date: 2 days
-description: "this is an example dag"
-schedule_interval: "0 3 * * *"
 tasks:
   task_1:
     operator: svoe_airflow.operators.featurizer_operator.FeaturizerOperator
