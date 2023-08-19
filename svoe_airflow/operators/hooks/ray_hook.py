@@ -26,7 +26,7 @@ class RayHook(BaseHook):
         if self.cluster_config is not None:
             self.cluster_name = self.cluster_config.cluster_name
             # provision new cluster
-            timeout = 60
+            timeout = 120
             success, error = self.cluster_manager.create_ray_cluster(self.cluster_config)
             if not success:
                 raise ValueError(f'Unable to create cluster {self.cluster_name}: {error}')
@@ -36,7 +36,7 @@ class RayHook(BaseHook):
         # verify cluster is healthy
         is_running, error = self.cluster_manager.wait_until_ray_cluster_running(self.cluster_name, timeout=timeout)
         if not is_running:
-            raise ValueError(f'Can not connect to existing cluster {self.cluster_name} after {timeout}s: {error}')
+            raise ValueError(f'Can not validate cluster {self.cluster_name}: {error}')
         ray_head_address = f'{self.cluster_name}-{RAY_HEAD_SVC_SUFFIX}.{RAY_CLUSTER_NAMESPACE}:{RAY_HEAD_PORT}'
         return ray_head_address
 

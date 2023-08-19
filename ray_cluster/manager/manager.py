@@ -157,7 +157,7 @@ class RayClusterManager:
                 log.error(err)
                 return None, err
 
-    def get_ray_cluster_status(self, name: str, timeout: int = 60, delay_between_attempts: int = 5) -> Tuple[Any, Optional[str]]:
+    def get_ray_cluster_status(self, name: str, timeout: int = 60, delay_between_attempts: int = 1) -> Tuple[Any, Optional[str]]:
         while timeout > 0:
             try:
                 resource: Any = self.custom_objects_api.get_namespaced_custom_object_status(
@@ -177,10 +177,9 @@ class RayClusterManager:
                     log.error(err)
                     return None, err
 
-            if resource["status"]:
-                return resource["status"], None
+            if 'status' in resource and resource['status'] is not None:
+                return resource['status'], None
             else:
-
                 log.info("raycluster {} status not set yet, waiting...".format(name))
                 time.sleep(delay_between_attempts)
                 timeout -= delay_between_attempts
@@ -195,11 +194,22 @@ class RayClusterManager:
     def wait_until_ray_cluster_running(self, name: str, timeout: int = 60, delay_between_attempts: int = 5) -> Tuple[bool, Optional[str]]:
         status, err = self.get_ray_cluster_status(name, timeout, delay_between_attempts)
 
-        # TODO: once we add State to Status, we should check for that as well  <if status and status["state"] == "Running":>
-        if status and status['head'] and status['head']['serviceIP']:
-            return True, None
+        if status is None:
+            return False, err
 
-        return False, err
+        if status['state'] != 'running':
+            return False, status['reason']
+
+        if 'head' not in status or 'serviceIP' not in status['head']:
+            return False, 'Clusters head is not conneceted'
+
+        # if status and status['head'] and status['head']['serviceIP'] and 'state' in status:
+        #     if status['state'] == 'running':
+        #         return True, None
+        #     else:
+        #         return False, status['reason']
+        #
+        return False, 'Cluster status is bad'
 
     def create_ray_cluster(self, config: RayClusterConfig) -> Tuple[bool, Optional[str]]:
         try:
