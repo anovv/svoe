@@ -1,7 +1,6 @@
 import unittest
 
-from apiserver.apiserver import RayClusterWorkerGroupConfig, RayClusterConfig
-from ray_cluster.manager.manager import RayClusterManager
+from ray_cluster.manager.manager import RayClusterManager, RayClusterWorkerGroupConfig, RayClusterConfig
 
 
 class TestRayClusterManager(unittest.TestCase):

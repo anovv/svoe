@@ -9,12 +9,13 @@ from svoe_airflow.operators.ray_provisioned_base_operator import RayProvisionedB
 
 class FeaturizerOperator(RayProvisionedBaseOperator):
 
+    # re args https://github.com/ajbosco/dag-factory/issues/121
+
     def __init__(self, args: Dict, **kwargs):
         super().__init__(args=args, **kwargs)
         self.featurizer_config = self.parse_featurizer_args()
 
     def parse_featurizer_args(self) -> FeaturizerConfig:
-        print(self.args)
         featurizer_config_raw = self.args.get('featurizer_config', None)
         if featurizer_config_raw is None:
             raise ValueError('No featurizer_config is provided')

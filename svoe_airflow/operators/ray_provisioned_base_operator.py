@@ -3,7 +3,8 @@ from typing import Dict, Tuple, Optional
 from airflow.models import BaseOperator
 
 from svoe_airflow.operators.hooks.ray_hook import RayHook
-from client.fast_api_client.models import RayClusterConfig
+from ray_cluster.manager.manager import RayClusterConfig
+# from client.fast_api_client.models import RayClusterConfig
 
 
 class RayProvisionedBaseOperator(BaseOperator):
@@ -21,7 +22,7 @@ class RayProvisionedBaseOperator(BaseOperator):
         cluster_config = None
         cluster_config_raw = self.args.get('cluster_config', None)
         if cluster_config_raw is not None:
-            cluster_config = RayClusterConfig.from_dict(cluster_config_raw)
+            cluster_config = RayClusterConfig(**cluster_config_raw)
 
         # TODO cluster_name should be appended with user_id for isolation per user
         return cluster_config, self.args.get('cluster_name', None), self.args.get('cleanup_cluster', False)

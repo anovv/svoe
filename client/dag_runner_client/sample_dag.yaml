@@ -4,7 +4,7 @@ tasks:
     args:
       cluster_config:
         user_id: '1'
-        cluster_name: 'test_cluster'
+        cluster_name: 'test-cluster'
         is_minikube: True
         enable_autoscaling: False
         head_cpu: 1

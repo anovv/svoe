@@ -7,29 +7,9 @@ import json, typing
 from pydantic import BaseModel
 
 from featurizer.storage.featurizer_storage import FeaturizerStorage
-from ray_cluster.manager.manager import RayClusterManager
+from ray_cluster.manager.manager import RayClusterManager, RayClusterConfig
 from common.common_utils import base64_decode
 from svoe_airflow.dag_runner import DagRunner
-
-
-class RayClusterWorkerGroupConfig(BaseModel):
-    group_name: str
-    replicas: int
-    min_replicas: int
-    max_replicas: int
-    cpu: float
-    memory: str
-    ray_resources: Dict
-
-
-class RayClusterConfig(BaseModel):
-    user_id: str
-    cluster_name: str
-    is_minikube: bool
-    enable_autoscaling: bool
-    head_cpu: float
-    head_memory: str
-    worker_groups: List[RayClusterWorkerGroupConfig]
 
 
 class Resp(BaseModel):

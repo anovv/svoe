@@ -1,4 +1,5 @@
 import codecs
+import ast
 import time
 from datetime import datetime, timezone
 from typing import Dict, Callable, Optional, Generator, Tuple
@@ -193,11 +194,15 @@ class DagRunner:
                 **kwargs
             )
             content, new_continuation_token = logs['content'], logs['continuation_token']
+
+
             decoded = codecs.escape_decode(bytes(content, 'utf-8'))[0].decode('utf-8')
+            # this is a string of [('host', 'logs')] format # TODO parse
+            logs = decoded
 
             if len(decoded) != 0 and continuation_token != new_continuation_token:
                 continuation_token = new_continuation_token
-                yield decoded
+                yield logs
 
             # terminal states
             if task_state in ['success', 'failed', 'upstream_failed', 'shutdown']:
@@ -220,7 +225,7 @@ if __name__ == '__main__':
         # print(next(w1))
         # time.sleep(3)
         # print(next(w2))
-        for l in w1:
+        for l in w2:
             print(l)
         # print(next(w2))
         # print(next(w2))

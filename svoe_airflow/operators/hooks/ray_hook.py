@@ -2,8 +2,7 @@ from typing import Optional
 
 from airflow.hooks.base import BaseHook
 
-from client.fast_api_client.models import RayClusterConfig
-from client.ray_cluster_manager.ray_cluster_manager_client import RayClusterManagerClient
+from ray_cluster.manager.manager import RayClusterManager, RayClusterConfig
 
 RAY_CLUSTER_NAMESPACE = 'ray-system'
 RAY_HEAD_SVC_SUFFIX = 'head-svc'
@@ -16,8 +15,7 @@ class RayHook(BaseHook):
         super().__init__(*args, **kwargs)
         self.cluster_config = cluster_config
         self.cluster_name = cluster_name
-        # TODO we can use RayClusterManager directly here
-        self.cluster_manager_client = RayClusterManagerClient()
+        self.cluster_manager = RayClusterManager()
 
     def connect_or_create_cluster(self) -> str:
         if self.cluster_name is None and self.cluster_config is None:
@@ -29,21 +27,21 @@ class RayHook(BaseHook):
             self.cluster_name = self.cluster_config.cluster_name
             # provision new cluster
             timeout = 60
-            success = self.cluster_manager_client.create_ray_cluster(self.cluster_config)
+            success, error = self.cluster_manager.create_ray_cluster(self.cluster_config)
             if not success:
-                raise ValueError(f'Unable to create cluster {self.cluster_name}')
+                raise ValueError(f'Unable to create cluster {self.cluster_name}: {error}')
         else:
             timeout = 30
 
         # verify cluster is healthy
-        is_running = self.cluster_manager_client.wait_until_ray_cluster_running(self.cluster_name, timeout=timeout)
+        is_running, error = self.cluster_manager.wait_until_ray_cluster_running(self.cluster_name, timeout=timeout)
         if not is_running:
-            raise ValueError(f'Can not connect to existing cluster {self.cluster_name} after {timeout}s')
+            raise ValueError(f'Can not connect to existing cluster {self.cluster_name} after {timeout}s: {error}')
         ray_head_address = f'{self.cluster_name}-{RAY_HEAD_SVC_SUFFIX}.{RAY_CLUSTER_NAMESPACE}:{RAY_HEAD_PORT}'
         return ray_head_address
 
     def delete_cluster(self):
         # TODO retries?
-        success = self.cluster_manager_client.delete_ray_cluster(name=self.cluster_name)
+        success, err = self.cluster_manager.delete_ray_cluster(name=self.cluster_name)
         if not success:
             raise ValueError(f'Unable to delete cluster {self.cluster_name}')
