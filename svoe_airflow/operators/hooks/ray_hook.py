@@ -31,7 +31,7 @@ class RayHook(BaseHook):
             timeout = 60
             success = self.cluster_manager_client.create_ray_cluster(self.cluster_config)
             if not success:
-                raise ValueError(f'Unable to create cluste {self.cluster_name}')
+                raise ValueError(f'Unable to create cluster {self.cluster_name}')
         else:
             timeout = 30
 

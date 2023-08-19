@@ -89,7 +89,8 @@ class DagRunner:
         print('dag registered')
 
         # run dag
-        now = datetime.now().astimezone(tz=timezone.utc)
+        # now = datetime.now().astimezone(tz=timezone.utc) # TODO check timezone to run dag
+        now = datetime.now().astimezone()
         now_ts = int(round(now.timestamp()))
 
         dag_run_id = f'{DAG_RUN_ID_PREFIX}-{user_id}-{now_ts}'
@@ -135,7 +136,6 @@ class DagRunner:
             # TODO asyncify
             dag_run = self.airflow_dag_run_api.get_dag_run(dag_id=dag_name, dag_run_id=dag_run_id)
             task_instances = self.airflow_task_instance_api.get_task_instances(dag_id=dag_name, dag_run_id=dag_run_id, _check_return_type=False)
-
             # yield only on difference
             if prev_dag_run != dag_run or prev_task_instances != task_instances:
                 prev_dag_run = dag_run
@@ -146,11 +146,13 @@ class DagRunner:
                 for t in task_instances['task_instances']:
                     res['tasks'].append({k: t[k] for k in ['task_id', 'state', 'start_date', 'end_date', 'execution_date', 'duration']})
 
-                # terminal state
-                if res['state'] == 'success' or res['state'] == 'failed':
-                    break
-
                 yield res
+
+            # terminal state
+            state = dag_run['state']
+            if str(state) in ['success', 'failed']:
+                yield f'Dag finished with state: {state}'
+                break
 
             time.sleep(1)
 
@@ -160,7 +162,21 @@ class DagRunner:
         while True:
             # TODO asyncify
             # get task state to check if we should continue fetching logs
-            task_instance = self.airflow_task_instance_api.get_task_instance(dag_id=dag_name, dag_run_id=dag_run_id, task_id=task_name, _check_return_type=False)
+            task_instance = None
+            retry_count = 0
+            while retry_count < 5:
+                try:
+                    task_instance = self.airflow_task_instance_api.get_task_instance(dag_id=dag_name, dag_run_id=dag_run_id, task_id=task_name, _check_return_type=False)
+                    break
+                except:
+                    print('Not able to retrievce task instance, retrying...')
+                    retry_count += 1
+                    time.sleep(1)
+                    continue
+            if task_instance is None:
+                yield f'Not able to retrievce task instance after {retry_count} retries'
+                break
+
             task_state = task_instance['state']
 
             kwargs = {
@@ -185,7 +201,7 @@ class DagRunner:
 
             # terminal states
             if task_state in ['success', 'failed', 'upstream_failed', 'shutdown']:
-                yield f'Task finished with state {task_state}'
+                yield f'Task finished with state: {task_state}'
                 break
 
             time.sleep(1)
@@ -201,9 +217,11 @@ if __name__ == '__main__':
         dag_name, dag_run_id = runner.run_dag(user_id=user_id, user_defined_dag_config=dag_conf)
         w1 = runner.watch_dag(user_id=user_id, dag_name=dag_name, dag_run_id=dag_run_id)
         w2 = runner.watch_task_logs(user_id=user_id, task_name='task_1', dag_name=dag_name, dag_run_id=dag_run_id)
-        print(next(w1))
+        # print(next(w1))
         # time.sleep(3)
-        print(next(w2))
+        # print(next(w2))
+        for l in w1:
+            print(l)
         # print(next(w2))
         # print(next(w2))
     # w = runner.watch_task_logs(user_id='1', task_name='task_1', dag_name='dag-1-1692167919')

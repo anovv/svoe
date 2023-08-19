@@ -77,10 +77,12 @@ def user_dag_conf_to_airflow_dag_conf(svoe_dag_conf: Dict, owner_id: str) -> Tup
     # add required by Airflow default_args
     svoe_dag_conf['default_args'] = {
         'owner': 'default',
-        'start_date': '1992-09-02' # TODO what is this for ?
+        'start_date': '1992-09-02'
     }
-    svoe_dag_conf['schedule_interval'] = '@once'
-    svoe_dag_conf['catchup'] = False # TODO is this needed? catchup or catch_up
+    svoe_dag_conf['schedule_interval'] = None
+    svoe_dag_conf['catchup'] = False
+    svoe_dag_conf['is_paused_upon_creation'] = False
+    svoe_dag_conf['max_active_runs'] = 1
     now = datetime.now().astimezone(tz=timezone.utc)
     now_ts = int(round(now.timestamp()))
     dag_name = f'dag-{owner_id}-{now_ts}'
