@@ -1,4 +1,5 @@
 import logging
+import ray
 import os
 import time
 from typing import Dict, List, Any, Tuple, Optional
@@ -19,6 +20,8 @@ PLURAL = "rayclusters"
 KIND = "RayCluster"
 RAYCLUSTER_TEMPLATE_PATH = f'{__location__}/yaml/raycluster-template.yaml'
 RAY_NAMESPACE = 'ray-system' # TODO separate namespace for clusters?
+RAY_HEAD_SVC_SUFFIX = 'head-svc'
+RAY_HEAD_PORT = '10001'
 
 log = logging.getLogger(__name__)
 
@@ -54,16 +57,19 @@ class RayClusterManager:
         else:
             kubernetes.config.load_kube_config()
 
-        self.custom_objects_api = kubernetes.client.CustomObjectsApi()
+        self.kube_custom_objects_api = kubernetes.client.CustomObjectsApi()
+        self.kube_core_api = kubernetes.client.CoreV1Api()
 
     def _ray_cluster_crd(self, config: RayClusterConfig):
-
-        print(type(config.worker_groups[0]))
-        # raise
         worker_groups_dicts = [dict(c) for c in config.worker_groups]
         # make ray_resources str representation from dict
         for w in worker_groups_dicts:
+            if 'ray_resources' not in w:
+                continue
             ray_resources_dict = w['ray_resources']
+            if len(ray_resources_dict) == 0:
+                del w['ray_resources']
+                continue
             # '"{\"worker_size_small\": 9999999, \"instance_on_demand\": 9999999}"'
             ray_resources_str = '\'"{\\"'
             for k in ray_resources_dict:
@@ -73,9 +79,11 @@ class RayClusterManager:
                 ray_resources_str += str(v)
                 ray_resources_str += ', \\"'
 
-            # remove last ', \"'
-            ray_resources_str = ray_resources_str[:-4]
+            if len(ray_resources_dict) > 0:
+                # remove last ', \"'
+                ray_resources_str = ray_resources_str[:-4]
             ray_resources_str += '}"\''
+
             w['ray_resources'] = ray_resources_str
             # w['ray_resources'] = '\'"{\\"worker_size_small\\": 9999999, \\"instance_on_demand\\": 9999999}"\''
 
@@ -117,7 +125,7 @@ class RayClusterManager:
 
     def list_ray_clusters(self, label_selector: str = '') -> Tuple[Any, Optional[str]]:
         try:
-            resource: Any = self.custom_objects_api.list_namespaced_custom_object(
+            resource: Any = self.kube_custom_objects_api.list_namespaced_custom_object(
                 group=GROUP,
                 version=VERSION,
                 plural=PLURAL,
@@ -139,7 +147,7 @@ class RayClusterManager:
 
     def get_ray_cluster(self, name: str) -> Tuple[Any, Optional[str]]:
         try:
-            resource: Any = self.custom_objects_api.get_namespaced_custom_object(
+            resource: Any = self.kube_custom_objects_api.get_namespaced_custom_object(
                 group=GROUP,
                 version=VERSION,
                 plural=PLURAL,
@@ -160,7 +168,7 @@ class RayClusterManager:
     def get_ray_cluster_status(self, name: str, timeout: int = 60, delay_between_attempts: int = 1) -> Tuple[Any, Optional[str]]:
         while timeout > 0:
             try:
-                resource: Any = self.custom_objects_api.get_namespaced_custom_object_status(
+                resource: Any = self.kube_custom_objects_api.get_namespaced_custom_object_status(
                     group=GROUP,
                     version=VERSION,
                     plural=PLURAL,
@@ -191,25 +199,51 @@ class RayClusterManager:
 
         return None, err
 
-    def wait_until_ray_cluster_running(self, name: str, timeout: int = 60, delay_between_attempts: int = 5) -> Tuple[bool, Optional[str]]:
+    def wait_until_ray_cluster_ready(self, name: str, timeout: int = 60, delay_between_attempts: int = 5) -> Tuple[bool, Optional[str]]:
+        # RayCluster custom object level checks
         status, err = self.get_ray_cluster_status(name, timeout, delay_between_attempts)
-
         if status is None:
             return False, err
 
-        if status['state'] != 'running':
+        # TODO all check above should be retried until success or timeout
+
+        # TODO is this check needed
+        # if 'state' not in status:
+        #     return False, 'Cluster has no state'
+
+        # TODO is this sufficient
+        if 'state' in status and status['state'] != 'ready':
             return False, status['reason']
 
         if 'head' not in status or 'serviceIP' not in status['head']:
-            return False, 'Clusters head is not conneceted'
+            return False, 'Clusters head is not connected'
 
-        # if status and status['head'] and status['head']['serviceIP'] and 'state' in status:
-        #     if status['state'] == 'running':
-        #         return True, None
-        #     else:
-        #         return False, status['reason']
-        #
-        return False, 'Cluster status is bad'
+        # Kubernetes level checks
+        label_selector = f'ray.io/cluster={name},ray.io/node-type=head'
+        # TODO this should be retries multiple times
+        head_pod_list = self.kube_core_api.list_namespaced_pod(namespace=RAY_NAMESPACE, label_selector=label_selector)
+        if len(head_pod_list.items) < 1:
+            return False, 'Unable to locate clusters head pod'
+        head_pod = head_pod_list.items[0]
+        phase = head_pod.status.phase
+        if phase != 'Running':
+            return False, f'Head pod is not in running state: {phase}'
+
+        # TODO add head container check (also with multiple retries)
+        # Ray app level checks
+        @ray.remote
+        def ping():
+            return 'ping'
+        ray_address = self.construct_head_address(name)
+        try:
+            with ray.init(address=ray_address, ignore_reinit_error=True):
+                ping = ray.get(ping.remote())
+                if ping != 'ping':
+                    return False, 'Unable to verify ray remote function'
+        except Exception as e:
+            return False, f'Unable to connect to cluster at {ray_address}: {e}'
+
+        return True, None
 
     def create_ray_cluster(self, config: RayClusterConfig) -> Tuple[bool, Optional[str]]:
         try:
@@ -219,7 +253,7 @@ class RayClusterManager:
             log.error(err)
             return False, err
         try:
-            self.custom_objects_api.create_namespaced_custom_object(
+            self.kube_custom_objects_api.create_namespaced_custom_object(
                 group=GROUP,
                 version=VERSION,
                 plural=PLURAL,
@@ -238,8 +272,9 @@ class RayClusterManager:
                 return False, err
 
     def delete_ray_cluster(self, name: str) -> Tuple[bool, Optional[str]]:
+        # TODO wait for pods to be terminated
         try:
-            self.custom_objects_api.delete_namespaced_custom_object(
+            self.kube_custom_objects_api.delete_namespaced_custom_object(
                 group=GROUP,
                 version=VERSION,
                 plural=PLURAL,
@@ -259,7 +294,7 @@ class RayClusterManager:
 
     def patch_ray_cluster(self, name: str, ray_patch: Any) -> Tuple[bool, Optional[str]]:
         try:
-            self.custom_objects_api.patch_namespaced_custom_object(
+            self.kube_custom_objects_api.patch_namespaced_custom_object(
                 group=GROUP,
                 version=VERSION,
                 plural=PLURAL,
@@ -273,3 +308,7 @@ class RayClusterManager:
             return False, err
 
         return True, None
+
+    @staticmethod
+    def construct_head_address(cluster_name) -> str:
+        return f'ray://{cluster_name}-{RAY_HEAD_SVC_SUFFIX}.{RAY_NAMESPACE}:{RAY_HEAD_PORT}'

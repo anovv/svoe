@@ -8,14 +8,14 @@ tasks:
         is_minikube: True
         enable_autoscaling: False
         head_cpu: 1
-        head_memory: '500m'
+        head_memory: '1Gi'
         worker_groups:
-          - group_name: 'test_worker_group'
+          - group_name: 'test-worker-group'
             replicas: 4
             min_replicas: 4
             max_replicas: 4
             cpu: 1
-            memory: '500m'
+            memory: '1Gi'
             ray_resources: {}
       cleanup_cluster: True
       featurizer_config:

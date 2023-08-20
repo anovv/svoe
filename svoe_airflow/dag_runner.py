@@ -1,5 +1,6 @@
 import codecs
 import ast
+import ray
 import time
 from datetime import datetime, timezone
 from typing import Dict, Callable, Optional, Generator, Tuple
@@ -214,21 +215,37 @@ class DagRunner:
 
 # TODO remove after testing
 if __name__ == '__main__':
-    runner = DagRunner()
-    user_id = '1'
-    dag_yaml_path = '../client/dag_runner_client/sample_dag.yaml'
-    with open(dag_yaml_path, 'r') as stream:
-        dag_conf = yaml.safe_load(stream)
-        dag_name, dag_run_id = runner.run_dag(user_id=user_id, user_defined_dag_config=dag_conf)
-        w1 = runner.watch_dag(user_id=user_id, dag_name=dag_name, dag_run_id=dag_run_id)
-        w2 = runner.watch_task_logs(user_id=user_id, task_name='task_1', dag_name=dag_name, dag_run_id=dag_run_id)
+    # runner = DagRunner()
+    # user_id = '1'
+    # dag_yaml_path = '../client/dag_runner_client/sample_dag.yaml'
+    # with open(dag_yaml_path, 'r') as stream:
+    #     dag_conf = yaml.safe_load(stream)
+    #     dag_name, dag_run_id = runner.run_dag(user_id=user_id, user_defined_dag_config=dag_conf)
+        # w1 = runner.watch_dag(user_id=user_id, dag_name=dag_name, dag_run_id=dag_run_id)
+        # w2 = runner.watch_task_logs(user_id=user_id, task_name='task_1', dag_name=dag_name, dag_run_id=dag_run_id)
         # print(next(w1))
         # time.sleep(3)
         # print(next(w2))
-        for l in w2:
-            print(l)
+        # for l in w2:
+        #     print(l)
         # print(next(w2))
         # print(next(w2))
     # w = runner.watch_task_logs(user_id='1', task_name='task_1', dag_name='dag-1-1692167919')
     # print(next(w))
     # print(next(w))
+    @ray.remote
+    def ping():
+        return 'ping'
+
+
+    # ray_address = 'ray://test-cluster-head-svc.ray-system:10001'
+    ray_address = 'ray://127.0.0.1:10001'
+    try:
+        with ray.init(address=ray_address, ignore_reinit_error=True):
+            ping = ray.get(ping.remote())
+            if ping != 'ping':
+                print('Unable to verify ray remote function')
+            else:
+                print('All good')
+    except Exception as e:
+        print(f'Unable to connect to cluster at {ray_address}: {e}')

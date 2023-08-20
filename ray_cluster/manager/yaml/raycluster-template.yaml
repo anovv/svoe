@@ -97,7 +97,9 @@ spec:
   workerGroupSpecs:
   {%- for worker_group in worker_groups %}
   - rayStartParams:
+      {%- if 'ray_resources' in worker_group %}
       resources: {{ worker_group['ray_resources'] }}
+      {%- endif %}
       node-ip-address: $MY_POD_IP
       redis-password: LetMeInRay
       block: 'true'
