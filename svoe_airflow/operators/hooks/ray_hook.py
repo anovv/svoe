@@ -30,10 +30,9 @@ class RayHook(BaseHook):
             timeout = 30
 
         # verify cluster is healthy
-        is_ready, error = self.cluster_manager.wait_until_ray_cluster_ready(self.cluster_name, timeout=timeout)
-        if not is_ready:
+        ray_head_address, error = self.cluster_manager.wait_until_ray_cluster_ready(self.cluster_name, timeout=timeout)
+        if ray_head_address is None:
             raise ValueError(f'Can not validate cluster {self.cluster_name}: {error}')
-        ray_head_address = RayClusterManager.construct_head_address(self.cluster_name)
         return ray_head_address
 
     def delete_cluster(self):

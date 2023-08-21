@@ -1,8 +1,13 @@
+import atexit
 import logging
+import random
+
 import ray
 import os
 import time
 from typing import Dict, List, Any, Tuple, Optional
+import subprocess
+import signal
 
 import kubernetes
 import yaml
@@ -199,11 +204,11 @@ class RayClusterManager:
 
         return None, err
 
-    def wait_until_ray_cluster_ready(self, name: str, timeout: int = 60, delay_between_attempts: int = 5) -> Tuple[bool, Optional[str]]:
+    def wait_until_ray_cluster_ready(self, name: str, timeout: int = 60, delay_between_attempts: int = 5) -> Tuple[Optional[str], Optional[str]]:
         # RayCluster custom object level checks
         status, err = self.get_ray_cluster_status(name, timeout, delay_between_attempts)
         if status is None:
-            return False, err
+            return None, err
 
         # TODO all check above should be retried until success or timeout
 
@@ -213,21 +218,21 @@ class RayClusterManager:
 
         # TODO is this sufficient
         if 'state' in status and status['state'] != 'ready':
-            return False, status['reason']
+            return None, status['reason']
 
         if 'head' not in status or 'serviceIP' not in status['head']:
-            return False, 'Clusters head is not connected'
+            return None, 'Clusters head is not connected'
 
         # Kubernetes level checks
         label_selector = f'ray.io/cluster={name},ray.io/node-type=head'
         # TODO this should be retries multiple times
         head_pod_list = self.kube_core_api.list_namespaced_pod(namespace=RAY_NAMESPACE, label_selector=label_selector)
         if len(head_pod_list.items) < 1:
-            return False, 'Unable to locate clusters head pod'
+            return None, 'Unable to locate clusters head pod'
         head_pod = head_pod_list.items[0]
         phase = head_pod.status.phase
         if phase != 'Running':
-            return False, f'Head pod is not in running state: {phase}'
+            return None, f'Head pod is not in running state: {phase}'
 
         # TODO add head container check (also with multiple retries)
         # Ray app level checks
@@ -239,11 +244,11 @@ class RayClusterManager:
             with ray.init(address=ray_address, ignore_reinit_error=True):
                 ping = ray.get(ping.remote())
                 if ping != 'ping':
-                    return False, 'Unable to verify ray remote function'
+                    return None, 'Unable to verify ray remote function'
         except Exception as e:
-            return False, f'Unable to connect to cluster at {ray_address}: {e}'
+            return None, f'Unable to connect to cluster at {ray_address}: {e}'
 
-        return True, None
+        return ray_address, None
 
     def create_ray_cluster(self, config: RayClusterConfig) -> Tuple[bool, Optional[str]]:
         try:
@@ -312,3 +317,30 @@ class RayClusterManager:
     @staticmethod
     def construct_head_address(cluster_name) -> str:
         return f'ray://{cluster_name}-{RAY_HEAD_SVC_SUFFIX}.{RAY_NAMESPACE}:{RAY_HEAD_PORT}'
+
+    # for local dev
+    @staticmethod
+    def port_forward_local(cluster_name: str) -> str:
+        def kill_proc(_cluster_name: str):
+            pid = globals()[_cluster_name]
+            print(f'Killing {pid} for cluster {_cluster_name}...')
+            os.kill(pid, signal.SIGTERM)
+            print(f'Killed {pid}')
+
+        globs_dict = globals()
+        if cluster_name in globs_dict:
+            raise ValueError(f'{cluster_name} already being port forwarded ')
+
+        port_to_forward = random.randint(1001, 9999)
+        cmd = f'kubectl port-forward service/{cluster_name}-{RAY_HEAD_SVC_SUFFIX} {port_to_forward}:{RAY_HEAD_PORT} -n {RAY_NAMESPACE}'
+        print(cmd)
+        p = subprocess.Popen(
+            cmd,
+            shell=True,
+            stdout=subprocess.DEVNULL,
+        )
+        globs_dict[cluster_name] = p.pid
+        # kill proc on exit
+        atexit.register(kill_proc, _cluster_name=cluster_name)
+        local_addr = f'ray://127.0.0.1:{port_to_forward}'
+        return local_addr

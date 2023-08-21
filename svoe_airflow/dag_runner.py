@@ -13,6 +13,7 @@ from airflow_client.client.api.task_instance_api import TaskInstanceApi
 from airflow_client.client.model.dag_run import DAGRun
 
 from common.common_utils import base64_encode
+from ray_cluster.manager.manager import RayClusterManager
 from svoe_airflow.db.dags_mysql_client import DagsMysqlClient
 from svoe_airflow.utils import user_dag_conf_to_airflow_dag_conf
 
@@ -195,8 +196,6 @@ class DagRunner:
                 **kwargs
             )
             content, new_continuation_token = logs['content'], logs['continuation_token']
-
-
             decoded = codecs.escape_decode(bytes(content, 'utf-8'))[0].decode('utf-8')
             # this is a string of [('host', 'logs')] format # TODO parse
             logs = decoded
@@ -215,37 +214,30 @@ class DagRunner:
 
 # TODO remove after testing
 if __name__ == '__main__':
-    # runner = DagRunner()
-    # user_id = '1'
-    # dag_yaml_path = '../client/dag_runner_client/sample_dag.yaml'
-    # with open(dag_yaml_path, 'r') as stream:
-    #     dag_conf = yaml.safe_load(stream)
-    #     dag_name, dag_run_id = runner.run_dag(user_id=user_id, user_defined_dag_config=dag_conf)
-        # w1 = runner.watch_dag(user_id=user_id, dag_name=dag_name, dag_run_id=dag_run_id)
-        # w2 = runner.watch_task_logs(user_id=user_id, task_name='task_1', dag_name=dag_name, dag_run_id=dag_run_id)
-        # print(next(w1))
-        # time.sleep(3)
-        # print(next(w2))
-        # for l in w2:
-        #     print(l)
-        # print(next(w2))
-        # print(next(w2))
-    # w = runner.watch_task_logs(user_id='1', task_name='task_1', dag_name='dag-1-1692167919')
-    # print(next(w))
-    # print(next(w))
-    @ray.remote
-    def ping():
-        return 'ping'
-
-
+    runner = DagRunner()
+    user_id = '1'
+    dag_yaml_path = '../client/dag_runner_client/sample_dag.yaml'
+    with open(dag_yaml_path, 'r') as stream:
+        dag_conf = yaml.safe_load(stream)
+        dag_name, dag_run_id = runner.run_dag(user_id=user_id, user_defined_dag_config=dag_conf)
+        w1 = runner.watch_dag(user_id=user_id, dag_name=dag_name, dag_run_id=dag_run_id)
+        w2 = runner.watch_task_logs(user_id=user_id, task_name='task_1', dag_name=dag_name, dag_run_id=dag_run_id)
+        print(next(w1))
+        time.sleep(3)
+        for l in w2:
+            print(l)
+    # @ray.remote
+    # def ping():
+    #     return 'ping'
+    #
     # ray_address = 'ray://test-cluster-head-svc.ray-system:10001'
-    ray_address = 'ray://127.0.0.1:10001'
-    try:
-        with ray.init(address=ray_address, ignore_reinit_error=True):
-            ping = ray.get(ping.remote())
-            if ping != 'ping':
-                print('Unable to verify ray remote function')
-            else:
-                print('All good')
-    except Exception as e:
-        print(f'Unable to connect to cluster at {ray_address}: {e}')
+    # local_ray_address = RayClusterManager.port_forward_local(cluster_name='test-cluster')
+    # try:
+    #     with ray.init(address=local_ray_address, ignore_reinit_error=True):
+    #         ping = ray.get(ping.remote())
+    #         if ping != 'ping':
+    #             print('Unable to verify ray remote function')
+    #         else:
+    #             print('All good')
+    # except Exception as e:
+    #     print(f'Unable to connect to cluster at {ray_address}: {e}')
