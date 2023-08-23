@@ -1,8 +1,8 @@
-from typing import Tuple, Type, List, Dict, Any
+from typing import Type, List, Dict, Any
 from pandas import DataFrame
 from frozendict import frozendict
 
-from utils.pandas.df_utils import is_ts_sorted
+from common.pandas import is_ts_sorted
 
 Event = Dict[str, Any] # note that this corresponds to raw grouped events by timestamp (only for some data_types, e.g. l2_book_inc)
 EventSchema = Dict[str, Type]

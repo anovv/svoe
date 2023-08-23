@@ -1,4 +1,3 @@
-import heapq
 import itertools
 import time
 from datetime import datetime
@@ -13,14 +12,14 @@ from ray.types import ObjectRef
 from streamz import Stream
 
 from featurizer.actors.cache_actor import get_cache_actor
-from featurizer.blocks.blocks import Block, BlockRange, lookahead_shift, merge_asof_multi
+from featurizer.blocks.blocks import Block, lookahead_shift, merge_asof_multi
 from featurizer.features.feature_tree.feature_tree import Feature
 from featurizer.featurizer_utils.featurizer_utils import merge_blocks
 from featurizer.sql.db_actor import DbActor
 from featurizer.sql.feature_catalog.models import FeatureCatalog, _construct_feature_catalog_s3_path
-from utils.pandas import df_utils
-from utils.streamz.stream_utils import run_named_events_stream
-from utils.pandas.df_utils import load_df, store_df, is_ts_sorted, concat, sub_df_ts
+from common.pandas import df_utils
+from common.streamz.stream_utils import run_named_events_stream
+from common.pandas.df_utils import load_df, store_df, is_ts_sorted, concat, sub_df_ts
 
 
 def context(feature_key: str, interval: Interval) -> Dict[str, Any]:

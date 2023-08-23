@@ -8,7 +8,7 @@ from featurizer.data_definitions.l2_book_incremental.cryptofeed.cryptofeed_l2_bo
 from featurizer.data_definitions.trades.trades import TradesData
 from featurizer.features.definitions.feature_definition import FeatureDefinition
 from featurizer.features.feature_tree.feature_tree import Feature
-from utils.pandas.df_utils import load_dfs, time_range, get_size_kb, get_num_rows
+from common.pandas import load_dfs, time_range, get_size_kb, get_num_rows
 import featurizer.data_definitions.l2_book_incremental.cryptofeed.utils as cryptofeed_l2_utils
 
 

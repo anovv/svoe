@@ -10,7 +10,7 @@ from portion import Interval, IntervalDict, closed
 
 from featurizer.calculator.tasks import calculate_feature, load_if_needed, bind_and_cache, context, \
     lookahead_shift_blocks, point_in_time_join_block
-from utils.time.utils import convert_str_to_seconds
+from common.time.utils import convert_str_to_seconds
 
 
 # TODO re: cache https://discuss.ray.io/t/best-way-to-share-memory-for-ray-tasks/3759

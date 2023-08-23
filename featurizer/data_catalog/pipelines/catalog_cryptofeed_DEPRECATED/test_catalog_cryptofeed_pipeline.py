@@ -9,7 +9,7 @@ from featurizer.data_catalog import CatalogCryptofeedDag
 from featurizer.data_catalog import PipelineRunner
 from featurizer.sql.client import FeaturizerMysqlClient
 from featurizer.data_catalog.common.utils.cryptofeed.utils import generate_cryptofeed_input_items
-from utils.pandas.df_utils import load_dfs
+from common.pandas import load_dfs
 
 
 class TestCatalogCryptofeedPipeline(unittest.TestCase):

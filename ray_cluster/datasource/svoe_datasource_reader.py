@@ -2,7 +2,7 @@ from typing import List, Optional
 from ray.data.datasource.datasource import Reader, ReadTask
 from ray.data.block import BlockMetadata
 from ray.data.block import Block
-from utils.pandas.df_utils import load_single_file
+from common.pandas import load_single_file
 
 
 def _read_single_file(file_path) -> Block:

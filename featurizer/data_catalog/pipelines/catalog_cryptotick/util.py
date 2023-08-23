@@ -3,7 +3,7 @@ from typing import Optional
 import ciso8601
 import pandas as pd
 
-from utils.pandas.df_utils import is_ts_sorted
+from common.pandas import is_ts_sorted
 
 
 def process_cryptotick_timestamps(df: pd.DataFrame, date_str: Optional[str] = None) -> pd.DataFrame:

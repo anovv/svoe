@@ -1,7 +1,6 @@
 import time
 from typing import Tuple
 
-import matplotlib.pyplot as plt
 import pandas as pd
 from portion import closed
 from streamz import Stream
@@ -10,8 +9,8 @@ from featurizer.calculator.tasks import merge_blocks
 from featurizer.data_definitions.trades.trades import TradesData
 from featurizer.features.definitions.tvi.trade_volume_imb_fd import TradeVolumeImbFD
 from featurizer.features.feature_tree.feature_tree import construct_feature_tree
-from utils.pandas.df_utils import load_df, time_range, is_ts_sorted
-from utils.streamz.stream_utils import run_named_events_stream
+from common.pandas import load_df, time_range
+from common.streamz import run_named_events_stream
 
 
 # test tvi feature calculation using pandas only for vectorization

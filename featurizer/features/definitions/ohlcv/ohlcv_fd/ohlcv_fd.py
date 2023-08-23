@@ -8,14 +8,13 @@ from featurizer.data_definitions.data_definition import EventSchema, DataDefinit
 from featurizer.data_definitions.trades.trades import TradesData
 from featurizer.features.definitions.feature_definition import FeatureDefinition
 from featurizer.features.feature_tree.feature_tree import Feature
-from utils.time.utils import convert_str_to_seconds, get_sampling_bucket_ts
+from common.time.utils import convert_str_to_seconds, get_sampling_bucket_ts
 
 from dataclasses import dataclass
 
 import functools
-import utils.streamz.stream_utils as su
+import common.streamz.stream_utils as su
 import toolz
-from datetime import datetime
 
 
 @dataclass

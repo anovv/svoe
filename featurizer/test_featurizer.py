@@ -1,10 +1,9 @@
 import unittest
 import ray
 
-from featurizer.actors.cache_actor import get_cache_actor
 from featurizer.config import FeaturizerConfig
 from featurizer.runner import Featurizer
-from utils.pandas.df_utils import concat
+from common.pandas import concat
 
 
 class TestFeaturizer(unittest.TestCase):

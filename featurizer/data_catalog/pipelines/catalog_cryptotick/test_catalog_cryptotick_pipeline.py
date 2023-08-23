@@ -14,8 +14,8 @@ from featurizer.data_catalog.pipelines.catalog_cryptotick.pipeline import Catalo
 from featurizer.data_definitions.l2_book_incremental.cryptotick.utils import starts_with_snapshot, remove_snap, \
     get_snapshot_depth, mock_processed_cryptotick_df, \
     gen_split_l2_inc_df_and_pad_with_snapshot
-from utils.pandas.df_utils import concat, load_df, store_df
-from utils.s3.s3_utils import list_files_and_sizes_kb
+from common.pandas import concat, load_df, store_df
+from common.s3 import list_files_and_sizes_kb
 
 
 class TestCatalogCryptotickPipeline(unittest.TestCase):

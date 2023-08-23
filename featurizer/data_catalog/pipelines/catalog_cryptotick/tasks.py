@@ -16,8 +16,8 @@ from featurizer.data_definitions.l2_book_incremental.cryptofeed import utils as 
 from featurizer.data_definitions.l2_book_incremental.cryptotick import utils as cryptotick_l2_utils
 from featurizer.data_definitions.l2_book_incremental.cryptotick.utils import preprocess_l2_inc_df, \
     gen_split_l2_inc_df_and_pad_with_snapshot
-from utils.pandas import df_utils
-from utils.pandas.df_utils import gen_split_df_by_mem
+from common.pandas import df_utils
+from common.pandas import gen_split_df_by_mem
 
 
 # TODO set cpu separately when running on aws kuber cluster

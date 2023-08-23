@@ -5,7 +5,7 @@ from typing import List, Dict, Optional, Type, Tuple
 
 from portion import IntervalDict
 from streamz import Stream
-import utils.streamz.stream_utils as su
+import common.streamz.stream_utils as su
 
 from featurizer.blocks.blocks import BlockMeta, windowed_grouping
 from featurizer.data_definitions.trades.trades import TradesData
@@ -15,7 +15,7 @@ from featurizer.features.feature_tree.feature_tree import Feature
 
 import toolz
 
-from utils.time.utils import convert_str_to_seconds, get_sampling_bucket_ts
+from common.time.utils import convert_str_to_seconds, get_sampling_bucket_ts
 
 
 @dataclass

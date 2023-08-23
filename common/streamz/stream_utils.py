@@ -5,7 +5,7 @@ from portion import Interval
 from streamz import Stream
 
 from featurizer.data_definitions.data_definition import Event
-from utils.time.utils import convert_str_to_seconds
+from common.time.utils import convert_str_to_seconds
 from collections import deque
 
 

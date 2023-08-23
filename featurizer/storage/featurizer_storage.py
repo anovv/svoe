@@ -14,7 +14,7 @@ from featurizer.sql.client import FeaturizerMysqlClient
 from featurizer.sql.data_catalog.models import DataCatalog
 from featurizer.sql.feature_catalog.models import FeatureCatalog, SVOE_S3_FEATURE_CATALOG_BUCKET
 from featurizer.sql.feature_def.models import construct_feature_def_s3_path, FeatureDefinitionDB
-from utils.s3.s3_utils import delete_files, upload_dir, download_dir
+from common.s3 import delete_files, upload_dir, download_dir
 
 # TODO this should be synced with DataDef somehow?
 DataKey = Tuple[str, str, str, str]

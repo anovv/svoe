@@ -1,9 +1,8 @@
 import ray
-import toolz
 from portion import closed
 
 import calculator as C
-import utils.streamz.stream_utils
+import common.streamz.stream_utils
 from featurizer.actors.cache_actor import create_cache_actor
 from featurizer.calculator.executor import execute_graph
 from featurizer.calculator.tasks import merge_blocks
@@ -22,7 +21,7 @@ import unittest
 import pandas as pd
 from typing import List
 from featurizer.featurizer_utils.testing_utils import mock_feature, mock_ts_df_remote
-from utils.pandas.df_utils import concat, load_df, sort_dfs, plot_multi
+from common.pandas import concat, load_df, plot_multi
 from featurizer.blocks.blocks import merge_asof_multi
 
 
@@ -94,7 +93,7 @@ class TestFeatureCalculator(unittest.TestCase):
         path = 's3://svoe-cataloged-data/l2_book/BINANCE/spot/BTC-USDT/2023-02-01/cryptotick/100.0mb/1675216068-40f26fdc1fafb2c056fc77f76609049ce0a47944.parquet.gz'
         df = load_df(path)
         merged_events = merge_blocks({data: [df]})
-        online_res = utils.streamz.stream_utils.run_named_events_stream(merged_events, sources, stream)
+        online_res = common.streamz.stream_utils.run_named_events_stream(merged_events, sources, stream)
         print(online_res)
         print(online_res['asks'].iloc[1000])
         print(len(online_res['asks'].iloc[1000]))

@@ -6,7 +6,7 @@ import pandas as pd
 from featurizer.config import FeaturizerConfig
 from simulation.data.feature_stream.feature_stream_generator import FeatureStreamGenerator
 
-from utils.pandas.df_utils import plot_multi
+from common.pandas import plot_multi
 
 
 class TestFeatureStreamGenerator(unittest.TestCase):

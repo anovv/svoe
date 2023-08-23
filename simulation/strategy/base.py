@@ -11,7 +11,7 @@ from simulation.clock import Clock
 from simulation.models.instrument import Instrument
 from simulation.models.order import Order, OrderSide, OrderType, OrderStatus
 from simulation.models.portfolio import Portfolio
-from utils.time.utils import convert_str_to_seconds
+from common.time.utils import convert_str_to_seconds
 
 
 class BaseStrategy:

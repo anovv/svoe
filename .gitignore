@@ -42,7 +42,7 @@ data_feed/perf/resources-estimation-out/*
 !data_feed/perf/resources-estimation-out/result_analyzer.py
 
 featurizer/notebooks
-utils/s3/s3_svoe.test.1_inventory
+common/s3/s3_svoe.test.1_inventory
 ray_cluster/featurizer/cached_dfs
 
 featurizer/perf/rust/target

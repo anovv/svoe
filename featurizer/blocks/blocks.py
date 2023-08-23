@@ -3,8 +3,8 @@ import pandas as pd
 from portion import Interval, closed, IntervalDict
 
 from featurizer.sql.data_catalog.models import DataCatalog
-from utils.pandas.df_utils import is_ts_sorted, sub_df, sub_df_ts
-from utils.time.utils import convert_str_to_seconds
+from common.pandas.df_utils import is_ts_sorted, sub_df_ts
+from common.time.utils import convert_str_to_seconds
 
 BlockMeta = Dict # represents s3 file metadata: name, time range, size, etc.
 BlockRangeMeta = List[BlockMeta] # represents metadata of consecutive blocks

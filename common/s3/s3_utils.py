@@ -1,13 +1,12 @@
 import tempfile
-from io import BytesIO
+from pathlib import Path
 
-import awswrangler as wr
 import s3fs
 
-import utils.concurrency.concurrency_utils as cu
+import common.concurrency.concurrency_utils as cu
 import boto3
 import functools
-from typing import Tuple, List, Any, Optional, Generator, Dict
+from typing import Tuple, List, Optional, Generator
 import pandas as pd
 import os
 
@@ -117,6 +116,17 @@ def download_dir(s3_path: str) -> Tuple[tempfile.TemporaryDirectory, List[str]]:
         s3.download(files[i], paths[i])
 
     return temp_dir, paths
+
+
+def download_file(s3_path) -> Tuple[tempfile.TemporaryDirectory, str]:
+    s3 = s3fs.S3FileSystem()
+    temp_dir = tempfile.TemporaryDirectory()
+    bucket, key = to_bucket_and_key(s3_path)
+    fname = Path(key).name
+    path = f'{temp_dir.name}/{fname}'
+    s3.download(f'{bucket}/{key}', path)
+    return temp_dir, path
+
 
 
 def inventory() -> Generator[pd.DataFrame, None, None]:

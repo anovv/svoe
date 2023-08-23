@@ -6,7 +6,7 @@ from typing import List, Any, Optional
 import featurizer.features.loader.loader as loader
 import featurizer.features.loader.catalog as catalog
 import featurizer.data.l2_book_incremental.cryptofeed.l2_snapshot_utils as l2u
-import utils.s3.s3_utils as s3u
+import common.s3.s3_utils as s3u
 import time
 import pandas as pd
 

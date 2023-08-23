@@ -4,7 +4,7 @@ import pandas as pd
 import portion as P
 
 from featurizer.blocks.blocks import get_overlaps, mock_meta, prune_overlaps, lookahead_shift, merge_asof_multi
-from featurizer.utils.testing_utils import mock_ts_df
+from featurizer.featurizer_utils.testing_utils import mock_ts_df
 
 
 class TestBlocks(unittest.TestCase):

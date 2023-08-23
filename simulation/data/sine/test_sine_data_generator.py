@@ -5,7 +5,6 @@ import pandas as pd
 
 from simulation.data.sine.sine_data_generator import SineDataGenerator
 from simulation.models.instrument import Instrument
-from utils.pandas.df_utils import plot_multi
 
 
 class TestSineDataGenerator(unittest.TestCase):

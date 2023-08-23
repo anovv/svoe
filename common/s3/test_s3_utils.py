@@ -1,6 +1,6 @@
 import unittest
 
-from utils.s3.s3_utils import list_files_and_sizes_kb, download_dir
+from common.s3.s3_utils import list_files_and_sizes_kb, download_dir
 
 
 class TestS3Utils(unittest.TestCase):

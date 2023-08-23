@@ -10,13 +10,13 @@ from featurizer.data_definitions.l2_book_incremental.cryptotick.cryptotick_l2_bo
 from featurizer.features.definitions.l2_book.l2_snapshot_fd.utils import _State, cryptofeed_update_state, cryptotick_update_state
 from featurizer.features.feature_tree.feature_tree import Feature
 from featurizer.features.definitions.feature_definition import FeatureDefinition
-import utils.streamz.stream_utils as su
+import common.streamz.stream_utils as su
 from featurizer.data_definitions.l2_book_incremental.cryptofeed.cryptofeed_l2_book_incremental import CryptofeedL2BookIncrementalData
 from featurizer.blocks.blocks import BlockMeta
 import functools
 import toolz
 
-from utils.time.utils import convert_str_to_seconds
+from common.time.utils import convert_str_to_seconds
 
 
 class L2SnapshotFD(FeatureDefinition):

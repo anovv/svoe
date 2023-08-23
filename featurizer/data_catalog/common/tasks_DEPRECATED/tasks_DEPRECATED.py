@@ -9,7 +9,7 @@ from featurizer.data_catalog.common.data_models.models import InputItem, InputIt
 from featurizer.data_catalog.common.utils.register import report_stats_decor, EventType
 from featurizer.sql.data_catalog.models import DataCatalog
 from featurizer.data_catalog.pipelines.catalog_cryptotick.tasks import make_catalog_item
-from utils.pandas import df_utils
+from common.pandas import df_utils
 
 
 @ray.remote

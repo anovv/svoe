@@ -5,7 +5,7 @@ from featurizer.data_definitions.data_definition import DataDefinition, Event, E
 from featurizer.features.definitions.mid_price.mid_price_fd.mid_price_fd import MidPriceFD
 from featurizer.features.feature_tree.feature_tree import Feature
 from featurizer.blocks.blocks import BlockMeta, windowed_grouping
-from utils.streamz.stream_utils import lookback_apply
+from common.streamz import lookback_apply
 from portion import IntervalDict
 
 import numpy as np

@@ -2,7 +2,7 @@ import unittest
 
 import joblib
 
-from utils.pandas.df_utils import store_df, get_cached_df, load_df
+from common.pandas.df_utils import store_df, get_cached_df, load_df
 
 
 class TestDfUtils(unittest.TestCase):
