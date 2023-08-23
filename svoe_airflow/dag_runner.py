@@ -1,5 +1,8 @@
 import codecs
 import ast
+import secrets
+from pathlib import Path
+
 import ray
 import time
 from datetime import datetime, timezone
@@ -12,6 +15,7 @@ from airflow_client.client.api.dag_run_api import DAGRunApi
 from airflow_client.client.api.task_instance_api import TaskInstanceApi
 from airflow_client.client.model.dag_run import DAGRun
 
+from utils.s3.s3_utils import upload_dir, delete_by_prefix
 from common.common_utils import base64_encode
 from ray_cluster.manager.manager import RayClusterManager
 from svoe_airflow.db.dags_mysql_client import DagsMysqlClient
@@ -211,14 +215,38 @@ class DagRunner:
 
             time.sleep(1)
 
+    # TODO should be in client module
+    @staticmethod
+    def preprocess_user_defined_dag_config(user_id: str, dag_conf: Dict) -> Dict:
+        REMOTE_CODE_S3_BUCKET = 'svoe-remote-code'
+        # all sanitization and client side uploads go here
+        # remote_code_local_path code upload:
+        for operator in dag_conf['tasks']:
+            args = dag_conf['tasks'][operator]['args']
+            # TODO sync keys with all remote code operators
+            if 'remote_code_local_path' in args:
+                remote_code_local_path = args['remote_code_local_path']
+                file_name = Path(remote_code_local_path).name
+                token = secrets.token_hex(16)
+                s3_path = f's3://{REMOTE_CODE_S3_BUCKET}/{user_id}/{operator}/{token}/{file_name}'
+                # cleanup previous content for this operator by deleting prefix
+                s3_prefix = f'{user_id}/{operator}'
+                # TODO asyncify
+                delete_by_prefix(bucket_name=REMOTE_CODE_S3_BUCKET, prefix=s3_prefix)
+                # upload
+                upload_dir(s3_path=s3_path, local_path=remote_code_local_path)
+                args['_remote_code_remote_path'] = s3_path
+        return dag_conf
+
 
 # TODO remove after testing
 if __name__ == '__main__':
     runner = DagRunner()
     user_id = '1'
-    dag_yaml_path = '../client/dag_runner_client/sample_dag.yaml'
+    dag_yaml_path = '../client/dag_runner_client/sample_dag2.yaml'
     with open(dag_yaml_path, 'r') as stream:
         dag_conf = yaml.safe_load(stream)
+        dag_conf = DagRunner.preprocess_user_defined_dag_config(user_id=user_id, dag_conf=dag_conf)
         dag_name, dag_run_id = runner.run_dag(user_id=user_id, user_defined_dag_config=dag_conf)
         w1 = runner.watch_dag(user_id=user_id, dag_name=dag_name, dag_run_id=dag_run_id)
         w2 = runner.watch_task_logs(user_id=user_id, task_name='task_1', dag_name=dag_name, dag_run_id=dag_run_id)

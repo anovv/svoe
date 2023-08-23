@@ -1,0 +1,24 @@
+tasks:
+  task_1:
+    operator: svoe_airflow.operators.svoe_python_operator.SvoePythonOperator
+    args:
+      remote_code_local_path: '/Users/anov/svoe_junk/py_files/test_remote_code_v1.py'
+      cluster_config:
+        user_id: '1'
+        cluster_name: 'test-cluster'
+        is_minikube: True
+        enable_autoscaling: False
+        head_cpu: 1
+        head_memory: '1Gi'
+        worker_groups:
+          - group_name: 'test-worker-group'
+            replicas: 4
+            min_replicas: 4
+            max_replicas: 4
+            cpu: 1
+            memory: '1Gi'
+            ray_resources: {}
+  task_2:
+    operator: airflow.operators.bash_operator.BashOperator
+    bash_command: "echo 2"
+    dependencies: [task_1]

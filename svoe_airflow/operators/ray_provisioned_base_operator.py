@@ -4,6 +4,7 @@ from airflow.models import BaseOperator
 
 from svoe_airflow.operators.hooks.ray_hook import RayHook
 from ray_cluster.manager.manager import RayClusterConfig
+from common.common_utils import RemoteCodeBase
 
 
 class RayProvisionedBaseOperator(BaseOperator):
