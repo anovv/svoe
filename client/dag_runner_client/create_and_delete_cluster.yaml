@@ -1,0 +1,26 @@
+tasks:
+  create_cluster:
+    operator: svoe_airflow.operators.cluster_operator.ClusterOperator
+    args:
+      operation: 'create'
+      cluster_config:
+        user_id: '1'
+        cluster_name: 'sample-cluster'
+        is_minikube: True
+        enable_autoscaling: False
+        head_cpu: 1
+        head_memory: '1Gi'
+        worker_groups:
+          - group_name: 'test-worker-group'
+            replicas: 4
+            min_replicas: 4
+            max_replicas: 4
+            cpu: 1
+            memory: '1Gi'
+            ray_resources: {}
+  delete_cluster:
+    operator: svoe_airflow.operators.cluster_operator.ClusterOperator
+    args:
+      operation: 'delete'
+      cluster_name: 'test-cluster'
+    dependencies: [create_cluster]

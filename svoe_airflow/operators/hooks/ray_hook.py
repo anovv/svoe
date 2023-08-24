@@ -3,34 +3,38 @@ from typing import Optional
 from airflow.hooks.base import BaseHook
 
 from ray_cluster.manager.manager import RayClusterManager, RayClusterConfig
+from airflow.utils.context import Context
 
 
 class RayHook(BaseHook):
 
-    def __init__(self, cluster_config: Optional[RayClusterConfig], cluster_name: Optional[str], *args, **kwargs):
+    def __init__(self, cluster_config: Optional[RayClusterConfig], cluster_name: str, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.cluster_config = cluster_config
         self.cluster_name = cluster_name
         self.cluster_manager = RayClusterManager()
 
     def connect_or_create_cluster(self) -> str:
-        if self.cluster_name is None and self.cluster_config is None:
-            raise ValueError('Should specify either cluster_config or cluster_name')
-        if self.cluster_name is not None and self.cluster_config is not None:
-            raise ValueError('Should specify either cluster_config or cluster_name')
-
+        # check if cluster already exists
+        cluster, _ = self.cluster_manager.get_ray_cluster(self.cluster_name) # TODO what if internal error?
+        wait_until_ray_cluster_ready_timeout = 30
         if self.cluster_config is not None:
-            self.cluster_name = self.cluster_config.cluster_name
-            # provision new cluster
-            timeout = 120
-            success, error = self.cluster_manager.create_ray_cluster(self.cluster_config)
-            if not success:
-                raise ValueError(f'Unable to create cluster {self.cluster_name}: {error}')
+            if cluster is None:
+                # provision new cluster
+                success, error = self.cluster_manager.create_ray_cluster(self.cluster_config)
+                if not success:
+                    raise ValueError(f'Unable to create cluster {self.cluster_name}: {error}')
+                wait_until_ray_cluster_ready_timeout = 60
         else:
-            timeout = 30
+            # user provided name only assuming cluster exists, raise
+            if cluster is None:
+                raise ValueError(f'Unable to find cluster {self.cluster_name}')
 
         # verify cluster is healthy
-        ray_head_address, error = self.cluster_manager.wait_until_ray_cluster_ready(self.cluster_name, timeout=timeout)
+        ray_head_address, error = self.cluster_manager.wait_until_ray_cluster_ready(
+            self.cluster_name,
+            timeout=wait_until_ray_cluster_ready_timeout
+        )
         if ray_head_address is None:
             raise ValueError(f'Can not validate cluster {self.cluster_name}: {error}')
         return ray_head_address

@@ -2,13 +2,13 @@
 from typing import Dict, Any, Collection, Mapping
 
 from common.common_utils import get_callable_from_remote_code_file
-from svoe_airflow.operators.ray_provisioned_base_operator import RayProvisionedBaseOperator
 from airflow.utils.context import Context
-from common.s3.s3_utils import download_dir, download_file
+from common.s3.s3_utils import download_file
+from airflow.models import BaseOperator
 
 
 # https://github.com/anyscale/airflow-provider-ray/blob/main/ray_provider/decorators/ray_decorators.py
-class SvoePythonOperator(RayProvisionedBaseOperator):
+class SvoePythonOperator(BaseOperator):
 
     # re args https://github.com/ajbosco/dag-factory/issues/121
 

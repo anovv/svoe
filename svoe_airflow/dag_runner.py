@@ -224,6 +224,7 @@ class DagRunner:
             if 'args' not in task_spec:
                 continue
             args = task_spec['args']
+            args['user_id'] = user_id
             # TODO sync keys with all remote code operators
             if 'remote_code_local_path' in args:
                 remote_code_local_path = args['remote_code_local_path']
@@ -247,7 +248,7 @@ if __name__ == '__main__':
     # print(path)
     runner = DagRunner()
     user_id = '1'
-    dag_yaml_path = '../client/dag_runner_client/sample_dag_2.yaml'
+    dag_yaml_path = '../client/dag_runner_client/create_and_delete_cluster.yaml'
     with open(dag_yaml_path, 'r') as stream:
         dag_conf = yaml.safe_load(stream)
         dag_conf = DagRunner.preprocess_user_defined_dag_config(user_id=user_id, dag_conf=dag_conf)

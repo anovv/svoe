@@ -3,11 +3,10 @@ from typing import Any, Dict
 from featurizer.config import FeaturizerConfig
 from featurizer.runner import Featurizer
 from airflow.utils.context import Context
+from airflow.models import BaseOperator
 
-from svoe_airflow.operators.ray_provisioned_base_operator import RayProvisionedBaseOperator
 
-
-class FeaturizerOperator(RayProvisionedBaseOperator):
+class FeaturizerOperator(BaseOperator):
 
     # re args https://github.com/ajbosco/dag-factory/issues/121
 
@@ -22,7 +21,7 @@ class FeaturizerOperator(RayProvisionedBaseOperator):
         return FeaturizerConfig(**featurizer_config_raw)
 
     def execute(self, context: Context) -> Any:
-        ray_head_address = self.ray_hook.connect_or_create_cluster()
+        # ray_head_address = self.ray_hook.connect_or_create_cluster()
         Featurizer.run(config=self.featurizer_config, ray_address=ray_head_address)
         if self.cleanup_cluster:
             self.ray_hook.delete_cluster()
