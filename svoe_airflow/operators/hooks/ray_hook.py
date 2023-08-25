@@ -3,7 +3,6 @@ from typing import Optional
 from airflow.hooks.base import BaseHook
 
 from ray_cluster.manager.manager import RayClusterManager, RayClusterConfig
-from airflow.utils.context import Context
 
 
 class RayHook(BaseHook):
@@ -16,7 +15,7 @@ class RayHook(BaseHook):
 
     def connect_or_create_cluster(self) -> str:
         # check if cluster already exists
-        cluster, _ = self.cluster_manager.get_ray_cluster(self.cluster_name) # TODO what if internal error?
+        cluster, err = self.cluster_manager.get_ray_cluster(self.cluster_name) # TODO what if internal error?
         wait_until_ray_cluster_ready_timeout = 30
         if self.cluster_config is not None:
             if cluster is None:
@@ -43,4 +42,4 @@ class RayHook(BaseHook):
         # TODO retries?
         success, err = self.cluster_manager.delete_ray_cluster(name=self.cluster_name)
         if not success:
-            raise ValueError(f'Unable to delete cluster {self.cluster_name}')
+            raise ValueError(f'Unable to delete cluster {self.cluster_name}: {err}')
