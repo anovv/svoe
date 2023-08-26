@@ -4,7 +4,7 @@ from airflow.models import BaseOperator, Variable
 from airflow.utils.context import Context
 
 from svoe_airflow.operators.hooks.ray_hook import RayHook
-from svoe_airflow.operators.require_cluster_address_mixin import RequireClusterMixin
+from svoe_airflow.operators.require_cluster_mixin import RequireClusterMixin
 
 
 class ClusterOperator(BaseOperator):

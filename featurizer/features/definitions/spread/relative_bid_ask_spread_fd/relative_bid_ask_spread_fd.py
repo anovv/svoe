@@ -6,7 +6,7 @@ from streamz import Stream
 from featurizer.blocks.blocks import BlockMeta, identity_grouping
 from featurizer.features.definitions.feature_definition import FeatureDefinition
 from featurizer.data_definitions.data_definition import DataDefinition, EventSchema
-from featurizer.features.definitions.l2_snapshot.l2_snapshot_fd import L2SnapshotFD
+from featurizer.features.definitions.l2_book.l2_snapshot_fd.l2_snapshot_fd import L2SnapshotFD
 from featurizer.features.feature_tree.feature_tree import Feature
 
 import math

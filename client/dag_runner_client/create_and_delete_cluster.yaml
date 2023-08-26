@@ -22,5 +22,5 @@ tasks:
     operator: svoe_airflow.operators.cluster_operator.ClusterOperator
     args:
       operation: 'delete'
-      cluster_name: 'test-cluster'
+      cluster_name: 'sample-cluster'
     dependencies: [create_cluster]

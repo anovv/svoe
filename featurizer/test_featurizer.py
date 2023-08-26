@@ -3,7 +3,7 @@ import ray
 
 from featurizer.config import FeaturizerConfig
 from featurizer.runner import Featurizer
-from common.pandas import concat
+from common.pandas.df_utils import concat
 
 
 class TestFeaturizer(unittest.TestCase):
@@ -11,7 +11,7 @@ class TestFeaturizer(unittest.TestCase):
     def test_fl_set(self):
         config_path = 'test_configs/feature-label-set.yaml'
         config = FeaturizerConfig.load_config(path=config_path)
-        Featurizer.run(config)
+        Featurizer.run(config, ray_address='auto', parallelism=12)
 
         with ray.init(address='auto', ignore_reinit_error=True):
             refs = Featurizer.get_result_refs()

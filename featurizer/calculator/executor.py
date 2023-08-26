@@ -8,7 +8,7 @@ from ray.dag import DAGNode
 from featurizer.features.feature_tree.feature_tree import Feature
 
 
-def execute_graph(dag: Dict[Interval, Dict[Interval, DAGNode]], concurrency: int = 12) -> List[ObjectRef]:
+def execute_graph(dag: Dict[Interval, Dict[Interval, DAGNode]], parallelism: int = 12) -> List[ObjectRef]:
     refs_by_interval = {}
 
     cur_range_index = 0
@@ -20,7 +20,7 @@ def execute_graph(dag: Dict[Interval, Dict[Interval, DAGNode]], concurrency: int
         for interval in dag[range_interval]:
             keyed_nodes.append((interval, dag[range_interval][interval]))
         print(f'Executing {cur_range_index + 1}/{num_ranges} range: {range_interval}')
-        refs = execute_flattened_nodes(keyed_nodes, concurrency)
+        refs = execute_flattened_nodes(keyed_nodes, parallelism)
         refs_by_interval.update(refs)
         cur_range_index += 1
 
@@ -33,7 +33,7 @@ def execute_graph(dag: Dict[Interval, Dict[Interval, DAGNode]], concurrency: int
     return res
 
 # executes
-def execute_flattened_nodes(nodes: List[Tuple[Any, DAGNode]], concurrency: int) -> Dict[Any, List[ObjectRef]]:
+def execute_flattened_nodes(nodes: List[Tuple[Any, DAGNode]], parallelism: int) -> Dict[Any, List[ObjectRef]]:
     results_refs_per_key = {}
     executing_refs_per_key = {}
 
@@ -57,7 +57,7 @@ def execute_flattened_nodes(nodes: List[Tuple[Any, DAGNode]], concurrency: int) 
         num_executing_tasks = 0
         for k in executing_refs_per_key:
             num_executing_tasks += len(executing_refs_per_key[k])
-        if num_executing_tasks < concurrency:
+        if num_executing_tasks < parallelism:
             print(f'Scheduled {i + 1}/{len(nodes)} dags')
             if _key in executing_refs_per_key:
                 executing_refs_per_key[_key].append(node.execute())

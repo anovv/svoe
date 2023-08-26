@@ -27,5 +27,8 @@ class FeaturizerOperator(BaseOperator, RequireClusterMixin):
         ray_head_address = self.get_cluster_address()
         if ray_head_address is None:
             raise ValueError(f'No head address found for cluster: {self.get_cluster_name()}')
-        Featurizer.run(config=self.featurizer_config, ray_address=ray_head_address)
+        parallelism = self.args.get('parallelism', None)
+        if parallelism is None:
+            parallelism = 1
+        Featurizer.run(config=self.featurizer_config, ray_address=ray_head_address, parallelism=parallelism)
 

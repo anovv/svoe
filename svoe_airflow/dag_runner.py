@@ -88,7 +88,7 @@ class DagRunner:
             time.sleep(1)
 
         if dag is None:
-            raise ValueError(f'Unable to get validate dag in db after {timeout}s, last exception: {last_exception}')
+            raise ValueError(f'Unable to get validated dag in db after {timeout}s, last exception: {last_exception}')
 
         print('dag registered')
 
@@ -248,7 +248,7 @@ if __name__ == '__main__':
     # print(path)
     runner = DagRunner()
     user_id = '1'
-    dag_yaml_path = '../client/dag_runner_client/create_and_delete_cluster.yaml'
+    dag_yaml_path = '../client/dag_runner_client/sample_dag.yaml'
     with open(dag_yaml_path, 'r') as stream:
         dag_conf = yaml.safe_load(stream)
         dag_conf = DagRunner.preprocess_user_defined_dag_config(user_id=user_id, dag_conf=dag_conf)

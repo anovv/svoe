@@ -1,10 +1,11 @@
 tasks:
-  task_1:
-    operator: svoe_airflow.operators.featurizer_operator.FeaturizerOperator
+  create_cluster:
+    operator: svoe_airflow.operators.cluster_operator.ClusterOperator
     args:
+      operation: 'create'
       cluster_config:
         user_id: '1'
-        cluster_name: 'test-cluster'
+        cluster_name: 'sample-cluster'
         is_minikube: True
         enable_autoscaling: False
         head_cpu: 1
@@ -17,6 +18,11 @@ tasks:
             cpu: 1
             memory: '1Gi'
             ray_resources: {}
+  featurize:
+    operator: svoe_airflow.operators.featurizer_operator.FeaturizerOperator
+    args:
+      cluster_name: 'sample-cluster'
+      parallelism: 4
       featurizer_config:
         start_date: '2023-02-01'
         end_date: '2023-02-01'
@@ -39,11 +45,10 @@ tasks:
               2:
                 dep_schema: cryptotick
                 sampling: 1s
-  task_2:
-    operator: airflow.operators.bash_operator.BashOperator
-    bash_command: "echo 2"
-    dependencies: [task_1]
-  task_3:
-    operator: airflow.operators.bash_operator.BashOperator
-    bash_command: "echo 3"
-    dependencies: [task_1]
+    dependencies: [create_cluster]
+  delete_cluster:
+    operator: svoe_airflow.operators.cluster_operator.ClusterOperator
+    args:
+      operation: 'delete'
+      cluster_name: 'sample-cluster'
+    dependencies: [featurize]

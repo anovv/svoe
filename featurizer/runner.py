@@ -6,12 +6,13 @@ from featurizer.config import FeaturizerConfig
 from featurizer.features.feature_tree.feature_tree import construct_feature_tree
 
 import ray
+import featurizer
 
 
 class Featurizer:
 
     @classmethod
-    def run(cls, config: FeaturizerConfig, ray_address: str = 'auto'):
+    def run(cls, config: FeaturizerConfig, ray_address: str, parallelism: int):
         features = []
         for feature_config in config.feature_configs:
             features.append(construct_feature_tree(
@@ -51,10 +52,7 @@ class Featurizer:
         # TODO first two values are weird outliers for some reason, why?
         # df = df.tail(-2)
 
-        # TODO pass cluster address in config?
-        with ray.init(address=ray_address, ignore_reinit_error=True):
-            # ray.init(address='auto', ignore_reinit_error=True)
-
+        with ray.init(address=ray_address, ignore_reinit_error=True, runtime_env={'py_modules': [featurizer]}):
             # remove old actor from prev session if it exists
             try:
                 cache_actor = get_cache_actor()
@@ -63,7 +61,7 @@ class Featurizer:
                 pass
 
             cache_actor = create_cache_actor(cache)
-            refs = execute_graph(dag)
+            refs = execute_graph(dag=dag, parallelism=parallelism)
             ray.get(cache_actor.record_featurizer_result_refs.remote(refs))
 
 

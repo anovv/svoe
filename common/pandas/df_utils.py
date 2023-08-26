@@ -12,7 +12,7 @@ from typing import List, Tuple, Generator, Optional, Callable
 from matplotlib import pyplot as plt
 
 import common.concurrency.concurrency_utils as cu
-from common.s3 import get_session
+from common.s3.s3_utils import get_session
 
 CACHE_DIR = '/tmp/svoe/dfs_cache/'
 
