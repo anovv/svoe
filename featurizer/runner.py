@@ -6,7 +6,13 @@ from featurizer.config import FeaturizerConfig
 from featurizer.features.feature_tree.feature_tree import construct_feature_tree
 
 import ray
+
+# TODO these are local packages to pass to dev cluster
 import featurizer
+import common
+import client
+
+LOCAL_PACKAGES_TO_PASS_TO_DEV_RAY_CLUSTER = [featurizer, common, client]
 
 
 class Featurizer:
@@ -52,7 +58,10 @@ class Featurizer:
         # TODO first two values are weird outliers for some reason, why?
         # df = df.tail(-2)
 
-        with ray.init(address=ray_address, ignore_reinit_error=True, runtime_env={'py_modules': [featurizer]}):
+        with ray.init(address=ray_address, ignore_reinit_error=True, runtime_env={
+            'py_modules': LOCAL_PACKAGES_TO_PASS_TO_DEV_RAY_CLUSTER,
+            'pip': ['pyhumps']
+        }):
             # remove old actor from prev session if it exists
             try:
                 cache_actor = get_cache_actor()

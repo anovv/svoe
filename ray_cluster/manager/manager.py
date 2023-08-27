@@ -316,7 +316,8 @@ class RayClusterManager:
 
     @staticmethod
     def construct_head_address(cluster_name) -> str:
-        return f'ray://{cluster_name}-{RAY_HEAD_SVC_SUFFIX}.{RAY_NAMESPACE}:{RAY_HEAD_PORT}'
+        # return f'ray://{cluster_name}-{RAY_HEAD_SVC_SUFFIX}.{RAY_NAMESPACE}:{RAY_HEAD_PORT}'
+        return f'ray://127.0.0.1:10001'
 
     # for local dev
     @staticmethod

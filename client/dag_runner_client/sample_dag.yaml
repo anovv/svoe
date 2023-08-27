@@ -9,14 +9,14 @@ tasks:
         is_minikube: True
         enable_autoscaling: False
         head_cpu: 1
-        head_memory: '1Gi'
+        head_memory: '4Gi'
         worker_groups:
           - group_name: 'test-worker-group'
             replicas: 4
             min_replicas: 4
             max_replicas: 4
             cpu: 1
-            memory: '1Gi'
+            memory: '4Gi'
             ray_resources: {}
   featurize:
     operator: svoe_airflow.operators.featurizer_operator.FeaturizerOperator
@@ -46,9 +46,9 @@ tasks:
                 dep_schema: cryptotick
                 sampling: 1s
     dependencies: [create_cluster]
-  delete_cluster:
-    operator: svoe_airflow.operators.cluster_operator.ClusterOperator
-    args:
-      operation: 'delete'
-      cluster_name: 'sample-cluster'
-    dependencies: [featurize]
+#  delete_cluster:
+#    operator: svoe_airflow.operators.cluster_operator.ClusterOperator
+#    args:
+#      operation: 'delete'
+#      cluster_name: 'sample-cluster'
+#    dependencies: [featurize]

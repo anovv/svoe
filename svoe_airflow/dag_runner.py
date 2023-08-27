@@ -13,7 +13,7 @@ from airflow_client.client.api.dag_run_api import DAGRunApi
 from airflow_client.client.api.task_instance_api import TaskInstanceApi
 from airflow_client.client.model.dag_run import DAGRun
 
-from common.s3.s3_utils import upload_dir, delete_by_prefix, download_file
+from common.s3.s3_utils import upload_dir, delete_by_prefix
 from common.common_utils import base64_encode
 from svoe_airflow.db.dags_mysql_client import DagsMysqlClient
 from svoe_airflow.utils import user_dag_conf_to_airflow_dag_conf
@@ -160,25 +160,24 @@ class DagRunner:
 
             time.sleep(1)
 
-    def watch_task_logs(self, user_id: str, task_name: str, dag_name: Optional[str] = None, dag_run_id: Optional[str] = None) -> Generator:
+    def watch_task_logs(self, user_id: str, task_name: str, dag_name: Optional[str] = None, dag_run_id: Optional[str] = None, timeout: int = 90) -> Generator:
         dag_name, dag_run_id = self._get_dag_name_and_run_id_if_needed(user_id=user_id, dag_name=dag_name, dag_run_id=dag_run_id)
         continuation_token = None
         while True:
             # TODO asyncify
             # get task state to check if we should continue fetching logs
             task_instance = None
-            retry_count = 0
-            while retry_count < 5:
+            start_ts = time.time()
+            while time.time() - start_ts < timeout:
                 try:
                     task_instance = self.airflow_task_instance_api.get_task_instance(dag_id=dag_name, dag_run_id=dag_run_id, task_id=task_name, _check_return_type=False)
                     break
                 except:
-                    print('Not able to retrievce task instance, retrying...')
-                    retry_count += 1
+                    print('Not able to retrieve task instance, retrying...')
                     time.sleep(1)
                     continue
             if task_instance is None:
-                yield f'Not able to retrievce task instance after {retry_count} retries'
+                yield f'Not able to retrieve task instance after {timeout}s'
                 break
 
             task_state = task_instance['state']
@@ -254,7 +253,7 @@ if __name__ == '__main__':
         dag_conf = DagRunner.preprocess_user_defined_dag_config(user_id=user_id, dag_conf=dag_conf)
         dag_name, dag_run_id = runner.run_dag(user_id=user_id, user_defined_dag_config=dag_conf)
         w1 = runner.watch_dag(user_id=user_id, dag_name=dag_name, dag_run_id=dag_run_id)
-        w2 = runner.watch_task_logs(user_id=user_id, task_name='task_1', dag_name=dag_name, dag_run_id=dag_run_id)
+        w2 = runner.watch_task_logs(user_id=user_id, task_name='featurize', dag_name=dag_name, dag_run_id=dag_run_id)
         print(next(w1))
         time.sleep(3)
         for l in w2:

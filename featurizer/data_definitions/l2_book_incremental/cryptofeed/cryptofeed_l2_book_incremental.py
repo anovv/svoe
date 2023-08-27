@@ -25,6 +25,8 @@ class CryptofeedL2BookIncrementalData(DataSourceDefinition):
         # TODO update ray's image to use latest pandas
         df = df.copy()
 
+        print(df.head())
+
         # TODO merge this logic with TradesData parse_events
         grouped = df.groupby(['timestamp', 'delta'])
         dfs = [grouped.get_group(x) for x in grouped.groups]
