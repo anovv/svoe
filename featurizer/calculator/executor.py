@@ -4,8 +4,11 @@ import ray
 from intervaltree import Interval
 from ray import ObjectRef
 from ray.dag import DAGNode
+import ray.util
 
 from featurizer.features.feature_tree.feature_tree import Feature
+
+import ray.internal
 
 
 def execute_graph(dag: Dict[Interval, Dict[Interval, DAGNode]], parallelism: int = 12) -> List[ObjectRef]:
@@ -30,7 +33,10 @@ def execute_graph(dag: Dict[Interval, Dict[Interval, DAGNode]], parallelism: int
     for ref_list in srt.values():
         res.extend(ref_list)
 
-    return res
+    # dag execution returns refs to ObjectRef[Block] (i.e. ref to ref). This is needed to keep
+    # original result Block ownership so it is not released when workers die
+    result_refs = ray.get(res)
+    return result_refs
 
 # executes
 def execute_flattened_nodes(nodes: List[Tuple[Any, DAGNode]], parallelism: int) -> Dict[Any, List[ObjectRef]]:

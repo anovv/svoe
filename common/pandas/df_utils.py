@@ -185,3 +185,8 @@ def gen_split_df_by_mem(df: pd.DataFrame, chunk_size_kb: int, callback: Optional
 def hash_df(df: pd.DataFrame) -> str:
     return hashlib.sha1(pd.util.hash_pandas_object(df).values).hexdigest()
 
+
+# assumes uniformly distributed time points
+def downsample_uniform(df: pd.DataFrame, every_n_row: int) -> pd.DataFrame:
+    return df.iloc[::every_n_row]
+

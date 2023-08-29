@@ -1,5 +1,7 @@
 from typing import Dict, List, Tuple, Optional
 
+import ray
+
 from ray.dag import DAGNode
 from ray.types import ObjectRef
 
@@ -96,7 +98,7 @@ def build_feature_task_graph(
                     # node = calculate_feature.bind(feature, dep_nodes, interval, store)
                     node = bind_and_cache(calculate_feature, obj_ref_cache, ctx, feature=feature, dep_refs=dep_nodes, interval=interval, store=store)
 
-                # TODO validate interval is withtin range_interval
+                # TODO validate interval is within range_interval
                 nodes[interval] = node
 
             # TODO check if range_interval intersects with existing keys/intervals"
@@ -169,7 +171,8 @@ def build_lookahead_graph(feature_graph: Dict[Interval, Dict[Interval, DAGNode]]
 def point_in_time_join_dag(
     dag: Dict[Feature, Dict[Interval, Dict[Interval, DAGNode]]],
     features_to_join: List[Feature],
-    label_feature: Feature
+    label_feature: Feature,
+    result_owner: Optional[ray.actor.ActorHandle] = None
 ) -> Dict[Interval, Dict[Interval, DAGNode]]:
     # get range overlaps first
     ranges_per_feature = {}
@@ -229,7 +232,7 @@ def point_in_time_join_dag(
             # in case one value is at the start of current block and another is in the end of prev block
             prev_interval_nodes = get_prev_nodes(nodes_per_feature)
             # TODO set resource spec here
-            join_node = point_in_time_join_block.bind(interval, nodes_per_feature, prev_interval_nodes, label_feature)
+            join_node = point_in_time_join_block.bind(interval, nodes_per_feature, prev_interval_nodes, label_feature, result_owner)
             joined_nodes[interval] = join_node
 
         res[range_interval] = joined_nodes
@@ -246,6 +249,7 @@ def build_feature_label_set_task_graph(
     obj_ref_cache: Dict[str, Dict[Interval, Tuple[int, Optional[ObjectRef]]]],
     features_to_store: Optional[List[Feature]] = None,
     stored_feature_blocks_meta: Optional[Dict[Feature, Dict[Interval, BlockMeta]]] = None,
+    result_owner: Optional[ray.actor.ActorHandle] = None
 ) -> Dict[Interval, Dict[Interval, DAGNode]]:
     dag = build_feature_set_task_graph(
         features=features,
@@ -259,4 +263,4 @@ def build_feature_label_set_task_graph(
     label_feature = Feature.make_label(label)
     dag[label_feature] = lookahead_dag
     features.append(label_feature)
-    return point_in_time_join_dag(dag, features, label_feature)
+    return point_in_time_join_dag(dag, features, label_feature, result_owner=result_owner)

@@ -253,7 +253,7 @@ if __name__ == '__main__':
         dag_conf = DagRunner.preprocess_user_defined_dag_config(user_id=user_id, dag_conf=dag_conf)
         dag_name, dag_run_id = runner.run_dag(user_id=user_id, user_defined_dag_config=dag_conf)
         w1 = runner.watch_dag(user_id=user_id, dag_name=dag_name, dag_run_id=dag_run_id)
-        w2 = runner.watch_task_logs(user_id=user_id, task_name='featurize', dag_name=dag_name, dag_run_id=dag_run_id)
+        w2 = runner.watch_task_logs(user_id=user_id, task_name='featurize', dag_name=dag_name, dag_run_id=dag_run_id, timeout=90)
         print(next(w1))
         time.sleep(3)
         for l in w2:

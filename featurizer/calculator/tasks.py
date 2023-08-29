@@ -186,7 +186,9 @@ def point_in_time_join_block(
     blocks_refs_per_feature: Dict[Feature, ObjectRef[Block]],
     prev_block_ref_per_feature: Dict[Feature, ObjectRef[Block]],
     label_feature: Feature,
-) -> pd.DataFrame:
+    result_owner: Optional[ray.actor.ActorHandle] = None
+) -> ObjectRef[pd.DataFrame]: # TODO is it the same as pd.DataFrame
+
     # TODO this loads all dfs at once,
     # TODO can we do it iteratively so gc has time to collect old dfs to reduce mem footprint? (tradeoff speed/memory)
     print('Join started')
@@ -210,7 +212,13 @@ def point_in_time_join_block(
     merged = merge_asof_multi(dfs)
 
     print(f'Join finished, merged in {time.time() - t}s')
-    return sub_df_ts(merged, interval.lower, interval.upper)
+    res = sub_df_ts(merged, interval.lower, interval.upper)
+    # return res
+    if result_owner is not None:
+        ref = ray.put(res, _owner=result_owner)
+    else:
+        ref = ray.put(res)
+    return ref
 
 
 @ray.remote
