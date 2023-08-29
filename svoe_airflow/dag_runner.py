@@ -7,16 +7,20 @@ from datetime import datetime
 from typing import Dict, Optional, Generator, Tuple
 
 import yaml
+from airflow import DAG
 from airflow_client.client import ApiClient, Configuration
 from airflow_client.client.api.dag_api import DAGApi
 from airflow_client.client.api.dag_run_api import DAGRunApi
 from airflow_client.client.api.task_instance_api import TaskInstanceApi
 from airflow_client.client.model.dag_run import DAGRun
+from dagfactory import DagFactory
 
 from common.s3.s3_utils import upload_dir, delete_by_prefix
 from common.common_utils import base64_encode
 from svoe_airflow.db.dags_mysql_client import DagsMysqlClient
 from svoe_airflow.utils import user_dag_conf_to_airflow_dag_conf
+
+import dagfactory
 
 # AIRFLOW_HOST = 'airflow-webserver.airflow.svc.cluster.local:8080/api/v1'
 AIRFLOW_HOST = 'http://localhost:8080/api/v1'
@@ -49,6 +53,14 @@ class DagRunner:
         # delete config from db
         self.db_client.delete_configs(user_id)
         print('deleted db')
+
+    def run_dag_locally(self, user_defined_dag_config: Dict):
+        dag_name, dag_config = user_dag_conf_to_airflow_dag_conf(user_defined_dag_config)
+        dag_factory = DagFactory(config=dag_config)
+        dags = dag_factory.build_dags()
+        dag = list(dags.values())[0]
+        dag.test()
+
 
     def run_dag(self, user_id: str, user_defined_dag_config: Dict) -> Tuple[str, str]:
         # get prev configs for this user
@@ -251,13 +263,14 @@ if __name__ == '__main__':
     with open(dag_yaml_path, 'r') as stream:
         dag_conf = yaml.safe_load(stream)
         dag_conf = DagRunner.preprocess_user_defined_dag_config(user_id=user_id, dag_conf=dag_conf)
-        dag_name, dag_run_id = runner.run_dag(user_id=user_id, user_defined_dag_config=dag_conf)
-        w1 = runner.watch_dag(user_id=user_id, dag_name=dag_name, dag_run_id=dag_run_id)
-        w2 = runner.watch_task_logs(user_id=user_id, task_name='featurize', dag_name=dag_name, dag_run_id=dag_run_id, timeout=90)
-        print(next(w1))
-        time.sleep(3)
-        for l in w2:
-            print(l)
+        runner.run_dag_locally(user_defined_dag_config=dag_conf)
+        # dag_name, dag_run_id = runner.run_dag(user_id=user_id, user_defined_dag_config=dag_conf)
+        # w1 = runner.watch_dag(user_id=user_id, dag_name=dag_name, dag_run_id=dag_run_id)
+        # w2 = runner.watch_task_logs(user_id=user_id, task_name='featurize', dag_name=dag_name, dag_run_id=dag_run_id, timeout=90)
+        # print(next(w1))
+        # time.sleep(3)
+        # for l in w2:
+        #     print(l)
     # @ray.remote
     # def ping():
     #     return 'ping'

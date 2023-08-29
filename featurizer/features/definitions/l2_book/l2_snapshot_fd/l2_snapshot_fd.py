@@ -55,7 +55,7 @@ class L2SnapshotFD(FeatureDefinition):
 
     @classmethod
     def _update_state(cls, state: _State, event: Event, depth: int, sampling: str, dep_schema: Optional[str] = None) -> Tuple[_State, Optional[Event]]:
-        if dep_schema is None:
+        if dep_schema is None or dep_schema == 'cryptotick':
             state, skip_event = cryptotick_update_state(state, event, depth)
         elif dep_schema == 'cryptofeed':
             state, skip_event = cryptofeed_update_state(state, event, depth)
@@ -148,7 +148,7 @@ class L2SnapshotFD(FeatureDefinition):
 
     @classmethod
     def dep_upstream_schema(cls, dep_schema: str = Optional[None]) -> List[Type[DataDefinition]]:
-        if dep_schema is None:
+        if dep_schema is None or dep_schema == 'cryptotick':
             return [CryptotickL2BookIncrementalData]
 
         if dep_schema == 'cryptofeed':

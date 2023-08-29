@@ -3,7 +3,7 @@ import time
 from datetime import datetime, timezone
 
 import yaml
-from typing import List, Tuple, Dict
+from typing import List, Tuple, Dict, Optional
 
 from common.common_utils import base64_decode
 from svoe_airflow.db.models import DagConfigEncoded
@@ -73,7 +73,7 @@ def dag_name_from_yaml_path(path: str, suffix: str) -> str:
 
 
 # translates user defined dag config to proper Airflow format, generates unqiue name
-def user_dag_conf_to_airflow_dag_conf(svoe_dag_conf: Dict, owner_id: str) -> Tuple[str, Dict]:
+def user_dag_conf_to_airflow_dag_conf(svoe_dag_conf: Dict, owner_id: Optional[str] = None) -> Tuple[str, Dict]:
     # add required by Airflow default_args
     svoe_dag_conf['default_args'] = {
         'owner': 'default',
@@ -85,7 +85,10 @@ def user_dag_conf_to_airflow_dag_conf(svoe_dag_conf: Dict, owner_id: str) -> Tup
     svoe_dag_conf['max_active_runs'] = 1
     now = datetime.now().astimezone(tz=timezone.utc)
     now_ts = int(round(now.timestamp()))
-    dag_name = f'dag-{owner_id}-{now_ts}'
+    if owner_id is not None:
+        dag_name = f'dag-{owner_id}-{now_ts}'
+    else:
+        dag_name = f'dag-{now_ts}'
     airflow_dag_conf = {
         dag_name: svoe_dag_conf
     }
