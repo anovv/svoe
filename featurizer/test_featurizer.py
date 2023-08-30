@@ -14,7 +14,7 @@ class TestFeaturizer(unittest.TestCase):
         Featurizer.run(config, ray_address='auto', parallelism=12)
 
         with ray.init(address='auto', ignore_reinit_error=True):
-            df = Featurizer.get_data()
+            df = Featurizer.get_materialized_data()
             print(df.head())
             print(df.tail())
 

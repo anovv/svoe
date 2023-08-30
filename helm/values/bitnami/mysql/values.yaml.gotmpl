@@ -1,91 +1,6 @@
 auth:
   rootPassword: {{ .Values | get "mysqlRootPassword" }}
 primary:
-  # https://stackoverflow.com/questions/52148322/control-order-of-container-termination-in-a-single-pod-in-kubernetes
-  # https://github.com/bitnami/bitnami-docker-mysql/blob/master/8.0/debian-10/Dockerfile
-  terminationGracePeriodSeconds: 300 # wait for dumper-restorer to make s3 dump on pod termination
-  command: ["/bin/sh", "-c"]
-  args:
-    - |
-      /opt/bitnami/scripts/mysql/entrypoint.sh /opt/bitnami/scripts/mysql/run.sh &
-      PID=$!
-
-      stop () {
-        echo "Calling stop..."
-        while true; do
-          if [ -f "/lifecycle/dump-finished" ]; then
-            echo "Dumper finished."
-            kill $PID
-            break
-          fi
-          sleep 1
-        done
-      }
-      trap stop TERM INT EXIT
-      # We explicitly call stop to ensure the sidecar will terminate
-      # if the main container exits outside a request from Kubernetes
-      # to kill the Pod.
-      stop &
-      wait $PID
-      echo "Exited."
-  sidecars:
-    - name: dumper-restorer
-      image: alpine:latest
-      command: ["/bin/sh", "-c"]
-      args:
-        - |
-          IS_TERMINATING=false
-
-          stopLoop () {
-            IS_TERMINATING=true
-          }
-
-          trap stopLoop TERM INT EXIT
-
-          /scripts/mysqls3init.sh
-          if [ "$IS_TERMINATING" = true ]; then
-            echo "Early exit"
-            touch /lifecycle/dump-finished
-            exit 0
-          fi
-          echo "Waiting 20s for mysql to warmup before s3 restore..."
-          sleep 20
-          if [ "$IS_TERMINATING" = true ]; then
-            echo "Early exit"
-            touch /lifecycle/dump-finished
-            exit 0
-          fi
-          echo "Starting restore..."
-          /scripts/mysqls3restore.sh
-
-          echo "Sleeping..."
-          while [ "$IS_TERMINATING" = false ]
-          do
-            sleep 1
-          done
-          echo "Sleeping done."
-          MYSQL_HOST=127.0.0.1 # when pod is being terminated we can't make calls to service of this pod, hence use localhost
-          /scripts/mysqls3dump.sh
-          touch /lifecycle/dump-finished
-          echo "Flagged dump finished."
-      volumeMounts:
-        - name: mysqls3-vol
-          mountPath: /scripts
-        - name: lifecycle
-          mountPath: /lifecycle
-      envFrom:
-        - secretRef:
-            name: mysqls3backup-secret # should be synced with mysql-extra
-  extraVolumeMounts:
-    - name: lifecycle
-      mountPath: /lifecycle
-  extraVolumes:
-    - name: mysqls3-vol
-      configMap:
-        name: mysqls3backup-cm # should be synced with mysql chart
-        defaultMode: 365
-    - name: lifecycle
-      emptyDir: {}
   persistance:
     enabled: true
     existingClaim: ""
@@ -94,15 +9,3 @@ primary:
     size: 4Gi
   service:
     type: ClusterIP
-metrics:
-  enabled: true
-  service:
-    type: ClusterIP
-    port: 9104
-    annotations:
-      prometheus.io/scrape: "true"
-      prometheus.io/port: "9104"
-#  serviceMonitor: # TODO when enabling this, dependency should be added on monitoring chart
-#    enabled: true
-#    namespace: mysql # should be synced with release namespace
-#    interval: 10s

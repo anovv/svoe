@@ -27,3 +27,4 @@ aiofiles
 fastapi
 python-multipart
 pyhumps
+mlflow

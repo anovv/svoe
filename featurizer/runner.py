@@ -86,7 +86,13 @@ class Featurizer:
         raise NotImplementedError
 
     @classmethod
-    def get_data(cls, start: Optional[str] = None, end: Optional[str] = None, pick_every_nth_row: Optional[int] = 1) -> pd.DataFrame:
+    def get_dataset(cls):
+        cache_actor = get_cache_actor()
+        refs = ray.get(cache_actor.get_featurizer_result_refs.remote())
+        return ray.data.from_pandas_refs(refs)
+
+    @classmethod
+    def get_materialized_data(cls, start: Optional[str] = None, end: Optional[str] = None, pick_every_nth_row: Optional[int] = 1) -> pd.DataFrame:
         cache_actor = get_cache_actor()
         refs = ray.get(cache_actor.get_featurizer_result_refs.remote())
 
@@ -111,5 +117,5 @@ if __name__ == '__main__':
         'py_modules': LOCAL_PACKAGES_TO_PASS_TO_REMOTE_DEV_RAY_CLUSTER,
         'pip': ['pyhumps']
     }):
-        df = Featurizer.get_data()
+        df = Featurizer.get_materialized_data()
         print(df)
