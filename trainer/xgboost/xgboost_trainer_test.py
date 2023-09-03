@@ -10,7 +10,6 @@ import numpy as np
 import ray
 from matplotlib import pyplot as plt
 from ray.air import ScalingConfig, RunConfig
-# from ray.air.config import RunConfig as CRunConfig
 from ray.train.batch_predictor import BatchPredictor
 from ray.train.xgboost import XGBoostTrainer, XGBoostPredictor
 from ray.tune import Tuner, TuneConfig
@@ -32,7 +31,7 @@ def _xgboost_trainer(label: str, datesets: Dict[str, Any]) -> XGBoostTrainer:
         },
         run_config=RunConfig(
             name='test-run-1',
-            verbose=1,
+            verbose=2,
             callbacks=[MLflowLoggerCallback(
                 tracking_uri='http://mlflow.mlflow.svc:5000',
                 experiment_name='test-experiment-2',

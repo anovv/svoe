@@ -1,6 +1,7 @@
-from typing import Optional
+from typing import Optional, Dict
 
 import pandas as pd
+import pyarrow
 
 from common.pandas.df_utils import concat, downsample_uniform
 from featurizer.actors.cache_actor import get_cache_actor, create_cache_actor
@@ -13,12 +14,13 @@ from featurizer.features.feature_tree.feature_tree import construct_feature_tree
 import ray.experimental
 
 import ray
+from ray.data import Dataset
 
-# TODO these are local packages to pass to dev cluster
 import featurizer
 import common
 import client
 
+# TODO these are local packages to pass to dev cluster
 LOCAL_PACKAGES_TO_PASS_TO_REMOTE_DEV_RAY_CLUSTER = [featurizer, common, client]
 
 
@@ -79,17 +81,39 @@ class Featurizer:
             refs = execute_graph(dag=dag, parallelism=parallelism)
             ray.get(cache_actor.record_featurizer_result_refs.remote(refs))
 
-    # TODO
     @classmethod
-    def get_metadata(cls) -> pd.DataFrame:
+    def get_ds_metadata(cls, ds: Dataset) -> Dict:
         # should return metadata about featurization result e.g. in memory size, num blocks, schema, set name, etc.
-        raise NotImplementedError
+        return {
+            'count': ds.count(),
+            'columns': ds.columns(),
+            'schema': ds.schema(),
+            'num_blocks': ds.num_blocks(),
+            'size_bytes': ds.size_bytes(),
+            'stats': ds.stats()
+        }
 
     @classmethod
-    def get_dataset(cls):
+    def get_dataset(cls) -> Dataset:
         cache_actor = get_cache_actor()
         refs = ray.get(cache_actor.get_featurizer_result_refs.remote())
         return ray.data.from_pandas_refs(refs)
+
+    @classmethod
+    def get_label_column(cls, ds: Dataset) -> str:
+        ds_metadata = cls.get_ds_metadata(ds)
+        cols = ds_metadata['columns']
+        pos = None
+        for i in range(len(cols)):
+            if cols[i].startswith('label_'):
+                if pos is not None:
+                    raise ValueError('Can not have more than 1 label column')
+                pos = i
+
+        if pos is None:
+            raise ValueError('Can not find label column')
+
+        return cols[pos]
 
     @classmethod
     def get_materialized_data(cls, start: Optional[str] = None, end: Optional[str] = None, pick_every_nth_row: Optional[int] = 1) -> pd.DataFrame:
