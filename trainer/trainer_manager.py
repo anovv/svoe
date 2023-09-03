@@ -1,5 +1,6 @@
 from typing import Optional, Dict, Any, List
 
+import yaml
 from pydantic import BaseModel
 from ray.air import ScalingConfig, RunConfig
 from ray.air.integrations.mlflow import MLflowLoggerCallback
@@ -16,7 +17,7 @@ from ray.tune.search import sample
 
 class XGBoostParams(BaseModel):
     num_boost_rounds: int
-    train_valid_test_split: List[int]
+    train_valid_test_split: List[float]
     params: Dict[str, Any]
 
 
@@ -33,8 +34,7 @@ class TunerConfig(BaseModel):
 
 # TODO worker spec?
 class TrainerConfig(BaseModel):
-    user_id: str
-    xgboost_params: Optional[XGBoostParams]
+    xgboost: Optional[XGBoostParams]
     num_workers: int
     tuner_config: Optional[TunerConfig]
 
@@ -49,7 +49,7 @@ class TrainerManager:
 
     @classmethod
     def _validate_config(cls, config: TrainerConfig) -> bool:
-        required_params = ['xgboost_params', 'pytorch_params']
+        required_params = ['xgboost', 'pytorch']
         config_args_keys = list(config.__dict__.keys())
         intersect = list(set(required_params).intersection(set(config_args_keys)))
         if len(intersect) != 1:
@@ -95,27 +95,27 @@ class TrainerManager:
         params_raw = param_space_raw['params']
         params = {}
         for param_name in params_raw:
-            func_name = params_raw[param_name]
+            func_name = list(params_raw[param_name].keys())[0]
             if func_name not in func_name_to_callable:
                 raise ValueError(f'Unnknown function {func_name}')
             func = func_name_to_callable[func_name]
-            kwargs = params_raw[func_name]
+            kwargs = params_raw[param_name][func_name]
             params[param_name] = func(**kwargs)
 
         return {'params': params}
 
-    def _build_run_config(self, run_name: str, tags: Dict) -> RunConfig:
+    def _build_run_config(self, trainer_run_id: str, tags: Dict) -> RunConfig:
         return RunConfig(
             verbose=2,
             callbacks=[MLflowLoggerCallback(
                 tracking_uri=REMOTE_TRACKING_URI,
-                experiment_name=run_name,
+                experiment_name=trainer_run_id,
                 tags=tags,
                 save_artifact=True)]
         )
 
     def _build_trainer(self, run_config: RunConfig) -> BaseTrainer:
-        if self.trainer_config.xgboost_params is not None:
+        if self.trainer_config.xgboost is not None:
             return self._build_xgboost_trainer(run_config=run_config)
         else:
             raise ValueError('Unknown trainer type')
@@ -126,7 +126,7 @@ class TrainerManager:
         print(f'Starting trainer for dataset: {ds_metadata}')
         label_column = Featurizer.get_label_column(ds)
 
-        train_valid_test_split = self.trainer_config.xgboost_params.train_valid_test_split
+        train_valid_test_split = self.trainer_config.xgboost.train_valid_test_split
         train_ds, valid_ds, test_ds = ds.split_proportionately(train_valid_test_split)
 
         # TODO validate dataset has ['timestamp', 'receipt_timestamp'] cols
@@ -137,14 +137,14 @@ class TrainerManager:
         trainer = XGBoostTrainer(
             scaling_config=ScalingConfig(num_workers=self.trainer_config.num_workers, use_gpu=False),
             label_column=label_column,
-            params=self.trainer_config.xgboost_params.params,
+            params=self.trainer_config.xgboost.params,
             # TODO set run name?
             run_config=run_config,
             # TODO re what valid is used for
             # https://www.kaggle.com/questions-and-answers/61835
             datasets=xgboost_datasets,
             # preprocessor=preprocessor, # XGBoost does not need feature scaling
-            num_boost_round=self.trainer_config.xgboost_params.num_boost_rounds,
+            num_boost_round=self.trainer_config.xgboost.num_boost_rounds,
         )
         return trainer
 
@@ -161,15 +161,30 @@ class TrainerManager:
             ),
         )
 
-    def run(self, run_name: str, tags: Dict):
+    def run(self, trainer_run_id: str, tags: Dict):
         with ray.init(address=self.ray_address, ignore_reinit_error=True, runtime_env={
             'pip': ['xgboost', 'xgboost_ray', 'mlflow']
         }):
-            run_config = self._build_run_config(run_name=run_name, tags=tags)
+            # TODO
+            # INFO tuner_internal.py:90 -- A `RunConfig` was passed to both the `Tuner` and the `XGBoostTrainer`.
+            # The run config passed to the `Tuner` is the one that will be used.
+            run_config = self._build_run_config(trainer_run_id=trainer_run_id, tags=tags)
             trainer = self._build_trainer(run_config=run_config)
             if self.requires_tuner:
                 tuner = self._build_tuner(trainer=trainer, run_config=run_config)
                 tuner.fit()
             else:
                 trainer.fit()
+
+if __name__ == '__main__':
+    # tempdir, path = download_file('s3://svoe-remote-code/1/svoe_airflow.operators.svoe_python_operator.SvoePythonOperator/5e0d8a6714798ab5138596693e2ec6ab/test_remote_code_v1.py')
+    # tempdir.cleanup()
+    # print(path)
+    user_id = '1'
+    conf_yaml_path = './trainer-config.yaml'
+    with open(conf_yaml_path, 'r') as stream:
+        raw_conf = yaml.safe_load(stream)
+        config = TrainerConfig(**raw_conf)
+        trainer_manager = TrainerManager(config=config, ray_address='ray://127.0.0.1:10001')
+        trainer_manager.run(trainer_run_id='sample-run-id', tags={})
 

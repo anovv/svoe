@@ -86,7 +86,6 @@ class Featurizer:
         # should return metadata about featurization result e.g. in memory size, num blocks, schema, set name, etc.
         return {
             'count': ds.count(),
-            'columns': ds.columns(),
             'schema': ds.schema(),
             'num_blocks': ds.num_blocks(),
             'size_bytes': ds.size_bytes(),
@@ -102,7 +101,8 @@ class Featurizer:
     @classmethod
     def get_label_column(cls, ds: Dataset) -> str:
         ds_metadata = cls.get_ds_metadata(ds)
-        cols = ds_metadata['columns']
+        schema: pyarrow.Schema = ds_metadata['schema']
+        cols = schema.names
         pos = None
         for i in range(len(cols)):
             if cols[i].startswith('label_'):

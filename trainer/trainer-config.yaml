@@ -1,0 +1,24 @@
+xgboost:
+  params:
+    tree_method: 'approx'
+    objective: 'reg:linear'
+    eval_metric: [ 'logloss', 'error' ]
+  num_boost_rounds: 10
+  train_valid_test_split: [0.5, 0.3]
+
+num_workers: 3
+tuner_config:
+  param_space:
+    params:
+      max_depth:
+        randint:
+          lower: 2
+          upper: 8
+      min_child_weight:
+        randint:
+          lower: 1
+          upper: 10
+  num_samples: 8
+  metric: 'train-logloss'
+  mode: 'min'
+  max_concurrent_trials: 1
