@@ -129,7 +129,7 @@ class ExecutionSimulator:
                 commission=commission
             )
 
-        order.status = OrderStatus.FILLED # TODO is it by ref? does it update self.orders?
+        order.status = OrderStatus.FILLED
         return trade
 
     def _record_state_snapshot(self):
@@ -182,7 +182,7 @@ class ExecutionSimulator:
             records.append(record)
         return pd.DataFrame(records)
 
-    # TODO this does not take in accout full instrument info
+    # TODO this does not take in account full instrument info
     def trades_df(self) -> pd.DataFrame:
         records = []
         for t in self.executed_trades:

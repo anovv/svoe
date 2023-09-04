@@ -9,11 +9,12 @@ def _parse_symbol(symbol: str) -> Tuple[str, str]:
     s = symbol.split('-')
     return s[0], s[1]
 
+
 def _compose_symbol(base: str, quote: str) -> str:
     return base + '-' + quote
 
 
-# instead of symbol (pair of assets) it has single asset. Used in walltes
+# instead of symbol (pair of assets) it has single asset. Used in wallets
 @dataclass(frozen=True, eq=True)
 class AssetInstrument:
     exchange: str

@@ -15,7 +15,7 @@ import concurrent.futures
 from simulation.data.data_generator import DataGenerator
 from simulation.models.instrument import Instrument
 from common.common_utils import flatten_tuples
-from common.pandas import load_df
+from common.pandas.df_utils import load_df
 
 
 class FeatureStreamGenerator(DataGenerator):

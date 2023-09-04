@@ -63,7 +63,7 @@ class BaseStrategy:
     def on_data_udf(self, data_event: Dict) -> Optional[List[Order]]:
         raise NotImplementedError
 
-    def make_order(self, side: OrderSide, type: OrderType, instrument: Instrument, qty: float, price: float) -> Order:
+    def make_order(self, side: OrderSide, order_type: OrderType, instrument: Instrument, qty: float, price: float) -> Order:
         order_id = str(uuid.uuid4())
         # lock quantities
         base_instr, quote_instr = instrument.to_asset_instruments()
@@ -72,14 +72,14 @@ class BaseStrategy:
         # qty is base_qty
         if side == OrderSide.BUY:
             # we lock quote
-            qoute_qty = price * qty
-            quote_wallet.lock_from_balance(order_id=order_id, qty=qoute_qty)
+            quote_qty = price * qty
+            quote_wallet.lock_from_balance(order_id=order_id, qty=quote_qty)
         else:
             base_wallet.lock_from_balance(order_id=order_id, qty=qty)
 
         return Order(
             order_id=order_id,
-            type=type,
+            type=order_type,
             side=side,
             instrument=instrument,
             price=price,

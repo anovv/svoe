@@ -1,22 +1,16 @@
 import yaml
 
 from pydantic.dataclasses import dataclass
-from typing import List, Dict
+from typing import List
 
-from simulation.models.instrument import Instrument, AssetInstrument
+from simulation.models.instrument import AssetInstrument
 from simulation.models.wallet import Wallet
 
 
 @dataclass
 class Portfolio:
-    # TODO make it a List[Wallet]
     wallets: List[Wallet]
     quote: AssetInstrument
-
-    # @classmethod
-    # def from_config(cls, config: Dict) -> 'Portfolio':
-    #     q = AssetInstrument(exchange='BINANCE', instrument_type='spot', asset='USDT')
-    #     return Portfolio(wallets={},quote=quote) # TODO construct wallets from config
 
     @classmethod
     def load_config(cls, path: str) -> 'Portfolio':

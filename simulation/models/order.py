@@ -17,6 +17,7 @@ class OrderType(Enum):
     LIMIT = 'limit'
     MARKET = 'market'
 
+
 class OrderSide(Enum):
     BUY = 'BUY'
     SELL = 'SELL'

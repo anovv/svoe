@@ -9,7 +9,7 @@ from simulation.strategy.base import BaseStrategy
 
 class BuyLowSellHighStrategy(BaseStrategy):
 
-    def __init__(self, instrument: Instrument, clock: Clock, portfolio: Portfolio):
+    def __init__(self, instrument: Instrument, clock: Clock, portfolio: Portfolio, params: Dict):
         super(BuyLowSellHighStrategy, self).__init__(clock, portfolio)
         self.instrument = instrument
         base, quote = self.instrument.to_asset_instruments()
@@ -18,8 +18,8 @@ class BuyLowSellHighStrategy(BaseStrategy):
         self.local_min = None
         self.local_max = None
 
-        self.buy_signal_thresh = 0.05
-        self.sell_signal_thresh = 0.05
+        self.buy_signal_thresh = params['buy_signal_thresh']
+        self.sell_signal_thresh = params['sell_signal_thresh']
 
         self.three_vals = []
 
@@ -45,7 +45,7 @@ class BuyLowSellHighStrategy(BaseStrategy):
                 self.local_max = None
                 return [self.make_order(
                     side=OrderSide.BUY,
-                    type=OrderType.MARKET,
+                    order_type=OrderType.MARKET,
                     instrument=self.instrument,
                     qty=0.9 * self.quote_wallet.free_balance() / mid_price,
                     price=mid_price
@@ -58,7 +58,7 @@ class BuyLowSellHighStrategy(BaseStrategy):
                 self.local_max = None
                 return [self.make_order(
                     side=OrderSide.SELL,
-                    type=OrderType.MARKET,
+                    order_type=OrderType.MARKET,
                     instrument=self.instrument,
                     qty=0.9 * self.base_wallet.free_balance(),
                     price=mid_price
