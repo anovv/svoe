@@ -5,6 +5,8 @@ from simulation.loop.loop import Loop
 
 import ray
 
+# TODO re blocking calls
+# https://stackoverflow.com/questions/56556905/remote-calls-are-blocking-when-used-on-methods-in-an-actor-object
 
 @ray.remote
 class SimulationWorkerActor:
@@ -12,7 +14,7 @@ class SimulationWorkerActor:
     def __init__(self):
         self.loop = None
 
-    async def run_loop(self, loop: Loop, split_id: int):
+    def run_loop(self, loop: Loop, split_id: int):
         # TODO check if there is already a running loop
         self.split_id = split_id
         self.loop = loop
@@ -23,10 +25,10 @@ class SimulationWorkerActor:
         print(f'Finished loop for split {split_id} in {self.run_loop_time}s')
 
     # TODO make actor threaded, otherwise calling this won't work due to block from run_loop
-    async def interrupt_loop(self):
+    def interrupt_loop(self):
         self.loop.set_is_running(False)
 
-    async def get_run_stats(self) -> Dict:
+    def get_run_stats(self) -> Dict:
         # TODO proper method on Portfolio class to get run stats
         return {
             'split_id': self.split_id,

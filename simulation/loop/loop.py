@@ -32,6 +32,7 @@ class Loop:
             data_event = self.data_generator.next()
             if data_event is not None:
                 ts = data_event['timestamp'] # TODO
+                raise
                 self.clock.set(ts)
                 orders = self.strategy.on_data(data_event)
                 if orders is not None and len(orders) > 0:
