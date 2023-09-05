@@ -1,4 +1,5 @@
-from typing import List, Any
+import time
+from typing import List, Any, Dict
 
 import ray
 
@@ -14,74 +15,122 @@ from simulation.models.portfolio import Portfolio
 from simulation.strategy.base import BaseStrategy
 from simulation.strategy.buy_low_sell_high import BuyLowSellHighStrategy
 
+import simulation, common
 
 class SimulationRunner:
 
-    def __init__(self, generators: List[DataGenerator], portfolio: Portfolio, strategy: BaseStrategy, execution_simulator: ExecutionSimulator):
+    def __init__(self, clock: Clock, generators: List[DataGenerator], portfolio: Portfolio, strategy: BaseStrategy):
+        self.clock = clock
         self.generators = generators
         self.portfolio = portfolio
         self.strategy = strategy
-        self.execution_simulator = execution_simulator
         # TODO config?
-        pass
 
     def run_single(self):
         loop = Loop(
-            clock=clock,
+            clock=self.clock,
             data_generator=self.generators[0],
             portfolio=self.portfolio,
             strategy=self.strategy,
-            execution_simulator=self.execution_simulator
+            execution_simulator=ExecutionSimulator(self.clock, self.portfolio, self.generators[0])
         )
-
         try:
             loop.run()
         except KeyboardInterrupt:
             loop.set_is_running(False)
 
-    def run_distributed(self) -> Any:
-        # TODO resource spec for workers
-        actors = [SimulationWorkerActor.remote(num_cpus=1) for _ in range(len(self.generators))]
+    def run_distributed(self, ray_address: str) -> Any:
+        with ray.init(address=ray_address, ignore_reinit_error=True, runtime_env={
+            'pip': ['xgboost', 'xgboost_ray', 'mlflow'],
+            'py_modules': [simulation, common],
 
-        refs = [actors[i].run_loop.remote(Loop(
-            clock=Clock(-1),
-            data_generator=self.generators[i],
-            portfolio=self.portfolio,
-            strategy=self.strategy,
-            execution_simulator=self.execution_simulator
-        )) for i in range(len(actors))]
+        }):
+            print(f'Starting distributed run for {len(self.generators)} data splits...')
+            # TODO resource spec for workers
+            actors = [SimulationWorkerActor.options(num_cpus=1).remote() for _ in range(len(self.generators))]
+            print(f'Inited {len(actors)} worker actors')
 
-        # wait for all runs to finish
-        ray.get(refs)
-        stats = ray.get([actor.get_run_stats.remote() for actor in actors])
-        return self._aggregate_stats(stats)
+            refs = [actors[i].run_loop.remote(
+                loop=Loop(
+                    clock=self.clock,
+                    data_generator=self.generators[i],
+                    portfolio=self.portfolio,
+                    strategy=self.strategy,
+                    execution_simulator=ExecutionSimulator(self.clock, self.portfolio, self.generators[i])
+                ),
+                split_id=i
+            ) for i in range(len(actors))]
+            print(f'Scheduled loops, waiting for finish...')
 
-    def _aggregate_stats(self, stats: List[Any]) -> Any:
-        pass # TODO
+            # wait for all runs to finish
+            ray.get(refs)
+            stats = ray.get([actor.get_run_stats.remote() for actor in actors])
+            return self._aggregate_stats(stats)
 
-if __name__ == '__main__':
-    clock = Clock(-1)
+    def _aggregate_stats(self, stats: List[Dict]) -> Dict:
+        for s in stats:
+            del s['state_snapshots']
+        return {'stats': stats}
+
+
+def test_single_run():
     # generator = FeatureStreamGenerator(featurizer_config=None)
+    clock = Clock(-1)
     instrument = Instrument('BINANCE', 'spot', 'BTC-USDT')
-    generator = SineDataGenerator(instrument, 0, 100000, 1)
+    generator = SineDataGenerator.from_time_range(
+        instrument=instrument,
+        start_ts=0,
+        end_ts=1000000,
+        step=1
+    )
     portfolio = Portfolio.load_config('portfolio-config.yaml')
     strategy = BuyLowSellHighStrategy(instrument=instrument, clock=clock, portfolio=portfolio, params={
         'buy_signal_thresh': 0.05,
         'sell_signal_thresh': 0.05,
     })
-    execution_simulator = ExecutionSimulator(clock, portfolio, generator)
-    loop = Loop(
-        clock=clock,
-        data_generator=generator,
-        portfolio=portfolio,
-        strategy=strategy,
-        execution_simulator=execution_simulator
-    )
 
     runner = SimulationRunner(
+        clock=clock,
         generators=[generator],
         portfolio=portfolio,
-        strategy=strategy,
-        execution_simulator=execution_simulator
+        strategy=strategy
     )
+
+    start = time.time()
+    print(f'Single run started')
     runner.run_single()
+    print(f'Single run finished in {time.time() - start}s')
+
+
+def test_distributed_run():
+    clock = Clock(-1)
+    instrument = Instrument('BINANCE', 'spot', 'BTC-USDT')
+    # TODO load featurizer_config
+    # generators = FeatureStreamGenerator.split(featurizer_config=None, num_splits=4)
+    generators = SineDataGenerator.split(
+        instrument=instrument,
+        start_ts=0,
+        end_ts=1000000,
+        step=1,
+        num_splits=4
+    )
+    portfolio = Portfolio.load_config('portfolio-config.yaml')
+    strategy = BuyLowSellHighStrategy(instrument=instrument, clock=clock, portfolio=portfolio, params={
+        'buy_signal_thresh': 0.05,
+        'sell_signal_thresh': 0.05,
+    })
+
+    runner = SimulationRunner(
+        clock=clock,
+        generators=generators,
+        portfolio=portfolio,
+        strategy=strategy,
+    )
+    res = runner.run_distributed(ray_address='ray://127.0.0.1:10001')
+    return res
+
+
+if __name__ == '__main__':
+    # test_single_run()
+    res = test_distributed_run()
+    print(res)

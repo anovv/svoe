@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, List
 
 from simulation.models.instrument import Instrument
 
@@ -12,4 +12,8 @@ class DataGenerator:
         raise NotImplementedError
 
     def get_cur_mid_prices(self) -> Dict[Instrument, float]:
+        raise NotImplementedError
+
+    @classmethod
+    def split(cls, *args, **kwargs) -> List['DataGenerator']:
         raise NotImplementedError

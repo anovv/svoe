@@ -2,6 +2,7 @@ from typing import Dict, List, Tuple
 
 from intervaltree import Interval
 
+from common.time.utils import split_date_range
 from featurizer.blocks.blocks import BlockRangeMeta, BlockRange, ranges_to_interval_dict, get_overlaps, \
     prune_overlaps
 from featurizer.calculator.tasks import merge_blocks
@@ -93,11 +94,11 @@ class FeatureStreamGenerator(DataGenerator):
         ranges_meta_per_data_key = storage.get_data_meta(data_keys, start_date=featurizer_config.start_date,
                                                          end_date=featurizer_config.end_date)
         ranges_meta_per_data = {data: ranges_meta_per_data_key[data_key(data.params)] for data in data_deps} # Dict[Feature, List[BlockRangeMeta]]
+        # TODO indicate if data ranges are empty
         data_ranges = self.load_data_ranges(ranges_meta_per_data)
         self.input_data_events = self.merge_data_ranges(data_ranges)
         self.cur_interval_id = 0
         self.cur_input_event_index = 0
-
 
     # TODO util this?
     def load_data_ranges(self, ranges_meta_per_data: Dict[Feature, List[BlockRangeMeta]]) -> Dict[Interval, Dict[Feature, BlockRange]]:
@@ -113,7 +114,6 @@ class FeatureStreamGenerator(DataGenerator):
         for interval in range_meta_intervals:
             for feature in range_meta_intervals[interval]:
                 num_blocks += len(range_meta_intervals[interval][feature])
-
 
         # init data_ranges with empty lists. They will be populated later
         data_ranges = {}
@@ -227,3 +227,23 @@ class FeatureStreamGenerator(DataGenerator):
         if mid_price is None:
             raise ValueError('DataGenerator should provide mid_price stream for all data/instrument inputs')
         return {Instrument('BINANCE', 'spot', 'BTC-USDT'): mid_price}
+
+    @classmethod
+    def split(cls, featurizer_config: FeaturizerConfig, num_splits: int) -> List['DataGenerator']:
+        start_date = featurizer_config.start_date
+        end_date = featurizer_config.end_date
+        generators = []
+        date_range_splits = split_date_range(start_date, end_date)
+        for _start_date, _end_date in date_range_splits:
+            config_split = featurizer_config.copy(deep=True)
+            config_split.start_date = _start_date
+            config_split.end_date = _end_date
+            gen = FeatureStreamGenerator(config_split)
+            # TODO check if generator is empty
+            generators.append(gen)
+
+        return generators
+
+
+
+

@@ -45,11 +45,11 @@ class Loop:
         prices = prices.drop_duplicates()
 
         df = pd.merge(prices, self.execution_simulator.balances_df(), on='timestamp')
-        print(df)
+        # print(df)
 
         trades = self.execution_simulator.trades_df()
         trades = trades[trades.symbol == 'BTC-USDT']
-        print(trades)
+        # print(trades)
 
 
 

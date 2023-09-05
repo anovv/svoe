@@ -3,7 +3,7 @@ import unittest
 from typing import Dict, Any
 
 from ray import serve
-from ray.train.sklearn import SklearnTrainer
+# from ray.train.sklearn import SklearnTrainer
 from ray.air.config import ScalingConfig
 
 import numpy as np
@@ -17,7 +17,7 @@ from ray.air.integrations.mlflow import MLflowLoggerCallback
 
 from featurizer.runner import Featurizer
 
-from sklearn.metrics import mean_squared_error, mean_absolute_error
+# from sklearn.metrics import mean_squared_error, mean_absolute_error
 
 def _xgboost_trainer(label: str, datesets: Dict[str, Any]) -> XGBoostTrainer:
     num_workers = 2
@@ -93,10 +93,10 @@ class TestXGBoostTrainer(unittest.TestCase):
             # TODO first two values are weird outliers for some reason, why?
             p = p.tail(-2)
 
-            mse = mean_squared_error(p['label_mid_price'], p['predictions'])
-            rmse = np.sqrt(mse)
-            mae = mean_absolute_error(p['label_mid_price'], p['predictions'])
-            print(f'MSE: {mse}, RMSE: {rmse}, MAE: {mae}')
+            # mse = mean_squared_error(p['label_mid_price'], p['predictions'])
+            # rmse = np.sqrt(mse)
+            # mae = mean_absolute_error(p['label_mid_price'], p['predictions'])
+            # print(f'MSE: {mse}, RMSE: {rmse}, MAE: {mae}')
 
             p = p.head(200)
             # p.plot(x='timestamp', y=['mid_price', 'label_mid_price', 'predictions'])

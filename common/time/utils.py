@@ -1,6 +1,6 @@
 import math
 from datetime import datetime
-from typing import Optional
+from typing import Optional, List, Tuple
 
 import pytz
 
@@ -31,3 +31,8 @@ def get_sampling_bucket_ts(timestamp: float, bucket: str, return_bucket_start: O
     num_buckets = int((timestamp - start_ts)/bucket_s)
     bucket_start_ts = start_ts + num_buckets * bucket_s
     return bucket_start_ts if return_bucket_start else bucket_start_ts + bucket_s
+
+
+def split_date_range(start_date: str, end_date: str) -> List[Tuple[str, str]]:
+    raise NotImplementedError
+

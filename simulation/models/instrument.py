@@ -1,8 +1,6 @@
 from pydantic.dataclasses import dataclass
 from typing import Tuple
 
-from tensortrade.oms.instruments import Instrument
-
 
 # TODO util this
 def _parse_symbol(symbol: str) -> Tuple[str, str]:
@@ -41,7 +39,7 @@ class Instrument:
         )
 
     @classmethod
-    def from_asset_instruments(cls, base: AssetInstrument, quote: AssetInstrument) -> Instrument:
+    def from_asset_instruments(cls, base: AssetInstrument, quote: AssetInstrument) -> 'Instrument':
         if base.exchange != quote.exchange:
             raise ValueError('instruments should be of same exchange')
         if base.instrument_type != quote.instrument_type:

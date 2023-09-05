@@ -3,8 +3,6 @@ from typing import Dict, List, Optional, Any
 
 from ray.air import Checkpoint
 from ray.train.predictor import Predictor
-from ray.train.sklearn import SklearnPredictor
-from ray.train.torch import TorchPredictor
 from ray.train.xgboost import XGBoostPredictor
 
 from simulation.clock import Clock
@@ -36,10 +34,10 @@ class BaseStrategy:
         # TODO enum this
         if model_type == 'xgboost':
             predictor = XGBoostPredictor.from_checkpoint(checkpoint)
-        elif model_type == 'torch':
-            predictor = TorchPredictor.from_checkpoint(checkpoint)
-        elif model_type == 'sklearn':
-            predictor = SklearnPredictor.from_checkpoint(checkpoint)
+        # elif model_type == 'torch':
+        #     predictor = TorchPredictor.from_checkpoint(checkpoint)
+        # elif model_type == 'sklearn':
+        #     predictor = SklearnPredictor.from_checkpoint(checkpoint)
         # elif model_type == 'rl':
             # predictor = RLPredictor.from_checkpoint(checkpoint)
         else:

@@ -11,7 +11,7 @@ class TestSineDataGenerator(unittest.TestCase):
 
     def test_gen(self):
         instrument = Instrument('BINANCE', 'spot', 'BTC-USDT')
-        g = SineDataGenerator(instrument, 0, 100000, 1)
+        g = SineDataGenerator.from_time_range(instrument, 0, 100000, 1)
 
         events = []
         # for _ in range(10000):
