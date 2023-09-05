@@ -94,7 +94,7 @@ class SimulationRunner:
 
 
 def test_single_run():
-    featurizer_config_raw = yaml.safe_load(open('./feature_stream/test-featurizer_config', 'r'))
+    featurizer_config_raw = yaml.safe_load(open('./data/feature_stream/test-featurizer-config.yaml', 'r'))
     generator = FeatureStreamGenerator(featurizer_config=FeaturizerConfig(**featurizer_config_raw))
     clock = Clock(-1)
     instrument = Instrument('BINANCE', 'spot', 'BTC-USDT')

@@ -201,7 +201,21 @@ class FeatureStreamGenerator(DataGenerator):
                     data_streams[data].emit(input_event)
 
         self.should_construct_new_out_event = True
-        return self.cur_out_event
+        return FeatureStreamGenerator._pretify_out_event(self.cur_out_event)
+
+    @staticmethod
+    def _pretify_out_event(raw_out_event: Dict) -> Dict:
+        # sample raw event
+        # {
+        #   feature-MidPriceFD-0-4f83d18e: frozendict.frozendict({'timestamp': 1675216068.340869, 'receipt_timestamp': 1675216068.340869, 'mid_price': 23169.260000000002}),
+        #   feature-VolatilityStddevFD-0-ad30ace5: frozendict.frozendict({'timestamp': 1675216068.340869, 'receipt_timestamp': 1675216068.340869, 'volatility': 0.00023437500931322575})
+        # }
+        event = {}
+        for feature in raw_out_event:
+            for col in raw_out_event[feature]:
+                event[col] = raw_out_event[feature][col]
+        return event
+
 
     def has_next(self) -> bool:
         if self.cur_interval_id >= len(self.input_data_events.keys()):
