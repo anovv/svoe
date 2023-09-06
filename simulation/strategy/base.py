@@ -6,6 +6,7 @@ from ray.train.predictor import Predictor
 from ray.train.xgboost import XGBoostPredictor
 
 from simulation.clock import Clock
+from simulation.data.data_generator import DataStreamEvent
 from simulation.models.instrument import Instrument
 from simulation.models.order import Order, OrderSide, OrderType, OrderStatus
 from simulation.models.portfolio import Portfolio
@@ -48,8 +49,8 @@ class BaseStrategy:
     def _event_to_predictor_request(self, event: Any) -> Any:
         return None # TODO
 
-    def on_data(self, data_event: Dict) -> Optional[List[Order]]:
-        ts = data_event['timestamp']
+    def on_data(self, data_event: DataStreamEvent) -> Optional[List[Order]]:
+        ts = data_event.timestamp
         if self.predictor is not None:
             if self.latest_prediction_ts is None or \
                     ts - self.latest_prediction_ts > convert_str_to_seconds(self.prediction_latency):
@@ -58,7 +59,7 @@ class BaseStrategy:
                 self.latest_prediction_ts = ts
         return self.on_data_udf(data_event)
 
-    def on_data_udf(self, data_event: Dict) -> Optional[List[Order]]:
+    def on_data_udf(self, data_event: DataStreamEvent) -> Optional[List[Order]]:
         raise NotImplementedError
 
     def make_order(self, side: OrderSide, order_type: OrderType, instrument: Instrument, qty: float, price: float) -> Order:

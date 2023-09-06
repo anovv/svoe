@@ -3,7 +3,7 @@ import unittest
 import matplotlib.pyplot as plt
 import pandas as pd
 
-from simulation.data.sine.sine_data_generator import SineDataGenerator
+from simulation.data.sine.sine_data_generator import SineDataStreamGenerator
 from simulation.models.instrument import Instrument
 
 
@@ -11,7 +11,7 @@ class TestSineDataGenerator(unittest.TestCase):
 
     def test_gen(self):
         instrument = Instrument('BINANCE', 'spot', 'BTC-USDT')
-        g = SineDataGenerator.from_time_range(instrument, 0, 100000, 1)
+        g = SineDataStreamGenerator.from_time_range(instrument, 0, 100000, 1)
 
         events = []
         # for _ in range(10000):

@@ -4,8 +4,8 @@ import io
 
 import requests
 
-from featurizer.api.api import FeaturizerStorage
-from featurizer.features.definitions.tvi.trade_volume_imb_fd import TradeVolumeImbFD
+from featurizer.storage.featurizer_storage import FeaturizerStorage
+from featurizer.features.definitions.tvi.trade_volume_imb_fd.trade_volume_imb_fd import TradeVolumeImbFD
 from featurizer.features.feature_tree.feature_tree import construct_feature_tree
 from featurizer.sql.data_catalog.models import DataCatalog
 

@@ -1,7 +1,7 @@
 import pandas as pd
 
 from simulation.clock import Clock
-from simulation.data.data_generator import DataGenerator
+from simulation.data.data_generator import DataStreamGenerator
 from simulation.execution.execution_simulator import ExecutionSimulator
 from simulation.models.portfolio import Portfolio
 from simulation.strategy.base import BaseStrategy
@@ -12,7 +12,7 @@ class Loop:
     def __init__(
             self,
             clock: Clock,
-            data_generator: DataGenerator,
+            data_generator: DataStreamGenerator,
             portfolio: Portfolio,
             strategy: BaseStrategy,
             execution_simulator: ExecutionSimulator):
@@ -31,7 +31,7 @@ class Loop:
         while self.is_running and self.data_generator.has_next():
             data_event = self.data_generator.next()
             if data_event is not None:
-                ts = data_event['timestamp'] # TODO
+                ts = data_event.timestamp
                 self.clock.set(ts)
                 orders = self.strategy.on_data(data_event)
                 if orders is not None and len(orders) > 0:
@@ -45,7 +45,6 @@ class Loop:
         prices = prices.drop_duplicates()
         print(prices)
         print(self.execution_simulator.balances_df())
-        raise
 
         df = pd.merge(prices, self.execution_simulator.balances_df(), on='timestamp')
         # print(df)

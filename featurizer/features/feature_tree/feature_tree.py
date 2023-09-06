@@ -39,7 +39,7 @@ class Feature(NodeMixin):
         dep_data_params = [d.params for d in data_deps]
         dep_feature_params = [f.params for f in feature_deps]
 
-        # TODO add current and dep feature_defenition version to hash
+        # TODO add current and dep feature_defenition versions to hash
         # TODO prev feature/data dep keys should also be a part of the key
         return joblib.hash([self._is_label, self.feature_definition.__name__, dep_data_params, dep_feature_params])
 

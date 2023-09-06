@@ -2,12 +2,12 @@ from typing import Dict, List
 
 import numpy as np
 
-from simulation.data.data_generator import DataGenerator
+from simulation.data.data_generator import DataStreamGenerator
 from simulation.models.instrument import Instrument
 
 
 # TODO deprecate this, create SineFD feature definition and use FeatureStreamGenerator instead
-class SineDataGenerator(DataGenerator):
+class SineDataStreamGenerator(DataStreamGenerator):
 
     def __init__(self, instrument: Instrument, timesteps: List[float], mid_prices: List[float]):
         self.instrument = instrument
@@ -41,10 +41,11 @@ class SineDataGenerator(DataGenerator):
         mean = 10000
         frequency = int(num_samples / 5000)
         mid_prices = amplitude * np.sin(2 * np.pi * frequency * timesteps) + mean
-        return SineDataGenerator(instrument=instrument, timesteps=list(timesteps), mid_prices=mid_prices)
+        return SineDataStreamGenerator(instrument=instrument, timesteps=list(timesteps), mid_prices=mid_prices)
 
     @classmethod
-    def split(cls, instrument: Instrument, start_ts: float, end_ts: float, step: float, num_splits: int) -> List['DataGenerator']:
+    def split(cls, instrument: Instrument, start_ts: float, end_ts: float, step: float, num_splits: int) -> List[
+        'DataStreamGenerator']:
         num_samples = int((end_ts - start_ts) / step)
         timesteps = np.linspace(start_ts, end_ts, num_samples, endpoint=True)
         amplitude = 2000
@@ -62,7 +63,7 @@ class SineDataGenerator(DataGenerator):
         for i in range(len(split_ts)):
             _timesteps = split_ts[i]
             _mid_prices = split_mid_prices[i]
-            generators.append(SineDataGenerator(
+            generators.append(SineDataStreamGenerator(
                 instrument=instrument,
                 timesteps=_timesteps,
                 mid_prices=_mid_prices

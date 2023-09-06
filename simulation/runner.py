@@ -9,9 +9,9 @@ from ray.util.scheduling_strategies import PlacementGroupSchedulingStrategy
 from featurizer.config import FeaturizerConfig
 from simulation.actors.simulation_worker_actor import SimulationWorkerActor
 from simulation.clock import Clock
-from simulation.data.data_generator import DataGenerator
-from simulation.data.feature_stream.feature_stream_generator import FeatureStreamGenerator
-from simulation.data.sine.sine_data_generator import SineDataGenerator
+from simulation.data.data_generator import DataStreamGenerator
+from simulation.data.feature_stream.feature_stream_generator import FeatureStreamStreamGenerator
+from simulation.data.sine.sine_data_generator import SineDataStreamGenerator
 from simulation.execution.execution_simulator import ExecutionSimulator
 from simulation.loop.loop import Loop
 from simulation.models.instrument import Instrument
@@ -24,7 +24,7 @@ import simulation, common
 
 class SimulationRunner:
 
-    def __init__(self, clock: Clock, generators: List[DataGenerator], portfolio: Portfolio, strategy: BaseStrategy):
+    def __init__(self, clock: Clock, generators: List[DataStreamGenerator], portfolio: Portfolio, strategy: BaseStrategy):
         # TODO generator creation should be inside actor (since it pulls data from remote store)
         self.clock = clock
         self.generators = generators
@@ -97,7 +97,7 @@ class SimulationRunner:
 
 def test_single_run():
     featurizer_config_raw = yaml.safe_load(open('./data/feature_stream/test-featurizer-config.yaml', 'r'))
-    generator = FeatureStreamGenerator(featurizer_config=FeaturizerConfig(**featurizer_config_raw))
+    generator = FeatureStreamStreamGenerator(featurizer_config=FeaturizerConfig(**featurizer_config_raw))
     clock = Clock(-1)
     instrument = Instrument('BINANCE', 'spot', 'BTC-USDT')
     # generator = SineDataGenerator.from_time_range(
@@ -131,7 +131,7 @@ def test_distributed_run():
     instrument = Instrument('BINANCE', 'spot', 'BTC-USDT')
     # TODO load featurizer_config
     # generators = FeatureStreamGenerator.split(featurizer_config=None, num_splits=4)
-    generators = SineDataGenerator.split(
+    generators = SineDataStreamGenerator.split(
         instrument=instrument,
         start_ts=0,
         end_ts=1000000,

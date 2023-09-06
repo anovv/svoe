@@ -6,7 +6,7 @@ from typing import List, Dict, Optional, Tuple
 import pandas as pd
 
 from simulation.clock import Clock
-from simulation.data.data_generator import DataGenerator
+from simulation.data.data_generator import DataStreamGenerator
 from simulation.models.instrument import Instrument, AssetInstrument
 from simulation.models.order import Order, OrderStatus, OrderType, OrderSide
 from simulation.models.portfolio import Portfolio
@@ -23,7 +23,7 @@ class ExecutionSimulator:
         timestamp: float
         total_balance: float
 
-    def __init__(self, clock: Clock, portfolio: Portfolio, data_generator: DataGenerator):
+    def __init__(self, clock: Clock, portfolio: Portfolio, data_generator: DataStreamGenerator):
         self.clock = clock
         self.orders: List[Order] = []
         self.portfolio: Portfolio = portfolio

@@ -1,11 +1,19 @@
+from dataclasses import dataclass
 from typing import Dict, List
 
 from simulation.models.instrument import Instrument
 
 
-class DataGenerator:
+@dataclass
+class DataStreamEvent:
+    timestamp: float
+    receipt_timestamp: float
+    feature_values: Dict[str, Dict[str, float]]
 
-    def next(self) -> Dict:
+
+class DataStreamGenerator:
+
+    def next(self) -> DataStreamEvent:
         raise NotImplementedError
 
     def has_next(self) -> bool:
@@ -15,5 +23,5 @@ class DataGenerator:
         raise NotImplementedError
 
     @classmethod
-    def split(cls, *args, **kwargs) -> List['DataGenerator']:
+    def split(cls, *args, **kwargs) -> List['DataStreamGenerator']:
         raise NotImplementedError

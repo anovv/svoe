@@ -28,3 +28,4 @@ fastapi
 python-multipart
 pyhumps
 mlflow
+diskcache

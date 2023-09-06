@@ -4,7 +4,7 @@ import unittest
 import pandas as pd
 
 from featurizer.config import FeaturizerConfig
-from simulation.data.feature_stream.feature_stream_generator import FeatureStreamGenerator
+from simulation.data.feature_stream.feature_stream_generator import FeatureStreamStreamGenerator
 
 from common.pandas.df_utils import plot_multi
 
@@ -14,7 +14,7 @@ class TestFeatureStreamGenerator(unittest.TestCase):
     def test_gen(self):
         config_path = 'test-featurizer-config.yaml'
         config = FeaturizerConfig.load_config(path=config_path)
-        data_generator = FeatureStreamGenerator(config)
+        data_generator = FeatureStreamStreamGenerator(config)
 
         input_events_per_interval = data_generator.input_data_events
         input_events = input_events_per_interval[list(input_events_per_interval.keys())[0]]

@@ -1,6 +1,7 @@
 from typing import List, Dict, Optional, Tuple
 
 from simulation.clock import Clock
+from simulation.data.data_generator import DataStreamEvent
 from simulation.models.instrument import Instrument
 from simulation.models.order import Order, OrderSide, OrderType
 from simulation.models.portfolio import Portfolio
@@ -25,8 +26,9 @@ class BuyLowSellHighStrategy(BaseStrategy):
 
         self.is_buying = True
 
-    def on_data_udf(self, data_event: Dict) -> Optional[List[Order]]:
-        mid_price = data_event['mid_price'] # TODO query data_generator?
+    def on_data_udf(self, data_event: DataStreamEvent) -> Optional[List[Order]]:
+        feature_key = get_feature_key_for_instrument(self.instrument)
+        mid_price = data_event.feature_values[feature_key]['mid_price'] # TODO query data_generator?
         self.three_vals.append(mid_price)
         if len(self.three_vals) > 3:
             self.three_vals.pop(0)
