@@ -43,6 +43,9 @@ class Loop:
 
         prices = self.execution_simulator.prices_df()
         prices = prices.drop_duplicates()
+        print(prices)
+        print(self.execution_simulator.balances_df())
+        raise
 
         df = pd.merge(prices, self.execution_simulator.balances_df(), on='timestamp')
         # print(df)

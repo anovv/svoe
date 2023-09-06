@@ -21,9 +21,11 @@ from simulation.strategy.buy_low_sell_high import BuyLowSellHighStrategy
 
 import simulation, common
 
+
 class SimulationRunner:
 
     def __init__(self, clock: Clock, generators: List[DataGenerator], portfolio: Portfolio, strategy: BaseStrategy):
+        # TODO generator creation should be inside actor (since it pulls data from remote store)
         self.clock = clock
         self.generators = generators
         self.portfolio = portfolio
@@ -45,7 +47,7 @@ class SimulationRunner:
 
     def run_distributed(self, ray_address: str) -> Any:
         with ray.init(address=ray_address, ignore_reinit_error=True, runtime_env={
-            'pip': ['xgboost', 'xgboost_ray', 'mlflow'],
+            'pip': ['xgboost', 'xgboost_ray', 'mlflow', 'diskcache'],
             'py_modules': [simulation, common],
 
         }):
@@ -125,6 +127,7 @@ def test_single_run():
 
 def test_distributed_run():
     clock = Clock(-1)
+    # TODO infer instruments from featurizer
     instrument = Instrument('BINANCE', 'spot', 'BTC-USDT')
     # TODO load featurizer_config
     # generators = FeatureStreamGenerator.split(featurizer_config=None, num_splits=4)
