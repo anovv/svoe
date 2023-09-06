@@ -83,7 +83,7 @@ class FeatureStreamStreamGenerator(DataStreamGenerator):
                         feature_values={}
                     )
                     self.should_construct_new_out_event = False
-                self.cur_out_event.feature_values[feature.feature_key] = event
+                self.cur_out_event.feature_values[feature] = event
 
         self.unified_out_stream.sink(_unified_out_stream)
 

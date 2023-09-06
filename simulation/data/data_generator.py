@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import Dict, List
 
+from featurizer.features.feature_tree.feature_tree import Feature
 from simulation.models.instrument import Instrument
 
 
@@ -8,7 +9,7 @@ from simulation.models.instrument import Instrument
 class DataStreamEvent:
     timestamp: float
     receipt_timestamp: float
-    feature_values: Dict[str, Dict[str, float]]
+    feature_values: Dict[Feature, Dict[str, float]]
 
 
 class DataStreamGenerator:

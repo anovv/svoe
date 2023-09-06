@@ -16,6 +16,9 @@ class Feature(NodeMixin):
         self.feature_definition = feature_definition
         self.params = params
         self._is_label = False
+
+        # TODO is it ok to call these at init time? Are all the children ready?
+        self._data_deps = self.get_data_deps()
         self.feature_key = self._feature_key()
 
     def __hash__(self):
@@ -44,14 +47,17 @@ class Feature(NodeMixin):
         return joblib.hash([self._is_label, self.feature_definition.__name__, dep_data_params, dep_feature_params])
 
     def get_data_deps(self) -> List['Feature']:
-        data_leafs = []
+        if self._data_deps is not None:
+            return self._data_deps
 
+        data_leafs = []
         def callback(node):
             if node.feature_definition.is_data_source():
                 data_leafs.append(node)
 
         postorder(self, callback)
-        return data_leafs
+        self._data_deps = data_leafs
+        return self._data_deps
 
     def get_inorder_feature_deps(self) -> List['Feature']:
         deps = []
