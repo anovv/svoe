@@ -67,29 +67,6 @@ class Feature(NodeMixin):
         inorder(self, callback)
         return deps
 
-    # TODO move this to FeatureDefinition package
-    def build_stream_graph(self) -> Dict['Feature', Stream]:
-        stream_graph = {}
-
-        def callback(feature: Feature):
-            if feature.feature_definition.is_data_source():
-                stream_graph[feature] = Stream()
-                return
-            dep_upstreams = {}
-            for dep_feature in feature.children:
-                dep_upstreams[dep_feature] = stream_graph[dep_feature]
-            # TODO this should be part of Feature class
-            s = feature.feature_definition.stream(dep_upstreams, feature.params)
-            if isinstance(s, Tuple):
-                stream = s[0]
-                state = s[1]
-            else:
-                stream = s
-            stream_graph[feature] = stream
-
-        postorder(self, callback)
-        return stream_graph
-
     def is_label(self) -> bool:
         return self._is_label
 

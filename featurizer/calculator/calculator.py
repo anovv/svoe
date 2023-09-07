@@ -44,7 +44,12 @@ def build_feature_task_graph(
                     path = block_meta['path']
                     # node = load_if_needed.bind(path, False)
                     ctx = context(feature.feature_key, interval)
-                    node = bind_and_cache(load_if_needed, obj_ref_cache, ctx, path=path, is_feature=False)
+                    if feature.feature_definition.is_synthetic():
+                        node = bind_and_cache(feature.feature_definition.gen_events, obj_ref_cache, ctx, interval=interval, params=feature.params)
+                    else:
+                        # BIG TODO if we only have data sources in config (no features) this won't call parse_events and will
+                        # return raw data. Should we parse events here and no in calc_feature?
+                        node = bind_and_cache(load_if_needed, obj_ref_cache, ctx, path=path, is_feature=False)
 
                     # TODO validate no overlapping intervals here
                     nodes[interval] = node
@@ -101,7 +106,7 @@ def build_feature_task_graph(
                 # TODO validate interval is within range_interval
                 nodes[interval] = node
 
-            # TODO check if range_interval intersects with existing keys/intervals"
+            # TODO check if range_interval intersects with existing keys/intervals
             dag[feature][range_interval] = nodes
             # TODO check if duplicate feature
             if feature not in features_ranges_meta:

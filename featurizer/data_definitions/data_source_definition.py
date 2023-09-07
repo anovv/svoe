@@ -8,3 +8,6 @@ class DataSourceDefinition(DataDefinition):
     def is_data_source(cls) -> bool:
         return True
 
+    @classmethod
+    def is_synthetic(cls) -> bool:
+        return False

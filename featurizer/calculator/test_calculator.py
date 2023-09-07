@@ -15,7 +15,7 @@ from featurizer.features.definitions.volatility.volatility_stddev_fd.volatility_
 from featurizer.sql.data_catalog.models import DataCatalog
 from featurizer.features.definitions.l2_book.l2_snapshot_fd.l2_snapshot_fd import L2SnapshotFD
 from featurizer.features.definitions.mid_price.mid_price_fd.mid_price_fd import MidPriceFD
-from featurizer.features.feature_tree.feature_tree import construct_feature_tree, Feature
+from featurizer.features.feature_tree.feature_tree import construct_feature_tree, Feature, construct_stream_tree
 
 import unittest
 import pandas as pd
@@ -86,10 +86,10 @@ class TestFeatureCalculator(unittest.TestCase):
         data_params = {}
         feature_params = [{'dep_schema': 'cryptotick'}]
         feature = construct_feature_tree(L2SnapshotFD, data_params, feature_params)
-        stream_graph = feature.build_stream_graph()
-        stream = stream_graph[feature]
+        stream, tree = construct_stream_tree(feature)
         data = Feature([], 0, CryptotickL2BookIncrementalData, data_params)
-        sources = {data: stream_graph[data]}
+        sources = {data: tree[data]}
+
         path = 's3://svoe-cataloged-data/l2_book/BINANCE/spot/BTC-USDT/2023-02-01/cryptotick/100.0mb/1675216068-40f26fdc1fafb2c056fc77f76609049ce0a47944.parquet.gz'
         df = load_df(path)
         merged_events = merge_blocks({data: [df]})

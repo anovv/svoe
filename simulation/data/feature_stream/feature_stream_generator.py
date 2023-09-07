@@ -97,7 +97,7 @@ class FeatureStreamStreamGenerator(DataStreamGenerator):
         data_keys = [data_key(d.params) for d in data_deps]
         ranges_meta_per_data_key = storage.get_data_meta(data_keys, start_date=featurizer_config.start_date,
                                                          end_date=featurizer_config.end_date)
-        ranges_meta_per_data = {data: ranges_meta_per_data_key[data_key(data.params)] for data in data_deps} # Dict[Feature, List[BlockRangeMeta]]
+        ranges_meta_per_data: Dict[Feature, List[BlockRangeMeta]] = {data: ranges_meta_per_data_key[data_key(data.params)] for data in data_deps}
         # TODO indicate if data ranges are empty
         data_ranges = self.load_data_ranges(ranges_meta_per_data)
         self.input_data_events = self.merge_data_ranges(data_ranges)
@@ -111,7 +111,7 @@ class FeatureStreamStreamGenerator(DataStreamGenerator):
             meta = ranges_meta_per_data[data]
             ranges_meta_dict_per_data[data] = ranges_to_interval_dict(meta)
 
-        range_meta_intervals = prune_overlaps(get_overlaps(ranges_meta_dict_per_data)) # Dict[Interval, Dict[Feature, BlockRangeMeta]]
+        range_meta_intervals: Dict[Interval, Dict[Feature, BlockRangeMeta]] = prune_overlaps(get_overlaps(ranges_meta_dict_per_data))
 
         # count number of blocks
         num_blocks = 0

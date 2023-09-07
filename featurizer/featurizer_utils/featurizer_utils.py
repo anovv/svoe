@@ -14,6 +14,7 @@ from featurizer.features.feature_tree.feature_tree import Feature
 def merge_blocks(
     blocks: Dict[Feature, BlockRange]
 ) -> List[Tuple[Feature, Event]]:
+    # TODO if only one feature, map directly
     merged = None
     features = list(blocks.keys())
     for i in range(0, len(features)):

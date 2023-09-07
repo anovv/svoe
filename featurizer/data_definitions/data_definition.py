@@ -1,4 +1,6 @@
 from typing import Type, List, Dict, Any
+
+from intervaltree import Interval
 from pandas import DataFrame
 from frozendict import frozendict
 
@@ -22,6 +24,10 @@ class DataDefinition:
     # without isinstance (due to python 3.9 bug)
     @classmethod
     def is_data_source(cls) -> bool:
+        raise NotImplemented
+
+    @classmethod
+    def is_synthetic(cls) -> bool:
         raise NotImplemented
 
     @classmethod
@@ -54,3 +60,8 @@ class DataDefinition:
     def construct_event(cls, *args) -> Event:
         # TODO validate schema here?
         return frozendict(dict(zip(list(cls.event_schema().keys()), list(args))))
+
+    # for synthetic data
+    @classmethod
+    def gen_events(cls, interval: Interval, params: Dict) -> DataFrame:
+        raise NotImplementedError
