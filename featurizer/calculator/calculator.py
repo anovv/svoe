@@ -45,7 +45,7 @@ def build_feature_task_graph(
                     # node = load_if_needed.bind(path, False)
                     ctx = context(feature.feature_key, interval)
                     if feature.feature_definition.is_synthetic():
-                        node = bind_and_cache(feature.feature_definition.gen_events, obj_ref_cache, ctx, interval=interval, params=feature.params)
+                        node = bind_and_cache(feature.feature_definition.gen_synthetic_events, obj_ref_cache, ctx, interval=interval, params=feature.params)
                     else:
                         # TODO check if data_def needs preproc and if not call load_if_needed directly,
                         # this will save workers

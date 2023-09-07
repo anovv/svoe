@@ -31,15 +31,33 @@ class FeaturizerStorage:
 
     def get_data_meta(
         self,
-        data_keys: List[DataKey], # TODO make it Feature objects and derive keys
+        features: List[Feature],
         start_date: Optional[str] = None,
         end_date: Optional[str] = None
-    ) -> Dict[DataKey, List[BlockRangeMeta]]:
+    ) -> Dict[Feature, List[BlockRangeMeta]]:
+        data_deps = set()
+        synthetic_data_deps = set()
+        for feature in features:
+            for d in feature.get_data_deps():
+                # skip synthetic data sources
+                if d.feature_definition.is_synthetic():
+                    synthetic_data_deps.add(d)
+                else:
+                    data_deps.add(d)
+
+        data_keys = [data_key(d.params) for d in data_deps]
         exchanges = list(set([d[0] for d in data_keys]))
         data_types = list(set([d[1] for d in data_keys]))
         instrument_types = list(set([d[2] for d in data_keys]))
         symbols = list(set([d[3] for d in data_keys]))
-        return self._get_data_meta(exchanges, data_types, instrument_types, symbols, start_date=start_date, end_date=end_date)
+        ranges_meta_per_data_key = self._get_data_meta(exchanges, data_types, instrument_types, symbols, start_date=start_date, end_date=end_date)
+        res = {data: ranges_meta_per_data_key[data_key(data.params)] for data in data_deps}
+
+        # add synthetic ranges
+        # TODO if start_date or end_date were passed as None we need to derive them from what was returned from database
+        for synthetic_data in synthetic_data_deps:
+            res[synthetic_data] = synthetic_data.feature_definition.gen_synthetic_ranges_meta(start_date, end_date)
+        return res
 
     def _get_data_meta(
         self,

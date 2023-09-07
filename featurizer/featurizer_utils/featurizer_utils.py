@@ -24,7 +24,6 @@ def merge_blocks(
         for block in block_range:
             t = time.time()
             events = df_to_events(block)
-            print(f'[{feature}] Parsed block in {time.time() - t}s')
             named = []
             for e in events:
                 named.append((feature, e))

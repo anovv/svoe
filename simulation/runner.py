@@ -10,7 +10,7 @@ from featurizer.config import FeaturizerConfig
 from simulation.actors.simulation_worker_actor import SimulationWorkerActor
 from simulation.clock import Clock
 from simulation.data.data_generator import DataStreamGenerator
-from simulation.data.feature_stream.feature_stream_generator import FeatureStreamStreamGenerator
+from simulation.data.feature_stream.feature_stream_generator import FeatureStreamGenerator
 from simulation.data.sine.sine_data_generator import SineDataStreamGenerator
 from simulation.execution.execution_simulator import ExecutionSimulator
 from simulation.loop.loop import Loop
@@ -97,7 +97,7 @@ class SimulationRunner:
 
 def test_single_run():
     featurizer_config_raw = yaml.safe_load(open('./data/feature_stream/test-featurizer-config.yaml', 'r'))
-    generator = FeatureStreamStreamGenerator(featurizer_config=FeaturizerConfig(**featurizer_config_raw))
+    generator = FeatureStreamGenerator(featurizer_config=FeaturizerConfig(**featurizer_config_raw))
     clock = Clock(-1)
     instrument = Instrument('BINANCE', 'spot', 'BTC-USDT')
     # generator = SineDataGenerator.from_time_range(

@@ -1,11 +1,13 @@
 from typing import Type, List, Dict, Any
 
-from intervaltree import Interval
 from pandas import DataFrame
 from frozendict import frozendict
+from portion import Interval
 
 from common.pandas.df_utils import is_ts_sorted, hash_df
 from diskcache import Cache
+
+from featurizer.blocks.blocks import BlockRangeMeta
 
 cache_location = '~/svoe_parsed_events_cache'
 
@@ -48,7 +50,7 @@ class DataDefinition:
         key = hash_df(df)
         cache = Cache(cache_location)
         if key in cache:
-            print(f'[{cls.__name__}] Reading parsed events from cache')
+            print(f'[{cls.__name__}] Reading preprocessed df from cache')
             return cache[key]
         res = cls.preprocess_impl(df)
         cache[key] = res
@@ -56,7 +58,6 @@ class DataDefinition:
 
     @classmethod
     def preprocess_impl(cls, df: DataFrame) -> DataFrame:
-        # TODO validate schema here?
         raise NotImplementedError
 
     @classmethod
@@ -66,5 +67,10 @@ class DataDefinition:
 
     # for synthetic data
     @classmethod
-    def gen_events(cls, interval: Interval, params: Dict) -> DataFrame:
+    def gen_synthetic_events(cls, interval: Interval, params: Dict) -> DataFrame:
         raise NotImplementedError
+
+    @classmethod
+    def gen_synthetic_ranges_meta(cls, start_date: str, end_date: str) -> List[BlockRangeMeta]:
+        raise NotImplementedError
+

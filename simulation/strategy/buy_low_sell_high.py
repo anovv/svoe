@@ -5,6 +5,7 @@ from featurizer.features.definitions.mid_price.mid_price_fd.mid_price_fd import 
 from featurizer.features.feature_tree.feature_tree import Feature
 from simulation.clock import Clock
 from simulation.data.data_generator import DataStreamEvent
+from simulation.data.feature_stream.feature_stream_generator import FeatureStreamGenerator
 from simulation.models.instrument import Instrument
 from simulation.models.order import Order, OrderSide, OrderType
 from simulation.models.portfolio import Portfolio
@@ -85,33 +86,12 @@ class BuyLowSellHighStrategy(BaseStrategy):
         }
 
     # TODO util this?
-    @classmethod
-    def _get_feature_for_instrument(cls, data_event: DataStreamEvent, feature_definition: Type[FeatureDefinition], instrument: Instrument) -> Feature:
-        # TODO cache this to avoid recalculation on each update? or make a FeatureStreamSchema abstraction?
-        _feature = None
-        for feature in data_event.feature_values:
-            if feature.feature_definition != feature_definition:
-                continue
-            data_deps = feature.get_data_deps()
-            if len(data_deps) != 1:
-                raise ValueError('Expected exactly 1 data source dependency')
-            params = data_deps[0].params
 
-            # TODO make model for params?
-            instr = Instrument(
-                params['exchange'],
-                params['instrument_type'],
-                params['symbol'],
-            )
-            if instr == instrument:
-                _feature = feature
-        if _feature is None:
-            raise ValueError(f'Unable to find feature for {feature_definition} and {instrument}')
 
     def on_data_udf(self, data_event: DataStreamEvent) -> Optional[List[Order]]:
         all_orders = []
         for instrument in self.states:
-            feature = self._get_feature_for_instrument(data_event, MidPriceFD, instrument)
+            feature = FeatureStreamGenerator._get_feature_for_instrument(data_event, MidPriceFD, instrument)
             mid_price = data_event.feature_values[feature]['mid_price'] # TODO query data_generator?
             orders = self.states[instrument].on_price_update(mid_price)
             if orders is not None:

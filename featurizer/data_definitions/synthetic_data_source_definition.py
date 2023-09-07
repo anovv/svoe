@@ -17,7 +17,3 @@ class SyntheticDataSourceDefinition(DataDefinition):
     @classmethod
     def is_synthetic(cls) -> bool:
         return True
-
-    @classmethod
-    def gen_events(cls, interval: Interval, params: Dict) -> pd.DataFrame:
-        raise NotImplementedError

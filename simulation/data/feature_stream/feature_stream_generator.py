@@ -1,4 +1,4 @@
-from typing import Dict, List, Tuple, Optional
+from typing import Dict, List, Tuple, Optional, Type
 
 from intervaltree import Interval
 
@@ -7,6 +7,7 @@ from featurizer.blocks.blocks import BlockRangeMeta, BlockRange, ranges_to_inter
     prune_overlaps
 from featurizer.calculator.tasks import merge_blocks
 from featurizer.config import FeaturizerConfig
+from featurizer.features.definitions.feature_definition import FeatureDefinition
 from featurizer.features.feature_tree.feature_tree import construct_feature_tree, Feature, construct_stream_tree
 from featurizer.storage.featurizer_storage import FeaturizerStorage, data_key
 import featurizer.data_definitions.data_definition as data_def
@@ -19,7 +20,7 @@ from common.common_utils import flatten_tuples
 from common.pandas.df_utils import load_df
 
 
-class FeatureStreamStreamGenerator(DataStreamGenerator):
+class FeatureStreamGenerator(DataStreamGenerator):
 
     NUM_IO_THREADS = 16
 
@@ -88,23 +89,15 @@ class FeatureStreamStreamGenerator(DataStreamGenerator):
         self.unified_out_stream.sink(_unified_out_stream)
 
         storage = FeaturizerStorage()
-        data_deps = set()
-        for feature in self.features:
-            for d in feature.get_data_deps():
-                data_deps.add(d)
-
-        # TODO infer Instrument objects from this
-        data_keys = [data_key(d.params) for d in data_deps]
-        ranges_meta_per_data_key = storage.get_data_meta(data_keys, start_date=featurizer_config.start_date,
-                                                         end_date=featurizer_config.end_date)
-        ranges_meta_per_data: Dict[Feature, List[BlockRangeMeta]] = {data: ranges_meta_per_data_key[data_key(data.params)] for data in data_deps}
+        data_ranges_meta = storage.get_data_meta(self.features, start_date=featurizer_config.start_date, end_date=featurizer_config.end_date)
         # TODO indicate if data ranges are empty
-        data_ranges = self.load_data_ranges(ranges_meta_per_data)
+        data_ranges = self.load_data_ranges(data_ranges_meta)
         self.input_data_events = self.merge_data_ranges(data_ranges)
         self.cur_interval_id = 0
         self.cur_input_event_index = 0
 
     # TODO util this?
+    # TODO decouple synthetic data gen
     def load_data_ranges(self, ranges_meta_per_data: Dict[Feature, List[BlockRangeMeta]]) -> Dict[Interval, Dict[Feature, BlockRange]]:
         ranges_meta_dict_per_data = {}
         for data in ranges_meta_per_data:
@@ -236,16 +229,48 @@ class FeatureStreamStreamGenerator(DataStreamGenerator):
         return True
 
     def get_cur_mid_prices(self) -> Dict[Instrument, float]:
-        # TODO this is hacky, we need to map feature (really data in this case) to instrument properly
-        mid_price = None
-        for feature_key in self.cur_out_event.feature_values:
-            for col in self.cur_out_event[feature_key]:
+        mid_prices = {}
+
+        for feature in self.cur_out_event.feature_values:
+            mid_price = None
+            for col in self.cur_out_event.feature_values[feature]:
                 if col == 'mid_price':
-                    mid_price = self.cur_out_event[feature_key][col]
+                    mid_price = self.cur_out_event.feature_values[feature][col]
+                    instrument = FeatureStreamGenerator._get_instrument_for_feature(feature)
+                    mid_prices[instrument] = mid_price
                     break
-        if mid_price is None:
-            raise ValueError('DataGenerator should provide mid_price stream for all data/instrument inputs')
-        return {Instrument('BINANCE', 'spot', 'BTC-USDT'): mid_price}
+            if mid_price is None:
+                raise ValueError('DataGenerator should provide mid_price stream for all data/instrument inputs')
+
+        return mid_prices
+
+    @classmethod
+    def _get_instrument_for_feature(cls, feature):
+        data_deps = feature.get_data_deps()
+        if len(data_deps) != 1:
+            raise ValueError('Expected exactly 1 data source dependency')
+        params = data_deps[0].params
+
+        # TODO make model for params?
+        instr = Instrument(
+            params['exchange'],
+            params['instrument_type'],
+            params['symbol'],
+        )
+        return instr
+
+    @classmethod
+    def _get_feature_for_instrument(cls, data_event: DataStreamEvent, feature_definition: Type[FeatureDefinition], instrument: Instrument) -> Feature:
+        # TODO cache this to avoid recalculation on each update? or make a FeatureStreamSchema abstraction?
+        _feature = None
+        for feature in data_event.feature_values:
+            if feature.feature_definition != feature_definition:
+                continue
+            instr = cls._get_instrument_for_feature(feature)
+            if instr == instrument:
+                _feature = feature
+        if _feature is None:
+            raise ValueError(f'Unable to find feature for {feature_definition} and {instrument}')
 
     @classmethod
     def split(cls, featurizer_config: FeaturizerConfig, num_splits: int) -> List['DataStreamGenerator']:
@@ -257,7 +282,7 @@ class FeatureStreamStreamGenerator(DataStreamGenerator):
             config_split = featurizer_config.copy(deep=True)
             config_split.start_date = _start_date
             config_split.end_date = _end_date
-            gen = FeatureStreamStreamGenerator(config_split)
+            gen = FeatureStreamGenerator(config_split)
             # TODO check if generator is empty
             generators.append(gen)
 

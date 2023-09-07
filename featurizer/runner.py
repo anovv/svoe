@@ -37,14 +37,7 @@ class Featurizer:
             ))
 
         storage = FeaturizerStorage()
-        data_deps = set()
-        for feature in features:
-            for d in feature.get_data_deps():
-                data_deps.add(d)
-        data_keys = [data_key(d.params) for d in data_deps]
-        ranges_meta_per_data_key = storage.get_data_meta(data_keys, start_date=config.start_date, end_date=config.end_date)
-        data_ranges_meta = {data: ranges_meta_per_data_key[data_key(data.params)] for data in data_deps}
-
+        data_ranges_meta = storage.get_data_meta(features, start_date=config.start_date, end_date=config.end_date)
         stored_features_meta = storage.get_features_meta(features, start_date=config.start_date, end_date=config.end_date)
 
         label_feature = features[config.label_feature_index]

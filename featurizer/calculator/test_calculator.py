@@ -117,18 +117,11 @@ class TestFeatureCalculator(unittest.TestCase):
         feature_mid_price = construct_feature_tree(MidPriceFD, data_params, feature_params2)
         feature_volatility = construct_feature_tree(VolatilityStddevFD, data_params, feature_params3)
         feature_spread = construct_feature_tree(RelativeBidAskSpreadFD, data_params, feature_params4)
+
         features = [feature_l2_snap, feature_mid_price, feature_volatility, feature_spread]
-        # features = [feature_mid_price]
-        data_deps = set()
-        for feature in features:
-            for d in feature.get_data_deps():
-                data_deps.add(d)
-        data_keys = [data_key(d.params) for d in data_deps]
         start_date = '2023-02-01'
         end_date = '2023-02-01'
-        ranges_meta_per_data_key = storage.get_data_meta(data_keys, start_date=start_date, end_date=end_date)
-        data_ranges_meta = {data: ranges_meta_per_data_key[data_key(data.params)] for data in data_deps}
-
+        data_ranges_meta = storage.get_data_meta(features, start_date=start_date, end_date=end_date)
         stored_features_meta = storage.get_features_meta(features, start_date=start_date, end_date=end_date)
 
         cache = {}
@@ -199,16 +192,9 @@ class TestFeatureCalculator(unittest.TestCase):
         # print(RenderTree(feature_tvi))
         # features = [feature_mid_price, feature_tvi, feature_volatility]
         features = [feature_mid_price, feature_tvi]
-        data_deps = set()
-        for feature in features:
-            for d in feature.get_data_deps():
-                data_deps.add(d)
-        data_keys = [data_key(d.params) for d in data_deps]
-        print(data_keys)
         start_date = '2023-02-01'
         end_date = '2023-02-01'
-        ranges_meta_per_data_key = storage.get_data_meta(data_keys, start_date=start_date, end_date=end_date)
-        data_ranges_meta = {data: ranges_meta_per_data_key[data_key(data.params)] for data in data_deps}
+        data_ranges_meta = storage.get_data_meta(features, start_date=start_date, end_date=end_date)
 
         stored_features_meta = storage.get_features_meta(features, start_date=start_date, end_date=end_date)
 
@@ -291,18 +277,11 @@ class TestFeatureCalculator(unittest.TestCase):
         feature_volatility = construct_feature_tree(VolatilityStddevFD, data_params, feature_params2)
 
         features = [feature_mid_price, feature_volatility]
-        data_deps = set()
-        for feature in features:
-            for d in feature.get_data_deps():
-                data_deps.add(d)
-        data_keys = [data_key(d.params) for d in data_deps]
-        print(data_keys)
         start_date = '2023-02-01'
         end_date = '2023-02-01'
-        ranges_meta_per_data_key = storage.get_data_meta(data_keys, start_date=start_date, end_date=end_date)
-        data_ranges_meta = {data: ranges_meta_per_data_key[data_key(data.params)] for data in data_deps}
+        data_ranges_meta = storage.get_data_meta(features, start_date=start_date, end_date=end_date)
 
-        # stored_features_meta = api.get_features_meta(features, start_date=start_date, end_date=end_date)
+        # stored_features_meta = storage.get_features_meta(features, start_date=start_date, end_date=end_date)
 
         cache = {}
         label_feature = feature_mid_price
@@ -338,16 +317,9 @@ class TestFeatureCalculator(unittest.TestCase):
         # print(RenderTree(feature_tvi))
         # features = [feature_mid_price, feature_tvi, feature_volatility]
         features = [feature_tvi]
-        data_deps = set()
-        for feature in features:
-            for d in feature.get_data_deps():
-                data_deps.add(d)
-        data_keys = [data_key(d.params) for d in data_deps]
-        print(data_keys)
         start_date = '2023-02-01'
         end_date = '2023-02-01'
-        ranges_meta_per_data_key = storage.get_data_meta(data_keys, start_date=start_date, end_date=end_date)
-        data_ranges_meta = {data: ranges_meta_per_data_key[data_key(data.params)] for data in data_deps}
+        data_ranges_meta = storage.get_data_meta(features, start_date=start_date, end_date=end_date)
 
         stored_features_meta = storage.get_features_meta(features, start_date=start_date, end_date=end_date)
 
