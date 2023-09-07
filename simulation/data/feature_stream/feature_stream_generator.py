@@ -152,7 +152,9 @@ class FeatureStreamStreamGenerator(DataStreamGenerator):
             block = executor_future.result()
 
             # data_ranges dict already constructed above
-            data_ranges[interval][feature][block_position] = block
+            # TODO preproc only if needed
+            preproc_block = feature.feature_definition.preprocess(block)
+            data_ranges[interval][feature][block_position] = preproc_block
 
         return data_ranges
 
