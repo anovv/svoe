@@ -5,6 +5,7 @@ import joblib
 from streamz import Stream
 
 from featurizer.data_catalog.pipelines.catalog_cryptotick.util import process_cryptotick_timestamps
+from featurizer.data_definitions.data_definition import df_to_events
 from featurizer.data_definitions.l2_book_incremental.cryptotick.cryptotick_l2_book_incremental import \
     CryptotickL2BookIncrementalData
 from featurizer.features.definitions.l2_snapshot.l2_snapshot_fd import L2SnapshotFD
@@ -66,7 +67,7 @@ def gen_split_l2_inc_df_and_pad_with_snapshot(processed_df: pd.DataFrame, split_
 
 # TODO typing
 def run_l2_snapshot_stream(l2_inc_df: pd.DataFrame) -> Any:
-    events = CryptotickL2BookIncrementalData.parse_events(l2_inc_df)
+    events = df_to_events(CryptotickL2BookIncrementalData.preprocess(l2_inc_df))
     source = Stream()
 
     # cryptotick stores 5000 depth levels

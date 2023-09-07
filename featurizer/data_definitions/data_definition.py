@@ -12,6 +12,11 @@ cache_location = '~/svoe_parsed_events_cache'
 Event = Dict[str, Any] # note that this corresponds to raw grouped events by timestamp (only for some data_types, e.g. l2_book_inc)
 EventSchema = Dict[str, Type]
 
+def df_to_events(df: DataFrame) -> List[Event]:
+    if not is_ts_sorted(df):
+        raise ValueError('Unable to parse df with unsorted timestamps')
+    return df.to_dict('records')
+
 
 # TODO move this to a separate package
 # a base class for raw data sources and derived features
@@ -39,22 +44,20 @@ class DataDefinition:
         raise NotImplemented
 
     @classmethod
-    def parse_events(cls, df: DataFrame) -> List[Event]:
+    def preprocess(cls, df: DataFrame) -> DataFrame:
         key = hash_df(df)
         cache = Cache(cache_location)
         if key in cache:
             print(f'[{cls.__name__}] Reading parsed events from cache')
             return cache[key]
-        res = cls.parse_events_impl(df)
+        res = cls.preprocess_impl(df)
         cache[key] = res
         return res
 
     @classmethod
-    def parse_events_impl(cls, df: DataFrame) -> List[Event]:
+    def preprocess_impl(cls, df: DataFrame) -> DataFrame:
         # TODO validate schema here?
-        if not is_ts_sorted(df):
-            raise ValueError('Unable to parse df with unsorted timestamps')
-        return df.to_dict('records')
+        raise NotImplementedError
 
     @classmethod
     def construct_event(cls, *args) -> Event:

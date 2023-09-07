@@ -1,7 +1,7 @@
 import itertools
 import time
 from datetime import datetime
-from typing import Dict, List, Tuple, Any, Optional
+from typing import Dict, List, Tuple, Any, Optional, Type
 
 import pandas as pd
 import pytz
@@ -13,6 +13,7 @@ from streamz import Stream
 
 from featurizer.actors.cache_actor import get_cache_actor
 from featurizer.blocks.blocks import Block, lookahead_shift, merge_asof_multi
+from featurizer.data_definitions.data_source_definition import DataSourceDefinition
 from featurizer.features.feature_tree.feature_tree import Feature
 from featurizer.featurizer_utils.featurizer_utils import merge_blocks
 from featurizer.sql.db_actor import DbActor
@@ -92,6 +93,30 @@ def load_if_needed(
         _cache(df, context)
     print(f'Loading {s} block finished {time.time() - t}s')
     return df
+
+
+@ray.remote(num_cpus=1)
+def preprocess_data_block(
+    block: Block,
+    data_def: Type[DataSourceDefinition]
+) -> Block:
+    # TODO similar caching to load_if_needed ?
+    t = time.time()
+    res = data_def.preprocess(block)
+    print(f'[{data_def}] Preprocessing data block finished {time.time() - t}s')
+    return res
+
+
+@ray.remote(num_cpus=0.001)
+def load_and_preprocess(
+    context: Dict[str, Any],
+    path: str,
+    data_def: Type[DataSourceDefinition],
+    is_feature: bool = False,
+) -> Block:
+    block = ray.get(load_if_needed.remote(context=context, path=path, is_feature=is_feature))
+    preproc_block = ray.get(preprocess_data_block.remote(block=block, data_def=data_def))
+    return preproc_block
 
 # TODO for Virtual clock
 # https://stackoverflow.com/questions/53829383/mocking-the-internal-clock-of-asyncio-event-loop

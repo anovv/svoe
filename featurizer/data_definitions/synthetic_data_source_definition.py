@@ -21,8 +21,3 @@ class SyntheticDataSourceDefinition(DataDefinition):
     @classmethod
     def gen_events(cls, interval: Interval, params: Dict) -> pd.DataFrame:
         raise NotImplementedError
-
-    @classmethod
-    def parse_events(cls, df: DataFrame) -> List[Event]:
-        # this should not be used for synthetic data
-        raise NotImplementedError

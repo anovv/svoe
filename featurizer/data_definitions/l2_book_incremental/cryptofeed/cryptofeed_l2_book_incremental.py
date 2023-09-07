@@ -1,3 +1,5 @@
+import pandas as pd
+
 from featurizer.data_definitions.data_source_definition import DataSourceDefinition
 from featurizer.data_definitions.data_definition import EventSchema, Event
 from collections import OrderedDict
@@ -18,7 +20,7 @@ class CryptofeedL2BookIncrementalData(DataSourceDefinition):
         }
 
     @classmethod
-    def parse_events_impl(cls, df: DataFrame) -> List[Event]:
+    def preprocess_impl(cls, df: DataFrame) -> DataFrame:
 
         # TODO this is a bug in ray's version of pandas
         # TODO see https://stackoverflow.com/questions/53985535/pandas-valueerror-buffer-source-array-is-read-only
@@ -47,4 +49,4 @@ class CryptofeedL2BookIncrementalData(DataSourceDefinition):
                 orders.append((v['side'], v['price'], v['size']))
             events.append(cls.construct_event(timestamp, receipt_timestamp, delta, orders))
 
-        return events
+        return pd.DataFrame(events)

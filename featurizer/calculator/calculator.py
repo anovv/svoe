@@ -11,7 +11,7 @@ from featurizer.blocks.blocks import meta_to_interval, interval_to_meta, get_ove
 from portion import Interval, IntervalDict, closed
 
 from featurizer.calculator.tasks import calculate_feature, load_if_needed, bind_and_cache, context, \
-    lookahead_shift_blocks, point_in_time_join_block
+    lookahead_shift_blocks, point_in_time_join_block, load_and_preprocess
 from common.time.utils import convert_str_to_seconds
 
 
@@ -47,9 +47,10 @@ def build_feature_task_graph(
                     if feature.feature_definition.is_synthetic():
                         node = bind_and_cache(feature.feature_definition.gen_events, obj_ref_cache, ctx, interval=interval, params=feature.params)
                     else:
-                        # BIG TODO if we only have data sources in config (no features) this won't call parse_events and will
-                        # return raw data. Should we parse events here and no in calc_feature?
-                        node = bind_and_cache(load_if_needed, obj_ref_cache, ctx, path=path, is_feature=False)
+                        # TODO check if data_def needs preproc and if not call load_if_needed directly,
+                        # this will save workers
+                        # node = bind_and_cache(load_if_needed, obj_ref_cache, ctx, path=path, is_feature=False)
+                        node = bind_and_cache(load_and_preprocess, obj_ref_cache, ctx, path=path, data_def=feature.feature_definition, is_feature=False)
 
                     # TODO validate no overlapping intervals here
                     nodes[interval] = node

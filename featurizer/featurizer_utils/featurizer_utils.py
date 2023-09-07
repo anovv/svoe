@@ -3,7 +3,7 @@ import time
 from typing import Dict, List, Tuple
 
 from featurizer.blocks.blocks import BlockRange
-from featurizer.data_definitions.data_definition import Event
+from featurizer.data_definitions.data_definition import Event, df_to_events
 from featurizer.features.feature_tree.feature_tree import Feature
 
 
@@ -23,10 +23,10 @@ def merge_blocks(
         named_events = []
         for block in block_range:
             t = time.time()
-            parsed = feature.feature_definition.parse_events(block)
+            events = df_to_events(block)
             print(f'[{feature}] Parsed block in {time.time() - t}s')
             named = []
-            for e in parsed:
+            for e in events:
                 named.append((feature, e))
             named_events = list(heapq.merge(named_events, named, key=lambda named_event: named_event[1]['timestamp']))
 

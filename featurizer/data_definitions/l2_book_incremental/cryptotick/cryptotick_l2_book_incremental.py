@@ -19,7 +19,7 @@ class CryptotickL2BookIncrementalData(DataSourceDefinition):
         }
 
     @classmethod
-    def parse_events_impl(cls, df: pd.DataFrame) -> List[Event]:
+    def preprocess_impl(cls, df: pd.DataFrame) -> pd.DataFrame:
         grouped = df.groupby(['timestamp', 'update_type'])
         dfs = [grouped.get_group(x) for x in grouped.groups]
         dfs = sorted(dfs, key=lambda df: df['timestamp'].iloc[0], reverse=False)
@@ -35,4 +35,4 @@ class CryptotickL2BookIncrementalData(DataSourceDefinition):
                 orders.append((v['side'], v['price'], v['size']))
             events.append(cls.construct_event(timestamp, receipt_timestamp, update_type, orders))
 
-        return events
+        return pd.DataFrame(events)
