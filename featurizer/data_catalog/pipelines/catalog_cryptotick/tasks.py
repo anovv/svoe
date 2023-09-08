@@ -8,14 +8,13 @@ import pandas as pd
 import pytz
 import ray
 
-from featurizer.data_definitions.trades.cryptotick.utils import preprocess_trades_df
+from featurizer.data_definitions.common.trades.cryptotick import preprocess_trades_df
 from featurizer.sql.db_actor import DbActor
 from featurizer.data_catalog.common.data_models.models import InputItem
 from featurizer.sql.data_catalog.models import DataCatalog, _construct_s3_path
-from featurizer.data_definitions.l2_book_incremental.cryptofeed import utils as cryptofeed_l2_utils
-from featurizer.data_definitions.l2_book_incremental.cryptotick import utils as cryptotick_l2_utils
-from featurizer.data_definitions.l2_book_incremental.cryptotick.utils import preprocess_l2_inc_df, \
-    gen_split_l2_inc_df_and_pad_with_snapshot
+from featurizer.data_definitions.common.l2_book_incremental.cryptofeed import utils as cryptofeed_l2_utils
+from featurizer.data_definitions.common.l2_book_incremental.cryptotick.utils import preprocess_l2_inc_df, \
+    gen_split_l2_inc_df_and_pad_with_snapshot, utils as cryptotick_l2_utils
 from common.pandas import df_utils
 from common.pandas import gen_split_df_by_mem
 

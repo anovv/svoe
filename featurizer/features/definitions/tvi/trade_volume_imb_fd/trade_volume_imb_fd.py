@@ -8,7 +8,7 @@ from streamz import Stream
 import common.streamz.stream_utils as su
 
 from featurizer.blocks.blocks import BlockMeta, windowed_grouping
-from featurizer.data_definitions.trades.trades import TradesData
+from featurizer.data_definitions.common.trades import TradesData
 from featurizer.features.definitions.feature_definition import FeatureDefinition
 from featurizer.data_definitions.data_definition import DataDefinition, EventSchema, Event
 from featurizer.features.feature_tree.feature_tree import Feature

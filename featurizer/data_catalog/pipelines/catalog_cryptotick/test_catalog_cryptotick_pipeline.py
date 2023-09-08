@@ -11,7 +11,7 @@ from featurizer.sql.client import FeaturizerMysqlClient
 from featurizer.sql.db_actor import DbActor
 from featurizer.data_catalog.common.utils.cryptotick_utils import cryptotick_input_items, CRYPTOTICK_RAW_BUCKET_NAME
 from featurizer.data_catalog.pipelines.catalog_cryptotick.pipeline import CatalogCryptotickPipeline, poll_to_tqdm
-from featurizer.data_definitions.l2_book_incremental.cryptotick.utils import starts_with_snapshot, remove_snap, \
+from featurizer.data_definitions.common.l2_book_incremental.cryptotick.utils import starts_with_snapshot, remove_snap, \
     get_snapshot_depth, mock_processed_cryptotick_df, \
     gen_split_l2_inc_df_and_pad_with_snapshot
 from common.pandas import concat, load_df, store_df

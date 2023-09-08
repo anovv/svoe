@@ -32,21 +32,31 @@ class DefinitionsLoader:
         group, definition, version = self._parse_definition_name(fd_name)
         class_name = humps.pascalize(definition)
         # ...Fd -> ...FD
-        class_name = class_name.removesuffix('Fd')
-        class_name = f'{class_name}FD'
+        if class_name.endswith('Fd'):
+            class_name = class_name.removesuffix('Fd')
+            class_name = f'{class_name}FD'
 
         fd_module = None
 
         # TODO version
         # first check if given definition can be located in feature.definitions. (i.e. common feature defs like l2_snapshot_fd)
-        common_definitions_module_name = featurizer.features.definitions.__name__
+        common_feature_definitions_module_name = featurizer.features.definitions.__name__
         # first {definition} for module, second {definition} for .py file
-        common_definitions_fd_module_name = f'{common_definitions_module_name}.{group}.{definition}.{definition}'
+        feature_definition_module_name = f'{common_feature_definitions_module_name}.{group}.{definition}.{definition}'
 
         try:
-            fd_module = __import__(common_definitions_fd_module_name, fromlist=[class_name])
+            fd_module = __import__(feature_definition_module_name, fromlist=[class_name])
         except:
-            print(f'Unable to load {common_definitions_fd_module_name} locally')
+            print(f'Unable to load {feature_definition_module_name} locally')
+            pass
+
+        # try load data definition
+        data_definitions_module_name = featurizer.data_definitions.__name__
+        data_definition_module_name = f'{data_definitions_module_name}.{group}.{definition}.{definition}'
+        try:
+            fd_module = __import__(data_definition_module_name, fromlist=[class_name])
+        except:
+            print(f'Unable to load {data_definition_module_name} locally')
             pass
 
         # then check if it can be found in already remote loaded fds

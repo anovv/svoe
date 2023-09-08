@@ -18,6 +18,7 @@ class Feature(NodeMixin):
         self._is_label = False
 
         # TODO is it ok to call these at init time? Are all the children ready?
+        self._data_deps = None
         self._data_deps = self.get_data_deps()
         self.feature_key = self._feature_key()
 

@@ -1,0 +1,12 @@
+start_date: '2023-02-01'
+end_date: '2023-02-01'
+feature_configs:
+  - feature_definition: synthetic.synthetic_sine_mid_price
+    data_params:
+      - exchange: BINANCE
+        instrument_type: spot
+        symbol: BTC-USDT
+        step: 1
+        amplitude: 2000
+        mean: 10000
+        freq: 50

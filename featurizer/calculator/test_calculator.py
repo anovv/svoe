@@ -6,8 +6,8 @@ import common.streamz.stream_utils
 from featurizer.actors.cache_actor import create_cache_actor
 from featurizer.calculator.executor import execute_graph
 from featurizer.calculator.tasks import merge_blocks
-from featurizer.storage.featurizer_storage import FeaturizerStorage, data_key
-from featurizer.data_definitions.l2_book_incremental.cryptotick.cryptotick_l2_book_incremental import CryptotickL2BookIncrementalData
+from featurizer.storage.featurizer_storage import FeaturizerStorage
+from featurizer.data_definitions.common.l2_book_incremental.cryptotick.cryptotick_l2_book_incremental import CryptotickL2BookIncrementalData
 from featurizer.features.definitions.spread.relative_bid_ask_spread_fd.relative_bid_ask_spread_fd import RelativeBidAskSpreadFD
 from featurizer.features.definitions.tvi.trade_volume_imb_fd.trade_volume_imb_fd import TradeVolumeImbFD
 from featurizer.features.definitions.volatility.volatility_stddev_fd.volatility_stddev_fd import VolatilityStddevFD

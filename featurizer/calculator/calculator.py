@@ -11,7 +11,7 @@ from featurizer.blocks.blocks import meta_to_interval, interval_to_meta, get_ove
 from portion import Interval, IntervalDict, closed
 
 from featurizer.calculator.tasks import calculate_feature, load_if_needed, bind_and_cache, context, \
-    lookahead_shift_blocks, point_in_time_join_block, load_and_preprocess
+    lookahead_shift_blocks, point_in_time_join_block, load_and_preprocess, gen_synth_events
 from common.time.utils import convert_str_to_seconds
 
 
@@ -41,13 +41,13 @@ def build_feature_task_graph(
                 nodes = {}
                 for block_meta in block_range_meta:
                     interval = meta_to_interval(block_meta)
-                    path = block_meta['path']
                     # node = load_if_needed.bind(path, False)
                     ctx = context(feature.feature_key, interval)
                     if feature.feature_definition.is_synthetic():
-                        node = bind_and_cache(feature.feature_definition.gen_synthetic_events, obj_ref_cache, ctx, interval=interval, params=feature.params)
+                        node = bind_and_cache(gen_synth_events, obj_ref_cache, ctx, interval=interval, synth_data_def=feature.feature_definition, params=feature.params)
                     else:
-                        # TODO check if data_def needs preproc and if not call load_if_needed directly,
+                        path = block_meta['path']
+                        # TODO call load_and_preprocess only if data_def needs preproc, otherwise call load_if_needed
                         # this will save workers
                         # node = bind_and_cache(load_if_needed, obj_ref_cache, ctx, path=path, is_feature=False)
                         node = bind_and_cache(load_and_preprocess, obj_ref_cache, ctx, path=path, data_def=feature.feature_definition, is_feature=False)
@@ -177,7 +177,7 @@ def build_lookahead_graph(feature_graph: Dict[Interval, Dict[Interval, DAGNode]]
 def point_in_time_join_dag(
     dag: Dict[Feature, Dict[Interval, Dict[Interval, DAGNode]]],
     features_to_join: List[Feature],
-    label_feature: Feature,
+    label_feature: Optional[Feature],
     result_owner: Optional[ray.actor.ActorHandle] = None
 ) -> Dict[Interval, Dict[Interval, DAGNode]]:
     # get range overlaps first
@@ -249,7 +249,7 @@ def point_in_time_join_dag(
 # TODO for feature scaling https://github.com/online-ml/river/blob/main/river/preprocessing/scale.py
 def build_feature_label_set_task_graph(
     features: List[Feature],
-    label: Feature,
+    label: Optional[Feature],
     label_lookahead: str,
     data_ranges_meta: Dict[Feature, List[BlockRangeMeta]],
     obj_ref_cache: Dict[str, Dict[Interval, Tuple[int, Optional[ObjectRef]]]],
@@ -264,9 +264,10 @@ def build_feature_label_set_task_graph(
         features_to_store=features_to_store,
         stored_feature_blocks_meta=stored_feature_blocks_meta
     )
-
-    lookahead_dag = build_lookahead_graph(dag[label], label_lookahead)
-    label_feature = Feature.make_label(label)
-    dag[label_feature] = lookahead_dag
-    features.append(label_feature)
+    label_feature = None
+    if label is not None:
+        lookahead_dag = build_lookahead_graph(dag[label], label_lookahead)
+        label_feature = Feature.make_label(label)
+        dag[label_feature] = lookahead_dag
+        features.append(label_feature)
     return point_in_time_join_dag(dag, features, label_feature, result_owner=result_owner)

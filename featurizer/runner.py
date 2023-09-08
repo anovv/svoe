@@ -40,14 +40,16 @@ class Featurizer:
         data_ranges_meta = storage.get_data_meta(features, start_date=config.start_date, end_date=config.end_date)
         stored_features_meta = storage.get_features_meta(features, start_date=config.start_date, end_date=config.end_date)
 
-        label_feature = features[config.label_feature_index]
+        label_feature = None
+        if config.label_feature_index is not None:
+            label_feature = features[config.label_feature_index]
 
         cache = {}
         features_to_store = [features[i] for i in config.features_to_store]
 
         with ray.init(address=ray_address, ignore_reinit_error=True, runtime_env={
             'py_modules': LOCAL_PACKAGES_TO_PASS_TO_REMOTE_DEV_RAY_CLUSTER,
-            'pip': ['pyhumps']
+            'pip': ['pyhumps', 'diskcache']
         }):
             # remove old actor from prev session if it exists
             try:

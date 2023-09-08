@@ -6,7 +6,7 @@ from streamz import Stream
 
 from featurizer.data_catalog.pipelines.catalog_cryptotick.util import process_cryptotick_timestamps
 from featurizer.data_definitions.data_definition import df_to_events
-from featurizer.data_definitions.l2_book_incremental.cryptotick.cryptotick_l2_book_incremental import \
+from featurizer.data_definitions.common.l2_book_incremental.cryptotick.cryptotick_l2_book_incremental import \
     CryptotickL2BookIncrementalData
 from featurizer.features.definitions.l2_snapshot.l2_snapshot_fd import L2SnapshotFD
 from featurizer.utils.testing_utils import mock_feature

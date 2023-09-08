@@ -14,6 +14,7 @@ from streamz import Stream
 from featurizer.actors.cache_actor import get_cache_actor
 from featurizer.blocks.blocks import Block, lookahead_shift, merge_asof_multi
 from featurizer.data_definitions.data_source_definition import DataSourceDefinition
+from featurizer.data_definitions.synthetic_data_source_definition import SyntheticDataSourceDefinition
 from featurizer.features.feature_tree.feature_tree import Feature
 from featurizer.featurizer_utils.featurizer_utils import merge_blocks
 from featurizer.sql.db_actor import DbActor
@@ -95,7 +96,7 @@ def load_if_needed(
     return df
 
 
-@ray.remote(num_cpus=1)
+@ray.remote(num_cpus=0.9)
 def preprocess_data_block(
     block: Block,
     data_def: Type[DataSourceDefinition]
@@ -117,6 +118,16 @@ def load_and_preprocess(
     block = ray.get(load_if_needed.remote(context=context, path=path, is_feature=is_feature))
     preproc_block = ray.get(preprocess_data_block.remote(block=block, data_def=data_def))
     return preproc_block
+
+
+@ray.remote(num_cpus=0.9)
+def gen_synth_events(
+    context: Dict[str, Any],
+    interval: Interval,
+    synth_data_def: Type[SyntheticDataSourceDefinition],
+    params: Dict,
+) -> Block:
+    return synth_data_def.gen_synthetic_events(interval=interval, params=params)
 
 # TODO for Virtual clock
 # https://stackoverflow.com/questions/53829383/mocking-the-internal-clock-of-asyncio-event-loop
@@ -210,7 +221,7 @@ def point_in_time_join_block(
     interval: Interval,
     blocks_refs_per_feature: Dict[Feature, ObjectRef[Block]],
     prev_block_ref_per_feature: Dict[Feature, ObjectRef[Block]],
-    label_feature: Feature,
+    label_feature: Optional[Feature],
     result_owner: Optional[ray.actor.ActorHandle] = None
 ) -> ObjectRef[pd.DataFrame]: # TODO is it the same as pd.DataFrame
 
@@ -226,9 +237,14 @@ def point_in_time_join_block(
         blocks = ray.get(block_refs)
         concated[feature] = concat(blocks)
 
-    dfs = [concated[label_feature]] # make sure label is first so that we can use it's ts as join keys
+    if label_feature is not None:
+        dfs = [concated[label_feature]] # make sure label is first so that we can use it's ts as join keys
+    else:
+        dfs = []
+
+    # make result blocks and features same order
     for feature in concated:
-        if feature == label_feature:
+        if label_feature is not None and feature == label_feature:
             # it's already there
             continue
         dfs.append(concated[feature])
@@ -236,7 +252,7 @@ def point_in_time_join_block(
     t = time.time()
     merged = merge_asof_multi(dfs)
 
-    print(f'Join finished, merged in {time.time() - t}s')
+    print(f'Join finished, merged {len(dfs)} blocks in {time.time() - t}s')
     res = sub_df_ts(merged, interval.lower, interval.upper)
     # return res
     if result_owner is not None:

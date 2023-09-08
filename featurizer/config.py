@@ -8,7 +8,7 @@ import yaml
 class FeatureConfig(BaseModel):
     feature_definition: str
     data_params: Union[List[Dict], Dict]
-    feature_params: Union[List[Dict], Dict]
+    feature_params: Optional[Union[List[Dict], Dict]]
 
 
 class FeaturizerConfig(BaseModel):

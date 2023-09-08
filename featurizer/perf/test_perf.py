@@ -6,7 +6,7 @@ from portion import closed
 from streamz import Stream
 
 from featurizer.calculator.tasks import merge_blocks
-from featurizer.data_definitions.trades.trades import TradesData
+from featurizer.data_definitions.common.trades import TradesData
 from featurizer.features.definitions.tvi.trade_volume_imb_fd import TradeVolumeImbFD
 from featurizer.features.feature_tree.feature_tree import construct_feature_tree
 from common.pandas import load_df, time_range
