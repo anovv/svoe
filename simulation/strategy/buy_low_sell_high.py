@@ -1,8 +1,8 @@
 from typing import List, Dict, Optional, Tuple, Type, Callable
 
-from featurizer.features.definitions.feature_definition import FeatureDefinition
+from featurizer.data_definitions.synthetic.synthetic_sine_mid_price.synthetic_sine_mid_price import \
+    SyntheticSineMidPrice
 from featurizer.features.definitions.mid_price.mid_price_fd.mid_price_fd import MidPriceFD
-from featurizer.features.feature_tree.feature_tree import Feature
 from simulation.clock import Clock
 from simulation.data.data_generator import DataStreamEvent
 from simulation.data.feature_stream.feature_stream_generator import FeatureStreamGenerator
@@ -85,13 +85,10 @@ class BuyLowSellHighStrategy(BaseStrategy):
             for instrument in instruments
         }
 
-    # TODO util this?
-
-
     def on_data_udf(self, data_event: DataStreamEvent) -> Optional[List[Order]]:
         all_orders = []
         for instrument in self.states:
-            feature = FeatureStreamGenerator._get_feature_for_instrument(data_event, MidPriceFD, instrument)
+            feature = FeatureStreamGenerator.get_feature_for_instrument(data_event, SyntheticSineMidPrice, instrument)
             mid_price = data_event.feature_values[feature]['mid_price'] # TODO query data_generator?
             orders = self.states[instrument].on_price_update(mid_price)
             if orders is not None:

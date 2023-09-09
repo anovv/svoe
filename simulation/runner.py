@@ -11,7 +11,6 @@ from simulation.actors.simulation_worker_actor import SimulationWorkerActor
 from simulation.clock import Clock
 from simulation.data.data_generator import DataStreamGenerator
 from simulation.data.feature_stream.feature_stream_generator import FeatureStreamGenerator
-from simulation.data.sine.sine_data_generator import SineDataStreamGenerator
 from simulation.execution.execution_simulator import ExecutionSimulator
 from simulation.loop.loop import Loop
 from simulation.models.instrument import Instrument
@@ -100,14 +99,8 @@ def test_single_run():
     generator = FeatureStreamGenerator(featurizer_config=FeaturizerConfig(**featurizer_config_raw))
     clock = Clock(-1)
     instrument = Instrument('BINANCE', 'spot', 'BTC-USDT')
-    # generator = SineDataGenerator.from_time_range(
-    #     instrument=instrument,
-    #     start_ts=0,
-    #     end_ts=1000000,
-    #     step=1
-    # )
     portfolio = Portfolio.load_config('portfolio-config.yaml')
-    strategy = BuyLowSellHighStrategy(instrument=instrument, clock=clock, portfolio=portfolio, params={
+    strategy = BuyLowSellHighStrategy(instruments=[instrument], clock=clock, portfolio=portfolio, params={
         'buy_signal_thresh': 0.05,
         'sell_signal_thresh': 0.05,
     })
@@ -127,19 +120,12 @@ def test_single_run():
 
 def test_distributed_run():
     clock = Clock(-1)
-    # TODO infer instruments from featurizer
+    # TODO infer instruments from featurizer_config?
     instrument = Instrument('BINANCE', 'spot', 'BTC-USDT')
-    # TODO load featurizer_config
-    # generators = FeatureStreamGenerator.split(featurizer_config=None, num_splits=4)
-    generators = SineDataStreamGenerator.split(
-        instrument=instrument,
-        start_ts=0,
-        end_ts=1000000,
-        step=1,
-        num_splits=4
-    )
+    featurizer_config_raw = yaml.safe_load(open('./data/feature_stream/test-featurizer-config.yaml', 'r'))
+    generators = FeatureStreamGenerator.split(featurizer_config=FeaturizerConfig(**featurizer_config_raw), num_splits=4)
     portfolio = Portfolio.load_config('portfolio-config.yaml')
-    strategy = BuyLowSellHighStrategy(instrument=instrument, clock=clock, portfolio=portfolio, params={
+    strategy = BuyLowSellHighStrategy(instruments=[instrument], clock=clock, portfolio=portfolio, params={
         'buy_signal_thresh': 0.05,
         'sell_signal_thresh': 0.05,
     })

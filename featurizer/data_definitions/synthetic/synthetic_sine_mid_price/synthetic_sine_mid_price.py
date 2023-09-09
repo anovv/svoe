@@ -33,7 +33,7 @@ class SyntheticSineMidPrice(SyntheticDataSourceDefinition):
         mean = params['mean']
         freq = params['freq']
 
-        # TODO adjust frequency so consequitive blocks end and start at the same point
+        # TODO adjust frequency so consecutive blocks end and start at the same point
         mid_prices = amplitude * np.sin(2 * np.pi * freq * timesteps) + mean
         return pd.DataFrame(zip(timesteps, timesteps, mid_prices), columns=['timestamp', 'receipt_timestamp', 'mid_price'])
 

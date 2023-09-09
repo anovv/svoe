@@ -4,7 +4,7 @@ from intervaltree import Interval
 
 from common.time.utils import split_date_range
 from featurizer.blocks.blocks import BlockRangeMeta, BlockRange, ranges_to_interval_dict, get_overlaps, \
-    prune_overlaps
+    prune_overlaps, meta_to_interval
 from featurizer.calculator.tasks import merge_blocks
 from featurizer.config import FeaturizerConfig
 from featurizer.features.definitions.feature_definition import FeatureDefinition
@@ -134,10 +134,16 @@ class FeatureStreamGenerator(DataStreamGenerator):
                 for feature in range_meta_intervals[interval]:
                     for block_position in range(len(range_meta_intervals[interval][feature])):
                         block_meta = range_meta_intervals[interval][feature][block_position]
-                        path = block_meta['path']
-                        key = (interval, feature, block_position)
-                        executor_futures[key] = executor.submit(_load_and_store_block, cur_block_id=block_id, path=path)
-                        block_id += 1
+                        if feature.feature_definition.is_synthetic():
+                            data_ranges[interval][feature][block_position] = feature.feature_definition.gen_synthetic_events(
+                                interval=meta_to_interval(block_meta),
+                                params=feature.params
+                            )
+                        else:
+                            path = block_meta['path']
+                            key = (interval, feature, block_position)
+                            executor_futures[key] = executor.submit(_load_and_store_block, cur_block_id=block_id, path=path)
+                            block_id += 1
 
         for key in executor_futures:
             executor_future = executor_futures[key]
@@ -236,7 +242,7 @@ class FeatureStreamGenerator(DataStreamGenerator):
             for col in self.cur_out_event.feature_values[feature]:
                 if col == 'mid_price':
                     mid_price = self.cur_out_event.feature_values[feature][col]
-                    instrument = FeatureStreamGenerator._get_instrument_for_feature(feature)
+                    instrument = FeatureStreamGenerator.get_instrument_for_feature(feature)
                     mid_prices[instrument] = mid_price
                     break
             if mid_price is None:
@@ -245,7 +251,7 @@ class FeatureStreamGenerator(DataStreamGenerator):
         return mid_prices
 
     @classmethod
-    def _get_instrument_for_feature(cls, feature):
+    def get_instrument_for_feature(cls, feature):
         data_deps = feature.get_data_deps()
         if len(data_deps) != 1:
             raise ValueError('Expected exactly 1 data source dependency')
@@ -260,17 +266,19 @@ class FeatureStreamGenerator(DataStreamGenerator):
         return instr
 
     @classmethod
-    def _get_feature_for_instrument(cls, data_event: DataStreamEvent, feature_definition: Type[FeatureDefinition], instrument: Instrument) -> Feature:
+    def get_feature_for_instrument(cls, data_event: DataStreamEvent, feature_definition: Type[data_def.DataDefinition], instrument: Instrument) -> Feature:
         # TODO cache this to avoid recalculation on each update? or make a FeatureStreamSchema abstraction?
         _feature = None
         for feature in data_event.feature_values:
             if feature.feature_definition != feature_definition:
                 continue
-            instr = cls._get_instrument_for_feature(feature)
+            instr = cls.get_instrument_for_feature(feature)
             if instr == instrument:
                 _feature = feature
         if _feature is None:
-            raise ValueError(f'Unable to find feature for {feature_definition} and {instrument}')
+            raise ValueError(f'Unable to find feature for {feature_definition}, instrument {instrument}, event: {data_event}')
+
+        return _feature
 
     @classmethod
     def split(cls, featurizer_config: FeaturizerConfig, num_splits: int) -> List['DataStreamGenerator']:
@@ -287,7 +295,3 @@ class FeatureStreamGenerator(DataStreamGenerator):
             generators.append(gen)
 
         return generators
-
-
-
-
