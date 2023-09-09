@@ -1,22 +1,22 @@
 start_date: '2023-02-01'
 end_date: '2023-02-01'
 feature_configs:
-  - feature_definition: mid_price.mid_price_fd
-    data_params: &id001
-      - exchange: BINANCE
-        data_type: l2_book
-        instrument_type: spot
-        symbol: BTC-USDT
-    feature_params:
-      1:
-        dep_schema: cryptotick
-        sampling: 1s
-#  - feature_definition: synthetic.synthetic_sine_mid_price
-#    data_params:
+#  - feature_definition: mid_price.mid_price_fd
+#    data_params: &id001
 #      - exchange: BINANCE
+#        data_type: l2_book
 #        instrument_type: spot
 #        symbol: BTC-USDT
-#        step: 1
-#        amplitude: 2000
-#        mean: 10000
-#        freq: 50
+#    feature_params:
+#      1:
+#        dep_schema: cryptotick
+#        sampling: 1s
+  - feature_definition: synthetic.synthetic_sine_mid_price
+    data_params:
+      - exchange: BINANCE
+        instrument_type: spot
+        symbol: BTC-USDT
+        step: 1
+        amplitude: 2000
+        mean: 10000
+        freq: 5

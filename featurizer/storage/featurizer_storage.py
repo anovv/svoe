@@ -57,6 +57,7 @@ class FeaturizerStorage:
         # TODO if start_date or end_date were passed as None we need to derive them from what was returned from database
         for synthetic_data in synthetic_data_deps:
             res[synthetic_data] = synthetic_data.feature_definition.gen_synthetic_ranges_meta(start_date, end_date)
+
         return res
 
     def _get_data_meta(
@@ -69,7 +70,7 @@ class FeaturizerStorage:
         end_date: Optional[str] = None
     ) -> Dict[DataKey, List[BlockRangeMeta]]:
         raw_data = self.client.select_data_catalog(exchanges, data_types, instrument_types, symbols, start_date=start_date, end_date=end_date)
-        raw_data = raw_data[:10] # TODO this is for debug
+        raw_data = raw_data[:3] # TODO this is for debug
         # group data by data key
         groups = {}
         for r in raw_data:

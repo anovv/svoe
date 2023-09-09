@@ -31,10 +31,9 @@ class SyntheticSineMidPrice(SyntheticDataSourceDefinition):
         timesteps = np.linspace(start_ts, end_ts, num_samples, endpoint=True)
         amplitude = params['amplitude']
         mean = params['mean']
-        freq = int(num_samples / params['freq'])
-        if freq == 0:
-            raise ValueError(f'Derived freq is 0')
-        print(f'Freq: {freq}')
+        freq = params['freq']
+
+        # TODO adjust frequency so consequitive blocks end and start at the same point
         mid_prices = amplitude * np.sin(2 * np.pi * freq * timesteps) + mean
         return pd.DataFrame(zip(timesteps, timesteps, mid_prices), columns=['timestamp', 'receipt_timestamp', 'mid_price'])
 
@@ -45,9 +44,11 @@ class SyntheticSineMidPrice(SyntheticDataSourceDefinition):
         end_ts = ciso8601.parse_datetime(end_date).timestamp() + (s_in_d - 1) # last second
 
         num_days = math.ceil((end_ts - start_ts)/s_in_d)
-        splits_per_day = 60
+        splits_per_day = 4
         num_splits = num_days * splits_per_day
+        # print(num_splits)
         split_size = int((end_ts - start_ts)/num_splits)
+        # print(split_size)
         ranges = []
         cur_start_ts = start_ts
         cur_end_ts = start_ts + split_size
@@ -62,8 +63,10 @@ class SyntheticSineMidPrice(SyntheticDataSourceDefinition):
                     'start_ts': cur_start_ts,
                     'end_ts': end_ts,
                 }])
-            cur_start_ts = end_ts + 0.1 # 100ms diff betweeb blocks
+            cur_start_ts = cur_end_ts + 0.1 # 100ms diff betweeb blocks
             cur_end_ts = cur_start_ts + split_size
 
         # TODO why does it execute only 1 block_range?
+        # print(ranges)
+        # raise
         return ranges

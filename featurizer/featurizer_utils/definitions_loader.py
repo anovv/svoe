@@ -47,7 +47,6 @@ class DefinitionsLoader:
         try:
             fd_module = __import__(feature_definition_module_name, fromlist=[class_name])
         except:
-            print(f'Unable to load {feature_definition_module_name} locally')
             pass
 
         # try load data definition
