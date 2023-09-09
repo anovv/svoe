@@ -1,18 +1,18 @@
 import copy
 import uuid
 from dataclasses import dataclass
-from typing import List, Dict, Optional, Tuple
-
-import pandas as pd
-
+from typing import List, Dict
 from simulation.clock import Clock
 from simulation.data.data_generator import DataStreamGenerator
 from simulation.models.instrument import Instrument, AssetInstrument
 from simulation.models.order import Order, OrderStatus, OrderType, OrderSide
-from simulation.models.portfolio import Portfolio
+from simulation.models.portfolio import Portfolio, PortfolioBalanceRecord
 from simulation.models.trade import Trade
 
 COMMISSION = 0.005 # TODO make dynamic
+
+
+# TODO where does this belong?
 
 
 class ExecutionSimulator:
@@ -29,7 +29,7 @@ class ExecutionSimulator:
         self.portfolio: Portfolio = portfolio
         self.data_generator = data_generator
         self.state_snapshots: List[ExecutionSimulator._State] = []
-        self.executed_trades: List[Trade] = []
+        self.executed_trades: Dict[Instrument, List[Trade]] = {}
 
     def stage_for_execution(self, orders: List[Order]):
         if len(orders) > 0:
@@ -39,7 +39,12 @@ class ExecutionSimulator:
     def update_state(self):
         trades = self._execute_staged_orders()
         if len(trades) > 0:
-            self.executed_trades.extend(trades)
+            for trade in trades:
+                if trade.instrument in self.executed_trades:
+                    self.executed_trades[trade.instrument].append(trade)
+                else:
+                    self.executed_trades[trade.instrument] = [trade]
+
             self._record_state_snapshot()
 
     # here we assume there is always liquidity for execution
@@ -113,7 +118,7 @@ class ExecutionSimulator:
 
             # we assume qty  was already locked, so no deduction here
             base_qty = wallet_from.unlock(order.order_id)
-            # TODO  slippage
+            # TODO slippage
             commission = (base_qty * price) * COMMISSION
             quote_qty = (base_qty * price) - commission
             wallet_to.deposit(quote_qty)
@@ -157,41 +162,18 @@ class ExecutionSimulator:
         )
         self.state_snapshots.append(snapshot)
 
-    def balances_df(self) -> pd.DataFrame:
+    def get_portfolio_balances(self) -> List[PortfolioBalanceRecord]:
         records = []
         for s in self.state_snapshots:
-            record = {
-                'timestamp': s.timestamp
-            }
+            record = PortfolioBalanceRecord(
+                timestamp=s.timestamp,
+                total=s.total_balance,
+                per_wallet={}
+            )
             for wallet in s.portfolio.wallets:
-                record[wallet.asset_instrument.asset + '_free'] = wallet.free_balance()
-                record[wallet.asset_instrument.asset + '_locked'] = wallet.locked_balance()
-            record['total'] = s.total_balance
+                record.per_wallet[wallet.asset_instrument] = wallet.get_free_and_locked_balance()
             records.append(record)
-        return pd.DataFrame(records)
+        return records
 
-    # TODO this should be on data_generator
-    def prices_df(self) -> pd.DataFrame:
-        records = []
-        for s in self.state_snapshots:
-            record = {
-                'timestamp': s.timestamp
-            }
-            for inst in s.mid_prices:
-                record[inst.symbol] = s.mid_prices[inst]
-            records.append(record)
-        return pd.DataFrame(records)
-
-    # TODO this does not take in account full instrument info
-    def trades_df(self) -> pd.DataFrame:
-        records = []
-        for t in self.executed_trades:
-            record = {
-                'timestamp': t.timestamp,
-                'side': t.side,
-                'price': t.price,
-                'qty': t.quantity,
-                'symbol': t.instrument.symbol
-            }
-            records.append(record)
-        return pd.DataFrame(records)
+    def get_executed_trades(self) -> Dict[Instrument, List[Trade]]:
+        return self.executed_trades

@@ -1,10 +1,10 @@
 import yaml
 
 from pydantic.dataclasses import dataclass
-from typing import List
+from typing import List, Dict
 
 from simulation.models.instrument import AssetInstrument
-from simulation.models.wallet import Wallet
+from simulation.models.wallet import Wallet, WalletBalance
 
 
 @dataclass
@@ -28,3 +28,10 @@ class Portfolio:
         if wallet is None:
             raise ValueError(f'Can not find wallet for {asset_instrument}')
         return wallet
+
+
+@dataclass
+class PortfolioBalanceRecord:
+    timestamp: float
+    total: float
+    per_wallet: Dict[AssetInstrument, WalletBalance]

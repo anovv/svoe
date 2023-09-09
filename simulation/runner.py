@@ -1,5 +1,5 @@
 import time
-from typing import List, Any, Dict
+from typing import List, Any, Dict, Optional
 
 import ray
 import yaml
@@ -19,6 +19,7 @@ from simulation.strategy.base import BaseStrategy
 from simulation.strategy.buy_low_sell_high import BuyLowSellHighStrategy
 
 import simulation, common
+from simulation.viz.visualizer import Visualizer
 
 
 class SimulationRunner:
@@ -29,10 +30,11 @@ class SimulationRunner:
         self.generators = generators
         self.portfolio = portfolio
         self.strategy = strategy
+        self.single_loop: Optional[Loop] = None
         # TODO config?
 
     def run_single(self):
-        loop = Loop(
+        self.single_loop = Loop(
             clock=self.clock,
             data_generator=self.generators[0],
             portfolio=self.portfolio,
@@ -40,9 +42,9 @@ class SimulationRunner:
             execution_simulator=ExecutionSimulator(self.clock, self.portfolio, self.generators[0])
         )
         try:
-            loop.run()
+            self.single_loop.run()
         except KeyboardInterrupt:
-            loop.set_is_running(False)
+            self.single_loop.set_is_running(False)
 
     def run_distributed(self, ray_address: str) -> Any:
         with ray.init(address=ray_address, ignore_reinit_error=True, runtime_env={
@@ -116,6 +118,12 @@ def test_single_run():
     print(f'Single run started')
     runner.run_single()
     print(f'Single run finished in {time.time() - start}s')
+    viz = Visualizer(
+        executed_trades=runner.single_loop.execution_simulator.get_executed_trades(),
+        portfolio_balances=runner.single_loop.execution_simulator.get_portfolio_balances(),
+        sampled_prices=generator.get_sampled_mid_prices()
+    )
+    viz.visualize(instruments=[instrument])
 
 
 def test_distributed_run():

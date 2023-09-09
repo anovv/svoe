@@ -38,20 +38,3 @@ class Loop:
                     self.execution_simulator.stage_for_execution(orders)
                 self.execution_simulator.update_state()
         self.is_running = False
-        # print(self.execution_simulator.balances_df())
-        # df = pd.merge(self.execution_simulator.prices_df(), self.execution_simulator.balances_df(), how='outer', on='timestamp')
-
-        prices = self.execution_simulator.prices_df()
-        prices = prices.drop_duplicates()
-        print(prices)
-        print(self.execution_simulator.balances_df())
-
-        df = pd.merge(prices, self.execution_simulator.balances_df(), on='timestamp')
-        # print(df)
-
-        trades = self.execution_simulator.trades_df()
-        trades = trades[trades.symbol == 'BTC-USDT']
-        # print(trades)
-
-
-

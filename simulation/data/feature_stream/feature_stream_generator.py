@@ -24,8 +24,8 @@ class FeatureStreamGenerator(DataStreamGenerator):
 
     NUM_IO_THREADS = 16
 
-    def __init__(self, featurizer_config: FeaturizerConfig):
-        # TODO this logic is duplicated in featurizer/runner.py, util it?
+    def __init__(self, featurizer_config: FeaturizerConfig, price_sampling_period: str = '1s'):
+        self._price_sampling_period = price_sampling_period
         self.features = []
         for feature_config in featurizer_config.feature_configs:
             self.features.append(construct_feature_tree(
@@ -95,6 +95,9 @@ class FeatureStreamGenerator(DataStreamGenerator):
         self.input_data_events = self.merge_data_ranges(data_ranges)
         self.cur_interval_id = 0
         self.cur_input_event_index = 0
+
+        self._sampled_mid_prices: Dict[Instrument, List[Tuple[float, float]]] = {}
+        self._last_sampled_ts = None
 
     # TODO util this?
     # TODO decouple synthetic data gen
@@ -205,6 +208,17 @@ class FeatureStreamGenerator(DataStreamGenerator):
                     data_streams[data].emit(input_event)
 
         self.should_construct_new_out_event = True
+
+        # update sampled mid prices
+        cur_ts = self.cur_out_event.timestamp
+        if self._last_sampled_ts is None or cur_ts - self._last_sampled_ts > self._price_sampling_period:
+            mid_prices = self.get_cur_mid_prices()
+            for instrument in mid_prices:
+                if instrument in self._sampled_mid_prices:
+                    self._sampled_mid_prices[instrument].append((cur_ts, mid_prices[instrument]))
+                else:
+                    self._sampled_mid_prices[instrument] = [(cur_ts, mid_prices[instrument])]
+
         return self.cur_out_event
         # return FeatureStreamStreamGenerator._pretify_out_event(self.cur_out_event)
 
@@ -235,18 +249,25 @@ class FeatureStreamGenerator(DataStreamGenerator):
         return True
 
     def get_cur_mid_prices(self) -> Dict[Instrument, float]:
+        return FeatureStreamGenerator.get_mid_prices_from_event(self.cur_out_event)
+
+    def get_sampled_mid_prices(self) -> Dict[Instrument, List[Tuple[float, float]]]:
+        return self._sampled_mid_prices
+
+    @classmethod
+    def get_mid_prices_from_event(cls, data_event: DataStreamEvent) -> Dict[Instrument, float]:
         mid_prices = {}
 
-        for feature in self.cur_out_event.feature_values:
+        for feature in data_event.feature_values:
             mid_price = None
-            for col in self.cur_out_event.feature_values[feature]:
+            for col in data_event.feature_values[feature]:
                 if col == 'mid_price':
-                    mid_price = self.cur_out_event.feature_values[feature][col]
+                    mid_price = data_event.feature_values[feature][col]
                     instrument = FeatureStreamGenerator.get_instrument_for_feature(feature)
                     mid_prices[instrument] = mid_price
                     break
             if mid_price is None:
-                raise ValueError('DataGenerator should provide mid_price stream for all data/instrument inputs')
+                raise ValueError('DataGenerator event should contain mid_price field for all data/instrument inputs')
 
         return mid_prices
 

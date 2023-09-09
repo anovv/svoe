@@ -1,3 +1,5 @@
+from collections import namedtuple
+
 from pydantic.dataclasses import dataclass, Field
 from typing import Dict
 
@@ -5,6 +7,9 @@ from simulation.models.instrument import AssetInstrument
 
 
 # TODO add Ledger class to keep track of all executed Trade instances
+
+WalletBalance = namedtuple('WalletBalance', ['free', 'locked'])
+
 @dataclass
 class Wallet:
     asset_instrument: AssetInstrument
@@ -39,15 +44,18 @@ class Wallet:
             raise ValueError(f'Can not withdraw {qty}: not enough funds')
         self.balance -= qty
 
-    def locked_balance(self):
+    def locked_balance(self) -> float:
         res = 0
         for order_id in self.locked:
             res += self.locked[order_id]
         return res
 
     # includes locked
-    def total_balance(self):
+    def total_balance(self) -> float:
         return self.balance + self.locked_balance()
 
-    def free_balance(self):
+    def free_balance(self) -> float:
         return self.balance
+
+    def get_free_and_locked_balance(self) -> WalletBalance:
+        return WalletBalance(self.free_balance(), self.locked_balance())

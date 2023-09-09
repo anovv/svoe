@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Dict, List
+from typing import Dict, List, Tuple
 
 from featurizer.features.feature_tree.feature_tree import Feature
 from simulation.models.instrument import Instrument
@@ -21,6 +21,9 @@ class DataStreamGenerator:
         raise NotImplementedError
 
     def get_cur_mid_prices(self) -> Dict[Instrument, float]:
+        raise NotImplementedError
+
+    def get_sampled_mid_prices(self) -> Dict[Instrument, List[Tuple[float, float]]]:
         raise NotImplementedError
 
     @classmethod
