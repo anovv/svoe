@@ -1,13 +1,15 @@
 from typing import Dict, List, Tuple, Optional, Type
 
+import streamz
+from anytree import RenderTree
 from intervaltree import Interval
+from streamz import Stream
 
 from common.time.utils import split_date_range
 from featurizer.blocks.blocks import BlockRangeMeta, BlockRange, ranges_to_interval_dict, get_overlaps, \
     prune_overlaps, meta_to_interval
 from featurizer.calculator.tasks import merge_blocks
 from featurizer.config import FeaturizerConfig
-from featurizer.features.definitions.feature_definition import FeatureDefinition
 from featurizer.features.feature_tree.feature_tree import construct_feature_tree, Feature, construct_stream_tree
 from featurizer.storage.featurizer_storage import FeaturizerStorage, data_key
 import featurizer.data_definitions.data_definition as data_def
@@ -35,20 +37,16 @@ class FeatureStreamGenerator(DataStreamGenerator):
             ))
 
         # build data streams trees
-        self.data_streams_per_feature = {}
+        self.data_streams_per_feature: Dict[Feature, Tuple[Stream, Dict[Feature, Stream]]] = {}
         for f in self.features:
             out, data_streams = construct_stream_tree(f)
             self.data_streams_per_feature[f] = out, data_streams
 
-        # constructed unified out stream
-        first_feature = self.features[0]
-        first_out_stream, _ = self.data_streams_per_feature[first_feature]
-        unified_out_stream = first_out_stream.map(lambda e: [first_feature, e])
-        for i in range(1, len(self.features)):
-            feature = self.features[i]
+        out_streams = []
+        for feature in self.features:
             out_stream, _ = self.data_streams_per_feature[feature]
-            out_stream = out_stream.map(lambda e: [feature, e])
-            unified_out_stream = unified_out_stream.combine_latest(out_stream)
+            out_streams.append(out_stream)
+        unified_out_stream = streamz.combine_latest(*out_streams)
 
         self.unified_out_stream = unified_out_stream
         self.cur_out_event: Optional[DataStreamEvent] = None
@@ -58,7 +56,7 @@ class FeatureStreamGenerator(DataStreamGenerator):
         def _unified_out_stream(elems: Tuple):
             if elems is None:
                 raise ValueError('Stream returned None event')
-            elems = flatten_tuples(elems)
+            # elems = flatten_tuples(elems) # TODO is this needed?
             # (
             #   [feature-MidPriceFD-0-4f83d18e, frozendict.frozendict(
             #       {'timestamp': 1675216068.340869,
@@ -69,13 +67,10 @@ class FeatureStreamGenerator(DataStreamGenerator):
             #       'receipt_timestamp': 1675216068.340869,
             #       'volatility': 0.00023437500931322575})]
             #  )
+
             for l in elems:
-                feature = l[0]
+                _feature = l[0]
                 event = l[1]
-                interval = list(self.input_data_events.keys())[self.cur_interval_id]
-                if interval.lower > event['timestamp'] or event['timestamp'] > interval.upper:
-                    # skip if event is outside of current interval
-                    return
 
                 if self.should_construct_new_out_event:
                     self.cur_out_event = DataStreamEvent(
@@ -84,7 +79,7 @@ class FeatureStreamGenerator(DataStreamGenerator):
                         feature_values={}
                     )
                     self.should_construct_new_out_event = False
-                self.cur_out_event.feature_values[feature] = event
+                self.cur_out_event.feature_values[_feature] = event
 
         self.unified_out_stream.sink(_unified_out_stream)
 
@@ -92,15 +87,13 @@ class FeatureStreamGenerator(DataStreamGenerator):
         data_ranges_meta = storage.get_data_meta(self.features, start_date=featurizer_config.start_date, end_date=featurizer_config.end_date)
         # TODO indicate if data ranges are empty
         data_ranges = self.load_data_ranges(data_ranges_meta)
-        self.input_data_events = self.merge_data_ranges(data_ranges)
-        self.cur_interval_id = 0
+        self.input_data_events: List[Tuple[Feature, data_def.Event]] = self.merge_data_ranges(data_ranges)
         self.cur_input_event_index = 0
 
         self._sampled_mid_prices: Dict[Instrument, List[Tuple[float, float]]] = {}
         self._last_sampled_ts = None
 
     # TODO util this?
-    # TODO decouple synthetic data gen
     def load_data_ranges(self, ranges_meta_per_data: Dict[Feature, List[BlockRangeMeta]]) -> Dict[Interval, Dict[Feature, BlockRange]]:
         ranges_meta_dict_per_data = {}
         for data in ranges_meta_per_data:
@@ -160,36 +153,28 @@ class FeatureStreamGenerator(DataStreamGenerator):
 
         return data_ranges
 
-    def merge_data_ranges(self, data_ranges: Dict[Interval, Dict[Feature, BlockRange]]) -> Dict[Interval, List[Tuple[Feature, data_def.Event]]]:
+    def merge_data_ranges(self, data_ranges: Dict[Interval, Dict[Feature, BlockRange]]) -> List[Tuple[Feature, data_def.Event]]:
         # return {i: merge_blocks(b) for (i, b) in data_ranges}
-        res = {}
+        merged_per_data: Dict[Interval, List[Tuple[Feature, data_def.Event]]] = {}
         for interval in data_ranges:
-            res[interval] = merge_blocks(data_ranges[interval])
+            merged_per_data[interval] = merge_blocks(data_ranges[interval])
+
+        res = []
+        sorted_intervals = sorted(merged_per_data.keys())
+        for interval in sorted_intervals:
+            res.extend(merged_per_data[interval])
         return res
 
     def _pop_input_events(self) -> List[Tuple[Feature, data_def.Event]]:
-        # move interval if necessary
-        if self.cur_interval_id >= len(self.input_data_events.keys()):
-            raise ValueError('DataGenerator out of bounds')
-        interval = list(self.input_data_events.keys())[self.cur_interval_id]
-        input_events = self.input_data_events[interval]
-        if self.cur_input_event_index >= len(input_events):
-            self.cur_interval_id += 1
-            if self.cur_interval_id >= len(self.input_data_events.keys()):
-                raise ValueError('DataGenerator out of bounds')
-            self.cur_input_event_index = 0
-            interval = list(self.input_data_events.keys())[self.cur_interval_id]
-            input_events = self.input_data_events[interval]
-
         res = []
-        data, input_event = input_events[self.cur_input_event_index]
+        data, input_event = self.input_data_events[self.cur_input_event_index]
         timestamp = input_event['timestamp']
         res.append((data, input_event))
         self.cur_input_event_index += 1
 
         # group events with same ts
-        while self.cur_input_event_index < len(input_events):
-            next_data, next_input_event = input_events[self.cur_input_event_index]
+        while self.cur_input_event_index < len(self.input_data_events):
+            next_data, next_input_event = self.input_data_events[self.cur_input_event_index]
             # TODO float comparison
             if timestamp == next_input_event['timestamp']:
                 res.append((next_data, next_input_event))
@@ -205,48 +190,24 @@ class FeatureStreamGenerator(DataStreamGenerator):
             for feature in self.data_streams_per_feature:
                 _, data_streams = self.data_streams_per_feature[feature]
                 if data in data_streams:
-                    data_streams[data].emit(input_event)
+                    data_streams[data].emit([data, input_event])
 
         self.should_construct_new_out_event = True
 
         # update sampled mid prices
-        cur_ts = self.cur_out_event.timestamp
-        if self._last_sampled_ts is None or cur_ts - self._last_sampled_ts > self._price_sampling_period:
-            mid_prices = self.get_cur_mid_prices()
-            for instrument in mid_prices:
-                if instrument in self._sampled_mid_prices:
-                    self._sampled_mid_prices[instrument].append((cur_ts, mid_prices[instrument]))
-                else:
-                    self._sampled_mid_prices[instrument] = [(cur_ts, mid_prices[instrument])]
-
+        if self.cur_out_event is not None:
+            cur_ts = self.cur_out_event.timestamp
+            if self._last_sampled_ts is None or cur_ts - self._last_sampled_ts > self._price_sampling_period:
+                mid_prices = self.get_cur_mid_prices()
+                for instrument in mid_prices:
+                    if instrument in self._sampled_mid_prices:
+                        self._sampled_mid_prices[instrument].append((cur_ts, mid_prices[instrument]))
+                    else:
+                        self._sampled_mid_prices[instrument] = [(cur_ts, mid_prices[instrument])]
         return self.cur_out_event
-        # return FeatureStreamStreamGenerator._pretify_out_event(self.cur_out_event)
-
-    # @staticmethod
-    # def _pretify_out_event(raw_out_event: Dict) -> Dict:
-    #     # sample raw event
-    #     # {
-    #     #   feature-MidPriceFD-0-4f83d18e: frozendict.frozendict({'timestamp': 1675216068.340869, 'receipt_timestamp': 1675216068.340869, 'mid_price': 23169.260000000002}),
-    #     #   feature-VolatilityStddevFD-0-ad30ace5: frozendict.frozendict({'timestamp': 1675216068.340869, 'receipt_timestamp': 1675216068.340869, 'volatility': 0.00023437500931322575})
-    #     # }
-    #     event = {}
-    #     for feature in raw_out_event:
-    #         for col in raw_out_event[feature]:
-    #             event[col] = raw_out_event[feature][col]
-    #     return event
 
     def has_next(self) -> bool:
-        if self.cur_interval_id >= len(self.input_data_events.keys()):
-            return False
-
-        # last elem
-        if self.cur_interval_id == len(self.input_data_events.keys()) - 1:
-            interval = list(self.input_data_events.keys())[self.cur_interval_id]
-            input_events = self.input_data_events[interval]
-            if self.cur_input_event_index == len(input_events) - 1:
-                return False
-
-        return True
+        return self.cur_input_event_index < len(self.input_data_events)
 
     def get_cur_mid_prices(self) -> Dict[Instrument, float]:
         return FeatureStreamGenerator.get_mid_prices_from_event(self.cur_out_event)
@@ -287,17 +248,17 @@ class FeatureStreamGenerator(DataStreamGenerator):
         return instr
 
     @classmethod
-    def get_feature_for_instrument(cls, data_event: DataStreamEvent, feature_definition: Type[data_def.DataDefinition], instrument: Instrument) -> Feature:
+    def get_feature_for_instrument(cls, data_event: DataStreamEvent, instrument: Instrument, feature_definition: Optional[Type[data_def.DataDefinition]] = None) -> Optional[Feature]:
         # TODO cache this to avoid recalculation on each update? or make a FeatureStreamSchema abstraction?
         _feature = None
         for feature in data_event.feature_values:
-            if feature.feature_definition != feature_definition:
+            if feature_definition is not None and feature.feature_definition != feature_definition:
                 continue
             instr = cls.get_instrument_for_feature(feature)
             if instr == instrument:
+                if _feature is not None:
+                    raise ValueError(f'Found more then one feature for instrument {instrument}, event: {data_event}')
                 _feature = feature
-        if _feature is None:
-            raise ValueError(f'Unable to find feature for {feature_definition}, instrument {instrument}, event: {data_event}')
 
         return _feature
 

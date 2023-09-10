@@ -10,3 +10,18 @@ wallets:
       instrument_type: 'spot'
       asset: 'BTC'
     balance: 0
+  - asset_instrument:
+      exchange: 'BINANCE'
+      instrument_type: 'spot'
+      asset: 'ETH'
+    balance: 0
+  - asset_instrument:
+      exchange: 'BINANCE'
+      instrument_type: 'spot'
+      asset: 'SOL'
+    balance: 0
+  - asset_instrument:
+      exchange: 'BINANCE'
+      instrument_type: 'spot'
+      asset: 'XRP'
+    balance: 0

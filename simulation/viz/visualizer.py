@@ -30,6 +30,7 @@ class Visualizer:
 
         fig = make_subplots(rows=num_subplots, cols=1)
         start_pos = 1
+        # TODO scale all _timestamps lists to same start and end so graphs are properly scaled
         if include_total:
             totals = [b.total for b in self.portfolio_balances]
             totals_timestamps = [datetime.datetime.utcfromtimestamp(b.timestamp) for b in self.portfolio_balances]
@@ -75,5 +76,4 @@ class Visualizer:
             fig.add_trace(sell_trace, start_pos, 1)
             start_pos += 1
 
-        # TODO time axis are not scaled properly between graphs
         fig.show()

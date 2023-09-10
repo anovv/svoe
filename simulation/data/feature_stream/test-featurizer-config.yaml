@@ -26,3 +26,30 @@ feature_configs:
         amplitude: 2000
         mean: 10000
         freq: 5
+  - feature_definition: synthetic.synthetic_sine_mid_price
+    data_params:
+      - exchange: BINANCE
+        instrument_type: spot
+        symbol: ETH-USDT
+        step: 1
+        amplitude: 400
+        mean: 2000
+        freq: 5
+  - feature_definition: synthetic.synthetic_sine_mid_price
+    data_params:
+      - exchange: BINANCE
+        instrument_type: spot
+        symbol: SOL-USDT
+        step: 1
+        amplitude: 2
+        mean: 10
+        freq: 5
+  - feature_definition: synthetic.synthetic_sine_mid_price
+    data_params:
+      - exchange: BINANCE
+        instrument_type: spot
+        symbol: XRP-USDT
+        step: 1
+        amplitude: 20
+        mean: 100
+        freq: 5

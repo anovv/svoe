@@ -14,8 +14,9 @@ from simulation.strategy.base import BaseStrategy
 
 class _StatePerInstrument:
     def __init__(self, instrument: Instrument, portfolio: Portfolio, buy_signal_thresh: float,
-                 sell_signal_thresh: float, make_order_callable: Callable):
+                 sell_signal_thresh: float, quote_allocation: float, make_order_callable: Callable):
         self.instrument = instrument
+        self.quote_allocation = quote_allocation
         base, quote = instrument.to_asset_instruments()
         self.base_wallet = portfolio.get_wallet(base)
         self.quote_wallet = portfolio.get_wallet(quote)
@@ -58,7 +59,7 @@ class _StatePerInstrument:
                     side=OrderSide.BUY,
                     order_type=OrderType.MARKET,
                     instrument=self.instrument,
-                    qty=0.9 * self.quote_wallet.free_balance() / mid_price,
+                    qty=0.9 * self.quote_allocation * self.quote_wallet.free_balance() / mid_price,
                     price=mid_price
                 )]
         else:
@@ -81,17 +82,29 @@ class BuyLowSellHighStrategy(BaseStrategy):
         super(BuyLowSellHighStrategy, self).__init__(clock, portfolio)
         # TODO thresholds per instrument?
         self.states: Dict[Instrument, _StatePerInstrument] = {
-            instrument: _StatePerInstrument(instrument, portfolio, params['buy_signal_thresh'], params['sell_signal_thresh'], self.make_order)
+            instrument: _StatePerInstrument(
+                instrument=instrument,
+                portfolio=portfolio,
+                buy_signal_thresh=params['buy_signal_thresh'],
+                sell_signal_thresh=params['sell_signal_thresh'],
+                quote_allocation=1/len(instruments), # TODO parametrize
+                make_order_callable=self.make_order)
             for instrument in instruments
         }
 
     def on_data_udf(self, data_event: DataStreamEvent) -> Optional[List[Order]]:
         all_orders = []
+        feature = None
         for instrument in self.states:
-            feature = FeatureStreamGenerator.get_feature_for_instrument(data_event, SyntheticSineMidPrice, instrument)
+            feature = FeatureStreamGenerator.get_feature_for_instrument(data_event, instrument)
+            if feature is None:
+                continue
             mid_price = data_event.feature_values[feature]['mid_price'] # TODO query data_generator?
             orders = self.states[instrument].on_price_update(mid_price)
             if orders is not None:
                 all_orders.extend(orders)
+
+        if feature is None:
+            raise ValueError(f'Unable to find feature for any of the provided instruments, event: {data_event}, instruments: {list(self.states.keys())}')
 
         return all_orders

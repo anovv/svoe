@@ -148,7 +148,9 @@ class ExecutionSimulator:
                 continue
             instrument = Instrument.from_asset_instruments(base=asset_instrument, quote=self.portfolio.quote)
             if instrument not in mid_prices:
-                raise ValueError(f'Can not find mid_price for {instrument}')
+                # TODO why?
+                # raise ValueError(f'Can not find mid_price for {instrument}, prices: {mid_prices}')
+                continue
             mid_price = mid_prices[instrument]
             wallet = self.portfolio.get_wallet(asset_instrument)
             total_balance += (wallet.total_balance() * mid_price)

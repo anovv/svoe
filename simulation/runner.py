@@ -2,10 +2,13 @@ import time
 from typing import List, Any, Dict, Optional
 
 import ray
+import streamz
 import yaml
 from ray.util import placement_group, remove_placement_group
 from ray.util.scheduling_strategies import PlacementGroupSchedulingStrategy
+from streamz import Stream
 
+from common.common_utils import flatten_tuples
 from featurizer.config import FeaturizerConfig
 from simulation.actors.simulation_worker_actor import SimulationWorkerActor
 from simulation.clock import Clock
@@ -100,9 +103,14 @@ def test_single_run():
     featurizer_config_raw = yaml.safe_load(open('./data/feature_stream/test-featurizer-config.yaml', 'r'))
     generator = FeatureStreamGenerator(featurizer_config=FeaturizerConfig(**featurizer_config_raw))
     clock = Clock(-1)
-    instrument = Instrument('BINANCE', 'spot', 'BTC-USDT')
+    instruments = [
+        Instrument('BINANCE', 'spot', 'BTC-USDT'),
+        Instrument('BINANCE', 'spot', 'ETH-USDT'),
+        Instrument('BINANCE', 'spot', 'SOL-USDT'),
+        Instrument('BINANCE', 'spot', 'XRP-USDT'),
+    ]
     portfolio = Portfolio.load_config('portfolio-config.yaml')
-    strategy = BuyLowSellHighStrategy(instruments=[instrument], clock=clock, portfolio=portfolio, params={
+    strategy = BuyLowSellHighStrategy(instruments=instruments, clock=clock, portfolio=portfolio, params={
         'buy_signal_thresh': 0.05,
         'sell_signal_thresh': 0.05,
     })
@@ -123,17 +131,23 @@ def test_single_run():
         portfolio_balances=runner.single_loop.execution_simulator.get_portfolio_balances(),
         sampled_prices=generator.get_sampled_mid_prices()
     )
-    viz.visualize(instruments=[instrument])
+    viz.visualize(instruments=instruments)
 
 
 def test_distributed_run():
     clock = Clock(-1)
     # TODO infer instruments from featurizer_config?
-    instrument = Instrument('BINANCE', 'spot', 'BTC-USDT')
+    instruments = [
+        Instrument('BINANCE', 'spot', 'BTC-USDT'),
+        Instrument('BINANCE', 'spot', 'ETH-USDT'),
+        Instrument('BINANCE', 'spot', 'SOL-USDT'),
+        Instrument('BINANCE', 'spot', 'XRP-USDT'),
+    ]
+
     featurizer_config_raw = yaml.safe_load(open('./data/feature_stream/test-featurizer-config.yaml', 'r'))
     generators = FeatureStreamGenerator.split(featurizer_config=FeaturizerConfig(**featurizer_config_raw), num_splits=4)
     portfolio = Portfolio.load_config('portfolio-config.yaml')
-    strategy = BuyLowSellHighStrategy(instruments=[instrument], clock=clock, portfolio=portfolio, params={
+    strategy = BuyLowSellHighStrategy(instruments=instruments, clock=clock, portfolio=portfolio, params={
         'buy_signal_thresh': 0.05,
         'sell_signal_thresh': 0.05,
     })
@@ -148,7 +162,7 @@ def test_distributed_run():
     return res
 
 
+
 if __name__ == '__main__':
     test_single_run()
     # res = test_distributed_run()
-    # print(res)
