@@ -11,7 +11,7 @@ from simulation.strategy.base import BaseStrategy
 
 @dataclass
 class LoopRunResult:
-    executed_trades: List[Trade]
+    executed_trades: Dict[Instrument, List[Trade]]
     portfolio_balances: List[PortfolioBalanceRecord]
     sampled_prices: Dict[Instrument, List[Tuple[float, float]]]
 
@@ -49,7 +49,7 @@ class Loop:
         self.is_running = False
 
         return LoopRunResult(
-            executed_trades=self.execution_simulator.get_executed_trades(),
+            executed_trades=self.execution_simulator.executed_trades,
             portfolio_balances=self.execution_simulator.get_portfolio_balances(),
             sampled_prices=self.data_generator.get_sampled_mid_prices()
         )

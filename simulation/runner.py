@@ -1,19 +1,19 @@
 import time
-from typing import List, Any, Dict, Optional
+from typing import List, Any, Dict, Type, Tuple
 
 import ray
 import yaml
 from ray.util import placement_group, remove_placement_group
 from ray.util.scheduling_strategies import PlacementGroupSchedulingStrategy
-from featurizer.config import FeaturizerConfig
+from featurizer.config import FeaturizerConfig, split_featurizer_config
 from simulation.actors.simulation_worker_actor import SimulationWorkerActor
 from simulation.clock import Clock
-from simulation.data.data_generator import DataStreamGenerator
 from simulation.data.feature_stream.feature_stream_generator import FeatureStreamGenerator
 from simulation.execution.execution_simulator import ExecutionSimulator
 from simulation.loop.loop import Loop, LoopRunResult
 from simulation.models.instrument import Instrument
-from simulation.models.portfolio import Portfolio
+from simulation.models.portfolio import Portfolio, PortfolioBalanceRecord
+from simulation.models.trade import Trade
 from simulation.strategy.base import BaseStrategy
 from simulation.strategy.buy_low_sell_high import BuyLowSellHighStrategy
 
@@ -23,43 +23,59 @@ from simulation.viz.visualizer import Visualizer
 
 class SimulationRunner:
 
-    def __init__(self, clock: Clock, generators: List[DataStreamGenerator], portfolio: Portfolio, strategy: BaseStrategy):
-        # TODO generator creation should be inside actor (since it pulls data from remote store)
-        self.clock = clock
-        self.generators = generators
+    def __init__(
+        self,
+        featurizer_config: FeaturizerConfig,
+        portfolio: Portfolio,
+        strategy_class: Type[BaseStrategy],
+        strategy_params: Dict,
+        tradable_instruments: List[Instrument],
+    ):
+        # TODO configify?
+        self.featurizer_config = featurizer_config
         self.portfolio = portfolio
-        self.strategy = strategy
-        # TODO config?
+        self.strategy_class = strategy_class
+        self.strategy_params = strategy_params
+        self.tradable_instruments = tradable_instruments
 
-    def run_single(self) -> LoopRunResult:
-        loop = Loop(
-            clock=self.clock,
-            data_generator=self.generators[0],
+    def run_locally(self) -> LoopRunResult:
+        clock = Clock(-1)
+        strategy: BaseStrategy = self.strategy_class(
+            instruments=self.tradable_instruments,
+            clock=clock,
             portfolio=self.portfolio,
-            strategy=self.strategy,
-            execution_simulator=ExecutionSimulator(self.clock, self.portfolio, self.generators[0])
+            params=self.strategy_params
+        )
+        data_generator = FeatureStreamGenerator(featurizer_config=self.featurizer_config)
+        loop = Loop(
+            clock=clock,
+            data_generator=data_generator,
+            portfolio=self.portfolio,
+            strategy=strategy,
+            execution_simulator=ExecutionSimulator(clock, self.portfolio, data_generator)
         )
         try:
             return loop.run()
         except KeyboardInterrupt:
             loop.set_is_running(False)
 
-    def run_distributed(self, ray_address: str) -> Any:
+    def run_remotely(self, ray_address: str, num_workers: int) -> Any:
         with ray.init(address=ray_address, ignore_reinit_error=True, runtime_env={
-            'pip': ['xgboost', 'xgboost_ray', 'mlflow', 'diskcache', 'humps'],
+            'pip': ['xgboost', 'xgboost_ray', 'mlflow', 'diskcache', 'pyhumps'],
             'py_modules': [simulation, common, featurizer, client],
 
         }):
-            print(f'Starting distributed run for {len(self.generators)} data splits...')
+            print(f'Starting distributed run with {num_workers} workers...')
             # TODO resource spec for workers
             # TODO verify cluster has enough resources (also consider mem, custom resource, etc.)
             print(ray.available_resources())
 
-            num_workers = len(self.generators)
             pg = placement_group(bundles=[{'CPU': 0.9} for _ in range(num_workers)], strategy='SPREAD')
             ready, unready = ray.wait([pg.ready()], timeout=10)
             if unready:
                 raise ValueError(f'Unable to create placement group for {num_workers} workers')
+
+            featurizer_configs = split_featurizer_config(self.featurizer_config, num_workers)
 
             actors = [SimulationWorkerActor.options(
                 num_cpus=0.9,
@@ -67,19 +83,17 @@ class SimulationRunner:
                 scheduling_strategy=PlacementGroupSchedulingStrategy(
                     placement_group=pg,
                     placement_group_capture_child_tasks=True
-            )).remote() for _ in range(len(self.generators))]
+            )).remote(
+                worker_id=i,
+                featurizer_config=featurizer_configs[i],
+                portfolio = self.portfolio,
+                strategy_class = self.strategy_class,
+                strategy_params = self.strategy_params,
+                tradable_instruments = self.tradable_instruments
+            ) for i in range(num_workers)]
 
             print(f'Inited {len(actors)} worker actors')
-            refs = [actors[i].run_loop.remote(
-                loop=Loop(
-                    clock=self.clock,
-                    data_generator=self.generators[i],
-                    portfolio=self.portfolio,
-                    strategy=self.strategy,
-                    execution_simulator=ExecutionSimulator(self.clock, self.portfolio, self.generators[i])
-                ),
-                split_id=i
-            ) for i in range(len(actors))]
+            refs = [actors[i].run_loop.remote() for i in range(len(actors))]
             print(f'Scheduled loops, waiting for finish...')
 
             # wait for all runs to finish
@@ -88,11 +102,12 @@ class SimulationRunner:
             return self._aggregate_loop_run_results(results)
 
     # TODO this should be udf
-    # TODO make separate dataclass form distributed run result?
+    # TODO make separate dataclass for distributed run result?
     def _aggregate_loop_run_results(self, results: List[LoopRunResult]) -> LoopRunResult:
-        agg_trades = []
-        agg_balances = []
-        agg_prices = []
+        agg_trades: Dict[Instrument, List[Trade]] = {} # should be dict
+        agg_balances: List[PortfolioBalanceRecord] = []
+        agg_prices: Dict[Instrument, List[Tuple[float, float]]] = {} # should be dict
+        # TODO proper aggregation
         for result in results:
             agg_trades.extend(result.executed_trades)
             agg_balances.extend(result.portfolio_balances)
@@ -104,75 +119,38 @@ class SimulationRunner:
         )
 
 
-
-def test_single_run():
+if __name__ == '__main__':
     featurizer_config_raw = yaml.safe_load(open('./data/feature_stream/test-featurizer-config.yaml', 'r'))
-    generator = FeatureStreamGenerator(featurizer_config=FeaturizerConfig(**featurizer_config_raw))
-    clock = Clock(-1)
-    instruments = [
+    featurizer_config = FeaturizerConfig(**featurizer_config_raw)
+    # TODO derive from featurizer_config
+    tradable_instruments = [
         Instrument('BINANCE', 'spot', 'BTC-USDT'),
         Instrument('BINANCE', 'spot', 'ETH-USDT'),
         Instrument('BINANCE', 'spot', 'SOL-USDT'),
         Instrument('BINANCE', 'spot', 'XRP-USDT'),
     ]
+    # TODO derive from featurizer_config
     portfolio = Portfolio.load_config('portfolio-config.yaml')
-    strategy = BuyLowSellHighStrategy(instruments=instruments, clock=clock, portfolio=portfolio, params={
+    strategy_params = {
         'buy_signal_thresh': 0.05,
         'sell_signal_thresh': 0.05,
-    })
+    }
 
     runner = SimulationRunner(
-        clock=clock,
-        generators=[generator],
+        featurizer_config=featurizer_config,
         portfolio=portfolio,
-        strategy=strategy
+        strategy_class=BuyLowSellHighStrategy,
+        strategy_params=strategy_params,
+        tradable_instruments=tradable_instruments
     )
 
     start = time.time()
-    print(f'Single run started')
-    result = runner.run_single()
-    print(f'Single run finished in {time.time() - start}s')
+    result = runner.run_locally()
+    # result = runner.run_remotely('ray://127.0.0.1:10001', 4)
+    print(f'Finished run in {time.time() - start}s')
     viz = Visualizer(
         executed_trades=result.executed_trades,
         portfolio_balances=result.portfolio_balances,
         sampled_prices=result.sampled_prices
     )
-    viz.visualize(instruments=instruments)
-
-
-def test_distributed_run():
-    clock = Clock(-1)
-    # TODO infer instruments from featurizer_config?
-    instruments = [
-        Instrument('BINANCE', 'spot', 'BTC-USDT'),
-        Instrument('BINANCE', 'spot', 'ETH-USDT'),
-        Instrument('BINANCE', 'spot', 'SOL-USDT'),
-        Instrument('BINANCE', 'spot', 'XRP-USDT'),
-    ]
-
-    featurizer_config_raw = yaml.safe_load(open('./data/feature_stream/test-featurizer-config.yaml', 'r'))
-    generators = FeatureStreamGenerator.split(featurizer_config=FeaturizerConfig(**featurizer_config_raw), num_splits=3)
-    portfolio = Portfolio.load_config('portfolio-config.yaml')
-    strategy = BuyLowSellHighStrategy(instruments=instruments, clock=clock, portfolio=portfolio, params={
-        'buy_signal_thresh': 0.05,
-        'sell_signal_thresh': 0.05,
-    })
-
-    runner = SimulationRunner(
-        clock=clock,
-        generators=generators,
-        portfolio=portfolio,
-        strategy=strategy,
-    )
-    result = runner.run_distributed(ray_address='ray://127.0.0.1:10001')
-    viz = Visualizer(
-        executed_trades=result.executed_trades,
-        portfolio_balances=result.portfolio_balances,
-        sampled_prices=result.sampled_prices
-    )
-    viz.visualize(instruments=instruments)
-
-
-if __name__ == '__main__':
-    # test_single_run()
-    test_distributed_run()
+    viz.visualize(instruments=tradable_instruments)

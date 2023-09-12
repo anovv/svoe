@@ -51,6 +51,8 @@ def get_sampling_bucket_ts(timestamp: float, bucket: str, return_bucket_start: O
 
 
 def split_time_range_between_ts(start_ts: float, end_ts: float, num_splits: int, diff_between: float) -> List[Interval]:
+    if num_splits == 1:
+        return [closed(start_ts, end_ts)]
     split_size = int((end_ts - start_ts) / num_splits)
     intervals = []
     cur_start_ts = start_ts

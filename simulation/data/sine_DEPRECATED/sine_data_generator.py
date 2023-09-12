@@ -43,32 +43,32 @@ class SineDataStreamGenerator(DataStreamGenerator):
         mid_prices = amplitude * np.sin(2 * np.pi * frequency * timesteps) + mean
         return SineDataStreamGenerator(instrument=instrument, timesteps=list(timesteps), mid_prices=mid_prices)
 
-    @classmethod
-    def split(cls, instrument: Instrument, start_ts: float, end_ts: float, step: float, num_splits: int) -> List[
-        'DataStreamGenerator']:
-        num_samples = int((end_ts - start_ts) / step)
-        timesteps = np.linspace(start_ts, end_ts, num_samples, endpoint=True)
-        amplitude = 2000
-        mean = 10000
-        frequency = int(num_samples / 5000)
-        mid_prices = amplitude * np.sin(2 * np.pi * frequency * timesteps) + mean
-
-        split_ts = np.array_split(timesteps, num_splits)
-        split_mid_prices = np.array_split(mid_prices, num_splits)
-
-        if len(split_ts) != len(split_mid_prices):
-            raise ValueError('Failed to split sine data: ts and price size mismatch')
-
-        generators = []
-        for i in range(len(split_ts)):
-            _timesteps = split_ts[i]
-            _mid_prices = split_mid_prices[i]
-            generators.append(SineDataStreamGenerator(
-                instrument=instrument,
-                timesteps=_timesteps,
-                mid_prices=_mid_prices
-            ))
-
-        return generators
+    # @classmethod
+    # def split(cls, instrument: Instrument, start_ts: float, end_ts: float, step: float, num_splits: int) -> List[
+    #     'DataStreamGenerator']:
+    #     num_samples = int((end_ts - start_ts) / step)
+    #     timesteps = np.linspace(start_ts, end_ts, num_samples, endpoint=True)
+    #     amplitude = 2000
+    #     mean = 10000
+    #     frequency = int(num_samples / 5000)
+    #     mid_prices = amplitude * np.sin(2 * np.pi * frequency * timesteps) + mean
+    #
+    #     split_ts = np.array_split(timesteps, num_splits)
+    #     split_mid_prices = np.array_split(mid_prices, num_splits)
+    #
+    #     if len(split_ts) != len(split_mid_prices):
+    #         raise ValueError('Failed to split sine data: ts and price size mismatch')
+    #
+    #     generators = []
+    #     for i in range(len(split_ts)):
+    #         _timesteps = split_ts[i]
+    #         _mid_prices = split_mid_prices[i]
+    #         generators.append(SineDataStreamGenerator(
+    #             instrument=instrument,
+    #             timesteps=_timesteps,
+    #             mid_prices=_mid_prices
+    #         ))
+    #
+    #     return generators
 
 

@@ -25,7 +25,3 @@ class DataStreamGenerator:
 
     def get_sampled_mid_prices(self) -> Dict[Instrument, List[Tuple[float, float]]]:
         raise NotImplementedError
-
-    @classmethod
-    def split(cls, *args, **kwargs) -> List['DataStreamGenerator']:
-        raise NotImplementedError
