@@ -26,6 +26,8 @@ class FeatureCatalog(Base):
 
     start_ts = Column(String(32), primary_key=True)
     end_ts = Column(String(32), primary_key=True)
+
+    # TODO rename date -> day
     date = Column(String(32), primary_key=True)
 
     sampling = Column(String(32))

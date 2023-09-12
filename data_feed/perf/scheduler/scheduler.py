@@ -61,7 +61,7 @@ class Scheduler:
     def run(self, subset=None, label_selector=None):
         if self.enable_oom_handler:
             self.oom_handler.start()
-            self.oom_handler_client.run()
+            self.oom_handler_client.run
         self.scheduling_state.init_pods_work_queue(self.kube_api.load_pod_names_from_ss(subset, label_selector))
         self.init_work_queue_size = len(self.scheduling_state.pods_work_queue)
         print(f'[Scheduler] Scheduling estimation for {self.init_work_queue_size} pods...')

@@ -2,8 +2,11 @@ import math
 from datetime import datetime
 from typing import Optional, List, Tuple
 
+import ciso8601
 import pytz
+from portion import Interval, closed
 
+SECONDS_IN_DAY = 24 * 60 * 60
 
 def convert_str_to_seconds(s: str) -> float:
     if 'ms' in s:
@@ -13,9 +16,23 @@ def convert_str_to_seconds(s: str) -> float:
     return int(s[:-1]) * seconds_per_unit[s[-1]]
 
 
-def date_str_from_ts(ts) -> str:
+def day_str_from_ts(ts) -> str:
     dt_obj = datetime.fromtimestamp(float(ts), tz=pytz.utc)
     return f'{dt_obj.year}-{dt_obj:%m}-{dt_obj:%d}'
+
+
+def date_str_to_ts(date: str) -> float:
+    return ciso8601.parse_datetime(date).timestamp()
+
+
+def ts_to_str_date(ts: float) -> str:
+    dt_obj = datetime.fromtimestamp(float(ts), tz=pytz.utc)
+    return str(dt_obj)
+
+
+def date_str_to_day_str(date: str) -> str:
+    ts = date_str_to_ts(date)
+    return day_str_from_ts(ts)
 
 
 # divides time into equal buckets starting from 00:00:00:00 UTC based on window_s and gets bucket for given ts
@@ -33,6 +50,18 @@ def get_sampling_bucket_ts(timestamp: float, bucket: str, return_bucket_start: O
     return bucket_start_ts if return_bucket_start else bucket_start_ts + bucket_s
 
 
-def split_date_range(start_date: str, end_date: str) -> List[Tuple[str, str]]:
-    raise NotImplementedError
+def split_time_range_between_ts(start_ts: float, end_ts: float, num_splits: int, diff_between: float) -> List[Interval]:
+    split_size = int((end_ts - start_ts) / num_splits)
+    intervals = []
+    cur_start_ts = start_ts
+    cur_end_ts = start_ts + split_size
+    while cur_start_ts < end_ts:
+        if cur_end_ts <= end_ts:
+            intervals.append(closed(cur_start_ts, cur_end_ts))
+        else:
+            intervals.append(closed(cur_start_ts, end_ts))
+        cur_start_ts = cur_end_ts + diff_between
+        cur_end_ts = cur_start_ts + split_size
+
+    return intervals
 

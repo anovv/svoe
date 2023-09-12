@@ -33,6 +33,8 @@ class DataCatalog(Base):
 
     start_ts = Column(String(32), primary_key=True)
     end_ts = Column(String(32), primary_key=True)
+
+    # TODO rename date -> day
     date = Column(String(32), primary_key=True)
 
     # TODO this should be a secondary key

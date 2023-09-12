@@ -18,5 +18,5 @@ with Flow("hello-flow") as flow:
 
 list = S3List(bucket='svoe.test.1')
 # res = list.run(prefix='parquet/BINANCE/l2_book/XLM-USDT')
-res = list.run(prefix='parquet/BINANCE/l2_book')
+res = list.run
 print(res)

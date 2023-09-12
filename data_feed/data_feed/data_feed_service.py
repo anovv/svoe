@@ -16,6 +16,6 @@ class DataFeedService(object):
     def run() -> None:
         cs = Cryptostore(config=DATA_FEED_CONFIG_PATH)
         try:
-            cs.run()
+            cs.run
         except KeyboardInterrupt:
             pass

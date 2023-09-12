@@ -7,7 +7,8 @@ sys.path.append('/Users/anov/IdeaProjects/cryptostore')
 from data_feed.data_feed_service import DataFeedService
 
 def test_datafeed():
-    DataFeedService.run()
+    DataFeedService.run
+
 
 # To rebuild Cython https://stackoverflow.com/questions/34928001/distutils-ignores-changes-to-setup-py-when-building-an-extension
 # python setup.py clean --all

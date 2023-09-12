@@ -1,10 +1,19 @@
-import pandas as pd
+from dataclasses import dataclass
+from typing import List, Dict, Tuple
 
 from simulation.clock import Clock
 from simulation.data.data_generator import DataStreamGenerator
 from simulation.execution.execution_simulator import ExecutionSimulator
-from simulation.models.portfolio import Portfolio
+from simulation.models.instrument import Instrument
+from simulation.models.portfolio import Portfolio, PortfolioBalanceRecord
+from simulation.models.trade import Trade
 from simulation.strategy.base import BaseStrategy
+
+@dataclass
+class LoopRunResult:
+    executed_trades: List[Trade]
+    portfolio_balances: List[PortfolioBalanceRecord]
+    sampled_prices: Dict[Instrument, List[Tuple[float, float]]]
 
 
 class Loop:
@@ -38,3 +47,9 @@ class Loop:
                     self.execution_simulator.stage_for_execution(orders)
                 self.execution_simulator.update_state()
         self.is_running = False
+
+        return LoopRunResult(
+            executed_trades=self.execution_simulator.get_executed_trades(),
+            portfolio_balances=self.execution_simulator.get_portfolio_balances(),
+            sampled_prices=self.data_generator.get_sampled_mid_prices()
+        )

@@ -53,7 +53,7 @@ class Runner:
             CHANNEL_NODE_KUBE_EVENTS,
             CHANNEL_DF_POD_OBJECT_EVENTS,
             CHANNEL_DF_POD_KUBE_EVENTS])
-        self.scheduler.run(subset, label_selector)
+        self.scheduler.run
         self.cleanup()
 
     def rerun(self, label_selector, date):

@@ -1,11 +1,11 @@
 from typing import Dict, List, Tuple, Optional, Type
 
+import ciso8601
 import streamz
-from anytree import RenderTree
 from intervaltree import Interval
 from streamz import Stream
 
-from common.time.utils import split_date_range
+from common.time.utils import split_time_range_between_ts, ts_to_str_date
 from featurizer.blocks.blocks import BlockRangeMeta, BlockRange, ranges_to_interval_dict, get_overlaps, \
     prune_overlaps, meta_to_interval
 from featurizer.calculator.tasks import merge_blocks
@@ -18,9 +18,10 @@ import concurrent.futures
 
 from simulation.data.data_generator import DataStreamGenerator, DataStreamEvent
 from simulation.models.instrument import Instrument
-from common.common_utils import flatten_tuples
 from common.pandas.df_utils import load_df
 
+# free data https://www.cryptoarchive.com.au/faq
+# https://ccdata.io/
 
 class FeatureStreamGenerator(DataStreamGenerator):
 
@@ -267,7 +268,11 @@ class FeatureStreamGenerator(DataStreamGenerator):
         start_date = featurizer_config.start_date
         end_date = featurizer_config.end_date
         generators = []
-        date_range_splits = split_date_range(start_date, end_date)
+        start_ts = ciso8601.parse_datetime(start_date).timestamp()
+        end_ts = ciso8601.parse_datetime(end_date).timestamp()
+        splits = split_time_range_between_ts(start_ts, end_ts, num_splits, 0.1)
+        date_range_splits = [(ts_to_str_date(i.lower), ts_to_str_date(i.upper)) for i in splits]
+
         for _start_date, _end_date in date_range_splits:
             config_split = featurizer_config.copy(deep=True)
             config_split.start_date = _start_date

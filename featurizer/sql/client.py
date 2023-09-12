@@ -98,8 +98,8 @@ class FeaturizerMysqlClient(MysqlClient):
         source: Optional[str] = None,
         version: Optional[str] = None,
         extras: Optional[str] = None,
-        start_date: Optional[str] = None,
-        end_date: Optional[str] = None
+        start_day: Optional[str] = None,
+        end_day: Optional[str] = None
     ) -> List[Dict]:
         # TODO instrument_extra
         args = {}
@@ -118,10 +118,10 @@ class FeaturizerMysqlClient(MysqlClient):
             .filter(DataCatalog.instrument_type.in_(instrument_types))\
             .filter(DataCatalog.symbol.in_(symbols))\
             .filter_by(**args)
-        if start_date is not None:
-            q = q.filter(DataCatalog.date >= start_date)
-        if end_date is not None:
-            q = q.filter(DataCatalog.date <= end_date)
+        if start_day is not None:
+            q = q.filter(DataCatalog.date >= start_day)
+        if end_day is not None:
+            q = q.filter(DataCatalog.date <= end_day)
         res = q.order_by(DataCatalog.start_ts).all()
         # TODO this adds unnecessary sqlalchemy fields, remove to reduce memory footprint
         return [r.__dict__ for r in res]
@@ -137,15 +137,15 @@ class FeaturizerMysqlClient(MysqlClient):
     def select_feature_catalog(
         self,
         feature_keys: List[str],
-        start_date: Optional[str] = None,
-        end_date: Optional[str] = None
+        start_day: Optional[str] = None,
+        end_day: Optional[str] = None
     ) -> List[Dict]:
         session = Session()
         f = session.query(FeatureCatalog).filter(FeatureCatalog.feature_key.in_(feature_keys))
-        if start_date is not None:
-            f = f.filter(FeatureCatalog.date >= start_date)
-        if end_date is not None:
-            f = f.filter(FeatureCatalog.date <= end_date)
+        if start_day is not None:
+            f = f.filter(FeatureCatalog.date >= start_day)
+        if end_day is not None:
+            f = f.filter(FeatureCatalog.date <= end_day)
         res = f.order_by(FeatureCatalog.start_ts).all()
         # TODO this adds unnecessary sqlalchemy fields, remove to reduce memory footprint
         return [r.__dict__ for r in res]

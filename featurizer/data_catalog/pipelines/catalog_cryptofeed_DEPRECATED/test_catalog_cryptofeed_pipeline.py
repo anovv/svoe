@@ -55,7 +55,7 @@ class TestCatalogCryptofeedPipeline(unittest.TestCase):
             batch_size = 10
             num_batches = 5
             runner = PipelineRunner()
-            runner.run(CatalogCryptofeedDag())
+            runner.run
             print('Inited runner')
             print('Loading generator...')
             generator = generate_cryptofeed_input_items(batch_size)

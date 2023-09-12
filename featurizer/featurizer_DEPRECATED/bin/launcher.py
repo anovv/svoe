@@ -7,6 +7,6 @@ FEATURIZER_CONFIG_PATH = '/etc/svoe/featurizer/configs/data-feed-config.yaml'
 def main():
     fr = Featurizer(config=FEATURIZER_CONFIG_PATH)
     try:
-        fr.run()
+        fr.run
     except KeyboardInterrupt:
         pass

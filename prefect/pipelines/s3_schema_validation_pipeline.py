@@ -58,11 +58,8 @@ def list_files() -> List[str]: #TODO param prefix
     # prefix = 'parquet/BINANCE/l2_book/BNB-USDT'
     # prefix = 'parquet/FTX/l2_book/UNI-USD'
     prefix = 'parquet/BINANCE/l2_book/XVS-USDT'
-    return list.run(prefix=prefix, credentials={
-        # these are read locally
-        'ACCESS_KEY': Secret('AWS_KEY').get(),
-        'SECRET_ACCESS_KEY': Secret('AWS_SECRET').get(),
-    })
+    return list.run
+
 
 # TODO use awsdatawrangler
 @task
@@ -132,7 +129,7 @@ from prefect.executors import DaskExecutor
 executor = DaskExecutor(address='tcp://13.231.161.223:8786', debug=True)
 
 with raise_on_exception():
-    state = flow.run(executor=executor)
+    state = flow.run
     # state = flow.run()
     task_ref = flow.get_tasks(name=reduce_tuples.name)[0]
     print(state.result[task_ref].result)

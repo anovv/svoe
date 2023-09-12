@@ -24,8 +24,8 @@ tasks:
       cluster_name: 'sample-cluster'
       parallelism: 4
       featurizer_config:
-        start_date: '2023-02-01'
-        end_date: '2023-02-01'
+        start_date: '2023-02-01 00:00:00'
+        end_date: '2023-02-01 01:00:00'
         label_feature_index: 0
         label_lookahead: '5100ms'
         feature_configs:
