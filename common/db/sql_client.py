@@ -76,6 +76,6 @@ class SqlClient:
         return engine
 
     # TODO this should not be used, migrate table management to Alembic
-    def create_tables(self):
+    def create_tables_SCRIPT_ONLY(self):
         # creates if not exists
         Base.metadata.create_all(self.engine)

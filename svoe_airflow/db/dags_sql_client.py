@@ -14,7 +14,6 @@ class DagsSqlClient(SqlClient):
         dag_name: str,
         dag_config_encoded: str
     ):
-        self.create_tables() # TODO remove this
         item = DagConfigEncoded(
             owner_id=owner_id,
             dag_name=dag_name,

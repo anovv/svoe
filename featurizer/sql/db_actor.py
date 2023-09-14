@@ -15,7 +15,6 @@ class DbActor:
         self.client = FeaturizerSqlClient(db_config)
 
     async def filter_batch(self, input_batch: InputItemBatch) -> InputItemBatch:
-        self.client.create_tables()
         items = input_batch[1]
         if len(items) == 0:
             return input_batch
@@ -28,13 +27,11 @@ class DbActor:
             raise ValueError(f'Unsupported source:{ source}')
 
     async def write_batch(self, batch: List[DataCatalog | FeatureCatalog]) -> Dict:
-        self.client.create_tables()
         self.client.write_catalog_item_batch(batch)
         # TODO return status to pass to stats actor
         return {}
 
     async def in_feature_catalog(self, item: FeatureCatalog) -> bool:
-        self.client.create_tables()
         return self.client.in_feature_catalog(item)
 
 

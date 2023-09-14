@@ -177,7 +177,6 @@ class FeaturizerStorage:
             upload_dir(s3_path=s3_path, local_path=f'{temp_dir.name}/')
 
             # TODO update DB only on S3 success
-            self.client.create_tables()
             self.client.write_feature_def(item)
             return True, None
         except Exception as e:

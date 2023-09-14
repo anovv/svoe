@@ -23,4 +23,4 @@ if get_db_type() == DbType.MYSQL:
 
 # create tables
 client = SqlClient()
-client.create_tables()
+client.create_tables_SCRIPT_ONLY()

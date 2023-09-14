@@ -109,7 +109,6 @@ class TestCatalogCryptotickPipeline(unittest.TestCase):
     # TODO asserts, write mock data
     def test_db_client(self):
         client = FeaturizerSqlClient()
-        client.create_tables()
         batch = ({'batch_id': 0}, [{'path': 's3://svoe-cryptotick-data/limitbook_full/20230201/BINANCE_SPOT_BTC_USDT.csv.gz'}])
         _, not_exist = client.filter_cryptotick_batch(batch)
         print(not_exist)

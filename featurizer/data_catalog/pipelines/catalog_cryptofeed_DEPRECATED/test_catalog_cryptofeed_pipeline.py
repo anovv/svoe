@@ -4,6 +4,7 @@ import unittest
 
 import ray
 
+from common.db.sql_client import SqlClient
 from featurizer.data_catalog.pipelines.catalog_cryptotick.tasks import make_catalog_item
 from featurizer.data_catalog import CatalogCryptofeedDag
 from featurizer.data_catalog import PipelineRunner
@@ -34,8 +35,7 @@ class TestCatalogCryptofeedPipeline(unittest.TestCase):
         generator = generate_cryptofeed_input_items(batch_size)
         print('Generator loaded')
         batch = next(generator)
-        client = MysqlClient()
-        client.create_tables()
+        client = SqlClient()
         _, not_exist = client.filter_cryptofeed_batch(batch)
         print(not_exist)
         print(f'Found {batch_size - len(not_exist)} items in db, {len(not_exist)} to write')
