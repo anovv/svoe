@@ -2,8 +2,6 @@ from sqlalchemy import Column, String, JSON, DateTime, func, Integer
 
 from common.db.base import Base
 
-# from sqlalchemy.orm import declarative_base
-
 
 # defaults
 DEFAULT_VERSION = ''

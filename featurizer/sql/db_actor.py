@@ -3,7 +3,7 @@ from typing import Optional, Dict, List
 import ray
 
 from featurizer.data_catalog.common.data_models.models import InputItemBatch
-from featurizer.sql.client import FeaturizerMysqlClient
+from featurizer.sql.client import FeaturizerSqlClient
 from featurizer.sql.data_catalog.models import DataCatalog
 from featurizer.sql.feature_catalog.models import FeatureCatalog
 
@@ -12,7 +12,7 @@ from featurizer.sql.feature_catalog.models import FeatureCatalog
 @ray.remote
 class DbActor:
     def __init__(self, db_config: Optional[Dict] = None):
-        self.client = FeaturizerMysqlClient(db_config)
+        self.client = FeaturizerSqlClient(db_config)
 
     async def filter_batch(self, input_batch: InputItemBatch) -> InputItemBatch:
         self.client.create_tables()

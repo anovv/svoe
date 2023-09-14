@@ -7,7 +7,7 @@ import boto3.session
 import ray
 
 from featurizer.data_catalog.pipelines.catalog_cryptotick.util import process_cryptotick_timestamps
-from featurizer.sql.client import FeaturizerMysqlClient
+from featurizer.sql.client import FeaturizerSqlClient
 from featurizer.sql.db_actor import DbActor
 from featurizer.data_catalog.common.utils.cryptotick_utils import cryptotick_input_items, CRYPTOTICK_RAW_BUCKET_NAME
 from featurizer.data_catalog.pipelines.catalog_cryptotick.pipeline import CatalogCryptotickPipeline, poll_to_tqdm
@@ -108,7 +108,7 @@ class TestCatalogCryptotickPipeline(unittest.TestCase):
 
     # TODO asserts, write mock data
     def test_db_client(self):
-        client = FeaturizerMysqlClient()
+        client = FeaturizerSqlClient()
         client.create_tables()
         batch = ({'batch_id': 0}, [{'path': 's3://svoe-cryptotick-data/limitbook_full/20230201/BINANCE_SPOT_BTC_USDT.csv.gz'}])
         _, not_exist = client.filter_cryptotick_batch(batch)

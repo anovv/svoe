@@ -1,37 +1,16 @@
 from typing import Optional, Dict, List
-
-from sqlalchemy import create_engine
-
-from common.db.base import Base
-from common.db.mysql_client import MysqlClient, Session
+from common.db.sql_client import SqlClient, Session
 from featurizer.sql.data_catalog.models import DataCatalog
 from featurizer.sql.feature_catalog.models import FeatureCatalog
 from featurizer.data_catalog.common.data_models.models import InputItemBatch
 
-import os
 
 from featurizer.sql.feature_def.models import FeatureDefinitionDB
 
 
-class FeaturizerMysqlClient(MysqlClient):
+class FeaturizerSqlClient(SqlClient):
     def __init__(self, config: Optional[Dict] = None):
-        super(FeaturizerMysqlClient, self).__init__(config=config)
-
-    def _init_engine(self):
-        user = os.getenv('MYSQL_USER', self.config.get('mysql_user'))
-        password = os.getenv('MYSQL_PASSWORD', self.config.get('mysql_password'))
-        host = os.getenv('MYSQL_HOST', self.config.get('mysql_host'))
-        port = os.getenv('MYSQL_PORT', self.config.get('mysql_port'))
-        db = os.getenv('MYSQL_DATABASE', self.config.get('mysql_database'))
-        url = f'mysql+pymysql://{user}:{password}@{host}:{port}/{db}'
-        engine = create_engine(url, echo=False)
-        Session.configure(bind=engine)
-        return engine
-
-    # TODO this should not be used, migrate table management to Alembic
-    def create_tables(self):
-        # creates if not exists
-        Base.metadata.create_all(self.engine)
+        super(FeaturizerSqlClient, self).__init__(config=config)
 
     # TODO separate api methods and pipeline methods
     def write_catalog_item_batch(self, batch: List[DataCatalog | FeatureCatalog]):
@@ -173,12 +152,5 @@ class FeaturizerMysqlClient(MysqlClient):
         feature_definition: str,
         version: str,
     ) -> FeatureDefinitionDB:
-
         session = Session()
         return session.query(FeatureDefinitionDB).get((owner_id, feature_group, feature_definition, version))
-
-
-
-
-
-

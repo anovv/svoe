@@ -17,7 +17,7 @@ from dagfactory import DagFactory
 
 from common.s3.s3_utils import upload_dir, delete_by_prefix
 from common.common_utils import base64_encode
-from svoe_airflow.db.dags_mysql_client import DagsMysqlClient
+from svoe_airflow.db.dags_mysql_client import DagsSqlClient
 from svoe_airflow.utils import user_dag_conf_to_airflow_dag_conf
 
 import dagfactory
@@ -29,7 +29,7 @@ DAG_RUN_ID_PREFIX = 'dag-run'
 class DagRunner:
 
     def __init__(self):
-        self.db_client = DagsMysqlClient()
+        self.db_client = DagsSqlClient()
 
         # TODO pass via env vars/config
         self.airflow_api_client = ApiClient(Configuration(

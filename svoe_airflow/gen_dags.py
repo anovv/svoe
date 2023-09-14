@@ -3,7 +3,7 @@ import traceback
 
 from dagfactory import load_yaml_dags, DagFactory
 from airflow.configuration import conf as airflow_conf
-from svoe_airflow.db.dags_mysql_client import DagsMysqlClient
+from svoe_airflow.db.dags_mysql_client import DagsSqlClient
 from svoe_airflow.utils import DEFAULT_DAG_YAML_SUFFIX, sync_configs, dag_name_from_yaml_path
 from pathlib import Path
 
@@ -11,7 +11,7 @@ print(f'[gen_dags.py] Called at {datetime.datetime.now()}')
 dags_folder = airflow_conf.get('core', 'dags_folder')
 suffix = DEFAULT_DAG_YAML_SUFFIX # '.yaml'
 
-client = DagsMysqlClient()
+client = DagsSqlClient()
 confs = client.select_all_configs()
 
 # only sync confs without compilation errors

@@ -1,14 +1,12 @@
-from typing import Optional, Dict, Tuple, List
+from typing import Optional, Dict, List
 
-from common.db.mysql_client import MysqlClient, Session
+from common.db.sql_client import SqlClient, Session
 from svoe_airflow.db.models import DagConfigEncoded
 
-import concurrent.futures
 
-
-class DagsMysqlClient(MysqlClient):
+class DagsSqlClient(SqlClient):
     def __init__(self, config: Optional[Dict] = None):
-        super(DagsMysqlClient, self).__init__(config=config)
+        super(DagsSqlClient, self).__init__(config=config)
 
     def save_db_config_encoded(
         self,

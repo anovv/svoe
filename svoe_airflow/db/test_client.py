@@ -5,7 +5,7 @@ import unittest
 import yaml
 
 from common.common_utils import base64_encode
-from svoe_airflow.db.dags_mysql_client import DagsMysqlClient
+from svoe_airflow.db.dags_mysql_client import DagsSqlClient
 
 
 class TestDagsMysqlClient(unittest.TestCase):
@@ -13,7 +13,7 @@ class TestDagsMysqlClient(unittest.TestCase):
     def test_save_and_read(self):
         os.environ['MYSQL_HOST'] = 'localhost'
         os.environ['MYSQL_PASSWORD'] = ''
-        client = DagsMysqlClient()
+        client = DagsSqlClient()
         owner_id = '1'
         dag_name = 'sample_dag'
         dag_config_encoded = 'abc'
