@@ -104,14 +104,26 @@ class SimulationRunner:
     # TODO this should be udf
     # TODO make separate dataclass for distributed run result?
     def _aggregate_loop_run_results(self, results: List[LoopRunResult]) -> LoopRunResult:
+        # results should be already ordered
         agg_trades: Dict[Instrument, List[Trade]] = {} # should be dict
         agg_balances: List[PortfolioBalanceRecord] = []
         agg_prices: Dict[Instrument, List[Tuple[float, float]]] = {} # should be dict
         # TODO proper aggregation
-        for result in results:
-            agg_trades.extend(result.executed_trades)
-            agg_balances.extend(result.portfolio_balances)
-            agg_prices.extend(result.sampled_prices)
+        for res in results:
+            for instrument in res.executed_trades:
+                if instrument in agg_trades:
+                    agg_trades[instrument].extend(res.executed_trades[instrument])
+                else:
+                    agg_trades[instrument] = res.executed_trades[instrument]
+
+            agg_balances.extend(res.portfolio_balances)
+
+            for instrument in res.executed_trades:
+                if instrument in agg_prices:
+                    agg_prices[instrument].extend(res.sampled_prices[instrument])
+                else:
+                    agg_prices[instrument] = res.sampled_prices[instrument]
+
         return LoopRunResult(
             executed_trades=agg_trades,
             portfolio_balances=agg_balances,
@@ -145,8 +157,8 @@ if __name__ == '__main__':
     )
 
     start = time.time()
-    result = runner.run_locally()
-    # result = runner.run_remotely('ray://127.0.0.1:10001', 4)
+    # result = runner.run_locally()
+    result = runner.run_remotely('ray://127.0.0.1:10001', 4)
     print(f'Finished run in {time.time() - start}s')
     viz = Visualizer(
         executed_trades=result.executed_trades,
