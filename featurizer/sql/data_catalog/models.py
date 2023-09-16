@@ -12,8 +12,6 @@ DEFAULT_VERSION = ''
 DEFAULT_COMPACTION = 'raw'
 DEFAULT_INSTRUMENT_EXTRA = ''
 
-SVOE_S3_CATALOGED_DATA_BUCKET = 'svoe-cataloged-data'
-
 
 # TODO figure out float precision issues
 class DataCatalog(Base):
@@ -69,8 +67,8 @@ class DataCatalog(Base):
             setattr(self, DataCatalog.version.name, DEFAULT_VERSION)
 
 
-def _construct_s3_path(item: DataCatalog) -> str:
-    res = f's3://{SVOE_S3_CATALOGED_DATA_BUCKET}/'
+def build_data_catalog_block_path(item: DataCatalog, prefix: str) -> str:
+    res = prefix
     for field in [
         DataCatalog.data_type.name,
         DataCatalog.exchange.name,

@@ -13,6 +13,8 @@ from portion import Interval, IntervalDict, closed
 from featurizer.calculator.tasks import calculate_feature, load_if_needed, bind_and_cache, context, \
     lookahead_shift_blocks, point_in_time_join_block, load_and_preprocess, gen_synth_events
 from common.time.utils import convert_str_to_seconds
+from featurizer.storage.data_store_adapter.data_store_adapter import DataStoreAdapter
+from featurizer.storage.data_store_adapter.local_data_store_adapter import LocalDataStoreAdapter
 
 
 # TODO re: cache https://discuss.ray.io/t/best-way-to-share-memory-for-ray-tasks/3759
@@ -26,6 +28,7 @@ def build_feature_task_graph(
     obj_ref_cache: Dict[str, Dict[Interval, Tuple[int, Optional[ObjectRef]]]],
     features_to_store: Optional[List[Feature]] = None,
     stored_feature_blocks_meta: Optional[Dict[Feature, Dict[Interval, BlockMeta]]] = None,
+    data_store_adapter: DataStoreAdapter = LocalDataStoreAdapter()
 ) -> Dict[Feature, Dict[Interval, Dict[Interval, DAGNode]]]:
     features_ranges_meta = {}
 
@@ -98,11 +101,11 @@ def build_feature_task_graph(
                 if stored_feature_blocks_meta is not None and feature in stored_feature_blocks_meta and interval in stored_feature_blocks_meta[feature]:
                     path = stored_feature_blocks_meta[feature][interval]['path']
                     # node = load_if_needed.bind(path, True)
-                    node = bind_and_cache(load_if_needed, obj_ref_cache, ctx, path=path, is_feature=True)
+                    node = bind_and_cache(load_if_needed, obj_ref_cache, ctx, path=path, data_store_adapter=data_store_adapter, is_feature=True)
                 else:
                     store = features_to_store is not None and feature in features_to_store
                     # node = calculate_feature.bind(feature, dep_nodes, interval, store)
-                    node = bind_and_cache(calculate_feature, obj_ref_cache, ctx, feature=feature, dep_refs=dep_nodes, interval=interval, store=store)
+                    node = bind_and_cache(calculate_feature, obj_ref_cache, ctx, feature=feature, dep_refs=dep_nodes, interval=interval, data_store_adapter=data_store_adapter, store=store)
 
                 # TODO validate interval is within range_interval
                 nodes[interval] = node

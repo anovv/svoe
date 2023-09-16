@@ -21,7 +21,7 @@ import unittest
 import pandas as pd
 from typing import List
 from featurizer.featurizer_utils.testing_utils import mock_feature, mock_ts_df_remote
-from common.pandas import concat, load_df, plot_multi
+from common.pandas.df_utils import concat, load_df, plot_multi
 from featurizer.blocks.blocks import merge_asof_multi
 
 

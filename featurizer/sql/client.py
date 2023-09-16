@@ -9,8 +9,8 @@ from featurizer.sql.feature_def.models import FeatureDefinitionDB
 
 
 class FeaturizerSqlClient(SqlClient):
-    def __init__(self, config: Optional[Dict] = None):
-        super(FeaturizerSqlClient, self).__init__(config=config)
+    def __init__(self):
+        super(FeaturizerSqlClient, self).__init__()
 
     # TODO separate api methods and pipeline methods
     def write_catalog_item_batch(self, batch: List[DataCatalog | FeatureCatalog]):

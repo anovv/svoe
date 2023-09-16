@@ -11,8 +11,8 @@ from featurizer.sql.feature_catalog.models import FeatureCatalog
 # @ray.remote(resources={'worker_size_small': 1, 'instance_on_demand': 1})
 @ray.remote
 class DbActor:
-    def __init__(self, db_config: Optional[Dict] = None):
-        self.client = FeaturizerSqlClient(db_config)
+    def __init__(self):
+        self.client = FeaturizerSqlClient()
 
     async def filter_batch(self, input_batch: InputItemBatch) -> InputItemBatch:
         items = input_batch[1]

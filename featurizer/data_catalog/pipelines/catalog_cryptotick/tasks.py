@@ -8,24 +8,31 @@ import pandas as pd
 import pytz
 import ray
 
-from featurizer.data_definitions.common.trades.cryptotick import preprocess_trades_df
+from featurizer.data_definitions.common.trades.cryptotick.utils import preprocess_trades_df
 from featurizer.sql.db_actor import DbActor
 from featurizer.data_catalog.common.data_models.models import InputItem
-from featurizer.sql.data_catalog.models import DataCatalog, _construct_s3_path
-from featurizer.data_definitions.common.l2_book_incremental.cryptofeed import utils as cryptofeed_l2_utils
+from featurizer.sql.data_catalog.models import DataCatalog
 from featurizer.data_definitions.common.l2_book_incremental.cryptotick.utils import preprocess_l2_inc_df, \
-    gen_split_l2_inc_df_and_pad_with_snapshot, utils as cryptotick_l2_utils
+    gen_split_l2_inc_df_and_pad_with_snapshot, get_snapshot_ts
 from common.pandas import df_utils
-from common.pandas import gen_split_df_by_mem
+from common.pandas.df_utils import gen_split_df_by_mem
+from featurizer.storage.data_store_adapter.data_store_adapter import DataStoreAdapter
 
 
 # TODO set cpu separately when running on aws kuber cluster
 @ray.remote(num_cpus=2, resources={'worker_size_large': 1, 'instance_spot': 1})
-def load_split_catalog_store_df(input_item: InputItem, chunk_size_kb: int, date_str: str, db_actor: DbActor, callback: Optional[Callable] = None) -> Dict:
+def load_split_catalog_store_df(
+    input_item: InputItem,
+    chunk_size_kb: int,
+    date_str: str, # TODO date -> day
+    db_actor: DbActor,
+    data_store_adapter: DataStoreAdapter,
+    callback: Optional[Callable] = None
+) -> Dict:
     path = input_item[DataCatalog.path.name]
     data_type = input_item[DataCatalog.data_type.name]
     t = time.time()
-    df = df_utils.load_df(path)
+    df = data_store_adapter.load_df(path)
     callback({'name': 'load_finished', 'time': time.time() - t})
     t = time.time()
 
@@ -67,9 +74,9 @@ def load_split_catalog_store_df(input_item: InputItem, chunk_size_kb: int, date_
         # remove raw source path so it is constructed by SqlAlchemy default value when making catalog item
         del item_split[DataCatalog.path.name]
 
-        catalog_item = make_catalog_item(split, item_split)
+        catalog_item = make_catalog_item(split, item_split, data_store_adapter)
         store_futures.append(
-            executor.submit(functools.partial(store_df, df=split, path=catalog_item.path, callback=callback))
+            executor.submit(functools.partial(store_df, df=split, path=catalog_item.path, data_store_adapter=data_store_adapter, callback=callback))
         )
 
         catalog_items.append(catalog_item)
@@ -86,10 +93,11 @@ def load_split_catalog_store_df(input_item: InputItem, chunk_size_kb: int, date_
     return res
 
 
-def store_df(df: pd.DataFrame, path: str, callback: Callable):
+def store_df(df: pd.DataFrame, path: str, data_store_adapter: DataStoreAdapter, callback: Callable):
     t = time.time()
-    df_utils.store_df(path, df)
+    data_store_adapter.store_df(path, df)
     callback({'name': 'store_finished', 'time': time.time() - t})
+
 
 @ray.remote(num_cpus=0.9, resources={'worker_size_large': 1, 'instance_spot': 1})
 def mock_split(callback, wait=1):
@@ -111,7 +119,7 @@ def mock_split(callback, wait=1):
     return {}
 
 
-def make_catalog_item(df: pd.DataFrame, input_item: InputItem) -> DataCatalog:
+def make_catalog_item(df: pd.DataFrame, input_item: InputItem, data_store_adapter: DataStoreAdapter) -> DataCatalog:
     source = input_item[DataCatalog.source.name]
     if source not in ['cryptofeed', 'cryptotick']:
         raise ValueError(f'Unknown source: {source}')
@@ -136,9 +144,9 @@ def make_catalog_item(df: pd.DataFrame, input_item: InputItem) -> DataCatalog:
     # TODO l2_book -> l2_inc
     if catalog_item_params[DataCatalog.data_type.name] == 'l2_book':
         if source == 'cryptofeed':
-            snapshot_ts = cryptofeed_l2_utils.get_snapshot_ts(df)
+            snapshot_ts = get_snapshot_ts(df)
         else:
-            snapshot_ts = cryptotick_l2_utils.get_snapshot_ts(df)
+            snapshot_ts = get_snapshot_ts(df)
         if snapshot_ts is not None:
             meta = {
                 'snapshot_ts': snapshot_ts
@@ -152,6 +160,6 @@ def make_catalog_item(df: pd.DataFrame, input_item: InputItem) -> DataCatalog:
     if res.path is None:
         if source != 'cryptotick':
             raise ValueError(f'Empty path only allowed for cryptotick')
-        res.path = _construct_s3_path(res)
+        res.path = data_store_adapter.make_data_catalog_block_path(res)
 
     return res

@@ -2,8 +2,6 @@ import hashlib
 import time
 from pathlib import Path
 
-import awswrangler as wr
-import joblib
 import pandas as pd
 from cache_df import CacheDF
 import functools
@@ -11,52 +9,16 @@ from typing import List, Tuple, Generator, Optional, Callable
 
 from matplotlib import pyplot as plt
 
-import common.concurrency.concurrency_utils as cu
-from common.s3.s3_utils import get_session
-
 CACHE_DIR = '/tmp/svoe/dfs_cache/'
 
 
-def store_df(path: str, df: pd.DataFrame, cache_dir: str = CACHE_DIR):
-    # TODO add caching
-    session = get_session()
-    wr.s3.to_parquet(df, path=path, dataset=False, compression='gzip', boto3_session=session)
+def load_df_local(path: str) -> pd.DataFrame:
+    # TODO parse s3:// strings
+    return pd.read_parquet(path)
 
 
-def load_df(path: str, use_cache: bool = True, cache_dir: str = CACHE_DIR) -> pd.DataFrame:
-    # caching first
-    cache_key = joblib.hash(path) # can't use s3:// strings as keys, cache_df lib flips out
-    if use_cache:
-        df = get_cached_df(cache_key, cache_dir=cache_dir)
-        if df is not None:
-            return df
-
-
-    # split path into prefix and suffix
-    # this is needed because if dataset=True data wrangler handles input path as a glob pattern,
-    # hence messing up special characters
-
-    # for Python < 3.9
-    # def remove_suffix(input_string, suffix):
-    #     if suffix and input_string.endswith(suffix):
-    #         return input_string[:-len(suffix)]
-    #     return input_string
-
-    split = path.split('/')
-    suffix = split[len(split) - 1]
-    # prefix = remove_suffix(path, suffix)
-    prefix = path.removesuffix(suffix)
-    session = get_session()
-    if '.csv' in path:
-        df = wr.s3.read_csv(path=prefix, path_suffix=suffix, dataset=False, boto3_session=session, delimiter=';')
-    elif '.parquet' in path:
-        df = wr.s3.read_parquet(path=prefix, path_suffix=suffix, dataset=False, boto3_session=session)
-    else:
-        raise ValueError(f'Unknown file extension: {path}')
-
-    if use_cache:
-        cache_df_if_needed(df, cache_key, cache_dir=cache_dir)
-    return df
+def store_df_local(path: str, df: pd.DataFrame):
+    df.to_parquet(path, compression='gzip')
 
 
 def cache_df_if_needed(df: pd.DataFrame, cache_key: str, cache_dir: str = CACHE_DIR):
@@ -83,9 +45,9 @@ def delete_cached_df(cache_key: str, cache_dir: str = CACHE_DIR):
     cache.uncache(cache_key)
 
 
-def load_dfs(paths: List[str], use_cache: bool = True, cache_dir: str = CACHE_DIR) -> List[pd.DataFrame]:
-    callables = [functools.partial(load_df, path=path, use_cache=use_cache, cache_dir=cache_dir) for path in paths]
-    return cu.run_concurrently(callables)
+# def load_dfs(paths: List[str], use_cache: bool = True, cache_dir: str = CACHE_DIR) -> List[pd.DataFrame]:
+#     callables = [functools.partial(load_df, path=path, use_cache=use_cache, cache_dir=cache_dir) for path in paths]
+#     return cu.run_concurrently(callables)
 
 
 def sub_df(df: pd.DataFrame, start: int, end: int) -> pd.DataFrame:

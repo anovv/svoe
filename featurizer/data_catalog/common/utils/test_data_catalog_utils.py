@@ -3,8 +3,8 @@ import unittest
 import numpy as np
 
 from featurizer.data_definitions.common.l2_book_incremental.cryptotick.utils import preprocess_l2_inc_df
-from featurizer.utils.testing_utils import mock_l2_book_delta_data_and_meta, mock_trades_data_and_meta
-from common.pandas import gen_split_df_by_mem, load_df, get_size_kb, concat
+from featurizer.featurizer_utils.testing_utils import mock_l2_book_delta_data_and_meta, mock_trades_data_and_meta
+from common.pandas.df_utils import gen_split_df_by_mem, load_df, get_size_kb, concat
 
 
 class TestDataCatalogUtils(unittest.TestCase):

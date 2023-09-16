@@ -11,6 +11,8 @@ from featurizer.sql.db_actor import DbActor
 from featurizer.data_catalog.common.data_models.models import InputItemBatch
 from featurizer.sql.data_catalog.models import DataCatalog
 from featurizer.data_catalog.pipelines.catalog_cryptotick.tasks import load_split_catalog_store_df
+from featurizer.storage.data_store_adapter.data_store_adapter import DataStoreAdapter
+from featurizer.storage.data_store_adapter.remote_data_store_adapter import RemoteDataStoreAdapter
 
 SPLIT_CHUNK_SIZE_KB = 100 * 1024
 
@@ -100,7 +102,7 @@ def poll_to_tqdm(total_files, chunk_size, max_bars=10):
 @ray.remote
 class CatalogCryptotickPipeline:
 
-    def __init__(self, max_executing_tasks: int, db_actor: DbActor, split_chunk_size_kb: int = SPLIT_CHUNK_SIZE_KB):
+    def __init__(self, max_executing_tasks: int, db_actor: DbActor, data_store_adapter: DataStoreAdapter = RemoteDataStoreAdapter(), split_chunk_size_kb: int = SPLIT_CHUNK_SIZE_KB):
         self.is_running = True
 
         self.input_queue = asyncio.Queue()
@@ -108,6 +110,7 @@ class CatalogCryptotickPipeline:
         self.db_actor = db_actor
         self.max_executing_tasks = max_executing_tasks
         self.split_chunk_size_kb = split_chunk_size_kb
+        self.data_store_adapter = data_store_adapter
 
         self.results_refs = []
         self.stats = {}

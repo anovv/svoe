@@ -1,7 +1,10 @@
 import tempfile
 from pathlib import Path
 
+import joblib
 import s3fs
+
+import awswrangler as wr
 
 import common.concurrency.concurrency_utils as cu
 import boto3
@@ -9,6 +12,12 @@ import functools
 from typing import Tuple, List, Optional, Generator
 import pandas as pd
 import os
+
+from common.pandas.df_utils import cache_df_if_needed, get_cached_df, CACHE_DIR
+
+
+# for progress bar https://github.com/alphatwirl/atpbar
+# https://leimao.github.io/blog/Python-tqdm-Multiprocessing/
 
 # _sessions_per_process = {}
 # _lock = threading.Lock()
@@ -128,7 +137,6 @@ def download_file(s3_path) -> Tuple[tempfile.TemporaryDirectory, str]:
     return temp_dir, path
 
 
-
 def inventory() -> Generator[pd.DataFrame, None, None]:
     # TODO implement large files download with progress callback and fetch directly from s3
     inventory_files_folder = '/Users/anov/IdeaProjects/svoe/utils/s3/s3_svoe.test.1_inventory'
@@ -136,5 +144,34 @@ def inventory() -> Generator[pd.DataFrame, None, None]:
     for f in files:
         yield pd.read_parquet(f'{inventory_files_folder}/{f}')
 
-# for progress bar https://github.com/alphatwirl/atpbar
-# https://leimao.github.io/blog/Python-tqdm-Multiprocessing/
+
+def store_df_s3(path: str, df: pd.DataFrame, cache_dir: str = CACHE_DIR):
+    # TODO add caching
+    session = get_session()
+    wr.s3.to_parquet(df, path=path, dataset=False, compression='gzip', boto3_session=session)
+
+
+def load_df_s3(path: str, use_cache: bool = True, cache_dir: str = CACHE_DIR) -> pd.DataFrame:
+    # caching first
+    cache_key = joblib.hash(path) # can't use s3:// strings as keys, cache_df lib flips out
+    if use_cache:
+        df = get_cached_df(cache_key, cache_dir=cache_dir)
+        if df is not None:
+            return df
+
+
+    # split path into prefix and suffix
+    split = path.split('/')
+    suffix = split[len(split) - 1]
+    prefix = path.removesuffix(suffix)
+    session = get_session()
+    if '.csv' in path:
+        df = wr.s3.read_csv(path=prefix, path_suffix=suffix, dataset=False, boto3_session=session, delimiter=';')
+    elif '.parquet' in path:
+        df = wr.s3.read_parquet(path=prefix, path_suffix=suffix, dataset=False, boto3_session=session)
+    else:
+        raise ValueError(f'Unknown file extension: {path}')
+
+    if use_cache:
+        cache_df_if_needed(df, cache_key, cache_dir=cache_dir)
+    return df

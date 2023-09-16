@@ -11,14 +11,16 @@ from featurizer.blocks.blocks import BlockRangeMeta, BlockRange, ranges_to_inter
 from featurizer.calculator.tasks import merge_blocks
 from featurizer.config import FeaturizerConfig
 from featurizer.features.feature_tree.feature_tree import construct_feature_tree, Feature, construct_stream_tree
-from featurizer.storage.featurizer_storage import FeaturizerStorage, data_key
+from featurizer.storage.data_store_adapter.data_store_adapter import DataStoreAdapter
+from featurizer.storage.data_store_adapter.local_data_store_adapter import LocalDataStoreAdapter
+from featurizer.storage.featurizer_storage import FeaturizerStorage
 import featurizer.data_definitions.data_definition as data_def
 
 import concurrent.futures
 
 from simulation.data.data_generator import DataStreamGenerator, DataStreamEvent
 from simulation.models.instrument import Instrument
-from common.pandas.df_utils import load_df
+# from common.pandas.df_utils import load_df
 
 # free data https://www.cryptoarchive.com.au/faq
 # https://ccdata.io/
@@ -27,8 +29,9 @@ class FeatureStreamGenerator(DataStreamGenerator):
 
     NUM_IO_THREADS = 16
 
-    def __init__(self, featurizer_config: FeaturizerConfig, price_sampling_period: str = '1s'):
+    def __init__(self, featurizer_config: FeaturizerConfig, data_store_adapter: DataStoreAdapter = LocalDataStoreAdapter(), price_sampling_period: str = '1s'):
         self._price_sampling_period = price_sampling_period
+        self._data_store_adapter = data_store_adapter
         self.features = []
         for feature_config in featurizer_config.feature_configs:
             self.features.append(construct_feature_tree(
@@ -121,7 +124,7 @@ class FeatureStreamGenerator(DataStreamGenerator):
 
         def _load_and_store_block(cur_block_id: int, path: str):
             print(f'Started loading block {cur_block_id}/{num_blocks}')
-            df = load_df(path)
+            df = self._data_adapter.load_df(path)
             print(f'Finished loading block {cur_block_id}/{num_blocks}')
             return df
 

@@ -5,8 +5,8 @@ from svoe_airflow.db.models import DagConfigEncoded
 
 
 class DagsSqlClient(SqlClient):
-    def __init__(self, config: Optional[Dict] = None):
-        super(DagsSqlClient, self).__init__(config=config)
+    def __init__(self):
+        super(DagsSqlClient, self).__init__()
 
     def save_db_config_encoded(
         self,

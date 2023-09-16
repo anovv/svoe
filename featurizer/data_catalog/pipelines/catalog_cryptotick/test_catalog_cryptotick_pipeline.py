@@ -14,17 +14,17 @@ from featurizer.data_catalog.pipelines.catalog_cryptotick.pipeline import Catalo
 from featurizer.data_definitions.common.l2_book_incremental.cryptotick.utils import starts_with_snapshot, remove_snap, \
     get_snapshot_depth, mock_processed_cryptotick_df, \
     gen_split_l2_inc_df_and_pad_with_snapshot
-from common.pandas import concat, load_df, store_df
-from common.s3 import list_files_and_sizes_kb
+from common.pandas.df_utils import concat
+from common.s3.s3_utils import list_files_and_sizes_kb, load_df_s3, store_df_s3
 
 
 class TestCatalogCryptotickPipeline(unittest.TestCase):
 
     def _store_test_df_to_s3(self):
         small_df_path = 's3://svoe-cryptotick-data/testing/small_df.parquet.gz'
-        big_df = load_df('s3://svoe-cryptotick-data/limitbook_full/20230201/BINANCE_SPOT_BTC_USDT.csv.gz')
+        big_df = load_df_s3('s3://svoe-cryptotick-data/limitbook_full/20230201/BINANCE_SPOT_BTC_USDT.csv.gz')
         small_df = big_df.head(100000)
-        store_df(path=small_df_path, df=small_df)
+        store_df_s3(path=small_df_path, df=small_df)
 
     def test_pipeline(self):
         with ray.init(address='auto', ignore_reinit_error=True):

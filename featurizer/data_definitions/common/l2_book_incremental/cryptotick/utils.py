@@ -8,9 +8,9 @@ from featurizer.data_catalog.pipelines.catalog_cryptotick.util import process_cr
 from featurizer.data_definitions.data_definition import df_to_events
 from featurizer.data_definitions.common.l2_book_incremental.cryptotick.cryptotick_l2_book_incremental import \
     CryptotickL2BookIncrementalData
-from featurizer.features.definitions.l2_snapshot.l2_snapshot_fd import L2SnapshotFD
-from featurizer.utils.testing_utils import mock_feature
-from common.pandas import concat, gen_split_df_by_mem, get_cached_df, load_df, \
+from featurizer.features.definitions.l2_book.l2_snapshot_fd.l2_snapshot_fd import L2SnapshotFD
+from featurizer.featurizer_utils.testing_utils import mock_feature
+from common.pandas.df_utils import concat, gen_split_df_by_mem, get_cached_df, load_df, \
     cache_df_if_needed
 
 import pandas as pd

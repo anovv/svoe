@@ -27,8 +27,8 @@ def data_key(e: Dict) -> DataKey:
 
 
 class FeaturizerStorage:
-    def __init__(self, db_config: Optional[Dict] = None):
-        self.client = FeaturizerSqlClient(db_config)
+    def __init__(self):
+        self.client = FeaturizerSqlClient()
 
     def get_data_meta(
         self,
@@ -74,8 +74,8 @@ class FeaturizerStorage:
         end_day = date_str_to_day_str(end_date)
         raw_data = self.client.select_data_catalog(exchanges, data_types, instrument_types, symbols, start_day=start_day, end_day=end_day)
 
-        # filter records not within start_date - end_date
 
+        # TODO filter records not within start_date - end_date
         raw_data = raw_data[:3] # TODO this is for debug
         # group data by data key
         groups = {}
@@ -104,7 +104,7 @@ class FeaturizerStorage:
         feature_keys = [f.feature_key for f in features]
         raw_data = self.client.select_feature_catalog(feature_keys, start_day=start_day, end_day=end_day)
 
-        # filter records not within start_date - end_date
+        # TODO filter records not within start_date - end_date
 
         groups = {}
 

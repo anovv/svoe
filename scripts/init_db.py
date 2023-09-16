@@ -1,7 +1,8 @@
 # script to initialize database
-# these imports are needed for SQLAlchemy to init metadata
+
 import sqlalchemy
 
+# these imports are needed for SQLAlchemy to init metadata
 from featurizer.sql.data_catalog.models import DataCatalog
 from featurizer.sql.feature_catalog.models import FeatureCatalog
 
@@ -10,7 +11,8 @@ from featurizer.sql.feature_def.models import FeatureDefinitionDB
 from svoe_airflow.db.models import DagConfigEncoded
 
 
-from common.db.sql_client import get_db_type, DbType, mysql_connection_string, SqlClient, SVOE_DB_NAME
+from common.db.sql_client import get_db_type, DbType, mysql_connection_string, SqlClient, SVOE_DB_NAME, \
+    sqlite_connection_string
 
 # create mysql database if not exist
 if get_db_type() == DbType.MYSQL:
@@ -20,7 +22,9 @@ if get_db_type() == DbType.MYSQL:
         isolation_level='AUTOCOMMIT'
     ).connect() as connection:
         connection.execute(f'CREATE DATABASE {SVOE_DB_NAME}')
+else:
+    conn_str = sqlite_connection_string()
 
 # create tables
-client = SqlClient()
+client = SqlClient(conn_str)
 client.create_tables_SCRIPT_ONLY()

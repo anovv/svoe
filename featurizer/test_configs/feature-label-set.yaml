@@ -1,7 +1,7 @@
-start_date: '2023-02-01'
-end_date: '2023-02-01'
-label_feature_index: 0
-label_lookahead: '5100ms'
+start_date: '2023-02-01 00:00:00'
+end_date: '2023-02-01 23:00:00'
+#label_feature_index: 0
+#label_lookahead: '5100ms'
 feature_configs:
   - feature_definition: mid_price.mid_price_fd
     data_params: &id001

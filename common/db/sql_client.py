@@ -36,6 +36,8 @@ def sqlite_connection_string() -> str:
 
 
 def mysql_connection_string(config: Optional[Dict] = None, add_db: bool = True) -> str:
+    if config is None:
+        config = DEFAULT_MYSQL_CONFIG
     user = os.getenv('MYSQL_USER', config.get('mysql_user'))
     password = os.getenv('MYSQL_PASSWORD', config.get('mysql_password'))
     host = os.getenv('MYSQL_HOST', config.get('mysql_host'))
@@ -49,14 +51,21 @@ def mysql_connection_string(config: Optional[Dict] = None, add_db: bool = True) 
     return url
 
 
+def get_conn_str() -> str:
+    db_type = get_db_type()
+    if db_type == DbType.SQLITE:
+        return sqlite_connection_string()
+    elif db_type == DbType.MYSQL:
+        return mysql_connection_string()
+    else:
+        raise ValueError(f'Unsupported db type: {db_type}')
+
+
 class SqlClient:
 
     engine_instance = None
 
-    def __init__(self, config: Optional[Dict] = None):
-        self.config = config
-        if self.config is None:
-            self.config = DEFAULT_MYSQL_CONFIG
+    def __init__(self):
         if SqlClient.engine_instance is None:
             SqlClient.engine_instance = self._init_engine()
             self.engine = SqlClient.engine_instance
@@ -64,18 +73,10 @@ class SqlClient:
             self.engine = SqlClient.engine_instance
 
     def _init_engine(self):
-        db_type = get_db_type()
-        if db_type == DbType.SQLITE:
-            conn_str = sqlite_connection_string()
-        elif db_type == DbType.MYSQL:
-            conn_str = mysql_connection_string(self.config)
-        else:
-            raise ValueError(f'Unknown db type: {db_type}')
-        engine = create_engine(conn_str, echo=False)
+        engine = create_engine(get_conn_str(), echo=False)
         Session.configure(bind=engine)
         return engine
 
-    # TODO this should not be used, migrate table management to Alembic
     def create_tables_SCRIPT_ONLY(self):
         # creates if not exists
         Base.metadata.create_all(self.engine)

@@ -7,8 +7,6 @@ from common.db.base import Base
 DEFAULT_VERSION = ''
 DEFAULT_COMPACTION = 'raw'
 
-SVOE_S3_FEATURE_CATALOG_BUCKET = 'svoe-feature-catalog-data'
-
 
 class FeatureCatalog(Base):
     __tablename__ = 'feature_catalog'
@@ -58,8 +56,8 @@ class FeatureCatalog(Base):
             setattr(self, FeatureCatalog.version.name, DEFAULT_VERSION)
 
 
-def _construct_feature_catalog_s3_path(item: FeatureCatalog) -> str:
-    res = f's3://{SVOE_S3_FEATURE_CATALOG_BUCKET}/'
+def build_feature_catalog_block_path(item: FeatureCatalog, prefix: str) -> str:
+    res = prefix
     for field in [
         FeatureCatalog.feature_def.name,
         FeatureCatalog.feature_key.name,

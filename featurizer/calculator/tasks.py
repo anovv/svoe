@@ -21,7 +21,8 @@ from featurizer.sql.db_actor import DbActor
 from featurizer.sql.feature_catalog.models import FeatureCatalog, _construct_feature_catalog_s3_path
 from common.pandas import df_utils
 from common.streamz.stream_utils import run_named_events_stream
-from common.pandas.df_utils import load_df, store_df, is_ts_sorted, concat, sub_df_ts
+from common.pandas.df_utils import is_ts_sorted, concat, sub_df_ts
+from featurizer.storage.data_store_adapter.data_store_adapter import DataStoreAdapter
 
 
 def context(feature_key: str, interval: Interval) -> Dict[str, Any]:
@@ -77,6 +78,7 @@ def _cache(obj: Any, context: Dict[str, Any]):
 @ray.remote(num_cpus=0.001)
 def load_if_needed(
     context: Dict[str, Any],
+    data_store_adapter: DataStoreAdapter,
     path: str,
     is_feature: bool = False,
 ) -> Block:
@@ -87,7 +89,7 @@ def load_if_needed(
         return df
     print(f'Loading {s} block started')
     t = time.time()
-    df = load_df(path)
+    df = data_store_adapter.load_df(path)
     if not is_ts_sorted(df):
         raise ValueError('[Data] df is not ts sorted')
     if should_cache:
@@ -149,6 +151,7 @@ def calculate_feature(
     feature: Feature,
     dep_refs: Dict[Feature, List[ObjectRef[Block]]],
     interval: Interval,
+    data_store_adapter: DataStoreAdapter,
     store: bool
 ) -> Block:
     df, should_cache = _get_from_cache(context)
@@ -202,10 +205,11 @@ def calculate_feature(
         # TODO make a separate actor pool for S3 IO and batchify store operation
         t = time.time()
         db_actor = DbActor.options(name='DbActor', get_if_exists=True).remote()
-        catalog_item = catalog_feature_block(feature, df, interval)
+        catalog_item = catalog_feature_block(feature, df, interval, data_store_adapter)
         exists = ray.get(db_actor.in_feature_catalog.remote(catalog_item))
         if not exists:
-            store_df(catalog_item.path, df)
+            # TODO this will block, we need to asyncify, using IO actor pool mentioned above?
+            data_store_adapter.store_df(catalog_item.path, df)
             write_res = ray.get(db_actor.write_batch.remote([catalog_item]))
             print(f'[{feature}] Store feature block finished {time.time() - t}s')
         else:
@@ -281,7 +285,7 @@ def lookahead_shift_blocks(block_refs: List[ObjectRef[Block]], interval: Interva
     return shifted
 
 
-def catalog_feature_block(feature: Feature, df: pd.DataFrame, interval: Interval) -> FeatureCatalog:
+def catalog_feature_block(feature: Feature, df: pd.DataFrame, interval: Interval, data_store_adapter: DataStoreAdapter) -> FeatureCatalog:
     _time_range = df_utils.time_range(df)
 
     date_str = datetime.fromtimestamp(_time_range[1], tz=pytz.utc).strftime('%Y-%m-%d')
@@ -311,5 +315,5 @@ def catalog_feature_block(feature: Feature, df: pd.DataFrame, interval: Interval
 
     res = FeatureCatalog(**catalog_item_params)
     if res.path is None:
-        res.path = _construct_feature_catalog_s3_path(res)
+        res.path = data_store_adapter.make_feature_catalog_block_path(res)
     return res
