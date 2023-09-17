@@ -13,9 +13,10 @@ from featurizer.blocks.blocks import BlockRangeMeta, make_ranges, BlockMeta
 from featurizer.features.feature_tree.feature_tree import Feature
 from featurizer.sql.client import FeaturizerSqlClient
 from featurizer.sql.data_catalog.models import DataCatalog
-from featurizer.sql.feature_catalog.models import FeatureCatalog, SVOE_S3_FEATURE_CATALOG_BUCKET
+from featurizer.sql.feature_catalog.models import FeatureCatalog
 from featurizer.sql.feature_def.models import construct_feature_def_s3_path, FeatureDefinitionDB
 from common.s3.s3_utils import delete_files, upload_dir, download_dir
+from featurizer.storage.data_store_adapter.remote_data_store_adapter import SVOE_S3_FEATURE_CATALOG_BUCKET
 
 # TODO this should be synced with DataDef somehow?
 DataKey = Tuple[str, str, str, str]

@@ -17,3 +17,4 @@ class DataStoreAdapter:
 
     def make_data_catalog_block_path(self, item: DataCatalog) -> str:
         raise NotImplementedError
+

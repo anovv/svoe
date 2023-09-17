@@ -15,6 +15,7 @@ from featurizer.calculator.tasks import calculate_feature, load_if_needed, bind_
 from common.time.utils import convert_str_to_seconds
 from featurizer.storage.data_store_adapter.data_store_adapter import DataStoreAdapter
 from featurizer.storage.data_store_adapter.local_data_store_adapter import LocalDataStoreAdapter
+from featurizer.storage.data_store_adapter.remote_data_store_adapter import RemoteDataStoreAdapter
 
 
 # TODO re: cache https://discuss.ray.io/t/best-way-to-share-memory-for-ray-tasks/3759
@@ -28,7 +29,7 @@ def build_feature_task_graph(
     obj_ref_cache: Dict[str, Dict[Interval, Tuple[int, Optional[ObjectRef]]]],
     features_to_store: Optional[List[Feature]] = None,
     stored_feature_blocks_meta: Optional[Dict[Feature, Dict[Interval, BlockMeta]]] = None,
-    data_store_adapter: DataStoreAdapter = LocalDataStoreAdapter()
+    data_store_adapter: DataStoreAdapter = RemoteDataStoreAdapter()
 ) -> Dict[Feature, Dict[Interval, Dict[Interval, DAGNode]]]:
     features_ranges_meta = {}
 
@@ -53,7 +54,7 @@ def build_feature_task_graph(
                         # TODO call load_and_preprocess only if data_def needs preproc, otherwise call load_if_needed
                         # this will save workers
                         # node = bind_and_cache(load_if_needed, obj_ref_cache, ctx, path=path, is_feature=False)
-                        node = bind_and_cache(load_and_preprocess, obj_ref_cache, ctx, path=path, data_def=feature.feature_definition, is_feature=False)
+                        node = bind_and_cache(load_and_preprocess, obj_ref_cache, ctx, path=path, data_def=feature.feature_definition, data_store_adapter=data_store_adapter, is_feature=False)
 
                     # TODO validate no overlapping intervals here
                     nodes[interval] = node

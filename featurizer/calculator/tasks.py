@@ -18,7 +18,7 @@ from featurizer.data_definitions.synthetic_data_source_definition import Synthet
 from featurizer.features.feature_tree.feature_tree import Feature
 from featurizer.featurizer_utils.featurizer_utils import merge_blocks
 from featurizer.sql.db_actor import DbActor
-from featurizer.sql.feature_catalog.models import FeatureCatalog, _construct_feature_catalog_s3_path
+from featurizer.sql.feature_catalog.models import FeatureCatalog
 from common.pandas import df_utils
 from common.streamz.stream_utils import run_named_events_stream
 from common.pandas.df_utils import is_ts_sorted, concat, sub_df_ts
@@ -115,9 +115,10 @@ def load_and_preprocess(
     context: Dict[str, Any],
     path: str,
     data_def: Type[DataSourceDefinition],
+    data_store_adapter: DataStoreAdapter,
     is_feature: bool = False,
 ) -> Block:
-    block = ray.get(load_if_needed.remote(context=context, path=path, is_feature=is_feature))
+    block = ray.get(load_if_needed.remote(context=context, data_store_adapter=data_store_adapter, path=path, is_feature=is_feature))
     preproc_block = ray.get(preprocess_data_block.remote(block=block, data_def=data_def))
     return preproc_block
 

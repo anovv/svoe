@@ -1,5 +1,6 @@
 from typing import Type, List, Dict, Any
 
+import pandas as pd
 from pandas import DataFrame
 from frozendict import frozendict
 from portion import Interval
@@ -13,6 +14,7 @@ cache_location = '~/svoe_parsed_events_cache'
 
 Event = Dict[str, Any] # note that this corresponds to raw grouped events by timestamp (only for some data_types, e.g. l2_book_inc)
 EventSchema = Dict[str, Type]
+
 
 def df_to_events(df: DataFrame) -> List[Event]:
     if not is_ts_sorted(df):
@@ -51,7 +53,13 @@ class DataDefinition:
         cache = Cache(cache_location)
         if key in cache:
             print(f'[{cls.__name__}] Reading preprocessed df from cache')
-            return cache[key]
+            cached_df = cache[key]
+            # TODO temp bug fix
+            if not isinstance(cached_df, pd.DataFrame):
+                print(f'[{cls.__name__}] Malformed df in cache, clearing')
+                del cache[key]
+            else:
+                return cached_df
         res = cls.preprocess_impl(df)
         cache[key] = res
         return res
