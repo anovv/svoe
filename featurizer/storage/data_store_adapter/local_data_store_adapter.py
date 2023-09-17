@@ -1,3 +1,5 @@
+import os
+
 import pandas as pd
 
 from common.pandas.df_utils import load_df_local, store_df_local
@@ -32,6 +34,8 @@ class LocalDataStoreAdapter(DataStoreAdapter):
         return load_df_local(path)
 
     def store_df(self, path: str, df: pd.DataFrame, **kwargs):
+        dirname = os.path.dirname(path)
+        os.makedirs(dirname, exist_ok=True)
         store_df_local(path=path, df=df)
 
     def make_feature_catalog_block_path(self, item: FeatureCatalog) -> str:

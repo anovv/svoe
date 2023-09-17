@@ -29,7 +29,7 @@ def build_feature_task_graph(
     obj_ref_cache: Dict[str, Dict[Interval, Tuple[int, Optional[ObjectRef]]]],
     features_to_store: Optional[List[Feature]] = None,
     stored_feature_blocks_meta: Optional[Dict[Feature, Dict[Interval, BlockMeta]]] = None,
-    data_store_adapter: DataStoreAdapter = RemoteDataStoreAdapter()
+    data_store_adapter: DataStoreAdapter = LocalDataStoreAdapter()
 ) -> Dict[Feature, Dict[Interval, Dict[Interval, DAGNode]]]:
     features_ranges_meta = {}
 

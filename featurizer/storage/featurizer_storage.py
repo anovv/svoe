@@ -53,6 +53,8 @@ class FeaturizerStorage:
         instrument_types = list(set([d[2] for d in data_keys]))
         symbols = list(set([d[3] for d in data_keys]))
         ranges_meta_per_data_key = self._get_data_meta(exchanges, data_types, instrument_types, symbols, start_date=start_date, end_date=end_date)
+        if (len(ranges_meta_per_data_key)) == 0:
+            raise ValueError('No data for given time range')
         res = {data: ranges_meta_per_data_key[data_key(data.params)] for data in data_deps}
 
         # add synthetic ranges

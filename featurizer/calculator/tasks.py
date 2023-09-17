@@ -205,7 +205,8 @@ def calculate_feature(
     if store:
         # TODO make a separate actor pool for S3 IO and batchify store operation
         t = time.time()
-        db_actor = DbActor.options(name='DbActor', get_if_exists=True).remote()
+        # TODO create db outside
+        db_actor = DbActor.options(name='DbActor', get_if_exists=True, lifetime="detached").remote()
         catalog_item = catalog_feature_block(feature, df, interval, data_store_adapter)
         exists = ray.get(db_actor.in_feature_catalog.remote(catalog_item))
         if not exists:

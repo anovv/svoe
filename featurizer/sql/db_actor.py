@@ -27,6 +27,7 @@ class DbActor:
             raise ValueError(f'Unsupported source:{ source}')
 
     async def write_batch(self, batch: List[DataCatalog | FeatureCatalog]) -> Dict:
+        # TODO check if exists
         self.client.write_catalog_item_batch(batch)
         # TODO return status to pass to stats actor
         return {}
