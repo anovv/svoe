@@ -8,7 +8,7 @@ from portion import Interval, closed
 
 from typing import Optional, Dict, List, Tuple
 
-from common.time.utils import date_str_to_day_str
+from common.time.utils import date_str_to_day_str, date_str_to_ts
 from featurizer.blocks.blocks import BlockRangeMeta, make_ranges, BlockMeta
 from featurizer.features.feature_tree.feature_tree import Feature
 from featurizer.sql.client import FeaturizerSqlClient
@@ -75,12 +75,19 @@ class FeaturizerStorage:
         end_day = date_str_to_day_str(end_date)
         raw_data = self.client.select_data_catalog(exchanges, data_types, instrument_types, symbols, start_day=start_day, end_day=end_day)
 
-
-        # TODO filter records not within start_date - end_date
-        raw_data = raw_data[:3] # TODO this is for debug
+        start_ts = None if start_date is None else date_str_to_ts(start_date)
+        end_ts = None if end_date is None else date_str_to_ts(end_date)
         # group data by data key
         groups = {}
         for r in raw_data:
+            # filter not in range
+            _start_ts = float(r[DataCatalog.start_ts.name])
+            _end_ts = float(r[DataCatalog.end_ts.name])
+            if start_ts is not None and _end_ts < start_ts:
+                continue
+            if end_ts is not None and _start_ts > end_ts:
+                continue
+
             key = data_key(r)
             if key in groups:
                 groups[key].append(r)
@@ -105,21 +112,25 @@ class FeaturizerStorage:
         feature_keys = [f.feature_key for f in features]
         raw_data = self.client.select_feature_catalog(feature_keys, start_day=start_day, end_day=end_day)
 
-        # TODO filter records not within start_date - end_date
-
         groups = {}
-
         def _feature_by_key(key):
             for f in features:
                 if f.feature_key == key:
                     return f
             return None
 
+        start_ts = None if start_date is None else date_str_to_ts(start_date)
+        end_ts = None if end_date is None else date_str_to_ts(end_date)
         for r in raw_data:
+            # filter not in range
             feature_key = r[FeatureCatalog.feature_key.name]
-            start_ts = float(r[FeatureCatalog.start_ts.name])
-            end_ts = float(r[FeatureCatalog.end_ts.name])
-            interval = closed(start_ts, end_ts)
+            _start_ts = float(r[FeatureCatalog.start_ts.name])
+            _end_ts = float(r[FeatureCatalog.end_ts.name])
+            if start_ts is not None and _end_ts < start_ts:
+                continue
+            if end_ts is not None and _start_ts > end_ts:
+                continue
+            interval = closed(_start_ts, _end_ts)
             feature = _feature_by_key(feature_key)
             if feature in groups:
                 if interval in groups[feature]:
@@ -131,6 +142,7 @@ class FeaturizerStorage:
         return groups
 
     # TODO verify consistency + retries in case of failures
+    # TODO delete should also depend on data adapter?
     def delete_features(self, features: List[Feature]):
         feature_keys = [f.feature_key for f in features]
         raw_data = self.client.select_feature_catalog(feature_keys)

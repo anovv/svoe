@@ -7,7 +7,7 @@ from common.pandas.df_utils import concat, downsample_uniform
 from featurizer.actors.cache_actor import get_cache_actor, create_cache_actor
 from featurizer.calculator.calculator import build_feature_label_set_task_graph
 from featurizer.calculator.executor import execute_graph
-from featurizer.storage.featurizer_storage import FeaturizerStorage, data_key
+from featurizer.storage.featurizer_storage import FeaturizerStorage
 from featurizer.config import FeaturizerConfig
 from featurizer.features.feature_tree.feature_tree import construct_feature_tree
 

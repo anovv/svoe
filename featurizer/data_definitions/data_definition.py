@@ -10,7 +10,7 @@ from diskcache import Cache
 
 from featurizer.blocks.blocks import BlockRangeMeta
 
-cache_location = '~/svoe_parsed_events_cache'
+PREPROCESSED_DATA_BLOCKS_CACHE = '/tmp/svoe/preprocessed_data_blocks_cache'
 
 Event = Dict[str, Any] # note that this corresponds to raw grouped events by timestamp (only for some data_types, e.g. l2_book_inc)
 EventSchema = Dict[str, Type]
@@ -50,7 +50,7 @@ class DataDefinition:
     @classmethod
     def preprocess(cls, df: DataFrame) -> DataFrame:
         key = hash_df(df)
-        cache = Cache(cache_location)
+        cache = Cache(PREPROCESSED_DATA_BLOCKS_CACHE)
         if key in cache:
             print(f'[{cls.__name__}] Reading preprocessed df from cache')
             cached_df = cache[key]

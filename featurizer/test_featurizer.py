@@ -13,7 +13,7 @@ class TestFeaturizer(unittest.TestCase):
         # config_path = 'test_configs/synthetic-sine-data-config.yaml'
         config = FeaturizerConfig.load_config(path=config_path)
         ray_address = 'ray://127.0.0.1:10001'
-        Featurizer.run(config, ray_address=ray_address, parallelism=4)
+        Featurizer.run(config, ray_address=ray_address, parallelism=12)
 
         with ray.init(address=ray_address, ignore_reinit_error=True):
             df = Featurizer.get_materialized_data()

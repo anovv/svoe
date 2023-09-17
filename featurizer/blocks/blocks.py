@@ -6,7 +6,7 @@ from featurizer.sql.data_catalog.models import DataCatalog
 from common.pandas.df_utils import is_ts_sorted, sub_df_ts
 from common.time.utils import convert_str_to_seconds
 
-BlockMeta = Dict # represents s3 file metadata: name, time range, size, etc.
+BlockMeta = Dict # represents block metadata: name, time range, size, etc.
 BlockRangeMeta = List[BlockMeta] # represents metadata of consecutive blocks
 
 Block = pd.DataFrame

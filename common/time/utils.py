@@ -8,6 +8,7 @@ from portion import Interval, closed
 
 SECONDS_IN_DAY = 24 * 60 * 60
 
+
 def convert_str_to_seconds(s: str) -> float:
     if 'ms' in s:
         # millis special case
