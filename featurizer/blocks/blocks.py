@@ -204,3 +204,7 @@ def merge_asof_multi(dfs: List[pd.DataFrame]) -> pd.DataFrame:
             res.insert(1, 'receipt_timestamp', res['receipt_timestamp_x'])
             res = res.drop(columns=['receipt_timestamp_x', 'receipt_timestamp_y'])
     return res
+
+def intervals_almost_equal(i1: Interval, i2: Interval, diff=0.15) -> bool:
+    return abs(i1.upper - i2.upper) <= diff and abs(i1.lower - i2.lower) <= diff
+

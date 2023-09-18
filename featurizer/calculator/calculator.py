@@ -7,7 +7,8 @@ from ray.types import ObjectRef
 
 from featurizer.features.feature_tree.feature_tree import Feature, postorder
 from featurizer.blocks.blocks import meta_to_interval, interval_to_meta, get_overlaps, BlockRangeMeta, \
-    prune_overlaps, range_meta_to_interval, ranges_to_interval_dict, BlockMeta, overlaps_keys, is_sorted_intervals
+    prune_overlaps, range_meta_to_interval, ranges_to_interval_dict, BlockMeta, overlaps_keys, is_sorted_intervals, \
+    intervals_almost_equal
 from portion import Interval, IntervalDict, closed
 
 from featurizer.calculator.tasks import calculate_feature, load_if_needed, bind_and_cache, context, \
@@ -45,7 +46,6 @@ def build_feature_task_graph(
                 nodes = {}
                 for block_meta in block_range_meta:
                     interval = meta_to_interval(block_meta)
-                    # node = load_if_needed.bind(path, False)
                     ctx = context(feature.feature_key, interval)
                     if feature.feature_definition.is_synthetic():
                         node = bind_and_cache(gen_synth_events, obj_ref_cache, ctx, interval=interval, synth_data_def=feature.feature_definition, params=feature.params)
@@ -99,14 +99,32 @@ def build_feature_task_graph(
                     dep_nodes[dep_feature] = ds
 
                 ctx = context(feature.feature_key, interval)
-                if stored_feature_blocks_meta is not None and feature in stored_feature_blocks_meta and interval in stored_feature_blocks_meta[feature]:
-                    path = stored_feature_blocks_meta[feature][interval]['path']
-                    # node = load_if_needed.bind(path, True)
-                    node = bind_and_cache(load_if_needed, obj_ref_cache, ctx, path=path, data_store_adapter=data_store_adapter, is_feature=True)
+                if stored_feature_blocks_meta is not None and feature in stored_feature_blocks_meta:
+                    almost_equal_interval = None
+                    for i in stored_feature_blocks_meta[feature]:
+                        if intervals_almost_equal(i, interval):
+                            if almost_equal_interval is not None:
+                                # TODO warning?
+                                raise ValueError(f'[{feature}] More than one almost equal interval')
+                            almost_equal_interval = i
+                    if almost_equal_interval is not None:
+                        # load cached block
+                        path = stored_feature_blocks_meta[feature][almost_equal_interval]['path']
+                        node = bind_and_cache(load_if_needed, obj_ref_cache, ctx, path=path,
+                                              data_store_adapter=data_store_adapter, is_feature=True)
+                    else:
+                        # TODO warning
+                        print(f'[{feature}] Feature is cached but no intervals match, possibly malformed feature')
+                        # calc block
+                        store = features_to_store is not None and feature in features_to_store
+                        node = bind_and_cache(calculate_feature, obj_ref_cache, ctx, feature=feature,
+                                              dep_refs=dep_nodes, interval=interval,
+                                              data_store_adapter=data_store_adapter, store=store)
                 else:
+                    # calc block
                     store = features_to_store is not None and feature in features_to_store
-                    # node = calculate_feature.bind(feature, dep_nodes, interval, store)
-                    node = bind_and_cache(calculate_feature, obj_ref_cache, ctx, feature=feature, dep_refs=dep_nodes, interval=interval, data_store_adapter=data_store_adapter, store=store)
+                    node = bind_and_cache(calculate_feature, obj_ref_cache, ctx, feature=feature, dep_refs=dep_nodes,
+                                          interval=interval, data_store_adapter=data_store_adapter, store=store)
 
                 # TODO validate interval is within range_interval
                 nodes[interval] = node

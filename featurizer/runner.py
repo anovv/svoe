@@ -40,6 +40,12 @@ class Featurizer:
         data_ranges_meta = storage.get_data_meta(features, start_date=config.start_date, end_date=config.end_date)
         stored_features_meta = storage.get_features_meta(features, start_date=config.start_date, end_date=config.end_date)
 
+        # print(stored_features_meta)
+        # for feature in stored_features_meta:
+        #     for interval in stored_features_meta[feature]:
+        #         print(f'[{feature}] {interval}')
+        # raise
+
         label_feature = None
         if config.label_feature_index is not None:
             label_feature = features[config.label_feature_index]
