@@ -14,8 +14,20 @@ class FeaturizerSqlClient(SqlClient):
 
     # TODO separate api methods and pipeline methods
     def write_catalog_item_batch(self, batch: List[DataCatalog | FeatureCatalog]):
-        # TODO figure out insert_or_update logic
+        # check for existing hashes
+        # hashes = [i.hash for i in batch]
         session = Session()
+        #
+        # if isinstance(batch[0], DataCatalog):
+        #     existing = session.query(DataCatalog).filter(DataCatalog.hash.in_(hashes)).all()
+        # else:
+        #     existing = session.query(FeatureCatalog).filter(FeatureCatalog.hash.in_(hashes)).all()
+        #
+        # existing_hashes = [i.hash for i in existing]
+        # # filter existing
+        # batch = [i for i in batch if i.hash not in existing_hashes]
+
+        # TODO what if primary key exists? Override?
         session.bulk_save_objects(batch)
 
         # TODO try catch and handle

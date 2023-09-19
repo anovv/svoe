@@ -7,6 +7,8 @@ from featurizer.sql.client import FeaturizerSqlClient
 from featurizer.sql.data_catalog.models import DataCatalog
 from featurizer.sql.feature_catalog.models import FeatureCatalog
 
+DB_ACTOR_NAME = 'DbActor'
+DB_ACTOR_NAMESPACE = 'db'
 
 # @ray.remote(resources={'worker_size_small': 1, 'instance_on_demand': 1})
 @ray.remote
@@ -36,4 +38,10 @@ class DbActor:
         return self.client.in_feature_catalog(item)
 
 
+def get_db_actor() -> ray.actor.ActorHandle:
+    return ray.get_actor(name=DB_ACTOR_NAME, namespace=DB_ACTOR_NAMESPACE)
+
+
+def create_db_actor() -> ray.actor.ActorHandle:
+    return DbActor.options(name=DB_ACTOR_NAME, namespace=DB_ACTOR_NAMESPACE, lifetime='detached', get_if_exists=True).remote()
 

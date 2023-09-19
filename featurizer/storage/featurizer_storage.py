@@ -73,8 +73,8 @@ class FeaturizerStorage:
         start_date: Optional[str] = None,
         end_date: Optional[str] = None
     ) -> Dict[DataKey, List[BlockRangeMeta]]:
-        start_day = date_str_to_day_str(start_date)
-        end_day = date_str_to_day_str(end_date)
+        start_day = None if start_date is None else date_str_to_day_str(start_date)
+        end_day = None if end_date is None else date_str_to_day_str(end_date)
         raw_data = self.client.select_data_catalog(exchanges, data_types, instrument_types, symbols, start_day=start_day, end_day=end_day)
 
         start_ts = None if start_date is None else date_str_to_ts(start_date)
@@ -109,8 +109,8 @@ class FeaturizerStorage:
         start_date: Optional[str] = None,
         end_date: Optional[str] = None
     ) -> Dict[Feature, Dict[Interval, BlockMeta]]: # TODO return FeatureCatalog instead of Dict?
-        start_day = date_str_to_day_str(start_date)
-        end_day = date_str_to_day_str(end_date)
+        start_day = None if start_date is None else date_str_to_day_str(start_date)
+        end_day = None if end_date is None else date_str_to_day_str(end_date)
         feature_keys = [f.feature_key for f in features]
         raw_data = self.client.select_feature_catalog(feature_keys, start_day=start_day, end_day=end_day)
 

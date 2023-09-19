@@ -8,7 +8,7 @@ import ray
 
 from featurizer.data_catalog.pipelines.catalog_cryptotick.util import process_cryptotick_timestamps
 from featurizer.sql.client import FeaturizerSqlClient
-from featurizer.sql.db_actor import DbActor
+from featurizer.sql.db_actor import DbActor, create_db_actor
 from featurizer.data_catalog.common.utils.cryptotick_utils import cryptotick_input_items, CRYPTOTICK_RAW_BUCKET_NAME
 from featurizer.data_catalog.pipelines.catalog_cryptotick.pipeline import CatalogCryptotickPipeline, poll_to_tqdm
 from featurizer.data_definitions.common.l2_book_incremental.cryptotick.utils import starts_with_snapshot, remove_snap, \
@@ -34,7 +34,7 @@ class TestCatalogCryptotickPipeline(unittest.TestCase):
         #             'py_modules': [featurizer, ray_cluster, data_catalog, utils],
         #             'excludes': ['*s3_svoe.test.1_inventory*']
         #         }):
-            db_actor = DbActor.remote()
+            db_actor = create_db_actor()
             batch_size = 30
             num_batches = 1
             raw_files_and_sizes = list_files_and_sizes_kb(CRYPTOTICK_RAW_BUCKET_NAME)

@@ -59,4 +59,4 @@ def get_cache_actor() -> ray.actor.ActorHandle:
 
 
 def create_cache_actor(cache: Dict[str, Dict[Interval, Tuple[int, Optional[ObjectRef]]]]) -> ray.actor.ActorHandle:
-    return CacheActor.options(name=CACHE_ACTOR_NAME, namespace=CACHE_ACTOR_NAMESPACE, lifetime="detached").remote(cache)
+    return CacheActor.options(name=CACHE_ACTOR_NAME, namespace=CACHE_ACTOR_NAMESPACE, lifetime='detached').remote(cache)

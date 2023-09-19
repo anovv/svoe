@@ -2,7 +2,7 @@ from typing import List, Dict, Type, Deque, Optional
 from streamz import Stream
 from featurizer.features.definitions.feature_definition import FeatureDefinition
 from featurizer.data_definitions.data_definition import DataDefinition, Event, EventSchema
-from featurizer.features.definitions.mid_price.mid_price_fd.mid_price_fd import MidPriceFD
+from featurizer.features.definitions.price.mid_price_fd.mid_price_fd import MidPriceFD
 from featurizer.features.feature_tree.feature_tree import Feature
 from featurizer.blocks.blocks import BlockMeta, windowed_grouping
 from common.streamz.stream_utils import lookback_apply

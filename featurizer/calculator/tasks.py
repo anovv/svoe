@@ -17,7 +17,7 @@ from featurizer.data_definitions.data_source_definition import DataSourceDefinit
 from featurizer.data_definitions.synthetic_data_source_definition import SyntheticDataSourceDefinition
 from featurizer.features.feature_tree.feature_tree import Feature
 from featurizer.featurizer_utils.featurizer_utils import merge_blocks
-from featurizer.sql.db_actor import DbActor
+from featurizer.sql.db_actor import DbActor, get_db_actor
 from featurizer.sql.feature_catalog.models import FeatureCatalog
 from common.pandas import df_utils
 from common.streamz.stream_utils import run_named_events_stream
@@ -205,8 +205,7 @@ def calculate_feature(
     if store:
         # TODO make a separate actor pool for S3 IO and batchify store operation
         t = time.time()
-        # TODO create db outside
-        db_actor = DbActor.options(name='DbActor', get_if_exists=True, lifetime="detached").remote()
+        db_actor = get_db_actor()
         catalog_item = catalog_feature_block(feature, df, interval, data_store_adapter)
         exists = ray.get(db_actor.in_feature_catalog.remote(catalog_item))
         if not exists:

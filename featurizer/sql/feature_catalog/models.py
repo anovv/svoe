@@ -17,14 +17,15 @@ class FeatureCatalog(Base):
 
     # composite primary key cols
     owner_id = Column(String(32), primary_key=True)
-    feature_def = Column(String(32), primary_key=True)
     feature_key = Column(String(256), primary_key=True)
 
     start_ts = Column(String(32), primary_key=True)
     end_ts = Column(String(32), primary_key=True)
 
+
+    feature_def = Column(String(32))
     # TODO rename date -> day
-    date = Column(String(32), primary_key=True)
+    date = Column(String(32))
 
     sampling = Column(String(32))
     window = Column(String(32))

@@ -7,6 +7,7 @@ from common.pandas.df_utils import concat, downsample_uniform
 from featurizer.actors.cache_actor import get_cache_actor, create_cache_actor
 from featurizer.calculator.calculator import build_feature_label_set_task_graph
 from featurizer.calculator.executor import execute_graph
+from featurizer.sql.db_actor import create_db_actor
 from featurizer.storage.featurizer_storage import FeaturizerStorage
 from featurizer.config import FeaturizerConfig
 from featurizer.features.feature_tree.feature_tree import construct_feature_tree
@@ -40,12 +41,6 @@ class Featurizer:
         data_ranges_meta = storage.get_data_meta(features, start_date=config.start_date, end_date=config.end_date)
         stored_features_meta = storage.get_features_meta(features, start_date=config.start_date, end_date=config.end_date)
 
-        # print(stored_features_meta)
-        # for feature in stored_features_meta:
-        #     for interval in stored_features_meta[feature]:
-        #         print(f'[{feature}] {interval}')
-        # raise
-
         label_feature = None
         if config.label_feature_index is not None:
             label_feature = features[config.label_feature_index]
@@ -65,6 +60,7 @@ class Featurizer:
                 pass
 
             cache_actor = create_cache_actor(cache)
+            create_db_actor()
             # TODO pass params indicating if user doesn't want to join/lookahead and build/execute graph accordingly
             dag = build_feature_label_set_task_graph(
                 features=features,

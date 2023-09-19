@@ -1,10 +1,10 @@
-start_date: '2023-02-01 10:00:00'
-end_date: '2023-02-01 14:00:00'
+#start_date: '2023-02-01 10:00:00'
+#end_date: '2023-02-01 23:59:59'
 #label_feature_index: 0
 #label_lookahead: '5100ms'
 features_to_store: [0, 1]
 feature_configs:
-  - feature_definition: mid_price.mid_price_fd
+  - feature_definition: price.mid_price_fd
     data_params: &id001
       - exchange: BINANCE
         data_type: l2_book
