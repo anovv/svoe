@@ -124,7 +124,7 @@ class Featurizer:
 
         if pick_every_nth_row != 1:
             # TODO const num_cpus ?
-            downsampled_refs = [downsample.remote(ref, pick_every_nth_row).options(num_cpus=0.9) for ref in refs]
+            downsampled_refs = [downsample.options(num_cpus=0.9).remote(ref, pick_every_nth_row) for ref in refs]
         else:
             downsampled_refs = refs
 
