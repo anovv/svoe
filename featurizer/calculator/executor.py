@@ -71,7 +71,8 @@ def execute_flattened_nodes(nodes: List[Tuple[Any, DAGNode]], parallelism: int) 
                 executing_refs_per_key[_key] = [node.execute()]
             i += 1
 
-        ready, remaining = ray.wait(flatten(executing_refs_per_key), num_returns=1, fetch_local=False, timeout=0.001)
+        ready, _ = ray.wait(flatten(executing_refs_per_key), num_returns=1, fetch_local=False, timeout=0.001)
+
         for ref in ready:
             key = get_key_by_ref(ref, executing_refs_per_key)
             if key in results_refs_per_key:
@@ -79,7 +80,7 @@ def execute_flattened_nodes(nodes: List[Tuple[Any, DAGNode]], parallelism: int) 
             else:
                 results_refs_per_key[key] = [ref]
 
-            results_refs_per_key[key].remove(ref)
+            executing_refs_per_key[key].remove(ref)
 
     # all scheduled, wait for completion
     while len(flatten(executing_refs_per_key)) > 0:
