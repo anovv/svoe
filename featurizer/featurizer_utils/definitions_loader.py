@@ -28,6 +28,7 @@ class DefinitionsLoader:
         s = fd_name.split('.')
         return s[0], s[1], '1'
 
+    # TODO can we load by name only?
     def _load_local_class(self, fd_name: str) -> Optional[Type[DataDefinition]]:
         group, definition, version = self._parse_definition_name(fd_name)
         class_name = humps.pascalize(definition)

@@ -3,7 +3,6 @@ from typing import List, Dict, Optional, Tuple, Type
 from portion import IntervalDict, closed
 from streamz import Stream
 from order_book import OrderBook
-from frozenlist import FrozenList
 from featurizer.data_definitions.data_definition import DataDefinition, Event, EventSchema
 from featurizer.data_definitions.common.l2_book_incremental.cryptotick.cryptotick_l2_book_incremental import \
     CryptotickL2BookIncrementalData
@@ -28,8 +27,8 @@ class L2SnapshotFD(FeatureDefinition):
         return {
             'timestamp': float,
             'receipt_timestamp': float,
-            'bids': List[Tuple[float, float]], # price, size
-            'asks': List[Tuple[float, float]] # price, size
+            'bids': Tuple[Tuple[float, float], ...], # price, size
+            'asks': Tuple[Tuple[float, float], ...] # price, size
         }
 
     @classmethod
@@ -79,8 +78,8 @@ class L2SnapshotFD(FeatureDefinition):
 
     @classmethod
     def _state_snapshot(cls, state: _State, depth: int) -> Event:
-        bids = FrozenList()
-        asks = FrozenList()
+        bids = []
+        asks = []
         if depth == -1: # indicates full book
             depth = min(len(state.order_book.bids), len(state.order_book.asks))
         else:
@@ -101,8 +100,8 @@ class L2SnapshotFD(FeatureDefinition):
                 else:
                     asks.append((price, size))
 
-        bids.freeze()
-        asks.freeze()
+        bids = tuple(bids)
+        asks = tuple(asks)
 
         return cls.construct_event(state.timestamp, state.receipt_timestamp, bids, asks)
 

@@ -32,6 +32,9 @@ class FeatureStreamGenerator(DataStreamGenerator):
     def __init__(self, featurizer_config: FeaturizerConfig, data_store_adapter: DataStoreAdapter = LocalDataStoreAdapter(), price_sampling_period: str = '1s'):
         self._price_sampling_period = price_sampling_period
         self._data_store_adapter = data_store_adapter
+
+        # TODO what happens if we have same features as source and dependency?
+        # duplicate constructed trees?
         self.features = []
         for feature_config in featurizer_config.feature_configs:
             self.features.append(construct_feature_tree(
@@ -40,6 +43,7 @@ class FeatureStreamGenerator(DataStreamGenerator):
                 feature_config.feature_params
             ))
 
+        # TODO what happens if we have same features as source and dependency?
         # build data streams trees
         self.data_streams_per_feature: Dict[Feature, Tuple[Stream, Dict[Feature, Stream]]] = {}
         for f in self.features:
