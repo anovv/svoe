@@ -1,7 +1,7 @@
 import joblib
 from streamz import Stream
 
-from typing import Dict, List, Callable, Union, Tuple, Type
+from typing import Dict, List, Callable, Union, Tuple, Type, Set, Optional
 from anytree import NodeMixin
 from copy import deepcopy
 
@@ -83,7 +83,8 @@ class Feature(NodeMixin):
 def construct_feature_tree(
     root_def_name: Union[str, Type[DataDefinition]],
     data_params: Union[Dict, List],
-    feature_params: Union[Dict, List]
+    feature_params: Union[Dict, List],
+    existing_features: Dict[str, Feature] = {},
 ) -> Feature:
     return _construct_feature_tree(root_def_name, [0], [0], data_params, feature_params)
 
@@ -94,7 +95,8 @@ def _construct_feature_tree(
     feature_position_ref: List[int],
     data_position_ref: List[int],
     data_params: Union[Dict, List],
-    feature_params: Union[Dict, List]
+    feature_params: Union[Dict, List],
+    existing_features: Optional[Dict[str, Feature]] = None,
 ) -> Feature:
     if isinstance(root_def_name, str):
         root_def = DefinitionsLoader.load(root_def_name)
@@ -104,12 +106,19 @@ def _construct_feature_tree(
     if root_def.is_data_source():
         position = data_position_ref[0]
         data_position_ref[0] += 1
-        return Feature(
+        f = Feature(
             children=[],
             position=position,
             feature_definition=root_def,
             params=_parse_params(data_params, position)
         )
+        if existing_features is None:
+            return f
+        if f.feature_key in existing_features:
+            return existing_features[f.feature_key]
+        else:
+            existing_features[f.feature_key] = f
+            return f
 
     position = feature_position_ref[0]
     params = _parse_params(feature_params, position)
@@ -122,14 +131,20 @@ def _construct_feature_tree(
             feature_position_ref[0] += 1
         children.append(_construct_feature_tree(dep_fd, feature_position_ref, data_position_ref, data_params, feature_params))
 
-    feature = Feature(
+    f = Feature(
         children=children,
         position=position,
         feature_definition=root_def,
         params=params
     )
     feature_position_ref[0] -= 1
-    return feature
+    if existing_features is None:
+        return f
+    if f.feature_key in existing_features:
+        return existing_features[f.feature_key]
+    else:
+        existing_features[f.feature_key] = f
+        return f
 
 
 def _parse_params(params: Union[Dict, List], position: int):
