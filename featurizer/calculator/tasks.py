@@ -183,7 +183,7 @@ def calculate_feature(
     upstreams = {dep_feature: Stream() for dep_feature in deps.keys()}
 
     # TODO unify feature_definition.stream return type
-    s = feature.feature_definition.stream(upstreams, feature.params)
+    s = feature.data_definition.stream(upstreams, feature.params)
     if isinstance(s, Tuple):
         out_stream = s[0]
         state = s[1]
@@ -289,6 +289,7 @@ def lookahead_shift_blocks(block_refs: List[ObjectRef[Block]], interval: Interva
 def catalog_feature_block(feature: Feature, df: pd.DataFrame, interval: Interval, data_store_adapter: DataStoreAdapter) -> FeatureCatalog:
     _time_range = df_utils.time_range(df)
 
+    # TODO day_str
     date_str = datetime.fromtimestamp(_time_range[1], tz=pytz.utc).strftime('%Y-%m-%d')
     # check if end_ts is also same date:
     date_str_end = datetime.fromtimestamp(_time_range[2], tz=pytz.utc).strftime('%Y-%m-%d')
@@ -300,8 +301,8 @@ def catalog_feature_block(feature: Feature, df: pd.DataFrame, interval: Interval
     # TODO window, sampling, feature_params, data_params, tags
     catalog_item_params.update({
         FeatureCatalog.owner_id.name: '0',
-        FeatureCatalog.feature_def.name: feature.feature_definition.__name__,
-        FeatureCatalog.feature_key.name: feature.feature_key,
+        FeatureCatalog.feature_def.name: feature.data_definition.__name__,
+        FeatureCatalog.key.name: feature.key,
         # TODO pass interval directly instead of start, end? or keep both?
         FeatureCatalog.start_ts.name: interval.lower,
         FeatureCatalog.end_ts.name: interval.upper,

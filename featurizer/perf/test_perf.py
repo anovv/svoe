@@ -77,8 +77,10 @@ def test_vectorized_tvi():
 
 def test_streaming_tvi():
     feature_params = {0: {'window': '1m', 'sampling': '1s'}}
-    feature_tvi = construct_feature_tree(TradeVolumeImbFD, {}, feature_params)
-    data_trades = construct_feature_tree(TradesData, {}, {})
+    feature_tvi = construct_feature_tree(TradeVolumeImbFD, {
+        'feature': feature_params
+    })
+    data_trades = construct_feature_tree(TradesData, {})
     df = load_df(
         's3://svoe-cataloged-data/trades/BINANCE/spot/BTC-USDT/cryptotick/100.0mb/2023-02-01/1675209965-4ea8eeea78da2f99f312377c643e6b491579f852.parquet.gz'
     )
@@ -90,7 +92,7 @@ def test_streaming_tvi():
     print(f'Merged in {time.time() - t}s')
     # construct upstreams
     upstreams = {dep_feature: Stream() for dep_feature in deps.keys()}
-    s = feature_tvi.feature_definition.stream(upstreams, feature_tvi.params)
+    s = feature_tvi.data_definition.stream(upstreams, feature_tvi.params)
     if isinstance(s, Tuple):
         out_stream = s[0]
         state = s[1]

@@ -3,8 +3,8 @@ import os
 import pandas as pd
 
 from common.pandas.df_utils import load_df_local, store_df_local
-from featurizer.sql.data_catalog.models import build_data_catalog_block_path
-from featurizer.sql.feature_catalog.models import build_feature_catalog_block_path, FeatureCatalog
+from featurizer.sql.models.data_source_block_metadata import DataSourceBlockMetadata, build_data_source_block_path
+from featurizer.sql.models.feature_block_metadata import build_feature_block_path, FeatureBlockMetadata
 from featurizer.storage.data_store_adapter.data_store_adapter import DataStoreAdapter
 from featurizer.storage.data_store_adapter.remote_data_store_adapter import SVOE_S3_FEATURE_CATALOG_BLOCK_PATH_PREFIX, \
     SVOE_S3_DATA_CATALOG_BLOCK_PATH_PREFIX
@@ -38,8 +38,8 @@ class LocalDataStoreAdapter(DataStoreAdapter):
         os.makedirs(dirname, exist_ok=True)
         store_df_local(path=path, df=df)
 
-    def make_feature_catalog_block_path(self, item: FeatureCatalog) -> str:
-        return build_feature_catalog_block_path(item=item, prefix=LOCAL_FEATURE_CATALOG_BLOCK_PATH_PREFIX)
+    def make_feature_block_path(self, item: FeatureBlockMetadata) -> str:
+        return build_feature_block_path(item=item, prefix=LOCAL_FEATURE_CATALOG_BLOCK_PATH_PREFIX)
 
-    def make_data_catalog_block_path(self, item: FeatureCatalog) -> str:
-        return build_data_catalog_block_path(item=item, prefix=LOCAL_DATA_CATALOG_BLOCK_PATH_PREFIX)
+    def make_data_source_block_path(self, item: DataSourceBlockMetadata) -> str:
+        return build_data_source_block_path(item=item, prefix=LOCAL_DATA_CATALOG_BLOCK_PATH_PREFIX)

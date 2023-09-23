@@ -39,8 +39,7 @@ class FeatureStreamGenerator(DataStreamGenerator):
         for feature_config in featurizer_config.feature_configs:
             self.features.append(construct_feature_tree(
                 feature_config.feature_definition,
-                feature_config.data_params,
-                feature_config.feature_params
+                feature_config.params,
             ))
 
         # TODO what happens if we have same features as source and dependency?
@@ -92,7 +91,7 @@ class FeatureStreamGenerator(DataStreamGenerator):
         self.unified_out_stream.sink(_unified_out_stream)
 
         storage = FeaturizerStorage()
-        data_ranges_meta = storage.get_data_meta(self.features, start_date=featurizer_config.start_date, end_date=featurizer_config.end_date)
+        data_ranges_meta = storage.get_data_sources_meta(self.features, start_date=featurizer_config.start_date, end_date=featurizer_config.end_date)
         # TODO indicate if data ranges are empty
         data_ranges = self.load_data_ranges(data_ranges_meta)
         self.input_data_events: List[Tuple[Feature, data_def.Event]] = self.merge_data_ranges(data_ranges)
@@ -138,8 +137,8 @@ class FeatureStreamGenerator(DataStreamGenerator):
                 for feature in range_meta_intervals[interval]:
                     for block_position in range(len(range_meta_intervals[interval][feature])):
                         block_meta = range_meta_intervals[interval][feature][block_position]
-                        if feature.feature_definition.is_synthetic():
-                            data_ranges[interval][feature][block_position] = feature.feature_definition.gen_synthetic_events(
+                        if feature.data_definition.is_synthetic():
+                            data_ranges[interval][feature][block_position] = feature.data_definition.gen_synthetic_events(
                                 interval=meta_to_interval(block_meta),
                                 params=feature.params
                             )
@@ -156,7 +155,7 @@ class FeatureStreamGenerator(DataStreamGenerator):
 
             # data_ranges dict already constructed above
             # TODO preproc only if needed
-            preproc_block = feature.feature_definition.preprocess(block)
+            preproc_block = feature.data_definition.preprocess(block)
             data_ranges[interval][feature][block_position] = preproc_block
 
         return data_ranges
@@ -260,7 +259,7 @@ class FeatureStreamGenerator(DataStreamGenerator):
         # TODO cache this to avoid recalculation on each update? or make a FeatureStreamSchema abstraction?
         _feature = None
         for feature in data_event.feature_values:
-            if feature_definition is not None and feature.feature_definition != feature_definition:
+            if feature_definition is not None and feature.data_definition != feature_definition:
                 continue
             instr = cls.get_instrument_for_feature(feature)
             if instr == instrument:

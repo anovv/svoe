@@ -4,13 +4,14 @@ from typing import Optional, List, Tuple, Any, Generator, Callable
 import joblib
 from streamz import Stream
 
+from common.s3.s3_utils import load_df_s3
 from featurizer.data_catalog.pipelines.catalog_cryptotick.util import process_cryptotick_timestamps
 from featurizer.data_definitions.data_definition import df_to_events
 from featurizer.data_definitions.common.l2_book_incremental.cryptotick.cryptotick_l2_book_incremental import \
     CryptotickL2BookIncrementalData
 from featurizer.features.definitions.l2_book.l2_snapshot_fd.l2_snapshot_fd import L2SnapshotFD
 from featurizer.featurizer_utils.testing_utils import mock_feature
-from common.pandas.df_utils import concat, gen_split_df_by_mem, get_cached_df, load_df, \
+from common.pandas.df_utils import concat, gen_split_df_by_mem, get_cached_df, \
     cache_df_if_needed
 
 import pandas as pd
@@ -118,7 +119,7 @@ def mock_processed_cryptotick_df(
     if proc_df is not None:
         print('Mock cryptotick df cached')
         return proc_df
-    raw_df = load_df(path)
+    raw_df = load_df_s3(path)
     proc_df = preprocess_l2_inc_df(raw_df, date_str)
     if split_size_kb < 0:
         split = proc_df

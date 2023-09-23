@@ -13,7 +13,7 @@ DEFAULT_COMPACTION = 'raw'
 DEFAULT_INSTRUMENT_EXTRA = ''
 
 
-# TODO figure out float precision issues
+# TODO decouple Data object and DataCatalog item object
 class DataCatalog(Base):
     __tablename__ = 'data_catalog'
     created_at = Column(DateTime(timezone=True), server_default=func.now())

@@ -10,42 +10,45 @@ from featurizer.featurizer_utils.definitions_loader import DefinitionsLoader
 
 
 class Feature(NodeMixin):
-    def __init__(self, children: List['Feature'], position: int, feature_definition: Type[DataDefinition], params: Dict):
+    def __init__(self, children: List['Feature'], data_definition: Type[DataDefinition], params: Dict):
         self.children = children
-        self.position = position
-        self.feature_definition = feature_definition
+        self.data_definition = data_definition
         self.params = params
         self._is_label = False
 
         # TODO is it ok to call these at init time? Are all the children ready?
         self._data_deps = None
         self._data_deps = self.get_data_deps()
-        self.feature_key = self._feature_key()
+        self.key = self._key()
 
     def __hash__(self):
-        return hash(self.feature_key)
+        return hash(self.key)
 
     def __eq__(self, other):
-        return self.feature_key == other.feature_key
+        return self.key == other.key
 
     def __repr__(self):
-        short_key = self.feature_key[:8]
+        short_key = self.key[:8]
         if self._is_label:
-            return f'label-{self.feature_definition.__name__}-{self.position}-{short_key}'
-        elif self.feature_definition.is_data_source():
-            return f'data-source-{self.feature_definition.__name__}-{self.position}-{short_key}'
+            return f'label-{self.data_definition.__name__}-{short_key}'
+        elif self.data_definition.is_data_source():
+            return f'data-source-{self.data_definition.__name__}-{short_key}'
         else:
-            return f'feature-{self.feature_definition.__name__}-{self.position}-{short_key}'
+            return f'feature-{self.data_definition.__name__}-{short_key}'
 
-    def _feature_key(self) -> str:
+    def _key(self) -> str:
+        if self.data_definition.is_data_source():
+            return joblib.hash([self.data_definition.__name__, self.params])
+
         data_deps = self.get_data_deps()
         feature_deps = self.get_inorder_feature_deps()
         dep_data_params = [d.params for d in data_deps]
         dep_feature_params = [f.params for f in feature_deps]
 
-        # TODO add current and dep feature_defenition versions to hash
+        # TODO add current and dep feature_definition versions to hash
         # TODO prev feature/data dep keys should also be a part of the key
-        return joblib.hash([self._is_label, self.feature_definition.__name__, dep_data_params, dep_feature_params])
+        # TODO data_deps/feature_deps class types should also be part of the key
+        return joblib.hash([self._is_label, self.data_definition.__name__, dep_data_params, dep_feature_params])
 
     def get_data_deps(self) -> List['Feature']:
         if self._data_deps is not None:
@@ -53,7 +56,7 @@ class Feature(NodeMixin):
 
         data_leafs = []
         def callback(node):
-            if node.feature_definition.is_data_source():
+            if node.data_definition.is_data_source():
                 data_leafs.append(node)
 
         postorder(self, callback)
@@ -63,7 +66,7 @@ class Feature(NodeMixin):
     def get_inorder_feature_deps(self) -> List['Feature']:
         deps = []
         def callback(node):
-            if not node.feature_definition.is_data_source():
+            if not node.data_definition.is_data_source():
                 deps.append(node)
         inorder(self, callback)
         return deps
@@ -76,25 +79,26 @@ class Feature(NodeMixin):
         c = deepcopy(feature)
         c._is_label = True
         # recalc feature key
-        c.feature_key = c._feature_key()
+        c.key = c._key()
         return c
 
 
 def construct_feature_tree(
     root_def_name: Union[str, Type[DataDefinition]],
-    data_params: Union[Dict, List],
-    feature_params: Union[Dict, List],
+    params: Dict,
     existing_features: Dict[str, Feature] = {},
 ) -> Feature:
-    return _construct_feature_tree(root_def_name, [0], [0], data_params, feature_params)
+    data_source_params: Union[Dict, List] = params['data_source']
+    feature_params: Union[Dict, List] = params['feature']
+    return _construct_feature_tree(root_def_name, [0], [0], data_source_params, feature_params, existing_features)
 
 
 # traverse DataDefinition tree to construct parametrized FeatureTree
 def _construct_feature_tree(
     root_def_name: Union[str, Type[DataDefinition]],
     feature_position_ref: List[int],
-    data_position_ref: List[int],
-    data_params: Union[Dict, List],
+    data_source_position_ref: List[int],
+    data_source_params: Union[Dict, List],
     feature_params: Union[Dict, List],
     existing_features: Optional[Dict[str, Feature]] = None,
 ) -> Feature:
@@ -104,20 +108,19 @@ def _construct_feature_tree(
         root_def = root_def_name
     # TODO deprecate is_data_source, use isinstance
     if root_def.is_data_source():
-        position = data_position_ref[0]
-        data_position_ref[0] += 1
+        position = data_source_position_ref[0]
+        data_source_position_ref[0] += 1
         f = Feature(
             children=[],
-            position=position,
-            feature_definition=root_def,
-            params=_parse_params(data_params, position)
+            data_definition=root_def,
+            params=_parse_params(data_source_params, position)
         )
         if existing_features is None:
             return f
-        if f.feature_key in existing_features:
-            return existing_features[f.feature_key]
+        if f.key in existing_features:
+            return existing_features[f.key]
         else:
-            existing_features[f.feature_key] = f
+            existing_features[f.key] = f
             return f
 
     position = feature_position_ref[0]
@@ -129,21 +132,20 @@ def _construct_feature_tree(
     for dep_fd in deps:
         if not dep_fd.is_data_source():
             feature_position_ref[0] += 1
-        children.append(_construct_feature_tree(dep_fd, feature_position_ref, data_position_ref, data_params, feature_params))
+        children.append(_construct_feature_tree(dep_fd, feature_position_ref, data_source_position_ref, data_source_params, feature_params))
 
     f = Feature(
         children=children,
-        position=position,
-        feature_definition=root_def,
+        data_definition=root_def,
         params=params
     )
     feature_position_ref[0] -= 1
     if existing_features is None:
         return f
-    if f.feature_key in existing_features:
-        return existing_features[f.feature_key]
+    if f.key in existing_features:
+        return existing_features[f.key]
     else:
-        existing_features[f.feature_key] = f
+        existing_features[f.key] = f
         return f
 
 
@@ -204,7 +206,7 @@ def _construct_stream_tree(feature: Feature, data_streams: Dict[Feature, Stream]
         upstreams[child] = stream
 
     # TODO unify feature_definition.stream return type
-    s = feature.feature_definition.stream(upstreams, feature.params)
+    s = feature.data_definition.stream(upstreams, feature.params)
     if isinstance(s, Tuple):
         out_stream = s[0]
         state = s[1]

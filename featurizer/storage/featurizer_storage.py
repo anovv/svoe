@@ -12,26 +12,18 @@ from common.time.utils import date_str_to_day_str, date_str_to_ts
 from featurizer.blocks.blocks import BlockRangeMeta, make_ranges, BlockMeta
 from featurizer.features.feature_tree.feature_tree import Feature
 from featurizer.sql.client import FeaturizerSqlClient
-from featurizer.sql.data_catalog.models import DataCatalog
-from featurizer.sql.feature_catalog.models import FeatureCatalog
 from featurizer.sql.feature_def.models import construct_feature_def_s3_path, FeatureDefinitionDB
 from common.s3.s3_utils import delete_files, upload_dir, download_dir
+from featurizer.sql.models.data_source_block_metadata import DataSourceBlockMetadata
+from featurizer.sql.models.feature_block_metadata import FeatureBlockMetadata
 from featurizer.storage.data_store_adapter.remote_data_store_adapter import SVOE_S3_FEATURE_CATALOG_BUCKET
-
-# TODO this should be synced with DataDef somehow?
-DataKey = Tuple[str, str, str, str]
-
-
-def data_key(e: Dict) -> DataKey:
-    return (e[DataCatalog.exchange.name], e[DataCatalog.data_type.name], e[DataCatalog.instrument_type.name],
-            e[DataCatalog.symbol.name])
 
 
 class FeaturizerStorage:
     def __init__(self):
         self.client = FeaturizerSqlClient()
 
-    def get_data_meta(
+    def get_data_sources_meta(
         self,
         features: List[Feature],
         start_date: Optional[str] = None,
@@ -42,17 +34,13 @@ class FeaturizerStorage:
         for feature in features:
             for d in feature.get_data_deps():
                 # skip synthetic data sources
-                if d.feature_definition.is_synthetic():
+                if d.data_definition.is_synthetic():
                     synthetic_data_deps.add(d)
                 else:
                     data_deps.add(d)
 
-        data_keys = [data_key(d.params) for d in data_deps]
-        exchanges = list(set([d[0] for d in data_keys]))
-        data_types = list(set([d[1] for d in data_keys]))
-        instrument_types = list(set([d[2] for d in data_keys]))
-        symbols = list(set([d[3] for d in data_keys]))
-        ranges_meta_per_data_key = self._get_data_meta(exchanges, data_types, instrument_types, symbols, start_date=start_date, end_date=end_date)
+        data_keys = [d.key for d in data_deps]
+        ranges_meta_per_data_key = self._get_data_meta(data_keys, start_date=start_date, end_date=end_date)
         if (len(ranges_meta_per_data_key)) == 0:
             raise ValueError('No data for given time range')
         res = {data: ranges_meta_per_data_key[data_key(data.params)] for data in data_deps}
@@ -60,37 +48,34 @@ class FeaturizerStorage:
         # add synthetic ranges
         # TODO if start_date or end_date were passed as None we need to derive them from what was returned from database
         for synthetic_data in synthetic_data_deps:
-            res[synthetic_data] = synthetic_data.feature_definition.gen_synthetic_ranges_meta(start_date, end_date)
+            res[synthetic_data] = synthetic_data.data_definition.gen_synthetic_ranges_meta(start_date, end_date)
 
         return res
 
-    def _get_data_meta(
+    def _get_data_sources_meta(
         self,
-        exchanges: List[str],
-        data_types: List[str],
-        instrument_types: List[str],
-        symbols: List[str],
+        keys: List[str],
         start_date: Optional[str] = None,
         end_date: Optional[str] = None
-    ) -> Dict[DataKey, List[BlockRangeMeta]]:
+    ) -> Dict[str, List[BlockRangeMeta]]:
         start_day = None if start_date is None else date_str_to_day_str(start_date)
         end_day = None if end_date is None else date_str_to_day_str(end_date)
-        raw_data = self.client.select_data_catalog(exchanges, data_types, instrument_types, symbols, start_day=start_day, end_day=end_day)
+        raw_data = self.client.select_data_source_metadata(keys, start_day=start_day, end_day=end_day)
 
         start_ts = None if start_date is None else date_str_to_ts(start_date)
         end_ts = None if end_date is None else date_str_to_ts(end_date)
-        # group data by data key
+        # group data by key
         groups = {}
         for r in raw_data:
             # filter not in range
-            _start_ts = float(r[DataCatalog.start_ts.name])
-            _end_ts = float(r[DataCatalog.end_ts.name])
+            _start_ts = float(r[DataSourceBlockMetadata.start_ts.name])
+            _end_ts = float(r[DataSourceBlockMetadata.end_ts.name])
             if start_ts is not None and _end_ts < start_ts:
                 continue
             if end_ts is not None and _start_ts > end_ts:
                 continue
 
-            key = data_key(r)
+            key = r['key']
             if key in groups:
                 groups[key].append(r)
             else:
@@ -111,13 +96,13 @@ class FeaturizerStorage:
     ) -> Dict[Feature, Dict[Interval, BlockMeta]]: # TODO return FeatureCatalog instead of Dict?
         start_day = None if start_date is None else date_str_to_day_str(start_date)
         end_day = None if end_date is None else date_str_to_day_str(end_date)
-        feature_keys = [f.feature_key for f in features]
-        raw_data = self.client.select_feature_catalog(feature_keys, start_day=start_day, end_day=end_day)
+        feature_keys = [f.key for f in features]
+        raw_data = self.client.select_feature_blocks_metadata(feature_keys, start_day=start_day, end_day=end_day)
 
         groups = {}
         def _feature_by_key(key):
             for f in features:
-                if f.feature_key == key:
+                if f.key == key:
                     return f
             return None
 
@@ -125,9 +110,9 @@ class FeaturizerStorage:
         end_ts = None if end_date is None else date_str_to_ts(end_date)
         for r in raw_data:
             # filter not in range
-            feature_key = r[FeatureCatalog.feature_key.name]
-            _start_ts = float(r[FeatureCatalog.start_ts.name])
-            _end_ts = float(r[FeatureCatalog.end_ts.name])
+            feature_key = r[FeatureBlockMetadata.key.name]
+            _start_ts = float(r[FeatureBlockMetadata.start_ts.name])
+            _end_ts = float(r[FeatureBlockMetadata.end_ts.name])
             if start_ts is not None and _end_ts < start_ts:
                 continue
             if end_ts is not None and _start_ts > end_ts:
@@ -136,7 +121,7 @@ class FeaturizerStorage:
             feature = _feature_by_key(feature_key)
             if feature in groups:
                 if interval in groups[feature]:
-                    raise ValueError('FeatureCatalog entry duplicate interval')
+                    raise ValueError('FeatureBlockMetadata entry duplicate interval')
                 groups[feature][interval] = r
             else:
                 groups[feature] = {interval: r}
@@ -146,11 +131,11 @@ class FeaturizerStorage:
     # TODO verify consistency + retries in case of failures
     # TODO delete should also depend on data adapter?
     def delete_features(self, features: List[Feature]):
-        feature_keys = [f.feature_key for f in features]
-        raw_data = self.client.select_feature_catalog(feature_keys)
+        feature_keys = [f.key for f in features]
+        raw_data = self.client.select_feature_blocks_metadata(feature_keys)
         paths = [r['path'] for r in raw_data]
         delete_files(SVOE_S3_FEATURE_CATALOG_BUCKET, paths)
-        self.client.delete_feature_catalog(feature_keys)
+        self.client.delete_feature_metadata(feature_keys)
 
     # TODO verify consistency + retries in case of failures
     def store_feature_def(

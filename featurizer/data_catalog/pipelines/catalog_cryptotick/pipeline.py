@@ -9,8 +9,8 @@ from tqdm import tqdm
 
 from featurizer.sql.db_actor import DbActor
 from featurizer.data_catalog.common.data_models.models import InputItemBatch
-from featurizer.sql.data_catalog.models import DataCatalog
 from featurizer.data_catalog.pipelines.catalog_cryptotick.tasks import load_split_catalog_store_df
+from featurizer.sql.models.data_source_block_metadata import DataSourceBlockMetadata
 from featurizer.storage.data_store_adapter.data_store_adapter import DataStoreAdapter
 from featurizer.storage.data_store_adapter.remote_data_store_adapter import RemoteDataStoreAdapter
 
@@ -142,7 +142,7 @@ class CatalogCryptotickPipeline:
 
             for i in range(len(filtered_items)):
                 item = filtered_items[i]
-                raw_size_kb = item[DataCatalog.size_kb.name]
+                raw_size_kb = item[DataSourceBlockMetadata.size_kb.name]
 
                 while self.is_running and len(self.results_refs) >= self.max_executing_tasks:
                     await asyncio.sleep(0.1)

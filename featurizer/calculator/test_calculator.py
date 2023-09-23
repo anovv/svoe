@@ -85,7 +85,10 @@ class TestFeatureCalculator(unittest.TestCase):
     def test_cryptotick_l2_snap_feature_online(self):
         data_params = {}
         feature_params = [{'dep_schema': 'cryptotick'}]
-        feature = construct_feature_tree(L2SnapshotFD, data_params, feature_params)
+        feature = construct_feature_tree(L2SnapshotFD, {
+            'data_source': data_params,
+            'feature': feature_params
+        })
         stream, tree = construct_stream_tree(feature)
         data = Feature([], 0, CryptotickL2BookIncrementalData, data_params)
         sources = {data: tree[data]}
@@ -113,15 +116,27 @@ class TestFeatureCalculator(unittest.TestCase):
             DataCatalog.instrument_type.name: 'spot',
             DataCatalog.symbol.name: 'BTC-USDT'}
         ]
-        feature_l2_snap = construct_feature_tree(L2SnapshotFD, data_params, feature_params1)
-        feature_mid_price = construct_feature_tree(MidPriceFD, data_params, feature_params2)
-        feature_volatility = construct_feature_tree(VolatilityStddevFD, data_params, feature_params3)
-        feature_spread = construct_feature_tree(RelativeBidAskSpreadFD, data_params, feature_params4)
+        feature_l2_snap = construct_feature_tree(L2SnapshotFD, {
+            'data_source': data_params,
+            'feature': feature_params1
+        })
+        feature_mid_price = construct_feature_tree(MidPriceFD, {
+            'data_source': data_params,
+            'feature': feature_params2
+        })
+        feature_volatility = construct_feature_tree(VolatilityStddevFD, {
+            'data_source': data_params,
+            'feature': feature_params3
+        })
+        feature_spread = construct_feature_tree(RelativeBidAskSpreadFD, {
+            'data_source': data_params,
+            'feature': feature_params4
+        })
 
         features = [feature_l2_snap, feature_mid_price, feature_volatility, feature_spread]
         start_date = '2023-02-01'
         end_date = '2023-02-01'
-        data_ranges_meta = storage.get_data_meta(features, start_date=start_date, end_date=end_date)
+        data_ranges_meta = storage.get_data_sources_meta(features, start_date=start_date, end_date=end_date)
         stored_features_meta = storage.get_features_meta(features, start_date=start_date, end_date=end_date)
 
         cache = {}
@@ -186,15 +201,24 @@ class TestFeatureCalculator(unittest.TestCase):
              DataCatalog.instrument_type.name: 'spot',
              DataCatalog.symbol.name: 'BTC-USDT'}
         ]
-        feature_mid_price = construct_feature_tree(MidPriceFD, data_params2, feature_params2)
-        feature_volatility = construct_feature_tree(VolatilityStddevFD, data_params2, feature_params3)
-        feature_tvi = construct_feature_tree(TradeVolumeImbFD, data_params1, feature_params1)
+        feature_mid_price = construct_feature_tree(MidPriceFD, {
+            'data_source': data_params2,
+            'feature': feature_params2
+        })
+        feature_volatility = construct_feature_tree(VolatilityStddevFD, {
+            'data_source': data_params2,
+            'feature': feature_params3
+        })
+        feature_tvi = construct_feature_tree(TradeVolumeImbFD, {
+            'data_source': data_params1,
+            'feature': feature_params1
+        })
         # print(RenderTree(feature_tvi))
         # features = [feature_mid_price, feature_tvi, feature_volatility]
         features = [feature_mid_price, feature_tvi]
         start_date = '2023-02-01'
         end_date = '2023-02-01'
-        data_ranges_meta = storage.get_data_meta(features, start_date=start_date, end_date=end_date)
+        data_ranges_meta = storage.get_data_sources_meta(features, start_date=start_date, end_date=end_date)
 
         stored_features_meta = storage.get_features_meta(features, start_date=start_date, end_date=end_date)
 
@@ -273,13 +297,19 @@ class TestFeatureCalculator(unittest.TestCase):
              DataCatalog.symbol.name: 'BTC-USDT'}
         ]
 
-        feature_mid_price = construct_feature_tree(MidPriceFD, data_params, feature_params1)
-        feature_volatility = construct_feature_tree(VolatilityStddevFD, data_params, feature_params2)
+        feature_mid_price = construct_feature_tree(MidPriceFD, {
+            'data_source': data_params,
+            'feature': feature_params1
+        })
+        feature_volatility = construct_feature_tree(VolatilityStddevFD, {
+            'data_source': data_params,
+            'feature': feature_params2
+        })
 
         features = [feature_mid_price, feature_volatility]
         start_date = '2023-02-01'
         end_date = '2023-02-01'
-        data_ranges_meta = storage.get_data_meta(features, start_date=start_date, end_date=end_date)
+        data_ranges_meta = storage.get_data_sources_meta(features, start_date=start_date, end_date=end_date)
 
         # stored_features_meta = storage.get_features_meta(features, start_date=start_date, end_date=end_date)
 
@@ -313,13 +343,16 @@ class TestFeatureCalculator(unittest.TestCase):
              DataCatalog.instrument_type.name: 'spot',
              DataCatalog.symbol.name: 'BTC-USDT'}
         ]
-        feature_tvi = construct_feature_tree('tvi.trade_volume_imb_fd', data_params1, feature_params1)
+        feature_tvi = construct_feature_tree('tvi.trade_volume_imb_fd', {
+            'data_source': data_params1,
+            'feature': feature_params1
+        })
         # print(RenderTree(feature_tvi))
         # features = [feature_mid_price, feature_tvi, feature_volatility]
         features = [feature_tvi]
         start_date = '2023-02-01'
         end_date = '2023-02-01'
-        data_ranges_meta = storage.get_data_meta(features, start_date=start_date, end_date=end_date)
+        data_ranges_meta = storage.get_data_sources_meta(features, start_date=start_date, end_date=end_date)
 
         stored_features_meta = storage.get_features_meta(features, start_date=start_date, end_date=end_date)
 

@@ -26,7 +26,11 @@ class TestDataCatalogApi(unittest.TestCase):
              DataCatalog.instrument_type.name: 'spot',
              DataCatalog.symbol.name: 'BTC-USDT'}
         ]
-        feature_tvi = construct_feature_tree(TradeVolumeImbFD, data_params1, feature_params1)
+        params = {
+            'data_source': data_params1,
+            'feature': feature_params1
+        }
+        feature_tvi = construct_feature_tree(TradeVolumeImbFD, params)
         api = FeaturizerStorage()
         api.delete_features([feature_tvi])
 

@@ -8,6 +8,7 @@ DEFAULT_VERSION = ''
 DEFAULT_COMPACTION = 'raw'
 
 
+# TODO decouple Feature object and FeatureCatalog item object
 class FeatureCatalog(Base):
     __tablename__ = 'feature_catalog'
     created_at = Column(DateTime(timezone=True), server_default=func.now())
@@ -21,7 +22,6 @@ class FeatureCatalog(Base):
 
     start_ts = Column(String(32), primary_key=True)
     end_ts = Column(String(32), primary_key=True)
-
 
     feature_def = Column(String(32))
     # TODO rename date -> day

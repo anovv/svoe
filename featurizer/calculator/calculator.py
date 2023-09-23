@@ -35,7 +35,7 @@ def build_feature_task_graph(
     features_ranges_meta = {}
 
     def tree_traversal_callback(feature: Feature):
-        if feature.feature_definition.is_data_source():
+        if feature.data_definition.is_data_source():
             # leafs
             # TODO decouple derived feature_ranges_meta and input data ranges meta
             ranges = data_ranges_meta[feature]  # this is already populated for Data in load_data_ranges above
@@ -46,15 +46,15 @@ def build_feature_task_graph(
                 nodes = {}
                 for block_meta in block_range_meta:
                     interval = meta_to_interval(block_meta)
-                    ctx = context(feature.feature_key, interval)
-                    if feature.feature_definition.is_synthetic():
-                        node = bind_and_cache(gen_synth_events, obj_ref_cache, ctx, interval=interval, synth_data_def=feature.feature_definition, params=feature.params)
+                    ctx = context(feature.key, interval)
+                    if feature.data_definition.is_synthetic():
+                        node = bind_and_cache(gen_synth_events, obj_ref_cache, ctx, interval=interval, synth_data_def=feature.data_definition, params=feature.params)
                     else:
                         path = block_meta['path']
                         # TODO call load_and_preprocess only if data_def needs preproc, otherwise call load_if_needed
                         # this will save workers
                         # node = bind_and_cache(load_if_needed, obj_ref_cache, ctx, path=path, is_feature=False)
-                        node = bind_and_cache(load_and_preprocess, obj_ref_cache, ctx, path=path, data_def=feature.feature_definition, data_store_adapter=data_store_adapter, is_feature=False)
+                        node = bind_and_cache(load_and_preprocess, obj_ref_cache, ctx, path=path, data_def=feature.data_definition, data_store_adapter=data_store_adapter, is_feature=False)
 
                     # TODO validate no overlapping intervals here
                     nodes[interval] = node
@@ -65,7 +65,7 @@ def build_feature_task_graph(
 
         ranges_per_dep_feature = {}
         for dep_feature in feature.children:
-            meta = data_ranges_meta[dep_feature] if dep_feature.feature_definition.is_data_source() else features_ranges_meta[dep_feature]
+            meta = data_ranges_meta[dep_feature] if dep_feature.data_definition.is_data_source() else features_ranges_meta[dep_feature]
             ranges_per_dep_feature[dep_feature] = ranges_to_interval_dict(meta)
 
         range_intervals = prune_overlaps(get_overlaps(ranges_per_dep_feature))
@@ -76,7 +76,7 @@ def build_feature_task_graph(
             for dep_feature in feature.children:
                 dep_ranges = range_meta_per_dep_feature[dep_feature]
                 # TODO this should be in Feature class
-                grouped_ranges_by_dep_feature[dep_feature] = feature.feature_definition.group_dep_ranges(dep_ranges, feature, dep_feature)
+                grouped_ranges_by_dep_feature[dep_feature] = feature.data_definition.group_dep_ranges(dep_ranges, feature, dep_feature)
 
             overlaps = get_overlaps(grouped_ranges_by_dep_feature)
             block_range_meta = []
@@ -98,7 +98,7 @@ def build_feature_task_graph(
                         ds.append(dep_node)
                     dep_nodes[dep_feature] = ds
 
-                ctx = context(feature.feature_key, interval)
+                ctx = context(feature.key, interval)
                 if stored_feature_blocks_meta is not None and feature in stored_feature_blocks_meta:
                     almost_equal_interval = None
                     for i in stored_feature_blocks_meta[feature]:

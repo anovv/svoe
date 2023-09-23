@@ -10,8 +10,7 @@ from common.time.utils import split_time_range_between_ts, ts_to_str_date
 
 class FeatureConfig(BaseModel):
     feature_definition: str
-    data_params: Union[List[Dict], Dict]
-    feature_params: Optional[Union[List[Dict], Dict]]
+    params: Dict
 
 
 class FeaturizerConfig(BaseModel):

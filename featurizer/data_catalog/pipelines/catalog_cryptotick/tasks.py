@@ -8,10 +8,13 @@ import pandas as pd
 import pytz
 import ray
 
+from featurizer.data_definitions.common.l2_book_incremental.cryptotick.cryptotick_l2_book_incremental import \
+    CryptotickL2BookIncrementalData
 from featurizer.data_definitions.common.trades.cryptotick.utils import preprocess_trades_df
+from featurizer.data_definitions.common.trades.trades import TradesData
 from featurizer.sql.db_actor import DbActor
 from featurizer.data_catalog.common.data_models.models import InputItem
-from featurizer.sql.data_catalog.models import DataCatalog
+from featurizer.sql.models.data_source_block_metadata import DataSourceBlockMetadata
 from featurizer.data_definitions.common.l2_book_incremental.cryptotick.utils import preprocess_l2_inc_df, \
     gen_split_l2_inc_df_and_pad_with_snapshot, get_snapshot_ts
 from common.pandas import df_utils
@@ -29,8 +32,8 @@ def load_split_catalog_store_df(
     data_store_adapter: DataStoreAdapter,
     callback: Optional[Callable] = None
 ) -> Dict:
-    path = input_item[DataCatalog.path.name]
-    data_type = input_item[DataCatalog.data_type.name]
+    path = input_item[DataSourceBlockMetadata.path.name]
+    data_source_definition = input_item[DataSourceBlockMetadata.data_source_definition.name]
     t = time.time()
     df = data_store_adapter.load_df(path)
     callback({'name': 'load_finished', 'time': time.time() - t})
@@ -39,16 +42,16 @@ def load_split_catalog_store_df(
     def split_callback(i, t):
         callback({'name': 'split_finished', 'time': t})
 
-    if data_type == 'l2_book':
+    if data_source_definition == CryptotickL2BookIncrementalData.__name__:
         processed_df = preprocess_l2_inc_df(df, date_str)
         gen = gen_split_l2_inc_df_and_pad_with_snapshot(processed_df, chunk_size_kb, split_callback)
-    elif data_type == 'trades':
+    elif data_source_definition == TradesData.__name__:
         processed_df = preprocess_trades_df(df)
         gen = gen_split_df_by_mem(processed_df, chunk_size_kb, split_callback)
     # elif data_type == 'quotes':
     #     processed_df = preprocess_l2_inc_df(df, date_str)
     else:
-        raise ValueError(f'Unknown data_type: {data_type}')
+        raise ValueError(f'Unknown data_source_definition: {data_source_definition}')
 
     callback({'name': 'preproc_finished', 'time': time.time() - t})
     catalog_items = []
@@ -64,17 +67,16 @@ def load_split_catalog_store_df(
 
         # additional info to be passed to catalog item
         compaction = f'{chunk_size_kb}kb' if chunk_size_kb < 1024 else f'{round(chunk_size_kb / 1024, 2)}mb'
-        item_split[DataCatalog.compaction.name] = compaction
-        item_split[DataCatalog.source.name] = 'cryptotick'
-        item_split[DataCatalog.extras.name] = {
-            'source_path': item_split[DataCatalog.path.name],
+        item_split[DataSourceBlockMetadata.compaction.name] = compaction
+        item_split[DataSourceBlockMetadata.extras.name] = {
+            'source_path': item_split[DataSourceBlockMetadata.path.name],
             'split_id': split_id,
         }
 
         # remove raw source path so it is constructed by SqlAlchemy default value when making catalog item
-        del item_split[DataCatalog.path.name]
+        del item_split[DataSourceBlockMetadata.path.name]
 
-        catalog_item = make_catalog_item(split, item_split, data_store_adapter)
+        catalog_item = make_data_source_block_metadata(split, item_split, data_store_adapter)
         store_futures.append(
             executor.submit(functools.partial(store_df, df=split, path=catalog_item.path, data_store_adapter=data_store_adapter, callback=callback))
         )
@@ -119,12 +121,12 @@ def mock_split(callback, wait=1):
     return {}
 
 
-def make_catalog_item(df: pd.DataFrame, input_item: InputItem, data_store_adapter: DataStoreAdapter) -> DataCatalog:
-    source = input_item[DataCatalog.source.name]
+def make_data_source_block_metadata(df: pd.DataFrame, input_item: InputItem, data_store_adapter: DataStoreAdapter) -> DataSourceBlockMetadata:
+    source = input_item[DataSourceBlockMetadata.source.name]
     if source not in ['cryptofeed', 'cryptotick']:
         raise ValueError(f'Unknown source: {source}')
 
-    catalog_item_params = input_item.copy()
+    block_metadata_params = input_item.copy()
     _time_range = df_utils.time_range(df)
 
     date_str = datetime.fromtimestamp(_time_range[1], tz=pytz.utc).strftime('%Y-%m-%d')
@@ -133,33 +135,29 @@ def make_catalog_item(df: pd.DataFrame, input_item: InputItem, data_store_adapte
     if date_str != date_str_end:
         raise ValueError(f'start_ts and end_ts belong to different dates: {date_str}, {date_str_end}')
 
-    catalog_item_params.update({
-        DataCatalog.start_ts.name: _time_range[1],
-        DataCatalog.end_ts.name: _time_range[2],
-        DataCatalog.size_in_memory_kb.name: df_utils.get_size_kb(df),
-        DataCatalog.num_rows.name: df_utils.get_num_rows(df),
-        DataCatalog.date.name: date_str,
+    block_metadata_params.update({
+        DataSourceBlockMetadata.owner_id.name: '0', # default owner
+        DataSourceBlockMetadata.start_ts.name: _time_range[1],
+        DataSourceBlockMetadata.end_ts.name: _time_range[2],
+        DataSourceBlockMetadata.size_in_memory_kb.name: df_utils.get_size_kb(df),
+        DataSourceBlockMetadata.num_rows.name: df_utils.get_num_rows(df),
+        DataSourceBlockMetadata.day.name: date_str,
     })
 
     # TODO l2_book -> l2_inc
-    if catalog_item_params[DataCatalog.data_type.name] == 'l2_book':
-        if source == 'cryptofeed':
-            snapshot_ts = get_snapshot_ts(df)
-        else:
-            snapshot_ts = get_snapshot_ts(df)
+    if block_metadata_params[DataSourceBlockMetadata.data_source_definition.name] == CryptotickL2BookIncrementalData.__name__:
+        snapshot_ts = get_snapshot_ts(df)
         if snapshot_ts is not None:
             meta = {
                 'snapshot_ts': snapshot_ts
             }
-            catalog_item_params[DataCatalog.meta.name] = meta
+            block_metadata_params[DataSourceBlockMetadata.meta.name] = meta
 
     df_hash = df_utils.hash_df(df)
-    catalog_item_params[DataCatalog.hash.name] = df_hash
+    block_metadata_params[DataSourceBlockMetadata.hash.name] = df_hash
 
-    res = DataCatalog(**catalog_item_params)
+    res = DataSourceBlockMetadata(**block_metadata_params)
     if res.path is None:
-        if source != 'cryptotick':
-            raise ValueError(f'Empty path only allowed for cryptotick')
-        res.path = data_store_adapter.make_data_catalog_block_path(res)
+        res.path = data_store_adapter.make_data_source_block_path(res)
 
     return res

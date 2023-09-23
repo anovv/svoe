@@ -1,7 +1,7 @@
 import pandas as pd
 
-from featurizer.sql.data_catalog.models import DataCatalog
-from featurizer.sql.feature_catalog.models import FeatureCatalog
+from featurizer.sql.models.data_source_block_metadata import DataSourceBlockMetadata
+from featurizer.sql.models.feature_block_metadata import FeatureBlockMetadata
 
 
 class DataStoreAdapter:
@@ -12,9 +12,9 @@ class DataStoreAdapter:
     def store_df(self, path: str, df: pd.DataFrame, **kwargs):
         raise NotImplementedError
 
-    def make_feature_catalog_block_path(self, item: FeatureCatalog) -> str:
+    def make_feature_block_path(self, item: FeatureBlockMetadata) -> str:
         raise NotImplementedError
 
-    def make_data_catalog_block_path(self, item: DataCatalog) -> str:
+    def make_data_source_block_path(self, item: DataSourceBlockMetadata) -> str:
         raise NotImplementedError
 

@@ -33,12 +33,11 @@ class Featurizer:
         for feature_config in config.feature_configs:
             features.append(construct_feature_tree(
                 feature_config.feature_definition,
-                feature_config.data_params,
-                feature_config.feature_params
+                feature_config.params
             ))
 
         storage = FeaturizerStorage()
-        data_ranges_meta = storage.get_data_meta(features, start_date=config.start_date, end_date=config.end_date)
+        data_ranges_meta = storage.get_data_sources_meta(features, start_date=config.start_date, end_date=config.end_date)
         stored_features_meta = storage.get_features_meta(features, start_date=config.start_date, end_date=config.end_date)
 
         label_feature = None

@@ -1,11 +1,12 @@
 from typing import Optional, Dict, List
 from common.db.sql_client import SqlClient, Session
-from featurizer.sql.data_catalog.models import DataCatalog
-from featurizer.sql.feature_catalog.models import FeatureCatalog
 from featurizer.data_catalog.common.data_models.models import InputItemBatch
 
 
 from featurizer.sql.feature_def.models import FeatureDefinitionDB
+from featurizer.sql.models.data_source_block_metadata import DataSourceBlockMetadata
+from featurizer.sql.models.feature_block_metadata import FeatureBlockMetadata
+from featurizer.sql.models.feature_metadata import FeatureMetadata
 
 
 class FeaturizerSqlClient(SqlClient):
@@ -13,7 +14,7 @@ class FeaturizerSqlClient(SqlClient):
         super(FeaturizerSqlClient, self).__init__()
 
     # TODO separate api methods and pipeline methods
-    def write_catalog_item_batch(self, batch: List[DataCatalog | FeatureCatalog]):
+    def write_block_metadata_batch(self, batch: List[DataSourceBlockMetadata | FeatureBlockMetadata]):
         # check for existing hashes
         # hashes = [i.hash for i in batch]
         session = Session()
@@ -37,35 +38,20 @@ class FeaturizerSqlClient(SqlClient):
         print(f'Written {len(batch)} index items to Db')
         return # TODO return result?
 
-
-    def filter_cryptofeed_batch(self, batch: InputItemBatch) -> InputItemBatch:
-        # use path as a unique id per block
-        items = batch[1]
-        meta = batch[0]
-        paths = [item[DataCatalog.path.name] for item in items]
-        query_in = DataCatalog.path.in_(paths)
-        session = Session()
-        select_in_db = session.query(DataCatalog.path).filter(query_in)
-        res = [r[0] for r in select_in_db.all()]
-        non_exist = list(filter(lambda item: item[DataCatalog.path.name] not in res, items))
-        print(f'Checked db for items: {len(non_exist)} not in DB')
-        return meta, non_exist
-
-
     def filter_cryptotick_batch(self, batch: InputItemBatch) -> InputItemBatch:
         items = batch[1]
         meta = batch[0]
-        paths = [item[DataCatalog.path.name] for item in items]
+        paths = [item[DataSourceBlockMetadata.path.name] for item in items]
         session = Session()
-        query_in = DataCatalog.extras['source_path'].in_(paths)
-        select_in_db = session.query(DataCatalog).filter(query_in)
+        query_in = DataSourceBlockMetadata.extras['source_path'].in_(paths)
+        select_in_db = session.query(DataSourceBlockMetadata).filter(query_in)
         rows = select_in_db.all()
         if len(rows) == 0:
             return batch
         non_exist = []
         for item in items:
             # check if for given item num_splits == num returned rows
-            rows_for_item = list(filter(lambda row: row.extras['source_path'] == item[DataCatalog.path.name], rows))
+            rows_for_item = list(filter(lambda row: row.extras['source_path'] == item[DataSourceBlockMetadata.path.name], rows))
             if len(rows_for_item) == 0:
                 non_exist.append(item)
                 continue
@@ -78,16 +64,10 @@ class FeaturizerSqlClient(SqlClient):
         return meta, non_exist
 
     # api methods
-    def select_data_catalog(
+    def select_data_source_metadata(
         self,
-        exchanges: List[str],
-        data_types: List[str],
-        instrument_types: List[str],
-        symbols: List[str],
-        instrument_extra: Optional[str] = None,
+        keys: List[str],
         compaction: Optional[str] = None,
-        source: Optional[str] = None,
-        version: Optional[str] = None,
         extras: Optional[str] = None,
         start_day: Optional[str] = None,
         end_day: Optional[str] = None
@@ -95,58 +75,52 @@ class FeaturizerSqlClient(SqlClient):
         # TODO instrument_extra
         args = {}
         if compaction is not None:
-            args[DataCatalog.compaction.name] = compaction
-        if source is not None:
-            args[DataCatalog.symbol.name] = source
-        if version is not None:
-            args[DataCatalog.version.name] = version
+            args[DataSourceBlockMetadata.compaction.name] = compaction
         if extras is not None:
-            args[DataCatalog.extras.name] = extras
+            args[DataSourceBlockMetadata.extras.name] = extras
 
         session = Session()
-        q = session.query(DataCatalog).filter(DataCatalog.exchange.in_(exchanges))\
-            .filter(DataCatalog.data_type.in_(data_types))\
-            .filter(DataCatalog.instrument_type.in_(instrument_types))\
-            .filter(DataCatalog.symbol.in_(symbols))\
-            .filter_by(**args)
+        q = session.query(DataSourceBlockMetadata).filter(DataSourceBlockMetadata.key.in_(keys)).filter_by(**args)
         if start_day is not None:
-            q = q.filter(DataCatalog.date >= start_day)
+            q = q.filter(DataSourceBlockMetadata.day >= start_day)
         if end_day is not None:
-            q = q.filter(DataCatalog.date <= end_day)
-        res = q.order_by(DataCatalog.start_ts).all()
+            q = q.filter(DataSourceBlockMetadata.day <= end_day)
+        res = q.order_by(DataSourceBlockMetadata.start_ts).all()
         # TODO this adds unnecessary sqlalchemy fields, remove to reduce memory footprint
         return [r.__dict__ for r in res]
 
-    def in_feature_catalog(self, item: FeatureCatalog) -> bool:
+    def feature_block_exists(self, item: FeatureBlockMetadata) -> bool:
         session = Session()
-        q = session.query(FeatureCatalog).filter(FeatureCatalog.hash == item.hash)
+        q = session.query(FeatureBlockMetadata).filter(FeatureBlockMetadata.hash == item.hash)
         res = session.query(q.exists()).all()
         if len(res) == 0:
             return False
         return res[0][0]
 
-    def select_feature_catalog(
+    def select_feature_blocks_metadata(
         self,
         feature_keys: List[str],
         start_day: Optional[str] = None,
         end_day: Optional[str] = None
     ) -> List[Dict]:
         session = Session()
-        f = session.query(FeatureCatalog).filter(FeatureCatalog.feature_key.in_(feature_keys))
+        f = session.query(FeatureBlockMetadata).filter(FeatureBlockMetadata.key.in_(feature_keys))
         if start_day is not None:
-            f = f.filter(FeatureCatalog.date >= start_day)
+            f = f.filter(FeatureBlockMetadata.day >= start_day)
         if end_day is not None:
-            f = f.filter(FeatureCatalog.date <= end_day)
-        res = f.order_by(FeatureCatalog.start_ts).all()
+            f = f.filter(FeatureBlockMetadata.day <= end_day)
+        res = f.order_by(FeatureBlockMetadata.start_ts).all()
         # TODO this adds unnecessary sqlalchemy fields, remove to reduce memory footprint
         return [r.__dict__ for r in res]
 
-    def delete_feature_catalog(
+
+    def delete_feature_metadata(
         self,
         feature_keys: List[str]
     ):
         session = Session()
-        session.query(FeatureCatalog).filter(FeatureCatalog.feature_key.in_(feature_keys)).delete()
+        session.query(FeatureMetadata).filter(FeatureMetadata.key.in_(feature_keys)).delete()
+        session.query(FeatureBlockMetadata).filter(FeatureBlockMetadata.key.in_(feature_keys)).delete()
         session.commit()
 
     def write_feature_def(

@@ -3,9 +3,11 @@ from typing import Dict, List
 import ray
 
 from featurizer.data_catalog.common.data_models.models import InputItemBatch
+from featurizer.data_definitions.common.l2_book_incremental.cryptotick.cryptotick_l2_book_incremental import \
+    CryptotickL2BookIncrementalData
 from featurizer.sql.client import FeaturizerSqlClient
-from featurizer.sql.data_catalog.models import DataCatalog
-from featurizer.sql.feature_catalog.models import FeatureCatalog
+from featurizer.sql.models.data_source_block_metadata import DataSourceBlockMetadata
+from featurizer.sql.models.feature_block_metadata import FeatureBlockMetadata
 
 DB_ACTOR_NAME = 'DbActor'
 DB_ACTOR_NAMESPACE = 'db'
@@ -20,22 +22,20 @@ class DbActor:
         items = input_batch[1]
         if len(items) == 0:
             return input_batch
-        source = items[0]['source']
-        if source == 'cryptofeed':
-            return self.client.filter_cryptofeed_batch(input_batch)
-        elif source == 'cryptotick':
+        data_source_definition = items[0]['data_source_definition']
+        if data_source_definition == CryptotickL2BookIncrementalData.__name__:
             return self.client.filter_cryptotick_batch(input_batch)
         else:
-            raise ValueError(f'Unsupported source:{ source}')
+            raise ValueError(f'Unsupported data_source_definition: {data_source_definition}')
 
-    async def write_batch(self, batch: List[DataCatalog | FeatureCatalog]) -> Dict:
+    async def write_batch(self, batch: List[DataSourceBlockMetadata | FeatureBlockMetadata]) -> Dict:
         # TODO check if exists
-        self.client.write_catalog_item_batch(batch)
+        self.client.write_block_metadata_batch(batch)
         # TODO return status to pass to stats actor
         return {}
 
-    async def in_feature_catalog(self, item: FeatureCatalog) -> bool:
-        return self.client.in_feature_catalog(item)
+    async def feature_block_exists(self, item: FeatureBlockMetadata) -> bool:
+        return self.client.feature_block_exists(item)
 
 
 def get_db_actor() -> ray.actor.ActorHandle:
