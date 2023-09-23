@@ -11,6 +11,7 @@ from featurizer.sql.db_actor import DbActor
 from featurizer.data_catalog.common.data_models.models import InputItemBatch
 from featurizer.data_catalog.pipelines.catalog_cryptotick.tasks import load_split_catalog_store_df
 from featurizer.sql.models.data_source_block_metadata import DataSourceBlockMetadata
+from featurizer.sql.models.data_source_metadata import DataSourceMetadata
 from featurizer.storage.data_store_adapter.data_store_adapter import DataStoreAdapter
 from featurizer.storage.data_store_adapter.remote_data_store_adapter import RemoteDataStoreAdapter
 
@@ -131,9 +132,21 @@ class CatalogCryptotickPipeline:
             if self.input_queue.qsize() == 0:
                 await asyncio.sleep(0.1)
                 continue
-            input_batch = await self.input_queue.get()
 
-            _, filtered_items = await self.db_actor.filter_batch.remote(input_batch)
+            # TODO store DataSourceMetadata entry
+
+            input_batch = await self.input_queue.get()
+            _, filtered_items = await self.db_actor.filter_input_batch.remote(input_batch)
+
+            if len(filtered_items) > 0:
+                data_source_metadata = DataSourceMetadata(
+                    owner_id='0',
+                    key=filtered_items[0]['key'],
+                    data_source_definition=filtered_items[0]['data_source_definition'],
+                    params=filtered_items[0]['params'],
+                    extras={}
+                )
+                await self.db_actor.store_metadata.remote([data_source_metadata])
 
             # mark files in db as ready for reporting
             for _ in range(len(input_batch[1]) - len(filtered_items)):
@@ -160,7 +173,7 @@ class CatalogCryptotickPipeline:
 
                 self.results_refs.append(
                     load_split_catalog_store_df.remote(
-                        item, self.split_chunk_size_kb, item['date'], self.db_actor, functools.partial(callback, task_id=task_id)
+                        item, self.split_chunk_size_kb, item['day'], self.db_actor, functools.partial(callback, task_id=task_id)
                     )
                 )
                 # wait = 1 if task_id%2 == 0 else 2

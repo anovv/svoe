@@ -17,3 +17,9 @@ class DataSourceMetadata(Base):
     params = Column(JSON)
     extras = Column(JSON)
     version = Column(String(256), primary_key=True, default=DEFAULT_VERSION)
+
+    def __init__(self, **kwargs):
+        # set default values for model instance
+        super().__init__(**kwargs)
+        if self.version is None:
+            setattr(self, DataSourceMetadata.version.name, DEFAULT_VERSION)

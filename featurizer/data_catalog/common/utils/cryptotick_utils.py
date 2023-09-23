@@ -1,3 +1,4 @@
+import dataclasses
 from typing import List, Tuple
 
 from featurizer.data_catalog.common.data_models.models import InputItemBatch, InputItem
@@ -6,6 +7,7 @@ from featurizer.data_definitions.common.l2_book_incremental.cryptotick.cryptotic
 from featurizer.data_definitions.common.trades.trades import TradesData
 from featurizer.features.feature_tree.feature_tree import Feature
 from featurizer.sql.models.data_source_block_metadata import DataSourceBlockMetadata
+from featurizer.sql.models.data_source_metadata import DataSourceMetadata
 from simulation.models.instrument import Instrument
 
 CRYPTOTICK_RAW_BUCKET_NAME = 'svoe-cryptotick-data'
@@ -43,7 +45,8 @@ def _parse_s3_key(path: str, size_kb) -> InputItem:
             DataSourceBlockMetadata.day.name: '01-02-2023',
             DataSourceBlockMetadata.size_kb.name: size_kb,
             DataSourceBlockMetadata.key.name: data_source.key,
-            DataSourceBlockMetadata.data_source_definition.name: data_source.data_definition.__name__
+            DataSourceBlockMetadata.data_source_definition.name: data_source.data_definition.__name__,
+            DataSourceMetadata.params.name: data_source_params
         }
 
         return input_item
@@ -76,14 +79,15 @@ def _parse_s3_key(path: str, size_kb) -> InputItem:
     path = f's3://{CRYPTOTICK_RAW_BUCKET_NAME}/' + path
 
     instrument = Instrument(exchange, instrument_type, symbol)
-    data_source_params = instrument.asdict()
+    data_source_params = dataclasses.asdict(instrument)
     data_source = Feature([], CryptotickL2BookIncrementalData, data_source_params)
     input_item = {
         DataSourceBlockMetadata.path.name: path,
         DataSourceBlockMetadata.day.name: day,
         DataSourceBlockMetadata.size_kb.name: size_kb,
         DataSourceBlockMetadata.key.name: data_source.key,
-        DataSourceBlockMetadata.data_source_definition.name: data_source.data_definition.__name__
+        DataSourceBlockMetadata.data_source_definition.name: data_source.data_definition.__name__,
+        DataSourceMetadata.params.name: data_source_params
     }
 
     return input_item

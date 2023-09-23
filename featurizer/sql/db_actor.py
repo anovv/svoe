@@ -18,7 +18,7 @@ class DbActor:
     def __init__(self):
         self.client = FeaturizerSqlClient()
 
-    async def filter_batch(self, input_batch: InputItemBatch) -> InputItemBatch:
+    async def filter_input_batch(self, input_batch: InputItemBatch) -> InputItemBatch:
         items = input_batch[1]
         if len(items) == 0:
             return input_batch
@@ -28,11 +28,14 @@ class DbActor:
         else:
             raise ValueError(f'Unsupported data_source_definition: {data_source_definition}')
 
-    async def write_batch(self, batch: List[DataSourceBlockMetadata | FeatureBlockMetadata]) -> Dict:
+    async def store_block_metadata_batch(self, batch: List[DataSourceBlockMetadata | FeatureBlockMetadata]) -> Dict:
         # TODO check if exists
-        self.client.write_block_metadata_batch(batch)
+        self.client.store_block_metadata_batch(batch)
         # TODO return status to pass to stats actor
         return {}
+
+    async def store_metadata(self, items: List[DataSourceBlockMetadata | FeatureBlockMetadata]) -> int:
+        return self.client.store_metadata_if_needed(items)
 
     async def feature_block_exists(self, item: FeatureBlockMetadata) -> bool:
         return self.client.feature_block_exists(item)

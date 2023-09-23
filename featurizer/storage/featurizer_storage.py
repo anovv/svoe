@@ -16,6 +16,7 @@ from featurizer.sql.feature_def.models import construct_feature_def_s3_path, Fea
 from common.s3.s3_utils import delete_files, upload_dir, download_dir
 from featurizer.sql.models.data_source_block_metadata import DataSourceBlockMetadata
 from featurizer.sql.models.feature_block_metadata import FeatureBlockMetadata
+from featurizer.sql.models.feature_metadata import FeatureMetadata
 from featurizer.storage.data_store_adapter.remote_data_store_adapter import SVOE_S3_FEATURE_CATALOG_BUCKET
 
 
@@ -40,10 +41,10 @@ class FeaturizerStorage:
                     data_deps.add(d)
 
         data_keys = [d.key for d in data_deps]
-        ranges_meta_per_data_key = self._get_data_meta(data_keys, start_date=start_date, end_date=end_date)
+        ranges_meta_per_data_key = self._get_data_sources_meta(data_keys, start_date=start_date, end_date=end_date)
         if (len(ranges_meta_per_data_key)) == 0:
             raise ValueError('No data for given time range')
-        res = {data: ranges_meta_per_data_key[data_key(data.params)] for data in data_deps}
+        res = {data: ranges_meta_per_data_key[data.key] for data in data_deps}
 
         # add synthetic ranges
         # TODO if start_date or end_date were passed as None we need to derive them from what was returned from database
@@ -87,6 +88,15 @@ class FeaturizerStorage:
             ranges = make_ranges(groups[k])
             grouped_ranges[k] = ranges
         return grouped_ranges
+
+    def store_features_metadata_if_needed(self, features: List[Feature]):
+        features_metadata_items = [FeatureMetadata(
+            owner_id='0',  # TODO
+            key=feature.key,
+            feature_definition=feature.data_definition.__name__,
+            feature_name=feature.name,
+        ) for feature in features]
+        self.client.store_metadata_if_needed(features_metadata_items)
 
     def get_features_meta(
         self,

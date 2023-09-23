@@ -175,3 +175,8 @@ def load_df_s3(path: str, use_cache: bool = True, cache_dir: str = CACHE_DIR) ->
     if use_cache:
         cache_df_if_needed(df, cache_key, cache_dir=cache_dir)
     return df
+
+
+def load_dfs_s3(paths: List[str], use_cache: bool = True, cache_dir: str = CACHE_DIR) -> List[pd.DataFrame]:
+    callables = [functools.partial(load_df_s3, path=path, use_cache=use_cache, cache_dir=cache_dir) for path in paths]
+    return cu.run_concurrently(callables)

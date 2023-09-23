@@ -52,7 +52,7 @@ def gen_split_l2_inc_df_and_pad_with_snapshot(processed_df: pd.DataFrame, split_
             print(f'split {i} finished: {t}s')
         callback = p
 
-    gen = gen_split_df_by_mem(processed_df, split_size_kb)
+    gen = gen_split_df_by_mem(processed_df, split_size_kb, callback)
     prev_snap = None
     i = 0
     for split in gen:

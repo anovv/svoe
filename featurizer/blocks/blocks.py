@@ -2,10 +2,11 @@ from typing import Dict, List, Any, Tuple
 import pandas as pd
 from portion import Interval, closed, IntervalDict
 
-from featurizer.sql.data_catalog.models import DataCatalog
 from common.pandas.df_utils import is_ts_sorted, sub_df_ts
 from common.time.utils import convert_str_to_seconds
+from featurizer.sql.models.data_source_block_metadata import DataSourceBlockMetadata
 
+# TODO deprecate this, use FeatureBlockMetadata and DataSourceBlockMetadata objects
 BlockMeta = Dict # represents block metadata: name, time range, size, etc.
 BlockRangeMeta = List[BlockMeta] # represents metadata of consecutive blocks
 
@@ -16,16 +17,16 @@ BlockRange = List[Block] # represents consecutive blocks
 
 
 def meta_to_interval(meta: BlockMeta) -> Interval:
-    start = float(meta[DataCatalog.start_ts.name])
-    end = float(meta[DataCatalog.end_ts.name])
+    start = float(meta[DataSourceBlockMetadata.start_ts.name])
+    end = float(meta[DataSourceBlockMetadata.end_ts.name])
     if start > end:
         raise ValueError('start_ts cannot be greater than end_ts')
     return closed(start, end)
 
 
 def range_meta_to_interval(range_meta: BlockRangeMeta) -> Interval:
-    start = float(range_meta[0][DataCatalog.start_ts.name])
-    end = float(range_meta[-1][DataCatalog.end_ts.name])
+    start = float(range_meta[0][DataSourceBlockMetadata.start_ts.name])
+    end = float(range_meta[-1][DataSourceBlockMetadata.end_ts.name])
     if start > end:
         raise ValueError('start_ts cannot be greater than end_ts')
     return closed(start, end)
@@ -33,8 +34,8 @@ def range_meta_to_interval(range_meta: BlockRangeMeta) -> Interval:
 
 def interval_to_meta(interval: Interval) -> BlockMeta:
     return {
-        DataCatalog.start_ts.name: interval.lower,
-        DataCatalog.end_ts.name: interval.upper,
+        DataSourceBlockMetadata.start_ts.name: interval.lower,
+        DataSourceBlockMetadata.end_ts.name: interval.upper,
     }
 
 
@@ -60,8 +61,8 @@ def overlaps_keys(interval: Interval, d: IntervalDict) -> bool:
 
 def mock_meta(start_ts, end_ts, extra=None) -> BlockMeta:
     res = {
-        DataCatalog.start_ts.name: float(start_ts),
-        DataCatalog.end_ts.name: float(end_ts)
+        DataSourceBlockMetadata.start_ts.name: float(start_ts),
+        DataSourceBlockMetadata.end_ts.name: float(end_ts)
     }
 
     if extra:
@@ -79,7 +80,7 @@ def make_ranges(data: List[BlockMeta]) -> List[BlockRangeMeta]:
     cur_range = []
     for i in range(len(data)):
         cur_range.append(data[i])
-        if i < len(data) - 1 and float(data[i + 1][DataCatalog.start_ts.name]) - float(data[i][DataCatalog.end_ts.name]) > SAME_RANGE_DIFF_S:
+        if i < len(data) - 1 and float(data[i + 1][DataSourceBlockMetadata.start_ts.name]) - float(data[i][DataSourceBlockMetadata.end_ts.name]) > SAME_RANGE_DIFF_S:
             ranges.append(cur_range)
             cur_range = []
 

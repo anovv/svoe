@@ -46,7 +46,6 @@ def build_data_source_block_path(item: DataSourceBlockMetadata, prefix: str) -> 
         DataSourceBlockMetadata.data_source_definition.name,
         DataSourceBlockMetadata.key.name,
         DataSourceBlockMetadata.compaction.name,
-        DataSourceBlockMetadata.version.name,
         DataSourceBlockMetadata.day.name, # date should be last so we can identify all data by prefix in s3
     ]:
         v = item.__dict__[field]

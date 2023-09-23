@@ -3,18 +3,18 @@ end_date: '2023-02-02 23:59:59'
 #label_feature_index: 0
 #label_lookahead: '5100ms'
 #features_to_store: [0, 1, 2]
-features_to_store: [0]
+features_to_store: [0, 1]
 feature_configs:
   - feature_definition: price.mid_price_fd
-    data_params: &id001
-      - exchange: BINANCE
-        data_type: l2_book
-        instrument_type: spot
-        symbol: BTC-USDT
-    feature_params:
-      1:
-        dep_schema: cryptotick
-        sampling: 1s
+    params:
+      data_source: &id001
+        - exchange: BINANCE
+          instrument_type: spot
+          symbol: BTC-USDT
+      feature:
+        1:
+          dep_schema: cryptotick
+          sampling: 1s
 #  - feature_definition: volatility.volatility_stddev_fd
 #    data_params: *id001
 #    feature_params:
@@ -23,12 +23,12 @@ feature_configs:
 #        sampling: 1s
   - feature_definition: l2_book.l2_snapshot_fd
 #    data_params: *id001
-    data_params:
-      - exchange: BINANCE
-        data_type: l2_book
-        instrument_type: spot
-        symbol: BTC-USDT
-    feature_params:
-      0:
-        dep_schema: cryptotick
-        sampling: 1s
+    params:
+      data_source:
+        - exchange: BINANCE
+          instrument_type: spot
+          symbol: BTC-USDT
+      feature:
+        0:
+          dep_schema: cryptotick
+          sampling: 1s

@@ -10,10 +10,11 @@ from featurizer.featurizer_utils.definitions_loader import DefinitionsLoader
 
 
 class Feature(NodeMixin):
-    def __init__(self, children: List['Feature'], data_definition: Type[DataDefinition], params: Dict):
+    def __init__(self, children: List['Feature'], data_definition: Type[DataDefinition], params: Dict, name: Optional[str] = None):
         self.children = children
         self.data_definition = data_definition
         self.params = params
+        self.name = name
         self._is_label = False
 
         # TODO is it ok to call these at init time? Are all the children ready?
@@ -28,6 +29,8 @@ class Feature(NodeMixin):
         return self.key == other.key
 
     def __repr__(self):
+        if self.name is not None:
+            return self.name
         short_key = self.key[:8]
         if self._is_label:
             return f'label-{self.data_definition.__name__}-{short_key}'

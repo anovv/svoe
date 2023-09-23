@@ -37,6 +37,8 @@ class Featurizer:
             ))
 
         storage = FeaturizerStorage()
+        storage.store_features_metadata_if_needed(features)
+
         data_ranges_meta = storage.get_data_sources_meta(features, start_date=config.start_date, end_date=config.end_date)
         stored_features_meta = storage.get_features_meta(features, start_date=config.start_date, end_date=config.end_date)
 

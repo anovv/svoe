@@ -19,23 +19,27 @@ from featurizer.data_definitions.common.l2_book_incremental.cryptotick.utils imp
     gen_split_l2_inc_df_and_pad_with_snapshot, get_snapshot_ts
 from common.pandas import df_utils
 from common.pandas.df_utils import gen_split_df_by_mem
+from featurizer.sql.models.data_source_metadata import DataSourceMetadata
 from featurizer.storage.data_store_adapter.data_store_adapter import DataStoreAdapter
+from featurizer.storage.data_store_adapter.local_data_store_adapter import LocalDataStoreAdapter
+from featurizer.storage.data_store_adapter.remote_data_store_adapter import RemoteDataStoreAdapter
 
 
 # TODO set cpu separately when running on aws kuber cluster
-@ray.remote(num_cpus=2, resources={'worker_size_large': 1, 'instance_spot': 1})
+# @ray.remote(num_cpus=2, resources={'worker_size_large': 1, 'instance_spot': 1})
+@ray.remote
 def load_split_catalog_store_df(
     input_item: InputItem,
     chunk_size_kb: int,
     date_str: str, # TODO date -> day
     db_actor: DbActor,
-    data_store_adapter: DataStoreAdapter,
     callback: Optional[Callable] = None
 ) -> Dict:
     path = input_item[DataSourceBlockMetadata.path.name]
     data_source_definition = input_item[DataSourceBlockMetadata.data_source_definition.name]
     t = time.time()
-    df = data_store_adapter.load_df(path)
+    remote_data_store_adapter = RemoteDataStoreAdapter()
+    df = remote_data_store_adapter.load_df(path)
     callback({'name': 'load_finished', 'time': time.time() - t})
     t = time.time()
 
@@ -48,13 +52,11 @@ def load_split_catalog_store_df(
     elif data_source_definition == TradesData.__name__:
         processed_df = preprocess_trades_df(df)
         gen = gen_split_df_by_mem(processed_df, chunk_size_kb, split_callback)
-    # elif data_type == 'quotes':
-    #     processed_df = preprocess_l2_inc_df(df, date_str)
     else:
         raise ValueError(f'Unknown data_source_definition: {data_source_definition}')
 
     callback({'name': 'preproc_finished', 'time': time.time() - t})
-    catalog_items = []
+    metadata_items = []
     split_id = 0
     num_splits = 0
 
@@ -62,6 +64,7 @@ def load_split_catalog_store_df(
     executor = concurrent.futures.ThreadPoolExecutor(max_workers=STORE_PARALLELISM)
     store_futures = []
 
+    local_data_store_adapter = LocalDataStoreAdapter()
     for split in gen:
         item_split = input_item.copy()
 
@@ -76,21 +79,21 @@ def load_split_catalog_store_df(
         # remove raw source path so it is constructed by SqlAlchemy default value when making catalog item
         del item_split[DataSourceBlockMetadata.path.name]
 
-        catalog_item = make_data_source_block_metadata(split, item_split, data_store_adapter)
+        data_source_block_metadata = make_data_source_block_metadata(split, item_split)
         store_futures.append(
-            executor.submit(functools.partial(store_df, df=split, path=catalog_item.path, data_store_adapter=data_store_adapter, callback=callback))
+            executor.submit(functools.partial(store_df, df=split, path=data_source_block_metadata.path, data_store_adapter=local_data_store_adapter, callback=callback))
         )
 
-        catalog_items.append(catalog_item)
+        metadata_items.append(data_source_block_metadata)
         split_id += 1
         num_splits += 1
 
-    for catalog_item in catalog_items:
-        catalog_item.extras['num_splits'] = num_splits
+    for metadata_item in metadata_items:
+        metadata_item.extras['num_splits'] = num_splits
 
     concurrent.futures.wait(store_futures)
     t = time.time()
-    res = ray.get(db_actor.write_batch.remote(catalog_items))
+    res = ray.get(db_actor.store_block_metadata_batch.remote(metadata_items))
     callback({'name': 'write_finished', 'time': time.time() - t})
     return res
 
@@ -121,12 +124,14 @@ def mock_split(callback, wait=1):
     return {}
 
 
-def make_data_source_block_metadata(df: pd.DataFrame, input_item: InputItem, data_store_adapter: DataStoreAdapter) -> DataSourceBlockMetadata:
-    source = input_item[DataSourceBlockMetadata.source.name]
-    if source not in ['cryptofeed', 'cryptotick']:
-        raise ValueError(f'Unknown source: {source}')
-
+def make_data_source_block_metadata(df: pd.DataFrame, input_item: InputItem) -> DataSourceBlockMetadata:
     block_metadata_params = input_item.copy()
+
+    # TODO this is a hack since we pass DataSourceMetadata.params as part of the input item
+    # ideally we should pass it seprately
+    if DataSourceMetadata.params.name in block_metadata_params:
+        del block_metadata_params[DataSourceMetadata.params.name]
+
     _time_range = df_utils.time_range(df)
 
     date_str = datetime.fromtimestamp(_time_range[1], tz=pytz.utc).strftime('%Y-%m-%d')
@@ -157,7 +162,8 @@ def make_data_source_block_metadata(df: pd.DataFrame, input_item: InputItem, dat
     block_metadata_params[DataSourceBlockMetadata.hash.name] = df_hash
 
     res = DataSourceBlockMetadata(**block_metadata_params)
+    local_data_store_adapter = LocalDataStoreAdapter()
     if res.path is None:
-        res.path = data_store_adapter.make_data_source_block_path(res)
+        res.path = local_data_store_adapter.make_data_source_block_path(res)
 
     return res

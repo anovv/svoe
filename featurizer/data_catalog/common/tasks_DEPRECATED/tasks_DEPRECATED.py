@@ -49,7 +49,7 @@ def catalog_df(df: pd.DataFrame, input_item: InputItem, stats: 'Stats', task_id:
 @ray.remote
 @report_stats_decor([EventType.FINISHED])
 def write_batch(db_actor: DbActor, batch: List[DataCatalog], stats: 'Stats', task_id: str) -> Dict:
-    return ray.get(db_actor.write_batch.remote(batch))
+    return ray.get(db_actor.store_block_metadata_batch.remote(batch))
 
 
 # TODO we can add actor method ad as DAG node directly https://docs.ray.io/en/latest/ray-core/ray-dag.html#ray-dag-guide
@@ -58,7 +58,7 @@ def write_batch(db_actor: DbActor, batch: List[DataCatalog], stats: 'Stats', tas
 @ray.remote
 @report_stats_decor([EventType.FINISHED])
 def filter_existing(db_actor: DbActor, input_batch: InputItemBatch, stats: 'Stats', task_id: str) -> InputItemBatch:
-    return ray.get(db_actor.filter_batch.remote(input_batch))
+    return ray.get(db_actor.filter_input_batch.remote(input_batch))
 
 
 # TODO set CPU=0, or add parallelism resource, set memory and object_store_memory

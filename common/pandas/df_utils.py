@@ -45,11 +45,6 @@ def delete_cached_df(cache_key: str, cache_dir: str = CACHE_DIR):
     cache.uncache(cache_key)
 
 
-# def load_dfs(paths: List[str], use_cache: bool = True, cache_dir: str = CACHE_DIR) -> List[pd.DataFrame]:
-#     callables = [functools.partial(load_df, path=path, use_cache=use_cache, cache_dir=cache_dir) for path in paths]
-#     return cu.run_concurrently(callables)
-
-
 def sub_df(df: pd.DataFrame, start: int, end: int) -> pd.DataFrame:
     # includes end
     return df[start: end + 1].reset_index(drop=True)
@@ -138,7 +133,8 @@ def gen_split_df_by_mem(df: pd.DataFrame, chunk_size_kb: int, callback: Optional
         while end < num_rows and df.iloc[end]['timestamp'] == end_ts:
             end += 1
         yield df.iloc[start: end]
-        callback(None, time.time() - t)
+        if callback is not None:
+            callback(None, time.time() - t)
         start = end
 
         # TODO return num splits?

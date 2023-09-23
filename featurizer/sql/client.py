@@ -5,6 +5,7 @@ from featurizer.data_catalog.common.data_models.models import InputItemBatch
 
 from featurizer.sql.feature_def.models import FeatureDefinitionDB
 from featurizer.sql.models.data_source_block_metadata import DataSourceBlockMetadata
+from featurizer.sql.models.data_source_metadata import DataSourceMetadata
 from featurizer.sql.models.feature_block_metadata import FeatureBlockMetadata
 from featurizer.sql.models.feature_metadata import FeatureMetadata
 
@@ -14,7 +15,7 @@ class FeaturizerSqlClient(SqlClient):
         super(FeaturizerSqlClient, self).__init__()
 
     # TODO separate api methods and pipeline methods
-    def write_block_metadata_batch(self, batch: List[DataSourceBlockMetadata | FeatureBlockMetadata]):
+    def store_block_metadata_batch(self, batch: List[DataSourceBlockMetadata | FeatureBlockMetadata]):
         # check for existing hashes
         # hashes = [i.hash for i in batch]
         session = Session()
@@ -112,6 +113,28 @@ class FeaturizerSqlClient(SqlClient):
         res = f.order_by(FeatureBlockMetadata.start_ts).all()
         # TODO this adds unnecessary sqlalchemy fields, remove to reduce memory footprint
         return [r.__dict__ for r in res]
+
+    def store_metadata_if_needed(self, items: List[DataSourceMetadata | FeatureMetadata]) -> int:
+        session = Session()
+        keys = [i.key for i in items]
+        if isinstance(items[0], DataSourceMetadata):
+            existing = session.query(DataSourceMetadata).filter(DataSourceMetadata.key.in_(keys)).all()
+        else:
+            existing = session.query(FeatureMetadata).filter(FeatureMetadata.key.in_(keys)).all()
+
+        existing_keys = [i.key for i in existing]
+        batch = [i for i in items if i.key not in existing_keys]
+        if len(batch) == 0:
+            return 0
+
+        # TODO try catch and handle
+        # 1) connection issues
+        # 2) duplicate entries
+        session.bulk_save_objects(batch)
+        session.commit()
+
+        # return number of stored items
+        return len(batch)
 
 
     def delete_feature_metadata(

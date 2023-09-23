@@ -17,11 +17,11 @@ from featurizer.data_definitions.data_source_definition import DataSourceDefinit
 from featurizer.data_definitions.synthetic_data_source_definition import SyntheticDataSourceDefinition
 from featurizer.features.feature_tree.feature_tree import Feature
 from featurizer.featurizer_utils.featurizer_utils import merge_blocks
-from featurizer.sql.db_actor import DbActor, get_db_actor
-from featurizer.sql.feature_catalog.models import FeatureCatalog
+from featurizer.sql.db_actor import get_db_actor
 from common.pandas import df_utils
 from common.streamz.stream_utils import run_named_events_stream
 from common.pandas.df_utils import is_ts_sorted, concat, sub_df_ts
+from featurizer.sql.models.feature_block_metadata import FeatureBlockMetadata
 from featurizer.storage.data_store_adapter.data_store_adapter import DataStoreAdapter
 
 
@@ -206,12 +206,12 @@ def calculate_feature(
         # TODO make a separate actor pool for S3 IO and batchify store operation
         t = time.time()
         db_actor = get_db_actor()
-        catalog_item = catalog_feature_block(feature, df, interval, data_store_adapter)
-        exists = ray.get(db_actor.in_feature_catalog.remote(catalog_item))
+        metadata_item = make_feature_block_metadata(feature, df, interval, data_store_adapter)
+        exists = ray.get(db_actor.feature_block_exists.remote(metadata_item))
         if not exists:
             # TODO this will block, we need to asyncify, using IO actor pool mentioned above?
-            data_store_adapter.store_df(catalog_item.path, df)
-            write_res = ray.get(db_actor.write_batch.remote([catalog_item]))
+            data_store_adapter.store_df(metadata_item.path, df)
+            write_res = ray.get(db_actor.store_block_metadata_batch.remote([metadata_item]))
             print(f'[{feature}] Store feature block finished {time.time() - t}s')
         else:
             print(f'[{feature}] Feature block already stored')
@@ -286,36 +286,35 @@ def lookahead_shift_blocks(block_refs: List[ObjectRef[Block]], interval: Interva
     return shifted
 
 
-def catalog_feature_block(feature: Feature, df: pd.DataFrame, interval: Interval, data_store_adapter: DataStoreAdapter) -> FeatureCatalog:
+def make_feature_block_metadata(feature: Feature, df: pd.DataFrame, interval: Interval, data_store_adapter: DataStoreAdapter) -> FeatureBlockMetadata:
     _time_range = df_utils.time_range(df)
 
-    # TODO day_str
-    date_str = datetime.fromtimestamp(_time_range[1], tz=pytz.utc).strftime('%Y-%m-%d')
+    day_str = datetime.fromtimestamp(_time_range[1], tz=pytz.utc).strftime('%Y-%m-%d')
     # check if end_ts is also same date:
-    date_str_end = datetime.fromtimestamp(_time_range[2], tz=pytz.utc).strftime('%Y-%m-%d')
-    if date_str != date_str_end:
-        raise ValueError(f'start_ts and end_ts belong to different dates: {date_str}, {date_str_end}')
+    day_str_end = datetime.fromtimestamp(_time_range[2], tz=pytz.utc).strftime('%Y-%m-%d')
+    if day_str != day_str_end:
+        raise ValueError(f'start_ts and end_ts belong to different dates: {day_str}, {day_str_end}')
 
-    catalog_item_params = {}
+    metadata_params = {}
 
     # TODO window, sampling, feature_params, data_params, tags
-    catalog_item_params.update({
-        FeatureCatalog.owner_id.name: '0',
-        FeatureCatalog.feature_def.name: feature.data_definition.__name__,
-        FeatureCatalog.key.name: feature.key,
+    metadata_params.update({
+        FeatureBlockMetadata.owner_id.name: '0', # TODO
+        FeatureBlockMetadata.feature_definition.name: feature.data_definition.__name__,
+        FeatureBlockMetadata.key.name: feature.key,
         # TODO pass interval directly instead of start, end? or keep both?
-        FeatureCatalog.start_ts.name: interval.lower,
-        FeatureCatalog.end_ts.name: interval.upper,
+        FeatureBlockMetadata.start_ts.name: interval.lower,
+        FeatureBlockMetadata.end_ts.name: interval.upper,
         # FeatureCatalog.start_ts.name: _time_range[1],
         # FeatureCatalog.end_ts.name: _time_range[2],
-        FeatureCatalog.size_in_memory_kb.name: df_utils.get_size_kb(df),
-        FeatureCatalog.num_rows.name: df_utils.get_num_rows(df),
-        FeatureCatalog.date.name: date_str,
+        FeatureBlockMetadata.size_in_memory_kb.name: df_utils.get_size_kb(df),
+        FeatureBlockMetadata.num_rows.name: df_utils.get_num_rows(df),
+        FeatureBlockMetadata.day.name: day_str,
     })
     df_hash = df_utils.hash_df(df)
-    catalog_item_params[FeatureCatalog.hash.name] = df_hash
+    metadata_params[FeatureBlockMetadata.hash.name] = df_hash
 
-    res = FeatureCatalog(**catalog_item_params)
+    res = FeatureBlockMetadata(**metadata_params)
     if res.path is None:
-        res.path = data_store_adapter.make_feature_catalog_block_path(res)
+        res.path = data_store_adapter.make_feature_block_path(res)
     return res

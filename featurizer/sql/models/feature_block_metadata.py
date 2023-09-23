@@ -44,8 +44,7 @@ def build_feature_block_path(item: FeatureBlockMetadata, prefix: str) -> str:
     for field in [
         FeatureBlockMetadata.owner_id.name,
         FeatureBlockMetadata.feature_definition.name,
-        FeatureBlockMetadata.feature_key.name,
-        FeatureBlockMetadata.version.name,
+        FeatureBlockMetadata.key.name,
         FeatureBlockMetadata.compaction.name,
         FeatureBlockMetadata.day.name, # date should be last so we can identify all data by prefix in s3
     ]:
