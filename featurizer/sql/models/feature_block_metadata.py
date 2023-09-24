@@ -6,7 +6,7 @@ DEFAULT_COMPACTION = 'raw'
 
 
 class FeatureBlockMetadata(Base):
-    __tablename__ = 'feature_block_metadata'
+    __tablename__ = 'feature_blocks_metadata'
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
