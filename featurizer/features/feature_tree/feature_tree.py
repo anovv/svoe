@@ -5,6 +5,7 @@ from typing import Dict, List, Callable, Union, Tuple, Type, Set, Optional
 from anytree import NodeMixin
 from copy import deepcopy
 
+from featurizer.config import FeatureConfig
 from featurizer.data_definitions.data_definition import DataDefinition
 from featurizer.featurizer_utils.definitions_loader import DefinitionsLoader
 
@@ -86,29 +87,89 @@ class Feature(NodeMixin):
         return c
 
 
-def construct_feature_tree(
+def construct_features_from_configs(feature_configs: List[FeatureConfig]) -> List[Feature]:
+    features = []
+    configs = feature_configs
+    while len(configs) != 0:
+        _config = None
+        for feature_config in configs:
+            if feature_config.deps is None:
+                # first construct derived features
+                features.append(construct_feature(
+                    feature_config.feature_definition,
+                    feature_config.params,
+                    features,
+                    feature_config.name
+                ))
+                _config = feature_config
+                break
+            else:
+                # generic feature, check if we have all the necessary dependant features built
+                has_all_deps = True
+                for key_or_name in feature_config.deps:
+                    dep_feature = get_feature_by_key_or_name(features, key_or_name)
+                    if dep_feature is None:
+                        has_all_deps = False
+                        break
+                if has_all_deps:
+                    features.append(construct_feature(
+                        feature_config.feature_definition,
+                        feature_config.params,
+                        features,
+                        feature_config.name,
+                        feature_config.deps
+                    ))
+                    _config = feature_config
+
+        # none of the features were built in this iteration - malformed config
+        if _config is not None:
+            configs.remove(_config)
+        else:
+            raise ValueError(
+                'Can not construct features for given config, make sure all features have proper dependencies')
+
+    return features
+
+
+def construct_feature(
     root_def_name: Union[str, Type[DataDefinition]],
     params: Dict,
-    existing_features: Dict[str, Feature] = {},
-) -> Feature:
-    data_source_params: Union[Dict, List] = params['data_source']
-    feature_params: Union[Dict, List] = params['feature']
-    return _construct_feature_tree(root_def_name, [0], [0], data_source_params, feature_params, existing_features)
-
-
-# traverse DataDefinition tree to construct parametrized FeatureTree
-def _construct_feature_tree(
-    root_def_name: Union[str, Type[DataDefinition]],
-    feature_position_ref: List[int],
-    data_source_position_ref: List[int],
-    data_source_params: Union[Dict, List],
-    feature_params: Union[Dict, List],
-    existing_features: Optional[Dict[str, Feature]] = None,
+    existing_features: List[Feature],
+    name: Optional[str] = None,
+    deps: Optional[List[str]] = None,
 ) -> Feature:
     if isinstance(root_def_name, str):
         root_def = DefinitionsLoader.load(root_def_name)
     else:
         root_def = root_def_name
+    if deps is not None:
+        # generic feature
+        dep_features = []
+        for dep_key_or_name in deps:
+            dep_feature = get_feature_by_key_or_name(existing_features, dep_key_or_name)
+            if dep_feature is None:
+                raise ValueError(f'Can not find feature for key_or_name: {dep_key_or_name}')
+        feature = Feature(dep_features, root_def, params, name)
+        if feature in existing_features:
+            index = existing_features.index(feature)
+            return existing_features[index]
+        return feature
+
+    data_source_params: Union[Dict, List] = params['data_source']
+    feature_params: Union[Dict, List] = params['feature']
+    return _construct_feature_tree(root_def, [0], [0], data_source_params, feature_params, existing_features, name)
+
+
+# traverse DataDefinition tree to construct parametrized FeatureTree
+def _construct_feature_tree(
+    root_def: Type[DataDefinition],
+    feature_position_ref: List[int],
+    data_source_position_ref: List[int],
+    data_source_params: Union[Dict, List],
+    feature_params: Union[Dict, List],
+    existing_features: List[Feature],
+    name: Optional[str]
+) -> Feature:
     # TODO deprecate is_data_source, use isinstance
     if root_def.is_data_source():
         position = data_source_position_ref[0]
@@ -116,15 +177,13 @@ def _construct_feature_tree(
         f = Feature(
             children=[],
             data_definition=root_def,
-            params=_parse_params(data_source_params, position)
+            params=_parse_params(data_source_params, position),
+            name=name
         )
-        if existing_features is None:
-            return f
-        if f.key in existing_features:
-            return existing_features[f.key]
-        else:
-            existing_features[f.key] = f
-            return f
+        if f in existing_features:
+            index = existing_features.index(f)
+            return existing_features[index]
+        return f
 
     position = feature_position_ref[0]
     params = _parse_params(feature_params, position)
@@ -135,21 +194,27 @@ def _construct_feature_tree(
     for dep_fd in deps:
         if not dep_fd.is_data_source():
             feature_position_ref[0] += 1
-        children.append(_construct_feature_tree(dep_fd, feature_position_ref, data_source_position_ref, data_source_params, feature_params))
+        children.append(_construct_feature_tree(dep_fd, feature_position_ref, data_source_position_ref, data_source_params, feature_params, existing_features, name))
 
     f = Feature(
         children=children,
         data_definition=root_def,
-        params=params
+        params=params,
+        name=name
     )
     feature_position_ref[0] -= 1
-    if existing_features is None:
-        return f
-    if f.key in existing_features:
-        return existing_features[f.key]
-    else:
-        existing_features[f.key] = f
-        return f
+    if f in existing_features:
+        index = existing_features.index(f)
+        return existing_features[index]
+    return f
+
+
+def get_feature_by_key_or_name(features: List[Feature], key_or_name: str) -> Optional[Feature]:
+    for feature in features:
+        if feature.key == key_or_name or feature.name == key_or_name:
+            return feature
+
+    return None
 
 
 def _parse_params(params: Union[Dict, List], position: int):

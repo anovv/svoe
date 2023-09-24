@@ -10,7 +10,8 @@ from featurizer.calculator.executor import execute_graph
 from featurizer.sql.db_actor import create_db_actor
 from featurizer.storage.featurizer_storage import FeaturizerStorage
 from featurizer.config import FeaturizerConfig
-from featurizer.features.feature_tree.feature_tree import construct_feature_tree
+from featurizer.features.feature_tree.feature_tree import construct_feature, get_feature_by_key_or_name, \
+    construct_features_from_configs
 
 import ray.experimental
 
@@ -29,19 +30,13 @@ class Featurizer:
 
     @classmethod
     def run(cls, config: FeaturizerConfig, ray_address: str, parallelism: int):
-        features = []
-        for feature_config in config.feature_configs:
-            features.append(construct_feature_tree(
-                feature_config.feature_definition,
-                feature_config.params
-            ))
-
+        features = construct_features_from_configs(config.feature_configs)
+        print(features)
+        raise
         storage = FeaturizerStorage()
         storage.store_features_metadata_if_needed(features)
 
         data_ranges_meta = storage.get_data_sources_meta(features, start_date=config.start_date, end_date=config.end_date)
-        # print(data_ranges_meta)
-        # raise
         stored_features_meta = storage.get_features_meta(features, start_date=config.start_date, end_date=config.end_date)
 
         label_feature = None

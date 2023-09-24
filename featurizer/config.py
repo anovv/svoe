@@ -11,6 +11,8 @@ from common.time.utils import split_time_range_between_ts, ts_to_str_date
 class FeatureConfig(BaseModel):
     feature_definition: str
     params: Dict
+    name: Optional[str] = None
+    deps: Optional[List[str]] = None
 
 
 class FeaturizerConfig(BaseModel):

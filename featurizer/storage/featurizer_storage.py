@@ -101,6 +101,7 @@ class FeaturizerStorage:
             key=feature.key,
             feature_definition=feature.data_definition.__name__,
             feature_name=feature.name,
+            params=feature.params,
         ) for feature in features]
         self.client.store_metadata_if_needed(features_metadata_items)
 

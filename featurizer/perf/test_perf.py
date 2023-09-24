@@ -8,7 +8,7 @@ from streamz import Stream
 from featurizer.calculator.tasks import merge_blocks
 from featurizer.data_definitions.common.trades import TradesData
 from featurizer.features.definitions.tvi.trade_volume_imb_fd import TradeVolumeImbFD
-from featurizer.features.feature_tree.feature_tree import construct_feature_tree
+from featurizer.features.feature_tree.feature_tree import construct_feature
 from common.pandas import load_df, time_range
 from common.streamz import run_named_events_stream
 
@@ -77,10 +77,10 @@ def test_vectorized_tvi():
 
 def test_streaming_tvi():
     feature_params = {0: {'window': '1m', 'sampling': '1s'}}
-    feature_tvi = construct_feature_tree(TradeVolumeImbFD, {
+    feature_tvi = construct_feature(TradeVolumeImbFD, {
         'feature': feature_params
     })
-    data_trades = construct_feature_tree(TradesData, {})
+    data_trades = construct_feature(TradesData, {})
     df = load_df(
         's3://svoe-cataloged-data/trades/BINANCE/spot/BTC-USDT/cryptotick/100.0mb/2023-02-01/1675209965-4ea8eeea78da2f99f312377c643e6b491579f852.parquet.gz'
     )

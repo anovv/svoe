@@ -5,7 +5,14 @@ end_date: '2023-02-01 11:00:00'
 #features_to_store: [0, 1, 2]
 features_to_store: [0, 1]
 feature_configs:
+  - feature_definition: transforms.diff
+    name: mid_price_3s_diff
+    params:
+      window: 3s
+    deps:
+      - mid_price
   - feature_definition: price.mid_price_fd
+    name: mid_price
     params:
       data_source: &id001
         - exchange: BINANCE
@@ -22,7 +29,7 @@ feature_configs:
 #        dep_schema: cryptotick
 #        sampling: 1s
   - feature_definition: l2_book.l2_snapshot_fd
-#    data_params: *id001
+    name: l2_snapshot
     params:
       data_source:
         - exchange: BINANCE

@@ -6,7 +6,7 @@ import requests
 
 from featurizer.storage.featurizer_storage import FeaturizerStorage
 from featurizer.features.definitions.tvi.trade_volume_imb_fd.trade_volume_imb_fd import TradeVolumeImbFD
-from featurizer.features.feature_tree.feature_tree import construct_feature_tree
+from featurizer.features.feature_tree.feature_tree import construct_feature
 from featurizer.sql.data_catalog.models import DataCatalog
 
 
@@ -30,7 +30,7 @@ class TestDataCatalogApi(unittest.TestCase):
             'data_source': data_params1,
             'feature': feature_params1
         }
-        feature_tvi = construct_feature_tree(TradeVolumeImbFD, params)
+        feature_tvi = construct_feature(TradeVolumeImbFD, params)
         api = FeaturizerStorage()
         api.delete_features([feature_tvi])
 

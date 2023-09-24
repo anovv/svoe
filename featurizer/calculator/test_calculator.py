@@ -15,7 +15,7 @@ from featurizer.features.definitions.volatility.volatility_stddev_fd.volatility_
 from featurizer.sql.data_catalog.models import DataCatalog
 from featurizer.features.definitions.l2_book.l2_snapshot_fd.l2_snapshot_fd import L2SnapshotFD
 from featurizer.features.definitions.mid_price.mid_price_fd.mid_price_fd import MidPriceFD
-from featurizer.features.feature_tree.feature_tree import construct_feature_tree, Feature, construct_stream_tree
+from featurizer.features.feature_tree.feature_tree import construct_feature, Feature, construct_stream_tree
 
 import unittest
 import pandas as pd
@@ -85,7 +85,7 @@ class TestFeatureCalculator(unittest.TestCase):
     def test_cryptotick_l2_snap_feature_online(self):
         data_params = {}
         feature_params = [{'dep_schema': 'cryptotick'}]
-        feature = construct_feature_tree(L2SnapshotFD, {
+        feature = construct_feature(L2SnapshotFD, {
             'data_source': data_params,
             'feature': feature_params
         })
@@ -116,19 +116,19 @@ class TestFeatureCalculator(unittest.TestCase):
             DataCatalog.instrument_type.name: 'spot',
             DataCatalog.symbol.name: 'BTC-USDT'}
         ]
-        feature_l2_snap = construct_feature_tree(L2SnapshotFD, {
+        feature_l2_snap = construct_feature(L2SnapshotFD, {
             'data_source': data_params,
             'feature': feature_params1
         })
-        feature_mid_price = construct_feature_tree(MidPriceFD, {
+        feature_mid_price = construct_feature(MidPriceFD, {
             'data_source': data_params,
             'feature': feature_params2
         })
-        feature_volatility = construct_feature_tree(VolatilityStddevFD, {
+        feature_volatility = construct_feature(VolatilityStddevFD, {
             'data_source': data_params,
             'feature': feature_params3
         })
-        feature_spread = construct_feature_tree(RelativeBidAskSpreadFD, {
+        feature_spread = construct_feature(RelativeBidAskSpreadFD, {
             'data_source': data_params,
             'feature': feature_params4
         })
@@ -201,15 +201,15 @@ class TestFeatureCalculator(unittest.TestCase):
              DataCatalog.instrument_type.name: 'spot',
              DataCatalog.symbol.name: 'BTC-USDT'}
         ]
-        feature_mid_price = construct_feature_tree(MidPriceFD, {
+        feature_mid_price = construct_feature(MidPriceFD, {
             'data_source': data_params2,
             'feature': feature_params2
         })
-        feature_volatility = construct_feature_tree(VolatilityStddevFD, {
+        feature_volatility = construct_feature(VolatilityStddevFD, {
             'data_source': data_params2,
             'feature': feature_params3
         })
-        feature_tvi = construct_feature_tree(TradeVolumeImbFD, {
+        feature_tvi = construct_feature(TradeVolumeImbFD, {
             'data_source': data_params1,
             'feature': feature_params1
         })
@@ -297,11 +297,11 @@ class TestFeatureCalculator(unittest.TestCase):
              DataCatalog.symbol.name: 'BTC-USDT'}
         ]
 
-        feature_mid_price = construct_feature_tree(MidPriceFD, {
+        feature_mid_price = construct_feature(MidPriceFD, {
             'data_source': data_params,
             'feature': feature_params1
         })
-        feature_volatility = construct_feature_tree(VolatilityStddevFD, {
+        feature_volatility = construct_feature(VolatilityStddevFD, {
             'data_source': data_params,
             'feature': feature_params2
         })
@@ -343,7 +343,7 @@ class TestFeatureCalculator(unittest.TestCase):
              DataCatalog.instrument_type.name: 'spot',
              DataCatalog.symbol.name: 'BTC-USDT'}
         ]
-        feature_tvi = construct_feature_tree('tvi.trade_volume_imb_fd', {
+        feature_tvi = construct_feature('tvi.trade_volume_imb_fd', {
             'data_source': data_params1,
             'feature': feature_params1
         })
