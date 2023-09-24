@@ -35,20 +35,20 @@ class TestCatalogCryptotickPipeline(unittest.TestCase):
         #             'excludes': ['*s3_svoe.test.1_inventory*']
         #         }):
             db_actor = create_db_actor()
-            batch_size = 10
-            num_batches = 1
-            # raw_files_and_sizes = list_files_and_sizes_kb(CRYPTOTICK_RAW_BUCKET_NAME)
+            batch_size = 12
+            # num_batches = 1
+            raw_files_and_sizes = list_files_and_sizes_kb(CRYPTOTICK_RAW_BUCKET_NAME)
             # raw_files_and_sizes = list(filter(lambda e: 'limitbook_full' in e[0], raw_files_and_sizes))
             # print([e[1] for e in raw_files_and_sizes])
             # raw_files_and_sizes = list(filter(lambda e: 'quotes' in e[0] and e[1] < 100 * 1024, raw_files_and_sizes))
             # print(len(raw_files_and_sizes))
             # raise
-            raw_files_and_sizes = [
-                ('limitbook_full/20230201/BINANCE_SPOT_BTC_USDT.csv.gz', 252 * 1024),
-                ('limitbook_full/20230202/BINANCE_SPOT_BTC_USDT.csv.gz', 252 * 1024),
-                ('limitbook_full/20230203/BINANCE_SPOT_BTC_USDT.csv.gz', 252 * 1024),
-                ('limitbook_full/20230204/BINANCE_SPOT_BTC_USDT.csv.gz', 252 * 1024),
-            ]
+            # raw_files_and_sizes = [
+            #     ('limitbook_full/20230201/BINANCE_SPOT_BTC_USDT.csv.gz', 252 * 1024),
+            #     ('limitbook_full/20230202/BINANCE_SPOT_BTC_USDT.csv.gz', 252 * 1024),
+            #     ('limitbook_full/20230203/BINANCE_SPOT_BTC_USDT.csv.gz', 252 * 1024),
+            #     ('limitbook_full/20230204/BINANCE_SPOT_BTC_USDT.csv.gz', 252 * 1024),
+            # ]
             # raw_files_and_sizes = [('limitbook_full/20230201/BINANCE_SPOT_BTC_USDT.csv.gz', 252 * 1024))]
             # raw_files_and_sizes = [('trades/20230201/BINANCE_SPOT_BTC_USDT.csv.gz', 228 * 1024)]
             # raw_files_and_sizes = [('trades/20230202/BINANCE_SPOT_BTC_USDT.csv.gz', 330 * 1024)]
@@ -60,7 +60,7 @@ class TestCatalogCryptotickPipeline(unittest.TestCase):
             pipeline.run.remote()
             print('Queueing batches...')
 
-            for i in range(num_batches):
+            for i in range(len(batches)):
                 ray.get(pipeline.pipe_input.remote(batches[i]))
             print('Done queueing')
             # wait for everything to process

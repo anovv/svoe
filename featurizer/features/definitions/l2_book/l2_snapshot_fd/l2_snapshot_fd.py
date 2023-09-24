@@ -15,7 +15,7 @@ from featurizer.blocks.blocks import BlockMeta
 import functools
 import toolz
 
-from common.time.utils import convert_str_to_seconds
+from common.time.utils import convert_str_to_seconds, round_float
 
 
 class L2SnapshotFD(FeatureDefinition):
@@ -107,7 +107,7 @@ class L2SnapshotFD(FeatureDefinition):
 
     # TODO test this
     @classmethod
-    def group_dep_ranges(cls, ranges: List[BlockMeta], feature: Feature, dep_feature: Feature) -> IntervalDict:
+    def  group_dep_ranges(cls, ranges: List[BlockMeta], feature: Feature, dep_feature: Feature) -> IntervalDict:
         # TODO separate const for this
         # TODO or separate function for metadata parsing
         meta_key = 'snapshot_ts'
@@ -129,7 +129,7 @@ class L2SnapshotFD(FeatureDefinition):
                     # TODO there will be a 1ts overlap between partitioned groups
                     #  do we need to handle this?
                     end_ts = meta[meta_key][0]
-                    res[closed(float(start_ts), float(end_ts))] = cur_ranges
+                    res[closed(round_float(float(start_ts)), round_float(float(end_ts)))] = cur_ranges
                     start_ts = meta[meta_key][0]
                     cur_ranges = [r]
 
@@ -139,7 +139,7 @@ class L2SnapshotFD(FeatureDefinition):
 
         # append trailing deltas, last block
         end_ts = ranges[-1]['end_ts']
-        interval = closed(float(start_ts), float(end_ts))
+        interval = closed(round_float(float(start_ts)), round_float(float(end_ts)))
         if len(cur_ranges) != 0 and interval not in res:
             res[interval] = cur_ranges
 

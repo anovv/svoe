@@ -69,6 +69,8 @@ def build_feature_task_graph(
             ranges_per_dep_feature[dep_feature] = ranges_to_interval_dict(meta)
 
         range_intervals = prune_overlaps(get_overlaps(ranges_per_dep_feature))
+        # print(range_intervals)
+        # raise
         for range_interval in range_intervals:
             range_meta_per_dep_feature = range_intervals[range_interval]
 
@@ -94,6 +96,10 @@ def build_feature_task_graph(
                     ds = []
                     for dep_block_meta in overlap[dep_feature]:
                         dep_interval = meta_to_interval(dep_block_meta)
+                        # print(dep_block_meta)
+                        # print(dep_interval)
+                        # print(dag[dep_feature][])
+                        # raise
                         dep_node = dag[dep_feature][range_interval][dep_interval]
                         ds.append(dep_node)
                     dep_nodes[dep_feature] = ds

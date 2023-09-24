@@ -68,3 +68,6 @@ def split_time_range_between_ts(start_ts: float, end_ts: float, num_splits: int,
 
     return intervals
 
+
+def round_float(f: float) -> float:
+    return round(f, 3)

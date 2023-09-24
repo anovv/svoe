@@ -133,9 +133,8 @@ class CatalogCryptotickPipeline:
                 await asyncio.sleep(0.1)
                 continue
 
-            # TODO store DataSourceMetadata entry
-
             input_batch = await self.input_queue.get()
+            # _, input_items = input_batch
             _, filtered_items = await self.db_actor.filter_input_batch.remote(input_batch)
 
             if len(filtered_items) > 0:

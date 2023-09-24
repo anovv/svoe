@@ -5,6 +5,7 @@ import joblib
 from streamz import Stream
 
 from common.s3.s3_utils import load_df_s3
+from common.time.utils import round_float
 from featurizer.data_catalog.pipelines.catalog_cryptotick.util import process_cryptotick_timestamps
 from featurizer.data_definitions.data_definition import df_to_events
 from featurizer.data_definitions.common.l2_book_incremental.cryptotick.cryptotick_l2_book_incremental import \
@@ -135,7 +136,11 @@ def get_snapshot_ts(df: pd.DataFrame) -> Optional[List]:
     snaps = df[df.update_type == 'SNAPSHOT']
     if len(snaps) == 0:
         return None
-    return list(snaps['timestamp'].unique())
+
+    res = list(snaps['timestamp'].unique())
+
+    # TODO is this ok fix for precision?
+    return list(map(lambda ts: round_float(ts), res))
 
 
 def starts_with_snapshot(df: pd.DataFrame) -> bool:

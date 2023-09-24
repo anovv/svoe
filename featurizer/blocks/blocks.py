@@ -3,7 +3,7 @@ import pandas as pd
 from portion import Interval, closed, IntervalDict
 
 from common.pandas.df_utils import is_ts_sorted, sub_df_ts
-from common.time.utils import convert_str_to_seconds
+from common.time.utils import convert_str_to_seconds, round_float
 from featurizer.sql.models.data_source_block_metadata import DataSourceBlockMetadata
 
 # TODO deprecate this, use FeatureBlockMetadata and DataSourceBlockMetadata objects
@@ -17,16 +17,16 @@ BlockRange = List[Block] # represents consecutive blocks
 
 
 def meta_to_interval(meta: BlockMeta) -> Interval:
-    start = float(meta[DataSourceBlockMetadata.start_ts.name])
-    end = float(meta[DataSourceBlockMetadata.end_ts.name])
+    start = round_float(float(meta[DataSourceBlockMetadata.start_ts.name]))
+    end = round_float(float(meta[DataSourceBlockMetadata.end_ts.name]))
     if start > end:
         raise ValueError('start_ts cannot be greater than end_ts')
     return closed(start, end)
 
 
 def range_meta_to_interval(range_meta: BlockRangeMeta) -> Interval:
-    start = float(range_meta[0][DataSourceBlockMetadata.start_ts.name])
-    end = float(range_meta[-1][DataSourceBlockMetadata.end_ts.name])
+    start = round_float(float(range_meta[0][DataSourceBlockMetadata.start_ts.name]))
+    end = round_float(float(range_meta[-1][DataSourceBlockMetadata.end_ts.name]))
     if start > end:
         raise ValueError('start_ts cannot be greater than end_ts')
     return closed(start, end)

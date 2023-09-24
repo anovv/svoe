@@ -8,7 +8,7 @@ from portion import Interval, closed
 
 from typing import Optional, Dict, List, Tuple
 
-from common.time.utils import date_str_to_day_str, date_str_to_ts
+from common.time.utils import date_str_to_day_str, date_str_to_ts, round_float
 from featurizer.blocks.blocks import BlockRangeMeta, make_ranges, BlockMeta
 from featurizer.features.feature_tree.feature_tree import Feature
 from featurizer.sql.client import FeaturizerSqlClient
@@ -77,6 +77,12 @@ class FeaturizerStorage:
                 continue
 
             key = r['key']
+
+            # TODO we neeed to properly convert raw dict db record to BlockMeta object
+            # hacky fix for float precision
+            r['start_ts'] = str(round_float(float(r['start_ts'])))
+            r['end_ts'] = str(round_float(float(r['end_ts'])))
+
             if key in groups:
                 groups[key].append(r)
             else:
@@ -127,7 +133,9 @@ class FeaturizerStorage:
                 continue
             if end_ts is not None and _start_ts > end_ts:
                 continue
-            interval = closed(_start_ts, _end_ts)
+
+            # hacky fix for float precision
+            interval = closed(round_float(_start_ts), round_float(_end_ts))
             feature = _feature_by_key(feature_key)
             if feature in groups:
                 if interval in groups[feature]:
