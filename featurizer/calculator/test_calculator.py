@@ -152,7 +152,7 @@ class TestFeatureCalculator(unittest.TestCase):
             # TODO first value (or two) is weird outlier for some reason, why?
             df = df.tail(-1)
 
-        plot_multi(['mid_price', 'volatility', 'spread'], df)
+        plot_multi(df, ['mid_price', 'volatility', 'spread'])
 
         # compare to cryptotick quotes
         # mdf = load_df('s3://svoe-cryptotick-data/quotes/20230201/BINANCE_SPOT_BTC_USDT.csv.gz', extension='csv')
@@ -237,7 +237,7 @@ class TestFeatureCalculator(unittest.TestCase):
             # TODO first two values are weird outliers for some reason, why?
             df = df.tail(-2)
 
-        plot_multi(['mid_price', 'tvi'], df)
+        plot_multi(df, ['mid_price', 'tvi'])
 
     def test_lookahead_shift(self):
         lookahead = '3s'

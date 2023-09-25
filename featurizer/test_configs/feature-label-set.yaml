@@ -3,12 +3,30 @@ end_date: '2023-02-01 11:00:00'
 #label_feature_index: 0
 #label_lookahead: '5100ms'
 #features_to_store: [0, 1, 2]
-features_to_store: [0, 1]
+#features_to_store: [0, 1]
 feature_configs:
   - feature_definition: transforms.diff
-    name: mid_price_3s_diff
+    name: mid_price_20s_diff
     params:
-      window: 3s
+      window: 20s
+    deps:
+      - mid_price
+  - feature_definition: transforms.diff
+    name: mid_price_10s_diff
+    params:
+      window: 10s
+    deps:
+      - mid_price
+  - feature_definition: transforms.diff
+    name: mid_price_5s_diff
+    params:
+      window: 5s
+    deps:
+      - mid_price
+  - feature_definition: transforms.diff
+    name: mid_price_1s_diff
+    params:
+      window: 1s
     deps:
       - mid_price
   - feature_definition: price.mid_price_fd
@@ -28,14 +46,14 @@ feature_configs:
 #      2:
 #        dep_schema: cryptotick
 #        sampling: 1s
-  - feature_definition: l2_book.l2_snapshot_fd
-    name: l2_snapshot
-    params:
-      data_source:
-        - exchange: BINANCE
-          instrument_type: spot
-          symbol: BTC-USDT
-      feature:
-        0:
-          dep_schema: cryptotick
-          sampling: 1s
+#  - feature_definition: l2_book.l2_snapshot_fd
+#    name: l2_snapshot
+#    params:
+#      data_source:
+#        - exchange: BINANCE
+#          instrument_type: spot
+#          symbol: BTC-USDT
+#      feature:
+#        0:
+#          dep_schema: cryptotick
+#          sampling: 1s

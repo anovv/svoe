@@ -41,18 +41,7 @@ class Feature(NodeMixin):
             return f'feature-{self.data_definition.__name__}-{short_key}'
 
     def _key(self) -> str:
-        if self.data_definition.is_data_source():
-            return joblib.hash([self.data_definition.__name__, self.params])
-
-        data_deps = self.get_data_deps()
-        feature_deps = self.get_inorder_feature_deps()
-        dep_data_params = [d.params for d in data_deps]
-        dep_feature_params = [f.params for f in feature_deps]
-
-        # TODO add current and dep feature_definition versions to hash
-        # TODO prev feature/data dep keys should also be a part of the key
-        # TODO data_deps/feature_deps class types should also be part of the key
-        return joblib.hash([self._is_label, self.data_definition.__name__, dep_data_params, dep_feature_params])
+        return _calculate_key(self)
 
     def get_data_deps(self) -> List['Feature']:
         if self._data_deps is not None:
@@ -87,46 +76,74 @@ class Feature(NodeMixin):
         return c
 
 
+def _calculate_key(feature: Feature) -> str:
+    # TODO update when versioning is supported
+    if feature.data_definition.is_data_source():
+        return joblib.hash([feature.data_definition.__name__, feature.params])
+
+    dep_hashes = []
+    for dep_feature in feature.children:
+        dep_hashes.append(_calculate_key(dep_feature))
+
+    # sort to make sure order of dep features does not matter
+    dep_hashes.sort()
+    h = [feature.data_definition.__name__, feature.params]
+    h.extend(dep_hashes)
+    return joblib.hash(h)
+
+
 def construct_features_from_configs(feature_configs: List[FeatureConfig]) -> List[Feature]:
     features = []
+    existing_features = []
     configs = feature_configs
     while len(configs) != 0:
-        _config = None
+        num_configs = len(configs)
         for feature_config in configs:
             if feature_config.deps is None:
-                # first construct derived features
-                features.append(construct_feature(
-                    feature_config.feature_definition,
-                    feature_config.params,
-                    features,
-                    feature_config.name
-                ))
-                _config = feature_config
+                # first construct derived features because they have no dependencies
+                feature = construct_feature(
+                    root_def_name=feature_config.feature_definition,
+                    params=feature_config.params,
+                    existing_features=existing_features,
+                    name=feature_config.name
+                )
+                features.append(feature)
+                existing_features.append(feature)
+                for dep_feature in feature.get_inorder_feature_deps():
+                    if dep_feature not in existing_features:
+                        existing_features.append(dep_feature)
+                configs.remove(feature_config)
                 break
             else:
                 # generic feature, check if we have all the necessary dependant features built
                 has_all_deps = True
                 for key_or_name in feature_config.deps:
-                    dep_feature = get_feature_by_key_or_name(features, key_or_name)
+                    dep_feature = get_feature_by_key_or_name(existing_features, key_or_name)
                     if dep_feature is None:
                         has_all_deps = False
                         break
                 if has_all_deps:
-                    features.append(construct_feature(
-                        feature_config.feature_definition,
-                        feature_config.params,
-                        features,
-                        feature_config.name,
-                        feature_config.deps
-                    ))
-                    _config = feature_config
+                    feature = construct_feature(
+                        root_def_name=feature_config.feature_definition,
+                        params=feature_config.params,
+                        existing_features=existing_features,
+                        name=feature_config.name,
+                        deps=feature_config.deps
+                    )
+                    features.append(feature)
+                    existing_features.append(feature)
+                    for dep_feature in feature.get_inorder_feature_deps():
+                        if dep_feature not in existing_features:
+                            existing_features.append(dep_feature)
+
+                    configs.remove(feature_config)
 
         # none of the features were built in this iteration - malformed config
-        if _config is not None:
-            configs.remove(_config)
-        else:
+        if len(configs) == num_configs:
             raise ValueError(
                 'Can not construct features for given config, make sure all features have proper dependencies')
+
+    print(existing_features)
 
     return features
 
@@ -134,7 +151,7 @@ def construct_features_from_configs(feature_configs: List[FeatureConfig]) -> Lis
 def construct_feature(
     root_def_name: Union[str, Type[DataDefinition]],
     params: Dict,
-    existing_features: List[Feature],
+    existing_features: List[Feature] = [],
     name: Optional[str] = None,
     deps: Optional[List[str]] = None,
 ) -> Feature:
@@ -149,15 +166,24 @@ def construct_feature(
             dep_feature = get_feature_by_key_or_name(existing_features, dep_key_or_name)
             if dep_feature is None:
                 raise ValueError(f'Can not find feature for key_or_name: {dep_key_or_name}')
-        feature = Feature(dep_features, root_def, params, name)
+            dep_features.append(dep_feature)
+        feature = Feature(children=dep_features, data_definition=root_def, params=params, name=name)
         if feature in existing_features:
             index = existing_features.index(feature)
-            return existing_features[index]
+            feature= existing_features[index]
         return feature
 
     data_source_params: Union[Dict, List] = params['data_source']
     feature_params: Union[Dict, List] = params['feature']
-    return _construct_feature_tree(root_def, [0], [0], data_source_params, feature_params, existing_features, name)
+    return _construct_feature_tree(
+        root_def=root_def,
+        feature_position_ref=[0],
+        data_source_position_ref=[0],
+        data_source_params=data_source_params,
+        feature_params=feature_params,
+        existing_features=existing_features,
+        name=name
+    )
 
 
 # traverse DataDefinition tree to construct parametrized FeatureTree
@@ -171,6 +197,7 @@ def _construct_feature_tree(
     name: Optional[str]
 ) -> Feature:
     # TODO deprecate is_data_source, use isinstance
+    print(root_def)
     if root_def.is_data_source():
         position = data_source_position_ref[0]
         data_source_position_ref[0] += 1
@@ -194,7 +221,15 @@ def _construct_feature_tree(
     for dep_fd in deps:
         if not dep_fd.is_data_source():
             feature_position_ref[0] += 1
-        children.append(_construct_feature_tree(dep_fd, feature_position_ref, data_source_position_ref, data_source_params, feature_params, existing_features, name))
+        children.append(_construct_feature_tree(
+            root_def=dep_fd,
+            feature_position_ref=feature_position_ref,
+            data_source_position_ref=data_source_position_ref,
+            data_source_params=data_source_params,
+            feature_params=feature_params,
+            existing_features=existing_features,
+            name=None
+        ))
 
     f = Feature(
         children=children,

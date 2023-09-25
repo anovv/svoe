@@ -35,7 +35,7 @@ class TestFeatureStreamGenerator(unittest.TestCase):
 
         diffs = []
         for i in range(1, len(events)):
-            prev_e = events[i  - 1]
+            prev_e = events[i - 1]
             cur_e = events[i]
             prev_ts = prev_e[list(prev_e.keys())[0]]['timestamp']
             cur_ts = cur_e[list(cur_e.keys())[0]]['timestamp']
@@ -45,14 +45,13 @@ class TestFeatureStreamGenerator(unittest.TestCase):
         mid_price = list(map(lambda e: e[list(e.keys())[0]]['mid_price'], events))
         volatility = list(map(lambda e: e[list(e.keys())[1]]['volatility'], events))
         df = pd.DataFrame({'timestamp': ts, 'mid_price': mid_price, 'volatility': volatility})
-        plot_multi(col_names=['mid_price', 'volatility'], df=df)
+        plot_multi(df=df, col_names=['mid_price', 'volatility'])
 
         # plt.hist(diffs, bins=10)
         # plt.hist(input_diffs, bins=100)
         # plt.plot(input_diffs[10:])
         # plt.plot(diffs[10:])
         # plt.show()
-
 
 
 if __name__ == '__main__':

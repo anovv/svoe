@@ -16,10 +16,11 @@ class TestFeaturizer(unittest.TestCase):
         Featurizer.run(config, ray_address=ray_address, parallelism=10)
 
         with ray.init(address=ray_address, ignore_reinit_error=True):
-            df = Featurizer.get_materialized_data(pick_every_nth_row=1000)
+            # df = Featurizer.get_materialized_data(pick_every_nth_row=1000)
+            df = Featurizer.get_materialized_data(pick_every_nth_row=10)
             print(df.head())
             print(df.tail())
-            plot_multi(col_names=['mid_price', 'volatility'], df=df)
+            plot_multi(df=df)
 
 
 if __name__ == '__main__':

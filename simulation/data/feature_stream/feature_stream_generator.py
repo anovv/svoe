@@ -10,7 +10,7 @@ from featurizer.blocks.blocks import BlockRangeMeta, BlockRange, ranges_to_inter
     prune_overlaps, meta_to_interval
 from featurizer.calculator.tasks import merge_blocks
 from featurizer.config import FeaturizerConfig
-from featurizer.features.feature_tree.feature_tree import construct_feature_tree, Feature, construct_stream_tree
+from featurizer.features.feature_tree.feature_tree import construct_feature, Feature, construct_stream_tree
 from featurizer.storage.data_store_adapter.data_store_adapter import DataStoreAdapter
 from featurizer.storage.data_store_adapter.local_data_store_adapter import LocalDataStoreAdapter
 from featurizer.storage.featurizer_storage import FeaturizerStorage
@@ -37,7 +37,7 @@ class FeatureStreamGenerator(DataStreamGenerator):
         # duplicate constructed trees?
         self.features = []
         for feature_config in featurizer_config.feature_configs:
-            self.features.append(construct_feature_tree(
+            self.features.append(construct_feature(
                 feature_config.feature_definition,
                 feature_config.params,
             ))

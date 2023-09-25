@@ -42,8 +42,18 @@ class Diff(FeatureDefinition):
         return windowed_grouping(ranges, window)
 
     @classmethod
-    def _diff_percent(cls, values: Deque) -> Event:
-        last_value = values[-1]
-        first_value = values[0]
+    def _diff_percent(cls, elems: Deque) -> Event:
+        last_elem = elems[-1]
+        # TODO util this?
+        # find value key
+        keys = list(last_elem.keys())
+        keys.remove('timestamp')
+        keys.remove('receipt_timestamp')
+        if len(keys) != 1:
+            raise ValueError(f'Dependent feature element schema contain multiple values, should be 1')
+        key = keys[0]
+
+        last_value = last_elem[key]
+        first_value = elems[0][key]
         diff = (last_value - first_value)/first_value
-        return cls.construct_event(last_value['timestamp'], last_value['receipt_timestamp'], diff)
+        return cls.construct_event(last_elem['timestamp'], last_elem['receipt_timestamp'], diff)

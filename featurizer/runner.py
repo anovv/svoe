@@ -31,8 +31,6 @@ class Featurizer:
     @classmethod
     def run(cls, config: FeaturizerConfig, ray_address: str, parallelism: int):
         features = construct_features_from_configs(config.feature_configs)
-        print(features)
-        raise
         storage = FeaturizerStorage()
         storage.store_features_metadata_if_needed(features)
 
