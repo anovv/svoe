@@ -1,8 +1,7 @@
 import joblib
 from streamz import Stream
 
-from typing import Dict, List, Callable, Union, Tuple, Type, Set, Optional
-from anytree import NodeMixin
+from typing import Dict, List, Callable, Union, Tuple, Type, Optional
 from copy import deepcopy
 
 from featurizer.config import FeatureConfig
@@ -10,7 +9,7 @@ from featurizer.data_definitions.data_definition import DataDefinition
 from featurizer.featurizer_utils.definitions_loader import DefinitionsLoader
 
 
-class Feature(NodeMixin):
+class Feature:
     def __init__(self, children: List['Feature'], data_definition: Type[DataDefinition], params: Dict, name: Optional[str] = None):
         self.children = children
         self.data_definition = data_definition
@@ -20,7 +19,7 @@ class Feature(NodeMixin):
 
         # TODO is it ok to call these at init time? Are all the children ready?
         self._data_deps = None
-        self._data_deps = self.get_data_deps()
+        self._data_deps = self.get_data_sources()
         self.key = self._key()
 
     def __hash__(self):
@@ -43,20 +42,20 @@ class Feature(NodeMixin):
     def _key(self) -> str:
         return _calculate_key(self)
 
-    def get_data_deps(self) -> List['Feature']:
+    def get_data_sources(self) -> List['Feature']:
         if self._data_deps is not None:
             return self._data_deps
 
-        data_leafs = []
+        data_sources = []
         def callback(node):
             if node.data_definition.is_data_source():
-                data_leafs.append(node)
+                data_sources.append(node)
 
         postorder(self, callback)
-        self._data_deps = data_leafs
+        self._data_deps = data_sources
         return self._data_deps
 
-    def get_inorder_feature_deps(self) -> List['Feature']:
+    def get_dep_features_inorder(self) -> List['Feature']:
         deps = []
         def callback(node):
             if not node.data_definition.is_data_source():
@@ -77,6 +76,8 @@ class Feature(NodeMixin):
 
 
 def _calculate_key(feature: Feature) -> str:
+    if feature.name is not None:
+        return joblib.hash(feature.name)
     # TODO update when versioning is supported
     if feature.data_definition.is_data_source():
         return joblib.hash([feature.data_definition.__name__, feature.params])
@@ -87,7 +88,7 @@ def _calculate_key(feature: Feature) -> str:
 
     # sort to make sure order of dep features does not matter
     dep_hashes.sort()
-    h = [feature.data_definition.__name__, feature.params]
+    h = [feature._is_label, feature.data_definition.__name__, feature.params] # TODO add _is_label
     h.extend(dep_hashes)
     return joblib.hash(h)
 
@@ -108,10 +109,15 @@ def construct_features_from_configs(feature_configs: List[FeatureConfig]) -> Lis
                     name=feature_config.name
                 )
                 features.append(feature)
+
+                # update existing features with current feature and all dependencies
                 existing_features.append(feature)
-                for dep_feature in feature.get_inorder_feature_deps():
+                for dep_feature in feature.get_dep_features_inorder():
                     if dep_feature not in existing_features:
                         existing_features.append(dep_feature)
+                for dep_data_source in feature.get_data_sources():
+                    if dep_data_source not in existing_features:
+                        existing_features.append(dep_data_source)
                 configs.remove(feature_config)
                 break
             else:
@@ -131,10 +137,15 @@ def construct_features_from_configs(feature_configs: List[FeatureConfig]) -> Lis
                         deps=feature_config.deps
                     )
                     features.append(feature)
+
+                    # update existing features with current feature and all dependencies
                     existing_features.append(feature)
-                    for dep_feature in feature.get_inorder_feature_deps():
+                    for dep_feature in feature.get_dep_features_inorder():
                         if dep_feature not in existing_features:
                             existing_features.append(dep_feature)
+                    for dep_data_source in feature.get_data_sources():
+                        if dep_data_source not in existing_features:
+                            existing_features.append(dep_data_source)
 
                     configs.remove(feature_config)
 
@@ -142,8 +153,6 @@ def construct_features_from_configs(feature_configs: List[FeatureConfig]) -> Lis
         if len(configs) == num_configs:
             raise ValueError(
                 'Can not construct features for given config, make sure all features have proper dependencies')
-
-    print(existing_features)
 
     return features
 
@@ -170,7 +179,7 @@ def construct_feature(
         feature = Feature(children=dep_features, data_definition=root_def, params=params, name=name)
         if feature in existing_features:
             index = existing_features.index(feature)
-            feature= existing_features[index]
+            feature = existing_features[index]
         return feature
 
     data_source_params: Union[Dict, List] = params['data_source']
@@ -197,7 +206,6 @@ def _construct_feature_tree(
     name: Optional[str]
 ) -> Feature:
     # TODO deprecate is_data_source, use isinstance
-    print(root_def)
     if root_def.is_data_source():
         position = data_source_position_ref[0]
         data_source_position_ref[0] += 1

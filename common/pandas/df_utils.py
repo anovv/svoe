@@ -158,3 +158,15 @@ def hash_df(df: pd.DataFrame) -> str:
 def downsample_uniform(df: pd.DataFrame, every_n_row: int) -> pd.DataFrame:
     return df.iloc[::every_n_row]
 
+
+def prefix_cols(df: pd.DataFrame, prefix: str) -> pd.DataFrame:
+    cols = df.columns.values.tolist()
+    new_names = {}
+    for col in cols:
+        if col in ['timestamp', 'receipt_timestamp']:
+            continue
+        new_names[col] = f'{prefix}-{col}'
+    df.rename(columns=new_names, inplace=True)
+    return df
+
+

@@ -20,7 +20,7 @@ from featurizer.featurizer_utils.featurizer_utils import merge_blocks
 from featurizer.sql.db_actor import get_db_actor
 from common.pandas import df_utils
 from common.streamz.stream_utils import run_named_events_stream
-from common.pandas.df_utils import is_ts_sorted, concat, sub_df_ts
+from common.pandas.df_utils import is_ts_sorted, concat, sub_df_ts, prefix_cols
 from featurizer.sql.models.feature_block_metadata import FeatureBlockMetadata
 from featurizer.storage.data_store_adapter.data_store_adapter import DataStoreAdapter
 
@@ -193,8 +193,6 @@ def calculate_feature(
     t = time.time()
     df = run_named_events_stream(merged, upstreams, out_stream, interval)
 
-    # TODO add proper column naming here
-
     print(f'[{feature}] Events run in {time.time() - t}s')
 
     if not is_ts_sorted(df):
@@ -243,7 +241,7 @@ def point_in_time_join_block(
         concated[feature] = concat(blocks)
 
     if label_feature is not None:
-        dfs = [concated[label_feature]] # make sure label is first so that we can use it's ts as join keys
+        dfs = [prefix_cols(concated[label_feature], str(label_feature))] # make sure label is first so that we can use it's ts as join keys
     else:
         dfs = []
 
@@ -252,7 +250,7 @@ def point_in_time_join_block(
         if label_feature is not None and feature == label_feature:
             # it's already there
             continue
-        dfs.append(concated[feature])
+        dfs.append(prefix_cols(concated[feature], str(feature)))
 
     t = time.time()
     merged = merge_asof_multi(dfs)

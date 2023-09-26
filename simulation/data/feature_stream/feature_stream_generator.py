@@ -241,7 +241,7 @@ class FeatureStreamGenerator(DataStreamGenerator):
 
     @classmethod
     def get_instrument_for_feature(cls, feature):
-        data_deps = feature.get_data_deps()
+        data_deps = feature.get_data_sources()
         if len(data_deps) != 1:
             raise ValueError('Expected exactly 1 data source dependency')
         params = data_deps[0].params

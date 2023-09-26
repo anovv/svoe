@@ -90,7 +90,7 @@ class TestFeatureCalculator(unittest.TestCase):
             'feature': feature_params
         })
         stream, tree = construct_stream_tree(feature)
-        data = Feature([], 0, CryptotickL2BookIncrementalData, data_params)
+        data = Feature([], CryptotickL2BookIncrementalData, data_params)
         sources = {data: tree[data]}
 
         path = 's3://svoe-cataloged-data/l2_book/BINANCE/spot/BTC-USDT/2023-02-01/cryptotick/100.0mb/1675216068-40f26fdc1fafb2c056fc77f76609049ce0a47944.parquet.gz'

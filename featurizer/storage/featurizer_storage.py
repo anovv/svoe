@@ -33,7 +33,7 @@ class FeaturizerStorage:
         data_deps = set()
         synthetic_data_deps = set()
         for feature in features:
-            for d in feature.get_data_deps():
+            for d in feature.get_data_sources():
                 # skip synthetic data sources
                 if d.data_definition.is_synthetic():
                     synthetic_data_deps.add(d)
