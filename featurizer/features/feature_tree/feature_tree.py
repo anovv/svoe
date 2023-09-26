@@ -30,14 +30,16 @@ class Feature:
 
     def __repr__(self):
         if self.name is not None:
+            if self._is_label:
+                return f'label_{self.name}'
             return self.name
         short_key = self.key[:8]
         if self._is_label:
-            return f'label-{self.data_definition.__name__}-{short_key}'
+            return f'label_{self.data_definition.__name__}_{short_key}'
         elif self.data_definition.is_data_source():
-            return f'data-source-{self.data_definition.__name__}-{short_key}'
+            return f'data-source_{self.data_definition.__name__}_{short_key}'
         else:
-            return f'feature-{self.data_definition.__name__}-{short_key}'
+            return f'feature_{self.data_definition.__name__}_{short_key}'
 
     def _key(self) -> str:
         return _calculate_key(self)
