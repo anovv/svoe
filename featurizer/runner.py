@@ -1,4 +1,4 @@
-from typing import Optional, Dict
+from typing import Optional, Dict, List
 
 import pandas as pd
 import pyarrow
@@ -78,6 +78,12 @@ class Featurizer:
             ray.get(cache_actor.record_featurizer_result_refs.remote(refs))
 
     @classmethod
+    def get_dataset(cls) -> Dataset:
+        cache_actor = get_cache_actor()
+        refs = ray.get(cache_actor.get_featurizer_result_refs.remote())
+        return ray.data.from_pandas_refs(refs)
+
+    @classmethod
     def get_ds_metadata(cls, ds: Dataset) -> Dict:
         # should return metadata about featurization result e.g. in memory size, num blocks, schema, set name, etc.
         return {
@@ -89,16 +95,27 @@ class Featurizer:
         }
 
     @classmethod
-    def get_dataset(cls) -> Dataset:
-        cache_actor = get_cache_actor()
-        refs = ray.get(cache_actor.get_featurizer_result_refs.remote())
-        return ray.data.from_pandas_refs(refs)
-
-    @classmethod
-    def get_label_column(cls, ds: Dataset) -> str:
+    def get_columns(cls, ds: Dataset) -> List[str]:
         ds_metadata = cls.get_ds_metadata(ds)
         schema: pyarrow.Schema = ds_metadata['schema']
         cols = schema.names
+        return cols
+
+    @classmethod
+    def get_feature_columns(cls, ds: Dataset) -> List[str]:
+        columns = cls.get_columns(ds)
+        label_column = cls.get_label_column(ds)
+        res = []
+        to_remove = ['timestamp', 'receipt_timestamp', label_column]
+        for c in columns:
+            if c not in to_remove:
+                res.append(c)
+        return res
+
+    @classmethod
+    def get_label_column(cls, ds: Dataset) -> str:
+        cols = cls.get_columns(ds)
+        print(cols)
         pos = None
         for i in range(len(cols)):
             if cols[i].startswith('label_'):

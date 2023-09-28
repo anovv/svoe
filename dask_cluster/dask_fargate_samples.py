@@ -45,7 +45,7 @@ total.compute()
 def boto_bucket_exists():
     import boto3
     s3 = boto3.resource('s3')
-    return str(s3.meta.client.head_bucket(Bucket='svoe.test.1'))
+    return str(s3.meta.mlflow_client.head_bucket(Bucket='svoe.test.1'))
 
 def install_package():
     import os

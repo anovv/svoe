@@ -21,4 +21,4 @@ tuner_config:
   num_samples: 8
   metric: 'train-logloss'
   mode: 'min'
-  max_concurrent_trials: 1
+  max_concurrent_trials: 3

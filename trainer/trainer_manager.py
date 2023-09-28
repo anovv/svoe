@@ -1,15 +1,19 @@
-from typing import Optional, Dict, Any, List
+from typing import Optional, Dict, Any, List, Type
 
 import yaml
 from pydantic import BaseModel
-from ray.air import ScalingConfig, RunConfig
+from ray.air import ScalingConfig, RunConfig, Checkpoint
 from ray.air.integrations.mlflow import MLflowLoggerCallback
+from ray.data import Dataset
 from ray.train.base_trainer import BaseTrainer
-from ray.train.xgboost import XGBoostTrainer
+from ray.train.batch_predictor import BatchPredictor
+from ray.train.predictor import Predictor
+from ray.train.xgboost import XGBoostTrainer, XGBoostPredictor
 from ray.tune import TuneConfig, Tuner
 
+from common.pandas.df_utils import plot_multi
 from featurizer.runner import Featurizer
-from trainer.svoe_mlflow_client import REMOTE_TRACKING_URI
+from trainer.svoe_mlflow_client import REMOTE_TRACKING_URI, LOCAL_TRACKING_URI, SvoeMLFlowClient
 
 import ray
 from ray.tune.search import sample
@@ -39,6 +43,7 @@ class TrainerConfig(BaseModel):
     tuner_config: Optional[TunerConfig]
 
 
+# TODO rename to runner?
 class TrainerManager:
 
     def __init__(self, config: TrainerConfig, ray_address: str):
@@ -108,7 +113,7 @@ class TrainerManager:
         return RunConfig(
             verbose=2,
             callbacks=[MLflowLoggerCallback(
-                tracking_uri=REMOTE_TRACKING_URI,
+                tracking_uri=LOCAL_TRACKING_URI,
                 experiment_name=trainer_run_id,
                 tags=tags,
                 save_artifact=True)]
@@ -121,13 +126,13 @@ class TrainerManager:
             raise ValueError('Unknown trainer type')
 
     def _build_xgboost_trainer(self, run_config: RunConfig) -> XGBoostTrainer:
-        ds = Featurizer.get_dataset()
-        ds_metadata = Featurizer.get_ds_metadata(ds)
-        print(f'Starting trainer for dataset: {ds_metadata}')
-        label_column = Featurizer.get_label_column(ds)
+        feature_label_set = Featurizer.get_dataset()
+        feature_label_set = Featurizer.get_ds_metadata(feature_label_set)
+        print(f'Starting trainer for dataset: {feature_label_set}')
+        label_column = Featurizer.get_label_column(feature_label_set)
 
         train_valid_test_split = self.trainer_config.xgboost.train_valid_test_split
-        train_ds, valid_ds, test_ds = ds.split_proportionately(train_valid_test_split)
+        train_ds, valid_ds, test_ds = feature_label_set.split_proportionately(train_valid_test_split)
 
         # TODO validate dataset has ['timestamp', 'receipt_timestamp'] cols
         xgboost_datasets = {
@@ -176,15 +181,45 @@ class TrainerManager:
             else:
                 trainer.fit()
 
+    @classmethod
+    def generate_predictions_dataset(cls, model_checkpoint: Checkpoint, predictor_class: Type[Predictor], num_workers: int) -> Dataset:
+        feature_label_set = Featurizer.get_dataset()
+        print(Featurizer.get_ds_metadata(feature_label_set))
+        feature_columns = Featurizer.get_feature_columns(feature_label_set)
+        print(feature_columns)
+        label_column = Featurizer.get_label_column(feature_label_set)
+
+        batch_predictor = BatchPredictor.from_checkpoint(
+            model_checkpoint, predictor_class
+        )
+        predicted_labels = batch_predictor.predict(
+            data=feature_label_set,
+            feature_columns=feature_columns,
+            keep_columns=[label_column, 'timestamp'],
+            max_scoring_workers=num_workers,
+            num_cpus_per_worker=1 # TODO pass more resource related args here
+        )
+
+        # TODO cache this to avoid recalculation
+        return predicted_labels
+
+
 if __name__ == '__main__':
     # tempdir, path = download_file('s3://svoe-remote-code/1/svoe_airflow.operators.svoe_python_operator.SvoePythonOperator/5e0d8a6714798ab5138596693e2ec6ab/test_remote_code_v1.py')
     # tempdir.cleanup()
     # print(path)
-    user_id = '1'
-    conf_yaml_path = './trainer-config.yaml'
-    with open(conf_yaml_path, 'r') as stream:
-        raw_conf = yaml.safe_load(stream)
-        config = TrainerConfig(**raw_conf)
-        trainer_manager = TrainerManager(config=config, ray_address='ray://127.0.0.1:10001')
-        trainer_manager.run(trainer_run_id='sample-run-id', tags={})
+    # user_id = '1'
+    # conf_yaml_path = './trainer-config.yaml'
+    # with open(conf_yaml_path, 'r') as stream:
+    #     raw_conf = yaml.safe_load(stream)
+    #     config = TrainerConfig(**raw_conf)
+    #     trainer_manager = TrainerManager(config=config, ray_address='ray://127.0.0.1:10001')
+    #     trainer_manager.run(trainer_run_id='sample-run-id', tags={})
+
+    client = SvoeMLFlowClient()
+    best_model = client.get_best_model(metric_name='valid-logloss')
+    ds = TrainerManager.generate_predictions_dataset(best_model, XGBoostPredictor, 4)
+    df = ds.to_pandas()
+    print(df)
+    plot_multi(df)
 

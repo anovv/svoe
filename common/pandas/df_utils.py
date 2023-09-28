@@ -105,7 +105,8 @@ def plot_multi(df: pd.DataFrame, col_names: Optional[List[str]] = None):
     if col_names is None:
         col_names = df.columns.values.tolist()
         col_names.remove('timestamp')
-        col_names.remove('receipt_timestamp')
+        if 'receipt_timestamp' in col_names:
+            col_names.remove('receipt_timestamp')
 
     if len(col_names) == 1:
         df.plot(x='timestamp', y=col_names[0])

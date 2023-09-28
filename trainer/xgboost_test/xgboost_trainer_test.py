@@ -84,11 +84,13 @@ class TestXGBoostTrainer(unittest.TestCase):
             )
             t = time.time()
             predicted_labels = batch_predictor.predict(
+                # TODO no need to drop, they have feature_columns
                 test_ds.drop_columns(cols=[label_column, 'timestamp', 'receipt_timestamp'])
             )
 
             print(f'Predict in {time.time() - t}s')
 
+            # TODO no need to drop, they have keep_columns
             p = test_ds.zip(predicted_labels).to_pandas()
             # TODO first two values are weird outliers for some reason, why?
             p = p.tail(-2)
