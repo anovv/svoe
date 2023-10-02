@@ -1,5 +1,6 @@
 from typing import Optional, Dict, Any, List, Type
 
+from ray.serve.deployment import Deployment
 import yaml
 from pydantic import BaseModel
 from ray.air import ScalingConfig, RunConfig, Checkpoint
@@ -209,17 +210,17 @@ if __name__ == '__main__':
     # tempdir.cleanup()
     # print(path)
     # user_id = '1'
-    # conf_yaml_path = './trainer-config.yaml'
-    # with open(conf_yaml_path, 'r') as stream:
-    #     raw_conf = yaml.safe_load(stream)
-    #     config = TrainerConfig(**raw_conf)
-    #     trainer_manager = TrainerManager(config=config, ray_address='ray://127.0.0.1:10001')
-    #     trainer_manager.run(trainer_run_id='sample-run-id', tags={})
+    conf_yaml_path = './trainer-config.yaml'
+    with open(conf_yaml_path, 'r') as stream:
+        raw_conf = yaml.safe_load(stream)
+        config = TrainerConfig(**raw_conf)
+        trainer_manager = TrainerManager(config=config, ray_address='ray://127.0.0.1:10001')
+        trainer_manager.run(trainer_run_id='sample-run-id', tags={})
 
-    client = SvoeMLFlowClient()
-    best_model = client.get_best_model(metric_name='valid-logloss')
-    ds = TrainerManager.generate_predictions_dataset(best_model, XGBoostPredictor, 4)
-    df = ds.to_pandas()
-    print(df)
-    plot_multi(df)
+    # client = SvoeMLFlowClient()
+    # best_model = client.get_best_checkpoint(metric_name='valid-logloss')
+    # ds = TrainerManager.generate_predictions_dataset(best_model, XGBoostPredictor, 4)
+    # df = ds.to_pandas()
+    # print(df)
+    # plot_multi(df)
 

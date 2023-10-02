@@ -15,7 +15,7 @@ class SvoeMLFlowClient:
     def __init__(self, tracking_uri: str = LOCAL_TRACKING_URI):
         self.mlflow_client = MlflowClient(tracking_uri=tracking_uri)
 
-    def load_checkpoint(self, run_id: str) -> Checkpoint:
+    def checkpoint_uri_from_run_id(self, run_id: str) -> str:
         run = self.mlflow_client.get_run(run_id)
         artifact_uri = run.info.artifact_uri
         if 'mlflow-artifacts:/' in artifact_uri:
@@ -25,7 +25,7 @@ class SvoeMLFlowClient:
         else:
             # local store
             checkpoint_uri = f'{artifact_uri}/checkpoint_000010'
-        return Checkpoint.from_uri(checkpoint_uri)
+        return checkpoint_uri
 
     def get_last_experiment(self) -> Experiment:
         experiments = self.mlflow_client.search_experiments(order_by=['creation_time'])
@@ -49,11 +49,15 @@ class SvoeMLFlowClient:
             raise ValueError(f'Unknown mode: {mode}')
         return best_run
 
-    def get_best_model(self, metric_name: str, experiment_name: Optional[str] = None, mode: str = 'min') -> Checkpoint:
+    def get_best_checkpoint_uri(self, metric_name: str, experiment_name: Optional[str] = None, mode: str = 'min') -> str:
         if experiment_name is None:
             experiment = self.get_last_experiment()
         else:
             experiment = self.get_experiment_by_name(experiment_name)
 
         run = self.get_best_run_for_experiment(experiment=experiment, metric_name=metric_name, mode=mode)
-        return self.load_checkpoint(run.info.run_id)
+        return self.checkpoint_uri_from_run_id(run.info.run_id)
+
+    def get_best_checkpoint(self, metric_name: str, experiment_name: Optional[str] = None, mode: str = 'min') -> Checkpoint:
+        best_checkpoint_uri = self.get_best_checkpoint_uri(metric_name=metric_name, experiment_name=experiment_name, mode=mode)
+        return Checkpoint.from_uri(best_checkpoint_uri)
