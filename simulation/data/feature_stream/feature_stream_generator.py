@@ -127,7 +127,7 @@ class FeatureStreamGenerator(DataStreamGenerator):
 
         def _load_and_store_block(cur_block_id: int, path: str):
             print(f'Started loading block {cur_block_id}/{num_blocks}')
-            df = self._data_adapter.load_df(path)
+            df = self._data_store_adapter.load_df(path)
             print(f'Finished loading block {cur_block_id}/{num_blocks}')
             return df
 

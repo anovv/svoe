@@ -39,24 +39,3 @@ def start_serve_deployment(
 #     predictor_class=XGBoostPredictor,
 #     checkpoint_uri=uri
 # )
-
-start = time.time()
-ts = []
-for i in range(10000):
-    _start = time.time()
-    requests.post(
-        url='http://127.0.0.1:8000/Deployment/',
-        json={
-            'array': [1.0, 1.0]
-        }
-    )
-    latency = time.time() - _start
-    if i%100 == 0:
-        print(f'Finished {i} requests')
-    ts.append(latency)
-total = time.time() - start
-print(f'Total {total}s, mean: {np.mean(ts)}')
-
-# print(requests.get(
-#     "http://localhost:8000/Deployment", params={'mid_price': 1}
-# ).text)

@@ -57,4 +57,4 @@ class SimulationWorkerActor:
 
     # TODO make actor threaded, otherwise calling this won't work due to block from run_loop
     def interrupt_loop(self):
-        self.loop.set_is_running(False)
+        self.loop.stop()

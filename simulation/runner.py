@@ -57,7 +57,7 @@ class SimulationRunner:
         try:
             return loop.run()
         except KeyboardInterrupt:
-            loop.set_is_running(False)
+            loop.stop()
 
     def run_remotely(self, ray_address: str, num_workers: int) -> Any:
         with ray.init(address=ray_address, ignore_reinit_error=True, runtime_env={

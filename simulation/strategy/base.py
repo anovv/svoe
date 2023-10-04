@@ -1,67 +1,51 @@
 import uuid
-from typing import Dict, List, Optional, Any
-
-from ray.air import Checkpoint
-from ray.train.predictor import Predictor
-from ray.train.xgboost import XGBoostPredictor
+from typing import Dict, List, Optional
 
 from simulation.clock import Clock
 from simulation.data.data_generator import DataStreamEvent
 from simulation.models.instrument import Instrument
 from simulation.models.order import Order, OrderSide, OrderType, OrderStatus
 from simulation.models.portfolio import Portfolio
-from common.time.utils import convert_str_to_seconds
+from simulation.inference.inference_loop import InferenceLoop
 
 
 class BaseStrategy:
 
-    def __init__(self, clock: Clock, portfolio: Portfolio, predictor_config: Optional[Dict] = None):
+    def __init__(self, clock: Clock, portfolio: Portfolio, inference_config: Optional[Dict] = None):
         self.clock = clock
         self.portfolio = portfolio
-        if predictor_config is not None:
-            self.prediction_latency = predictor_config['prediction_latency']
-            self.predictor = self._predictor(predictor_config)
-        else:
-            self.prediction_latency = None
-            self.predictor = None
+        self.latest_data_event = None
+        self.inference_loop: Optional[InferenceLoop] = None
 
-        self.latest_prediction = None
-        self.latest_prediction_ts = None
+        if inference_config is not None:
+            self.inference_loop = InferenceLoop(self.get_latest_inference_input_values, inference_config)
 
-    def _predictor(self, predictor_config: Dict) -> Predictor:
-        model_type = predictor_config['model_type']
-        checkpoint_uri = predictor_config['checkpoint_uri']
-        checkpoint = Checkpoint.from_uri(checkpoint_uri)
-        # TODO enum this
-        if model_type == 'xgboost':
-            predictor = XGBoostPredictor.from_checkpoint(checkpoint)
-        # elif model_type == 'torch':
-        #     predictor = TorchPredictor.from_checkpoint(checkpoint)
-        # elif model_type == 'sklearn':
-        #     predictor = SklearnPredictor.from_checkpoint(checkpoint)
-        # elif model_type == 'rl':
-            # predictor = RLPredictor.from_checkpoint(checkpoint)
-        else:
-            raise ValueError(f'Unknown model type: {model_type}')
+    def get_latest_inference_input_values(self):
+        # TODO figure out how to preserve order
+        feature_values = []
+        if self.latest_data_event is not None:
+            for feature in self.latest_data_event.feature_values:
+                for name in self.latest_data_event.feature_values[feature]:
+                    feature_values.append(self.latest_data_event.feature_values[feature][name])
+        return feature_values
 
-        return predictor
+    def run_inference_loop(self):
+        if self.inference_loop is not None:
+            self.inference_loop.run()
 
-    def _event_to_predictor_request(self, event: Any) -> Any:
-        return None # TODO
+    def stop_inference_loop(self):
+        if self.inference_loop is not None:
+            self.inference_loop.stop()
 
+    # wrapper
     def on_data(self, data_event: DataStreamEvent) -> Optional[List[Order]]:
-        ts = data_event.timestamp
-        if self.predictor is not None:
-            if self.latest_prediction_ts is None or \
-                    ts - self.latest_prediction_ts > convert_str_to_seconds(self.prediction_latency):
-                req = self._event_to_predictor_request(data_event)
-                self.latest_prediction = self.predictor.predict(req)
-                self.latest_prediction_ts = ts
+        self.latest_data_event = data_event
         return self.on_data_udf(data_event)
 
     def on_data_udf(self, data_event: DataStreamEvent) -> Optional[List[Order]]:
         raise NotImplementedError
 
+    # TODO move to execution engine?
     def make_order(self, side: OrderSide, order_type: OrderType, instrument: Instrument, qty: float, price: float) -> Order:
         order_id = str(uuid.uuid4())
         # lock quantities

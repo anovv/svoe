@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import List, Dict, Tuple
+from typing import List, Dict, Tuple, Any
 
 from simulation.clock import Clock
 from simulation.data.data_generator import DataStreamGenerator
@@ -14,6 +14,7 @@ class LoopRunResult:
     executed_trades: Dict[Instrument, List[Trade]]
     portfolio_balances: List[PortfolioBalanceRecord]
     sampled_prices: Dict[Instrument, List[Tuple[float, float]]]
+    inference_results: List[Tuple[Any, float]]
 
 
 class Loop:
@@ -32,11 +33,16 @@ class Loop:
         self.execution_simulator = execution_simulator
         self.is_running = False
 
-    def set_is_running(self, running):
-        self.is_running = running
+    def stop(self):
+        self.is_running = False
+        self.strategy.inference_loop.stop()
 
     def run(self):
         self.is_running = True
+
+        # TODO start serve deployment
+
+        self.strategy.inference_loop.start()
         while self.is_running and self.data_generator.has_next():
             data_event = self.data_generator.next()
             if data_event is not None:
@@ -47,9 +53,14 @@ class Loop:
                     self.execution_simulator.stage_for_execution(orders)
                 self.execution_simulator.update_state()
         self.is_running = False
+        self.strategy.inference_loop.stop()
 
+        inference_results = []
+        if self.strategy.inference_loop is not None:
+            inference_results = self.strategy.inference_loop.inference_results
         return LoopRunResult(
             executed_trades=self.execution_simulator.executed_trades,
             portfolio_balances=self.execution_simulator.get_portfolio_balances(),
-            sampled_prices=self.data_generator.get_sampled_mid_prices()
+            sampled_prices=self.data_generator.get_sampled_mid_prices(),
+            inference_results=inference_results
         )
