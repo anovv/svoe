@@ -30,3 +30,4 @@ pyhumps
 mlflow
 diskcache
 aiorwlock
+typer

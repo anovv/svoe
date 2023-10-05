@@ -23,7 +23,7 @@ class InferenceLoop:
 
     def run(self):
         self.is_running = True
-        self.thread = threading.Thread(target=self._loop)
+        self.thread = threading.Thread(target=self._loop, daemon=True)
         self.thread.start()
 
     def _loop(self):
