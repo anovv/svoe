@@ -20,7 +20,7 @@ class Feature:
         # TODO is it ok to call these at init time? Are all the children ready?
         self._data_deps = None
         self._data_deps = self.get_data_sources()
-        self.key = self._key()
+        self.key = _calculate_key(self)
 
     def __hash__(self):
         return hash(self.key)
@@ -37,12 +37,12 @@ class Feature:
         if self._is_label:
             return f'label_{self.data_definition.__name__}_{short_key}'
         elif self.data_definition.is_data_source():
-            return f'data-source_{self.data_definition.__name__}_{short_key}'
+            return f'data_source_{self.data_definition.__name__}_{short_key}'
         else:
             return f'feature_{self.data_definition.__name__}_{short_key}'
 
-    def _key(self) -> str:
-        return _calculate_key(self)
+    # def _key(self) -> str:
+    #     return
 
     def get_data_sources(self) -> List['Feature']:
         if self._data_deps is not None:
@@ -70,27 +70,24 @@ class Feature:
 
     @classmethod
     def make_label(cls, feature: 'Feature') -> 'Feature':
-        c = deepcopy(feature)
-        c._is_label = True
+        l = deepcopy(feature)
+        l._is_label = True
         # recalc feature key
-        c.key = c._key()
-        return c
+        l.key = _calculate_key(l)
+        return l
 
 
 def _calculate_key(feature: Feature) -> str:
     if feature.name is not None:
         return joblib.hash(feature.name)
     # TODO update when versioning is supported
-    if feature.data_definition.is_data_source():
-        return joblib.hash([feature.data_definition.__name__, feature.params])
-
     dep_hashes = []
     for dep_feature in feature.children:
         dep_hashes.append(_calculate_key(dep_feature))
 
     # sort to make sure order of dep features does not matter
     dep_hashes.sort()
-    h = [feature._is_label, feature.data_definition.__name__, feature.params] # TODO add _is_label
+    h = [feature._is_label, feature.data_definition.__name__, feature.params]
     h.extend(dep_hashes)
     return joblib.hash(h)
 
@@ -185,7 +182,7 @@ def construct_feature(
         return feature
 
     data_source_params: Union[Dict, List] = params['data_source']
-    feature_params: Union[Dict, List] = params['feature']
+    feature_params: Union[Dict, List] = params.get('feature', None)
     return _construct_feature_tree(
         root_def=root_def,
         feature_position_ref=[0],
@@ -203,7 +200,7 @@ def _construct_feature_tree(
     feature_position_ref: List[int],
     data_source_position_ref: List[int],
     data_source_params: Union[Dict, List],
-    feature_params: Union[Dict, List],
+    feature_params: Optional[Union[Dict, List]],
     existing_features: List[Feature],
     name: Optional[str]
 ) -> Feature:
@@ -262,7 +259,7 @@ def get_feature_by_key_or_name(features: List[Feature], key_or_name: str) -> Opt
     return None
 
 
-def _parse_params(params: Union[Dict, List], position: int):
+def _parse_params(params: Optional[Union[Dict, List]], position: int):
     if params is None:
         return {}
 

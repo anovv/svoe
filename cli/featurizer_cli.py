@@ -1,23 +1,29 @@
-import os
 from typing import Annotated, Optional
 
 import typer
 
+from common.const import DEFAULT_LOCAL_RAY_ADDRESS, NUM_CPUS
+from common.pandas.df_utils import plot_multi
 from featurizer.config import FeaturizerConfig
 from featurizer.runner import Featurizer
 
-DEFAULT_RAY_ADDRESS = 'ray://127.0.0.1:10001' # TODO read env var
 FEATURIZER_CLI_NAME = 'featurizer'
-NUM_CPUS = os.cpu_count()
-
 featurizer_app = typer.Typer()
 
+
 @featurizer_app.command()
-def run(config: str, parallelism: Annotated[Optional[int], typer.Argument(default=NUM_CPUS)] = None, ray_address: Annotated[Optional[str], typer.Argument(default=DEFAULT_RAY_ADDRESS)] = None):
-    featurizer_config = FeaturizerConfig.load_config(path=config)
-    if parallelism is None:
-        parallelism = NUM_CPUS
-    if ray_address is None:
-        ray_address = DEFAULT_RAY_ADDRESS
+def run(config_path: str, parallelism: Annotated[Optional[int], typer.Argument(default=NUM_CPUS)] = NUM_CPUS, ray_address: Annotated[str, typer.Argument(default=DEFAULT_LOCAL_RAY_ADDRESS)] = DEFAULT_LOCAL_RAY_ADDRESS):
+    featurizer_config = FeaturizerConfig.load_config(path=config_path)
     Featurizer.run(featurizer_config, ray_address=ray_address, parallelism=parallelism)
 
+
+@featurizer_app.command()
+def get_data(every_n: Annotated[Optional[int], typer.Argument(default=1)] = 1):
+    df = Featurizer.get_materialized_data(pick_every_nth_row=every_n)
+    print(df)
+
+
+@featurizer_app.command()
+def plot(every_n: Annotated[Optional[int], typer.Argument(default=1)] = 1):
+    df = Featurizer.get_materialized_data(pick_every_nth_row=every_n)
+    plot_multi(df=df)

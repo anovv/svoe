@@ -42,14 +42,15 @@ class FeaturizerStorage:
 
         data_keys = [d.key for d in data_deps]
         ranges_meta_per_data_key = self._get_data_sources_meta(data_keys, start_date=start_date, end_date=end_date)
-        if (len(ranges_meta_per_data_key)) == 0:
+        if len(data_deps) != 0 and len(ranges_meta_per_data_key) == 0: # TODO raise only for non-synthetic data
             raise ValueError('No data for given time range')
         res = {data: ranges_meta_per_data_key[data.key] for data in data_deps}
 
         # add synthetic ranges
         # TODO if start_date or end_date were passed as None we need to derive them from what was returned from database
         for synthetic_data in synthetic_data_deps:
-            res[synthetic_data] = synthetic_data.data_definition.gen_synthetic_ranges_meta(start_date, end_date)
+            num_splits = synthetic_data.params.get('num_splits', 1)
+            res[synthetic_data] = synthetic_data.data_definition.gen_synthetic_ranges_meta(start_date, end_date, num_splits)
 
         return res
 

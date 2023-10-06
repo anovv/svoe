@@ -266,10 +266,11 @@ def point_in_time_join_block(
 
 
 @ray.remote
-def lookahead_shift_blocks(block_refs: List[ObjectRef[Block]], interval: Interval, lookahead: str):
+def lookahead_shift_blocks(block_refs: List[ObjectRef[Block]], interval: Interval, lookahead: str) -> Block:
     print('Lookahead shift block started')
     blocks = ray.get(block_refs)
     concated = concat(blocks)
+    # print(concated.head(1))
     shifted_concated = lookahead_shift(concated, lookahead)
     shifted = sub_df_ts(shifted_concated, interval.lower, interval.upper)
     # add label_ prefix
@@ -277,9 +278,10 @@ def lookahead_shift_blocks(block_refs: List[ObjectRef[Block]], interval: Interva
     cols.remove('timestamp')
     if 'receipt_timestamp' in cols:
         cols.remove('receipt_timestamp')
-    cols_new = [f'label_{c}' for c in cols]
-    shifted = shifted.rename(columns=dict(zip(cols, cols_new)))
+    # cols_new = [f'label_{c}' for c in cols]
+    # shifted = shifted.rename(columns=dict(zip(cols, cols_new)))
 
+    # print(shifted.head(1))
     print('Lookahead shift block finished')
     return shifted
 

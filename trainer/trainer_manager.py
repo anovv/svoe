@@ -43,6 +43,12 @@ class TrainerConfig(BaseModel):
     num_workers: int
     tuner_config: Optional[TunerConfig]
 
+    @classmethod
+    def load_config(cls, path: str) -> 'TrainerConfig':
+        with open(path, 'r') as stream:
+            d = yaml.safe_load(stream)
+            return TrainerConfig.parse_obj(d)
+
 
 # TODO rename to runner?
 class TrainerManager:
@@ -210,12 +216,10 @@ if __name__ == '__main__':
     # tempdir.cleanup()
     # print(path)
     # user_id = '1'
-    conf_yaml_path = './trainer-config.yaml'
-    with open(conf_yaml_path, 'r') as stream:
-        raw_conf = yaml.safe_load(stream)
-        config = TrainerConfig(**raw_conf)
-        trainer_manager = TrainerManager(config=config, ray_address='ray://127.0.0.1:10001')
-        trainer_manager.run(trainer_run_id='sample-run-id', tags={})
+    conf_path = './trainer-config.yaml'
+    config = TrainerConfig.load_config(conf_path)
+    trainer_manager = TrainerManager(config=config, ray_address='ray://127.0.0.1:10001')
+    trainer_manager.run(trainer_run_id='sample-run-id', tags={})
 
     # client = SvoeMLFlowClient()
     # best_model = client.get_best_checkpoint(metric_name='valid-logloss')

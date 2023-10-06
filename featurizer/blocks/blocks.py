@@ -73,7 +73,7 @@ def mock_meta(start_ts, end_ts, extra=None) -> BlockMeta:
 def make_ranges(data: List[BlockMeta]) -> List[BlockRangeMeta]:
     # TODO validate ts sorting
 
-    # if consecuitive files differ no more than this, they are in the same range
+    # if consecutive blocks differ no more than this, they are in the same range
     # TODO should this be const per data_type?
     SAME_RANGE_DIFF_S = 1
     ranges = []
@@ -179,7 +179,6 @@ def lookahead_shift(df: pd.DataFrame, lookahead: str) -> pd.DataFrame:
         cols.remove('receipt_timestamp')
     df['lookahead_timestamp'] = df['timestamp'] + lookahead_s
     shifted = pd.merge_asof(df, df, left_on='lookahead_timestamp', right_on='timestamp', direction='backward')
-    print(shifted)
     cols_new = [f'{c}_y' for c in cols]
     res_df = shifted[cols_new]
     res_df.insert(0, 'timestamp', shifted['timestamp_x'])
@@ -206,6 +205,7 @@ def merge_asof_multi(dfs: List[pd.DataFrame]) -> pd.DataFrame:
             res.insert(1, 'receipt_timestamp', res['receipt_timestamp_x'])
             res = res.drop(columns=['receipt_timestamp_x', 'receipt_timestamp_y'])
     return res
+
 
 def intervals_almost_equal(i1: Interval, i2: Interval, diff=0.15) -> bool:
     return abs(i1.upper - i2.upper) <= diff and abs(i1.lower - i2.lower) <= diff

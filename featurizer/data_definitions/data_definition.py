@@ -28,13 +28,14 @@ class DataDefinition:
 
     # TODO params schema
 
-    # TODO deprecate is_data_source, us isinstance
+    # TODO deprecate is_data_source, use isinstance
     # this is a hacky way to discern between types in Union[FeatureDefinition, DataSource]
     # without isinstance (due to python 3.9 bug)
     @classmethod
     def is_data_source(cls) -> bool:
         raise NotImplemented
 
+    # TODO deprecate is_data_source, use isinstance
     @classmethod
     def is_synthetic(cls) -> bool:
         raise NotImplemented
@@ -73,12 +74,9 @@ class DataDefinition:
         # TODO validate schema here?
         return frozendict(dict(zip(list(cls.event_schema().keys()), list(args))))
 
+    # TODO when is_synthetic is deprecated this can be in SyntheticDataSourceDefinition
     # for synthetic data
     @classmethod
     def gen_synthetic_events(cls, interval: Interval, params: Dict) -> DataFrame:
-        raise NotImplementedError
-
-    @classmethod
-    def gen_synthetic_ranges_meta(cls, start_date: str, end_date: str) -> List[BlockRangeMeta]:
         raise NotImplementedError
 

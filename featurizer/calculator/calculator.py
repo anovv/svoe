@@ -292,10 +292,13 @@ def build_feature_label_set_task_graph(
         features_to_store=features_to_store,
         stored_feature_blocks_meta=stored_feature_blocks_meta
     )
+    print(dag)
     label_feature = None
     if label is not None:
         lookahead_dag = build_lookahead_graph(dag[label], label_lookahead)
         label_feature = Feature.make_label(label)
+        print(label_feature)
+        print(lookahead_dag)
         dag[label_feature] = lookahead_dag
         features.append(label_feature)
     return point_in_time_join_dag(dag, features, label_feature, result_owner=result_owner)
