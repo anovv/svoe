@@ -101,12 +101,17 @@ def sort_dfs(dfs: List[pd.DataFrame]) -> List[pd.DataFrame]:
     return sorted(dfs, key=functools.cmp_to_key(compare))
 
 
-def plot_multi(df: pd.DataFrame, col_names: Optional[List[str]] = None):
+def plot_multi(df: pd.DataFrame, col_names: Optional[List[str]] = None, same_fig: bool = False):
     if col_names is None:
         col_names = df.columns.values.tolist()
         col_names.remove('timestamp')
         if 'receipt_timestamp' in col_names:
             col_names.remove('receipt_timestamp')
+
+    if same_fig:
+        df.plot(x='timestamp', y=col_names)
+        plt.show()
+        return
 
     if len(col_names) == 1:
         df.plot(x='timestamp', y=col_names[0])

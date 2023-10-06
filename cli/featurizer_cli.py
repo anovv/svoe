@@ -24,6 +24,9 @@ def get_data(every_n: Annotated[Optional[int], typer.Argument(default=1)] = 1):
 
 
 @featurizer_app.command()
-def plot(every_n: Annotated[Optional[int], typer.Argument(default=1)] = 1):
+def plot(
+    every_n: Annotated[Optional[int], typer.Argument(default=1)] = 1,
+    same_fig: Annotated[Optional[bool], typer.Argument(default=False)] = False
+):
     df = Featurizer.get_materialized_data(pick_every_nth_row=every_n)
-    plot_multi(df=df)
+    plot_multi(df=df, same_fig=same_fig)

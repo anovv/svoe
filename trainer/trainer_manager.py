@@ -134,7 +134,6 @@ class TrainerManager:
 
     def _build_xgboost_trainer(self, run_config: RunConfig) -> XGBoostTrainer:
         feature_label_set = Featurizer.get_dataset()
-        feature_label_set = Featurizer.get_ds_metadata(feature_label_set)
         print(f'Starting trainer for dataset: {feature_label_set}')
         label_column = Featurizer.get_label_column(feature_label_set)
 
@@ -188,21 +187,21 @@ class TrainerManager:
             else:
                 trainer.fit()
 
+    # TODO sampling
     @classmethod
     def generate_predictions_dataset(cls, model_checkpoint: Checkpoint, predictor_class: Type[Predictor], num_workers: int) -> Dataset:
         feature_label_set = Featurizer.get_dataset()
-        print(Featurizer.get_ds_metadata(feature_label_set))
         feature_columns = Featurizer.get_feature_columns(feature_label_set)
-        print(feature_columns)
         label_column = Featurizer.get_label_column(feature_label_set)
-
+        keep_columns = [label_column, 'timestamp']
+        keep_columns.extend(feature_columns)
         batch_predictor = BatchPredictor.from_checkpoint(
             model_checkpoint, predictor_class
         )
         predicted_labels = batch_predictor.predict(
             data=feature_label_set,
             feature_columns=feature_columns,
-            keep_columns=[label_column, 'timestamp'],
+            keep_columns=keep_columns,
             max_scoring_workers=num_workers,
             num_cpus_per_worker=1 # TODO pass more resource related args here
         )
