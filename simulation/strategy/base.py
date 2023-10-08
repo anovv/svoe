@@ -6,19 +6,20 @@ from simulation.data.data_generator import DataStreamEvent
 from simulation.models.instrument import Instrument
 from simulation.models.order import Order, OrderSide, OrderType, OrderStatus
 from simulation.models.portfolio import Portfolio
-from simulation.inference.inference_loop import InferenceLoop
+from simulation.inference.inference_loop import InferenceLoop, InferenceConfig
 
 
 class BaseStrategy:
 
-    def __init__(self, clock: Clock, portfolio: Portfolio, inference_config: Optional[Dict] = None):
+    def __init__(self, clock: Clock, portfolio: Portfolio, inference_config: Optional[InferenceConfig] = None):
         self.clock = clock
         self.portfolio = portfolio
         self.latest_data_event = None
         self.inference_loop: Optional[InferenceLoop] = None
+        self.inference_config = inference_config
 
-        if inference_config is not None:
-            self.inference_loop = InferenceLoop(self.get_latest_inference_input_values, inference_config)
+        if self.inference_config is not None:
+            self.inference_loop = InferenceLoop(self.get_latest_inference_input_values, self.inference_config)
 
     def get_latest_inference_input_values(self):
         # TODO figure out how to preserve order

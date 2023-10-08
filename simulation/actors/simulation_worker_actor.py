@@ -20,6 +20,7 @@ from simulation.strategy.base import BaseStrategy
 @ray.remote
 class SimulationWorkerActor:
 
+    # TODO proper pass inference_config
     def __init__(
         self,
         worker_id: int,

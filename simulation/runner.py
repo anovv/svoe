@@ -40,6 +40,7 @@ class SimulationRunner:
 
     def run_locally(self) -> LoopRunResult:
         clock = Clock(-1)
+        # TODO proper pass inference_config
         strategy: BaseStrategy = self.strategy_class(
             instruments=self.tradable_instruments,
             clock=clock,
@@ -77,9 +78,10 @@ class SimulationRunner:
 
             featurizer_configs = split_featurizer_config(self.featurizer_config, num_workers)
 
+            # TODO proper pass inference_config
             actors = [SimulationWorkerActor.options(
                 num_cpus=0.9,
-                max_concurrency=10,
+                max_concurrency=10, # wuut?
                 scheduling_strategy=PlacementGroupSchedulingStrategy(
                     placement_group=pg,
                     placement_group_capture_child_tasks=True

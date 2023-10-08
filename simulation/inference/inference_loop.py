@@ -1,18 +1,31 @@
 import threading
 import time
-from typing import Optional, Dict, Tuple, Any, Callable
+from typing import Optional, Dict, Tuple, Any, Callable, Type
 
 import requests
-
-from simulation.data.data_generator import DataStreamEvent
+from pydantic import BaseModel
+from ray.train.predictor import Predictor
+from ray.train.xgboost import XGBoostPredictor
 
 SERVE_LOCAL_URL = 'http://127.0.0.1:8000'
 
 
-class InferenceLoop:
+class InferenceConfig(BaseModel):
+    deployment_name: str
+    model_uri: str
+    predictor_class_name: str
+    num_replicas: int
 
-    def __init__(self, input_values_provider_callable: Callable, inference_config: Optional[Dict] = None):
-        self.serve_deployment_name = inference_config['deployment_name']
+    def predictor_class(self) -> Type[Predictor]:
+        if self.predictor_class_name == 'XGBoostPredictor':
+            return XGBoostPredictor
+        else:
+            raise ValueError(f'Unsupported predictor class: {self.predictor_class_name}')
+
+
+class InferenceLoop:
+    def __init__(self, input_values_provider_callable: Callable, inference_config: Optional[InferenceConfig] = None):
+        self.serve_deployment_name = inference_config.deployment_name
         self.is_running = False
         self.thread = None
         self.input_values_provider_callable = input_values_provider_callable

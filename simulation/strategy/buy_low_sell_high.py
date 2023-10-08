@@ -1,8 +1,5 @@
 from typing import List, Dict, Optional, Tuple, Type, Callable
 
-from featurizer.data_definitions.synthetic.synthetic_sine_mid_price.synthetic_sine_mid_price import \
-    SyntheticSineMidPrice
-from featurizer.features.definitions.mid_price.mid_price_fd.mid_price_fd import MidPriceFD
 from simulation.clock import Clock
 from simulation.data.data_generator import DataStreamEvent
 from simulation.data.feature_stream.feature_stream_generator import FeatureStreamGenerator
@@ -88,7 +85,8 @@ class BuyLowSellHighStrategy(BaseStrategy):
                 buy_signal_thresh=params['buy_signal_thresh'],
                 sell_signal_thresh=params['sell_signal_thresh'],
                 quote_allocation=1/len(instruments), # TODO parametrize
-                make_order_callable=self.make_order)
+                make_order_callable=self.make_order
+            )
             for instrument in instruments
         }
 

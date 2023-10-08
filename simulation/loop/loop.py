@@ -1,13 +1,17 @@
 from dataclasses import dataclass
-from typing import List, Dict, Tuple, Any
+from typing import List, Dict, Tuple, Any, Optional
+
+from ray.serve.deployment import Deployment
 
 from simulation.clock import Clock
 from simulation.data.data_generator import DataStreamGenerator
 from simulation.execution.execution_simulator import ExecutionSimulator
+from simulation.inference.inference import start_serve_predictor_deployment
 from simulation.models.instrument import Instrument
 from simulation.models.portfolio import Portfolio, PortfolioBalanceRecord
 from simulation.models.trade import Trade
 from simulation.strategy.base import BaseStrategy
+
 
 @dataclass
 class LoopRunResult:
@@ -20,29 +24,36 @@ class LoopRunResult:
 class Loop:
 
     def __init__(
-            self,
-            clock: Clock,
-            data_generator: DataStreamGenerator,
-            portfolio: Portfolio,
-            strategy: BaseStrategy,
-            execution_simulator: ExecutionSimulator):
+        self,
+        clock: Clock,
+        data_generator: DataStreamGenerator,
+        portfolio: Portfolio,
+        strategy: BaseStrategy,
+        execution_simulator: ExecutionSimulator
+    ):
         self.clock = clock
         self.data_generator = data_generator
         self.portfolio = portfolio
         self.strategy = strategy
         self.execution_simulator = execution_simulator
+        self.predictor_deployment: Optional[Deployment] = None
         self.is_running = False
 
     def stop(self):
         self.is_running = False
-        self.strategy.inference_loop.stop()
+        if self.strategy.inference_loop is not None:
+            self.strategy.inference_loop.stop()
+        if self.predictor_deployment is not None:
+            self.predictor_deployment.delete()
 
     def run(self):
         self.is_running = True
 
-        # TODO start serve deployment
-
-        self.strategy.inference_loop.start()
+        if self.strategy.inference_config is not None:
+            self.predictor_deployment = start_serve_predictor_deployment(
+                self.strategy.inference_config
+            )
+            self.strategy.inference_loop.start()
         while self.is_running and self.data_generator.has_next():
             data_event = self.data_generator.next()
             if data_event is not None:
