@@ -1,10 +1,11 @@
 import time
-from typing import Any, Dict, Type, List
+from typing import Any, Dict, Type, List, Optional
 
 from featurizer.config import FeaturizerConfig
 from simulation.clock import Clock
 from simulation.data.feature_stream.feature_stream_generator import FeatureStreamGenerator
 from simulation.execution.execution_simulator import ExecutionSimulator
+from simulation.inference.inference_loop import InferenceConfig
 from simulation.loop.loop import Loop, LoopRunResult
 
 import ray
@@ -27,16 +28,18 @@ class SimulationWorkerActor:
         featurizer_config: FeaturizerConfig,
         portfolio: Portfolio,
         strategy_class: Type[BaseStrategy],
-        strategy_params: Dict,
-        tradable_instruments: List[Instrument]
+        strategy_params: Optional[Dict],
+        tradable_instruments: Optional[List[Instrument]],
+        inference_config: Optional[InferenceConfig]
     ):
         self.worker_id = worker_id
         clock = Clock(-1)
         strategy: BaseStrategy = strategy_class(
-            instruments=tradable_instruments,
             clock=clock,
             portfolio=portfolio,
-            params=strategy_params
+            instruments=tradable_instruments,
+            params=strategy_params,
+            inference_config=inference_config
         )
 
         # TODO check if generator is empty

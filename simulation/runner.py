@@ -91,7 +91,8 @@ class SimulationRunner:
                 portfolio = self.portfolio,
                 strategy_class = self.strategy_class,
                 strategy_params = self.strategy_params,
-                tradable_instruments = self.tradable_instruments
+                tradable_instruments = self.tradable_instruments,
+                inference_config=None # TODO
             ) for i in range(num_workers)]
 
             print(f'Inited {len(actors)} worker actors')

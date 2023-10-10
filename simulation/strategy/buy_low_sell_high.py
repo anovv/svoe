@@ -3,6 +3,7 @@ from typing import List, Dict, Optional, Tuple, Type, Callable
 from simulation.clock import Clock
 from simulation.data.data_generator import DataStreamEvent
 from simulation.data.feature_stream.feature_stream_generator import FeatureStreamGenerator
+from simulation.inference.inference_loop import InferenceConfig
 from simulation.models.instrument import Instrument
 from simulation.models.order import Order, OrderSide, OrderType
 from simulation.models.portfolio import Portfolio
@@ -75,8 +76,21 @@ class _StatePerInstrument:
 
 
 class BuyLowSellHighStrategy(BaseStrategy):
-    def __init__(self, instruments: List[Instrument], clock: Clock, portfolio: Portfolio, params: Dict):
-        super(BuyLowSellHighStrategy, self).__init__(clock, portfolio)
+    def __init__(
+        self,
+        clock: Clock,
+        portfolio: Portfolio,
+        params: Optional[Dict] = None,
+        instruments: Optional[List[Instrument]] = None,
+        inference_config: Optional[InferenceConfig] = None
+    ):
+        super(BuyLowSellHighStrategy, self).__init__(
+            clock=clock,
+            portfolio=portfolio,
+            params=params,
+            instruments=instruments,
+            inference_config=inference_config
+        )
         # TODO thresholds per instrument?
         self.states: Dict[Instrument, _StatePerInstrument] = {
             instrument: _StatePerInstrument(
