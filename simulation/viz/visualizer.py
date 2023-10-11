@@ -12,6 +12,7 @@ from simulation.models.trade import Trade
 
 class Visualizer:
 
+    # TODO add inference results
     def __init__(
         self,
         executed_trades: Dict[Instrument, List[Trade]],

@@ -1,5 +1,5 @@
 import time
-from typing import List, Any, Dict, Type, Tuple
+from typing import List, Any, Dict, Type, Tuple, Optional
 
 import ray
 import yaml
@@ -10,6 +10,7 @@ from simulation.actors.simulation_worker_actor import SimulationWorkerActor
 from simulation.clock import Clock
 from simulation.data.feature_stream.feature_stream_generator import FeatureStreamGenerator
 from simulation.execution.execution_simulator import ExecutionSimulator
+from simulation.inference.inference_loop import InferenceConfig
 from simulation.loop.loop import Loop, LoopRunResult
 from simulation.models.instrument import Instrument
 from simulation.models.portfolio import Portfolio, PortfolioBalanceRecord
@@ -18,6 +19,7 @@ from simulation.strategy.base import BaseStrategy
 from simulation.strategy.buy_low_sell_high import BuyLowSellHighStrategy
 
 import simulation, common, featurizer, client
+from simulation.strategy.ml_strategy import MLStrategy
 from simulation.viz.visualizer import Visualizer
 
 
@@ -30,6 +32,7 @@ class SimulationRunner:
         strategy_class: Type[BaseStrategy],
         strategy_params: Dict,
         tradable_instruments: List[Instrument],
+        inference_config: Optional[InferenceConfig],
     ):
         # TODO configify?
         self.featurizer_config = featurizer_config
@@ -37,6 +40,7 @@ class SimulationRunner:
         self.strategy_class = strategy_class
         self.strategy_params = strategy_params
         self.tradable_instruments = tradable_instruments
+        self.inference_config = inference_config
 
     def run_locally(self) -> LoopRunResult:
         clock = Clock(-1)
@@ -45,7 +49,8 @@ class SimulationRunner:
             instruments=self.tradable_instruments,
             clock=clock,
             portfolio=self.portfolio,
-            params=self.strategy_params
+            params=self.strategy_params,
+            inference_config=self.inference_config
         )
         data_generator = FeatureStreamGenerator(featurizer_config=self.featurizer_config)
         loop = Loop(
@@ -92,7 +97,7 @@ class SimulationRunner:
                 strategy_class = self.strategy_class,
                 strategy_params = self.strategy_params,
                 tradable_instruments = self.tradable_instruments,
-                inference_config=None # TODO
+                inference_config=self.inference_config
             ) for i in range(num_workers)]
 
             print(f'Inited {len(actors)} worker actors')
@@ -111,6 +116,7 @@ class SimulationRunner:
         agg_trades: Dict[Instrument, List[Trade]] = {} # should be dict
         agg_balances: List[PortfolioBalanceRecord] = []
         agg_prices: Dict[Instrument, List[Tuple[float, float]]] = {} # should be dict
+        agg_inferences: List[Tuple[Any, float]] = []
         # TODO proper aggregation
         for res in results:
             for instrument in res.executed_trades:
@@ -127,14 +133,16 @@ class SimulationRunner:
                 else:
                     agg_prices[instrument] = res.sampled_prices[instrument]
 
+            agg_inferences.extend(res.inference_results)
+
         return LoopRunResult(
             executed_trades=agg_trades,
             portfolio_balances=agg_balances,
-            sampled_prices=agg_prices
+            sampled_prices=agg_prices,
+            inference_results=agg_inferences
         )
 
-
-if __name__ == '__main__':
+def test_buy_low_sell_high():
     featurizer_config_raw = yaml.safe_load(open('./data/feature_stream/test-featurizer-config.yaml', 'r'))
     featurizer_config = FeaturizerConfig(**featurizer_config_raw)
     # TODO derive from featurizer_config
@@ -156,7 +164,8 @@ if __name__ == '__main__':
         portfolio=portfolio,
         strategy_class=BuyLowSellHighStrategy,
         strategy_params=strategy_params,
-        tradable_instruments=tradable_instruments
+        tradable_instruments=tradable_instruments,
+        inference_config=None
     )
 
     start = time.time()
@@ -168,4 +177,53 @@ if __name__ == '__main__':
         portfolio_balances=result.portfolio_balances,
         sampled_prices=result.sampled_prices
     )
+
+    # TODO add inference results
     viz.visualize(instruments=tradable_instruments)
+
+
+def test_ml():
+    featurizer_config_raw = yaml.safe_load(open('./data/feature_stream/test-featurizer-config.yaml', 'r'))
+    featurizer_config = FeaturizerConfig(**featurizer_config_raw)
+    # TODO derive from featurizer_config
+    tradable_instruments = [
+        Instrument('BINANCE', 'spot', 'BTC-USDT'),
+    ]
+    # TODO derive from featurizer_config
+    portfolio = Portfolio.load_config('portfolio-config.yaml')
+    strategy_params = {
+        'buy_delta': 0,
+        'sell_delta': 0,
+    }
+
+    inference_config = InferenceConfig(
+        deployment_name='test-deployment',
+        model_uri='',
+        predictor_class_name='XGBoostPredictor',
+        num_replicas=1
+    )
+
+    runner = SimulationRunner(
+        featurizer_config=featurizer_config,
+        portfolio=portfolio,
+        strategy_class=MLStrategy,
+        strategy_params=strategy_params,
+        tradable_instruments=tradable_instruments,
+        inference_config=inference_config
+    )
+
+    start = time.time()
+    result = runner.run_locally()
+    # result = runner.run_remotely('ray://127.0.0.1:10001', 4)
+    print(f'Finished run in {time.time() - start}s')
+    viz = Visualizer(
+        executed_trades=result.executed_trades,
+        portfolio_balances=result.portfolio_balances,
+        sampled_prices=result.sampled_prices
+    )
+
+    # TODO add inference results
+    viz.visualize(instruments=tradable_instruments)
+
+if __name__ == '__main__':
+    test_buy_low_sell_high()

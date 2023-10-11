@@ -51,7 +51,7 @@ class MLStrategy(BaseStrategy):
         if not self.is_buying:
             if prediction - cur_price < sell_delta:
                 self.is_buying = False
-                return [self.make_order_callable(
+                return [self.make_order(
                     side=OrderSide.SELL,
                     order_type=OrderType.MARKET,
                     instrument=self.instrument,
