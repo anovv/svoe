@@ -172,11 +172,7 @@ def test_buy_low_sell_high():
     # result = runner.run_locally()
     result = runner.run_remotely('ray://127.0.0.1:10001', 4)
     print(f'Finished run in {time.time() - start}s')
-    viz = Visualizer(
-        executed_trades=result.executed_trades,
-        portfolio_balances=result.portfolio_balances,
-        sampled_prices=result.sampled_prices
-    )
+    viz = Visualizer(result)
 
     # TODO add inference results
     viz.visualize(instruments=tradable_instruments)
@@ -198,7 +194,7 @@ def test_ml():
 
     inference_config = InferenceConfig(
         deployment_name='test-deployment',
-        model_uri='',
+        model_uri='/tmp/svoe/mlflow/mlruns/1/211408db196847e2befc331887450660/artifacts/checkpoint_000010',
         predictor_class_name='XGBoostPredictor',
         num_replicas=1
     )
@@ -216,14 +212,10 @@ def test_ml():
     result = runner.run_locally()
     # result = runner.run_remotely('ray://127.0.0.1:10001', 4)
     print(f'Finished run in {time.time() - start}s')
-    viz = Visualizer(
-        executed_trades=result.executed_trades,
-        portfolio_balances=result.portfolio_balances,
-        sampled_prices=result.sampled_prices
-    )
+    viz = Visualizer(result)
 
     # TODO add inference results
     viz.visualize(instruments=tradable_instruments)
 
 if __name__ == '__main__':
-    test_buy_low_sell_high()
+    test_ml()

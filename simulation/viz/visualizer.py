@@ -1,27 +1,22 @@
 import datetime
-from typing import Dict, List, Tuple
+from typing import List
 
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
+from simulation.loop.loop import LoopRunResult
 from simulation.models.instrument import Instrument
 from simulation.models.order import OrderSide
-from simulation.models.portfolio import PortfolioBalanceRecord
-from simulation.models.trade import Trade
 
 
 class Visualizer:
 
     # TODO add inference results
-    def __init__(
-        self,
-        executed_trades: Dict[Instrument, List[Trade]],
-        portfolio_balances: List[PortfolioBalanceRecord],
-        sampled_prices: Dict[Instrument, List[Tuple[float, float]]]
-    ):
-        self.executed_trades = executed_trades
-        self.portfolio_balances = portfolio_balances
-        self.sampled_prices = sampled_prices
+    def __init__(self, loop_run_result: LoopRunResult):
+        self.executed_trades = loop_run_result.executed_trades
+        self.portfolio_balances = loop_run_result.portfolio_balances
+        self.sampled_prices = loop_run_result.sampled_prices
+        self.inference_results = loop_run_result.inference_results
 
     # https://medium.com/geekculture/are-you-a-beginner-in-trading-build-your-first-trading-strategy-with-python-95fef3b313ab
     def visualize(self, instruments: List[Instrument], include_total: bool = True):
@@ -53,6 +48,15 @@ class Visualizer:
             )
             fig.add_trace(prices_trace, start_pos, 1)
 
+            inferences_timestamps = [datetime.datetime.utcfromtimestamp(p[1]) for p in self.inference_results]
+            inferences = [p[0] for p in self.inference_results]
+            inferences_trace = go.Scatter(
+                x=inferences_timestamps,
+                y=inferences,
+                name=f'Inferences'
+            )
+            fig.add_trace(inferences_trace, start_pos, 1)
+
             buy_trades_timestamps = [datetime.datetime.utcfromtimestamp(t.timestamp) for t in self.executed_trades[instrument] if t.side == OrderSide.BUY]
             buy_trades_prices = [t.price for t in self.executed_trades[instrument] if t.side == OrderSide.BUY]
             buy_trace = go.Scatter(
@@ -64,6 +68,7 @@ class Visualizer:
                 hovertemplate=('BUY on %{x}')
             )
             fig.add_trace(buy_trace, start_pos, 1)
+
             sell_trades_timestamps = [datetime.datetime.utcfromtimestamp(t.timestamp) for t in self.executed_trades[instrument] if t.side == OrderSide.SELL]
             sell_trades_prices = [t.price for t in self.executed_trades[instrument] if t.side == OrderSide.SELL]
             sell_trace = go.Scatter(

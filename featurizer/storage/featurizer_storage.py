@@ -41,8 +41,11 @@ class FeaturizerStorage:
                     data_deps.add(d)
 
         data_keys = [d.key for d in data_deps]
-        ranges_meta_per_data_key = self._get_data_sources_meta(data_keys, start_date=start_date, end_date=end_date)
-        if len(data_deps) != 0 and len(ranges_meta_per_data_key) == 0: # TODO raise only for non-synthetic data
+        ranges_meta_per_data_key = {}
+        if len(data_keys) != 0:
+            ranges_meta_per_data_key = self._get_data_sources_meta(data_keys, start_date=start_date, end_date=end_date)
+        # raise only for non-synthetic data
+        if len(data_deps) != 0 and len(ranges_meta_per_data_key) == 0:
             raise ValueError('No data for given time range')
         res = {data: ranges_meta_per_data_key[data.key] for data in data_deps}
 
