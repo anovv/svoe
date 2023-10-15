@@ -38,16 +38,22 @@ class InferenceLoop:
         self.is_running = True
         self.thread = threading.Thread(target=self._loop, daemon=True)
         self.thread.start()
+        t = time.time()
+        while self.latest_inference_result is None:
+            thresh_s = 5
+            if time.time() - t > thresh_s:
+                raise RuntimeError(f'No inference results after {thresh_s}s')
+            time.sleep(1)
+        print('Inference loop started')
 
     def _loop(self):
         while self.is_running:
             self.latest_inference_result = self._make_request()
-            self.latest_inference_ts = time.time()
+            self.latest_inference_ts = time.time() # TODO for backtest this should use backtester's clock
             self.inference_results.append((self.latest_inference_result, self.latest_inference_ts))
             # TODO add sleep?
 
     def _make_request(self) -> Optional[Any]:
-
         # TODO typing?
         feature_values = self.input_values_provider_callable()
         try:

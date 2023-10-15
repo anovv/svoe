@@ -1,5 +1,5 @@
 import uuid
-from typing import List, Optional, Dict
+from typing import List, Optional, Dict, Any
 
 from simulation.clock import Clock
 from simulation.data.data_generator import DataStreamEvent
@@ -29,13 +29,14 @@ class BaseStrategy:
         if self.inference_config is not None:
             self.inference_loop = InferenceLoop(self.get_latest_inference_input_values, self.inference_config)
 
-    def get_latest_inference_input_values(self):
+    def get_latest_inference_input_values(self) -> List[Any]:
         # TODO figure out how to preserve order
         feature_values = []
         if self.latest_data_event is not None:
             for feature in self.latest_data_event.feature_values:
                 for name in self.latest_data_event.feature_values[feature]:
-                    feature_values.append(self.latest_data_event.feature_values[feature][name])
+                    if name not in ['timestamp', 'receipt_timestamp']:
+                        feature_values.append(self.latest_data_event.feature_values[feature][name])
         return feature_values
 
     def run_inference_loop(self):

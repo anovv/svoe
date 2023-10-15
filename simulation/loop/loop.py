@@ -53,7 +53,7 @@ class Loop:
             self.predictor_deployment = start_serve_predictor_deployment(
                 self.strategy.inference_config
             )
-            self.strategy.inference_loop.start()
+            self.strategy.inference_loop.run()
         while self.is_running and self.data_generator.has_next():
             data_event = self.data_generator.next()
             if data_event is not None:

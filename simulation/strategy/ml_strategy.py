@@ -35,7 +35,7 @@ class MLStrategy(BaseStrategy):
 
     def on_data_udf(self, data_event: DataStreamEvent) -> Optional[List[Order]]:
         buy_delta = self.params['buy_delta']
-        sell_delta = self.params['buy_delta']
+        sell_delta = self.params['sell_delta']
         cur_price = FeatureStreamGenerator.get_mid_prices_from_event(data_event)[self.instrument]
         prediction, _ = self.inference_loop.get_latest_inference()
         if self.is_buying:
@@ -50,7 +50,7 @@ class MLStrategy(BaseStrategy):
                 )]
         if not self.is_buying:
             if prediction - cur_price < sell_delta:
-                self.is_buying = False
+                self.is_buying = True
                 return [self.make_order(
                     side=OrderSide.SELL,
                     order_type=OrderType.MARKET,

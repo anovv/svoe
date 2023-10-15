@@ -194,7 +194,7 @@ def test_ml():
 
     inference_config = InferenceConfig(
         deployment_name='test-deployment',
-        model_uri='/tmp/svoe/mlflow/mlruns/1/211408db196847e2befc331887450660/artifacts/checkpoint_000010',
+        model_uri='file:///tmp/svoe/mlflow/mlruns/1/d6e5eccdfedf43f8acd966e4d6d331a4/artifacts/checkpoint_000010',
         predictor_class_name='XGBoostPredictor',
         num_replicas=1
     )
