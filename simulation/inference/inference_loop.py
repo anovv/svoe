@@ -7,6 +7,8 @@ from pydantic import BaseModel
 from ray.train.predictor import Predictor
 from ray.train.xgboost import XGBoostPredictor
 
+from simulation.clock import Clock
+
 SERVE_LOCAL_URL = 'http://127.0.0.1:8000'
 
 
@@ -24,7 +26,8 @@ class InferenceConfig(BaseModel):
 
 
 class InferenceLoop:
-    def __init__(self, input_values_provider_callable: Callable, inference_config: Optional[InferenceConfig] = None):
+    def __init__(self, input_values_provider_callable: Callable, inference_config: Optional[InferenceConfig] = None, clock: Optional[Clock] = None):
+        self.clock = clock
         self.serve_deployment_name = inference_config.deployment_name
         self.is_running = False
         self.thread = None
@@ -49,7 +52,7 @@ class InferenceLoop:
     def _loop(self):
         while self.is_running:
             self.latest_inference_result = self._make_request()
-            self.latest_inference_ts = time.time() # TODO for backtest this should use backtester's clock
+            self.latest_inference_ts = time.time() if self.clock is None else self.clock.now # TODO for backtest this should use backtester's clock
             self.inference_results.append((self.latest_inference_result, self.latest_inference_ts))
             # TODO add sleep?
 

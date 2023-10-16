@@ -48,8 +48,11 @@ class Visualizer:
             )
             fig.add_trace(prices_trace, start_pos, 1)
 
+            self.inference_results = list(filter(lambda r: r[1] > 0, self.inference_results))
+
             inferences_timestamps = [datetime.datetime.utcfromtimestamp(p[1]) for p in self.inference_results]
             inferences = [p[0] for p in self.inference_results]
+
             inferences_trace = go.Scatter(
                 x=inferences_timestamps,
                 y=inferences,

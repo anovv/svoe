@@ -27,7 +27,7 @@ class BaseStrategy:
         self.instruments = instruments
 
         if self.inference_config is not None:
-            self.inference_loop = InferenceLoop(self.get_latest_inference_input_values, self.inference_config)
+            self.inference_loop = InferenceLoop(self.get_latest_inference_input_values, self.inference_config, self.clock)
 
     def get_latest_inference_input_values(self) -> List[Any]:
         # TODO figure out how to preserve order
