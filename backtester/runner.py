@@ -23,7 +23,7 @@ from backtester.strategy.ml_strategy import MLStrategy
 from backtester.viz.visualizer import Visualizer
 
 
-class SimulationRunner:
+class Backtester:
 
     def __init__(
         self,
@@ -68,7 +68,7 @@ class SimulationRunner:
     def run_remotely(self, ray_address: str, num_workers: int) -> Any:
         with ray.init(address=ray_address, ignore_reinit_error=True, runtime_env={
             'pip': ['xgboost', 'xgboost_ray', 'mlflow', 'diskcache', 'pyhumps'],
-            'py_modules': [simulation, common, featurizer, client],
+            'py_modules': [backtester, common, featurizer, client],
 
         }):
             print(f'Starting distributed run with {num_workers} workers...')
@@ -159,7 +159,7 @@ def test_buy_low_sell_high():
         'sell_signal_thresh': 0.05,
     }
 
-    runner = SimulationRunner(
+    backtester = Backtester(
         featurizer_config=featurizer_config,
         portfolio=portfolio,
         strategy_class=BuyLowSellHighStrategy,
@@ -169,8 +169,8 @@ def test_buy_low_sell_high():
     )
 
     start = time.time()
-    # result = runner.run_locally()
-    result = runner.run_remotely('ray://127.0.0.1:10001', 4)
+    # result = backtester.run_locally()
+    result = backtester.run_remotely('ray://127.0.0.1:10001', 4)
     print(f'Finished run in {time.time() - start}s')
     viz = Visualizer(result)
 
@@ -199,7 +199,7 @@ def test_ml():
         num_replicas=1
     )
 
-    runner = SimulationRunner(
+    backtester = Backtester(
         featurizer_config=featurizer_config,
         portfolio=portfolio,
         strategy_class=MLStrategy,
@@ -209,8 +209,8 @@ def test_ml():
     )
 
     start = time.time()
-    result = runner.run_locally()
-    # result = runner.run_remotely('ray://127.0.0.1:10001', 4)
+    result = backtester.run_locally()
+    # result = backtester.run_remotely('ray://127.0.0.1:10001', 4)
     print(f'Finished run in {time.time() - start}s')
     viz = Visualizer(result)
 
