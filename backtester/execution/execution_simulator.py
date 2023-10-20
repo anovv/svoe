@@ -2,12 +2,12 @@ import copy
 import uuid
 from dataclasses import dataclass
 from typing import List, Dict
-from simulation.clock import Clock
-from simulation.data.data_generator import DataStreamGenerator
-from simulation.models.instrument import Instrument, AssetInstrument
-from simulation.models.order import Order, OrderStatus, OrderType, OrderSide
-from simulation.models.portfolio import Portfolio, PortfolioBalanceRecord
-from simulation.models.trade import Trade
+from backtester.clock import Clock
+from backtester.data.data_generator import DataStreamGenerator
+from backtester.models.instrument import Instrument, AssetInstrument
+from backtester.models.order import Order, OrderStatus, OrderType, OrderSide
+from backtester.models.portfolio import Portfolio, PortfolioBalanceRecord
+from backtester.models.trade import Trade
 
 COMMISSION = 0.005 # TODO make dynamic
 

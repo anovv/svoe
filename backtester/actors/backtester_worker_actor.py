@@ -2,24 +2,24 @@ import time
 from typing import Any, Dict, Type, List, Optional
 
 from featurizer.config import FeaturizerConfig
-from simulation.clock import Clock
-from simulation.data.feature_stream.feature_stream_generator import FeatureStreamGenerator
-from simulation.execution.execution_simulator import ExecutionSimulator
-from simulation.inference.inference_loop import InferenceConfig
-from simulation.loop.loop import Loop, LoopRunResult
+from backtester.clock import Clock
+from backtester.data.feature_stream.feature_stream_generator import FeatureStreamGenerator
+from backtester.execution.execution_simulator import ExecutionSimulator
+from backtester.inference.inference_loop import InferenceConfig
+from backtester.loop.loop import Loop, LoopRunResult
 
 import ray
 
-from simulation.models.instrument import Instrument
-from simulation.models.portfolio import Portfolio
-from simulation.strategy.base import BaseStrategy
+from backtester.models.instrument import Instrument
+from backtester.models.portfolio import Portfolio
+from backtester.strategy.base import BaseStrategy
 
 
 # TODO re blocking calls
 # https://stackoverflow.com/questions/56556905/remote-calls-are-blocking-when-used-on-methods-in-an-actor-object
 
 @ray.remote
-class SimulationWorkerActor:
+class BacktesterWorkerActor:
 
     # TODO proper pass inference_config
     def __init__(

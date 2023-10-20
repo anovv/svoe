@@ -3,7 +3,7 @@ from collections import namedtuple
 from pydantic.dataclasses import dataclass, Field
 from typing import Dict
 
-from simulation.models.instrument import AssetInstrument
+from backtester.models.instrument import AssetInstrument
 
 
 # TODO add Ledger class to keep track of all executed Trade instances

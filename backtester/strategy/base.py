@@ -1,12 +1,12 @@
 import uuid
 from typing import List, Optional, Dict, Any
 
-from simulation.clock import Clock
-from simulation.data.data_generator import DataStreamEvent
-from simulation.models.instrument import Instrument
-from simulation.models.order import Order, OrderSide, OrderType, OrderStatus
-from simulation.models.portfolio import Portfolio
-from simulation.inference.inference_loop import InferenceLoop, InferenceConfig
+from backtester.clock import Clock
+from backtester.data.data_generator import DataStreamEvent
+from backtester.models.instrument import Instrument
+from backtester.models.order import Order, OrderSide, OrderType, OrderStatus
+from backtester.models.portfolio import Portfolio
+from backtester.inference.inference_loop import InferenceLoop, InferenceConfig
 
 
 class BaseStrategy:

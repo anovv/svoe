@@ -7,7 +7,7 @@ from pydantic import BaseModel
 from ray.train.predictor import Predictor
 from ray.train.xgboost import XGBoostPredictor
 
-from simulation.clock import Clock
+from backtester.clock import Clock
 
 SERVE_LOCAL_URL = 'http://127.0.0.1:8000'
 

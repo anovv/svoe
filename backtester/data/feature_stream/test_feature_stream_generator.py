@@ -4,7 +4,7 @@ import unittest
 import pandas as pd
 
 from featurizer.config import FeaturizerConfig
-from simulation.data.feature_stream.feature_stream_generator import FeatureStreamGenerator
+from backtester.data.feature_stream.feature_stream_generator import FeatureStreamGenerator
 
 from common.pandas.df_utils import plot_multi
 

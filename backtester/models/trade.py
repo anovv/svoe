@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
-from simulation.models.instrument import Instrument
-from simulation.models.order import OrderSide, OrderType
+from backtester.models.instrument import Instrument
+from backtester.models.order import OrderSide, OrderType
 
 
 @dataclass

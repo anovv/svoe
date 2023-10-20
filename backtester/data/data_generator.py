@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import Dict, List, Tuple
 
 from featurizer.features.feature_tree.feature_tree import Feature
-from simulation.models.instrument import Instrument
+from backtester.models.instrument import Instrument
 
 
 @dataclass

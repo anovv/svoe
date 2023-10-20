@@ -3,14 +3,14 @@ from typing import List, Dict, Tuple, Any, Optional
 
 from ray.serve.deployment import Deployment
 
-from simulation.clock import Clock
-from simulation.data.data_generator import DataStreamGenerator
-from simulation.execution.execution_simulator import ExecutionSimulator
-from simulation.inference.inference import start_serve_predictor_deployment
-from simulation.models.instrument import Instrument
-from simulation.models.portfolio import Portfolio, PortfolioBalanceRecord
-from simulation.models.trade import Trade
-from simulation.strategy.base import BaseStrategy
+from backtester.clock import Clock
+from backtester.data.data_generator import DataStreamGenerator
+from backtester.execution.execution_simulator import ExecutionSimulator
+from backtester.inference.inference import start_serve_predictor_deployment
+from backtester.models.instrument import Instrument
+from backtester.models.portfolio import Portfolio, PortfolioBalanceRecord
+from backtester.models.trade import Trade
+from backtester.strategy.base import BaseStrategy
 
 
 @dataclass

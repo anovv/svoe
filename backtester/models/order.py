@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Optional
 
-from simulation.models.instrument import Instrument
+from backtester.models.instrument import Instrument
 
 
 class OrderStatus(Enum):

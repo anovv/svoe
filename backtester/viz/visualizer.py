@@ -4,9 +4,9 @@ from typing import List
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
-from simulation.loop.loop import LoopRunResult
-from simulation.models.instrument import Instrument
-from simulation.models.order import OrderSide
+from backtester.loop.loop import LoopRunResult
+from backtester.models.instrument import Instrument
+from backtester.models.order import OrderSide
 
 
 class Visualizer:

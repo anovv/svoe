@@ -6,21 +6,21 @@ import yaml
 from ray.util import placement_group, remove_placement_group
 from ray.util.scheduling_strategies import PlacementGroupSchedulingStrategy
 from featurizer.config import FeaturizerConfig, split_featurizer_config
-from simulation.actors.simulation_worker_actor import SimulationWorkerActor
-from simulation.clock import Clock
-from simulation.data.feature_stream.feature_stream_generator import FeatureStreamGenerator
-from simulation.execution.execution_simulator import ExecutionSimulator
-from simulation.inference.inference_loop import InferenceConfig
-from simulation.loop.loop import Loop, LoopRunResult
-from simulation.models.instrument import Instrument
-from simulation.models.portfolio import Portfolio, PortfolioBalanceRecord
-from simulation.models.trade import Trade
-from simulation.strategy.base import BaseStrategy
-from simulation.strategy.buy_low_sell_high import BuyLowSellHighStrategy
+from backtester.actors.backtester_worker_actor import BacktesterWorkerActor
+from backtester.clock import Clock
+from backtester.data.feature_stream.feature_stream_generator import FeatureStreamGenerator
+from backtester.execution.execution_simulator import ExecutionSimulator
+from backtester.inference.inference_loop import InferenceConfig
+from backtester.loop.loop import Loop, LoopRunResult
+from backtester.models.instrument import Instrument
+from backtester.models.portfolio import Portfolio, PortfolioBalanceRecord
+from backtester.models.trade import Trade
+from backtester.strategy.base import BaseStrategy
+from backtester.strategy.buy_low_sell_high import BuyLowSellHighStrategy
 
-import simulation, common, featurizer, client
-from simulation.strategy.ml_strategy import MLStrategy
-from simulation.viz.visualizer import Visualizer
+import backtester, common, featurizer, client
+from backtester.strategy.ml_strategy import MLStrategy
+from backtester.viz.visualizer import Visualizer
 
 
 class SimulationRunner:
@@ -84,7 +84,7 @@ class SimulationRunner:
             featurizer_configs = split_featurizer_config(self.featurizer_config, num_workers)
 
             # TODO proper pass inference_config
-            actors = [SimulationWorkerActor.options(
+            actors = [BacktesterWorkerActor.options(
                 num_cpus=0.9,
                 max_concurrency=10, # wuut?
                 scheduling_strategy=PlacementGroupSchedulingStrategy(
@@ -218,4 +218,5 @@ def test_ml():
     viz.visualize(instruments=tradable_instruments)
 
 if __name__ == '__main__':
-    test_ml()
+    # test_ml()
+    test_buy_low_sell_high()

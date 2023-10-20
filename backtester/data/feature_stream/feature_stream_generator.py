@@ -18,9 +18,8 @@ import featurizer.data_definitions.data_definition as data_def
 
 import concurrent.futures
 
-from simulation.data.data_generator import DataStreamGenerator, DataStreamEvent
-from simulation.models.instrument import Instrument
-# from common.pandas.df_utils import load_df
+from backtester.data.data_generator import DataStreamGenerator, DataStreamEvent
+from backtester.models.instrument import Instrument
 
 # free data https://www.cryptoarchive.com.au/faq
 # https://ccdata.io/

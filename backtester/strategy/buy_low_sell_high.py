@@ -1,13 +1,13 @@
 from typing import List, Dict, Optional, Tuple, Type, Callable
 
-from simulation.clock import Clock
-from simulation.data.data_generator import DataStreamEvent
-from simulation.data.feature_stream.feature_stream_generator import FeatureStreamGenerator
-from simulation.inference.inference_loop import InferenceConfig
-from simulation.models.instrument import Instrument
-from simulation.models.order import Order, OrderSide, OrderType
-from simulation.models.portfolio import Portfolio
-from simulation.strategy.base import BaseStrategy
+from backtester.clock import Clock
+from backtester.data.data_generator import DataStreamEvent
+from backtester.data.feature_stream.feature_stream_generator import FeatureStreamGenerator
+from backtester.inference.inference_loop import InferenceConfig
+from backtester.models.instrument import Instrument
+from backtester.models.order import Order, OrderSide, OrderType
+from backtester.models.portfolio import Portfolio
+from backtester.strategy.base import BaseStrategy
 
 
 class _StatePerInstrument:

@@ -6,7 +6,7 @@ from ray.serve import PredictorDeployment
 from ray.serve.deployment import Deployment
 from ray.train.predictor import Predictor
 
-from simulation.inference.inference_loop import InferenceConfig
+from backtester.inference.inference_loop import InferenceConfig
 
 
 # TODO http options

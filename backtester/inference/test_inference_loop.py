@@ -1,7 +1,7 @@
 from typing import List, Any
 
-from simulation.inference.inference import start_serve_predictor_deployment
-from simulation.inference.inference_loop import InferenceConfig, InferenceLoop
+from backtester.inference.inference import start_serve_predictor_deployment
+from backtester.inference.inference_loop import InferenceConfig, InferenceLoop
 
 inference_config = InferenceConfig(
     deployment_name='test-deployment',

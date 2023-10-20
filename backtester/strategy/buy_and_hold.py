@@ -1,8 +1,8 @@
 from typing import List, Optional
 
-from simulation.data.data_generator import DataStreamEvent
-from simulation.models.order import Order
-from simulation.strategy.base import BaseStrategy
+from backtester.data.data_generator import DataStreamEvent
+from backtester.models.order import Order
+from backtester.strategy.base import BaseStrategy
 
 
 class BuyAndHoldStrategy(BaseStrategy):

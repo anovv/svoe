@@ -3,8 +3,8 @@ import yaml
 from pydantic.dataclasses import dataclass
 from typing import List, Dict
 
-from simulation.models.instrument import AssetInstrument
-from simulation.models.wallet import Wallet, WalletBalance
+from backtester.models.instrument import AssetInstrument
+from backtester.models.wallet import Wallet, WalletBalance
 
 
 @dataclass
