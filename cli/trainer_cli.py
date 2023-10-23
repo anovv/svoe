@@ -13,6 +13,7 @@ TRAINER_CLI_NAME = 'trainer'
 trainer_app = typer.Typer()
 mlflow_client = SvoeMLFlowClient() # TODO configure tracking uri
 
+
 @trainer_app.command()
 def run(config_path: str, ray_address: Annotated[str, typer.Argument(default=DEFAULT_LOCAL_RAY_ADDRESS)] = DEFAULT_LOCAL_RAY_ADDRESS):
     config = TrainerConfig.load_config(config_path)

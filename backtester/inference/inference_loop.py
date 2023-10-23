@@ -3,6 +3,7 @@ import time
 from typing import Optional, Dict, Tuple, Any, Callable, Type
 
 import requests
+import yaml
 from pydantic import BaseModel
 from ray.train.predictor import Predictor
 from ray.train.xgboost import XGBoostPredictor
@@ -23,6 +24,11 @@ class InferenceConfig(BaseModel):
             return XGBoostPredictor
         else:
             raise ValueError(f'Unsupported predictor class: {self.predictor_class_name}')
+
+    def load_config(cls, path: str) -> 'InferenceConfig':
+        with open(path, 'r') as stream:
+            d = yaml.safe_load(stream)
+            return InferenceConfig.parse_obj(d)
 
 
 class InferenceLoop:

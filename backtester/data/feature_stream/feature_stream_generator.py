@@ -24,6 +24,7 @@ from backtester.models.instrument import Instrument
 # free data https://www.cryptoarchive.com.au/faq
 # https://ccdata.io/
 
+
 class FeatureStreamGenerator(DataStreamGenerator):
 
     NUM_IO_THREADS = 16

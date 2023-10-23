@@ -12,6 +12,7 @@ class DataStreamEvent:
     feature_values: Dict[Feature, Dict[str, float]]
 
 
+# TODO deprecate this
 class DataStreamGenerator:
 
     def next(self) -> DataStreamEvent:

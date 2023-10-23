@@ -1,8 +1,10 @@
+import importlib
 import time
 from typing import List, Any, Dict, Type, Tuple, Optional
 
 import ray
 import yaml
+from pydantic import BaseModel
 from ray.util import placement_group, remove_placement_group
 from ray.util.scheduling_strategies import PlacementGroupSchedulingStrategy
 from featurizer.config import FeaturizerConfig, split_featurizer_config
@@ -21,6 +23,58 @@ from backtester.strategy.buy_low_sell_high import BuyLowSellHighStrategy
 import backtester, common, featurizer, client
 from backtester.strategy.ml_strategy import MLStrategy
 from backtester.viz.visualizer import Visualizer
+
+
+class BacktesterConfig(BaseModel):
+    featurizer_config: Optional[FeaturizerConfig]
+    featurizer_config_path: Optional[str]
+    portfolio: Optional[Portfolio]
+    portfolio_path: Optional[str]
+    inference_config: Optional[InferenceConfig]
+    inference_config_path: Optional[str]
+    tradable_instruments_params: Optional[List[Dict]]
+    tradable_instruments: Optional[List[Instrument]]
+    strategy_class: Optional[Type[BaseStrategy]]
+    strategy_class_name: Optional[str]
+    strategy_params: Optional[Dict]
+
+    @classmethod
+    def load_config(cls, path: str) -> 'BacktesterConfig':
+
+        with open(path, 'r') as stream:
+            d = yaml.safe_load(stream)
+            c = BacktesterConfig.parse_obj(d)
+            if c.featurizer_config_path is not None:
+                if c.featurizer_config is not None:
+                    raise ValueError('Provide either featurizer_config or featurizer_config_path')
+                c.featurizer_config = FeaturizerConfig.load_config(c.featurizer_config_path)
+
+            if c.portfolio_path is not None:
+                if c.portfolio is not None:
+                    raise ValueError('Provide either portfolio_path or portfolio')
+                c.portfolio = Portfolio.load_config(c.portfolio_path)
+
+            if c.inference_config_path is not None:
+                if c.inference_config is not None:
+                    raise ValueError('Provide either inference_config_path or inference_config')
+                c.inference_config = InferenceConfig.load_config(c.inference_config_path)
+
+            if c.strategy_class_name is not None:
+                if c.strategy_class is not None:
+                    raise ValueError('Provide either strategy_class_name or strategy_class')
+                components = c.strategy_class_name.split('.')
+                class_name = components[-1]
+                module_name = c.strategy_class_name.removesuffix(f'.{class_name}')
+                module = importlib.import_module(module_name)
+                c.strategy_class = getattr(module, class_name)
+
+            if c.tradable_instruments_params is not None:
+                if c.tradable_instruments is not None:
+                    raise ValueError('Provide either tradable_instruments or tradable_instruments_params')
+
+                c.tradable_instruments = list(map(lambda d: Instrument(**d), c.tradable_instruments_params))
+
+            return c
 
 
 class Backtester:
@@ -42,9 +96,20 @@ class Backtester:
         self.tradable_instruments = tradable_instruments
         self.inference_config = inference_config
 
+
+    @classmethod
+    def from_config(cls, backtester_config: BacktesterConfig) -> 'Backtester':
+        return Backtester(
+            featurizer_config=backtester_config.featurizer_config,
+            portfolio=backtester_config.portfolio,
+            strategy_class=backtester_config.strategy_class,
+            strategy_params=backtester_config.strategy_params,
+            tradable_instruments=backtester_config.tradable_instruments,
+            inference_config=backtester_config.inference_config
+        )
+
     def run_locally(self) -> LoopRunResult:
         clock = Clock(-1)
-        # TODO proper pass inference_config
         strategy: BaseStrategy = self.strategy_class(
             instruments=self.tradable_instruments,
             clock=clock,
@@ -66,6 +131,7 @@ class Backtester:
             loop.stop()
 
     def run_remotely(self, ray_address: str, num_workers: int) -> Any:
+        # TODO this is not needed
         with ray.init(address=ray_address, ignore_reinit_error=True, runtime_env={
             'pip': ['xgboost', 'xgboost_ray', 'mlflow', 'diskcache', 'pyhumps'],
             'py_modules': [backtester, common, featurizer, client],
@@ -83,7 +149,6 @@ class Backtester:
 
             featurizer_configs = split_featurizer_config(self.featurizer_config, num_workers)
 
-            # TODO proper pass inference_config
             actors = [BacktesterWorkerActor.options(
                 num_cpus=0.9,
                 max_concurrency=10, # wuut?
@@ -141,6 +206,7 @@ class Backtester:
             sampled_prices=agg_prices,
             inference_results=agg_inferences
         )
+
 
 def test_buy_low_sell_high():
     featurizer_config_raw = yaml.safe_load(open('./data/feature_stream/test-featurizer-config.yaml', 'r'))
@@ -216,6 +282,7 @@ def test_ml():
 
     # TODO add inference results
     viz.visualize(instruments=tradable_instruments)
+
 
 if __name__ == '__main__':
     # test_ml()
