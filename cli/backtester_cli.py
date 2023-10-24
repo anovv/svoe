@@ -6,7 +6,6 @@ import typer
 from backtester.runner import BacktesterConfig, Backtester
 from backtester.viz.visualizer import Visualizer
 from common.const import DEFAULT_LOCAL_RAY_ADDRESS
-from trainer.trainer_manager import TrainerConfig, TrainerManager
 
 BACKTESTER_CLI_NAME = 'backtester'
 backtester_app = typer.Typer()

@@ -1,0 +1,11 @@
+featurizer_config_path: '/Users/anov/IdeaProjects/svoe/backtester/data/feature_stream/test-featurizer-config.yaml'
+portfolio_path: '/Users/anov/IdeaProjects/svoe/backtester/sample_configs/portfolio-config.yaml'
+inference_config_path: '/Users/anov/IdeaProjects/svoe/backtester/sample_configs/inference-config.yaml'
+tradable_instruments_params:
+  - exchange: 'BINANCE'
+    instrument_type: 'spot'
+    symbol: 'BTC-USDT'
+strategy_class_name: 'backtester.strategy.ml_strategy.MLStrategy'
+strategy_params:
+  buy_delta: 0
+  sell_delta: 0

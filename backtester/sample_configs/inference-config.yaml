@@ -1,0 +1,4 @@
+deployment_name: 'test-deployment'
+model_uri: 'file:///tmp/svoe/mlflow/mlruns/1/ac1fa6eb2a3b4edfbf29cfd208ea0a63/artifacts/checkpoint_000010'
+predictor_class_name: 'XGBoostPredictor'
+num_replicas: 1

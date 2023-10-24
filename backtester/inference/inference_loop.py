@@ -25,6 +25,7 @@ class InferenceConfig(BaseModel):
         else:
             raise ValueError(f'Unsupported predictor class: {self.predictor_class_name}')
 
+    @classmethod
     def load_config(cls, path: str) -> 'InferenceConfig':
         with open(path, 'r') as stream:
             d = yaml.safe_load(stream)

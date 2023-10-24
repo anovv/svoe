@@ -131,7 +131,7 @@ class Backtester:
             loop.stop()
 
     def run_remotely(self, ray_address: str, num_workers: int) -> Any:
-        # TODO this is not needed
+        # TODO this is not needed for local env
         with ray.init(address=ray_address, ignore_reinit_error=True, runtime_env={
             'pip': ['xgboost', 'xgboost_ray', 'mlflow', 'diskcache', 'pyhumps'],
             'py_modules': [backtester, common, featurizer, client],
@@ -219,7 +219,7 @@ def test_buy_low_sell_high():
         Instrument('BINANCE', 'spot', 'XRP-USDT'),
     ]
     # TODO derive from featurizer_config
-    portfolio = Portfolio.load_config('portfolio-config.yaml')
+    portfolio = Portfolio.load_config('sample_configs/portfolio-config.yaml')
     strategy_params = {
         'buy_signal_thresh': 0.05,
         'sell_signal_thresh': 0.05,
@@ -252,7 +252,7 @@ def test_ml():
         Instrument('BINANCE', 'spot', 'BTC-USDT'),
     ]
     # TODO derive from featurizer_config
-    portfolio = Portfolio.load_config('portfolio-config.yaml')
+    portfolio = Portfolio.load_config('sample_configs/portfolio-config.yaml')
     strategy_params = {
         'buy_delta': 0,
         'sell_delta': 0,
