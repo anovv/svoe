@@ -33,6 +33,7 @@ def load_split_catalog_store_df(
     chunk_size_kb: int,
     date_str: str, # TODO date -> day
     db_actor: DbActor,
+    data_store_adapter: DataStoreAdapter,
     callback: Optional[Callable] = None
 ) -> Dict:
     path = input_item[DataSourceBlockMetadata.path.name]
@@ -64,7 +65,6 @@ def load_split_catalog_store_df(
     executor = concurrent.futures.ThreadPoolExecutor(max_workers=STORE_PARALLELISM)
     store_futures = []
 
-    local_data_store_adapter = LocalDataStoreAdapter()
     for split in gen:
         item_split = input_item.copy()
 
@@ -81,7 +81,7 @@ def load_split_catalog_store_df(
 
         data_source_block_metadata = make_data_source_block_metadata(split, item_split)
         store_futures.append(
-            executor.submit(functools.partial(store_df, df=split, path=data_source_block_metadata.path, data_store_adapter=local_data_store_adapter, callback=callback))
+            executor.submit(functools.partial(store_df, df=split, path=data_source_block_metadata.path, data_store_adapter=data_store_adapter, callback=callback))
         )
 
         metadata_items.append(data_source_block_metadata)
