@@ -2,6 +2,11 @@
 
 ## Overview
 
+Featurizer is a framework which combines feature storage, feature calculation engine and user facing
+SDKs and configs to define features for real-time and batch (historical) processing on time series data.
+It is build on top of Ray and leverages Ray's distributed memory to produce feature sets/feature-lable sets for
+ML training.
+
 ## Key features
 
 - Flexible computation model: define modular FeatureDefinition’s to calculate features on historical data as well as live data streams using the same code
