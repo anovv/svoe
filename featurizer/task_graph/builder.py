@@ -11,7 +11,7 @@ from featurizer.blocks.blocks import meta_to_interval, interval_to_meta, get_ove
     intervals_almost_equal
 from portion import Interval, IntervalDict, closed
 
-from featurizer.calculator.tasks import calculate_feature, load_if_needed, bind_and_cache, context, \
+from featurizer.task_graph.tasks import calculate_feature, load_if_needed, bind_and_cache, context, \
     lookahead_shift_blocks, point_in_time_join_block, load_and_preprocess, gen_synth_events
 from common.time.utils import convert_str_to_seconds
 from featurizer.storage.data_store_adapter.data_store_adapter import DataStoreAdapter
@@ -285,7 +285,6 @@ def build_feature_label_set_task_graph(
     stored_feature_blocks_meta: Optional[Dict[Feature, Dict[Interval, BlockMeta]]] = None,
     result_owner: Optional[ray.actor.ActorHandle] = None
 ) -> Dict[Interval, Dict[Interval, DAGNode]]:
-    print(features)
     dag = build_feature_set_task_graph(
         features=features,
         data_ranges_meta=data_ranges_meta,

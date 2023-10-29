@@ -1,31 +1,32 @@
 import ray
 from portion import closed
 
-import calculator as C
+import builder as B
 import common.streamz.stream_utils
+from common.const import Fields
 from featurizer.actors.cache_actor import create_cache_actor
-from featurizer.calculator.executor import execute_graph
-from featurizer.calculator.tasks import merge_blocks
+from featurizer.task_graph.executor import execute_graph
+from featurizer.task_graph.tasks import merge_blocks
 from featurizer.storage.featurizer_storage import FeaturizerStorage
 from featurizer.data_definitions.common.l2_book_incremental.cryptotick.cryptotick_l2_book_incremental import CryptotickL2BookIncrementalData
 from featurizer.features.definitions.spread.relative_bid_ask_spread_fd.relative_bid_ask_spread_fd import RelativeBidAskSpreadFD
 from featurizer.features.definitions.tvi.trade_volume_imb_fd.trade_volume_imb_fd import TradeVolumeImbFD
 from featurizer.features.definitions.volatility.volatility_stddev_fd.volatility_stddev_fd import VolatilityStddevFD
 
-from featurizer.sql.data_catalog.models import DataCatalog
 from featurizer.features.definitions.l2_book.l2_snapshot_fd.l2_snapshot_fd import L2SnapshotFD
-from featurizer.features.definitions.mid_price.mid_price_fd.mid_price_fd import MidPriceFD
+from featurizer.features.definitions.price.mid_price_fd.mid_price_fd import MidPriceFD
 from featurizer.features.feature_tree.feature_tree import construct_feature, Feature, construct_stream_tree
 
 import unittest
 import pandas as pd
 from typing import List
 from featurizer.featurizer_utils.testing_utils import mock_feature, mock_ts_df_remote
-from common.pandas.df_utils import concat, load_df, plot_multi
+from common.pandas.df_utils import concat, plot_multi
+from common.s3.s3_utils import load_df_s3
 from featurizer.blocks.blocks import merge_asof_multi
 
 
-class TestFeatureCalculator(unittest.TestCase):
+class TestFeaturizerTaskGraph(unittest.TestCase):
 
     def test_point_in_time_join(self):
         label_feature = mock_feature(1)
@@ -55,7 +56,7 @@ class TestFeatureCalculator(unittest.TestCase):
         }
 
         # distributed
-        nodes = C.point_in_time_join_dag(dag, list(dag.keys()), label_feature)
+        nodes = B.point_in_time_join_dag(dag, list(dag.keys()), label_feature)
         with ray.init(address='auto'):
             # execute dag
             nodes_flattened = []
@@ -94,7 +95,7 @@ class TestFeatureCalculator(unittest.TestCase):
         sources = {data: tree[data]}
 
         path = 's3://svoe-cataloged-data/l2_book/BINANCE/spot/BTC-USDT/2023-02-01/cryptotick/100.0mb/1675216068-40f26fdc1fafb2c056fc77f76609049ce0a47944.parquet.gz'
-        df = load_df(path)
+        df = load_df_s3(path)
         merged_events = merge_blocks({data: [df]})
         online_res = common.streamz.stream_utils.run_named_events_stream(merged_events, sources, stream)
         print(online_res)
@@ -111,10 +112,10 @@ class TestFeatureCalculator(unittest.TestCase):
         feature_params3 = {2: {'dep_schema': 'cryptotick', 'sampling': '1s'}}
         feature_params4 = {1: {'dep_schema': 'cryptotick', 'sampling': '1s'}}
         data_params = [
-            {DataCatalog.exchange.name: 'BINANCE',
-            DataCatalog.data_type.name: 'l2_book',
-            DataCatalog.instrument_type.name: 'spot',
-            DataCatalog.symbol.name: 'BTC-USDT'}
+            {Fields.EXCHANGE: 'BINANCE',
+            Fields.DATA_TYPE: 'l2_book',
+            Fields.INSTRUMENT_TYPE: 'spot',
+            Fields.SYMBOL: 'BTC-USDT'}
         ]
         feature_l2_snap = construct_feature(L2SnapshotFD, {
             'data_source': data_params,
@@ -141,9 +142,9 @@ class TestFeatureCalculator(unittest.TestCase):
 
         cache = {}
         features_to_store = []
-        task_graph = C.build_feature_set_task_graph(features, data_ranges_meta, cache, features_to_store, stored_features_meta)
+        task_graph = B.build_feature_set_task_graph(features, data_ranges_meta, cache, features_to_store, stored_features_meta)
         label_feature = feature_mid_price
-        joined_task_graph = C.point_in_time_join_dag(task_graph, features, label_feature)
+        joined_task_graph = B.point_in_time_join_dag(task_graph, features, label_feature)
         with ray.init(address='auto', ignore_reinit_error=True):
             create_cache_actor(cache)
             refs = execute_graph(joined_task_graph)
@@ -190,16 +191,16 @@ class TestFeatureCalculator(unittest.TestCase):
         feature_params2 = {1: {'dep_schema': 'cryptotick', 'sampling': '1s'}}
         feature_params3 = {2: {'dep_schema': 'cryptotick', 'sampling': '1s'}}
         data_params1 = [
-            {DataCatalog.exchange.name: 'BINANCE',
-             DataCatalog.data_type.name: 'trades',
-             DataCatalog.instrument_type.name: 'spot',
-             DataCatalog.symbol.name: 'BTC-USDT'}
+            {Fields.EXCHANGE: 'BINANCE',
+             Fields.DATA_TYPE: 'trades',
+             Fields.INSTRUMENT_TYPE: 'spot',
+             Fields.SYMBOL: 'BTC-USDT'}
         ]
         data_params2 = [
-            {DataCatalog.exchange.name: 'BINANCE',
-             DataCatalog.data_type.name: 'l2_book',
-             DataCatalog.instrument_type.name: 'spot',
-             DataCatalog.symbol.name: 'BTC-USDT'}
+            {Fields.EXCHANGE: 'BINANCE',
+             Fields.DATA_TYPE: 'l2_book',
+             Fields.INSTRUMENT_TYPE: 'spot',
+             Fields.SYMBOL: 'BTC-USDT'}
         ]
         feature_mid_price = construct_feature(MidPriceFD, {
             'data_source': data_params2,
@@ -224,11 +225,11 @@ class TestFeatureCalculator(unittest.TestCase):
 
         cache = {}
         features_to_store = [feature_tvi]
-        task_graph = C.build_feature_set_task_graph(features, data_ranges_meta, cache, features_to_store,
+        task_graph = B.build_feature_set_task_graph(features, data_ranges_meta, cache, features_to_store,
                                                     stored_features_meta)
 
         label_feature = feature_mid_price
-        joined_task_graph = C.point_in_time_join_dag(task_graph, features, label_feature)
+        joined_task_graph = B.point_in_time_join_dag(task_graph, features, label_feature)
         with ray.init(address='auto', ignore_reinit_error=True):
             create_cache_actor(cache)  # assign to unused var so it stays in Ray's scope
             refs = execute_graph(joined_task_graph)
@@ -270,7 +271,7 @@ class TestFeatureCalculator(unittest.TestCase):
 
         input_dag[range_interval] = nodes
 
-        lookahead_graph = C.build_lookahead_graph(input_dag, lookahead)
+        lookahead_graph = B.build_lookahead_graph(input_dag, lookahead)
 
         with ray.init(address='auto', ignore_reinit_error=True):
             refs = execute_graph(lookahead_graph)
@@ -291,10 +292,10 @@ class TestFeatureCalculator(unittest.TestCase):
         feature_params1 = {1: {'dep_schema': 'cryptotick', 'sampling': '1s'}}
         feature_params2 = {2: {'dep_schema': 'cryptotick', 'sampling': '1s'}}
         data_params = [
-            {DataCatalog.exchange.name: 'BINANCE',
-             DataCatalog.data_type.name: 'l2_book',
-             DataCatalog.instrument_type.name: 'spot',
-             DataCatalog.symbol.name: 'BTC-USDT'}
+            {Fields.EXCHANGE: 'BINANCE',
+             Fields.DATA_TYPE: 'l2_book',
+             Fields.INSTRUMENT_TYPE: 'spot',
+             Fields.SYMBOL: 'BTC-USDT'}
         ]
 
         feature_mid_price = construct_feature(MidPriceFD, {
@@ -315,7 +316,7 @@ class TestFeatureCalculator(unittest.TestCase):
 
         cache = {}
         label_feature = feature_mid_price
-        dag = C.build_feature_label_set_task_graph(
+        dag = B.build_feature_label_set_task_graph(
             features=features,
             label=label_feature,
             label_lookahead='4s',
@@ -338,10 +339,10 @@ class TestFeatureCalculator(unittest.TestCase):
         storage = FeaturizerStorage()
         feature_params1 = {0: {'window': '1m', 'sampling': '1s'}}
         data_params1 = [
-            {DataCatalog.exchange.name: 'BINANCE',
-             DataCatalog.data_type.name: 'trades',
-             DataCatalog.instrument_type.name: 'spot',
-             DataCatalog.symbol.name: 'BTC-USDT'}
+            {Fields.EXCHANGE: 'BINANCE',
+             Fields.DATA_TYPE: 'trades',
+             Fields.INSTRUMENT_TYPE: 'spot',
+             Fields.SYMBOL: 'BTC-USDT'}
         ]
         feature_tvi = construct_feature('tvi.trade_volume_imb_fd', {
             'data_source': data_params1,
@@ -359,14 +360,14 @@ class TestFeatureCalculator(unittest.TestCase):
         cache = {}
         # features_to_store = [feature_tvi]
         features_to_store = []
-        task_graph = C.build_feature_set_task_graph(features, data_ranges_meta, cache, features_to_store,
+        task_graph = B.build_feature_set_task_graph(features, data_ranges_meta, cache, features_to_store,
                                                     stored_features_meta)
         print(task_graph)
 
 
 if __name__ == '__main__':
     # unittest.main()
-    t = TestFeatureCalculator()
+    t = TestFeaturizerTaskGraph()
     # t.test_featurization(L2BookSnapshotFeatureDefinition, L2BookDeltasData)
     # t.test_featurization(OHLCVFeatureDefinition, TradesData)
     # t.test_point_in_time_join()

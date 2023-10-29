@@ -8,7 +8,7 @@ from streamz import Stream
 from common.time.utils import split_time_range_between_ts, ts_to_str_date
 from featurizer.blocks.blocks import BlockRangeMeta, BlockRange, ranges_to_interval_dict, get_overlaps, \
     prune_overlaps, meta_to_interval
-from featurizer.calculator.tasks import merge_blocks
+from featurizer.task_graph.tasks import merge_blocks
 from featurizer.config import FeaturizerConfig
 from featurizer.features.feature_tree.feature_tree import construct_feature, Feature, construct_stream_tree
 from featurizer.storage.data_store_adapter.data_store_adapter import DataStoreAdapter

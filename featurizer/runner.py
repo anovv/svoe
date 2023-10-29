@@ -5,8 +5,8 @@ import pyarrow
 
 from common.pandas.df_utils import concat, downsample_uniform
 from featurizer.actors.cache_actor import get_cache_actor, create_cache_actor
-from featurizer.calculator.calculator import build_feature_label_set_task_graph
-from featurizer.calculator.executor import execute_graph
+from featurizer.task_graph.builder import build_feature_label_set_task_graph
+from featurizer.task_graph.executor import execute_graph
 from featurizer.sql.db_actor import create_db_actor
 from featurizer.storage.featurizer_storage import FeaturizerStorage
 from featurizer.config import FeaturizerConfig
