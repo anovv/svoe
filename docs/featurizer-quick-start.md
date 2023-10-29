@@ -35,15 +35,22 @@
           sampling: 1s
   ```
 - Run Featurizer
-  * CLI: svoe featurizer run <path_to_config>
-  * Python API: Featurizer.run(path='path_to_config')
+  * CLI: ```svoe featurizer run <path_to_config>```
+  * Python API: ```Featurizer.run(path='path_to_config')```
   
   Featurizer will compile a graph of tasks, execute it in a distributed manner over the cluster and store
-  the resulted distributed dataframe (FeatureLabelSet) in clutser memory and optionally in persistent storage.
+  the resulted distributed dataframe (FeatureLabelSet) in cluster memory and optionally in persistent storage.
   The above config will result in following dataframe: 
   
   ```
-  TODO show dataframe here
+          timestamp  receipt_timestamp  label_mid_price-mid_price  mid_price-mid_price  feature_VolatilityStddevFD_62271b09-volatility
+  0     1.675234e+09       1.675234e+09                  23084.800            23084.435                                        0.000547
+  1     1.675234e+09       1.675234e+09                  23083.760            23084.355                                        0.040003
+  2     1.675234e+09       1.675234e+09                  23083.505            23084.635                                        0.117757
+  3     1.675234e+09       1.675234e+09                  23084.610            23085.020                                        0.257091
+  4     1.675234e+09       1.675234e+09                  23084.725            23084.800                                        0.242034
+  ...            ...                ...                        ...                  ...                                             ...
+
   ```
   
 
