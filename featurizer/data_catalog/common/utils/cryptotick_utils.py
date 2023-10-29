@@ -8,7 +8,7 @@ from featurizer.data_definitions.common.trades.trades import TradesData
 from featurizer.features.feature_tree.feature_tree import Feature
 from featurizer.sql.models.data_source_block_metadata import DataSourceBlockMetadata
 from featurizer.sql.models.data_source_metadata import DataSourceMetadata
-from simulation.models.instrument import Instrument
+from backtester.models.instrument import Instrument
 
 CRYPTOTICK_RAW_BUCKET_NAME = 'svoe-cryptotick-data'
 

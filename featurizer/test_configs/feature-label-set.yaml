@@ -1,22 +1,22 @@
-start_date: '2023-02-01 10:00:00'
-end_date: '2023-02-01 11:00:00'
+#start_date: '2023-02-01 10:00:00'
+#end_date: '2023-02-01 11:00:00'
 label_feature_index: 1
 label_lookahead: '5s'
 #features_to_store: [0, 1, 2]
 #features_to_store: [0, 1]
 feature_configs:
-  - feature_definition: transforms.diff
-    name: mid_price_5s_diff
-    params:
-      window: 5s
-    deps:
-      - mid_price
-  - feature_definition: transforms.diff
-    name: mid_price_1s_diff
-    params:
-      window: 1100ms
-    deps:
-      - mid_price
+#  - feature_definition: transforms.diff
+#    name: mid_price_5s_diff
+#    params:
+#      window: 5s
+#    deps:
+#      - mid_price
+#  - feature_definition: transforms.diff
+#    name: mid_price_1s_diff
+#    params:
+#      window: 1100ms
+#    deps:
+#      - mid_price
   - feature_definition: price.mid_price_fd
     name: mid_price
     params:
@@ -28,12 +28,13 @@ feature_configs:
         1:
           dep_schema: cryptotick
           sampling: 1s
-#  - feature_definition: volatility.volatility_stddev_fd
-#    data_params: *id001
-#    feature_params:
-#      2:
-#        dep_schema: cryptotick
-#        sampling: 1s
+  - feature_definition: volatility.volatility_stddev_fd
+    params:
+      data_source:  *id001
+      feature:
+        2:
+          dep_schema: cryptotick
+          sampling: 1s
 #  - feature_definition: l2_book.l2_snapshot_fd
 #    name: l2_snapshot
 #    params:

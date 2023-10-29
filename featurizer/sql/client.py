@@ -62,6 +62,10 @@ class FeaturizerSqlClient(SqlClient):
         print(f'Checked db for items: {len(non_exist)} not in DB')
         return meta, non_exist
 
+    def select_all_TEST(self):
+        session = Session()
+        return session.query(DataSourceBlockMetadata).all()
+
     # api methods
     def select_data_source_metadata(
         self,
@@ -71,7 +75,6 @@ class FeaturizerSqlClient(SqlClient):
         start_day: Optional[str] = None,
         end_day: Optional[str] = None
     ) -> List[Dict]:
-        # TODO instrument_extra
         args = {}
         if compaction is not None:
             args[DataSourceBlockMetadata.compaction.name] = compaction
