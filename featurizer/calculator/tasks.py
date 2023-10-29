@@ -227,7 +227,6 @@ def point_in_time_join_block(
     label_feature: Optional[Feature],
     result_owner: Optional[ray.actor.ActorHandle] = None
 ) -> ObjectRef[pd.DataFrame]: # TODO is it the same as pd.DataFrame
-
     # TODO this loads all dfs at once,
     # TODO can we do it iteratively so gc has time to collect old dfs to reduce mem footprint? (tradeoff speed/memory)
     print('Join started')

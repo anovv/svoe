@@ -285,6 +285,7 @@ def build_feature_label_set_task_graph(
     stored_feature_blocks_meta: Optional[Dict[Feature, Dict[Interval, BlockMeta]]] = None,
     result_owner: Optional[ray.actor.ActorHandle] = None
 ) -> Dict[Interval, Dict[Interval, DAGNode]]:
+    print(features)
     dag = build_feature_set_task_graph(
         features=features,
         data_ranges_meta=data_ranges_meta,
@@ -292,7 +293,6 @@ def build_feature_label_set_task_graph(
         features_to_store=features_to_store,
         stored_feature_blocks_meta=stored_feature_blocks_meta
     )
-    print(dag)
     label_feature = None
     if label is not None:
         lookahead_dag = build_lookahead_graph(dag[label], label_lookahead)
@@ -301,4 +301,7 @@ def build_feature_label_set_task_graph(
         print(lookahead_dag)
         dag[label_feature] = lookahead_dag
         features.append(label_feature)
+
+    # for k in dag.keys():
+    #     print(k, k.key, k._is_label, k.name)
     return point_in_time_join_dag(dag, features, label_feature, result_owner=result_owner)

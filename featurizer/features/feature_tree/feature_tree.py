@@ -30,8 +30,6 @@ class Feature:
 
     def __repr__(self):
         if self.name is not None:
-            if self._is_label:
-                return f'label_{self.name}'
             return self.name
         short_key = self.key[:8]
         if self._is_label:
@@ -72,14 +70,17 @@ class Feature:
     def make_label(cls, feature: 'Feature') -> 'Feature':
         l = deepcopy(feature)
         l._is_label = True
+        if l.name is not None:
+            l.name = 'label_' + l.name
         # recalc feature key
         l.key = _calculate_key(l)
         return l
 
 
 def _calculate_key(feature: Feature) -> str:
-    if feature.name is not None:
-        return joblib.hash(feature.name)
+    # TODO feature name should not be used as a hash? what if we have derived feature same as named?
+    # if feature.name is not None:
+    #     return joblib.hash(feature.name)
     # TODO update when versioning is supported
     dep_hashes = []
     for dep_feature in feature.children:
