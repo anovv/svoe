@@ -12,7 +12,8 @@ nav:
   - Featurizer:
       - Overview: featurizer-overview.md
       - Quick Start: featurizer-quick-start.md
-      - Feature Definitions: featurizer-feature-definition.md
+      - Features and Feature Definitions: featurizer-feature-definition.md
+      - Data Source Definitions and Data Ingest: featurizer-data-source-definitions-and-data-ingest.md
       - Storage and Data Models: featurizer-storage.md
       - Task Graph Compilation and Execution: featurizer-task-graph.md
       - Real-time data and Streaming: featurizer-streaming.md
