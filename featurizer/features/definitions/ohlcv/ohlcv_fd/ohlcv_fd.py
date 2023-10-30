@@ -102,7 +102,12 @@ class OHLCVFD(FeatureDefinition):
 
     # TODO write tests and fix this, this is wrong
     @classmethod
-    def group_dep_ranges(cls, ranges: List[BlockMeta], feature: 'Feature', dep_feature: 'Feature') -> IntervalDict:
+    def group_dep_ranges(
+        cls,
+        feature: Feature,
+        dep_ranges: Dict[Feature, List[BlockMeta]]
+    ) -> IntervalDict:
+        ranges = list(dep_ranges.values())[0]
         # TODO we assume no holes here
         # TODO figure out default settings
         window = feature.params.get('window', '1m')

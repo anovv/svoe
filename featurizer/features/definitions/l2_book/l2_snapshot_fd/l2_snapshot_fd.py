@@ -107,7 +107,12 @@ class L2SnapshotFD(FeatureDefinition):
 
     # TODO test this
     @classmethod
-    def  group_dep_ranges(cls, ranges: List[BlockMeta], feature: Feature, dep_feature: Feature) -> IntervalDict:
+    def group_dep_ranges(
+        cls,
+        feature: Feature,
+        dep_ranges: Dict[Feature, List[BlockMeta]]
+    ) -> IntervalDict:
+        ranges = list(dep_ranges.values())[0]
         # TODO separate const for this
         # TODO or separate function for metadata parsing
         meta_key = 'snapshot_ts'

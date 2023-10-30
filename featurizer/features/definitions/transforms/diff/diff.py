@@ -35,7 +35,12 @@ class Diff(FeatureDefinition):
         return lookback_apply(upstream, window, cls._diff_percent)
 
     @classmethod
-    def group_dep_ranges(cls, ranges: List[BlockMeta], feature: Feature, dep_feature: Feature) -> IntervalDict:
+    def group_dep_ranges(
+        cls,
+        feature: Feature,
+        dep_ranges: Dict[Feature, List[BlockMeta]]
+    ) -> IntervalDict:
+        ranges = list(dep_ranges.values())[0]
         window = '1m'  # TODO figure out default setting
         if feature.params is not None and 'window' in feature.params:
             window = feature.params['window']

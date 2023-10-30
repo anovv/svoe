@@ -61,7 +61,7 @@ class FeatureDefinition(DataDefinition):
 
     # TODO we assume no 'holes' in data, use ranges: List[BlockRangeMeta] with holes
     @classmethod
-    def group_dep_ranges(cls, ranges: List[BlockMeta], feature: 'Feature', dep_feature: 'Feature') -> IntervalDict: # TODO typehint Block/BlockRange/BlockMeta/BlockRangeMeta
+    def group_dep_ranges(cls, feature: 'Feature', dep_ranges: Dict['Feature', List[BlockMeta]]) -> IntervalDict: # TODO typehint Block/BlockRange/BlockMeta/BlockRangeMeta
         # logic to group input data into atomic blocks for bulk processing
         # TODO this should be identity mapping by default?
         raise NotImplemented
