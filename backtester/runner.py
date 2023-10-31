@@ -7,6 +7,8 @@ import yaml
 from pydantic import BaseModel
 from ray.util import placement_group, remove_placement_group
 from ray.util.scheduling_strategies import PlacementGroupSchedulingStrategy
+
+from common.common_utils import load_class_by_name
 from featurizer.config import FeaturizerConfig, split_featurizer_config
 from backtester.actors.backtester_worker_actor import BacktesterWorkerActor
 from backtester.clock import Clock
@@ -62,11 +64,7 @@ class BacktesterConfig(BaseModel):
             if c.strategy_class_name is not None:
                 if c.strategy_class is not None:
                     raise ValueError('Provide either strategy_class_name or strategy_class')
-                components = c.strategy_class_name.split('.')
-                class_name = components[-1]
-                module_name = c.strategy_class_name.removesuffix(f'.{class_name}')
-                module = importlib.import_module(module_name)
-                c.strategy_class = getattr(module, class_name)
+                c.strategy_class = load_class_by_name(c.strategy_class_name)
 
             if c.tradable_instruments_params is not None:
                 if c.tradable_instruments is not None:

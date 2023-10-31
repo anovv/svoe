@@ -1,6 +1,6 @@
 from typing import Optional, Dict, List
 from common.db.sql_client import SqlClient, Session
-from featurizer.data_catalog.common.data_models.models import InputItemBatch
+from featurizer.data_ingest.models import InputItemBatch
 
 
 from featurizer.sql.feature_def.models import FeatureDefinitionDB
@@ -38,8 +38,7 @@ class FeaturizerSqlClient(SqlClient):
         return # TODO return result?
 
     def filter_cryptotick_batch(self, batch: InputItemBatch) -> InputItemBatch:
-        items = batch[1]
-        meta = batch[0]
+        items = batch.items
         paths = [item[DataSourceBlockMetadata.path.name] for item in items]
         session = Session()
         query_in = DataSourceBlockMetadata.extras['source_path'].in_(paths)
@@ -60,7 +59,7 @@ class FeaturizerSqlClient(SqlClient):
                 non_exist.append(item)
 
         print(f'Checked db for items: {len(non_exist)} not in DB')
-        return meta, non_exist
+        return InputItemBatch(batch.batch_id, non_exist)
 
     def select_all_TEST(self):
         session = Session()

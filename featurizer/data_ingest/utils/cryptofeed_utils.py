@@ -1,13 +1,14 @@
 from typing import Generator, Optional, Tuple, Dict
+
+from common.const import Fields
 from featurizer.data_catalog.common.data_models.models import InputItemBatch
-from featurizer.sql.data_catalog.models import DataCatalog
 from common.s3.s3_utils import inventory
 
 S3_BUCKET = 'svoe.test.1'
 
 
 def generate_cryptofeed_input_items(batch_size: int) -> Generator[InputItemBatch, None, None]:
-    meta = {'batch_id': 0}
+    batch_id = 0
     items = []
     for inv_df in inventory():
         for row in inv_df.itertuples():
@@ -20,12 +21,12 @@ def generate_cryptofeed_input_items(batch_size: int) -> Generator[InputItemBatch
             input_item['size_kb'] = size_kb
             items.append(input_item)
             if len(items) == batch_size:
-                yield meta, items
+                yield InputItemBatch(batch_id, items)
                 items = []
-                meta['batch_id'] += 1
+                batch_id += 1
 
     if len(items) != 0:
-        yield meta, items
+        yield InputItemBatch(batch_id, items)
 
 
 def _parse_s3_key(key: str) -> Optional[Dict]:
@@ -69,12 +70,12 @@ def _parse_s3_key(key: str) -> Optional[Dict]:
         return None
 
     return {
-        DataCatalog.data_type.name: data_type,
-        DataCatalog.exchange.name: exchange,
-        DataCatalog.symbol.name: symbol,
-        DataCatalog.instrument_type.name: instrument_type,
-        DataCatalog.source.name: 'cryptofeed',
-        DataCatalog.quote.name: quote,
-        DataCatalog.base.name: base,
-        DataCatalog.path.name: f's3://{S3_BUCKET}/{key}'
+        Fields.DATA_TYPE: data_type,
+        Fields.EXCHANGE: exchange,
+        Fields.SYMBOL: symbol,
+        Fields.INSTRUMENT_TYPE: instrument_type,
+        Fields.SOURCE: 'cryptofeed',
+        Fields.QUOTE: quote,
+        Fields.BASE: base,
+        Fields.PATH: f's3://{S3_BUCKET}/{key}'
     }

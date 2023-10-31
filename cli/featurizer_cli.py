@@ -5,6 +5,7 @@ import typer
 from common.const import DEFAULT_LOCAL_RAY_ADDRESS, NUM_CPUS
 from common.pandas.df_utils import plot_multi
 from featurizer.config import FeaturizerConfig
+from featurizer.data_ingest.runner import FeaturizerDataIngestPipelineRunner
 from featurizer.runner import Featurizer
 
 FEATURIZER_CLI_NAME = 'featurizer'
@@ -30,3 +31,7 @@ def plot(
 ):
     df = Featurizer.get_materialized_data(pick_every_nth_row=every_n)
     plot_multi(df=df, same_fig=same_fig)
+
+@featurizer_app.command()
+def run_data_ingest(config_path: str, ray_address: Annotated[str, typer.Argument(default=DEFAULT_LOCAL_RAY_ADDRESS)] = DEFAULT_LOCAL_RAY_ADDRESS):
+    FeaturizerDataIngestPipelineRunner.run(path_to_config=config_path, ray_address=ray_address)

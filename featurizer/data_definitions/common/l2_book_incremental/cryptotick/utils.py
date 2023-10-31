@@ -6,7 +6,7 @@ from streamz import Stream
 
 from common.s3.s3_utils import load_df_s3
 from common.time.utils import round_float
-from featurizer.data_catalog.pipelines.catalog_cryptotick.util import process_cryptotick_timestamps
+from featurizer.data_ingest.utils.cryptotick_utils import process_cryptotick_timestamps
 from featurizer.data_definitions.data_definition import df_to_events
 from featurizer.data_definitions.common.l2_book_incremental.cryptotick.cryptotick_l2_book_incremental import \
     CryptotickL2BookIncrementalData

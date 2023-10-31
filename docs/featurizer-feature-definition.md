@@ -11,8 +11,8 @@ feature in a modular way. In this contex, you can view a separate feature as a r
 params to feature definition, i.e. ```Feature = FeatureDefinition + params```
 
 In code, these abstractions are represented as ```Feature``` and ```FeatureDefinition``` classes. Users are not supposed to 
-construct ```Feature``` objects directly and are expected either use existing feature definitions or implement their own
-by subclassing ```FeatureDefinition``` and implementing key methods.
+construct ```Feature``` objects directly and are expected to either use existing feature definitions or to implement their own
+by subclassing ```FeatureDefinition```.
 
 ## FeatureDefinition overview
 
@@ -56,7 +56,7 @@ class MyFeatureDefinitionFD(FeatureDefinition):
         # Logic to group dependant input data (dep_ranges) into atomic blocks 
         # for parallel bulk processing of each group. The most basic case is 
         # identity_grouping(...): newly produced data blocks depend only on 
-        # current block (i.e. simple map operation)
+        # the current block (i.e. simple map operation)
         # For more complicated example, consider feature with 1 dependency, 
         # which produces window-aggregated calculations: here, for each new 
         # data block, we need to group all the dependant blocks which fall 
@@ -71,4 +71,6 @@ class MyFeatureDefinitionFD(FeatureDefinition):
 As can be seen from the example above, ```FeatureDefintion``` class describes a tree-like structure,
 where the root is the current ```FeatureDefintion``` and the leafs are ```DataSourceDefinition``` classes which
 produce all the dependent features. Similarly, when framework builds ```Feature``` objects, each object is a
-tree-like structure, uniquely identified by it's dependencies and parameters (see ```Feature``` class for more info)
+tree-like structure, uniquely identified by it's dependencies and parameters (see ```Feature``` class for more info).
+
+For more examples please see examples section

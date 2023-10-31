@@ -4,16 +4,17 @@ import numpy as np
 
 from featurizer.data_definitions.common.l2_book_incremental.cryptotick.utils import preprocess_l2_inc_df
 from featurizer.featurizer_utils.testing_utils import mock_l2_book_delta_data_and_meta, mock_trades_data_and_meta
-from common.pandas.df_utils import gen_split_df_by_mem, load_df, get_size_kb, concat
+from common.pandas.df_utils import gen_split_df_by_mem, get_size_kb, concat
+from common.s3.s3_utils import load_df_s3
 
 
-class TestDataCatalogUtils(unittest.TestCase):
+class TestDataIngestUtils(unittest.TestCase):
 
     def test_cryptotick_df_split(self):
         path = 's3://svoe-junk/27606-BITSTAMP_SPOT_BTC_EUR.csv.gz'
         date_str = '20230201'
         print('Started loading')
-        df = load_df(path)
+        df = load_df_s3(path)
         print('Finished loading, started processing')
         df = preprocess_l2_inc_df(df, date_str)
         print('Finished loading, started preprocessing')
@@ -78,6 +79,6 @@ class TestDataCatalogUtils(unittest.TestCase):
 
 if __name__ == '__main__':
     # unittest.main()
-    t = TestDataCatalogUtils()
+    t = TestDataIngestUtils()
     t.test_cryptofeed_df_split()
     t.test_cryptotick_df_split()

@@ -1,4 +1,5 @@
 import base64
+import importlib
 import json
 import os
 import sys
@@ -48,3 +49,11 @@ def get_callable_from_remote_code_file(python_file_path) -> Callable:
     if not issubclass(clazz, RemoteCodeBase):
         raise ValueError(f'{class_name} should implement RemoteCodeBase')
     return clazz.code
+
+
+def load_class_by_name(name: str):
+    components = name.split('.')
+    class_name = components[-1]
+    module_name = name.removesuffix(f'.{class_name}')
+    module = importlib.import_module(module_name)
+    return getattr(module, class_name)

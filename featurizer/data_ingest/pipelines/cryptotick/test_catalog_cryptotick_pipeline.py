@@ -6,11 +6,15 @@ import awswrangler as wr
 import boto3.session
 import ray
 
-from featurizer.data_catalog.pipelines.catalog_cryptotick.util import process_cryptotick_timestamps
+from featurizer.data_definitions.common.l2_book_incremental.cryptotick.cryptotick_l2_book_incremental import \
+    CryptotickL2BookIncrementalData
+from featurizer.data_ingest.config import FeaturizerDataSourceFiles, FeaturizerDataIngestConfig, DataProviderName
+from featurizer.data_ingest.models import InputItemBatch
+from featurizer.data_ingest.utils.cryptotick_utils import process_cryptotick_timestamps
 from featurizer.sql.client import FeaturizerSqlClient
 from featurizer.sql.db_actor import create_db_actor
-from featurizer.data_catalog.common.utils.cryptotick_utils import cryptotick_input_items, CRYPTOTICK_RAW_BUCKET_NAME
-from featurizer.data_catalog.pipelines.catalog_cryptotick.pipeline import CatalogCryptotickPipeline, poll_to_tqdm
+from featurizer.data_ingest.utils.cryptotick_utils import cryptotick_input_items, CRYPTOTICK_RAW_BUCKET_NAME
+from featurizer.data_ingest.pipelines.cryptotick.pipeline import CatalogCryptotickPipeline, poll_to_tqdm
 from featurizer.data_definitions.common.l2_book_incremental.cryptotick.utils import starts_with_snapshot, remove_snap, \
     get_snapshot_depth, mock_processed_cryptotick_df, \
     gen_split_l2_inc_df_and_pad_with_snapshot
@@ -34,8 +38,23 @@ class TestCatalogCryptotickPipeline(unittest.TestCase):
         #             'py_modules': [featurizer, ray_cluster, data_catalog, utils],
         #             'excludes': ['*s3_svoe.test.1_inventory*']
         #         }):
+            config = FeaturizerDataIngestConfig(
+                provider_name=DataProviderName.CRYPTOTICK,
+                batch_size=12,
+                max_executing_tasks=10,
+                data_source_files=[
+                    FeaturizerDataSourceFiles(
+                        data_source_definition=CryptotickL2BookIncrementalData,
+                        files_and_sizes=[
+                            ('limitbook_full/20230201/BINANCE_SPOT_BTC_USDT.csv.gz', 252 * 1024),
+                            ('limitbook_full/20230202/BINANCE_SPOT_BTC_USDT.csv.gz', 252 * 1024),
+                            ('limitbook_full/20230203/BINANCE_SPOT_BTC_USDT.csv.gz', 252 * 1024),
+                            ('limitbook_full/20230204/BINANCE_SPOT_BTC_USDT.csv.gz', 252 * 1024),
+                        ]
+                    )
+                ]
+            )
             db_actor = create_db_actor()
-            batch_size = 12
             # num_batches = 1
             # raw_files_and_sizes = list_files_and_sizes_kb(CRYPTOTICK_RAW_BUCKET_NAME)
             # raw_files_and_sizes = list(filter(lambda e: 'limitbook_full' in e[0], raw_files_and_sizes))
@@ -43,20 +62,16 @@ class TestCatalogCryptotickPipeline(unittest.TestCase):
             # raw_files_and_sizes = list(filter(lambda e: 'quotes' in e[0] and e[1] < 100 * 1024, raw_files_and_sizes))
             # print(len(raw_files_and_sizes))
             # raise
-            raw_files_and_sizes = [
-                ('limitbook_full/20230201/BINANCE_SPOT_BTC_USDT.csv.gz', 252 * 1024),
-                ('limitbook_full/20230202/BINANCE_SPOT_BTC_USDT.csv.gz', 252 * 1024),
-                ('limitbook_full/20230203/BINANCE_SPOT_BTC_USDT.csv.gz', 252 * 1024),
-                ('limitbook_full/20230204/BINANCE_SPOT_BTC_USDT.csv.gz', 252 * 1024),
-            ]
             # raw_files_and_sizes = [('limitbook_full/20230201/BINANCE_SPOT_BTC_USDT.csv.gz', 252 * 1024))]
             # raw_files_and_sizes = [('trades/20230201/BINANCE_SPOT_BTC_USDT.csv.gz', 228 * 1024)]
             # raw_files_and_sizes = [('trades/20230202/BINANCE_SPOT_BTC_USDT.csv.gz', 330 * 1024)]
-            batches = cryptotick_input_items(raw_files_and_sizes, batch_size)
-            max_executing_tasks = 10
-            pipeline = CatalogCryptotickPipeline.options(name='CatalogCryptotickPipeline').remote(max_executing_tasks=max_executing_tasks, db_actor=db_actor)
+            batches = cryptotick_input_items(config)
+            pipeline = CatalogCryptotickPipeline.options(name='CatalogCryptotickPipeline').remote(
+                max_executing_tasks=config.max_executing_tasks,
+                db_actor=db_actor
+            )
 
-            Thread(target=functools.partial(poll_to_tqdm, total_files=len(raw_files_and_sizes), chunk_size=100 * 1024)).start()
+            Thread(target=functools.partial(poll_to_tqdm, total_files=config.num_files(), chunk_size=100 * 1024)).start()
             pipeline.run.remote()
             print('Queueing batches...')
 
@@ -109,7 +124,7 @@ class TestCatalogCryptotickPipeline(unittest.TestCase):
     # TODO asserts, write mock data
     def test_db_client(self):
         client = FeaturizerSqlClient()
-        batch = ({'batch_id': 0}, [{'path': 's3://svoe-cryptotick-data/limitbook_full/20230201/BINANCE_SPOT_BTC_USDT.csv.gz'}])
+        batch = InputItemBatch(0, [{'path': 's3://svoe-cryptotick-data/limitbook_full/20230201/BINANCE_SPOT_BTC_USDT.csv.gz'}])
         _, not_exist = client.filter_cryptotick_batch(batch)
         print(not_exist)
 

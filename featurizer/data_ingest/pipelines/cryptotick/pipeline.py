@@ -8,8 +8,8 @@ import ray
 from tqdm import tqdm
 
 from featurizer.sql.db_actor import DbActor
-from featurizer.data_catalog.common.data_models.models import InputItemBatch
-from featurizer.data_catalog.pipelines.catalog_cryptotick.tasks import load_split_catalog_store_df
+from featurizer.data_ingest.models import InputItemBatch
+from featurizer.data_ingest.pipelines.cryptotick.tasks import load_split_catalog_store_df
 from featurizer.sql.models.data_source_block_metadata import DataSourceBlockMetadata
 from featurizer.sql.models.data_source_metadata import DataSourceMetadata
 from featurizer.storage.data_store_adapter.data_store_adapter import DataStoreAdapter
@@ -126,7 +126,7 @@ class CatalogCryptotickPipeline:
             await asyncio.sleep(0.1)
             continue
         await self.input_queue.put(input_item_batch)
-        print(f'Queued {input_item_batch[0]}')
+        print(f'Queued {input_item_batch.batch_id}')
 
     async def _schedule_tasks(self):
         while self.is_running:
@@ -136,8 +136,9 @@ class CatalogCryptotickPipeline:
 
             input_batch = await self.input_queue.get()
             # _, input_items = input_batch
-            _, filtered_items = await self.db_actor.filter_input_batch.remote(input_batch)
+            filtered_batch = await self.db_actor.filter_input_batch.remote(input_batch)
 
+            filtered_items = filtered_batch.items
             if len(filtered_items) > 0:
                 data_source_metadata = DataSourceMetadata(
                     owner_id='0',
@@ -149,7 +150,7 @@ class CatalogCryptotickPipeline:
                 await self.db_actor.store_metadata.remote([data_source_metadata])
 
             # mark files in db as ready for reporting
-            for _ in range(len(input_batch[1]) - len(filtered_items)):
+            for _ in range(len(input_batch.items) - len(filtered_items)):
                 task_id = len(self.stats)
                 self.stats[task_id] = {'status': 'done', 'size': 1}
 

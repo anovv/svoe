@@ -13,7 +13,7 @@ from featurizer.data_definitions.common.l2_book_incremental.cryptotick.cryptotic
 from featurizer.data_definitions.common.trades.cryptotick.utils import preprocess_trades_df
 from featurizer.data_definitions.common.trades.trades import TradesData
 from featurizer.sql.db_actor import DbActor
-from featurizer.data_catalog.common.data_models.models import InputItem
+from featurizer.data_ingest.models import InputItem
 from featurizer.sql.models.data_source_block_metadata import DataSourceBlockMetadata
 from featurizer.data_definitions.common.l2_book_incremental.cryptotick.utils import preprocess_l2_inc_df, \
     gen_split_l2_inc_df_and_pad_with_snapshot, get_snapshot_ts
@@ -79,7 +79,7 @@ def load_split_catalog_store_df(
         # remove raw source path so it is constructed by SqlAlchemy default value when making catalog item
         del item_split[DataSourceBlockMetadata.path.name]
 
-        data_source_block_metadata = make_data_source_block_metadata(split, item_split)
+        data_source_block_metadata = make_data_source_block_metadata(split, item_split, data_store_adapter)
         store_futures.append(
             executor.submit(functools.partial(store_df, df=split, path=data_source_block_metadata.path, data_store_adapter=data_store_adapter, callback=callback))
         )
@@ -124,11 +124,11 @@ def mock_split(callback, wait=1):
     return {}
 
 
-def make_data_source_block_metadata(df: pd.DataFrame, input_item: InputItem) -> DataSourceBlockMetadata:
+def make_data_source_block_metadata(df: pd.DataFrame, input_item: InputItem, data_store_adapter: DataStoreAdapter) -> DataSourceBlockMetadata:
     block_metadata_params = input_item.copy()
 
     # TODO this is a hack since we pass DataSourceMetadata.params as part of the input item
-    # ideally we should pass it seprately
+    # ideally we should pass it separately
     if DataSourceMetadata.params.name in block_metadata_params:
         del block_metadata_params[DataSourceMetadata.params.name]
 
@@ -162,8 +162,7 @@ def make_data_source_block_metadata(df: pd.DataFrame, input_item: InputItem) -> 
     block_metadata_params[DataSourceBlockMetadata.hash.name] = df_hash
 
     res = DataSourceBlockMetadata(**block_metadata_params)
-    local_data_store_adapter = LocalDataStoreAdapter()
     if res.path is None:
-        res.path = local_data_store_adapter.make_data_source_block_path(res)
+        res.path = data_store_adapter.make_data_source_block_path(res)
 
     return res

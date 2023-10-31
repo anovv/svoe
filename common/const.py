@@ -10,3 +10,7 @@ class Fields(str, Enum):
     DATA_TYPE = 'data_type'
     INSTRUMENT_TYPE = 'instrument_type'
     SYMBOL = 'symbol'
+    QUOTE = 'quote'
+    BASE = 'base'
+    PATH = 'path'
+    SOURCE = 'source'

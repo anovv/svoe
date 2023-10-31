@@ -1,7 +1,7 @@
 import joblib
 import pandas as pd
 
-from featurizer.data_catalog.pipelines.catalog_cryptotick.util import process_cryptotick_timestamps
+from featurizer.data_ingest.utils.cryptotick_utils import process_cryptotick_timestamps
 
 
 def preprocess_trades_df(df: pd.DataFrame) -> pd.DataFrame:

@@ -2,7 +2,7 @@ from typing import Dict, List
 
 import ray
 
-from featurizer.data_catalog.common.data_models.models import InputItemBatch
+from featurizer.data_ingest.models import InputItemBatch
 from featurizer.data_definitions.common.l2_book_incremental.cryptotick.cryptotick_l2_book_incremental import \
     CryptotickL2BookIncrementalData
 from featurizer.sql.client import FeaturizerSqlClient
@@ -19,7 +19,7 @@ class DbActor:
         self.client = FeaturizerSqlClient()
 
     async def filter_input_batch(self, input_batch: InputItemBatch) -> InputItemBatch:
-        items = input_batch[1]
+        items = input_batch.items
         if len(items) == 0:
             return input_batch
         data_source_definition = items[0]['data_source_definition']
