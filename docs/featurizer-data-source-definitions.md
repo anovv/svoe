@@ -26,14 +26,3 @@ class MyDataSourceDefinition(DataSourceDefinition):
 
 See CryptotickL2BookIncrementalData for an example of a data source representing 
 incremental order book updates from Cryptotick data provider.
-
-## Data Ingest Pipeline
-
-Featurizer provides a scalable, configurable and extensible data ingest pipeline
-which takes raw user data and puts it in Featurizer storage. It takes care of such
-things as indexing, compaction, per-data type resource allocation and many other data
-engineering related problems. It integrates with DataSourceDefinition class so users
-can easily add their own processing logic in a modular way without spinning up and maintaining
-data engineering infrastructure.
-
-TODO proper API and configuration for pipeline
