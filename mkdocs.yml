@@ -18,6 +18,7 @@ nav:
       - Storage and Data Models: featurizer-storage.md
       - Task Graph Compilation and Execution: featurizer-task-graph.md
       - Real-time data and Streaming: featurizer-streaming.md
+      - Synthetic Data Sources: featurizer-synthetic-data-sources.md
   - Trainer:
       - Overview: trainer-overview.md
   - Backtester:

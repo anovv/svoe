@@ -41,8 +41,46 @@ BlockRangeMeta = List[BlockMeta]
 
 ## SQL Tables
 
+Metadata about features/data sources and feature/data source blocks is stored in 4 tables
+
+- ```features_metadata```
+- ```data_sources_metadata```
+- ```feature_blocks_metadata```
+- ```data_source_blocks_metadata```
 
 
-## Data Adapters
+## Data Store Adapters
+
+Featurizer provides ```DataStoreAdapter``` class to implement custom read/write operations for block storage.
+Users are able to extend this class with their own logic.
+
+```
+class DataStoreAdapter:
+
+    def load_df(self, path: str, **kwargs) -> pd.DataFrame:
+        raise NotImplementedError
+
+    def store_df(self, path: str, df: pd.DataFrame, **kwargs):
+        raise NotImplementedError
+
+    def make_feature_block_path(self, item: FeatureBlockMetadata) -> str:
+        raise NotImplementedError
+
+    def make_data_source_block_path(self, item: DataSourceBlockMetadata) -> str:
+        raise NotImplementedError
+```
+
+
+Featurizer includes implementation two data store adapters:
+
+- ```LocalDataStoreAdapter```
+Stores and reads data from local filesystem
+- ```RemoteDataStoreAdapter```
+Stores and reads data from S3
+
+By default, ```LocalDataStoreAdapter``` is used
+
 
 ## Data Access API
+
+# TODO implement data access api
