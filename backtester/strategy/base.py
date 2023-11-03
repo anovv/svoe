@@ -2,7 +2,7 @@ import uuid
 from typing import List, Optional, Dict, Any
 
 from backtester.clock import Clock
-from backtester.data.data_generator import DataStreamEvent
+from featurizer.feature_stream.feature_stream_generator import DataStreamEvent
 from backtester.models.instrument import Instrument
 from backtester.models.order import Order, OrderSide, OrderType, OrderStatus
 from backtester.models.portfolio import Portfolio

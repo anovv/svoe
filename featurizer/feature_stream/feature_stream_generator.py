@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from typing import Dict, List, Tuple, Optional, Type
 
 import ciso8601
@@ -18,14 +19,19 @@ import featurizer.data_definitions.data_definition as data_def
 
 import concurrent.futures
 
-from backtester.data.data_generator import DataStreamGenerator, DataStreamEvent
 from backtester.models.instrument import Instrument
 
 # free data https://www.cryptoarchive.com.au/faq
 # https://ccdata.io/
 
+@dataclass
+class DataStreamEvent:
+    timestamp: float
+    receipt_timestamp: float
+    feature_values: Dict[Feature, Dict[str, float]]
 
-class FeatureStreamGenerator(DataStreamGenerator):
+
+class FeatureStreamGenerator():
 
     NUM_IO_THREADS = 16
 

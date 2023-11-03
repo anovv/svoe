@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from backtester.data.data_generator import DataStreamEvent
+from featurizer.feature_stream.feature_stream_generator import DataStreamEvent
 from backtester.models.order import Order
 from backtester.strategy.base import BaseStrategy
 

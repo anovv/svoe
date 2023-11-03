@@ -4,13 +4,13 @@ from typing import List, Dict, Tuple, Any, Optional
 from ray.serve.deployment import Deployment
 
 from backtester.clock import Clock
-from backtester.data.data_generator import DataStreamGenerator
 from backtester.execution.execution_simulator import ExecutionSimulator
 from backtester.inference.inference import start_serve_predictor_deployment
 from backtester.models.instrument import Instrument
 from backtester.models.portfolio import Portfolio, PortfolioBalanceRecord
 from backtester.models.trade import Trade
 from backtester.strategy.base import BaseStrategy
+from featurizer.feature_stream.feature_stream_generator import FeatureStreamGenerator
 
 
 @dataclass
@@ -26,13 +26,13 @@ class Loop:
     def __init__(
         self,
         clock: Clock,
-        data_generator: DataStreamGenerator,
+        feature_generator: FeatureStreamGenerator,
         portfolio: Portfolio,
         strategy: BaseStrategy,
         execution_simulator: ExecutionSimulator
     ):
         self.clock = clock
-        self.data_generator = data_generator
+        self.data_generator = feature_generator
         self.portfolio = portfolio
         self.strategy = strategy
         self.execution_simulator = execution_simulator

@@ -3,11 +3,11 @@ import uuid
 from dataclasses import dataclass
 from typing import List, Dict
 from backtester.clock import Clock
-from backtester.data.data_generator import DataStreamGenerator
 from backtester.models.instrument import Instrument, AssetInstrument
 from backtester.models.order import Order, OrderStatus, OrderType, OrderSide
 from backtester.models.portfolio import Portfolio, PortfolioBalanceRecord
 from backtester.models.trade import Trade
+from featurizer.feature_stream.feature_stream_generator import FeatureStreamGenerator
 
 COMMISSION = 0.005 # TODO make dynamic
 
@@ -23,11 +23,11 @@ class ExecutionSimulator:
         timestamp: float
         total_balance: float
 
-    def __init__(self, clock: Clock, portfolio: Portfolio, data_generator: DataStreamGenerator):
+    def __init__(self, clock: Clock, portfolio: Portfolio, feature_generator: FeatureStreamGenerator):
         self.clock = clock
         self.orders: List[Order] = []
         self.portfolio: Portfolio = portfolio
-        self.data_generator = data_generator
+        self.feature_generator = feature_generator
         self.state_snapshots: List[ExecutionSimulator._State] = []
         self.executed_trades: Dict[Instrument, List[Trade]] = {}
 
@@ -62,7 +62,7 @@ class ExecutionSimulator:
                 # immediate execution
                 res.append(self._execute_order(order))
 
-            mid_prices = self.data_generator.get_cur_mid_prices()
+            mid_prices = self.feature_generator.get_cur_mid_prices()
             if order.type == OrderType.LIMIT:
                 if order.instrument not in mid_prices:
                     raise ValueError(f'Instrument {order.instrument} not in mid_prices')
@@ -78,7 +78,7 @@ class ExecutionSimulator:
         return res
 
     def _execute_order(self, order: Order) -> Trade:
-        mid_prices = self.data_generator.get_cur_mid_prices()
+        mid_prices = self.feature_generator.get_cur_mid_prices()
         price = mid_prices[order.instrument]
 
         base_asset_instr, quote_asset_instr = order.instrument.to_asset_instruments()
@@ -141,7 +141,7 @@ class ExecutionSimulator:
         quote_wallet = self.portfolio.get_wallet(self.portfolio.quote)
         total_balance = quote_wallet.total_balance()
 
-        mid_prices = self.data_generator.get_cur_mid_prices()
+        mid_prices = self.feature_generator.get_cur_mid_prices()
         for wallet in self.portfolio.wallets:
             asset_instrument = wallet.asset_instrument
             if asset_instrument == self.portfolio.quote:

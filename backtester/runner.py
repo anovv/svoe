@@ -1,4 +1,3 @@
-import importlib
 import time
 from typing import List, Any, Dict, Type, Tuple, Optional
 
@@ -12,7 +11,7 @@ from common.common_utils import load_class_by_name
 from featurizer.config import FeaturizerConfig, split_featurizer_config
 from backtester.actors.backtester_worker_actor import BacktesterWorkerActor
 from backtester.clock import Clock
-from backtester.data.feature_stream.feature_stream_generator import FeatureStreamGenerator
+from featurizer.feature_stream.feature_stream_generator import FeatureStreamGenerator
 from backtester.execution.execution_simulator import ExecutionSimulator
 from backtester.inference.inference_loop import InferenceConfig
 from backtester.loop.loop import Loop, LoopRunResult
@@ -118,7 +117,7 @@ class Backtester:
         data_generator = FeatureStreamGenerator(featurizer_config=self.featurizer_config)
         loop = Loop(
             clock=clock,
-            data_generator=data_generator,
+            feature_generator=data_generator,
             portfolio=self.portfolio,
             strategy=strategy,
             execution_simulator=ExecutionSimulator(clock, self.portfolio, data_generator)
@@ -207,7 +206,7 @@ class Backtester:
 
 
 def test_buy_low_sell_high():
-    featurizer_config_raw = yaml.safe_load(open('./data/feature_stream/test-featurizer-config.yaml', 'r'))
+    featurizer_config_raw = yaml.safe_load(open('../featurizer/feature_stream/test-featurizer-config.yaml', 'r'))
     featurizer_config = FeaturizerConfig(**featurizer_config_raw)
     # TODO derive from featurizer_config
     tradable_instruments = [
@@ -243,7 +242,7 @@ def test_buy_low_sell_high():
 
 
 def test_ml():
-    featurizer_config_raw = yaml.safe_load(open('./data/feature_stream/test-featurizer-config.yaml', 'r'))
+    featurizer_config_raw = yaml.safe_load(open('../featurizer/feature_stream/test-featurizer-config.yaml', 'r'))
     featurizer_config = FeaturizerConfig(**featurizer_config_raw)
     # TODO derive from featurizer_config
     tradable_instruments = [

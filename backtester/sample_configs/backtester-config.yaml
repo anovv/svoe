@@ -1,4 +1,4 @@
-featurizer_config_path: '/Users/anov/IdeaProjects/svoe/backtester/data/feature_stream/test-featurizer-config.yaml'
+featurizer_config_path: '/Users/anov/IdeaProjects/svoe/featurizer/feature_stream/test-featurizer-config.yaml'
 portfolio_path: '/Users/anov/IdeaProjects/svoe/backtester/sample_configs/portfolio-config.yaml'
 inference_config_path: '/Users/anov/IdeaProjects/svoe/backtester/sample_configs/inference-config.yaml'
 tradable_instruments_params:

@@ -1,8 +1,7 @@
 from typing import Optional, Dict, List
 
 from backtester.clock import Clock
-from backtester.data.data_generator import DataStreamEvent
-from backtester.data.feature_stream.feature_stream_generator import FeatureStreamGenerator
+from featurizer.feature_stream.feature_stream_generator import FeatureStreamGenerator, DataStreamEvent
 from backtester.inference.inference_loop import InferenceConfig
 from backtester.models.instrument import Instrument
 from backtester.models.order import Order, OrderSide, OrderType

@@ -1,9 +1,9 @@
 import time
-from typing import Any, Dict, Type, List, Optional
+from typing import Dict, Type, List, Optional
 
 from featurizer.config import FeaturizerConfig
 from backtester.clock import Clock
-from backtester.data.feature_stream.feature_stream_generator import FeatureStreamGenerator
+from featurizer.feature_stream.feature_stream_generator import FeatureStreamGenerator
 from backtester.execution.execution_simulator import ExecutionSimulator
 from backtester.inference.inference_loop import InferenceConfig
 from backtester.loop.loop import Loop, LoopRunResult
@@ -46,7 +46,7 @@ class BacktesterWorkerActor:
         data_generator = FeatureStreamGenerator(featurizer_config=featurizer_config)
         self.loop = Loop(
             clock=clock,
-            data_generator=data_generator,
+            feature_generator=data_generator,
             portfolio=portfolio,
             strategy=strategy,
             execution_simulator=ExecutionSimulator(clock, portfolio, data_generator)
