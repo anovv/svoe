@@ -41,8 +41,12 @@ class Featurizer:
         stored_features_meta = storage.get_features_meta(features, start_date=config.start_date, end_date=config.end_date)
 
         label_feature = None
-        if config.label_feature_index is not None:
-            label_feature = features[config.label_feature_index]
+        if config.label_feature is not None:
+            if isinstance(config.label_feature, int):
+                label_feature = features[config.label_feature]
+            else:
+                # TODO implement fetching feature by name
+                raise NotImplementedError
 
         cache = {}
         features_to_store = [features[i] for i in config.features_to_store]

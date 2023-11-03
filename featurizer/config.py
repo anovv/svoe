@@ -20,7 +20,7 @@ class FeaturizerConfig(BaseModel):
     start_date: Optional[str] = None
     end_date: Optional[str] = None
     label_lookahead: Optional[str] = None
-    label_feature_index: Optional[int] = None
+    label_feature: Optional[Union[int, str]] = None
     features_to_store: Optional[List[int]] = []
 
     @classmethod
