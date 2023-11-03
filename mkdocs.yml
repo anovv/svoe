@@ -1,6 +1,6 @@
 site_name: Svoe
-repo_url: https://github.com/dirtyValera/svoe
-repo_name: dirtyValera/svoe
+repo_url: https://github.com/anovv/svoe
+repo_name: anovv/svoe
 theme:
   name: material
 nav:

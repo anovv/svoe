@@ -48,3 +48,4 @@ ray_cluster/featurizer/cached_dfs
 featurizer/perf/rust/target
 
 scripts/svoe_db_sqlitedump.sql
+
