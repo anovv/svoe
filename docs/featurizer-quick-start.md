@@ -9,31 +9,34 @@
       to FeatureDefinition.
   
   Example config:
-  ```
-  start_date: '2023-02-01 10:00:00'
-  end_date: '2023-02-01 11:00:00'
-  label_feature_index: 0
-  label_lookahead: '5s'
-  features_to_store: [0, 1]
-  feature_configs:
-    - feature_definition: price.mid_price_fd
-      name: mid_price
-      params:
-        data_source: &id001
-          - exchange: BINANCE
-            instrument_type: spot
-            symbol: BTC-USDT
-        feature:
-          1:
-            dep_schema: cryptotick
-            sampling: 1s
-    - feature_definition: volatility.volatility_stddev_fd
-      data_params: *id001
-      feature_params:
-        2:
+
+```
+start_date: '2023-02-01 10:00:00'
+end_date: '2023-02-01 11:00:00'
+label_feature_index: 0
+label_lookahead: '5s'
+features_to_store: [0, 1]
+feature_configs:
+  - feature_definition: price.mid_price_fd
+    name: mid_price
+    params:
+      data_source: &id001
+        - exchange: BINANCE
+          instrument_type: spot
+          symbol: BTC-USDT
+      feature:
+        1:
           dep_schema: cryptotick
           sampling: 1s
-  ```
+  - feature_definition: volatility.volatility_stddev_fd
+    data_params: *id001
+    feature_params:
+      2:
+        dep_schema: cryptotick
+        sampling: 1s
+ ```
+
+
 - Run Featurizer
   * CLI: ```svoe featurizer run <path_to_config>```
   * Python API: ```Featurizer.run(path='path_to_config')```
