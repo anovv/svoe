@@ -1,9 +1,9 @@
-# Featurizer Storage and Data Models
+# Featurizer Storage
 
 ## Overview
 
 Featurizer stores contents of features and data sources in blocks of timestamp-sorted records. For range-based queries and 
-other parametrized data access it keeps an index of all the blocks metadata (i.e. start and end timestamps, in-memory and 
+other parametrized data access and exploration it keeps an index of all the blocks metadata (i.e. start and end timestamps, in-memory and 
 on-disk size, user-defined parameters, etc.) in a SQL database (currently supports MySQL or SQLite). Each block is represented 
 as a pandas DataFrame when loaded in memory or as a gzip-compressed parquet file when stored on disk or blob storage.
 
@@ -81,6 +81,6 @@ Stores and reads data from S3
 By default, ```LocalDataStoreAdapter``` is used
 
 
-## Data Access API
+## Data Exploration API
 
-# TODO implement data access api
+TODO implement data exploration api
