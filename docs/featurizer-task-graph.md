@@ -51,4 +51,17 @@ and takes care of updating resulting graph to produce unified dataframe (see pic
 
 ## Execution
 
+After Task Graph is build, the framework submits it to Ray cluster for execution. Sub-graphs are submitted in batches
+defined by ```parallelism``` parameter:
 
+```
+Featurizer.run(config=<config>, ray_address=<ray_address>, parallelism=<parallelism>)
+```
+
+Ray automatically takes care of executing them amongst workers. In order to effectively 
+see speed-up from horizontal scaling users need to make sure that the cluster has more cores than ```parallelism```.
+
+Oncec execution is finished, the resulting dataframes are stored in cluster's distributed memory and can be accessed via
+```Featurizer.get_dataset()```
+
+More in ```featurizer.task_graph.executor.py```
