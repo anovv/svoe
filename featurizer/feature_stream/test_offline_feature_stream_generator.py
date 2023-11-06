@@ -4,17 +4,17 @@ import unittest
 import pandas as pd
 
 from featurizer.config import FeaturizerConfig
-from featurizer.feature_stream.feature_stream_generator import FeatureStreamGenerator
+from featurizer.feature_stream.offline_feature_stream_generator import OfflineFeatureStreamGenerator
 
 from common.pandas.df_utils import plot_multi
 
 
-class TestFeatureStreamGenerator(unittest.TestCase):
+class TestOfflineFeatureStreamGenerator(unittest.TestCase):
 
     def test_gen(self):
         config_path = 'test-featurizer-config.yaml'
         config = FeaturizerConfig.load_config(path=config_path)
-        data_generator = FeatureStreamGenerator(config)
+        data_generator = OfflineFeatureStreamGenerator(config)
 
         input_events_per_interval = data_generator.input_data_events
         input_events = input_events_per_interval[list(input_events_per_interval.keys())[0]]
@@ -56,5 +56,5 @@ class TestFeatureStreamGenerator(unittest.TestCase):
 
 if __name__ == '__main__':
     # unittest.main()
-    t = TestFeatureStreamGenerator()
+    t = TestOfflineFeatureStreamGenerator()
     t.test_gen()

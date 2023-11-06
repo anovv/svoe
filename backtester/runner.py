@@ -11,7 +11,7 @@ from common.common_utils import load_class_by_name
 from featurizer.config import FeaturizerConfig, split_featurizer_config
 from backtester.actors.backtester_worker_actor import BacktesterWorkerActor
 from backtester.clock import Clock
-from featurizer.feature_stream.feature_stream_generator import FeatureStreamGenerator
+from featurizer.feature_stream.feature_stream_generator import OfflineFeatureStreamGenerator
 from backtester.execution.execution_simulator import ExecutionSimulator
 from backtester.inference.inference_loop import InferenceConfig
 from backtester.loop.loop import Loop, LoopRunResult
@@ -114,7 +114,7 @@ class Backtester:
             params=self.strategy_params,
             inference_config=self.inference_config
         )
-        data_generator = FeatureStreamGenerator(featurizer_config=self.featurizer_config)
+        data_generator = OfflineFeatureStreamGenerator(featurizer_config=self.featurizer_config)
         loop = Loop(
             clock=clock,
             feature_generator=data_generator,

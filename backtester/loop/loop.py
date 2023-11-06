@@ -10,7 +10,7 @@ from backtester.models.instrument import Instrument
 from backtester.models.portfolio import Portfolio, PortfolioBalanceRecord
 from backtester.models.trade import Trade
 from backtester.strategy.base import BaseStrategy
-from featurizer.feature_stream.feature_stream_generator import FeatureStreamGenerator
+from featurizer.feature_stream.offline_feature_stream_generator import OfflineFeatureStreamGenerator
 
 
 @dataclass
@@ -26,7 +26,7 @@ class Loop:
     def __init__(
         self,
         clock: Clock,
-        feature_generator: FeatureStreamGenerator,
+        feature_generator: OfflineFeatureStreamGenerator,
         portfolio: Portfolio,
         strategy: BaseStrategy,
         execution_simulator: ExecutionSimulator

@@ -49,3 +49,4 @@ featurizer/perf/rust/target
 
 scripts/svoe_db_sqlitedump.sql
 
+.DS_Store

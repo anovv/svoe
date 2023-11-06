@@ -1,7 +1,7 @@
 from typing import Optional, Dict, List
 
 from backtester.clock import Clock
-from featurizer.feature_stream.feature_stream_generator import FeatureStreamGenerator, DataStreamEvent
+from featurizer.feature_stream.feature_stream_generator import OfflineFeatureStreamGenerator, DataStreamEvent
 from backtester.inference.inference_loop import InferenceConfig
 from backtester.models.instrument import Instrument
 from backtester.models.order import Order, OrderSide, OrderType
@@ -35,7 +35,7 @@ class MLStrategy(BaseStrategy):
     def on_data_udf(self, data_event: DataStreamEvent) -> Optional[List[Order]]:
         buy_delta = self.params['buy_delta']
         sell_delta = self.params['sell_delta']
-        cur_price = FeatureStreamGenerator.get_mid_prices_from_event(data_event)[self.instrument]
+        cur_price = OfflineFeatureStreamGenerator.get_mid_prices_from_event(data_event)[self.instrument]
         prediction, _ = self.inference_loop.get_latest_inference()
         if self.is_buying:
             if prediction - cur_price > buy_delta:

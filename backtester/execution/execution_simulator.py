@@ -7,7 +7,7 @@ from backtester.models.instrument import Instrument, AssetInstrument
 from backtester.models.order import Order, OrderStatus, OrderType, OrderSide
 from backtester.models.portfolio import Portfolio, PortfolioBalanceRecord
 from backtester.models.trade import Trade
-from featurizer.feature_stream.feature_stream_generator import FeatureStreamGenerator
+from featurizer.feature_stream.offline_feature_stream_generator import OfflineFeatureStreamGenerator
 
 COMMISSION = 0.005 # TODO make dynamic
 
@@ -23,7 +23,7 @@ class ExecutionSimulator:
         timestamp: float
         total_balance: float
 
-    def __init__(self, clock: Clock, portfolio: Portfolio, feature_generator: FeatureStreamGenerator):
+    def __init__(self, clock: Clock, portfolio: Portfolio, feature_generator: OfflineFeatureStreamGenerator):
         self.clock = clock
         self.orders: List[Order] = []
         self.portfolio: Portfolio = portfolio

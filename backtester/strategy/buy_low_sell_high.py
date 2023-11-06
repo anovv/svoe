@@ -1,7 +1,7 @@
 from typing import List, Dict, Optional, Callable
 
 from backtester.clock import Clock
-from featurizer.feature_stream.feature_stream_generator import FeatureStreamGenerator, DataStreamEvent
+from featurizer.feature_stream.feature_stream_generator import OfflineFeatureStreamGenerator, DataStreamEvent
 from backtester.inference.inference_loop import InferenceConfig
 from backtester.models.instrument import Instrument
 from backtester.models.order import Order, OrderSide, OrderType
@@ -107,7 +107,7 @@ class BuyLowSellHighStrategy(BaseStrategy):
         all_orders = []
         feature = None
         for instrument in self.states:
-            feature = FeatureStreamGenerator.get_feature_for_instrument(data_event, instrument)
+            feature = OfflineFeatureStreamGenerator.get_feature_for_instrument(data_event, instrument)
             if feature is None:
                 continue
             mid_price = data_event.feature_values[feature]['mid_price'] # TODO query data_generator?

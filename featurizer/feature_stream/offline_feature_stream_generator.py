@@ -4,14 +4,16 @@ from typing import Dict, List, Tuple, Optional, Type
 import ciso8601
 import streamz
 from intervaltree import Interval
-from streamz import Stream
 
 from common.time.utils import split_time_range_between_ts, ts_to_str_date
 from featurizer.blocks.blocks import BlockRangeMeta, BlockRange, ranges_to_interval_dict, get_overlaps, \
     prune_overlaps, meta_to_interval
+
+from featurizer.feature_stream.feature_stream_graph import FeatureStreamGraph, NamedDataEvent, GroupedNamedDataEvent
 from featurizer.task_graph.tasks import merge_blocks
 from featurizer.config import FeaturizerConfig
-from featurizer.features.feature_tree.feature_tree import construct_feature, Feature, construct_stream_tree
+from featurizer.features.feature_tree.feature_tree import Feature, construct_stream_tree, \
+    construct_features_from_configs
 from featurizer.storage.data_store_adapter.data_store_adapter import DataStoreAdapter
 from featurizer.storage.data_store_adapter.local_data_store_adapter import LocalDataStoreAdapter
 from featurizer.storage.featurizer_storage import FeaturizerStorage
@@ -24,6 +26,7 @@ from backtester.models.instrument import Instrument
 # free data https://www.cryptoarchive.com.au/faq
 # https://ccdata.io/
 
+
 @dataclass
 class DataStreamEvent:
     timestamp: float
@@ -31,59 +34,26 @@ class DataStreamEvent:
     feature_values: Dict[Feature, Dict[str, float]]
 
 
-class FeatureStreamGenerator():
+# Provides generator interface for already stored events
+class OfflineFeatureStreamGenerator:
 
     NUM_IO_THREADS = 16
 
     def __init__(self, featurizer_config: FeaturizerConfig, data_store_adapter: DataStoreAdapter = LocalDataStoreAdapter(), price_sampling_period: str = '1s'):
         self._price_sampling_period = price_sampling_period
         self._data_store_adapter = data_store_adapter
-
-        # TODO what happens if we have same features as source and dependency?
-        # duplicate constructed trees?
-        self.features = []
-        for feature_config in featurizer_config.feature_configs:
-            self.features.append(construct_feature(
-                feature_config.feature_definition,
-                feature_config.params,
-            ))
-
-        # TODO what happens if we have same features as source and dependency?
-        # build data streams trees
-        self.data_streams_per_feature: Dict[Feature, Tuple[Stream, Dict[Feature, Stream]]] = {}
-        for f in self.features:
-            out, data_streams = construct_stream_tree(f)
-            self.data_streams_per_feature[f] = out, data_streams
-
-        out_streams = []
-        for feature in self.features:
-            out_stream, _ = self.data_streams_per_feature[feature]
-            out_streams.append(out_stream)
-        unified_out_stream = streamz.combine_latest(*out_streams)
-
-        self.unified_out_stream = unified_out_stream
+        self.features = construct_features_from_configs(featurizer_config.feature_configs)
         self.cur_out_event: Optional[DataStreamEvent] = None
         self.should_construct_new_out_event = True
 
         # sink function for unified out stream
-        def _unified_out_stream(elems: Tuple):
-            if elems is None:
+        def _unified_out_stream_callback(grouped_event: GroupedNamedDataEvent):
+            if grouped_event is None:
                 raise ValueError('Stream returned None event')
-            # elems = flatten_tuples(elems) # TODO is this needed?
-            # (
-            #   [feature-MidPriceFD-0-4f83d18e, frozendict.frozendict(
-            #       {'timestamp': 1675216068.340869,
-            #       'receipt_timestamp': 1675216068.340869,
-            #       'mid_price': 23169.260000000002})],
-            #   [feature-VolatilityStddevFD-0-ad30ace5, frozendict.frozendict(
-            #       {'timestamp': 1675216068.340869,
-            #       'receipt_timestamp': 1675216068.340869,
-            #       'volatility': 0.00023437500931322575})]
-            #  )
 
-            for l in elems:
-                _feature = l[0]
-                event = l[1]
+            for e in grouped_event:
+                _feature = e[0]
+                event = e[1]
 
                 if self.should_construct_new_out_event:
                     self.cur_out_event = DataStreamEvent(
@@ -94,13 +64,14 @@ class FeatureStreamGenerator():
                     self.should_construct_new_out_event = False
                 self.cur_out_event.feature_values[_feature] = event
 
-        self.unified_out_stream.sink(_unified_out_stream)
+        self.feature_stream_graph = FeatureStreamGraph(self.features, _unified_out_stream_callback)
 
         storage = FeaturizerStorage()
         data_ranges_meta = storage.get_data_sources_meta(self.features, start_date=featurizer_config.start_date, end_date=featurizer_config.end_date)
         # TODO indicate if data ranges are empty
         data_ranges = self.load_data_ranges(data_ranges_meta)
-        self.input_data_events: List[Tuple[Feature, data_def.Event]] = self.merge_data_ranges(data_ranges)
+
+        self.input_data_events: List[NamedDataEvent] = self.merge_data_ranges(data_ranges)
         self.cur_input_event_index = 0
 
         self._sampled_mid_prices: Dict[Instrument, List[Tuple[float, float]]] = {}
@@ -166,9 +137,9 @@ class FeatureStreamGenerator():
 
         return data_ranges
 
-    def merge_data_ranges(self, data_ranges: Dict[Interval, Dict[Feature, BlockRange]]) -> List[Tuple[Feature, data_def.Event]]:
+    def merge_data_ranges(self, data_ranges: Dict[Interval, Dict[Feature, BlockRange]]) -> List[NamedDataEvent]:
         # return {i: merge_blocks(b) for (i, b) in data_ranges}
-        merged_per_data: Dict[Interval, List[Tuple[Feature, data_def.Event]]] = {}
+        merged_per_data: Dict[Interval, List[NamedDataEvent]] = {}
         for interval in data_ranges:
             merged_per_data[interval] = merge_blocks(data_ranges[interval])
 
@@ -178,7 +149,7 @@ class FeatureStreamGenerator():
             res.extend(merged_per_data[interval])
         return res
 
-    def _pop_input_events(self) -> List[Tuple[Feature, data_def.Event]]:
+    def _pop_input_events(self) -> GroupedNamedDataEvent:
         res = []
         data, input_event = self.input_data_events[self.cur_input_event_index]
         timestamp = input_event['timestamp']
@@ -195,15 +166,12 @@ class FeatureStreamGenerator():
             else:
                 break
 
-        return res
+        return tuple[res]
 
     def next(self) -> DataStreamEvent:
         grouped_input_events = self._pop_input_events()
-        for (data, input_event) in grouped_input_events:
-            for feature in self.data_streams_per_feature:
-                _, data_streams = self.data_streams_per_feature[feature]
-                if data in data_streams:
-                    data_streams[data].emit([data, input_event])
+        for named_data_event in grouped_input_events:
+            self.feature_stream_graph.emit_named_data_event(named_data_event)
 
         self.should_construct_new_out_event = True
 
@@ -223,7 +191,7 @@ class FeatureStreamGenerator():
         return self.cur_input_event_index < len(self.input_data_events)
 
     def get_cur_mid_prices(self) -> Dict[Instrument, float]:
-        return FeatureStreamGenerator.get_mid_prices_from_event(self.cur_out_event)
+        return OfflineFeatureStreamGenerator.get_mid_prices_from_event(self.cur_out_event)
 
     def get_sampled_mid_prices(self) -> Dict[Instrument, List[Tuple[float, float]]]:
         return self._sampled_mid_prices
@@ -237,7 +205,7 @@ class FeatureStreamGenerator():
             for col in data_event.feature_values[feature]:
                 if col == 'mid_price':
                     mid_price = data_event.feature_values[feature][col]
-                    instrument = FeatureStreamGenerator.get_instrument_for_feature(feature)
+                    instrument = OfflineFeatureStreamGenerator.get_instrument_for_feature(feature)
                     mid_prices[instrument] = mid_price
                     break
             if mid_price is None:
@@ -276,7 +244,7 @@ class FeatureStreamGenerator():
         return _feature
 
     @classmethod
-    def split(cls, featurizer_config: FeaturizerConfig, num_splits: int) -> List['DataStreamGenerator']:
+    def split(cls, featurizer_config: FeaturizerConfig, num_splits: int) -> List['OfflineFeatureStreamGenerator']:
         start_date = featurizer_config.start_date
         end_date = featurizer_config.end_date
         generators = []
@@ -289,7 +257,7 @@ class FeatureStreamGenerator():
             config_split = featurizer_config.copy(deep=True)
             config_split.start_date = _start_date
             config_split.end_date = _end_date
-            gen = FeatureStreamGenerator(config_split)
+            gen = OfflineFeatureStreamGenerator(config_split)
             # TODO check if generator is empty
             generators.append(gen)
 
