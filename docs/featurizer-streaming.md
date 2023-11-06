@@ -35,11 +35,30 @@ See more in ```featurizer.feature_stream.feature_stream_graph.py```
 
 ## Simulating real-time stream from offline data with OfflineFeatureStreamGenerator
 
-TODO OfflineFeatureStreamGenerator
+For backtesting/simulation/ML model validation purposes, we often need to be able to simulate
+a data stream from stored events. Featurizer provides OfflineFeatureStreamGenerator class, which
+implements a typical generator interface and can be used to run custom logic over stored
+data stream.
+
+Work In Progress 
+
+```
+OfflineFeatureStreamGenerator example
+```
+
+See more in ```featurizer.feature_stream.offline_feature_stream_generator.py```
 
 
 ## Scalability
 
-TODO
+Oftentimes user may want to use configs which calculate thousand , which  . For now Featurizer does not provide (although this is one of the
+highest )
 
+## Fault Tolerance
+
+Work In Progress
+
+## Visualization
+
+Work In Progress
 
