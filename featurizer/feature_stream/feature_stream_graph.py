@@ -1,8 +1,9 @@
-from typing import Dict, Tuple, Callable, List, Any
+from typing import Dict, Tuple, Callable, List, Any, Union
 
 import streamz
 from streamz import Stream
 
+from featurizer.config import FeaturizerConfig
 from featurizer.features.feature_tree.feature_tree import Feature, construct_stream_tree
 import featurizer.data_definitions.data_definition as data_def
 
@@ -30,11 +31,17 @@ GroupedNamedDataEvent = Tuple[NamedDataEvent, ...]
 
 class FeatureStreamGraph:
 
-    def __init__(self, features: List[Feature], callback: Callable[[GroupedNamedDataEvent], Any]):
+    def __init__(self, features_or_config: Union[List[Feature], FeaturizerConfig], callback: Callable[[GroupedNamedDataEvent], Any]):
+
+        if isinstance(features_or_config, list):
+            features = features_or_config
+        else:
+            # TODO implement
+            raise NotImplementedError
 
         # TODO what happens if we have same features as source and dependency?
-        # build data streams trees
 
+        # build data streams trees
         self.data_streams_per_feature: Dict[Feature, Tuple[Stream, Dict[Feature, Stream]]] = {}
         for f in features:
             out, data_streams = construct_stream_tree(f)
