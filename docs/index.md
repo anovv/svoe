@@ -38,4 +38,6 @@ and build streaming and historical features
 (stream processor, distributed computing engines, storages, etc.) which allows for easy deployment, maintenance and minimizes
 costly data transfers. The only dependency is an SQL database of user's choice. And it's all Python!
 
-Please see more docs for more details
+
+Please refer to **[Installation](https://anovv.github.io/svoe/installation/)** and **[Quick Start](https://anovv.github.io/svoe/quick-start/)** for more details
+

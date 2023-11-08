@@ -60,7 +60,7 @@ For distributed setting, please refer to [Running on remote clusters](TODO)
 
 As an example, here is a simple 3 step tutorial to build a simple **[mid-price](https://en.wikipedia.org/wiki/Mid_price)** prediction model based on past price and volatility. 
 
-- Run ***[Featurizer](https://anovv.github.io/svoe/featurizer-overview/)*** to construct mid-price and volatility features from partial order book updates, 5 second lookahead label as prediction target 
+- Run ***[Featurizer](https://anovv.github.io/svoe/featurizer-overview/)*** to construct mid-price and volatility features from partial order book updates, 5 second lookahead label as prediction target, using 1 second granularity data 
   - Define `featurizer-config.yaml`
     ```
     start_date: '2023-02-01 10:00:00'
@@ -80,7 +80,7 @@ As an example, here is a simple 3 step tutorial to build a simple **[mid-price](
             sampling: 1s
       - feature_definition: volatility.volatility_stddev_fd.VolatilityStddevFD
         params
-          data: *id001
+          data_source: *id001
           feature:
             sampling: 1s
     ```
