@@ -164,7 +164,7 @@ As an example, here is a simple 3 step tutorial to build a simple **[mid-price](
       buy_delta: 0
       sell_delta: 0
     ```
-  See [MLStrategy](https://github.com/anovv/svoe/blob/main/backtester/strategy/ml_strategy.py) for example implementation
+    See [MLStrategy](https://github.com/anovv/svoe/blob/main/backtester/strategy/ml_strategy.py) for example implementation
   - Run Backtester
     - CLI: `svoe backtester run --config-path <config-path> --ray-address <addr> --num-workers <num-workers>`
     - Python API:

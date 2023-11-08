@@ -22,5 +22,7 @@ nav:
       - Configuration: featurizer-configuration.md
   - Trainer:
       - Overview: trainer-overview.md
+      - Quick Start: trainer-quick-start.md
   - Backtester:
       - Overview: backtester-overview.md
+      - Quick Start: backtester-quick-start.md

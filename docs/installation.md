@@ -1,5 +1,3 @@
-## Installation
-
 Install from PyPi. Be aware that Svoe requires Python 3.10+.
 
 ```

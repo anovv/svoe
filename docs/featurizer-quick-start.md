@@ -1,5 +1,10 @@
 # Featurizer Quick Start
 
+Featurizer helps creating distributed ```FeatureLabelSet``` dataframes from [Feature Definitions]() to be used for analysis, ML training
+and real-time streaming.
+
+Here is an example to construct [mid-price](https://en.wikipedia.org/wiki/Mid_price) and volatility features from partial order book updates, 5 second lookahead label as prediction target
+
 - Pick existing or define your own ```FeatureDefinition``` (see [Feature Definitions]() section)
   - Create ```FeaturizerConfig```
       * Define start and end dates (more in Data Model)
