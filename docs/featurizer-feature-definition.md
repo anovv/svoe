@@ -74,3 +74,7 @@ produce all the dependent features. Similarly, when framework builds ```Feature`
 tree-like structure, uniquely identified by it's dependencies and parameters (see ```Feature``` class for more info).
 
 For more examples please see examples section
+
+## Defining parameters (feature_params and data_params)
+
+WIP

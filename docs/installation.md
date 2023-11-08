@@ -1,4 +1,4 @@
-# Installation
+## Installation
 
 `pip install svoe` - Install python package.
 
