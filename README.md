@@ -53,3 +53,14 @@ A simple 3 step to train a predictive model and ... TODO
 - Run ***[Featurizer](https://anovv.github.io/svoe/featurizer-overview/)***
 - Run ***[Trainer](https://anovv.github.io/svoe/trainer-overview/)***
 - Run ***[Backtester](https://anovv.github.io/svoe/backtester-overview/)***
+
+## *Documentation*
+
+We try to maintain as fresh and detailed [docs](https://anovv.github.io/svoe/) as possible. Please leave your feedback
+if you have any questions.
+
+## *Contributions*
+
+SVOE is built with an open-source first idea and we would love to get feedback and contributions from the community! 
+The project is in a very early stage and is till a work in progress, so any help would be greatly appriciated! Please feel
+free to open GitHub issues with questions/bugs or PRs with contributions!
