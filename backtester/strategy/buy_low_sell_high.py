@@ -1,7 +1,7 @@
 from typing import List, Dict, Optional, Callable
 
 from backtester.clock import Clock
-from featurizer.feature_stream.feature_stream_generator import OfflineFeatureStreamGenerator, DataStreamEvent
+from featurizer.feature_stream.offline_feature_stream_generator import OfflineFeatureStreamGenerator, DataStreamEvent
 from backtester.inference.inference_loop import InferenceConfig
 from backtester.models.instrument import Instrument
 from backtester.models.order import Order, OrderSide, OrderType

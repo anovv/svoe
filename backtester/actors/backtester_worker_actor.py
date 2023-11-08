@@ -3,7 +3,7 @@ from typing import Dict, Type, List, Optional
 
 from featurizer.config import FeaturizerConfig
 from backtester.clock import Clock
-from featurizer.feature_stream.feature_stream_generator import OfflineFeatureStreamGenerator
+from featurizer.feature_stream.offline_feature_stream_generator import OfflineFeatureStreamGenerator
 from backtester.execution.execution_simulator import ExecutionSimulator
 from backtester.inference.inference_loop import InferenceConfig
 from backtester.loop.loop import Loop, LoopRunResult

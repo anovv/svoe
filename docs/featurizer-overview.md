@@ -14,3 +14,5 @@ ML training.
 - Scalable execution: Built on top of Ray, Featurizer allows for horizontally scalable feature calculations on historical data
 - Scalable data storage: Unified data model and data access API for time-series data sources and user defined features allows for easy data discovery and retrieval
 - Zero-copy in-memory data access : Featurizer integrates with Ray’s distributed in-memory storage, allowing to use Ray’s distributed ML frameworks (XGBoost, PyTorch, RLLib) for predictive modelling without moving data to the third party storage
+
+## How is it different from other stream processors (Flink, Spark Streaming)?

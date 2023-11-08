@@ -11,7 +11,7 @@ from common.common_utils import load_class_by_name
 from featurizer.config import FeaturizerConfig, split_featurizer_config
 from backtester.actors.backtester_worker_actor import BacktesterWorkerActor
 from backtester.clock import Clock
-from featurizer.feature_stream.feature_stream_generator import OfflineFeatureStreamGenerator
+from featurizer.feature_stream.offline_feature_stream_generator import OfflineFeatureStreamGenerator
 from backtester.execution.execution_simulator import ExecutionSimulator
 from backtester.inference.inference_loop import InferenceConfig
 from backtester.loop.loop import Loop, LoopRunResult
