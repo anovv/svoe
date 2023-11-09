@@ -14,7 +14,7 @@ real-time/offline time-series based features
 - ***[Trainer](https://anovv.github.io/svoe/trainer-overview/)*** allows training predictive models in distributed setting using popular
 ML libraries (XGBoost, PyTorch)
 - ***[Backtester](https://anovv.github.io/svoe/backtester-overview/)*** is used to validate and test predictive models along with
-user defined logic in context of ... TODO (i.e. strategies)
+user defined logic in the context of financial markets (i.e. trading strategies)
 
 You can read more in [docs](https://anovv.github.io/svoe/)
 
