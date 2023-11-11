@@ -1,4 +1,8 @@
+from typing import Dict
+
 from featurizer.data_definitions.data_definition import DataDefinition
+from featurizer.data_definitions.data_source_event_emitter import DataSourceEventEmitter
+
 
 # TODO remove this and DataDefinition, keep only FeatureDefinition?
 # represents raw datasource
@@ -11,3 +15,7 @@ class DataSourceDefinition(DataDefinition):
     @classmethod
     def is_synthetic(cls) -> bool:
         return False
+
+    @classmethod
+    def event_emitter(cls, params: Dict) -> DataSourceEventEmitter:
+        raise NotImplementedError
