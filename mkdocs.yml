@@ -23,6 +23,7 @@ nav:
       - Task Graph Compilation and Execution: featurizer-task-graph.md
       - Real-time data and Streaming: featurizer-streaming.md
       - Synthetic Data Sources: featurizer-synthetic-data-sources.md
+      - Transforms: featurizer-transforms.md
       - Configuration: featurizer-configuration.md
   - Trainer:
       - Overview: trainer-overview.md
