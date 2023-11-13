@@ -273,7 +273,7 @@ def _parse_params(params: Optional[Union[Dict, List]], position: int):
     raise ValueError(f'Unsupported params type: {type(params)}')
 
 
-# TODO use anytree api
+# TODO move to helper class
 def postorder(node: Feature, callback: Callable):
     if node.children is None or len(node.children) == 0:
         callback(node)
@@ -290,34 +290,3 @@ def inorder(node: Feature, callback: Callable):
     callback(node)
     for child in node.children:
         inorder(child, callback)
-
-
-def construct_stream_tree(feature: Feature) -> Tuple[Stream, Dict[Feature, Stream]]:
-    data_streams = {}
-    _, s = _construct_stream_tree(feature, data_streams)
-    return s, data_streams
-
-
-def _construct_stream_tree(feature: Feature, data_streams: Dict[Feature, Stream]) -> Tuple[Feature, Stream]:
-    if feature.children is None or len(feature.children) == 0:
-        # data node
-        s = Stream()
-        if feature in data_streams:
-            raise ValueError('[Stream Tree] Duplicate data streams')
-        data_streams[feature] = s
-        return feature, s
-
-    # upstreams = {dep_feature: Stream() for dep_feature in deps.keys()}
-    upstreams = {}
-    for child in feature.children:
-        _, stream = _construct_stream_tree(child, data_streams)
-        upstreams[child] = stream
-
-    # TODO unify feature_definition.stream return type
-    s = feature.data_definition.stream(upstreams, feature.params)
-    if isinstance(s, Tuple):
-        out_stream = s[0]
-        state = s[1]
-    else:
-        out_stream = s
-    return feature, out_stream

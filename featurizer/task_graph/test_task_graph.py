@@ -5,6 +5,7 @@ import builder as B
 import common.streamz.stream_utils
 from common.const import Fields
 from featurizer.actors.cache_actor import create_cache_actor
+from featurizer.feature_stream.feature_stream_graph import FeatureStreamGraph
 from featurizer.task_graph.executor import execute_graph
 from featurizer.task_graph.tasks import merge_blocks
 from featurizer.storage.featurizer_storage import FeaturizerStorage
@@ -15,7 +16,7 @@ from featurizer.features.definitions.volatility.volatility_stddev_fd.volatility_
 
 from featurizer.features.definitions.l2_book.l2_snapshot_fd.l2_snapshot_fd import L2SnapshotFD
 from featurizer.features.definitions.price.mid_price_fd.mid_price_fd import MidPriceFD
-from featurizer.features.feature_tree.feature_tree import construct_feature, Feature, construct_stream_tree
+from featurizer.features.feature_tree.feature_tree import construct_feature, Feature
 
 import unittest
 import pandas as pd
@@ -90,9 +91,10 @@ class TestFeaturizerTaskGraph(unittest.TestCase):
             'data_source': data_params,
             'feature': feature_params
         })
-        stream, tree = construct_stream_tree(feature)
+        stream_nodes_graph = FeatureStreamGraph([feature])
+        stream = stream_nodes_graph.get_stream(feature)
         data = Feature([], CryptotickL2BookIncrementalData, data_params)
-        sources = {data: tree[data]}
+        sources = {data: stream_nodes_graph.get_stream(feature)}
 
         path = 's3://svoe-cataloged-data/l2_book/BINANCE/spot/BTC-USDT/2023-02-01/cryptotick/100.0mb/1675216068-40f26fdc1fafb2c056fc77f76609049ce0a47944.parquet.gz'
         df = load_df_s3(path)

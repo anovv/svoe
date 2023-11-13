@@ -1,11 +1,68 @@
-from typing import Dict, Tuple, Callable, List, Any, Union
+from typing import Dict, Tuple, Callable, List, Any, Union, Optional
 
 import streamz
 from streamz import Stream
 
 from featurizer.config import FeaturizerConfig
-from featurizer.data_definitions.data_definition import GroupedNamedDataEvent, NamedDataEvent
-from featurizer.features.feature_tree.feature_tree import Feature, construct_stream_tree
+from featurizer.data_definitions.data_definition import GroupedNamedDataEvent, NamedDataEvent, Event
+from featurizer.features.feature_tree.feature_tree import Feature
+
+
+class FeatureStreamNode:
+
+    def __init__(self, feature: Feature, stream: Stream):
+        self._feature = feature
+        self._stream = stream
+
+    def __hash__(self):
+        return hash(self._feature)
+
+    def __eq__(self, other):
+        return self._feature == other.get_feature()
+
+    def get_feature(self) -> Feature:
+        return self._feature
+
+    def get_stream(self) -> Stream:
+        return self._stream
+
+
+def _connect_stream_graph(features: List[Feature]) -> Dict[Feature, FeatureStreamNode]:
+    existing_nodes = {}
+    for feature in features:
+        _connect_stream_tree(feature, existing_nodes)
+
+    return existing_nodes
+
+
+def _connect_stream_tree(feature: Feature, exisitng_nodes: Dict[Feature, FeatureStreamNode]) -> FeatureStreamNode:
+    if feature.children is None or len(feature.children) == 0:
+        if feature not in exisitng_nodes:
+            # data node
+            node = FeatureStreamNode(feature, Stream())
+            exisitng_nodes[feature] = node
+            return node
+        else:
+            return exisitng_nodes[feature]
+    # upstreams = {dep_feature: Stream() for dep_feature in deps.keys()}
+    upstreams = {}
+    for child in feature.children:
+        _, stream = _connect_stream_tree(child, exisitng_nodes)
+        upstreams[child] = stream
+
+    if feature in exisitng_nodes:
+        return exisitng_nodes[feature]
+
+    # TODO unify feature_definition.stream return type
+    s = feature.data_definition.stream(upstreams, feature.params)
+    if isinstance(s, Tuple):
+        out_stream = s[0]
+        state = s[1]
+    else:
+        out_stream = s
+    node = FeatureStreamNode(feature, out_stream)
+    exisitng_nodes[feature] = node
+    return node
 
 
 class FeatureStreamGraph:
@@ -13,7 +70,9 @@ class FeatureStreamGraph:
     def __init__(
         self,
         features_or_config: Union[List[Feature], FeaturizerConfig],
-        out_callback: Callable[[GroupedNamedDataEvent], Any]
+        combine_outputs: bool = False,
+        combined_out_callback: Optional[Callable[[GroupedNamedDataEvent], Any]] = None,
+        callbacks: Optional[Dict[Feature, Callable[[Event], Any]]] = None
     ):
 
         if isinstance(features_or_config, list):
@@ -22,23 +81,23 @@ class FeatureStreamGraph:
             # TODO
             raise NotImplementedError
 
-        # TODO what happens if we have same features as source and dependency?
-        # build data streams trees
-        self.data_streams_per_feature: Dict[Feature, Tuple[Stream, Dict[Feature, Stream]]] = {}
-        for f in features:
-            out, data_streams = construct_stream_tree(f)
-            self.data_streams_per_feature[f] = out, data_streams
+        self.feature_stream_nodes = _connect_stream_graph(features)
 
-        out_streams = []
-        for feature in features:
-            out_stream, _ = self.data_streams_per_feature[feature]
-            out_streams.append(out_stream)
-        unified_out_stream = streamz.combine_latest(*out_streams)
-        unified_out_stream.sink(out_callback)
+        if combine_outputs:
+            out_streams = []
+            for feature in features:
+                out_streams.append(self.feature_stream_nodes[feature].get_stream())
+            unified_out_stream = streamz.combine_latest(*out_streams)
+            unified_out_stream.sink(combined_out_callback)
+
+        # set callbacks
+        if callbacks is not None:
+            for f in callbacks:
+                self.feature_stream_nodes[f].get_stream().sink(callbacks[f])
 
     def emit_named_data_event(self, named_event: NamedDataEvent):
-        for feature in self.data_streams_per_feature:
-            _, data_streams = self.data_streams_per_feature[feature]
-            data = named_event[0]
-            if data in data_streams:
-                data_streams[data].emit(named_event)
+        f = named_event[0]
+        self.feature_stream_nodes[f].emit(named_event)
+
+    def get_stream(self, feature: Feature) -> Stream:
+        return self.feature_stream_nodes[feature].get_stream()

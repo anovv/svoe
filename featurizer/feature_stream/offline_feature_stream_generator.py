@@ -12,8 +12,7 @@ from featurizer.blocks.blocks import BlockRangeMeta, BlockRange, ranges_to_inter
 from featurizer.feature_stream.feature_stream_graph import FeatureStreamGraph, NamedDataEvent, GroupedNamedDataEvent
 from featurizer.task_graph.tasks import merge_blocks
 from featurizer.config import FeaturizerConfig
-from featurizer.features.feature_tree.feature_tree import Feature, construct_stream_tree, \
-    construct_features_from_configs
+from featurizer.features.feature_tree.feature_tree import Feature, construct_features_from_configs
 from featurizer.storage.data_store_adapter.data_store_adapter import DataStoreAdapter
 from featurizer.storage.data_store_adapter.local_data_store_adapter import LocalDataStoreAdapter
 from featurizer.storage.featurizer_storage import FeaturizerStorage
@@ -64,7 +63,7 @@ class OfflineFeatureStreamGenerator:
                     self.should_construct_new_out_event = False
                 self.cur_out_event.feature_values[_feature] = event
 
-        self.feature_stream_graph = FeatureStreamGraph(self.features, _unified_out_stream_callback)
+        self.feature_stream_graph = FeatureStreamGraph(self.features, combine_outputs=True, combined_out_callback=_unified_out_stream_callback)
 
         storage = FeaturizerStorage()
         data_ranges_meta = storage.get_data_sources_meta(self.features, start_date=featurizer_config.start_date, end_date=featurizer_config.end_date)
