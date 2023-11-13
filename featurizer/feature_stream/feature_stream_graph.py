@@ -38,7 +38,6 @@ def _connect_stream_graph(features: List[Feature]) -> Dict[Feature, FeatureStrea
 def _connect_stream_tree(feature: Feature, exisitng_nodes: Dict[Feature, FeatureStreamNode]) -> FeatureStreamNode:
     if feature.children is None or len(feature.children) == 0:
         if feature not in exisitng_nodes:
-            # data node
             node = FeatureStreamNode(feature, Stream())
             exisitng_nodes[feature] = node
             return node
@@ -71,8 +70,7 @@ class FeatureStreamGraph:
         self,
         features_or_config: Union[List[Feature], FeaturizerConfig],
         combine_outputs: bool = False,
-        combined_out_callback: Optional[Callable[[GroupedNamedDataEvent], Any]] = None,
-        callbacks: Optional[Dict[Feature, Callable[[Event], Any]]] = None
+        combined_out_callback: Optional[Callable[[GroupedNamedDataEvent], Any]] = None
     ):
 
         if isinstance(features_or_config, list):
@@ -81,7 +79,8 @@ class FeatureStreamGraph:
             # TODO
             raise NotImplementedError
 
-        self.feature_stream_nodes = _connect_stream_graph(features)
+        self.features = features
+        self.feature_stream_nodes: Dict[Feature, FeatureStreamNode] = _connect_stream_graph(self.features)
 
         if combine_outputs:
             out_streams = []
@@ -90,10 +89,11 @@ class FeatureStreamGraph:
             unified_out_stream = streamz.combine_latest(*out_streams)
             unified_out_stream.sink(combined_out_callback)
 
-        # set callbacks
-        if callbacks is not None:
-            for f in callbacks:
-                self.feature_stream_nodes[f].get_stream().sink(callbacks[f])
+    def __hash__(self):
+        return hash(frozenset(self.features))
+
+    def __eq__(self, other):
+        return hash(self) == hash(other)
 
     def emit_named_data_event(self, named_event: NamedDataEvent):
         f = named_event[0]
@@ -101,3 +101,21 @@ class FeatureStreamGraph:
 
     def get_stream(self, feature: Feature) -> Stream:
         return self.feature_stream_nodes[feature].get_stream()
+
+    def set_callback(self, feature: Feature, callback: Callable[[Event], Any]):
+        self.feature_stream_nodes[feature].get_stream().sink(callback)
+
+    def get_ins(self) -> List[Feature]:
+        ins = []
+        for feature in self.feature_stream_nodes:
+            if feature.children is None or len(feature.children) == 0:
+                ins.append(feature)
+        if len(ins) == 0:
+            raise RuntimeError('Feature graph should have input nodes')
+        return ins
+
+    def get_outs(self) -> List[Feature]:
+        return self.features
+
+
+FeatureStreamGroupGraph = Dict[FeatureStreamGraph, List[FeatureStreamGraph]]

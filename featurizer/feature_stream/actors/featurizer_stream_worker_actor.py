@@ -1,28 +1,38 @@
 from threading import Thread
-from typing import Dict, Type, List, Callable, Any
+from typing import Dict, Type, List, Callable, Any, Optional
 
 import ray
 
-from featurizer.data_definitions.data_definition import NamedDataEvent
+from featurizer.data_definitions.data_definition import Event, GroupedNamedDataEvent
 from featurizer.data_definitions.data_source_definition import DataSourceDefinition
 from featurizer.data_definitions.data_source_event_emitter import DataSourceEventEmitter
+from featurizer.feature_stream.feature_stream_graph import FeatureStreamGraph
 from featurizer.features.feature_tree.feature_tree import Feature
+
 
 @ray.remote
 class FeaturizerStreamWorkerActor:
 
-    def __init__(self, features_and_callbacks: Dict[Feature, Callable[[NamedDataEvent], Any]]):
-        self.features_and_callbacks = features_and_callbacks
+    def __init__(
+        self,
+        features: List[Feature],
+        feature_stream_graph: FeatureStreamGraph
+    ):
+        self.features = features
 
-        # we assume one emitter per emitter type per worker
+        # TODO add store callbacks
+        self.feature_stream_graph = feature_stream_graph
+
+        # we assume one emitter per emitter_type per worker
         self._emitters_by_type: Dict[str, DataSourceEventEmitter] = {}
         self._emitters_threads_by_type: Dict[str, Thread] = {}
         self._init_emitters()
 
     # if this worker contains data_sources we need to register emitters
-    def _init_emitters_if_needed(self):
+    def _init_emitters(self):
         for feature in self.features_and_callbacks:
             if not feature.data_definition.is_data_source():
+                # TODO in case of partial feature graph, this should also have emitters and callbacks
                 continue
 
             data_source = feature
@@ -31,13 +41,17 @@ class FeaturizerStreamWorkerActor:
             emitter_type: Type[DataSourceEventEmitter] = data_source_definition.event_emitter_type()
             key = str(emitter_type)
 
+            def emitter_callback(event: Event):
+                # TODO set async=True?
+                self.feature_stream_graph.get_stream(data_source).emit(event, asynchronous=False)
+
             if key not in self._emitters_by_type:
                 emitter = emitter_type.instance()
-                emitter.register_callback(self.features_and_callbacks[data_source])
+                emitter.register_callback(data_source, emitter_callback)
                 self._emitters_by_type[key] = emitter
             else:
                 emitter = self._emitters_by_type[key]
-                emitter.register_callback(self.features_and_callbacks[data_source])
+                emitter.register_callback(data_source, emitter_callback)
 
             def _start_emitter(_emitter: DataSourceEventEmitter):
                 _emitter.start()

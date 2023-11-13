@@ -1,6 +1,7 @@
 from typing import Callable, Any
 
-from featurizer.data_definitions.data_definition import NamedDataEvent
+from featurizer.data_definitions.data_definition import Event
+from featurizer.features.feature_tree.feature_tree import Feature
 
 
 class DataSourceEventEmitter:
@@ -10,7 +11,7 @@ class DataSourceEventEmitter:
     def instance(cls) -> 'DataSourceEventEmitter':
         raise NotImplementedError
 
-    def register_callback(self, callback: Callable[[NamedDataEvent], Any]):
+    def register_callback(self, feature: Feature, callback: Callable[[Event], Any]):
         raise NotImplementedError
 
     def start(self):
