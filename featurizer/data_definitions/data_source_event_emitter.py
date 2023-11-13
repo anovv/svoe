@@ -1,11 +1,17 @@
-from typing import Callable
+from typing import Callable, Any
+
+from featurizer.data_definitions.data_definition import NamedDataEvent
 
 
 class DataSourceEventEmitter:
 
-    # TODO callback typing, add event type
-    def __init__(self, callback: Callable):
-        self.callback = callback
+    # TODO pass config
+    @classmethod
+    def instance(cls) -> 'DataSourceEventEmitter':
+        raise NotImplementedError
+
+    def register_callback(self, callback: Callable[[NamedDataEvent], Any]):
+        raise NotImplementedError
 
     def start(self):
         raise NotImplementedError

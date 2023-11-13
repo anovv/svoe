@@ -2,8 +2,9 @@ from typing import List, Callable, Union, Any, Dict
 
 import ray
 
+from featurizer.data_definitions.data_definition import GroupedNamedDataEvent, NamedDataEvent
 from featurizer.feature_stream.actors.featurizer_stream_worker_actor import FeaturizerStreamWorkerActor
-from featurizer.feature_stream.feature_stream_graph import GroupedNamedDataEvent, NamedDataEvent, FeatureStreamGraph
+from featurizer.feature_stream.feature_stream_graph import FeatureStreamGraph
 from featurizer.features.feature_tree.feature_tree import Feature
 
 
@@ -14,6 +15,9 @@ class FeaturizerStreamManagerActor:
         self.features = features
         self.out_callable = out_callable
 
-    def _distribute_features(self) -> Dict[FeaturizerStreamWorkerActor, FeatureStreamGraph]:
+    def _distribute_features(self) -> List[Dict[Feature, Callable[[NamedDataEvent], Any]]]:
         # TODO scaling happens here
-        return {}
+
+        group = {}
+
+        return []

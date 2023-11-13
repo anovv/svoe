@@ -39,9 +39,6 @@ class Feature:
         else:
             return f'feature_{self.data_definition.__name__}_{short_key}'
 
-    # def _key(self) -> str:
-    #     return
-
     def get_data_sources(self) -> List['Feature']:
         if self._data_deps is not None:
             return self._data_deps

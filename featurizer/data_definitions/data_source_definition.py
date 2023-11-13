@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, Type
 
 from featurizer.data_definitions.data_definition import DataDefinition
 from featurizer.data_definitions.data_source_event_emitter import DataSourceEventEmitter
@@ -17,5 +17,5 @@ class DataSourceDefinition(DataDefinition):
         return False
 
     @classmethod
-    def event_emitter(cls, params: Dict) -> DataSourceEventEmitter:
+    def event_emitter_type(cls) -> Type[DataSourceEventEmitter]:
         raise NotImplementedError

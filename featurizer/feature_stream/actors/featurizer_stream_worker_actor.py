@@ -1,8 +1,9 @@
 from threading import Thread
-from typing import Dict
+from typing import Dict, Type, List, Callable, Any
 
 import ray
 
+from featurizer.data_definitions.data_definition import NamedDataEvent
 from featurizer.data_definitions.data_source_definition import DataSourceDefinition
 from featurizer.data_definitions.data_source_event_emitter import DataSourceEventEmitter
 from featurizer.features.feature_tree.feature_tree import Feature
@@ -10,19 +11,33 @@ from featurizer.features.feature_tree.feature_tree import Feature
 @ray.remote
 class FeaturizerStreamWorkerActor:
 
-    def __init__(self, feature: Feature):
-        self.feature = feature
-        self._emitters: Dict[str, DataSourceEventEmitter] = {}
-        self._emitters_threads: Dict[str, Thread] = {}
+    def __init__(self, features_and_callbacks: Dict[Feature, Callable[[NamedDataEvent], Any]]):
+        self.features_and_callbacks = features_and_callbacks
 
-        # TODO what if its is a partial feature?
-        # init emitters and emitter threads
-        for data_source in feature.get_data_sources():
-            if not isinstance(data_source.data_definition, DataSourceDefinition):
-                raise RuntimeError('data_source should have DataSourceDefinition')
-            data_source_definition: DataSourceDefinition = data_source.data_definition
-            emitter = data_source_definition.event_emitter(data_source.params)
-            self._emitters[data_source.key] = emitter
+        # we assume one emitter per emitter type per worker
+        self._emitters_by_type: Dict[str, DataSourceEventEmitter] = {}
+        self._emitters_threads_by_type: Dict[str, Thread] = {}
+        self._init_emitters()
+
+    # if this worker contains data_sources we need to register emitters
+    def _init_emitters_if_needed(self):
+        for feature in self.features_and_callbacks:
+            if not feature.data_definition.is_data_source():
+                continue
+
+            data_source = feature
+
+            data_source_definition: Type[DataSourceDefinition] = data_source.data_definition
+            emitter_type: Type[DataSourceEventEmitter] = data_source_definition.event_emitter_type()
+            key = str(emitter_type)
+
+            if key not in self._emitters_by_type:
+                emitter = emitter_type.instance()
+                emitter.register_callback(self.features_and_callbacks[data_source])
+                self._emitters_by_type[key] = emitter
+            else:
+                emitter = self._emitters_by_type[key]
+                emitter.register_callback(self.features_and_callbacks[data_source])
 
             def _start_emitter(_emitter: DataSourceEventEmitter):
                 _emitter.start()
