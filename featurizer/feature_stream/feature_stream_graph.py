@@ -93,7 +93,7 @@ class FeatureStreamGraph:
         return hash(frozenset(self.features))
 
     def __eq__(self, other):
-        return hash(self) == hash(other)
+        return frozenset(self.features) == frozenset(other.features)
 
     def emit_named_data_event(self, named_event: NamedDataEvent):
         f = named_event[0]

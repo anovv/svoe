@@ -15,11 +15,10 @@ class FeaturizerStreamWorkerActor:
 
     def __init__(
         self,
-        features: List[Feature],
-        feature_stream_graph: FeatureStreamGraph
+        feature_stream_graph: FeatureStreamGraph,
+        worker_id: str
     ):
-        self.features = features
-
+        self.worker_id = worker_id
         # TODO add store callbacks
         self.feature_stream_graph = feature_stream_graph
 
@@ -30,7 +29,7 @@ class FeaturizerStreamWorkerActor:
 
     # if this worker contains data_sources we need to register emitters
     def _init_emitters(self):
-        for feature in self.features_and_callbacks:
+        for feature in self.feature_stream_graph.get_ins():
             if not feature.data_definition.is_data_source():
                 # TODO in case of partial feature graph, this should also have emitters and callbacks
                 continue
