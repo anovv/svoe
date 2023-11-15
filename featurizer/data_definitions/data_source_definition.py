@@ -1,7 +1,7 @@
-from typing import Dict, Type
+from typing import Type
 
 from featurizer.data_definitions.data_definition import DataDefinition
-from featurizer.data_definitions.data_source_event_emitter import DataSourceEventEmitter
+from featurizer.feature_stream.data_source_event_emitter import DataSourceEventEmitter
 
 
 # TODO remove this and DataDefinition, keep only FeatureDefinition?

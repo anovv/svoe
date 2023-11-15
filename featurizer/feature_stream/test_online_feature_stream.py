@@ -16,10 +16,15 @@ class TestOnlineFeatureStreamGenerator(unittest.TestCase):
         fh = FeedHandler(config={'uvloop': True, 'log': {'disabled': True}})
         async def ob(obj, receipt_timestamp):
             ob: OrderBook = obj
+            print(list(ob.to_dict().keys()))
             print(receipt_timestamp, ob.to_dict()['delta'])
+            # print(receipt_timestamp, ob.to_dict()['book'])
+            # print(receipt_timestamp, ob.to_dict()['book']['ask'])
+            # print(receipt_timestamp, ob.to_dict()['book']['bid'])
+            raise
 
         async def cb(obj, receipt_timestamp):
-            print(receipt_timestamp, type(obj))
+            print(receipt_timestamp, obj.to_dict())
 
         input = Stream()
         events = []
@@ -38,9 +43,10 @@ class TestOnlineFeatureStreamGenerator(unittest.TestCase):
         book_cb = {L2_BOOK: ob}
         ticker_cb = {TICKER: streamz_cb}
         trades_cb = {TRADES: cb}
+        cbs = {TICKER: cb, TRADES: cb, L2_BOOK: ob}
         # fh.add_feed(Bybit(symbols=['BTC-USDT-PERP'], channels=[L2_BOOK], callbacks=book_cb))
         # fh.add_feed(Bybit(symbols=['BTC-USDT-PERP'], channels=[TRADES], callbacks=trades_cb))
-        fh.add_feed(Binance(symbols=['BTC-USDT', 'ETH-USDT'], channels=[TICKER], callbacks=ticker_cb))
+        fh.add_feed(Binance(symbols=['BTC-USDT'], channels=[L2_BOOK], callbacks=cbs))
         # fh.add_feed(Binance(symbols=['BTC-USDT'], channels=[TRADES], callbacks=trades_cb))
         # fh.add_feed(BinanceFutures(symbols=['BTC-USDT-PERP'], channels=[TRADES], callbacks=trades_cb))
         # fh.add_feed(Binance(symbols=['BTC-USDT'], channels=[L2_BOOK], callbacks=book_cb))

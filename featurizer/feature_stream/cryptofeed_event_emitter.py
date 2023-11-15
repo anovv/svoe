@@ -1,0 +1,96 @@
+from typing import Callable, Any, Dict, Tuple, List
+
+from cryptofeed import FeedHandler
+from cryptofeed.defines import L2_BOOK, TRADES
+from cryptofeed.exchanges import EXCHANGE_MAP
+from cryptofeed.feed import Feed
+
+from featurizer.data_definitions.common.l2_book_incremental.cryptofeed.cryptofeed_l2_book_incremental import \
+    CryptofeedL2BookIncrementalData
+from featurizer.data_definitions.data_definition import Event
+from featurizer.feature_stream.data_source_event_emitter import DataSourceEventEmitter
+from featurizer.features.feature_tree.feature_tree import Feature
+
+
+class CryptofeedEventEmitter(DataSourceEventEmitter):
+
+    def __init__(self):
+        self.callbacks_per_exchange_per_channel: Dict[str, Dict[str, Callable]] = {}
+        self.symbols_per_exchange: Dict[str, List[str]] = {}
+        self.feed_handler = FeedHandler(config={'uvloop': True, 'log': {'disabled': True}})
+        pass
+
+    @classmethod
+    def instance(cls) -> 'DataSourceEventEmitter':
+        return CryptofeedEventEmitter()
+
+    def register_callback(self, feature: Feature, callback: Callable[[Event], Any]):
+        exchange, symbol, channel = self._parse_data_source_params(feature)
+        if exchange in self.callbacks_per_exchange_per_channel:
+            if channel in self.callbacks_per_exchange_per_channel:
+                raise ValueError(f'{channel} for {exchange} already exists')
+            else:
+                self.callbacks_per_exchange_per_channel[exchange][channel] = callback
+        else:
+            self.callbacks_per_exchange_per_channel[exchange] = {channel: callback}
+
+        if exchange in self.symbols_per_exchange:
+            self.symbols_per_exchange[exchange].append(symbol)
+        else:
+            self.symbols_per_exchange[exchange] = [symbol]
+
+    def start(self):
+        for exchange in self.symbols_per_exchange:
+            feed_class = EXCHANGE_MAP[exchange]
+            symbols = self.symbols_per_exchange[exchange]
+            callbacks_per_channel = self.callbacks_per_exchange_per_channel[exchange]
+            raw_callbacks = {}
+            for channel in callbacks_per_channel:
+                callback = callbacks_per_channel[channel]
+                async def cb(obj, receipt_timestamp):
+                    event = self._cryptofeed_obj_to_event(channel, obj, receipt_timestamp)
+                    callback(event)
+
+                raw_callbacks[channel] = cb
+
+            channels = list(callbacks_per_channel.keys())
+            feed = feed_class(
+                symbols=symbols,
+                channels=channels,
+                callbacks=raw_callbacks
+            )
+            self.feed_handler.add_feed(feed)
+        self.feed_handler.run()
+
+    def stop(self):
+        self.feed_handler.stop()
+
+    # TODO util this?
+    @classmethod
+    def _parse_data_source_params(cls, feature: Feature) -> Tuple[str, str, str]:
+        data_source_def = feature.data_definition
+        params = feature.params
+        if isinstance(data_source_def, CryptofeedL2BookIncrementalData):
+            channel = L2_BOOK
+        else:
+            raise ValueError(f'Unsupported data_source_def for CryptofeedEventEmitter: {data_source_def}')
+        return (params['exchange'], params['symbol'], channel)
+
+    @classmethod
+    def _cryptofeed_obj_to_event(cls, channel: str, obj, receipt_timestamp) -> Event:
+        # {'exchange': 'BINANCE', 'symbol': 'BTC-USDT', 'bid': Decimal('35600.62000000'),
+        #  'ask': Decimal('35600.63000000'), 'timestamp': 1700032092.916736}
+        # {'exchange': 'BINANCE', 'symbol': 'BTC-USDT', 'side': 'sell', 'amount': Decimal('1.12359000'),
+        #  'price': Decimal('35600.62000000'), 'id': '2757135063', 'type': None, 'timestamp': 1700032092.821}
+
+        d = obj.to_dict()
+        event = {
+            'timestamp': obj.timestamp,
+            'receipt_timestamp': receipt_timestamp
+        }
+
+
+        # TODO proper map to relevant data source defs
+        # if channel == TRADES:
+        return event
+

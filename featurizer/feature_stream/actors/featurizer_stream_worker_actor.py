@@ -1,13 +1,12 @@
 from threading import Thread
-from typing import Dict, Type, List, Callable, Any, Optional
+from typing import Dict, Type
 
 import ray
 
-from featurizer.data_definitions.data_definition import Event, GroupedNamedDataEvent
+from featurizer.data_definitions.data_definition import Event
 from featurizer.data_definitions.data_source_definition import DataSourceDefinition
-from featurizer.data_definitions.data_source_event_emitter import DataSourceEventEmitter
+from featurizer.feature_stream.data_source_event_emitter import DataSourceEventEmitter
 from featurizer.feature_stream.feature_stream_graph import FeatureStreamGraph
-from featurizer.features.feature_tree.feature_tree import Feature
 
 
 @ray.remote
