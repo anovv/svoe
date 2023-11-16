@@ -5,8 +5,7 @@ from streamz import Stream
 
 from featurizer.config import FeaturizerConfig
 from featurizer.data_definitions.data_definition import Event
-from featurizer.features.feature_tree.feature_tree import Feature
-
+from featurizer.features.feature_tree.feature_tree import Feature, construct_features_from_configs
 
 NamedDataEvent = Tuple[Feature, Event]
 # (
@@ -67,8 +66,8 @@ def _connect_stream_tree(feature: Feature, exisitng_nodes: Dict[Feature, Feature
     # upstreams = {dep_feature: Stream() for dep_feature in deps.keys()}
     upstreams = {}
     for child in feature.children:
-        _, stream = _connect_stream_tree(child, exisitng_nodes)
-        upstreams[child] = stream
+        stream_node = _connect_stream_tree(child, exisitng_nodes)
+        upstreams[child] = stream_node.get_stream()
 
     if feature in exisitng_nodes:
         return exisitng_nodes[feature]
@@ -97,8 +96,8 @@ class FeatureStreamGraph:
         if isinstance(features_or_config, list):
             features = features_or_config
         else:
-            # TODO
-            raise NotImplementedError
+            config = features_or_config
+            features = construct_features_from_configs(config.feature_configs)
 
         self.features = features
         self.feature_stream_nodes: Dict[Feature, FeatureStreamNode] = _connect_stream_graph(self.features)
@@ -123,7 +122,7 @@ class FeatureStreamGraph:
     def get_stream(self, feature: Feature) -> Stream:
         return self.feature_stream_nodes[feature].get_stream()
 
-    def set_callback(self, feature: Feature, callback: Callable[[Event], Any]):
+    def set_callback(self, feature: Feature, callback: Callable[[Event], Optional[Any]]):
         self.feature_stream_nodes[feature].get_stream().sink(callback)
 
     def get_ins(self) -> List[Feature]:

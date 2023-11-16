@@ -24,12 +24,12 @@ class FeatureDefinition(DataDefinition):
 
     # TODO make dep_schema part of feature_params
     @classmethod
-    def dep_upstream_schema(cls, dep_schema: str = Optional[None]) -> List[Union[str, Type[DataDefinition]]]:
+    def dep_upstream_schema(cls, dep_schema: Optional[str] = None) -> List[Union[str, Type[DataDefinition]]]:
         # upstream dependencies
         raise NotImplemented
 
     @classmethod
-    def dep_upstream_definitions(cls, dep_schema: str = Optional[None]) -> List[Type[DataDefinition]]:
+    def dep_upstream_definitions(cls, dep_schema: Optional[str] = None) -> List[Type[DataDefinition]]:
         defs = cls.dep_upstream_schema(dep_schema=dep_schema)
 
         # we need to keep track of indices so we can preserve order when merging later

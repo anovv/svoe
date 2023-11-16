@@ -1,4 +1,5 @@
-from typing import Callable, Any, Dict, Tuple, List, Type
+import functools
+from typing import Callable, Any, Dict, Tuple, List, Type, Set, Optional
 
 from cryptofeed import FeedHandler
 from cryptofeed.defines import L2_BOOK, TRADES, TICKER
@@ -19,7 +20,7 @@ class CryptofeedEventEmitter(DataSourceEventEmitter):
 
     def __init__(self):
         self.callbacks_per_exchange_per_channel: Dict[str, Dict[str, Callable]] = {}
-        self.symbols_per_exchange: Dict[str, List[str]] = {}
+        self.symbols_per_exchange: Dict[str, Set[str]] = {}
         self.feed_handler = FeedHandler(config={'uvloop': True, 'log': {'disabled': True}})
         pass
 
@@ -27,7 +28,7 @@ class CryptofeedEventEmitter(DataSourceEventEmitter):
     def instance(cls) -> 'DataSourceEventEmitter':
         return CryptofeedEventEmitter()
 
-    def register_callback(self, feature: Feature, callback: Callable[[Event], Any]):
+    def register_callback(self, feature: Feature, callback: Callable[[Event], Optional[Any]]):
         exchange, symbol, channel = self._parse_data_source_params(feature)
         if exchange in self.callbacks_per_exchange_per_channel:
             if channel in self.callbacks_per_exchange_per_channel:
@@ -38,24 +39,26 @@ class CryptofeedEventEmitter(DataSourceEventEmitter):
             self.callbacks_per_exchange_per_channel[exchange] = {channel: callback}
 
         if exchange in self.symbols_per_exchange:
-            self.symbols_per_exchange[exchange].append(symbol)
+            self.symbols_per_exchange[exchange].add(symbol)
         else:
-            self.symbols_per_exchange[exchange] = [symbol]
+            self.symbols_per_exchange[exchange] = {symbol}
 
     def start(self):
         for exchange in self.symbols_per_exchange:
             feed_class: Type[Feed] = EXCHANGE_MAP[exchange]
-            symbols = self.symbols_per_exchange[exchange]
+            symbols = list(self.symbols_per_exchange[exchange])
             callbacks_per_channel = self.callbacks_per_exchange_per_channel[exchange]
             raw_callbacks = {}
             for channel in callbacks_per_channel:
                 callback = callbacks_per_channel[channel]
-                async def cb(obj, receipt_timestamp):
-                    event = self._cryptofeed_obj_to_event(channel, obj, receipt_timestamp)
+
+                async def _cb(obj, receipt_timestamp):
+                    event_for_channel = functools.partial(self._cryptofeed_obj_to_event, channel)
+                    event = event_for_channel(obj, receipt_timestamp)
                     callback(event)
 
-                raw_callbacks[channel] = cb
-
+                raw_callbacks[channel] = _cb
+            # TODO for some reason different types of callbacks dont work
             channels = list(callbacks_per_channel.keys())
             feed = feed_class(
                 symbols=symbols,
@@ -63,6 +66,8 @@ class CryptofeedEventEmitter(DataSourceEventEmitter):
                 callbacks=raw_callbacks
             )
             self.feed_handler.add_feed(feed)
+        # print(self.callbacks_per_exchange_per_channel)
+        # print(self.symbols_per_exchange)
         self.feed_handler.run()
 
     def stop(self):
@@ -112,6 +117,7 @@ class CryptofeedEventEmitter(DataSourceEventEmitter):
         elif data_source_def == CryptofeedTradesData:
             if 'side' not in d:
                 print(d)
+                print(channel)
                 raise
             # print(d)
             # raise

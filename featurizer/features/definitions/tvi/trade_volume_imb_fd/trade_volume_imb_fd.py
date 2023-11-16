@@ -8,7 +8,8 @@ from streamz import Stream
 import common.streamz.stream_utils as su
 
 from featurizer.blocks.blocks import BlockMeta, windowed_grouping
-from featurizer.data_definitions.common.trades.trades import TradesData
+
+from featurizer.data_definitions.common.trades.cryptotick.cryptotick_trades import CryptotickTradesData
 from featurizer.features.definitions.feature_definition import FeatureDefinition
 from featurizer.data_definitions.data_definition import DataDefinition, EventSchema, Event
 from featurizer.features.feature_tree.feature_tree import Feature
@@ -51,8 +52,8 @@ class TradeVolumeImbFD(FeatureDefinition):
         return su.filter_none(acc).unique(maxsize=1)
 
     @classmethod
-    def dep_upstream_schema(cls, dep_schema: str = Optional[None]) -> List[Type[DataDefinition]]:
-        return [TradesData]
+    def dep_upstream_schema(cls, dep_schema: Optional[str] = None) -> List[Type[DataDefinition]]:
+        return [CryptotickTradesData]
 
     @classmethod
     def group_dep_ranges(

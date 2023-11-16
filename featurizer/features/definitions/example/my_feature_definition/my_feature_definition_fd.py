@@ -27,7 +27,7 @@ class MyFeatureDefinitionFD(FeatureDefinition):
         raise NotImplemented
 
     @classmethod
-    def dep_upstream_schema(cls, dep_schema: str = Optional[None]) -> List[Union[str, Type[DataDefinition]]]:
+    def dep_upstream_schema(cls, dep_schema: Optional[str] = None) -> List[Union[str, Type[DataDefinition]]]:
         # Specifies upstream dependencies for this FeatureDefinition as a list of DataDefinition's
         raise NotImplemented
 

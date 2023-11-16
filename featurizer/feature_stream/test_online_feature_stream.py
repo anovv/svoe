@@ -1,20 +1,25 @@
 import time
 import unittest
-from threading import Thread
+from threading import Thread, Event
 
+import yaml
 from cryptofeed import FeedHandler
 from cryptofeed.defines import TICKER, L2_BOOK, TRADES
 from cryptofeed.exchanges import Bybit, Binance, BinanceFutures
 from order_book import OrderBook
 from streamz import Stream
 
+from featurizer.config import FeaturizerConfig
+from featurizer.feature_stream.cryptofeed_event_emitter import CryptofeedEventEmitter
+from featurizer.feature_stream.feature_stream_graph import FeatureStreamGraph
 
-class TestOnlineFeatureStreamGenerator(unittest.TestCase):
-    def test_gen(self):
+
+class TestOnlineFeatureStream(unittest.TestCase):
+    def test_cryptofeed(self):
         # print(Bybit.symbols())
         # raise
         fh = FeedHandler(config={'uvloop': True, 'log': {'disabled': True}})
-        async def ob(obj, receipt_timestamp):
+        async def ob_cb(obj, receipt_timestamp):
             ob: OrderBook = obj
             print(list(ob.to_dict().keys()))
             print(receipt_timestamp, ob.to_dict()['delta'])
@@ -23,8 +28,15 @@ class TestOnlineFeatureStreamGenerator(unittest.TestCase):
             # print(receipt_timestamp, ob.to_dict()['book']['bid'])
             raise
 
-        async def cb(obj, receipt_timestamp):
-            print(receipt_timestamp, obj.to_dict())
+        async def trades_cb(obj, receipt_timestamp):
+            d = obj.to_dict()
+            side = d['side']
+            print(receipt_timestamp, 'trade', f'side: {side}')
+
+        async def ticker_cb(obj, receipt_timestamp):
+            d = obj.to_dict()
+            bid = d['bid']
+            print(receipt_timestamp, 'ticker', f'bid: {bid}')
 
         input = Stream()
         events = []
@@ -40,13 +52,10 @@ class TestOnlineFeatureStreamGenerator(unittest.TestCase):
         async def streamz_cb(obj, receipt_timestamp):
             input.emit(obj, asynchronous=True)
 
-        book_cb = {L2_BOOK: ob}
-        ticker_cb = {TICKER: streamz_cb}
-        trades_cb = {TRADES: cb}
-        cbs = {TICKER: cb, TRADES: cb, L2_BOOK: ob}
+        cbs = {TICKER: ticker_cb, TRADES: trades_cb, L2_BOOK: ob_cb}
         # fh.add_feed(Bybit(symbols=['BTC-USDT-PERP'], channels=[L2_BOOK], callbacks=book_cb))
         # fh.add_feed(Bybit(symbols=['BTC-USDT-PERP'], channels=[TRADES], callbacks=trades_cb))
-        fh.add_feed(Binance(symbols=['BTC-USDT'], channels=[L2_BOOK], callbacks=cbs))
+        fh.add_feed(Binance(symbols=['BTC-USDT'], channels=[TICKER, TRADES], callbacks=cbs))
         # fh.add_feed(Binance(symbols=['BTC-USDT'], channels=[TRADES], callbacks=trades_cb))
         # fh.add_feed(BinanceFutures(symbols=['BTC-USDT-PERP'], channels=[TRADES], callbacks=trades_cb))
         # fh.add_feed(Binance(symbols=['BTC-USDT'], channels=[L2_BOOK], callbacks=book_cb))
@@ -58,7 +67,46 @@ class TestOnlineFeatureStreamGenerator(unittest.TestCase):
         Thread(target=stop_after).start()
         fh.run()
 
+    def test_streaming(self):
+        dct = yaml.safe_load('''
+        feature_configs:
+          - feature_definition: price.mid_price_fd
+            params:
+              data_source: &id001
+                - exchange: BINANCE
+                  instrument_type: spot
+                  symbol: BTC-USDT
+              feature:
+                0:
+                  dep_schema: ticker
+                  sampling: 1s
+        ''')
+        config = FeaturizerConfig(**dct)
+        feature_stream_graph = FeatureStreamGraph(features_or_config=config)
+        ins = feature_stream_graph.get_ins()
+        emitter = CryptofeedEventEmitter.instance()
+        for f in ins:
+            def emitter_callback(event: Event):
+                # TODO set async=True?
+                feature_stream_graph.get_stream(f).emit(event, asynchronous=False)
+            emitter.register_callback(f, emitter_callback)
+
+        outs = feature_stream_graph.get_outs()
+        for f in outs:
+            def callback(event: Event):
+                print(event)
+
+            feature_stream_graph.set_callback(f, callback)
+
+        # s = feature_stream_graph.get_stream(outs[0])
+        # s.visualize()
+
+        emitter.start()
+
+
+
+
 if __name__ == '__main__':
     # unittest.main()
-    t = TestOnlineFeatureStreamGenerator()
-    t.test_gen()
+    t = TestOnlineFeatureStream()
+    t.test_streaming()

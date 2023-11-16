@@ -151,7 +151,7 @@ class L2SnapshotFD(FeatureDefinition):
         return res
 
     @classmethod
-    def dep_upstream_schema(cls, dep_schema: str = Optional[None]) -> List[Type[DataDefinition]]:
+    def dep_upstream_schema(cls, dep_schema: Optional[str] = None) -> List[Type[DataDefinition]]:
         if dep_schema is None or dep_schema == 'cryptotick':
             return [CryptotickL2BookIncrementalData]
 

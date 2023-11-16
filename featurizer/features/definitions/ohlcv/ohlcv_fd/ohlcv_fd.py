@@ -4,8 +4,8 @@ from portion import IntervalDict, closed
 from streamz import Stream
 
 from featurizer.blocks.blocks import BlockMeta
+from featurizer.data_definitions.common.trades.cryptotick.cryptotick_trades import CryptotickTradesData
 from featurizer.data_definitions.data_definition import EventSchema, DataDefinition, Event
-from featurizer.data_definitions.common.trades.trades import TradesData
 from featurizer.features.definitions.feature_definition import FeatureDefinition
 from featurizer.features.feature_tree.feature_tree import Feature
 from common.time.utils import convert_str_to_seconds, get_sampling_bucket_ts
@@ -42,8 +42,8 @@ class OHLCVFD(FeatureDefinition):
         }
 
     @classmethod
-    def dep_upstream_schema(cls, dep_schema: str = Optional[None]) -> List[Type[DataDefinition]]:
-        return [TradesData]
+    def dep_upstream_schema(cls, dep_schema: Optional[str] = None) -> List[Type[DataDefinition]]:
+        return [CryptotickTradesData]
 
     @classmethod
     def stream(cls, upstreams: Dict[Feature, Stream], feature_params: Dict) -> Stream:
