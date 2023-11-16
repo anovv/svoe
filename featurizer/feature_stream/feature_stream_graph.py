@@ -4,8 +4,29 @@ import streamz
 from streamz import Stream
 
 from featurizer.config import FeaturizerConfig
-from featurizer.data_definitions.data_definition import GroupedNamedDataEvent, NamedDataEvent, Event
+from featurizer.data_definitions.data_definition import Event
 from featurizer.features.feature_tree.feature_tree import Feature
+
+
+NamedDataEvent = Tuple[Feature, Event]
+# (
+#   feature-MidPriceFD-0-4f83d18e, frozendict.frozendict(
+#       {'timestamp': 1675216068.340869,
+#       'receipt_timestamp': 1675216068.340869,
+#       'mid_price': 23169.260000000002})
+#  )
+
+# (
+#   (feature-MidPriceFD-0-4f83d18e, frozendict.frozendict(
+#       {'timestamp': 1675216068.340869,
+#       'receipt_timestamp': 1675216068.340869,
+#       'mid_price': 23169.260000000002})),
+#   (feature-VolatilityStddevFD-0-ad30ace5, frozendict.frozendict(
+#       {'timestamp': 1675216068.340869,
+#       'receipt_timestamp': 1675216068.340869,
+#       'volatility': 0.00023437500931322575}))
+#  )
+GroupedNamedDataEvent = Tuple[NamedDataEvent, ...]
 
 
 class FeatureStreamNode:

@@ -1,9 +1,7 @@
-from typing import List, Callable, Union, Any, Dict, Optional
+from typing import List, Dict, Optional
 
-import ray
 import ray.actor
 
-from featurizer.data_definitions.data_definition import GroupedNamedDataEvent, NamedDataEvent
 from featurizer.feature_stream.actors.featurizer_stream_worker_actor import FeaturizerStreamWorkerActor
 from featurizer.feature_stream.feature_stream_graph import FeatureStreamGraph, FeatureStreamGroupGraph
 from featurizer.features.feature_tree.feature_tree import Feature

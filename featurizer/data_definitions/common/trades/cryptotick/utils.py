@@ -1,4 +1,3 @@
-import joblib
 import pandas as pd
 
 from featurizer.data_ingest.utils.cryptotick_utils import process_cryptotick_timestamps

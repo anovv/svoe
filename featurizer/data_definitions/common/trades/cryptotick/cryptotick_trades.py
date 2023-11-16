@@ -2,7 +2,8 @@ from featurizer.data_definitions.data_definition import EventSchema
 from featurizer.data_definitions.data_source_definition import DataSourceDefinition
 
 
-class TradesData(DataSourceDefinition):
+# TODO it is the same as CryptofeedTradesData, how to unify?
+class CryptotickTradesData(DataSourceDefinition):
 
     @classmethod
     def event_schema(cls) -> EventSchema:
