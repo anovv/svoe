@@ -41,7 +41,7 @@ class MidPriceFD(FeatureDefinition):
                 lambda ticker: cls.construct_event(
                     ticker['timestamp'],
                     ticker['receipt_timestamp'],
-                    (ticker['bid'] + ticker['asks']) / 2,
+                    (ticker['bid'] + ticker['ask']) / 2,
                 )
             )
         else:

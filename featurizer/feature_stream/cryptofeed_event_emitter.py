@@ -66,8 +66,6 @@ class CryptofeedEventEmitter(DataSourceEventEmitter):
                 callbacks=raw_callbacks
             )
             self.feed_handler.add_feed(feed)
-        # print(self.callbacks_per_exchange_per_channel)
-        # print(self.symbols_per_exchange)
         self.feed_handler.run()
 
     def stop(self):

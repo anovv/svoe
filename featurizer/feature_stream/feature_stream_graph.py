@@ -47,18 +47,21 @@ class FeatureStreamNode:
         return self._stream
 
 
-def _connect_stream_graph(features: List[Feature]) -> Dict[Feature, FeatureStreamNode]:
+def _connect_stream_graph(features: List[Feature], callbacks: Dict[Feature, Callable[[Event], Optional[Any]]]) -> Dict[Feature, FeatureStreamNode]:
     existing_nodes = {}
     for feature in features:
-        _connect_stream_tree(feature, existing_nodes)
+        _connect_stream_tree(feature, existing_nodes, callbacks)
 
     return existing_nodes
 
 
-def _connect_stream_tree(feature: Feature, exisitng_nodes: Dict[Feature, FeatureStreamNode]) -> FeatureStreamNode:
+def _connect_stream_tree(feature: Feature, exisitng_nodes: Dict[Feature, FeatureStreamNode], callbacks: Dict[Feature, Callable[[Event], Optional[Any]]]) -> FeatureStreamNode:
     if feature.children is None or len(feature.children) == 0:
         if feature not in exisitng_nodes:
-            node = FeatureStreamNode(feature, Stream())
+            source = Stream()
+            if callbacks is not None and feature in callbacks:
+                source.sink(callbacks[feature])
+            node = FeatureStreamNode(feature, source)
             exisitng_nodes[feature] = node
             return node
         else:
@@ -66,8 +69,9 @@ def _connect_stream_tree(feature: Feature, exisitng_nodes: Dict[Feature, Feature
     # upstreams = {dep_feature: Stream() for dep_feature in deps.keys()}
     upstreams = {}
     for child in feature.children:
-        stream_node = _connect_stream_tree(child, exisitng_nodes)
-        upstreams[child] = stream_node.get_stream()
+        stream_node = _connect_stream_tree(child, exisitng_nodes, callbacks)
+        stream = stream_node.get_stream()
+        upstreams[child] = stream
 
     if feature in exisitng_nodes:
         return exisitng_nodes[feature]
@@ -79,6 +83,9 @@ def _connect_stream_tree(feature: Feature, exisitng_nodes: Dict[Feature, Feature
         state = s[1]
     else:
         out_stream = s
+    if callbacks is not None and feature in callbacks:
+        out_stream.sink(callbacks[feature])
+    # print(out_stream)
     node = FeatureStreamNode(feature, out_stream)
     exisitng_nodes[feature] = node
     return node
@@ -100,14 +107,16 @@ class FeatureStreamGraph:
             features = construct_features_from_configs(config.feature_configs)
 
         self.features = features
-        self.feature_stream_nodes: Dict[Feature, FeatureStreamNode] = _connect_stream_graph(self.features)
+        self.feature_stream_nodes: Dict[Feature, FeatureStreamNode] = _connect_stream_graph(self.features, {})
 
         if combine_outputs:
             out_streams = []
-            for feature in features:
+            for feature in self.features:
                 out_streams.append(self.feature_stream_nodes[feature].get_stream())
             unified_out_stream = streamz.combine_latest(*out_streams)
             unified_out_stream.sink(combined_out_callback)
+
+        # self.ss = []
 
     def __hash__(self):
         return hash(frozenset(self.features))
@@ -122,8 +131,10 @@ class FeatureStreamGraph:
     def get_stream(self, feature: Feature) -> Stream:
         return self.feature_stream_nodes[feature].get_stream()
 
-    def set_callback(self, feature: Feature, callback: Callable[[Event], Optional[Any]]):
-        self.feature_stream_nodes[feature].get_stream().sink(callback)
+    def rebuild_with_callbacks(self, callbacks: Dict[Feature, Callable[[Event], Optional[Any]]]):
+        # for some reason, setting .sink on streams stored on graph does not work (need to figure out why)
+        # rebuilding graph with callbacks does the trick
+        self.feature_stream_nodes: Dict[Feature, FeatureStreamNode] = _connect_stream_graph(self.features, callbacks)
 
     def get_ins(self) -> List[Feature]:
         ins = []

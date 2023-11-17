@@ -11,7 +11,7 @@ from streamz import Stream
 
 from featurizer.config import FeaturizerConfig
 from featurizer.feature_stream.cryptofeed_event_emitter import CryptofeedEventEmitter
-from featurizer.feature_stream.feature_stream_graph import FeatureStreamGraph
+from featurizer.feature_stream.feature_stream_graph import FeatureStreamGraph, FeatureStreamNode
 
 
 class TestOnlineFeatureStream(unittest.TestCase):
@@ -70,9 +70,19 @@ class TestOnlineFeatureStream(unittest.TestCase):
     def test_streaming(self):
         dct = yaml.safe_load('''
         feature_configs:
+          - feature_definition: volatility.volatility_stddev_fd
+            params:
+              data_source:
+                - exchange: BINANCE
+                  instrument_type: spot
+                  symbol: BTC-USDT
+              feature:
+                1:
+                  dep_schema: ticker
+                  sampling: 1s
           - feature_definition: price.mid_price_fd
             params:
-              data_source: &id001
+              data_source:
                 - exchange: BINANCE
                   instrument_type: spot
                   symbol: BTC-USDT
@@ -83,27 +93,24 @@ class TestOnlineFeatureStream(unittest.TestCase):
         ''')
         config = FeaturizerConfig(**dct)
         feature_stream_graph = FeatureStreamGraph(features_or_config=config)
+        outs = feature_stream_graph.get_outs()
+        callbacks = {}
+        for f in outs:
+            def callback(event: Event):
+                print(event)
+
+            callbacks[f] = callback
+        feature_stream_graph.rebuild_with_callbacks(callbacks)
+
         ins = feature_stream_graph.get_ins()
         emitter = CryptofeedEventEmitter.instance()
         for f in ins:
             def emitter_callback(event: Event):
                 # TODO set async=True?
                 feature_stream_graph.get_stream(f).emit(event, asynchronous=False)
+
             emitter.register_callback(f, emitter_callback)
-
-        outs = feature_stream_graph.get_outs()
-        for f in outs:
-            def callback(event: Event):
-                print(event)
-
-            feature_stream_graph.set_callback(f, callback)
-
-        # s = feature_stream_graph.get_stream(outs[0])
-        # s.visualize()
-
         emitter.start()
-
-
 
 
 if __name__ == '__main__':
