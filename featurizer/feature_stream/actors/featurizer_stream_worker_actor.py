@@ -5,7 +5,7 @@ import ray
 
 from featurizer.data_definitions.data_definition import Event
 from featurizer.data_definitions.data_source_definition import DataSourceDefinition
-from featurizer.feature_stream.data_source_event_emitter import DataSourceEventEmitter
+from featurizer.feature_stream.event_emitter.data_source_event_emitter import DataSourceEventEmitter
 from featurizer.feature_stream.feature_stream_graph import FeatureStreamGraph
 
 

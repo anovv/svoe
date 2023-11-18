@@ -5,13 +5,13 @@ from threading import Thread, Event
 import yaml
 from cryptofeed import FeedHandler
 from cryptofeed.defines import TICKER, L2_BOOK, TRADES
-from cryptofeed.exchanges import Bybit, Binance, BinanceFutures
+from cryptofeed.exchanges import Binance
 from order_book import OrderBook
 from streamz import Stream
 
 from featurizer.config import FeaturizerConfig
-from featurizer.feature_stream.cryptofeed_event_emitter import CryptofeedEventEmitter
-from featurizer.feature_stream.feature_stream_graph import FeatureStreamGraph, FeatureStreamNode
+from featurizer.feature_stream.event_emitter.cryptofeed_event_emitter import CryptofeedEventEmitter
+from featurizer.feature_stream.feature_stream_graph import FeatureStreamGraph
 
 
 class TestOnlineFeatureStream(unittest.TestCase):

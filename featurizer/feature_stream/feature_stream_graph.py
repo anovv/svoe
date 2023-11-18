@@ -133,6 +133,7 @@ class FeatureStreamGraph:
 
     def rebuild_with_callbacks(self, callbacks: Dict[Feature, Callable[[Event], Optional[Any]]]):
         # for some reason, setting .sink on streams stored on graph does not work (need to figure out why)
+        # so having simple set_callback() API does not work.
         # rebuilding graph with callbacks does the trick
         self.feature_stream_nodes: Dict[Feature, FeatureStreamNode] = _connect_stream_graph(self.features, callbacks)
 

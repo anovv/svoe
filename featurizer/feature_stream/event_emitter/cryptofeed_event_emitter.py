@@ -1,5 +1,5 @@
 import functools
-from typing import Callable, Any, Dict, Tuple, List, Type, Set, Optional
+from typing import Callable, Any, Dict, Tuple, Type, Set, Optional
 
 from cryptofeed import FeedHandler
 from cryptofeed.defines import L2_BOOK, TRADES, TICKER
@@ -12,7 +12,7 @@ from featurizer.data_definitions.common.ticker.cryptofeed.cryptofeed_ticker impo
 from featurizer.data_definitions.common.trades.cryptofeed.cryptofeed_trades import CryptofeedTradesData
 from featurizer.data_definitions.data_definition import Event
 from featurizer.data_definitions.data_source_definition import DataSourceDefinition
-from featurizer.feature_stream.data_source_event_emitter import DataSourceEventEmitter
+from featurizer.feature_stream.event_emitter.data_source_event_emitter import DataSourceEventEmitter
 from featurizer.features.feature_tree.feature_tree import Feature
 
 

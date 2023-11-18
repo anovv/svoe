@@ -10,8 +10,8 @@ import ray
 
 from featurizer.data_definitions.common.l2_book_incremental.cryptotick.cryptotick_l2_book_incremental import \
     CryptotickL2BookIncrementalData
+from featurizer.data_definitions.common.trades.cryptotick.cryptotick_trades import CryptotickTradesData
 from featurizer.data_definitions.common.trades.cryptotick.utils import preprocess_trades_df
-from featurizer.data_definitions.common.trades.trades import TradesData
 from featurizer.sql.db_actor import DbActor
 from featurizer.data_ingest.models import InputItem
 from featurizer.sql.models.data_source_block_metadata import DataSourceBlockMetadata
@@ -50,7 +50,7 @@ def load_split_catalog_store_df(
     if data_source_definition == CryptotickL2BookIncrementalData.__name__:
         processed_df = preprocess_l2_inc_df(df, date_str)
         gen = gen_split_l2_inc_df_and_pad_with_snapshot(processed_df, chunk_size_kb, split_callback)
-    elif data_source_definition == TradesData.__name__:
+    elif data_source_definition == CryptotickTradesData.__name__:
         processed_df = preprocess_trades_df(df)
         gen = gen_split_df_by_mem(processed_df, chunk_size_kb, split_callback)
     else:
