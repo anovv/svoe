@@ -149,7 +149,7 @@ def make_data_source_block_metadata(df: pd.DataFrame, input_item: InputItem, dat
         DataSourceBlockMetadata.day.name: date_str,
     })
 
-    # TODO l2_book -> l2_inc
+    # TODO add cryptofeed and other possible l2_book sources
     if block_metadata_params[DataSourceBlockMetadata.data_source_definition.name] == CryptotickL2BookIncrementalData.__name__:
         snapshot_ts = get_snapshot_ts(df)
         if snapshot_ts is not None:
