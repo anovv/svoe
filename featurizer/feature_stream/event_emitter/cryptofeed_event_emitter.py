@@ -1,4 +1,6 @@
+import asyncio
 import functools
+from threading import Thread
 from typing import Callable, Any, Dict, Tuple, Type, Set, Optional
 
 from cryptofeed import FeedHandler
@@ -22,7 +24,8 @@ class CryptofeedEventEmitter(DataSourceEventEmitter):
         self.callbacks_per_exchange_per_channel: Dict[str, Dict[str, Callable]] = {}
         self.symbols_per_exchange: Dict[str, Set[str]] = {}
         self.feed_handler = FeedHandler(config={'uvloop': True, 'log': {'disabled': True}})
-        pass
+        self.event_loop = asyncio.new_event_loop()
+        self.loop_thread = Thread(target=self.start_loop)
 
     @classmethod
     def instance(cls) -> 'DataSourceEventEmitter':
@@ -43,7 +46,8 @@ class CryptofeedEventEmitter(DataSourceEventEmitter):
         else:
             self.symbols_per_exchange[exchange] = {symbol}
 
-    def start(self):
+    def start_loop(self):
+        asyncio.set_event_loop(self.event_loop)
         for exchange in self.symbols_per_exchange:
             feed_class: Type[Feed] = EXCHANGE_MAP[exchange]
             symbols = list(self.symbols_per_exchange[exchange])
@@ -66,10 +70,15 @@ class CryptofeedEventEmitter(DataSourceEventEmitter):
                 callbacks=raw_callbacks
             )
             self.feed_handler.add_feed(feed)
-        self.feed_handler.run()
+        self.feed_handler.run(start_loop=True, install_signal_handlers=False)
+
+    def start(self):
+        self.loop_thread.start()
 
     def stop(self):
-        self.feed_handler.stop()
+        self.feed_handler._stop(loop=self.event_loop) # async stop
+        self.event_loop.call_soon_threadsafe(self.event_loop.stop)
+        self.loop_thread.join()
 
     # TODO util cryptofeed related stuff ?
     @classmethod

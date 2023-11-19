@@ -1,6 +1,6 @@
 import sys
 import time
-from typing import List, Optional, Dict
+from typing import List, Dict
 
 import pandas as pd
 
@@ -34,33 +34,13 @@ class MemoryBasedCompactor:
         return res
 
     def _estimate_num_events(self, events: List[Event], in_memory_size_kb: int) -> int:
-        num_events_per_1kb = 20  # approx num event per 1 kb in terms of pandas df size in-memory
+        num_events_per_1kb = 20  # approx num events per 1 kb in terms of pandas df size in-memory
         num_events_per_block = num_events_per_1kb * in_memory_size_kb
 
         df = pd.DataFrame(events[:num_events_per_block + 1])
         approx_size_kb = get_size_kb(df)
 
         # proportionally scale num_events
-        # TODO finish
-        # num_events_per_block = num_events_per_block *
-
+        num_events_per_block = int(num_events_per_block * in_memory_size_kb / approx_size_kb)
 
         return num_events_per_block
-
-
-
-if __name__ == '__main__':
-    events = [{
-        'ts1': time.time(),
-        'ts2': time.time(),
-        'val1': i * 1_000_000,
-        'val2': i * 1_000_000,
-        'val3': i * 1_000_000,
-        'val4': i * 1_000_000,
-    } for i in range(2 * 1000 * 1000)]
-
-    df = pd.DataFrame(events)
-
-    print(sys.getsizeof(events)/1024)
-    print(sys.getsizeof(df)/1024)
-    print(get_size_kb(df))

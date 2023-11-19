@@ -111,7 +111,9 @@ class TestOnlineFeatureStream(unittest.TestCase):
 
             emitter.register_callback(f, emitter_callback)
         emitter.start()
-
+        time.sleep(10)
+        emitter.stop()
+        print('Done')
 
 if __name__ == '__main__':
     # unittest.main()
