@@ -25,7 +25,7 @@ class CryptofeedEventEmitter(DataSourceEventEmitter):
         self.symbols_per_exchange: Dict[str, Set[str]] = {}
         self.feed_handler = FeedHandler(config={'uvloop': True, 'log': {'disabled': True}})
         self.event_loop = asyncio.new_event_loop()
-        self.loop_thread = Thread(target=self.start_loop)
+        self.loop_thread = Thread(target=self.start_loop, daemon=True)
 
     @classmethod
     def instance(cls) -> 'DataSourceEventEmitter':
@@ -78,7 +78,7 @@ class CryptofeedEventEmitter(DataSourceEventEmitter):
     def stop(self):
         self.feed_handler._stop(loop=self.event_loop) # async stop
         self.event_loop.call_soon_threadsafe(self.event_loop.stop)
-        self.loop_thread.join()
+        self.loop_thread.join(timeout=10)
 
     # TODO util cryptofeed related stuff ?
     @classmethod

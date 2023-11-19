@@ -7,13 +7,15 @@ from featurizer.features.feature_tree.feature_tree import Feature
 
 
 class Compactor:
+    def __init__(self, config):
+        self.config = config
 
-    def compaction_split_indexes(self, feature: Feature, events: List[Event], **kwargs) -> List[int]:
+    def compaction_split_indexes(self, feature: Feature, events: List[Event]) -> List[int]:
         raise NotImplementedError
 
     # not thread safe
-    def compact(self, feature: Feature, events: List[Event], **kwargs) -> List[pd.DataFrame]:
-        split_indexes = self.compaction_split_indexes(feature, events, **kwargs)
+    def compact(self, feature: Feature, events: List[Event]) -> List[pd.DataFrame]:
+        split_indexes = self.compaction_split_indexes(feature, events)
         if len(split_indexes) == 0:
             return []
         dfs = []

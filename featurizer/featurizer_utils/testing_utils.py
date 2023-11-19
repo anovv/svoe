@@ -6,7 +6,8 @@ import ray
 from common.s3.s3_utils import load_dfs_s3
 from featurizer.blocks.blocks import BlockRangeMeta, BlockRange, mock_meta
 from featurizer.data_definitions.common.l2_book_incremental.cryptofeed.cryptofeed_l2_book_incremental import CryptofeedL2BookIncrementalData
-from featurizer.data_definitions.common.trades.trades import TradesData
+
+from featurizer.data_definitions.common.trades.cryptofeed.cryptofeed_trades import CryptofeedTradesData
 from featurizer.features.definitions.feature_definition import FeatureDefinition
 from featurizer.features.feature_tree.feature_tree import Feature
 from common.pandas.df_utils import time_range, get_size_kb, get_num_rows
@@ -86,7 +87,7 @@ def mock_trades_data_and_meta() -> Tuple[Dict[Feature, BlockRange], Dict[Feature
         })
 
     data_params =  {} # TODO mock
-    data = Feature([], 0, TradesData, data_params)
+    data = Feature([], 0, CryptofeedTradesData, data_params)
     return {data: block_range}, {data: block_range_meta}
 
 

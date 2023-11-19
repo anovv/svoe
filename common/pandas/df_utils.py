@@ -78,6 +78,10 @@ def get_size_kb(df: pd.DataFrame) -> int:
     return int(df.memory_usage(index=True, deep=True).sum()/1024.0)
 
 
+def get_size_bytes(df: pd.DataFrame) -> int:
+    return df.memory_usage(index=True, deep=True).sum()
+
+
 def get_time_diff(df1: pd.DataFrame, df2: pd.DataFrame) -> float:
     if df1 is None or df2 is None:
         return 0

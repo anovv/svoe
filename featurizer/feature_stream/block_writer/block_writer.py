@@ -1,32 +1,32 @@
 import concurrent.futures
-import functools
 import time
 from threading import Thread
-from typing import List, Any, Dict, Optional, Type
+from typing import List, Dict, Optional, Type
 
 import pandas as pd
-from portion import Interval
+from portion import closed
 
 from common.pandas.df_utils import time_range
 from featurizer.data_definitions.data_definition import Event, DataDefinition
 from featurizer.data_ingest.pipelines.cryptotick.tasks import make_data_source_block_metadata
 from featurizer.feature_stream.block_writer.compactor import Compactor
-from featurizer.feature_stream.block_writer.memory_based_compactor import MemoryBasedCompactor
 from featurizer.features.feature_tree.feature_tree import Feature
 from featurizer.sql.client import FeaturizerSqlClient
 from featurizer.sql.models.data_source_block_metadata import DataSourceBlockMetadata
 from featurizer.sql.models.data_source_metadata import DataSourceMetadata
+from featurizer.sql.models.feature_metadata import FeatureMetadata
 from featurizer.storage.data_store_adapter.data_store_adapter import DataStoreAdapter
 from featurizer.storage.data_store_adapter.local_data_store_adapter import LocalDataStoreAdapter
 from featurizer.task_graph.tasks import make_feature_block_metadata
 
 STORE_LOOP_INTERVAL_S = 5
 
+
 class BlockWriter:
 
     def __init__(
         self,
-        default_compactor: Compactor = MemoryBasedCompactor(),
+        default_compactor: Compactor,
         compactors: Optional[Dict[Type[DataDefinition], Compactor]] = None,
         data_store_adapter: DataStoreAdapter = LocalDataStoreAdapter(),
     ):
@@ -39,7 +39,7 @@ class BlockWriter:
         self._sql_client = FeaturizerSqlClient()
 
         self._executor = concurrent.futures.ThreadPoolExecutor(max_workers=128)
-        self._loop_thread = Thread(target=self._store_loop)
+        self._loop_thread = Thread(target=self._store_loop, daemon=True)
 
         self._is_running = False
 
@@ -50,7 +50,7 @@ class BlockWriter:
     def stop(self):
         self._is_running = False
         self._executor.shutdown(wait=True)
-        self._loop_thread.join()
+        self._loop_thread.join(timeout=10)
 
     def append_event(self, feature: Feature, event: Event):
         if feature in self._events_to_store:
@@ -72,12 +72,35 @@ class BlockWriter:
 
                 for df in dfs:
                     # fire and forget
-                    self._executor.submit(functools.partial(self._store_block, self, df, feature))
+                    # self._executor.submit(self._store_block, df, feature)
+                    self._store_block(df, feature)
+
+            time.sleep(STORE_LOOP_INTERVAL_S)
 
         # wait for running futures to finish
         self._executor.shutdown(wait=True)
 
     def _store_block(self, df: pd.DataFrame, feature: Feature):
+        print(f'Stored called for {feature}')
+        # TODO check if there is an entry in feature/data_source_metadata table
+        if feature.data_definition.is_data_source():
+            metadata = DataSourceMetadata(
+                owner_id='0',  # TODO
+                key=feature.key,
+                data_source_definition=feature.data_definition.__name__,
+                extras = {},
+                params=feature.params
+            )
+        else:
+            metadata = FeatureMetadata(
+                owner_id='0',  # TODO
+                key=feature.key,
+                feature_definition=feature.data_definition.__name__,
+                feature_name=feature.name,
+                params=feature.params
+            )
+        self._sql_client.store_metadata_if_needed([metadata])
+
         if feature.data_definition.is_data_source():
             data_source = feature
             input_item = {
@@ -85,19 +108,18 @@ class BlockWriter:
                 DataSourceBlockMetadata.data_source_definition.name: data_source.data_definition.__name__,
                 DataSourceMetadata.params.name: data_source.params
             }
-            metadata_item = make_data_source_block_metadata(df, input_item, self._data_store_adapter)
+            block_metadata = make_data_source_block_metadata(df, input_item, self._data_store_adapter)
         else:
             _time_range = time_range(df)
-            interval = Interval(_time_range[0], _time_range[1])
-            metadata_item = make_feature_block_metadata(feature, df, interval, self._data_store_adapter)
+            interval = closed(_time_range[0], _time_range[1])
+            block_metadata = make_feature_block_metadata(feature, df, interval, self._data_store_adapter)
 
         # TODO retries
-        self._data_store_adapter.store_df(metadata_item.path, df)
-        self._sql_client.store_block_metadata_batch([metadata_item])
+        self._data_store_adapter.store_df(block_metadata.path, df)
+        self._sql_client.store_block_metadata_batch([block_metadata])
 
         # TODO message to log?
         print(f'Stored block for {feature}')
-        time.sleep(STORE_LOOP_INTERVAL_S)
 
 
 

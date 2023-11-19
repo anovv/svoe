@@ -10,8 +10,11 @@ from order_book import OrderBook
 from streamz import Stream
 
 from featurizer.config import FeaturizerConfig
+from featurizer.feature_stream.block_writer.block_writer import BlockWriter
+from featurizer.feature_stream.block_writer.memory_based_compactor import MemoryBasedCompactor
 from featurizer.feature_stream.event_emitter.cryptofeed_event_emitter import CryptofeedEventEmitter
 from featurizer.feature_stream.feature_stream_graph import FeatureStreamGraph
+from featurizer.features.feature_tree.feature_tree import Feature
 
 
 class TestOnlineFeatureStream(unittest.TestCase):
@@ -94,13 +97,14 @@ class TestOnlineFeatureStream(unittest.TestCase):
         config = FeaturizerConfig(**dct)
         feature_stream_graph = FeatureStreamGraph(features_or_config=config)
         outs = feature_stream_graph.get_outs()
-        callbacks = {}
+        block_writer = BlockWriter(
+            default_compactor=MemoryBasedCompactor({'in_memory_size_kb': 1})
+        )
         for f in outs:
-            def callback(event: Event):
-                print(event)
+            def callback(feature: Feature, event: Event):
+                block_writer.append_event(feature, event)
 
-            callbacks[f] = callback
-        feature_stream_graph.rebuild_with_callbacks(callbacks)
+            feature_stream_graph.set_callback(f, callback)
 
         ins = feature_stream_graph.get_ins()
         emitter = CryptofeedEventEmitter.instance()
@@ -110,9 +114,11 @@ class TestOnlineFeatureStream(unittest.TestCase):
                 feature_stream_graph.get_stream(f).emit(event, asynchronous=False)
 
             emitter.register_callback(f, emitter_callback)
+        block_writer.start()
         emitter.start()
-        time.sleep(10)
+        time.sleep(1000)
         emitter.stop()
+        block_writer.stop()
         print('Done')
 
 if __name__ == '__main__':
