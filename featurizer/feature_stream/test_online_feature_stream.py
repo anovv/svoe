@@ -10,6 +10,8 @@ from order_book import OrderBook
 from streamz import Stream
 
 from featurizer.config import FeaturizerConfig
+from featurizer.data_definitions.common.ticker.cryptofeed.cryptofeed_ticker import CryptofeedTickerData
+from featurizer.data_definitions.common.trades.cryptofeed.cryptofeed_trades import CryptofeedTradesData
 from featurizer.feature_stream.block_writer.block_writer import BlockWriter
 from featurizer.feature_stream.block_writer.memory_based_compactor import MemoryBasedCompactor
 from featurizer.feature_stream.event_emitter.cryptofeed_event_emitter import CryptofeedEventEmitter
@@ -109,14 +111,14 @@ class TestOnlineFeatureStream(unittest.TestCase):
         ins = feature_stream_graph.get_ins()
         emitter = CryptofeedEventEmitter.instance()
         for f in ins:
-            def emitter_callback(event: Event):
+            def emitter_callback(feature: Feature, event: Event):
                 # TODO set async=True?
-                feature_stream_graph.get_stream(f).emit(event, asynchronous=False)
+                feature_stream_graph.get_stream(feature).emit(event, asynchronous=False)
 
             emitter.register_callback(f, emitter_callback)
         block_writer.start()
         emitter.start()
-        time.sleep(1000)
+        time.sleep(20)
         emitter.stop()
         block_writer.stop()
         print('Done')

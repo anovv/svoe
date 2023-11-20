@@ -31,15 +31,16 @@ class CryptofeedEventEmitter(DataSourceEventEmitter):
     def instance(cls) -> 'DataSourceEventEmitter':
         return CryptofeedEventEmitter()
 
-    def register_callback(self, feature: Feature, callback: Callable[[Event], Optional[Any]]):
+    def register_callback(self, feature: Feature, callback: Callable[[Feature, Event], Optional[Any]]):
+        cryptofeed_callback = functools.partial(callback, feature)
         exchange, symbol, channel = self._parse_data_source_params(feature)
         if exchange in self.callbacks_per_exchange_per_channel:
             if channel in self.callbacks_per_exchange_per_channel:
                 raise ValueError(f'{channel} for {exchange} already exists')
             else:
-                self.callbacks_per_exchange_per_channel[exchange][channel] = callback
+                self.callbacks_per_exchange_per_channel[exchange][channel] = cryptofeed_callback
         else:
-            self.callbacks_per_exchange_per_channel[exchange] = {channel: callback}
+            self.callbacks_per_exchange_per_channel[exchange] = {channel: cryptofeed_callback}
 
         if exchange in self.symbols_per_exchange:
             self.symbols_per_exchange[exchange].add(symbol)

@@ -117,7 +117,8 @@ def get_overlaps(key_intervaled_value: Dict[Any, IntervalDict]) -> Dict[Interval
     # https://github.com/AlexandreDecan/portion
     # https://stackoverflow.com/questions/40367461/intersection-of-two-lists-of-ranges-in-python
     d = IntervalDict()
-    # print(key_intervaled_value)
+    if len(key_intervaled_value) == 0:
+        return {}
     first_key = list(key_intervaled_value.keys())[0]
     for interval, values in key_intervaled_value[first_key].items():
         d[interval] = {first_key: values}  # named_intervaled_values_dict

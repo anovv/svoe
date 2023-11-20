@@ -1,39 +1,29 @@
-start_date: '2023-02-01 10:00:00'
-end_date: '2023-02-01 11:00:00'
-label_feature: 0
-label_lookahead: '5s'
+#start_date: '2023-02-01 10:00:00'
+#end_date: '2023-02-01 11:00:00'
+#label_feature: 0
+#label_lookahead: '5s'
 #features_to_store: [0, 1, 2]
 #features_to_store: [0, 1]
 feature_configs:
-#  - feature_definition: transforms.diff
-#    name: mid_price_5s_diff
-#    params:
-#      window: 5s
-#    deps:
-#      - mid_price
-#  - feature_definition: transforms.diff
-#    name: mid_price_1s_diff
-#    params:
-#      window: 1100ms
-#    deps:
-#      - mid_price
-  - feature_definition: price.mid_price_fd
-    name: mid_price
+  - feature_definition: volatility.volatility_stddev_fd
     params:
-      data_source: &id001
+      data_source:
         - exchange: BINANCE
           instrument_type: spot
           symbol: BTC-USDT
       feature:
         1:
-          dep_schema: cryptotick
+          dep_schema: ticker
           sampling: 1s
-  - feature_definition: volatility.volatility_stddev_fd
+  - feature_definition: price.mid_price_fd
     params:
-      data_source:  *id001
+      data_source:
+        - exchange: BINANCE
+          instrument_type: spot
+          symbol: BTC-USDT
       feature:
-        2:
-          dep_schema: cryptotick
+        0:
+          dep_schema: ticker
           sampling: 1s
 #  - feature_definition: l2_book.l2_snapshot_fd
 #    name: l2_snapshot

@@ -88,7 +88,6 @@ def _connect_stream_tree(feature: Feature, exisitng_nodes: Dict[Feature, Feature
     if callbacks is not None and feature in callbacks:
         sink_callable = functools.partial(callbacks[feature], feature)
         out_stream.sink(sink_callable)
-    # print(out_stream)
     node = FeatureStreamNode(feature, out_stream)
     exisitng_nodes[feature] = node
     return node
@@ -118,8 +117,6 @@ class FeatureStreamGraph:
                 out_streams.append(self.feature_stream_nodes[feature].get_stream())
             unified_out_stream = streamz.combine_latest(*out_streams)
             unified_out_stream.sink(combined_out_callback)
-
-        # self.ss = []
 
     def __hash__(self):
         return hash(frozenset(self.features))

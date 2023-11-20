@@ -73,6 +73,7 @@ class BlockWriter:
                 for df in dfs:
                     # fire and forget
                     # self._executor.submit(self._store_block, df, feature)
+                    # TODO run in executor after debug
                     self._store_block(df, feature)
 
             time.sleep(STORE_LOOP_INTERVAL_S)
@@ -88,7 +89,7 @@ class BlockWriter:
                 owner_id='0',  # TODO
                 key=feature.key,
                 data_source_definition=feature.data_definition.__name__,
-                extras = {},
+                extras={},
                 params=feature.params
             )
         else:

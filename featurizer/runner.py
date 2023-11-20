@@ -40,6 +40,11 @@ class Featurizer:
         data_ranges_meta = storage.get_data_sources_meta(features, start_date=config.start_date, end_date=config.end_date)
         stored_features_meta = storage.get_features_meta(features, start_date=config.start_date, end_date=config.end_date)
 
+        print(stored_features_meta.keys())
+
+        if len(data_ranges_meta) == 0 and len(stored_features_meta) == 0:
+            raise ValueError('No data for given time range')
+
         label_feature = None
         if config.label_feature is not None:
             if isinstance(config.label_feature, int):

@@ -16,12 +16,6 @@ class TestCryptofeedEventEmitter(unittest.TestCase):
         ticker_events = []
         trades_events = []
 
-        def ticker_cb(event: Event):
-            ticker_events.append(event)
-
-        def trades_cb(event: Event):
-            trades_events.append(event)
-
         ticker_data_source = Feature(children=[], data_definition=CryptofeedTickerData, params={
             'exchange': 'BINANCE',
             'symbol': 'BTC-USDT',
@@ -30,6 +24,15 @@ class TestCryptofeedEventEmitter(unittest.TestCase):
             'exchange': 'BINANCE',
             'symbol': 'BTC-USDT',
         })
+
+        def ticker_cb(feature: Feature, event: Event):
+            ticker_events.append(event)
+            print(event)
+
+        def trades_cb(feature: Feature, event: Event):
+            trades_events.append(event)
+            print(event)
+
         emitter.register_callback(ticker_data_source, ticker_cb)
         emitter.register_callback(trades_data_source, trades_cb)
 

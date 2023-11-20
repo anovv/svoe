@@ -37,7 +37,9 @@ def build_feature_task_graph(
     def tree_traversal_callback(feature: Feature):
         if feature.data_definition.is_data_source():
             # leafs
-            # TODO decouple derived feature_ranges_meta and input data ranges meta
+            if feature not in data_ranges_meta:
+                # can happen if we retrieve stored features, so no data sources
+                return
             ranges = data_ranges_meta[feature]  # this is already populated for Data in load_data_ranges above
             for block_range_meta in ranges:
                 if feature not in dag:
@@ -65,12 +67,16 @@ def build_feature_task_graph(
 
         ranges_per_dep_feature = {}
         for dep_feature in feature.children:
-            meta = data_ranges_meta[dep_feature] if dep_feature.data_definition.is_data_source() else features_ranges_meta[dep_feature]
+            meta = {}
+            if dep_feature.data_definition.is_data_source():
+                if dep_feature in data_ranges_meta:
+                    meta = data_ranges_meta[dep_feature]
+            else:
+                # TODO why key error
+                meta = features_ranges_meta[dep_feature]
             ranges_per_dep_feature[dep_feature] = ranges_to_interval_dict(meta)
 
         range_intervals = prune_overlaps(get_overlaps(ranges_per_dep_feature))
-        # print(range_intervals)
-        # raise
         for range_interval in range_intervals:
             range_meta_per_dep_feature = range_intervals[range_interval]
 
@@ -96,10 +102,6 @@ def build_feature_task_graph(
                     ds = []
                     for dep_block_meta in overlap[dep_feature]:
                         dep_interval = meta_to_interval(dep_block_meta)
-                        # print(dep_block_meta)
-                        # print(dep_interval)
-                        # print(dag[dep_feature][])
-                        # raise
                         dep_node = dag[dep_feature][range_interval][dep_interval]
                         ds.append(dep_node)
                     dep_nodes[dep_feature] = ds
@@ -107,6 +109,7 @@ def build_feature_task_graph(
                 ctx = context(feature.key, interval)
                 if stored_feature_blocks_meta is not None and feature in stored_feature_blocks_meta:
                     almost_equal_interval = None
+                    # TODO this is a hack but ok
                     for i in stored_feature_blocks_meta[feature]:
                         if intervals_almost_equal(i, interval):
                             if almost_equal_interval is not None:

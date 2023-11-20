@@ -11,7 +11,7 @@ class DataSourceEventEmitter:
     def instance(cls) -> 'DataSourceEventEmitter':
         raise NotImplementedError
 
-    def register_callback(self, feature: Feature, callback: Callable[[Event], Optional[Any]]):
+    def register_callback(self, feature: Feature, callback: Callable[[Feature, Event], Optional[Any]]):
         raise NotImplementedError
 
     def start(self):
