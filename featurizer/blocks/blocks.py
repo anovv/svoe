@@ -1,4 +1,4 @@
-from typing import Dict, List, Any, Tuple
+from typing import Dict, List, Any, Tuple, Union
 import pandas as pd
 from portion import Interval, closed, IntervalDict
 
@@ -49,6 +49,17 @@ def ranges_to_interval_dict(ranges: List[BlockRangeMeta]) -> IntervalDict:
         res[interval] = range
 
     return res
+
+
+def interval_dict_to_ranges(idict: Union[Dict[Interval, BlockMeta], IntervalDict]) -> List[BlockRangeMeta]:
+    metas = []
+    for interval in idict:
+        block_meta = idict[interval]
+        metas.append(block_meta)
+
+    metas = sorted(metas, key=lambda x: x['start_ts'])
+
+    return make_ranges(metas)
 
 
 def overlaps_keys(interval: Interval, d: IntervalDict) -> bool:

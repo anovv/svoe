@@ -30,6 +30,14 @@ class Featurizer:
 
     @classmethod
     def run(cls, config: FeaturizerConfig, ray_address: str, parallelism: int):
+        # @ray.remote
+        # def f(t: str):
+        #     print(t)
+        #
+        # node = f.bind('t')
+        # print(node._body.__name__)
+        # print(node.get_args())
+
         features = construct_features_from_configs(config.feature_configs)
         # for f in features:
         #     print(f, f.children)

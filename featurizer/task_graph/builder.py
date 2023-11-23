@@ -8,7 +8,7 @@ from ray.types import ObjectRef
 from featurizer.features.feature_tree.feature_tree import Feature, postorder
 from featurizer.blocks.blocks import meta_to_interval, interval_to_meta, get_overlaps, BlockRangeMeta, \
     prune_overlaps, range_meta_to_interval, ranges_to_interval_dict, BlockMeta, overlaps_keys, is_sorted_intervals, \
-    intervals_almost_equal
+    intervals_almost_equal, interval_dict_to_ranges
 from portion import Interval, IntervalDict, closed
 
 from featurizer.task_graph.tasks import calculate_feature, load_if_needed, bind_and_cache, context, \
@@ -72,11 +72,31 @@ def build_feature_task_graph(
                 if dep_feature in data_ranges_meta:
                     meta = data_ranges_meta[dep_feature]
             else:
-                # TODO why key error
-                meta = features_ranges_meta[dep_feature]
+                if dep_feature in features_ranges_meta:
+                    meta = features_ranges_meta[dep_feature]
             ranges_per_dep_feature[dep_feature] = ranges_to_interval_dict(meta)
 
         range_intervals = prune_overlaps(get_overlaps(ranges_per_dep_feature))
+
+        # TODO figure out what to do if stored_feature_blocks_meta and derived features overlap
+        # TODO we should decouple/refactor graph construction for calculation and loading
+        # in case we load already stored features
+        if len(range_intervals) == 0:
+            stored_feature_ranges_meta = interval_dict_to_ranges(stored_feature_blocks_meta[feature])
+            for block_range_meta in stored_feature_ranges_meta:
+                range_interval = range_meta_to_interval(block_range_meta)
+                nodes = {}
+                for block_meta in block_range_meta:
+                    interval = meta_to_interval(block_meta)
+                    ctx = context(feature.key, interval)
+                    path = block_meta['path']
+                    node = bind_and_cache(load_if_needed, obj_ref_cache, ctx, path=path,
+                                          data_store_adapter=data_store_adapter, is_feature=True)
+                    nodes[interval] = node
+                if feature not in dag:
+                    dag[feature] = {}
+                dag[feature][range_interval] = nodes
+
         for range_interval in range_intervals:
             range_meta_per_dep_feature = range_intervals[range_interval]
 
@@ -147,6 +167,8 @@ def build_feature_task_graph(
                 features_ranges_meta[feature].append(block_range_meta)
 
     postorder(feature, tree_traversal_callback)
+
+    # TODO prune unnecessary graph nodes (i.e load followed by load in case of stored features)
 
     return dag
 
