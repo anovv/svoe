@@ -100,7 +100,7 @@ class TestOnlineFeatureStream(unittest.TestCase):
         feature_stream_graph = FeatureStreamGraph(features_or_config=config)
         outs = feature_stream_graph.get_outs()
         block_writer = BlockWriter(
-            default_compactor=MemoryBasedCompactor({'in_memory_size_kb': 1})
+            default_compactor=MemoryBasedCompactor({'in_memory_size_kb': 10})
         )
         for f in outs:
             def callback(feature: Feature, event: Event):
@@ -118,7 +118,7 @@ class TestOnlineFeatureStream(unittest.TestCase):
             emitter.register_callback(f, emitter_callback)
         block_writer.start()
         emitter.start()
-        time.sleep(20)
+        time.sleep(240)
         emitter.stop()
         block_writer.stop()
         print('Done')

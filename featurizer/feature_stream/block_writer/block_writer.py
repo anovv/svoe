@@ -112,7 +112,7 @@ class BlockWriter:
             block_metadata = make_data_source_block_metadata(df, input_item, self._data_store_adapter)
         else:
             _time_range = time_range(df)
-            interval = closed(_time_range[0], _time_range[1])
+            interval = closed(_time_range[1], _time_range[2])
             block_metadata = make_feature_block_metadata(feature, df, interval, self._data_store_adapter)
 
         # TODO retries
