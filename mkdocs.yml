@@ -21,7 +21,8 @@ nav:
       - Data Ingest: featurizer-data-ingest.md
       - Storage and Data Models: featurizer-storage.md
       - Task Graph Compilation and Execution: featurizer-task-graph.md
-      - Real-time data and Streaming: featurizer-streaming.md
+      - Real-time Data and Streaming: featurizer-streaming.md
+      - Real-time Data Recording: featurizer-real-time-data-recording.md
       - Synthetic Data Sources: featurizer-synthetic-data-sources.md
       - Transforms: featurizer-transforms.md
       - Configuration: featurizer-configuration.md

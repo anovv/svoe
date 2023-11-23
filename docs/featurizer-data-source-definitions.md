@@ -22,7 +22,23 @@ class MyDataSourceDefinition(DataSourceDefinition):
         # Any preprocessing logic to get a sequence of EventSchema-like
         # records in a form of a DataFrame from raw data (raw_df)
         raise NotImplemented
+        
+    @classmethod
+    def event_emitter_type(cls) -> Type[DataSourceEventEmitter]:
+        # provides DataSourceEventEmitter type associated with this data source
+        raise NotImplemented
 ```
 
-See CryptotickL2BookIncrementalData for an example of a data source representing 
-incremental order book updates from Cryptotick data provider.
+Some examples of common data source definitions
+
+- [CryptotickL2BookIncrementalData](https://github.com/anovv/svoe/blob/main/featurizer/data_definitions/common/l2_book_incremental/cryptotick/cryptotick_l2_book_incremental.py) - incremental updates for L2 orderbook from [Cryptotick](https://www.cryptotick.com/) data provider
+
+- [CryptofeedL2BookIncrementalData](https://github.com/anovv/svoe/blob/main/featurizer/data_definitions/common/l2_book_incremental/cryptofeed/cryptofeed_l2_book_incremental.py) - incremental updates for L2 orderbook from [Cryptofeed](https://github.com/bmoscon/cryptofeed) library
+
+- [CryptofeedTickerData](https://github.com/anovv/svoe/blob/main/featurizer/data_definitions/common/ticker/cryptofeed/cryptofeed_ticker.py) - Cryptofeed ticker
+
+- [CryptotickTradesData](https://github.com/anovv/svoe/blob/main/featurizer/data_definitions/common/trades/cryptotick/cryptotick_trades.py) - Cryptotick trades
+
+- [CryptofeedTradesData](https://github.com/anovv/svoe/blob/main/featurizer/data_definitions/common/trades/cryptofeed/cryptofeed_trades.py) - Cryptofeed trades
+
+See [Featurizer Real Time Streaming](https://anovv.github.io/svoe/featurizer-streaming/) for Event Emitter details
