@@ -1,0 +1,15 @@
+[tool.poetry]
+name = "svoe"
+version = "0.1.0"
+description = "A scalable, declarative, low-code framework for quant finance research built on top of Ray"
+authors = ["Andrey Novitskiy"]
+license = "Apache-2.0"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
