@@ -1,5 +1,0 @@
-http://arun-gupta.github.io/kubeflow-kops-aws/
-
-kfctl: https://github.com/kubeflow/kfctl/releases/download/v1.2.0/kfctl_v1.2.0-0-gbc038f9_darwin.tar.gz
-
-export CONFIG=https://raw.githubusercontent.com/kubeflow/manifests/v1.2-branch/kfdef/kfctl_istio_dex.v1.2.0.yaml # Multiuser
