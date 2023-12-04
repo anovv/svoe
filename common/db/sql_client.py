@@ -20,15 +20,21 @@ DEFAULT_MYSQL_CONFIG = {
 }
 
 SQLITE_DB_PATH = '/tmp/svoe/sqlite'
+DUCKDB_DB_PATH = '/tmp/svoe/duckdb'
 
 
 class DbType(enum.Enum):
     SQLITE = 'sqlite'
     MYSQL = 'mysql'
+    DUCKDB = 'duckdb'
 
 
 def get_db_type() -> str:
-    return os.getenv('SVOE_DB_TYPE', DbType.SQLITE)
+    return os.getenv('SVOE_DB_TYPE', DbType.DUCKDB)
+
+
+def duckdb_connection_string() -> str:
+    return f'duckdb:///{DUCKDB_DB_PATH}/{SVOE_DB_NAME}.duckdb'
 
 
 def sqlite_connection_string() -> str:
@@ -57,6 +63,8 @@ def get_conn_str() -> str:
         return sqlite_connection_string()
     elif db_type == DbType.MYSQL:
         return mysql_connection_string()
+    elif db_type == DbType.DUCKDB:
+        return duckdb_connection_string()
     else:
         raise ValueError(f'Unsupported db type: {db_type}')
 
