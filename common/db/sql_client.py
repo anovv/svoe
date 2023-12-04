@@ -9,6 +9,7 @@ from common.db.base import Base
 
 Session = sessionmaker()
 
+SVOE_DB_DIR = '/tmp/svoe'
 SVOE_DB_NAME = 'svoe_db'
 
 DEFAULT_MYSQL_CONFIG = {
@@ -19,8 +20,8 @@ DEFAULT_MYSQL_CONFIG = {
     'mysql_database': SVOE_DB_NAME,
 }
 
-SQLITE_DB_PATH = '/tmp/svoe/sqlite'
-DUCKDB_DB_PATH = '/tmp/svoe/duckdb'
+SQLITE_DB_PATH = f'{SVOE_DB_DIR}/sqlite'
+DUCKDB_DB_PATH = f'{SVOE_DB_DIR}/duckdb'
 
 
 class DbType(enum.Enum):

@@ -1,9 +1,12 @@
 import os
+import pathlib
 
 import sqlalchemy
 
 from common.db.sql_client import get_db_type, DbType, mysql_connection_string, SVOE_DB_NAME, \
-    sqlite_connection_string, SQLITE_DB_PATH
+    sqlite_connection_string, SQLITE_DB_PATH, SVOE_DB_DIR
+
+pathlib.Path(SVOE_DB_DIR).mkdir(parents=True, exist_ok=True)
 
 # create mysql database if not exist
 if get_db_type() == DbType.MYSQL:
