@@ -1,5 +1,6 @@
 ## Backtester Quick Start
 
+In this example, we use ***[Backtester](https://anovv.github.io/svoe/backtester-overview/)*** in the context of financial markets, hence our user-defined logic is based on a notion of trading strategy. This can be extended to any other scenario which user wants to emulate. 
 Once we have our best model from ***[Trainer](https://anovv.github.io/svoe/trainer-overview/)***, we can plug it in our ```BaseStrategy``` derived class and run ***[Backtester](https://anovv.github.io/svoe/backtester-overview/)***
 
 - Define config

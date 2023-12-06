@@ -3,6 +3,7 @@
 Featurizer helps creating distributed ```FeatureLabelSet``` dataframes from [Feature Definitions]() to be used for analysis, ML training
 and real-time streaming.
 
+For this example, we will consider a scenario which often occurs in financial markets simulation, however please note that the framework is not limited to financial data and can be used with whatever scenario user provides.
 Here is an example to construct [mid-price](https://en.wikipedia.org/wiki/Mid_price) and volatility features from 
 partial order book updates, 5 second lookahead label as prediction target, using 1 second granularity data
 

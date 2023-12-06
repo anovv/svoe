@@ -1,9 +1,14 @@
 ## *Overview*
 
-**[SVOE](https://github.com/anovv/svoe)** is a low-code framework providing scalable and highly configurable pipelines for financial data research, 
+**[SVOE](https://github.com/anovv/svoe)** is a low-code framework providing scalable and highly configurable pipelines for time-series data research, 
 streaming and batch feature engineering, predictive model training, real-time inference and backtesting. 
 Built on top of **[Ray](https://github.com/ray-project/ray)**, the framework allows to build and scale your 
 custom pipelines from multi-core laptop to a cluster of 1000s of nodes.
+
+**SVOE** was originally built to accommodate a typical financial data research workflow (i.e. for Quant Researchers) with 
+specific data models in mind (trades, quotes, order book updates, etc., hence some examples are provided in this domain), 
+however the framework itself is domain-agnostic and it's components can easily be generalised and used in other fields 
+which rely on real-time time-series based data processing and simulation (fraud/anomaly detection, sales forecasting etc.)
 
 ![diagram](img/svoe_diagram.png)
 
@@ -16,7 +21,7 @@ real-time/offline time-series based features
 - ***[Trainer](https://anovv.github.io/svoe/trainer-overview/)*** allows training predictive models in distributed setting using popular
 ML libraries (XGBoost, PyTorch)
 - ***[Backtester](https://anovv.github.io/svoe/backtester-overview/)*** is used to validate and test predictive models along with
-user defined logic in context of financial markets (i.e. trading strategies)
+user defined logic (i.e. trading strategies if used in financial domain)
 
 You can read more in [docs](https://anovv.github.io/svoe/)
 

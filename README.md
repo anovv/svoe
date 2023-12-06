@@ -1,9 +1,14 @@
 ## *What is SVOE?*
 
 **SVOE** is a low-code declarative framework providing scalable and highly configurable pipelines for 
-financial data research, streaming and batch feature engineering, predictive model training, 
+time-series data research, streaming and batch feature engineering, predictive model training, 
 real-time inference and backtesting. Built on top of **[Ray](https://github.com/ray-project/ray)**, the framework allows to build and scale your custom pipelines 
 from multi-core laptop to a cluster of 1000s of nodes.
+
+**SVOE** was originally built to accommodate a typical financial data research workflow (i.e. for Quant Researchers) with 
+specific data models in mind (trades, quotes, order book updates, etc., hence some examples are provided in this domain), 
+however the framework itself is domain-agnostic and it's components can easily be generalised and used in other fields 
+which rely on real-time time-series based data processing and simulation(fraud/anomaly detection, sales forecasting etc.)
 
 ![diagram](docs/img/svoe_diagram.png)
 
@@ -16,7 +21,7 @@ real-time/offline time-series based features
 - ***[Trainer](https://anovv.github.io/svoe/trainer-overview/)*** allows training predictive models in distributed setting using popular
 ML libraries (XGBoost, PyTorch)
 - ***[Backtester](https://anovv.github.io/svoe/backtester-overview/)*** is used to validate and test predictive models along with
-user defined logic (i.e. trading strategies)
+user defined logic (i.e. trading strategies if used in financial domain)
 
 You can read more in [docs](https://anovv.github.io/svoe/)
 
@@ -32,7 +37,7 @@ to easily run your experiments
 - ***Cloud / Kubernetes ready*** - use **KubeRay** or native **Ray on AWS** to scale out your workloads in a cloud
 - ***Easily integrates with orchestrators (Airflow, Luigi, Prefect)*** - SVOE provides basic **[Airflow Operators](https://airflow.apache.org/docs/apache-airflow/stable/core-concepts/operators.html)**
 for each component to easily orchestrate your workflows
-- ***Designed for high volume low granularity data*** - unlike existing financial ML frameworks which use only OHLCV
+- ***Designed for high volume low granularity data*** - when used in financial domain, unlike existing financial ML frameworks which use only OHLCV
 as a base data model, SVOE's **[Featurizer](https://anovv.github.io/svoe/featurizer-overview/)** provides flexible tools to use and customize any data source (ticks, trades, book updates, etc.)
 and build streaming and historical features
 - ***Minimized number of external dependencies*** - SVOE is built using **[Ray Core](https://docs.ray.io/en/latest/ray-core/walkthrough.html)** primitives and has no heavyweight external dependencies
@@ -60,6 +65,7 @@ For distributed setting, please refer to [Running on remote clusters](TODO)
 
 ## *Quick Start*
 
+For this example, we will consider a scenario which often occurs in financial markets simulation, however please note that the framework is not limited to financial data and can be used with whatever scenario user provides.
 As an example, here is a simple 3 step tutorial to build a simple **[mid-price](https://en.wikipedia.org/wiki/Mid_price)** prediction model based on past price and volatility. 
 
 - Run ***[Featurizer](https://anovv.github.io/svoe/featurizer-overview/)*** to construct mid-price and volatility features from partial order book updates, 5 second lookahead label as prediction target, using 1 second granularity data 
@@ -148,7 +154,7 @@ As an example, here is a simple 3 step tutorial to build a simple **[mid-price](
       mlflow_client = SvoeMLFlowClient()
       best-model-uri = mlflow_client.get_best_checkpoint_uri(metric_name=metric_name, experiment_name=experiment_name, mode=mode)
       ```
--  Once we have our best model, we can plug it in our ```BaseStrategy``` derived class and run ***[Backtester](https://anovv.github.io/svoe/backtester-overview/)***
+-  In this example, we use ***[Backtester](https://anovv.github.io/svoe/backtester-overview/)*** in the context of financial markets, hence our user-defined logic is based on a notion of trading strategy. This can be extended to any other scenario which user wants to emulate. Once we have our best model, we can plug it in our ```BaseStrategy``` derived class and run backtester to simulate our scenario 
   - Define config
     ```
     featurizer_config_path: featurizer-config.yaml
