@@ -32,3 +32,4 @@ nav:
   - Backtester:
       - Overview: backtester-overview.md
       - Quick Start: backtester-quick-start.md
+      - Inference Loop: backtester-inference-loop.md

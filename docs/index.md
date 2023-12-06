@@ -5,6 +5,8 @@ streaming and batch feature engineering, predictive model training, real-time in
 Built on top of **[Ray](https://github.com/ray-project/ray)**, the framework allows to build and scale your 
 custom pipelines from multi-core laptop to a cluster of 1000s of nodes.
 
+![diagram](img/svoe_diagram.png)
+
 ## *How does it work?*
 
 SVOE consists of three main components, each providing a set of tools for a typical Quant/ML engineer workflow
