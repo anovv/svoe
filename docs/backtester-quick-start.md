@@ -6,19 +6,20 @@ Once we have our best model from ***[Trainer](https://anovv.github.io/svoe/train
 - Define config
   ```
   featurizer_config_path: featurizer-config.yaml
-  portfolio_config: <portfolio_config>
   inference_config:
     model_uri: <your-best-model-uri>
     predictor_class_name: 'XGBoostPredictor'
-    num_replicas: <number-of-predictor-replicas> 
-  tradable_instruments_params:
-  - exchange: 'BINANCE'
-    instrument_type: 'spot'
-    symbol: 'BTC-USDT'
-  strategy_class_name: 'backtester.strategy.ml_strategy.MLStrategy'
-  strategy_params:
+    num_replicas: <number-of-predictor-replicas>
+  simulation_class_name: 'backtester.strategy.ml_strategy.MLStrategy'
+  simulation_params:
     buy_delta: 0
     sell_delta: 0
+  user_defined_params:
+    portfolio_config: <portfolio_config>
+    tradable_instruments_params:
+      - exchange: 'BINANCE'
+        instrument_type: 'spot'
+        symbol: 'BTC-USDT'
   ```
   See [MLStrategy](https://github.com/anovv/svoe/blob/main/backtester/strategy/ml_strategy.py) for example implementation
  
