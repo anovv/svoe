@@ -14,7 +14,6 @@ of dependant features (they are constructed automatically), Transforms require s
 
 ```
 feature_configs:
-  
   - feature_definition: transforms.diff
     name: diff_mid_price
     deps:
@@ -27,4 +26,7 @@ feature_configs:
         ...
 ```
 
+## Creating new transforms
+
+WIP
 
