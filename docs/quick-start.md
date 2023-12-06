@@ -1,3 +1,4 @@
+For this example, we will consider a scenario which often occurs in financial markets simulation, however please note that the framework is not limited to financial data and can be used with whatever scenario user provides.
 As an example, here is a simple 3 step tutorial to build a simple **[mid-price](https://en.wikipedia.org/wiki/Mid_price)** prediction model based on past price and volatility. 
 
 - Run ***[Featurizer](https://anovv.github.io/svoe/featurizer-overview/)*** to construct mid-price and volatility features from partial order book updates, 5 second lookahead label as prediction target, using 1 second granularity data 
