@@ -1,4 +1,4 @@
-from configs.data_feed.cryptostore_config_builder import CryptostoreConfigBuilder
+from data_feed.configs.data_feed.cryptostore_config_builder import CryptostoreConfigBuilder
 
 from pathlib import Path
 

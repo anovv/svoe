@@ -6,7 +6,7 @@ __pycache__/
 data_feed/cryptostore.log
 feedhandler.log
 utils/parquet/parquet_sample_files/
-configs/data_feed/aws_credentials.yaml
+data_feed/configs/data_feed/aws_credentials.yaml
 **/*.egg-info
 cryptostore.log
 kubeflow/kfapp/

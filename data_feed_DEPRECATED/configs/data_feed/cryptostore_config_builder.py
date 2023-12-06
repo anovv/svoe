@@ -1,4 +1,4 @@
-from configs.data_feed.base_config_builder import BaseConfigBuilder
+from data_feed.configs.data_feed.base_config_builder import BaseConfigBuilder
 from cryptofeed.defines import TICKER, TRADES, L2_BOOK, L3_BOOK, LIQUIDATIONS, OPEN_INTEREST, FUNDING
 
 from pathlib import Path
