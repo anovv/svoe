@@ -32,7 +32,6 @@ class FeaturizerDataIngestPipelineRunner:
 
             batches = cryptotick_input_items(config)
 
-
             Thread(target=functools.partial(poll_to_tqdm, total_files=config.num_files(), chunk_size=100 * 1024)).start()
             pipeline.run.remote()
             print('Queueing batches...')

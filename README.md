@@ -8,7 +8,7 @@ from multi-core laptop to a cluster of 1000s of nodes.
 **SVOE** was originally built to accommodate a typical financial data research workflow (i.e. for Quant Researchers) with 
 specific data models in mind (trades, quotes, order book updates, etc., hence some examples are provided in this domain), 
 however the framework itself is domain-agnostic and it's components can easily be generalised and used in other fields 
-which rely on real-time time-series based data processing and simulation(fraud/anomaly detection, sales forecasting etc.)
+which rely on real-time time-series based data processing and simulation(anomaly detection, sales forecasting etc.)
 
 ![diagram](docs/img/svoe_diagram.png)
 
