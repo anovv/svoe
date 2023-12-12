@@ -28,12 +28,14 @@ You can read more in [docs](https://anovv.github.io/svoe/)
 ## *Why use SVOE?*
 
 
-- ***Easy to use standardized and flexible data and computation models*** - seamlessly switch between real-time and
+- ***Easy to use standardized and flexible data and computation models for unified batch and stream computations*** - seamlessly switch between real-time and
 historical data for feature engineering, ML training and backtesting
 - ***Low code, modularity and configurability*** - define reusable components such as 
 ```FeatureDefinition```, ```DataSourceDefinition```, ```FeaturizerConfig```, ```TrainerConfig```, ```BacktesterConfig``` etc. 
 to easily run your experiments
 - ***Avoid train-predict inconsistency*** - **[Featurizer](https://anovv.github.io/svoe/featurizer-overview/)** uses same feature definition for real-time inference and batch training
+- ***No need for external data infra/DWH*** - **[Featurizer Storage](https://anovv.github.io/svoe/featurizer-storage/)** allows to store and catalog computed features in any block storage while keeping index
+in any SQL backend, provides Data Exploration API
 - ***Ray integration*** - SVOE runs wherever **[Ray](https://github.com/ray-project/ray)** runs (everywhere!)
 - ***MLFlow integration*** - store, retrieve and analyze your ML models with **[MLFlow](https://github.com/mlflow/mlflow)** API
 - ***Cloud / Kubernetes ready*** - use **KubeRay** or native **Ray on AWS** to scale out your workloads in a cloud
