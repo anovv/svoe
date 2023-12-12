@@ -34,7 +34,7 @@ historical data for feature engineering, ML training and backtesting
 ```FeatureDefinition```, ```DataSourceDefinition```, ```FeaturizerConfig```, ```TrainerConfig```, ```BacktesterConfig``` etc. 
 to easily run your experiments
 - ***Avoid train-predict inconsistency*** - **[Featurizer](https://anovv.github.io/svoe/featurizer-overview/)** uses same feature definition for real-time inference and batch training
-- ***No need for external data infra/DWH*** - **[Featurizer Storage](https://anovv.github.io/svoe/featurizer-storage/)** allows to store and catalog computed features in any block storage while keeping index
+- ***No need for external data infra/DWH*** - **[Featurizer Storage](https://anovv.github.io/svoe/featurizer-storage/)** allows to store and catalog computed features in any object storage while keeping index
 in any SQL backend, provides Data Exploration API
 - ***Ray integration*** - SVOE runs wherever **[Ray](https://github.com/ray-project/ray)** runs (everywhere!)
 - ***MLFlow integration*** - store, retrieve and analyze your ML models with **[MLFlow](https://github.com/mlflow/mlflow)** API
