@@ -20,7 +20,7 @@ nav:
       - Data Source Definitions: featurizer-data-source-definitions.md
       - Data Ingest: featurizer-data-ingest.md
       - Storage and Data Models: featurizer-storage.md
-      - Task Graph Compilation and Execution: featurizer-task-graph.md
+      - Batch Execution and Task Graph Compilation: featurizer-batch-task-graph.md
       - Real-time Data and Streaming: featurizer-streaming.md
       - Real-time Inference Loop: featurizer-inference-loop.md
       - Real-time Data Recording: featurizer-real-time-data-recording.md

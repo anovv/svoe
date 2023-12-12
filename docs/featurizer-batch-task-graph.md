@@ -1,8 +1,8 @@
-# Featurizer Task Graph
+# Batch feature calculation and Featurizer Task Graph
 
 ## Overview
 
-The core of Featurizer's offline feature calculation is in building and executing Task Graph.
+The core of Featurizer's offline feature calculation is in building and executing a Task Graph.
 
 Task Graph is a graph made of load, preprocess and user-defined feature specific calculation logic tasks
 automatically built by the framework. See more in ```featurizer.task_graph.builder.py```
