@@ -37,6 +37,7 @@ to easily run your experiments
 - ***Cloud / Kubernetes ready*** - use **KubeRay** or native **Ray on AWS** to scale out your workloads in a cloud
 - ***Easily integrates with orchestrators (Airflow, Luigi, Prefect)*** - SVOE provides basic **[Airflow Operators](https://airflow.apache.org/docs/apache-airflow/stable/core-concepts/operators.html)**
 for each component to easily orchestrate your workflows
+- ***Real-time inference without MLOps burden*** - no need to maintain model containerization pipelines, FastAPI services and model registries. Deploy with simple Python API or yaml using **[InferenceLoop](https://anovv.github.io/svoe/featurizer-inference-loop/)**
 - ***Designed for high volume low granularity data*** - as an example, when used in financial domain, unlike existing financial ML frameworks which use only OHLCV
 as a base data model, SVOE's **[Featurizer](https://anovv.github.io/svoe/featurizer-overview/)** provides flexible tools to use and customize any data source (ticks, trades, book updates, etc.)
 and build streaming and historical features

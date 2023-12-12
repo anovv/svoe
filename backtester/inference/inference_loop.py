@@ -14,7 +14,7 @@ SERVE_LOCAL_URL = 'http://127.0.0.1:8000'
 
 
 class InferenceConfig(BaseModel):
-    deployment_name: str
+    deployment_name: Optional[str]
     model_uri: str
     predictor_class_name: str
     num_replicas: int
