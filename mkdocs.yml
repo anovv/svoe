@@ -22,6 +22,7 @@ nav:
       - Storage and Data Models: featurizer-storage.md
       - Task Graph Compilation and Execution: featurizer-task-graph.md
       - Real-time Data and Streaming: featurizer-streaming.md
+      - Real-time Inference Loop: featurizer-inference-loop.md
       - Real-time Data Recording: featurizer-real-time-data-recording.md
       - Synthetic Data Sources: featurizer-synthetic-data-sources.md
       - Transforms: featurizer-transforms.md
@@ -32,4 +33,3 @@ nav:
   - Backtester:
       - Overview: backtester-overview.md
       - Quick Start: backtester-quick-start.md
-      - Inference Loop: backtester-inference-loop.md
