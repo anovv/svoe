@@ -33,6 +33,7 @@ historical data for feature engineering, ML training and backtesting
 - ***Low code, modularity and configurability*** - define reusable components such as 
 ```FeatureDefinition```, ```DataSourceDefinition```, ```FeaturizerConfig```, ```TrainerConfig```, ```BacktesterConfig``` etc. 
 to easily run your experiments
+- ***Avoid train-predict inconsistency*** - **[Featurizer](https://anovv.github.io/svoe/featurizer-overview/)** uses same feature definition for real-time inference and batch training
 - ***Ray integration*** - SVOE runs wherever **[Ray](https://github.com/ray-project/ray)** runs (everywhere!)
 - ***MLFlow integration*** - store, retrieve and analyze your ML models with **[MLFlow](https://github.com/mlflow/mlflow)** API
 - ***Cloud / Kubernetes ready*** - use **KubeRay** or native **Ray on AWS** to scale out your workloads in a cloud

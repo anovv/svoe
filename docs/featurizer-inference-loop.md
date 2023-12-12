@@ -6,15 +6,16 @@ inference on streaming data.
 
 This allows to bypass a typical MLOps approach of creating Docker containers and FastAPI services and all the burden of maintaining relevant infrastructure.
 
+
 # InferenceLoop
- 
-[```InferenceLoop```](https://github.com/anovv/svoe/blob/main/backtester/inference/inference_loop.py) is class providing a mechanism
+
+[```InferenceLoop```](https://github.com/anovv/svoe/blob/main/backtester/inference/inference_loop.py) is a class providing a mechanism
 for continuous model polling and latest request result storage for downstream processing. 
 In a nutshell it is a separate actor/process that continuously sends requests to a model and outputs last results. 
 When used in offline mode, users can provide ```Clock``` instance to synchronize time between
 Featurizer event processing pipelines and inference.
 
-Some notable features of this approach:
+Some notable benefits of this approach:
 
 - No need to maintain model containerization pipelines, FastAPI services and model registries. Deploy with simple Python API or yaml
 - Integration with MLFlow
