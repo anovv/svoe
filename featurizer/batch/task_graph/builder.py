@@ -11,12 +11,11 @@ from featurizer.blocks.blocks import meta_to_interval, interval_to_meta, get_ove
     intervals_almost_equal, interval_dict_to_ranges
 from portion import Interval, IntervalDict, closed
 
-from featurizer.task_graph.tasks import calculate_feature, load_if_needed, bind_and_cache, context, \
+from featurizer.batch.task_graph.tasks import calculate_feature, load_if_needed, bind_and_cache, context, \
     lookahead_shift_blocks, point_in_time_join_block, load_and_preprocess, gen_synth_events
 from common.time.utils import convert_str_to_seconds
 from featurizer.storage.data_store_adapter.data_store_adapter import DataStoreAdapter
 from featurizer.storage.data_store_adapter.local_data_store_adapter import LocalDataStoreAdapter
-from featurizer.storage.data_store_adapter.remote_data_store_adapter import RemoteDataStoreAdapter
 
 
 # TODO re: cache https://discuss.ray.io/t/best-way-to-share-memory-for-ray-tasks/3759

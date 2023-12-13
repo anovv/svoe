@@ -5,13 +5,12 @@ import pyarrow
 
 from common.pandas.df_utils import concat, downsample_uniform
 from featurizer.actors.cache_actor import get_cache_actor, create_cache_actor
-from featurizer.task_graph.builder import build_feature_label_set_task_graph
-from featurizer.task_graph.executor import execute_graph
+from featurizer.batch.task_graph.builder import build_feature_label_set_task_graph
+from featurizer.batch.task_graph.executor import execute_graph
 from featurizer.sql.db_actor import create_db_actor
 from featurizer.storage.featurizer_storage import FeaturizerStorage
 from featurizer.config import FeaturizerConfig
-from featurizer.features.feature_tree.feature_tree import construct_feature, get_feature_by_key_or_name, \
-    construct_features_from_configs
+from featurizer.features.feature_tree.feature_tree import construct_features_from_configs
 
 import ray.experimental
 

@@ -6,7 +6,7 @@ import pandas as pd
 
 from common.pandas.df_utils import get_size_kb, get_size_bytes
 from featurizer.data_definitions.data_definition import Event
-from featurizer.feature_stream.block_writer.compactor import Compactor
+from featurizer.streaming.block_writer.compactor import Compactor
 from featurizer.features.feature_tree.feature_tree import Feature
 
 

@@ -9,7 +9,7 @@ from portion import closed
 from common.pandas.df_utils import time_range
 from featurizer.data_definitions.data_definition import Event, DataDefinition
 from featurizer.data_ingest.pipelines.cryptotick.tasks import make_data_source_block_metadata
-from featurizer.feature_stream.block_writer.compactor import Compactor
+from featurizer.streaming.block_writer.compactor import Compactor
 from featurizer.features.feature_tree.feature_tree import Feature
 from featurizer.sql.client import FeaturizerSqlClient
 from featurizer.sql.models.data_source_block_metadata import DataSourceBlockMetadata
@@ -17,7 +17,7 @@ from featurizer.sql.models.data_source_metadata import DataSourceMetadata
 from featurizer.sql.models.feature_metadata import FeatureMetadata
 from featurizer.storage.data_store_adapter.data_store_adapter import DataStoreAdapter
 from featurizer.storage.data_store_adapter.local_data_store_adapter import LocalDataStoreAdapter
-from featurizer.task_graph.tasks import make_feature_block_metadata
+from featurizer.batch.task_graph.tasks import make_feature_block_metadata
 
 STORE_LOOP_INTERVAL_S = 5
 

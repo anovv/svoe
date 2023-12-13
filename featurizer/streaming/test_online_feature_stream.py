@@ -12,10 +12,10 @@ from streamz import Stream
 from featurizer.config import FeaturizerConfig
 from featurizer.data_definitions.common.ticker.cryptofeed.cryptofeed_ticker import CryptofeedTickerData
 from featurizer.data_definitions.common.trades.cryptofeed.cryptofeed_trades import CryptofeedTradesData
-from featurizer.feature_stream.block_writer.block_writer import BlockWriter
-from featurizer.feature_stream.block_writer.memory_based_compactor import MemoryBasedCompactor
-from featurizer.feature_stream.event_emitter.cryptofeed_event_emitter import CryptofeedEventEmitter
-from featurizer.feature_stream.feature_stream_graph import FeatureStreamGraph
+from featurizer.streaming.block_writer.block_writer import BlockWriter
+from featurizer.streaming.block_writer.memory_based_compactor import MemoryBasedCompactor
+from featurizer.streaming.event_emitter.cryptofeed_event_emitter import CryptofeedEventEmitter
+from featurizer.streaming.feature_stream_graph import FeatureStreamGraph
 from featurizer.features.feature_tree.feature_tree import Feature
 
 

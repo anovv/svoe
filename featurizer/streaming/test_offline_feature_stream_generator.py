@@ -4,7 +4,7 @@ import unittest
 import pandas as pd
 
 from featurizer.config import FeaturizerConfig
-from featurizer.feature_stream.offline_feature_stream_generator import OfflineFeatureStreamGenerator
+from featurizer.streaming.offline_feature_stream_generator import OfflineFeatureStreamGenerator
 
 from common.pandas.df_utils import plot_multi
 

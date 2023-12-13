@@ -14,7 +14,7 @@ from featurizer.data_definitions.common.ticker.cryptofeed.cryptofeed_ticker impo
 from featurizer.data_definitions.common.trades.cryptofeed.cryptofeed_trades import CryptofeedTradesData
 from featurizer.data_definitions.data_definition import Event
 from featurizer.data_definitions.data_source_definition import DataSourceDefinition
-from featurizer.feature_stream.event_emitter.data_source_event_emitter import DataSourceEventEmitter
+from featurizer.streaming.event_emitter.data_source_event_emitter import DataSourceEventEmitter
 from featurizer.features.feature_tree.feature_tree import Feature
 
 

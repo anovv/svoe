@@ -2,15 +2,14 @@ from dataclasses import dataclass
 from typing import Dict, List, Tuple, Optional, Type
 
 import ciso8601
-import streamz
 from intervaltree import Interval
 
 from common.time.utils import split_time_range_between_ts, ts_to_str_date
 from featurizer.blocks.blocks import BlockRangeMeta, BlockRange, ranges_to_interval_dict, get_overlaps, \
     prune_overlaps, meta_to_interval
 
-from featurizer.feature_stream.feature_stream_graph import FeatureStreamGraph, NamedDataEvent, GroupedNamedDataEvent
-from featurizer.task_graph.tasks import merge_blocks
+from featurizer.streaming.feature_stream_graph import FeatureStreamGraph, NamedDataEvent, GroupedNamedDataEvent
+from featurizer.batch.task_graph.tasks import merge_blocks
 from featurizer.config import FeaturizerConfig
 from featurizer.features.feature_tree.feature_tree import Feature, construct_features_from_configs
 from featurizer.storage.data_store_adapter.data_store_adapter import DataStoreAdapter

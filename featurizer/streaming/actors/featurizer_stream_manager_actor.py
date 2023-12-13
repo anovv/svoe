@@ -2,8 +2,8 @@ from typing import List, Dict, Optional
 
 import ray.actor
 
-from featurizer.feature_stream.actors.featurizer_stream_worker_actor import FeaturizerStreamWorkerActor
-from featurizer.feature_stream.feature_stream_graph import FeatureStreamGraph, FeatureStreamGroupGraph
+from featurizer.streaming.actors.featurizer_stream_worker_actor import FeaturizerStreamWorkerActor
+from featurizer.streaming.feature_stream_graph import FeatureStreamGraph, FeatureStreamGroupGraph
 from featurizer.features.feature_tree.feature_tree import Feature
 
 
