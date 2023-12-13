@@ -1,26 +1,26 @@
 .idea/
 __pycache__/
 **/*.egg-info
-svoe/platform/ops/terraform/modules/helm_TODO/.terraform/
-svoe/platform/ops/terraform/modules/aws/glue/.terraform/
+platform/ops/terraform/modules/helm_TODO/.terraform/
+platform/ops/terraform/modules/aws/glue/.terraform/
 
 builds/
 cache/
 
 *.terraform/*
 *.terraform.*
-svoe/platform/ops/terraform/.terraform
-svoe/platform/ops/kops/clusters/*
+platform/ops/terraform/.terraform
+platform/ops/kops/clusters/*
 
-svoe/platform/ops/terraform/terraform.tfstate
-svoe/platform/ops/terraform/terraform.tfstate.backup
+platform/ops/terraform/terraform.tfstate
+platform/ops/terraform/terraform.tfstate.backup
 
 # helm secret age keys
-svoe/platform/ops/helm/secrets/key.txt
-svoe/platform/ops/helm/secrets/shared_secrets.yaml.dec
+platform/ops/helm/secrets/key.txt
+platform/ops/helm/secrets/shared_secrets.yaml.dec
 
 svoe/common/s3/s3_svoe.test.1_inventory
-svoe/platform/ray_cluster/featurizer/cached_dfs
+platform/ray_cluster/featurizer/cached_dfs
 
 svoe/featurizer/perf/rust/target
 
