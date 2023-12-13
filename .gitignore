@@ -1,51 +1,28 @@
-svoe_data_feed_config_map.yaml
-svoe_data_feed_stateful_set.yaml
-cryptostore_debug_config.yaml
 .idea/
 __pycache__/
-data_feed/cryptostore.log
-feedhandler.log
-utils/parquet/parquet_sample_files/
-data_feed/configs/data_feed/aws_credentials.yaml
 **/*.egg-info
-cryptostore.log
-kubeflow/kfapp/
-prometheus_multiproc_dir/
-terraform/modules/helm_TODO/.terraform/
-terraform/modules/aws/glue/.terraform/
-
-notebooks/dask-worker-space/
+svoe/platform/ops/terraform/modules/helm_TODO/.terraform/
+svoe/platform/ops/terraform/modules/aws/glue/.terraform/
 
 builds/
 cache/
 
-feedhandler.log*
-cryptostore.log*
-
 *.terraform/*
 *.terraform.*
-terraform/.terraform
-kops/clusters/*
+svoe/platform/ops/terraform/.terraform
+svoe/platform/ops/kops/clusters/*
 
-terraform/terraform.tfstate
-terraform/terraform.tfstate.backup
+svoe/platform/ops/terraform/terraform.tfstate
+svoe/platform/ops/terraform/terraform.tfstate.backup
 
 # helm secret age keys
-helm/secrets/key.txt
-helm/secrets/shared_secrets.yaml.dec
+svoe/platform/ops/helm/secrets/key.txt
+svoe/platform/ops/helm/secrets/shared_secrets.yaml.dec
 
-cryptostore.log
+svoe/common/s3/s3_svoe.test.1_inventory
+svoe/platform/ray_cluster/featurizer/cached_dfs
 
-data_feed/secrets_DO_NOT_COMMIT.env
-data_feed/common_services/alertmanager_telegram_bot/secrets_DO_NOT_COMMIT.env
-data_feed/perf/resources-estimation-out/*
-!data_feed/perf/resources-estimation-out/result_analyzer.py
-
-featurizer/notebooks
-common/s3/s3_svoe.test.1_inventory
-ray_cluster/featurizer/cached_dfs
-
-featurizer/perf/rust/target
+svoe/featurizer/perf/rust/target
 
 scripts/svoe_db_sqlitedump.sql
 
