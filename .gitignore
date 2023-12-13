@@ -24,6 +24,6 @@ platform/ray_cluster/featurizer/cached_dfs
 
 svoe/featurizer/perf/rust/target
 
-scripts/svoe_db_sqlitedump.sql
+svoe/scripts/svoe_db_sqlitedump.sql
 
 .DS_Store
