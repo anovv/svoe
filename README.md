@@ -1,9 +1,9 @@
 ## *What is SVOE?*
 
-**SVOE** is a low-code declarative framework providing scalable and highly configurable pipelines for 
-time-series data research, streaming and batch feature engineering, predictive model training, 
-real-time inference and backtesting. Built on top of **[Ray](https://github.com/ray-project/ray)**, the framework allows to build and scale your custom pipelines 
-from multi-core laptop to a cluster of 1000s of nodes.
+**SVOE** is a low-code declarative framework providing scalable and highly configurable pipelines for streaming and 
+batch feature engineering, predictive model training, real-time inference and backtesting. 
+Built on top of **[Ray](https://github.com/ray-project/ray)**, the framework allows to build and scale your custom 
+pipelines from multi-core laptop to a cluster of 1000s of nodes.
 
 **SVOE** was originally built to accommodate a typical financial data research workflow (i.e. for Quant Researchers) with 
 specific data models in mind (trades, quotes, order book updates, etc., hence some examples are provided in this domain), 
@@ -16,8 +16,7 @@ which rely on real-time time-series based data processing and simulation(anomaly
 
 SVOE consists of three main components, each providing a set of tools for a typical Quant/ML engineer workflow
 
-- ***[Featurizer](https://anovv.github.io/svoe/featurizer-overview/)*** helps defining, calculating, storing and analyzing
-real-time/offline time-series based features
+- ***[Featurizer](https://anovv.github.io/svoe/featurizer-overview/)*** helps defining, calculating and storing real-time/offline (batch) features
 - ***[Trainer](https://anovv.github.io/svoe/trainer-overview/)*** allows training predictive models in distributed setting using popular
 ML libraries (XGBoost, PyTorch)
 - ***[Backtester](https://anovv.github.io/svoe/backtester-overview/)*** is used to validate and test predictive models along with

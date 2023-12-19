@@ -2,8 +2,8 @@
 
 ## Overview
 
-Featurizer is a framework which combines feature storage, stream processing engine and user facing
-SDKs and configs to define features for real-time and batch (historical) processing on time series data.
+Featurizer is a framework which combines stream/batch feature processing engine, feature storage, exploration API and user facing
+SDKs and configs to define features for real-time and batch (historical) processing.
 It is build on top of Ray and leverages Ray's distributed memory to produce feature sets/feature-lable sets for
 ML training.
 
