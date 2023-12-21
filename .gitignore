@@ -20,7 +20,7 @@ ops/helm/secrets/key.txt
 ops/helm/secrets/shared_secrets.yaml.dec
 
 svoe/common/s3/s3_svoe.test.1_inventory
-platform/ray_cluster/featurizer/cached_dfs
+svoe_platform/ray_cluster/featurizer/cached_dfs
 
 svoe/featurizer/perf/rust/target
 
