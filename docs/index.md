@@ -17,7 +17,7 @@ which rely on real-time time-series based data processing and simulation (anomal
 SVOE consists of three main components, each providing a set of tools for a typical Quant/ML engineer workflow
 
 - ***[Featurizer](https://anovv.github.io/svoe/featurizer-overview/)*** helps defining, calculating, storing and managing
-real-time/offline (batch) features
+real-time/offline (batch) features. It uses custom stream processing engine (Ray Actors + ZeroMQ) and Kappa-architecture to calculate offline features using online pipelines
 - ***[Trainer](https://anovv.github.io/svoe/trainer-overview/)*** allows training predictive models in distributed setting using popular
 ML libraries (XGBoost, PyTorch)
 - ***[Backtester](https://anovv.github.io/svoe/backtester-overview/)*** is used to validate and test predictive models along with

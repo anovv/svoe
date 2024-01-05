@@ -4,8 +4,12 @@
 
 Featurizer is a framework combining stream/batch feature processing engine, feature storage, exploration API and user facing
 SDKs and configs to define features for real-time and batch (historical) processing.
-It is build on top of Ray and leverages Ray's distributed memory to produce feature sets/feature-lable sets for
-ML training.
+
+Featurizer is built around a custom stream processing engine (built on top of Ray Actors and ZeroMQ)
+and uses Kappa-architecture to calculate offline features using online pipelines.
+
+Featurizer leverages Ray's distributed memory to produce feature sets/feature-label sets for
+ML training without having costly data transfers.
 
 ## Key features
 

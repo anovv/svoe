@@ -4,6 +4,8 @@
 
 One of the most powerful tools of Featurizer is the ability to seamlessly switch
 between batch and real-time data processing without changing feature calculation code.
+Featurizer is built around a custom stream processing engine (built on top of Ray Actors and ZeroMQ)
+and uses Kappa-architecture to calculate offline features using online pipelines.
 
 Featurizer provides a set of user-facing classes to build, launch and scale real-time streaming pipelines.
 It is built using **[Streamz](https://github.com/python-streamz/streamz)** library to declaratively define event processing logic and 
