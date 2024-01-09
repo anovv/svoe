@@ -18,8 +18,8 @@ import ray
 from ray.data import Dataset
 
 from svoe import featurizer
-import common
-from cloud import client
+from svoe import common
+from svoe_platform import client
 
 # TODO these are local packages to pass to dev cluster
 LOCAL_PACKAGES_TO_PASS_TO_REMOTE_DEV_RAY_CLUSTER = [featurizer, common, client]
