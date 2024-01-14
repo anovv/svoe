@@ -1,6 +1,8 @@
 import logging
 from abc import ABC, abstractmethod
 
+from svoe.featurizer_v2.streaming.api.message.message import Record
+
 logger = logging.getLogger(__name__)
 
 
@@ -18,9 +20,9 @@ class CollectionCollector(Collector):
 
     def collect(self, value):
         for collector in self._collector_list:
-            pass
-            # collector.collect(message.Record(value))
+            collector.collect(Record(value))
 
 
 class OutputCollector(Collector):
+    # TODO
     pass
