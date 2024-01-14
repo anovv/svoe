@@ -8,6 +8,10 @@ import zmq
 # HWM
 # https://stackoverflow.com/questions/53356451/pyzmq-high-water-mark-not-working-on-pub-socket
 
+# EAGAIN
+# https://github.com/zeromq/libzmq/issues/1332
+
+
 @ray.remote
 class Push:
 
@@ -70,9 +74,9 @@ class Pull:
 with ray.init(address='auto'):
     pub_port = 5151
     pub_addr = f'tcp://127.0.0.1:{pub_port}'
-    pub = Push.remote()
-    ray.get(pub.initialize.remote(pub_port))
-    sub = Pull.remote()
-    ray.get(sub.initialize.remote(pub_addr))
-    pub.start.remote()
-    ray.get(sub.start.remote())
+    push = Push.remote()
+    ray.get(push.initialize.remote(pub_port))
+    pull = Pull.remote()
+    ray.get(pull.initialize.remote(pub_addr))
+    push.start.remote()
+    ray.get(pull.start.remote())
