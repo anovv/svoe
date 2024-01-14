@@ -25,7 +25,7 @@ As an example, here is a simple 3 step tutorial to build a simple **[mid-price](
             feature:
               sampling: 1s
       ```
-      See [MidPriceFD](https://github.com/anovv/svoe/blob/main/featurizer/features/definitions/price/mid_price_fd/mid_price_fd.py) and [VolatilityStddevFD](https://github.com/anovv/svoe/blob/main/featurizer/features/definitions/volatility/volatility_stddev_fd/volatility_stddev_fd.py) for implementation details
+      See [MidPriceFD](https://github.com/anovv/svoe/blob/main/svoe/featurizer/features/definitions/price/mid_price_fd/mid_price_fd.py) and [VolatilityStddevFD](https://github.com/anovv/svoe/blob/main/svoe/featurizer/features/definitions/volatility/volatility_stddev_fd/volatility_stddev_fd.py) for implementation details
     - Run Featurizer
      
         === "CLI"
@@ -139,7 +139,7 @@ As an example, here is a simple 3 step tutorial to build a simple **[mid-price](
             instrument_type: 'spot'
             symbol: 'BTC-USDT'
       ```
-    See [MLStrategy](https://github.com/anovv/svoe/blob/main/backtester/strategy/ml_strategy.py) for example implementation
+    See [MLStrategy](https://github.com/anovv/svoe/blob/main/svoe/backtester/strategy/ml_strategy.py) for example implementation
    
     - Run Backtester
         

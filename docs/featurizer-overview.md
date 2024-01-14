@@ -21,4 +21,12 @@ ML training without having costly data transfers.
 
 ## How is it different from other stream processors (Flink, Spark Streaming)?
 
-WIP
+The main goal of our framework is to provide a standalone real-time ML solution by reducing typical heavyweight dependencies
+which are present in similar systems - mainly Flink and Spark. Featurizer uses custom stream
+processing engine which is built on top of Ray Actors - this gives Kubernetes-ready system, helps to avoid cloud/vendor lock-in, 
+provides a common platform for feature processing and ML training/inference and as a result eliminates such problems as 
+heavyweight data transfers, CI/CD pipeline-hell and boilerplate inference code (FastAPI/Docker wrappers).
+
+Current version of Featurizer is built using Streamz Python library for pipeline definitions and 
+has a limited functionality, but our main focus is to provide full feature parity with Flink (state backend, checkpoints,
+watermarks, joins/shuffles, elasticity/autoscaling, etc.)

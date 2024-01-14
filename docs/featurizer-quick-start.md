@@ -7,7 +7,7 @@ For this example, we will consider a scenario which often occurs in financial ma
 Here is an example to construct [mid-price](https://en.wikipedia.org/wiki/Mid_price) and volatility features from 
 partial order book updates, 5 second lookahead label as prediction target, using 1 second granularity data
 
-- Pick existing or define your own ```FeatureDefinition``` (see [Feature Definitions]() section)
+- Pick existing or define your own ```FeatureDefinition``` (see [Feature Definitions](https://anovv.github.io/svoe/featurizer-feature-definition/))
     - Create ```FeaturizerConfig```
         - Define start and end dates (more in Data Model)
         - Pick which features to store by setting ```to_store``` (more in Storage)
@@ -39,7 +39,7 @@ partial order book updates, 5 second lookahead label as prediction target, using
               feature:
                 sampling: 1s
         ```
-        See [MidPriceFD](https://github.com/anovv/svoe/blob/main/featurizer/features/definitions/price/mid_price_fd/mid_price_fd.py) and [VolatilityStddevFD](https://github.com/anovv/svoe/blob/main/featurizer/features/definitions/volatility/volatility_stddev_fd/volatility_stddev_fd.py) for implementation details
+        See [MidPriceFD](https://github.com/anovv/svoe/blob/main/svoe/featurizer/features/definitions/price/mid_price_fd/mid_price_fd.py) and [VolatilityStddevFD](https://github.com/anovv/svoe/blob/main/svoe/featurizer/features/definitions/volatility/volatility_stddev_fd/volatility_stddev_fd.py) for implementation details
 
 - Run Featurizer
      
