@@ -1,7 +1,7 @@
 import enum
 import logging
 from abc import ABC, abstractmethod
-from typing import List, Any
+from typing import List, Any, Dict, Optional
 
 from svoe.featurizer_v2.streaming.api.collector.collector import Collector, CollectionCollector
 from svoe.featurizer_v2.streaming.api.context.runtime_context import RuntimeContext
@@ -70,8 +70,8 @@ class StreamOperator(Operator, ABC):
 
     def __init__(self, func: Function):
         self.func = func
-        self.collectors: List[Collector]
-        self.runtime_context: RuntimeContext
+        self.collectors = None
+        self.runtime_context = None
 
     def open(self, collectors: List[Collector], runtime_context: RuntimeContext):
         self.collectors = collectors
@@ -215,12 +215,39 @@ class UnionOperator(StreamOperator, OneInputOperator):
 
 class JoinOperator(StreamOperator, TwoInputOperator):
 
-    def __init__(self, join_func: JoinFunction):
-        assert isinstance(join_func, JoinFunction)
+    def __init__(self, join_func: Optional[JoinFunction] = None):
         super().__init__(join_func)
+        self.left_records_dict: Dict[Any, List[Any]] = {}
+        self.right_records_dict: Dict[Any, List[Any]] = {}
 
+    # TODO test
     @abstractmethod
     def process_element(self, left: Record, right: Record):
-        # TODO
-        raise NotImplementedError
+        assert isinstance(left, KeyRecord)
+        assert isinstance(right, KeyRecord)
+        key = right.key if left is None else left.key
 
+        if key in self.left_records_dict:
+            left_records = self.left_records_dict[key]
+        else:
+            left_records = []
+            self.left_records_dict[key] = left_records
+
+        if key in self.right_records_dict:
+            right_records = self.right_records_dict[key]
+        else:
+            right_records = []
+            self.right_records_dict[key] = right_records
+
+        if left is not None:
+            lv = left.value
+            left_records.append(lv)
+            self.collect(Record(self.func.join(lv, None)))
+            for rv in right_records:
+                self.collect(Record(self.func.join(lv, rv)))
+        else:
+            rv = right.value
+            right_records.append(rv)
+            self.collect(Record(self.func.join(None, rv)))
+            for lv in left_records:
+                self.collect(Record(self.func.join(lv, rv)))

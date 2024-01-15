@@ -1,7 +1,9 @@
 from typing import List
 
-from svoe.featurizer_v2.streaming.api.function.function import MapFunction, FlatMapFunction, FilterFunction
+from svoe.featurizer_v2.streaming.api.function.function import MapFunction, FlatMapFunction, FilterFunction, \
+    JoinFunction
 from svoe.featurizer_v2.streaming.api.operator.operator import MapOperator, FlatMapOperator, FilterOperator
+from svoe.featurizer_v2.streaming.api.stream.join_stream import JoinStream
 from svoe.featurizer_v2.streaming.api.stream.stream import Stream
 
 
@@ -25,6 +27,15 @@ class DataStream(Stream):
             stream_operator=FilterOperator(filter_func),
         )
 
-    # TODO join, union, key_by
+    def join(self, other: 'DataStream') -> JoinStream:
+        return JoinStream(
+            left_stream=self,
+            right_stream=other
+        )
+
+    # TODO union, key_by
     # def union(self, streams: List[Stream]) -> 'DataStream':
+
+
+
 

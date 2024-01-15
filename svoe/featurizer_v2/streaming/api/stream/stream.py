@@ -2,7 +2,7 @@ from abc import ABC
 from typing import Optional
 
 from svoe.featurizer_v2.streaming.api.context.streaming_context import StreamingContext
-from svoe.featurizer_v2.streaming.api.operator.operator import AbstractStreamOperator
+from svoe.featurizer_v2.streaming.api.operator.operator import StreamOperator
 from svoe.featurizer_v2.streaming.api.partition.partition import Partition, ForwardPartition
 
 
@@ -10,7 +10,7 @@ class Stream(ABC):
 
     def __init__(
         self,
-        stream_operator: AbstractStreamOperator,
+        stream_operator: StreamOperator,
         input_stream: Optional['Stream'] = None,
         streaming_context: Optional[StreamingContext] = None,
         partition: Optional[Partition] = None
