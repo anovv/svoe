@@ -64,7 +64,7 @@ class TwoInputOperator(Operator, ABC):
 class StreamOperator(Operator, ABC):
     """
     Basic interface for stream operators. Implementers would implement one of
-    :class:`OneInputOperator` or :class:`TwoInputOperator` to to create
+    :class:`OneInputOperator` or :class:`TwoInputOperator` to create
     operators that process elements.
     """
 
@@ -72,6 +72,9 @@ class StreamOperator(Operator, ABC):
         self.func = func
         self.collectors = None
         self.runtime_context = None
+
+        # set at jobGraph compilation
+        self.id = None
 
     def open(self, collectors: List[Collector], runtime_context: RuntimeContext):
         self.collectors = collectors

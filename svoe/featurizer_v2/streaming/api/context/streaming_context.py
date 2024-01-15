@@ -4,6 +4,8 @@ from typing import Dict, List
 from svoe.featurizer_v2.streaming.api.function.function import CollectionSourceFunction, LocalFileSourceFunction, \
     SourceFunction
 from svoe.featurizer_v2.streaming.api.job_graph.job_graph import JobGraph
+from svoe.featurizer_v2.streaming.api.stream.stream_sink import StreamSink
+from svoe.featurizer_v2.streaming.api.stream.stream_source import StreamSource
 
 logger = logging.getLogger(__name__)
 

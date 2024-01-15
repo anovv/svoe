@@ -33,7 +33,9 @@ class DataStream(Stream):
             right_stream=other
         )
 
-    # TODO union, key_by
+    # def key_by(self):
+
+    # TODO sink, key_by, union, broadcast, partition_by, process
     # def union(self, streams: List[Stream]) -> 'DataStream':
 
 
