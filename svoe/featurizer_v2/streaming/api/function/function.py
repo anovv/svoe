@@ -154,6 +154,13 @@ class SinkFunction(Function):
         every record."""
         pass
 
+class JoinFunction(Function):
+    """Interface for implementing user defined join functionality."""
+
+    @abstractmethod
+    def join(self, left, right):
+        pass
+
 
 class CollectionSourceFunction(SourceFunction):
     def __init__(self, values):
