@@ -154,6 +154,7 @@ class SinkFunction(Function):
         every record."""
         pass
 
+
 class JoinFunction(Function):
     """Interface for implementing user defined join functionality."""
 
