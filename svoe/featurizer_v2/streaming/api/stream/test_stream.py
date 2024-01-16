@@ -15,7 +15,7 @@ class TestStream(unittest.TestCase):
     def test_key_stream(self):
         ctx = StreamingContext()
         key_stream = ctx\
-            .from_values("a", "b", "c")\
+            .from_values('a', 'b', 'c')\
             .map(lambda x: (x, 1))\
             .key_by(lambda x: x[0])
 
