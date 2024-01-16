@@ -1,13 +1,11 @@
 import logging
-from typing import List, Dict
+from typing import List, Dict, Optional
 
 from svoe.featurizer_v2.streaming.api.job_graph.job_graph import JobGraph, JobVertex, VertexType, JobEdge
-from svoe.featurizer_v2.streaming.api.stream.data_stream import DataStream
-from svoe.featurizer_v2.streaming.api.stream.join_stream import JoinStream
+from svoe.featurizer_v2.streaming.api.stream.data_stream import DataStream, JoinStream, UnionStream
 from svoe.featurizer_v2.streaming.api.stream.stream_source import StreamSource
 from svoe.featurizer_v2.streaming.api.stream.stream import Stream
 from svoe.featurizer_v2.streaming.api.stream.stream_sink import StreamSink
-from svoe.featurizer_v2.streaming.api.stream.union_stream import UnionStream
 
 logger = logging.getLogger(__name__)
 
@@ -17,8 +15,8 @@ class JobGraphBuilder:
     def __init__(
         self,
         stream_sinks: List[StreamSink],
-        job_name: str,
-        job_config: Dict,
+        job_name: Optional[str] = None,
+        job_config: Optional[Dict] = None,
     ):
         self.job_graph = JobGraph(
             job_name,

@@ -1,5 +1,6 @@
 import enum
-from typing import List, Dict
+import time
+from typing import List, Dict, Optional
 
 from svoe.featurizer_v2.streaming.api.operator.operator import StreamOperator
 from svoe.featurizer_v2.streaming.api.partition.partition import Partition
@@ -51,9 +52,11 @@ class JobVertex:
 class JobGraph:
     def __init__(
         self,
-        job_name: str,
-        job_config: Dict
+        job_name: Optional[str],
+        job_config: Optional[Dict]
     ):
+        if job_name is None:
+            job_name = f'job_{time.time()}'
         self.job_name = job_name
         self.job_config = job_config
         self.job_vertices: List[JobVertex] = []
