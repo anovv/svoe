@@ -31,12 +31,12 @@ class StreamingContext:
     def from_values(self, *values) -> StreamSource:
         return self.from_collection(values)
 
-    def from_collection(self, values):
+    def from_collection(self, values) -> StreamSource:
         assert values, "values shouldn't be None or empty"
         func = CollectionSourceFunction(values)
         return self.source(func)
 
-    def read_text_file(self, filename: str):
+    def read_text_file(self, filename: str) -> StreamSource:
         # line by line
         func = LocalFileSourceFunction(filename)
         return self.source(func)
@@ -45,11 +45,6 @@ class StreamingContext:
         raise NotImplementedError
 
     def execute(self, job_name: str):
-        """Execute the job. This method will block until job finished.
-
-        Args:
-            job_name: name of the job
-        """
         # TODO support block to job finish
         # job_submit_result = self.submit(job_name)
         # job_submit_result.wait_finish()

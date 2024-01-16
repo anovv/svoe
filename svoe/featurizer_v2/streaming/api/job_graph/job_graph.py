@@ -5,6 +5,8 @@ from typing import List, Dict, Optional
 from svoe.featurizer_v2.streaming.api.operator.operator import StreamOperator
 from svoe.featurizer_v2.streaming.api.partition.partition import Partition
 
+# install https://github.com/pygraphviz/pygraphviz/issues/11
+import pygraphviz as pgv
 
 class JobEdge:
     def __init__(
@@ -71,3 +73,13 @@ class JobGraph:
                     edge.target_vertex_id == job_edge.target_vertex_id:
                 return
         self.job_edges.append(job_edge)
+
+    def gen_digraph(self) -> pgv.AGraph:
+        G = pgv.AGraph()
+        for jv in self.job_vertices:
+            G.add_node(jv.vertex_id, label=jv.stream_operator.__class__.__name__)
+
+        for je in self.job_edges:
+            G.add_edge(je.source_vertex_id, je.target_vertex_id)
+
+        return G

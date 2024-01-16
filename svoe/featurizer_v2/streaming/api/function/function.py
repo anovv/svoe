@@ -270,6 +270,14 @@ class SimpleReduceFunction(ReduceFunction):
         return self.func(old_value, new_value)
 
 
+class SimpleJoinFunction(JoinFunction):
+    def __init__(self, func):
+        self.func = func
+
+    def join(self, left, right):
+        return self.func(left, right)
+
+
 class SimpleSinkFunction(SinkFunction):
     def __init__(self, func):
         self.func = func

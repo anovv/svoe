@@ -1,11 +1,12 @@
 from typing import List, Callable
 
 from svoe.featurizer_v2.streaming.api.function.function import KeyFunction, SimpleMapFunction, SimpleFlatMapFunction, \
-    SimpleFilterFunction, SimpleKeyFunction, SimpleJoinFunction, SimpleReduceFunction
+    SimpleFilterFunction, SimpleKeyFunction, SimpleJoinFunction, SimpleReduceFunction, SimpleSinkFunction
 from svoe.featurizer_v2.streaming.api.operator.operator import MapOperator, FlatMapOperator, FilterOperator, \
-    ReduceOperator, StreamOperator, JoinOperator, KeyByOperator
+    ReduceOperator, StreamOperator, JoinOperator, KeyByOperator, SinkOperator
 from svoe.featurizer_v2.streaming.api.partition.partition import KeyPartition
 from svoe.featurizer_v2.streaming.api.stream.stream import Stream
+from svoe.featurizer_v2.streaming.api.stream.stream_sink import StreamSink
 
 
 class DataStream(Stream):
@@ -44,10 +45,17 @@ class DataStream(Stream):
             stream_operator=KeyByOperator(key_by_func)
         )
 
+    def sink(self, sink_func_callable: Callable) -> 'StreamSink':
+        sink_func = SimpleSinkFunction(sink_func_callable)
+        return StreamSink(
+            input_stream=self,
+            sink_operator=SinkOperator(sink_func)
+        )
 
 
 
-    # TODO sink, key_by, union, broadcast, partition_by, process
+
+    # TODO union, broadcast, partition_by, process
     # def union(self, streams: List[Stream]) -> 'DataStream':
 
 

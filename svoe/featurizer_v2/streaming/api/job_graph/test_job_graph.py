@@ -27,8 +27,9 @@ class TestJobGraph(unittest.TestCase):
         assert source_vertex.vertex_type == VertexType.SOURCE
 
     def test_key_by_job_graph(self):
-        jg = self._build_data_sync_job_graph()
+        jg = self._build_key_by_job_graph()
         vertices = jg.job_vertices
+        print(vertices)
         edges = jg.job_edges
         assert len(vertices) == 3
         assert len(edges) == 2
@@ -44,6 +45,13 @@ class TestJobGraph(unittest.TestCase):
         source_to_key_by: JobEdge = edges[1]
         assert isinstance(key_by_to_sink.partition, KeyPartition)
         assert isinstance(source_to_key_by.partition, ForwardPartition)
+
+
+    def print_digraph(self):
+        jg = self._build_key_by_job_graph()
+        dg = jg.gen_digraph()
+        dg.layout()
+        dg.draw('example.png', format='png')
 
     def _build_data_sync_job_graph(self) -> JobGraph:
         ctx = StreamingContext()
@@ -61,3 +69,4 @@ class TestJobGraph(unittest.TestCase):
 if __name__ == '__main__':
     t = TestJobGraph()
     t.test_data_sync_job_graph()
+    t.test_key_by_job_graph()

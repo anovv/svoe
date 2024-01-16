@@ -7,5 +7,5 @@ class JobGraphOptimizer:
         self.job_graph = job_graph
 
     def optimize(self) -> JobGraph:
-        # TODO implement optimizations
+        # TODO implement chaining and other optimizations
         return self.job_graph
