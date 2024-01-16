@@ -1,5 +1,5 @@
 import logging
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 from svoe.featurizer_v2.streaming.api.function.function import CollectionSourceFunction, LocalFileSourceFunction, \
     SourceFunction
@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 class StreamingContext:
 
-    def __init__(self, job_config: Dict):
+    def __init__(self, job_config: Optional[Dict] = None):
         self.job_config = job_config
         self._id_generator = 0
         self.stream_sinks: List[StreamSink] = []
@@ -25,10 +25,10 @@ class StreamingContext:
     def add_sink(self, stream_sink: StreamSink):
         self.stream_sinks.append(stream_sink)
 
-    def source(self, source_func: SourceFunction):
+    def source(self, source_func: SourceFunction) -> StreamSource:
         return StreamSource(self, source_func)
 
-    def from_values(self, *values):
+    def from_values(self, *values) -> StreamSource:
         return self.from_collection(values)
 
     def from_collection(self, values):
