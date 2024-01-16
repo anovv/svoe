@@ -92,13 +92,7 @@ class StreamOperator(Operator, ABC):
             collector.collect(record)
 
 
-class SourceOperator(Operator, ABC):
-    @abstractmethod
-    def fetch(self):
-        pass
-
-
-class SourceOperatorImpl(SourceOperator, StreamOperator):
+class SourceOperator(StreamOperator):
 
     class SourceContextImpl(SourceContext):
         def __init__(self, collectors: List[Collector]):
@@ -115,7 +109,7 @@ class SourceOperatorImpl(SourceOperator, StreamOperator):
 
     def open(self, collectors: List[Collector], runtime_context: RuntimeContext):
         super().open(collectors, runtime_context)
-        self.source_context = SourceOperatorImpl.SourceContextImpl(collectors)
+        self.source_context = SourceOperator.SourceContextImpl(collectors)
         self.func.init(
             runtime_context.parallelism, runtime_context.task_index
         )

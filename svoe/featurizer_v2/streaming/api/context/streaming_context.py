@@ -31,7 +31,7 @@ class StreamingContext:
         Returns:
             The data stream constructed from the source_func
         """
-        return StreamSource.build_source(self, source_func)
+        return StreamSource(source_func)
 
     def from_values(self, *values):
         """Creates a data stream from values
