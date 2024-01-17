@@ -1,6 +1,6 @@
 from typing import List, Dict
 
-from svoe.featurizer_v2.streaming.runtime.transfer.channel import Channel, ChannelMessage
+from svoe.featurizer_v2.streaming.runtime.transfer.channel import Channel
 from svoe.featurizer_v2.streaming.runtime.transfer.data_writer import TransportType
 
 import zmq
@@ -30,11 +30,11 @@ class DataReader:
 
             # TODO set HWM
             socket = context.socket(zmq.PULL)
-            socket.connect(f'tcp://{channel.source_ip}{channel.source_port}')
+            socket.connect(f'tcp://{channel.source_ip}:{channel.source_port}')
             self.sockets.append(socket)
 
     # TODO set timeout
-    def read_message(self) -> ChannelMessage:
+    def read_message(self) -> Dict:
         # TODO this should use a buffer?
 
         # round robin read
