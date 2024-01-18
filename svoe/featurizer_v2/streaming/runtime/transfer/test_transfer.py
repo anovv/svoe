@@ -25,6 +25,7 @@ class Writer:
             self.data_writer.write_message(self.channel.channel_id, item)
         self.data_writer.write_message(self.channel.channel_id, TERMINAL_MESSAGE)
 
+
 @ray.remote
 class Reader:
     def __init__(
@@ -49,10 +50,9 @@ class Reader:
         return res
 
 
-
 class TestTransfer(unittest.TestCase):
 
-    def test_transfer(self):
+    def test_one_to_one_transfer(self):
         channel = Channel(
             channel_id='1',
             source_ip='127.0.0.1',
@@ -79,4 +79,4 @@ class TestTransfer(unittest.TestCase):
 
 if __name__ == '__main__':
     t = TestTransfer()
-    t.test_transfer()
+    t.test_one_to_one_transfer()

@@ -1,6 +1,7 @@
 import logging
 import unittest
 
+from svoe.featurizer_v2.common.graph_utils import print_digraph
 from svoe.featurizer_v2.streaming.api.context.streaming_context import StreamingContext
 from svoe.featurizer_v2.streaming.api.job_graph.job_graph import JobGraph, JobEdge, JobVertex, VertexType
 from svoe.featurizer_v2.streaming.api.job_graph.job_graph_builder import JobGraphBuilder
@@ -29,7 +30,6 @@ class TestJobGraph(unittest.TestCase):
     def test_key_by_job_graph(self):
         jg = self._build_key_by_job_graph()
         vertices = jg.job_vertices
-        print(vertices)
         edges = jg.job_edges
         assert len(vertices) == 3
         assert len(edges) == 2
@@ -46,12 +46,8 @@ class TestJobGraph(unittest.TestCase):
         assert isinstance(key_by_to_sink.partition, KeyPartition)
         assert isinstance(source_to_key_by.partition, ForwardPartition)
 
+        # print_digraph(jg.gen_digraph())
 
-    def print_digraph(self):
-        jg = self._build_key_by_job_graph()
-        dg = jg.gen_digraph()
-        dg.layout()
-        dg.draw('example.png', format='png')
 
     def _build_data_sync_job_graph(self) -> JobGraph:
         ctx = StreamingContext()

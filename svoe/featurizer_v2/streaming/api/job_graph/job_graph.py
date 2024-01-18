@@ -8,6 +8,7 @@ from svoe.featurizer_v2.streaming.api.partition.partition import Partition
 # install https://github.com/pygraphviz/pygraphviz/issues/11
 import pygraphviz as pgv
 
+
 class JobEdge:
     def __init__(
         self,
@@ -77,9 +78,9 @@ class JobGraph:
     def gen_digraph(self) -> pgv.AGraph:
         G = pgv.AGraph()
         for jv in self.job_vertices:
-            G.add_node(jv.vertex_id, label=jv.stream_operator.__class__.__name__)
+            G.add_node(jv.vertex_id, label=f'{jv.stream_operator.__class__.__name__} p={jv.parallelism}')
 
         for je in self.job_edges:
-            G.add_edge(je.source_vertex_id, je.target_vertex_id)
+            G.add_edge(je.source_vertex_id, je.target_vertex_id, label=je.partition.__class__.__name__)
 
         return G
