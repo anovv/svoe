@@ -1,7 +1,6 @@
 from abc import ABC
 from typing import Optional
 
-# from svoe.featurizer_v2.streaming.api.context.streaming_context import StreamingContext
 from svoe.featurizer_v2.streaming.api.operator.operator import StreamOperator
 from svoe.featurizer_v2.streaming.api.partition.partition import Partition, ForwardPartition
 

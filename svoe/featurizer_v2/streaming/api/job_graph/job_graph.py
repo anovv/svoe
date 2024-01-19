@@ -51,6 +51,9 @@ class JobVertex:
         # set operator id
         self.stream_operator.id = vertex_id
 
+    def get_name(self) -> str:
+        return f'{self.vertex_id}_{self.stream_operator.__class__.__name__}'
+
 
 class JobGraph:
     def __init__(

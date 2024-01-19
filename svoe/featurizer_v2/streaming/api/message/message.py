@@ -1,5 +1,7 @@
 from typing import Any
 
+from svoe.featurizer_v2.streaming.runtime.transfer.channel import ChannelMessage
+
 
 class Record:
     # Data record in data stream
@@ -19,10 +21,11 @@ class Record:
     def __hash__(self):
         return hash((self.stream_name, self.value))
 
-    def to_dict(self):
+    def to_channel_message(self) -> ChannelMessage:
         return {
             'value': self.value
         }
+
 
 class KeyRecord(Record):
     # Data record in a keyed data stream
@@ -43,8 +46,20 @@ class KeyRecord(Record):
     def __hash__(self):
         return hash((self.stream_name, self.key, self.value))
 
-    def to_dict(self):
+    def to_channel_message(self):
         return {
             'key': self.key,
             'value': self.value
         }
+
+
+def record_from_channel_message(channel_message: ChannelMessage) -> Record:
+    if 'key' in channel_message:
+        return KeyRecord(
+            key=channel_message['key'],
+            value=channel_message['value']
+        )
+    else:
+        return Record(
+            value=channel_message['value']
+        )
