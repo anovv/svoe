@@ -1,10 +1,12 @@
 from typing import Dict, List, Optional
 
-from svoe.featurizer_v2.streaming.api.job_graph.job_graph import JobGraph
+from svoe.featurizer_v2.streaming.api.job_graph.job_graph import JobGraph, JobVertex
 from svoe.featurizer_v2.streaming.api.operator.operator import StreamOperator
 from svoe.featurizer_v2.streaming.api.partition.partition import RoundRobinPartition, Partition
 
 import pygraphviz as pgv
+
+from svoe.featurizer_v2.streaming.runtime.transfer.channel import Channel
 
 
 class ExecutionEdge:
@@ -18,23 +20,41 @@ class ExecutionEdge:
         self.source_execution_vertex = source_execution_vertex
         self.target_execution_vertex = target_execution_vertex
         self.partition = partition
+        self.channel = None
+
+    def set_channel(self, channel: Channel):
+        self.channel = channel
 
 
 class ExecutionVertex:
 
     def __init__(
         self,
-        vertex_id: str,
+        job_vertex: JobVertex,
+        execution_vertex_index: int, # sub index based on parallelism of job vertex operator
         parallelism: int,
         stream_operator: StreamOperator,
+        job_config: Optional[Dict] = None,
         resources: Optional[Dict[str, float]] = None
     ):
-        self.vertex_id = vertex_id
+        self.job_vertex = job_vertex
+        self.execution_vertex_index = execution_vertex_index
+        self.execution_vertex_id = self._gen_id()
         self.parallelism = parallelism
         self.stream_operator = stream_operator
         self.resources = resources
+        self.job_config = job_config
         self.input_edges: List[ExecutionEdge] = []
         self.output_edges: List[ExecutionEdge] = []
+
+    def _gen_id(self) -> str:
+        return f'{self.job_vertex.vertex_id}_{self.execution_vertex_index}'
+
+    def get_output_channels(self) -> List[Channel]:
+        return [e.channel for e in self.output_edges]
+
+    def get_input_channels(self) -> List[Channel]:
+        return [e.channel for e in self.input_edges]
 
 
 class ExecutionGraph:
@@ -53,9 +73,9 @@ class ExecutionGraph:
         # create exec vertices
         for job_vertex in job_graph.job_vertices:
             for i in range(job_vertex.parallelism):
-                execution_vertex_id = f'{job_vertex.vertex_id}_{i + 1}'
                 execution_vertex = ExecutionVertex(
-                    vertex_id=execution_vertex_id,
+                    job_vertex = job_vertex,
+                    execution_vertex_index=i,
                     parallelism=job_vertex.parallelism,
                     stream_operator=job_vertex.stream_operator
                 )
@@ -65,7 +85,7 @@ class ExecutionGraph:
                 else:
                     execution_graph._execution_vertices_groups_by_job_vertex_id[job_vertex.vertex_id] = [execution_vertex]
 
-                execution_graph.execution_vertices_by_id[execution_vertex_id] = execution_vertex
+                execution_graph.execution_vertices_by_id[execution_vertex.execution_vertex_id] = execution_vertex
 
         # create exec edges
         for job_edge in job_graph.job_edges:
@@ -96,9 +116,9 @@ class ExecutionGraph:
     def gen_digraph(self) -> pgv.AGraph:
         G = pgv.AGraph()
         for v in self.execution_vertices_by_id.values():
-            G.add_node(v.vertex_id, label=f'{v.stream_operator.__class__.__name__}_{v.vertex_id} p={v.parallelism}')
+            G.add_node(v.execution_vertex_id, label=f'{v.stream_operator.__class__.__name__}_{v.execution_vertex_id} p={v.parallelism}')
 
         for e in self.execution_edges:
-            G.add_edge(e.source_execution_vertex.vertex_id, e.target_execution_vertex.vertex_id, label=e.partition.__class__.__name__)
+            G.add_edge(e.source_execution_vertex.execution_vertex_id, e.target_execution_vertex.execution_vertex_id, label=e.partition.__class__.__name__)
 
         return G

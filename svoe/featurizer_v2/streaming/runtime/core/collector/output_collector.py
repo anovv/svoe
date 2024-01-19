@@ -21,4 +21,4 @@ class OutputCollector(Collector):
     def collect(self, record: Record):
         partitions = self.partition.partition(record=record, num_partition=len(self.output_channel_ids))
         for partition in partitions:
-            self.data_writer.write_message(self.output_channel_ids[partition], record.to_dict())
+            self.data_writer.write_message(self.output_channel_ids[partition], record.to_channel_message())
