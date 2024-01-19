@@ -5,8 +5,7 @@ from svoe.featurizer_v2.streaming.api.context.streaming_context import Streaming
 from svoe.featurizer_v2.streaming.api.job_graph.job_graph import JobGraph
 from svoe.featurizer_v2.streaming.api.job_graph.job_graph_builder import JobGraphBuilder
 from svoe.featurizer_v2.streaming.api.partition.partition import RoundRobinPartition
-from svoe.featurizer_v2.streaming.runtime.execution_graph.execution_graph import ExecutionGraph
-from svoe.featurizer_v2.common.graph_utils import print_digraph
+from svoe.featurizer_v2.streaming.runtime.core.execution_graph.execution_graph import ExecutionGraph
 
 logger = logging.getLogger(__name__)
 

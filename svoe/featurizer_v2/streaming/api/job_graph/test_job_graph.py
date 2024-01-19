@@ -1,7 +1,6 @@
 import logging
 import unittest
 
-from svoe.featurizer_v2.common.graph_utils import print_digraph
 from svoe.featurizer_v2.streaming.api.context.streaming_context import StreamingContext
 from svoe.featurizer_v2.streaming.api.job_graph.job_graph import JobGraph, JobEdge, JobVertex, VertexType
 from svoe.featurizer_v2.streaming.api.job_graph.job_graph_builder import JobGraphBuilder

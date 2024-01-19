@@ -19,6 +19,10 @@ class Record:
     def __hash__(self):
         return hash((self.stream, self.value))
 
+    def to_dict(self):
+        return {
+            'value': self.value
+        }
 
 class KeyRecord(Record):
     # Data record in a keyed data stream
@@ -38,3 +42,9 @@ class KeyRecord(Record):
 
     def __hash__(self):
         return hash((self.stream, self.key, self.value))
+
+    def to_dict(self):
+        return {
+            'key': self.key
+            'value': self.value
+        }
