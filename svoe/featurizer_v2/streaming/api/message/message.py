@@ -6,18 +6,18 @@ class Record:
 
     def __init__(self, value: Any):
         self.value = value
-        self.stream = None
+        self.stream_name = None
 
     def __repr__(self):
         return "Record({})".format(self.value)
 
     def __eq__(self, other):
         if type(self) is type(other):
-            return (self.stream, self.value) == (other.stream, other.value)
+            return (self.stream_name, self.value) == (other.stream_name, other.value)
         return False
 
     def __hash__(self):
-        return hash((self.stream, self.value))
+        return hash((self.stream_name, self.value))
 
     def to_dict(self):
         return {
@@ -33,18 +33,18 @@ class KeyRecord(Record):
 
     def __eq__(self, other):
         if type(self) is type(other):
-            return (self.stream, self.key, self.value) == (
-                other.stream,
+            return (self.stream_name, self.key, self.value) == (
+                other.stream_name,
                 other.key,
                 other.value,
             )
         return False
 
     def __hash__(self):
-        return hash((self.stream, self.key, self.value))
+        return hash((self.stream_name, self.key, self.value))
 
     def to_dict(self):
         return {
-            'key': self.key
+            'key': self.key,
             'value': self.value
         }
