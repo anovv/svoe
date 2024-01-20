@@ -20,7 +20,11 @@ class ExecutionEdge:
         self.source_execution_vertex = source_execution_vertex
         self.target_execution_vertex = target_execution_vertex
         self.partition = partition
+        self.id = self._gen_id()
         self.channel = None
+
+    def _gen_id(self):
+        return f'{self.source_execution_vertex.execution_vertex_id}-{self.target_execution_vertex.execution_vertex_id}'
 
     def set_channel(self, channel: Channel):
         self.channel = channel

@@ -13,9 +13,16 @@ logger = logging.getLogger(__name__)
 @ray.remote
 class JobWorker:
 
-    def __init__(self, execution_vertex: ExecutionVertex):
+    def __init__(self):
+        self.execution_vertex = None
+        self.task = None
+
+    def init(self, execution_vertex: ExecutionVertex):
         self.execution_vertex = execution_vertex
 
+    def start_or_rollback(self):
+        self.task = self._create_stream_task()
+        self.task.start_or_recover()
 
     def _create_stream_task(self) -> StreamTask:
         task = None
