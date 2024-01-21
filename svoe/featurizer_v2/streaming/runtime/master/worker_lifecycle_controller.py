@@ -36,12 +36,16 @@ class WorkerLifecycleController:
         logger.info(f'Creating {len(execution_graph.execution_vertices_by_id)} workers...')
         for vertex in execution_graph.execution_vertices_by_id.values():
             resources = vertex.resources
-            worker = JobWorker.remote(
-                max_restarts=-1,
-                num_cpus=resources.num_cpus,
-                num_gpus=resources.num_gpus,
-                memory=resources.memory
-            )
+            options_kwargs = {
+                'max_restarts': -1
+            }
+            if resources.num_cpus is not None:
+                options_kwargs['num_cpus'] = resources.num_cpus
+            if resources.num_gpus is not None:
+                options_kwargs['num_gpus'] = resources.num_gpus
+            if resources.memory is not None:
+                options_kwargs['memory'] = resources.memory
+            worker = JobWorker.remote(**options_kwargs)
             workers.append(worker)
             vertex.set_worker(worker)
 
