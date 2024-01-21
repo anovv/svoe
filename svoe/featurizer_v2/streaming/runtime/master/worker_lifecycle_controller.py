@@ -30,10 +30,12 @@ class WorkerLifecycleCoordinator:
     def __init__(self):
         self._used_ports = {}
 
-    def create_workers(self, num_workers) -> Dict[ActorHandle, WorkerNetworkInfo]:
+    def create_dummy_workers(self, num_workers) -> Dict[ActorHandle, WorkerNetworkInfo]:
+
+        # TODO set resources
         workers = []
         for _ in range(num_workers):
-            workers.append(JobWorker.remote())
+            workers.append(JobWorker.remote(max_restarts=-1))
 
         workers_info = {}
         all_actors_info = actors()
@@ -88,11 +90,30 @@ class WorkerLifecycleCoordinator:
         for vertex_id, worker in vertex_id_to_worker:
             execution_vertex = execution_graph.execution_vertices_by_id[vertex_id]
             f.append(worker.init.remote(execution_vertex))
+            execution_vertex.set_worker(worker)
 
         t = time.time()
         ray.wait(f)
-
         logger.info(f'Inited {len(vertex_id_to_worker)} workers in {time.time() - t}s')
+
+    def start_workers(self, execution_graph: ExecutionGraph):
+        # start source workers first
+        f = []
+        for w in execution_graph.get_source_workers():
+            f.append(w.start_or_rollback.remote())
+
+        t = time.time()
+        ray.wait(f)
+        logger.info(f'Started source workers in {time.time() - t}s')
+
+        # start rest
+        f = []
+        for w in execution_graph.get_non_source_workers():
+            f.append(w.start_or_rollback.remote())
+
+        t = time.time()
+        ray.wait(f)
+        logger.info(f'Started non-source workers in {time.time() - t}s')
 
     def _gen_port(self, node_id) -> int:
         while True:

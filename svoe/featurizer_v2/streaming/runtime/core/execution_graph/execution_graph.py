@@ -1,6 +1,8 @@
 from typing import Dict, List, Optional
 
-from svoe.featurizer_v2.streaming.api.job_graph.job_graph import JobGraph, JobVertex
+from ray.actor import ActorHandle
+
+from svoe.featurizer_v2.streaming.api.job_graph.job_graph import JobGraph, JobVertex, VertexType
 from svoe.featurizer_v2.streaming.api.operator.operator import StreamOperator
 from svoe.featurizer_v2.streaming.api.partition.partition import RoundRobinPartition, Partition
 
@@ -50,6 +52,7 @@ class ExecutionVertex:
         self.job_config = job_config
         self.input_edges: List[ExecutionEdge] = []
         self.output_edges: List[ExecutionEdge] = []
+        self.worker = None
 
     def _gen_id(self) -> str:
         return f'{self.job_vertex.vertex_id}_{self.execution_vertex_index}'
@@ -59,6 +62,9 @@ class ExecutionVertex:
 
     def get_input_channels(self) -> List[Channel]:
         return [e.channel for e in self.input_edges]
+
+    def set_worker(self, worker: ActorHandle):
+        self.worker = worker
 
 
 class ExecutionGraph:
@@ -126,3 +132,9 @@ class ExecutionGraph:
             G.add_edge(e.source_execution_vertex.execution_vertex_id, e.target_execution_vertex.execution_vertex_id, label=e.partition.__class__.__name__)
 
         return G
+
+    def get_source_workers(self) -> List[ActorHandle]:
+        return [v.worker for v in self.execution_vertices_by_id.values() if v.job_vertex.vertex_type == VertexType.SOURCE]
+
+    def get_non_source_workers(self) -> List[ActorHandle]:
+        return [v.worker for v in self.execution_vertices_by_id.values() if v.job_vertex.vertex_type != VertexType.SOURCE]
