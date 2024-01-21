@@ -159,9 +159,9 @@ class ExecutionGraph:
                         logger.info(f'Using custom resource for {op_name}')
                         _resources_dict = resource_config.proposed_operator_resources[_op_name]
                         if ResourceKey.CPU in _resources_dict:
-                            resources.num_cpus = _resources_dict[ResourceKey.CPU]
+                            resources.num_cpus = float(_resources_dict[ResourceKey.CPU])
                         if ResourceKey.GPU in _resources_dict:
-                            resources.num_gpus = _resources_dict[ResourceKey.GPU]
+                            resources.num_gpus = float(_resources_dict[ResourceKey.GPU])
                         if ResourceKey.MEM in _resources_dict:
                             resources.memory = _resources_dict[ResourceKey.MEM]
 

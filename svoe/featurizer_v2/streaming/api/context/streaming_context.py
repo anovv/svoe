@@ -4,8 +4,10 @@ from typing import Dict, List, Optional
 from svoe.featurizer_v2.streaming.api.function.function import CollectionSourceFunction, LocalFileSourceFunction, \
     SourceFunction
 from svoe.featurizer_v2.streaming.api.job_graph.job_graph import JobGraph
+from svoe.featurizer_v2.streaming.api.job_graph.job_graph_builder import JobGraphBuilder
 from svoe.featurizer_v2.streaming.api.stream.stream_sink import StreamSink
 from svoe.featurizer_v2.streaming.api.stream.stream_source import StreamSource
+from svoe.featurizer_v2.streaming.runtime.client.job_client import JobClient
 
 logger = logging.getLogger(__name__)
 
@@ -16,7 +18,6 @@ class StreamingContext:
         self.job_config = job_config
         self._id_generator = 0
         self.stream_sinks: List[StreamSink] = []
-        self.job_graph: JobGraph
 
     def generate_id(self):
         self._id_generator += 1
@@ -41,8 +42,11 @@ class StreamingContext:
         func = LocalFileSourceFunction(filename)
         return self.source(func)
 
-    def submit(self, job_name: str):
-        raise NotImplementedError
+    def submit(self):
+        job_graph = JobGraphBuilder(stream_sinks=self.stream_sinks).build()
+        job_client = JobClient()
+        job_client.submit(job_graph)
+
 
     def execute(self, job_name: str):
         # TODO support block to job finish

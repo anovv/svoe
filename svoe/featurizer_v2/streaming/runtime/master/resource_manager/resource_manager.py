@@ -18,8 +18,8 @@ class Resources(BaseModel):
     @classmethod
     def from_dict(cls, resources_dict) -> 'Resources':
         return Resources(
-            num_cpus=resources_dict.get(ResourceKey.CPU, None),
-            num_gpus=resources_dict.get(ResourceKey.GPU, None),
+            num_cpus=float(resources_dict.get(ResourceKey.CPU, None)),
+            num_gpus=float(resources_dict.get(ResourceKey.GPU, None)),
             memory=resources_dict.get(ResourceKey.MEM, None)
         )
 

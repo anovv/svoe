@@ -13,7 +13,6 @@ class StreamingWorkerConfig(BaseModel):
 class StreamingMasterConfig(BaseModel):
     resource_config: ResourceConfig
     scheduler_config: SchedulerConfig
-    job_name: str
 
 
 class StreamingConfig(BaseModel):
