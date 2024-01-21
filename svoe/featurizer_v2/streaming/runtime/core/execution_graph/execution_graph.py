@@ -8,6 +8,8 @@ from svoe.featurizer_v2.streaming.api.partition.partition import RoundRobinParti
 
 import pygraphviz as pgv
 
+from svoe.featurizer_v2.streaming.common.config.resource_config import ResourceConfig
+from svoe.featurizer_v2.streaming.runtime.master.resource_manager.resource_manager import Resources
 from svoe.featurizer_v2.streaming.runtime.transfer.channel import Channel
 
 
@@ -41,7 +43,7 @@ class ExecutionVertex:
         parallelism: int,
         stream_operator: StreamOperator,
         job_config: Optional[Dict] = None,
-        resources: Optional[Dict[str, float]] = None
+        resources: Optional[Resources] = None
     ):
         self.job_vertex = job_vertex
         self.execution_vertex_index = execution_vertex_index
@@ -65,6 +67,9 @@ class ExecutionVertex:
 
     def set_worker(self, worker: ActorHandle):
         self.worker = worker
+
+    def set_resources(self, resources: Resources):
+        self.resources = resources
 
 
 class ExecutionGraph:
@@ -138,3 +143,6 @@ class ExecutionGraph:
 
     def get_non_source_workers(self) -> List[ActorHandle]:
         return [v.worker for v in self.execution_vertices_by_id.values() if v.job_vertex.vertex_type != VertexType.SOURCE]
+
+    def set_resources(self, resource_config: ResourceConfig):
+        raise NotImplementedError

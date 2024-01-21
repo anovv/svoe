@@ -1,12 +1,12 @@
 import logging
 import time
 from random import randint
-from typing import Dict
+from typing import Dict, List
 
 import ray
 from ray.actor import ActorHandle
 
-from svoe.featurizer_v2.streaming.runtime.core.execution_graph.execution_graph import ExecutionGraph
+from svoe.featurizer_v2.streaming.runtime.core.execution_graph.execution_graph import ExecutionGraph, ExecutionVertex
 from svoe.featurizer_v2.streaming.runtime.transfer.channel import Channel
 from svoe.featurizer_v2.streaming.runtime.worker.job_worker import JobWorker
 
@@ -17,6 +17,7 @@ VALID_PORT_RANGE = (30000, 65000)
 
 logger = logging.getLogger(__name__)
 
+
 class WorkerNetworkInfo:
 
     def __init__(self, node_ip: str, node_id: str, data_writer_port: int):
@@ -25,17 +26,24 @@ class WorkerNetworkInfo:
         self.data_writer_port = data_writer_port
 
 
-class WorkerLifecycleCoordinator:
+class WorkerLifecycleController:
 
     def __init__(self):
         self._used_ports = {}
 
-    def create_dummy_workers(self, num_workers) -> Dict[ActorHandle, WorkerNetworkInfo]:
-
-        # TODO set resources
+    def create_dummy_workers(self, execution_graph: ExecutionGraph) -> Dict[ActorHandle, WorkerNetworkInfo]:
         workers = []
-        for _ in range(num_workers):
-            workers.append(JobWorker.remote(max_restarts=-1))
+        logger.info(f'Creating {len(execution_graph.execution_vertices_by_id)} workers...')
+        for vertex in execution_graph.execution_vertices_by_id.values():
+            resources = vertex.resources
+            worker = JobWorker.remote(
+                max_restarts=-1,
+                num_cpus=resources.num_cpus,
+                num_gpus=resources.num_gpus,
+                memory=resources.memory
+            )
+            workers.append(worker)
+            vertex.set_worker(worker)
 
         workers_info = {}
         all_actors_info = actors()
@@ -44,7 +52,7 @@ class WorkerLifecycleCoordinator:
                 if w._actor_id() == info['ActorID']:
                     workers_info[w] = info
 
-        assert len(workers_info) == num_workers
+        assert len(workers_info) == len(workers)
 
         res = {}
         for w in workers_info:
@@ -56,7 +64,7 @@ class WorkerLifecycleCoordinator:
                 data_writer_port=self._gen_port(node_id)
             )
 
-        logger.info(f'Created {num_workers} workers')
+        logger.info(f'Created {len(workers)} workers')
 
         return res
 
@@ -66,13 +74,12 @@ class WorkerLifecycleCoordinator:
         workers_info: Dict[ActorHandle, WorkerNetworkInfo],
         execution_graph: ExecutionGraph
     ):
+        logger.info(f'Initializing {len(execution_graph.execution_vertices_by_id)} workers...')
         assert len(workers_info) == len(execution_graph.execution_vertices_by_id)
-        # map workers to vertices
-        vertex_id_to_worker = dict(zip(execution_graph.execution_vertices_by_id.keys(), workers_info.keys()))
 
         # create channels
         for edge in execution_graph.execution_edges:
-            source_worker = vertex_id_to_worker[edge.source_execution_vertex.execution_vertex_id]
+            source_worker = edge.source_execution_vertex.worker
 
             source_ip = workers_info[source_worker].node_ip
             source_port = workers_info[source_worker].data_writer_port
@@ -87,16 +94,16 @@ class WorkerLifecycleCoordinator:
 
         # init workers
         f = []
-        for vertex_id, worker in vertex_id_to_worker:
-            execution_vertex = execution_graph.execution_vertices_by_id[vertex_id]
+        for execution_vertex in execution_graph.execution_vertices_by_id.values():
+            worker = execution_vertex.worker
             f.append(worker.init.remote(execution_vertex))
-            execution_vertex.set_worker(worker)
 
         t = time.time()
         ray.wait(f)
-        logger.info(f'Inited {len(vertex_id_to_worker)} workers in {time.time() - t}s')
+        logger.info(f'Inited workers in {time.time() - t}s')
 
     def start_workers(self, execution_graph: ExecutionGraph):
+        logger.info(f'Starting workers...')
         # start source workers first
         f = []
         for w in execution_graph.get_source_workers():
@@ -114,6 +121,10 @@ class WorkerLifecycleCoordinator:
         t = time.time()
         ray.wait(f)
         logger.info(f'Started non-source workers in {time.time() - t}s')
+
+    def delete_workers(self, vertices: List[ExecutionVertex]):
+        # TODO
+        raise NotImplementedError
 
     def _gen_port(self, node_id) -> int:
         while True:
