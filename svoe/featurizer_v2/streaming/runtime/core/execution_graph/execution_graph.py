@@ -10,7 +10,7 @@ from svoe.featurizer_v2.streaming.api.partition.partition import RoundRobinParti
 import pygraphviz as pgv
 
 from svoe.featurizer_v2.streaming.common.config.resource_config import ResourceConfig
-from svoe.featurizer_v2.streaming.runtime.master.resource_manager.resource_manager import Resources, ResourceKey
+from svoe.featurizer_v2.streaming.runtime.master.resource_manager.resource_manager import Resources, RESOURCE_KEY_CPU, RESOURCE_KEY_GPU, RESOURCE_KEY_MEM
 from svoe.featurizer_v2.streaming.runtime.transfer.channel import Channel
 
 
@@ -158,12 +158,12 @@ class ExecutionGraph:
                     if op_name == _op_name:
                         logger.info(f'Using custom resource for {op_name}')
                         _resources_dict = resource_config.proposed_operator_resources[_op_name]
-                        if ResourceKey.CPU in _resources_dict:
-                            resources.num_cpus = float(_resources_dict[ResourceKey.CPU])
-                        if ResourceKey.GPU in _resources_dict:
-                            resources.num_gpus = float(_resources_dict[ResourceKey.GPU])
-                        if ResourceKey.MEM in _resources_dict:
-                            resources.memory = _resources_dict[ResourceKey.MEM]
+                        if RESOURCE_KEY_CPU in _resources_dict:
+                            resources.num_cpus = float(_resources_dict[RESOURCE_KEY_CPU])
+                        if RESOURCE_KEY_GPU in _resources_dict:
+                            resources.num_gpus = float(_resources_dict[RESOURCE_KEY_GPU])
+                        if RESOURCE_KEY_MEM in _resources_dict:
+                            resources.memory = _resources_dict[RESOURCE_KEY_MEM]
 
             execution_vertex.set_resources(resources)
         logger.info(f'Set execution graph resources')

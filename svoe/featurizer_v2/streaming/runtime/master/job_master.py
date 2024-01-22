@@ -17,7 +17,7 @@ class JobMaster:
         streaming_config = StreamingConfig.from_dict(job_config)
         self.master_config = streaming_config.master_config
         self.runtime_context = JobMasterRuntimeContext(streaming_config)
-        self.job_scheduler = JobScheduler(self)
+        self.job_scheduler = JobScheduler(self.runtime_context)
         self.resource_manager = ResourceManager()
 
     def submit_job(self, job_graph: JobGraph) -> bool:

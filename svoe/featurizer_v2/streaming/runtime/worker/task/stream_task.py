@@ -2,12 +2,12 @@ from abc import ABC, abstractmethod
 from threading import Thread
 
 from svoe.featurizer_v2.streaming.api.message.message import Record, record_from_channel_message
+from svoe.featurizer_v2.streaming.runtime.core.execution_graph.execution_graph import ExecutionVertex
 from svoe.featurizer_v2.streaming.runtime.worker.task.streaming_runtime_context import StreamingRuntimeContext
 from svoe.featurizer_v2.streaming.runtime.core.collector.output_collector import OutputCollector
 from svoe.featurizer_v2.streaming.runtime.core.processor.processor import Processor, TwoInputProcessor
 from svoe.featurizer_v2.streaming.runtime.transfer.data_reader import DataReader
 from svoe.featurizer_v2.streaming.runtime.transfer.data_writer import DataWriter
-from svoe.featurizer_v2.streaming.runtime.worker.job_worker import JobWorker
 
 
 class StreamTask(ABC):
@@ -15,10 +15,10 @@ class StreamTask(ABC):
     def __init__(
         self,
         processor: Processor,
-        job_worker: JobWorker
+        execution_vertex: ExecutionVertex
     ):
         self.processor = processor
-        self.job_worker = job_worker
+        self.execution_vertex = execution_vertex
         self.thread = Thread(target=self.run, daemon=True)
         self.writer: DataWriter
         self.reader: DataReader
@@ -34,11 +34,9 @@ class StreamTask(ABC):
         self.thread.start()
 
     def _prepare_task(self):
-        execution_vertex = self.job_worker.execution_vertex
-
         # writer
-        if len(execution_vertex.output_edges) != 0:
-            output_channels = execution_vertex.get_output_channels()
+        if len(self.execution_vertex.output_edges) != 0:
+            output_channels = self.execution_vertex.get_output_channels()
             assert len(output_channels) > 0
             assert output_channels[0] != None
             self.writer = DataWriter(
@@ -46,8 +44,8 @@ class StreamTask(ABC):
             )
 
         # reader
-        if len(execution_vertex.input_edges) != 0:
-            input_channels = execution_vertex.get_input_channels()
+        if len(self.execution_vertex.input_edges) != 0:
+            input_channels = self.execution_vertex.get_input_channels()
             assert len(input_channels) > 0
             assert input_channels[0] != None
             self.reader = DataReader(
@@ -57,7 +55,7 @@ class StreamTask(ABC):
         self._open_processor()
 
     def _open_processor(self):
-        execution_vertex = self.job_worker.execution_vertex
+        execution_vertex = self.execution_vertex
         output_edges = execution_vertex.output_edges
         # grouped by each operator in target vertex
         grouped_channel_ids = {}
@@ -110,18 +108,19 @@ class InputStreamTask(StreamTask):
 class OneInputStreamTask(InputStreamTask):
     pass
 
+
 class TwoInputStreamTask(InputStreamTask):
 
     def __init__(
         self,
         processor: Processor,
-        job_worker: JobWorker,
+        execution_vertex: ExecutionVertex,
         left_stream_name: str,
         right_stream_name: str,
     ):
         super().__init__(
             processor=processor,
-            job_worker=job_worker
+            execution_vertex=execution_vertex
         )
 
         assert isinstance(self.processor, TwoInputProcessor)

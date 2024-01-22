@@ -30,12 +30,12 @@ class JobWorker:
         if isinstance(stream_processor, SourceProcessor):
             task = SourceStreamTask(
                 processor=stream_processor,
-                job_worker=self
+                execution_vertex=self.execution_vertex
             )
         elif isinstance(stream_processor, OneInputProcessor):
             task = OneInputStreamTask(
                 processor=stream_processor,
-                job_worker=self
+                execution_vertex=self.execution_vertex
             )
         else:
             input_op_ids = set()
@@ -48,7 +48,7 @@ class JobWorker:
             right_stream_name = str(input_op_ids[1])
             task = TwoInputStreamTask(
                 processor=stream_processor,
-                job_worker=self,
+                execution_vertex=self.execution_vertex,
                 left_stream_name=left_stream_name,
                 right_stream_name=right_stream_name
             )
