@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Optional
 
 from svoe.featurizer_v2.streaming.runtime.transfer.channel import ChannelMessage
 
@@ -23,8 +23,12 @@ class Record:
 
     def to_channel_message(self) -> ChannelMessage:
         return {
-            'value': self.value
+            'value': self.value,
+            'stream_name': self.stream_name
         }
+
+    def set_stream_name(self, stream_name):
+        self.stream_name = stream_name
 
 
 class KeyRecord(Record):
@@ -49,17 +53,21 @@ class KeyRecord(Record):
     def to_channel_message(self):
         return {
             'key': self.key,
-            'value': self.value
+            'value': self.value,
+            'stream_name': self.stream_name
         }
 
 
 def record_from_channel_message(channel_message: ChannelMessage) -> Record:
     if 'key' in channel_message:
-        return KeyRecord(
+        record = KeyRecord(
             key=channel_message['key'],
             value=channel_message['value']
         )
     else:
-        return Record(
+        record = Record(
             value=channel_message['value']
         )
+
+    record.set_stream_name(channel_message['stream_name'])
+    return record

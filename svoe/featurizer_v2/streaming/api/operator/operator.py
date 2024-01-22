@@ -54,7 +54,7 @@ class OneInputOperator(Operator, ABC):
 class TwoInputOperator(Operator, ABC):
 
     @abstractmethod
-    def process_element(self, record1: Record, record2: Record):
+    def process_element(self, left: Record, right: Record):
         pass
 
     def operator_type(self):
@@ -216,13 +216,15 @@ class JoinOperator(StreamOperator, TwoInputOperator):
         super().__init__(join_func)
         self.left_records_dict: Dict[Any, List[Any]] = {}
         self.right_records_dict: Dict[Any, List[Any]] = {}
+        self.left_key_by_function = None
+        self.right_key_by_function = None
 
     # TODO test
-    @abstractmethod
     def process_element(self, left: Record, right: Record):
-        assert isinstance(left, KeyRecord)
-        assert isinstance(right, KeyRecord)
-        key = right.key if left is None else left.key
+        if left is not None:
+            key = self.left_key_by_function.key_by(left.value)
+        else:
+            key = self.right_key_by_function.key_by(right.value)
 
         if key in self.left_records_dict:
             left_records = self.left_records_dict[key]

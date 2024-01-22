@@ -1,7 +1,8 @@
 import enum
 import json
-from typing import List
+from typing import List, Any
 
+from svoe.featurizer_v2.streaming.api.message.message import Record
 from svoe.featurizer_v2.streaming.runtime.transfer.channel import Channel, ChannelMessage
 
 import zmq
@@ -17,6 +18,7 @@ class DataWriter:
 
     def __init__(
         self,
+        source_stream_name: str,
         output_channels: List[Channel],
         transport_type: TransportType = TransportType.ZMQ_PUSH_PULL
     ):
@@ -24,9 +26,8 @@ class DataWriter:
             TransportType.ZMQ_PUSH_PULL,
         ]:
             raise RuntimeError(f'Unsupported transport {transport_type}')
-
+        self.source_stream_name = source_stream_name
         self.out_channels = output_channels
-
         # TODO buffering
 
         self.sockets = {}
@@ -40,9 +41,14 @@ class DataWriter:
             socket.bind(f'tcp://127.0.0.1:{channel.source_port}')
             self.sockets[channel.channel_id] = socket
 
+    def write_record(self, channel_id: str, record: Record):
+        # add sender operator_id
+        record.set_stream_name(self.source_stream_name)
+        message = record.to_channel_message()
+        self.write_message(channel_id, message)
+
     def write_message(self, channel_id: str, message: ChannelMessage):
         # TODO this should use a buffer?
-
         # TODO serialization perf
         json_str = json.dumps(message)
 

@@ -18,7 +18,7 @@ class Writer:
         channel: Channel,
     ):
         self.channel = channel
-        self.data_writer = DataWriter([channel])
+        self.data_writer = DataWriter(source_stream_name='0', output_channels=[channel])
 
     def send_items(self, items: List[Dict]):
         for item in items:

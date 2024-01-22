@@ -78,6 +78,8 @@ class TwoInputProcessor(StreamProcessor):
             self.operator.process_element(record, None)
         elif self.right_stream_name == stream_name:
             self.operator.process_element(None, record)
+        else:
+            raise RuntimeError(f'Unknown stream {stream_name}, left {self.left_stream_name}, right {self.right_stream_name}')
 
 
 class SourceProcessor(StreamProcessor):

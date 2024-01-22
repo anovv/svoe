@@ -52,12 +52,8 @@ class DataStream(Stream):
             sink_operator=SinkOperator(sink_func)
         )
 
-
-
-
     # TODO union, broadcast, partition_by, process
     # def union(self, streams: List[Stream]) -> 'DataStream':
-
 
 # join
 class JoinStream(DataStream):
@@ -71,29 +67,20 @@ class JoinStream(DataStream):
         self.right_stream = right_stream
 
     def where_key(self, key_by_func_callable: Callable) -> 'JoinWhere':
-        key_by_func = SimpleKeyFunction(key_by_func_callable)
-        return JoinWhere(
-            join_stream=self,
-            left_key_by_func=key_by_func
-        )
+        self.stream_operator.left_key_by_function = SimpleKeyFunction(key_by_func_callable)
+        return JoinWhere(join_stream=self)
 
 
 class JoinEqual:
 
     def __init__(
         self,
-        join_stream: 'JoinStream',
-        left_key_by_func: KeyFunction,
-        right_key_by_func: KeyFunction
+        join_stream: 'JoinStream'
     ):
         self.join_stream = join_stream
-        self.left_key_by_func = left_key_by_func
-        self.right_key_by_func = right_key_by_func
 
     def with_func(self, join_func_callable: Callable) -> DataStream:
-        join_func = SimpleJoinFunction(join_func_callable)
-        join_operator = self.join_stream.stream_operator
-        join_operator.func = join_func
+        self.join_stream.stream_operator.func = SimpleJoinFunction(join_func_callable)
         return self.join_stream
 
 
@@ -101,15 +88,13 @@ class JoinWhere:
 
     def __init__(
         self,
-        join_stream: 'JoinStream',
-        left_key_by_func: KeyFunction
+        join_stream: 'JoinStream'
     ):
         self.join_stream = join_stream
-        self.left_key_by_func = left_key_by_func
 
     def equal_to(self, right_key_by_func_callable: callable) -> JoinEqual:
-        right_key_by_func = SimpleKeyFunction(right_key_by_func_callable)
-        return JoinEqual(self.join_stream, self.left_key_by_func, right_key_by_func)
+        self.join_stream.stream_operator.right_key_by_function = SimpleKeyFunction(right_key_by_func_callable)
+        return JoinEqual(self.join_stream)
 
 
 # key_by

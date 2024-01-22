@@ -1,7 +1,9 @@
+import time
 from abc import ABC, abstractmethod
 from threading import Thread
 
 from svoe.featurizer_v2.streaming.api.message.message import Record, record_from_channel_message
+from svoe.featurizer_v2.streaming.api.operator.operator import JoinOperator
 from svoe.featurizer_v2.streaming.runtime.core.execution_graph.execution_graph import ExecutionVertex
 from svoe.featurizer_v2.streaming.runtime.worker.task.streaming_runtime_context import StreamingRuntimeContext
 from svoe.featurizer_v2.streaming.runtime.core.collector.output_collector import OutputCollector
@@ -40,6 +42,7 @@ class StreamTask(ABC):
             assert len(output_channels) > 0
             assert output_channels[0] != None
             self.writer = DataWriter(
+                source_stream_name=str(self.execution_vertex.stream_operator.id),
                 output_channels=output_channels
             )
 
@@ -102,6 +105,8 @@ class InputStreamTask(StreamTask):
         while self.running:
             message = self.reader.read_message()
             record = record_from_channel_message(message)
+            # if isinstance(self.execution_vertex.stream_operator, JoinOperator):
+            #     print(record)
             self.processor.process(record)
 
 
