@@ -3,13 +3,13 @@ from typing import Dict, List, Optional
 
 from svoe.featurizer_v2.streaming.api.function.function import CollectionSourceFunction, LocalFileSourceFunction, \
     SourceFunction
-from svoe.featurizer_v2.streaming.api.job_graph.job_graph import JobGraph
 from svoe.featurizer_v2.streaming.api.job_graph.job_graph_builder import JobGraphBuilder
 from svoe.featurizer_v2.streaming.api.stream.stream_sink import StreamSink
 from svoe.featurizer_v2.streaming.api.stream.stream_source import StreamSource
 from svoe.featurizer_v2.streaming.runtime.client.job_client import JobClient
 
-logger = logging.getLogger(__name__)
+# logger = logging.getLogger(__name__)
+logger = logging.getLogger("ray")
 
 
 class StreamingContext:
@@ -44,8 +44,10 @@ class StreamingContext:
 
     def submit(self):
         job_graph = JobGraphBuilder(stream_sinks=self.stream_sinks).build()
+        logger.info(f'Built job graph for {job_graph.job_name}')
+        logger.info(f'\n {job_graph.gen_digraph()}')
         job_client = JobClient()
-        job_client.submit(job_graph)
+        job_client.submit(job_graph=job_graph, job_config=self.job_config)
 
 
     def execute(self, job_name: str):

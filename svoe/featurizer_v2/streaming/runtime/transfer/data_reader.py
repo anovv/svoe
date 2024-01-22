@@ -1,4 +1,4 @@
-from typing import List, Dict
+from typing import List
 
 from svoe.featurizer_v2.streaming.runtime.transfer.channel import Channel, ChannelMessage
 from svoe.featurizer_v2.streaming.runtime.transfer.data_writer import TransportType

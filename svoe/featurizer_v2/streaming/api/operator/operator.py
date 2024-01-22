@@ -124,7 +124,6 @@ class SourceOperator(StreamOperator):
 class MapOperator(StreamOperator, OneInputOperator):
 
     def __init__(self, map_func: MapFunction):
-        print(map_func)
         assert isinstance(map_func, MapFunction)
         super().__init__(map_func)
 

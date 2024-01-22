@@ -28,9 +28,9 @@ class KeyPartition(Partition):
     def __init__(self):
         self.__partitions = [-1]
 
-    def partition(self, key_record: Any, num_partition: int) -> List[int]:
+    def partition(self, record: Any, num_partition: int) -> List[int]:
         # TODO support key group
-        self.__partitions[0] = abs(hash(key_record.key)) % num_partition
+        self.__partitions[0] = abs(hash(record.key)) % num_partition
         return self.__partitions
 
 

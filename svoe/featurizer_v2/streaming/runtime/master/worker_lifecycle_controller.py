@@ -10,19 +10,17 @@ from svoe.featurizer_v2.streaming.runtime.core.execution_graph.execution_graph i
 from svoe.featurizer_v2.streaming.runtime.transfer.channel import Channel
 from svoe.featurizer_v2.streaming.runtime.worker.job_worker import JobWorker
 
-from ray._private.state import actors
-
 VALID_PORT_RANGE = (30000, 65000)
 
 
-logger = logging.getLogger(__name__)
+# logger = logging.getLogger(__name__)
+logger = logging.getLogger("ray")
 
 
 class WorkerNetworkInfo:
 
-    def __init__(self, node_ip: str, node_id: str, data_writer_port: int):
+    def __init__(self, node_ip: str, data_writer_port: int):
         self.node_ip = node_ip
-        self.node_id = node_id
         self.data_writer_port = data_writer_port
 
 
@@ -45,27 +43,20 @@ class WorkerLifecycleController:
                 options_kwargs['num_gpus'] = resources.num_gpus
             if resources.memory is not None:
                 options_kwargs['memory'] = resources.memory
-            worker = JobWorker.remote(**options_kwargs)
+            worker = JobWorker.options(**options_kwargs).remote()
             workers.append(worker)
             vertex.set_worker(worker)
 
-        workers_info = {}
-        all_actors_info = actors()
-        for w in workers:
-            for info in all_actors_info:
-                if w._actor_id() == info['ActorID']:
-                    workers_info[w] = info
-
-        assert len(workers_info) == len(workers)
+        worker_hosts_ips = ray.get([w.get_host_ip.remote() for w in workers])
 
         res = {}
-        for w in workers_info:
-            node_id = workers_info[w]['Address']['NodeID']
-            node_ip = workers_info[w]['Address']['IPAddress']
-            res[w] = WorkerNetworkInfo(
+        for i in range(len(workers)):
+            worker = workers[i]
+            node_ip = worker_hosts_ips[i]
+            res[worker] = WorkerNetworkInfo(
                 node_ip=node_ip,
-                node_id=node_id,
-                data_writer_port=self._gen_port(node_id)
+                # TODO we assume node_ip == node_id
+                data_writer_port=self._gen_port(node_ip)
             )
 
         logger.info(f'Created {len(workers)} workers')
@@ -105,6 +96,7 @@ class WorkerLifecycleController:
         t = time.time()
         ray.wait(f)
         logger.info(f'Inited workers in {time.time() - t}s')
+        logger.info(f'Workers writer network info: {[(ni.node_ip, ni.data_writer_port) for ni in workers_info.values()]}')
 
     def start_workers(self, execution_graph: ExecutionGraph):
         logger.info(f'Starting workers...')

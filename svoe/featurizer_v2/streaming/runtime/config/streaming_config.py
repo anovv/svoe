@@ -17,8 +17,8 @@ class StreamingMasterConfig(BaseModel):
 
 class StreamingConfig(BaseModel):
     master_config: StreamingMasterConfig
-    worker_config_tempplate: StreamingWorkerConfig
+    worker_config_template: StreamingWorkerConfig
 
     @classmethod
     def from_dict(cls, config: Dict) -> 'StreamingConfig':
-        raise NotImplementedError
+        return StreamingConfig(**config)

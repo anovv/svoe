@@ -70,7 +70,7 @@ class StreamTask(ABC):
             grouped_channel_ids[op_name].append(output_channel_ids[i])
             grouped_partitions[op_name] = output_edge.partition
 
-        for op_name, partition in grouped_partitions:
+        for op_name in grouped_partitions:
             self.collectors.append(OutputCollector(
                 data_writer=self.writer,
                 output_channel_ids=grouped_channel_ids[op_name],

@@ -7,8 +7,8 @@ from svoe.featurizer_v2.streaming.runtime.core.processor.processor import Proces
 from svoe.featurizer_v2.streaming.runtime.worker.task.stream_task import StreamTask, SourceStreamTask, \
     OneInputStreamTask, TwoInputStreamTask
 
-logger = logging.getLogger(__name__)
-
+# logger = logging.getLogger(__name__)
+logger = logging.getLogger("ray")
 
 @ray.remote
 class JobWorker:
@@ -16,6 +16,9 @@ class JobWorker:
     def __init__(self):
         self.execution_vertex = None
         self.task = None
+
+    def get_host_ip(self) -> str:
+        return ray.util.get_node_ip_address()
 
     def init(self, execution_vertex: ExecutionVertex):
         self.execution_vertex = execution_vertex
@@ -52,6 +55,4 @@ class JobWorker:
                 left_stream_name=left_stream_name,
                 right_stream_name=right_stream_name
             )
-
-        logger.info(f'Created {task} stream task')
         return task

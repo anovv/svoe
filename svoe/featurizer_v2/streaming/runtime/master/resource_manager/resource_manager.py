@@ -16,9 +16,9 @@ class Resources(BaseModel):
     @classmethod
     def from_dict(cls, resources_dict) -> 'Resources':
         return Resources(
-            num_cpus=float(resources_dict.get(RESOURCE_KEY_CPU, None)),
-            num_gpus=float(resources_dict.get(RESOURCE_KEY_GPU, None)),
-            memory=resources_dict.get(RESOURCE_KEY_MEM, None)
+            num_cpus=None if RESOURCE_KEY_CPU not in resources_dict else float(resources_dict[RESOURCE_KEY_CPU]),
+            num_gpus=None if RESOURCE_KEY_GPU not in resources_dict else float(resources_dict[RESOURCE_KEY_GPU]),
+            memory=None if RESOURCE_KEY_MEM not in resources_dict else float(resources_dict[RESOURCE_KEY_MEM]),
         )
 
 
