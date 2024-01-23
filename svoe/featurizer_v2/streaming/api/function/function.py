@@ -197,6 +197,7 @@ class LocalFileSourceFunction(SourceFunction):
                 line = f.readline()
             self.done = True
 
+
 class TimedCollectionSourceFunction(SourceFunction):
     def __init__(self, values, time_period_s):
         self.values = values

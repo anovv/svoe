@@ -2,6 +2,7 @@ import time
 from abc import ABC, abstractmethod
 from threading import Thread
 
+from svoe.featurizer_v2.streaming.api.job_graph.job_graph import VertexType
 from svoe.featurizer_v2.streaming.api.message.message import Record, record_from_channel_message
 from svoe.featurizer_v2.streaming.api.operator.operator import JoinOperator
 from svoe.featurizer_v2.streaming.runtime.core.execution_graph.execution_graph import ExecutionVertex
@@ -43,10 +44,12 @@ class StreamTask(ABC):
             assert output_channels[0] != None
             if self.writer != None:
                 raise RuntimeError('Writer already inited')
-            self.writer = DataWriter(
-                source_stream_name=str(self.execution_vertex.stream_operator.id),
-                output_channels=output_channels
-            )
+            if self.execution_vertex.job_vertex.vertex_type != VertexType.SINK:
+                # sinks do not pass data downstream so no writer
+                self.writer = DataWriter(
+                    source_stream_name=str(self.execution_vertex.stream_operator.id),
+                    output_channels=output_channels
+                )
 
         # reader
         if len(self.execution_vertex.input_edges) != 0:
@@ -55,9 +58,11 @@ class StreamTask(ABC):
             assert input_channels[0] != None
             if self.reader != None:
                 raise RuntimeError('Reader already inited')
-            self.reader = DataReader(
-                input_channels=input_channels
-            )
+            if self.execution_vertex.job_vertex.vertex_type != VertexType.SOURCE:
+                # sources do not read data from upstream so no reader
+                self.reader = DataReader(
+                    input_channels=input_channels
+                )
 
         self._open_processor()
 
