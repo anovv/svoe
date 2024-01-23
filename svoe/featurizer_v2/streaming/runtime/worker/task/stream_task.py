@@ -22,8 +22,8 @@ class StreamTask(ABC):
         self.processor = processor
         self.execution_vertex = execution_vertex
         self.thread = Thread(target=self.run, daemon=True)
-        self.writer: DataWriter
-        self.reader: DataReader
+        self.writer = None
+        self.reader = None
         self.running = True
         self.collectors = []
 
@@ -41,6 +41,8 @@ class StreamTask(ABC):
             output_channels = self.execution_vertex.get_output_channels()
             assert len(output_channels) > 0
             assert output_channels[0] != None
+            if self.writer != None:
+                raise RuntimeError('Writer already inited')
             self.writer = DataWriter(
                 source_stream_name=str(self.execution_vertex.stream_operator.id),
                 output_channels=output_channels
@@ -51,6 +53,8 @@ class StreamTask(ABC):
             input_channels = self.execution_vertex.get_input_channels()
             assert len(input_channels) > 0
             assert input_channels[0] != None
+            if self.reader != None:
+                raise RuntimeError('Reader already inited')
             self.reader = DataReader(
                 input_channels=input_channels
             )

@@ -85,7 +85,7 @@ class JobGraphBuilder:
             raise RuntimeError(f'Unsupported stream type: {stream}')
 
         assert vertex_type is not None
-        self.job_graph.add_vertex(JobVertex(
+        self.job_graph.add_vertex_if_not_exists(JobVertex(
             vertex_id=vertex_id,
             parallelism=parallelism,
             vertex_type=vertex_type,

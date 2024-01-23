@@ -23,7 +23,7 @@ class JobWorker:
     def init(self, execution_vertex: ExecutionVertex):
         self.execution_vertex = execution_vertex
 
-    def start_or_rollback(self):
+    def start_or_rollback(self) -> object:
         self.task = self._create_stream_task()
         self.task.start_or_recover()
 

@@ -68,7 +68,10 @@ class JobGraph:
         self.job_vertices: List[JobVertex] = []
         self.job_edges: List[JobEdge] = []
 
-    def add_vertex(self, job_vertex: JobVertex):
+    def add_vertex_if_not_exists(self, job_vertex: JobVertex):
+        for vertex in self.job_vertices:
+            if vertex.vertex_id == job_vertex.vertex_id:
+                return
         self.job_vertices.append(job_vertex)
 
     def add_edge_if_not_exists(self, job_edge: JobEdge):

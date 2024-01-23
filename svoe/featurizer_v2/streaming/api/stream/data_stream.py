@@ -1,32 +1,36 @@
-from typing import List, Callable
+from typing import List, Callable, Union
 
 from svoe.featurizer_v2.streaming.api.function.function import KeyFunction, SimpleMapFunction, SimpleFlatMapFunction, \
-    SimpleFilterFunction, SimpleKeyFunction, SimpleJoinFunction, SimpleReduceFunction, SimpleSinkFunction
+    SimpleFilterFunction, SimpleKeyFunction, SimpleJoinFunction, SimpleReduceFunction, SimpleSinkFunction, Function
 from svoe.featurizer_v2.streaming.api.operator.operator import MapOperator, FlatMapOperator, FilterOperator, \
     ReduceOperator, StreamOperator, JoinOperator, KeyByOperator, SinkOperator
 from svoe.featurizer_v2.streaming.api.partition.partition import KeyPartition
 from svoe.featurizer_v2.streaming.api.stream.stream import Stream
 from svoe.featurizer_v2.streaming.api.stream.stream_sink import StreamSink
 
+FunctionOrCallable = Union[Function, Callable]
 
 class DataStream(Stream):
 
-    def map(self, map_func_callable: Callable) -> 'DataStream':
-        map_func = SimpleMapFunction(map_func_callable)
+    def map(self, map_func: FunctionOrCallable) -> 'DataStream':
+        if isinstance(map_func, Callable):
+            map_func = SimpleMapFunction(map_func)
         return DataStream(
             input_stream=self,
             stream_operator=MapOperator(map_func),
         )
 
-    def flat_map(self, flat_map_func_callable: Callable) -> 'DataStream':
-        flat_map_func = SimpleFlatMapFunction(flat_map_func_callable)
+    def flat_map(self, flat_map_func: FunctionOrCallable) -> 'DataStream':
+        if isinstance(flat_map_func, Callable):
+            flat_map_func = SimpleFlatMapFunction(flat_map_func)
         return DataStream(
             input_stream=self,
             stream_operator=FlatMapOperator(flat_map_func),
         )
 
-    def filter(self, filter_func_callable: Callable) -> 'DataStream':
-        filter_func = SimpleFilterFunction(filter_func_callable)
+    def filter(self, filter_func: FunctionOrCallable) -> 'DataStream':
+        if isinstance(filter_func, Callable):
+            filter_func = SimpleFilterFunction(filter_func)
         return DataStream(
             input_stream=self,
             stream_operator=FilterOperator(filter_func),
@@ -38,15 +42,17 @@ class DataStream(Stream):
             right_stream=other
         )
 
-    def key_by(self, key_by_func_callable: Callable) -> 'KeyDataStream':
-        key_by_func = SimpleKeyFunction(key_by_func_callable)
+    def key_by(self, key_by_func: FunctionOrCallable) -> 'KeyDataStream':
+        if isinstance(key_by_func, Callable):
+            key_by_func = SimpleKeyFunction(key_by_func)
         return KeyDataStream(
             input_stream=self,
             stream_operator=KeyByOperator(key_by_func)
         )
 
-    def sink(self, sink_func_callable: Callable) -> 'StreamSink':
-        sink_func = SimpleSinkFunction(sink_func_callable)
+    def sink(self, sink_func: FunctionOrCallable) -> 'StreamSink':
+        if isinstance(sink_func, Callable):
+            sink_func = SimpleSinkFunction(sink_func)
         return StreamSink(
             input_stream=self,
             sink_operator=SinkOperator(sink_func)
@@ -66,8 +72,10 @@ class JoinStream(DataStream):
         super().__init__(input_stream=left_stream, stream_operator=JoinOperator())
         self.right_stream = right_stream
 
-    def where_key(self, key_by_func_callable: Callable) -> 'JoinWhere':
-        self.stream_operator.left_key_by_function = SimpleKeyFunction(key_by_func_callable)
+    def where_key(self, key_by_func: FunctionOrCallable) -> 'JoinWhere':
+        if isinstance(key_by_func, Callable):
+            key_by_func = SimpleKeyFunction(key_by_func)
+        self.stream_operator.left_key_by_function = key_by_func
         return JoinWhere(join_stream=self)
 
 
@@ -79,8 +87,10 @@ class JoinEqual:
     ):
         self.join_stream = join_stream
 
-    def with_func(self, join_func_callable: Callable) -> DataStream:
-        self.join_stream.stream_operator.func = SimpleJoinFunction(join_func_callable)
+    def with_func(self, join_func: FunctionOrCallable) -> DataStream:
+        if isinstance(join_func, Callable):
+            join_func = SimpleJoinFunction(join_func)
+        self.join_stream.stream_operator.func = join_func
         return self.join_stream
 
 
@@ -92,8 +102,10 @@ class JoinWhere:
     ):
         self.join_stream = join_stream
 
-    def equal_to(self, right_key_by_func_callable: callable) -> JoinEqual:
-        self.join_stream.stream_operator.right_key_by_function = SimpleKeyFunction(right_key_by_func_callable)
+    def equal_to(self, right_key_by_func: FunctionOrCallable) -> JoinEqual:
+        if isinstance(right_key_by_func, Callable):
+            right_key_by_func = SimpleKeyFunction(right_key_by_func)
+        self.join_stream.stream_operator.right_key_by_function = right_key_by_func
         return JoinEqual(self.join_stream)
 
 
@@ -107,9 +119,10 @@ class KeyDataStream(DataStream):
     ):
         super().__init__(input_stream=input_stream, stream_operator=stream_operator, partition=KeyPartition())
 
-    def reduce(self, reduce_func_callable: Callable) -> DataStream:
-        reduce_function = SimpleReduceFunction(reduce_func_callable)
-        return DataStream(input_stream=self, stream_operator=ReduceOperator(reduce_function))
+    def reduce(self, reduce_func: FunctionOrCallable) -> DataStream:
+        if isinstance(reduce_func, Callable):
+            reduce_func = SimpleReduceFunction(reduce_func)
+        return DataStream(input_stream=self, stream_operator=ReduceOperator(reduce_func))
 
     def aggregate(self) -> DataStream:
         # TODO implement keyed aggregation

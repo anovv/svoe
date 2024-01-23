@@ -21,15 +21,10 @@ class JobScheduler:
     def _prepare_job_submission(self) -> bool:
         logger.info(f'Preparing job {self.runtime_context.job_graph.job_name}...')
         # create workers
-        dummy_workers_info = self.worker_lifecycle_controller.create_dummy_workers(
-            self.runtime_context.execution_graph
-        )
+        self.worker_lifecycle_controller.create_workers(self.runtime_context.execution_graph)
 
-        # init workers and update exec graph channels
-        self.worker_lifecycle_controller.init_workers_and_update_graph_channels(
-            dummy_workers_info,
-            self.runtime_context.execution_graph
-        )
+        # connect and init workers, update exec graph channels
+        self.worker_lifecycle_controller.connect_and_init_workers(self.runtime_context.execution_graph)
 
         logger.info(f'Prepared job {self.runtime_context.job_graph.job_name}.')
         # TODO init master?

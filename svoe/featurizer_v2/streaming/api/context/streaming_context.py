@@ -2,7 +2,7 @@ import logging
 from typing import Dict, List, Optional
 
 from svoe.featurizer_v2.streaming.api.function.function import CollectionSourceFunction, LocalFileSourceFunction, \
-    SourceFunction
+    SourceFunction, TimedCollectionSourceFunction
 from svoe.featurizer_v2.streaming.api.job_graph.job_graph_builder import JobGraphBuilder
 from svoe.featurizer_v2.streaming.api.stream.stream_sink import StreamSink
 from svoe.featurizer_v2.streaming.api.stream.stream_source import StreamSource
@@ -35,6 +35,11 @@ class StreamingContext:
     def from_collection(self, values) -> StreamSource:
         assert values, "values shouldn't be None or empty"
         func = CollectionSourceFunction(values)
+        return self.source(func)
+
+    def from_timed_collection(self, values, time_period_s) -> StreamSource:
+        assert values, "values shouldn't be None or empty"
+        func = TimedCollectionSourceFunction(values, time_period_s)
         return self.source(func)
 
     def read_text_file(self, filename: str) -> StreamSource:

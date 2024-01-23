@@ -1,10 +1,9 @@
 import logging
 import time
 from random import randint
-from typing import Dict, List
+from typing import Dict, List, Any
 
 import ray
-from ray.actor import ActorHandle
 
 from svoe.featurizer_v2.streaming.runtime.core.execution_graph.execution_graph import ExecutionGraph, ExecutionVertex
 from svoe.featurizer_v2.streaming.runtime.transfer.channel import Channel
@@ -19,9 +18,10 @@ logger = logging.getLogger("ray")
 
 class WorkerNetworkInfo:
 
-    def __init__(self, node_ip: str, data_writer_port: int):
+    def __init__(self, node_ip: str, out_edges_ports: Dict[Any, int]):
         self.node_ip = node_ip
-        self.data_writer_port = data_writer_port
+        # port per output edge
+        self.out_edges_ports = out_edges_ports
 
 
 class WorkerLifecycleController:
@@ -29,10 +29,12 @@ class WorkerLifecycleController:
     def __init__(self):
         self._used_ports = {}
 
-    def create_dummy_workers(self, execution_graph: ExecutionGraph) -> Dict[ActorHandle, WorkerNetworkInfo]:
-        workers = []
+    def create_workers(self, execution_graph: ExecutionGraph):
+        workers = {}
+        vertex_ids = []
         logger.info(f'Creating {len(execution_graph.execution_vertices_by_id)} workers...')
-        for vertex in execution_graph.execution_vertices_by_id.values():
+        for vertex_id in execution_graph.execution_vertices_by_id:
+            vertex = execution_graph.execution_vertices_by_id[vertex_id]
             resources = vertex.resources
             options_kwargs = {
                 'max_restarts': -1
@@ -44,48 +46,46 @@ class WorkerLifecycleController:
             if resources.memory is not None:
                 options_kwargs['memory'] = resources.memory
             worker = JobWorker.options(**options_kwargs).remote()
-            workers.append(worker)
+            vertex_ids.append(vertex_id)
+            workers[vertex_id] = worker
             vertex.set_worker(worker)
 
-        worker_hosts_ips = ray.get([w.get_host_ip.remote() for w in workers])
-
-        res = {}
-        for i in range(len(workers)):
-            worker = workers[i]
+        worker_hosts_ips = ray.get([workers[vertex_id].get_host_ip.remote() for vertex_id in vertex_ids])
+        worker_infos = []
+        for i in range(len(vertex_ids)):
+            vertex_id = vertex_ids[i]
             node_ip = worker_hosts_ips[i]
-            res[worker] = WorkerNetworkInfo(
+            vertex = execution_graph.execution_vertices_by_id[vertex_id]
+            # gen ports for each output edge
+            out_edges_ports = {}
+            for out_edge in vertex.output_edges:
+                out_edges_ports[out_edge.id] = self._gen_port(node_ip)
+            ni = WorkerNetworkInfo(
                 node_ip=node_ip,
                 # TODO we assume node_ip == node_id
-                data_writer_port=self._gen_port(node_ip)
+                out_edges_ports=out_edges_ports
             )
+            vertex.set_worker_network_info(ni)
+            worker_infos.append((vertex_id, ni.node_ip, ni.out_edges_ports))
 
         logger.info(f'Created {len(workers)} workers')
-
-        return res
+        logger.info(f'Workers writer network info: {worker_infos}')
 
     # construct channels based on Ray assigned actor IPs and update execution_graph
-    def init_workers_and_update_graph_channels(
-        self,
-        workers_info: Dict[ActorHandle, WorkerNetworkInfo],
-        execution_graph: ExecutionGraph
-    ):
+    def connect_and_init_workers(self, execution_graph: ExecutionGraph):
         logger.info(f'Initializing {len(execution_graph.execution_vertices_by_id)} workers...')
-        assert len(workers_info) == len(execution_graph.execution_vertices_by_id)
 
         # create channels
         for edge in execution_graph.execution_edges:
-            source_worker = edge.source_execution_vertex.worker
+            worker_network_info: WorkerNetworkInfo = edge.source_execution_vertex.worker_network_info
+            if worker_network_info is None:
+                raise RuntimeError(f'Vertex {edge.source_execution_vertex.job_vertex.get_name()} has no worker network info')
 
-            source_ip = workers_info[source_worker].node_ip
-            source_port = workers_info[source_worker].data_writer_port
-
-            channel = Channel(
+            edge.set_channel(Channel(
                 channel_id=edge.id,
-                source_ip=source_ip,
-                source_port=source_port
-            )
-
-            edge.set_channel(channel)
+                source_ip=worker_network_info.node_ip,
+                source_port=worker_network_info.out_edges_ports[edge.id]
+            ))
 
         # init workers
         f = []
@@ -96,7 +96,6 @@ class WorkerLifecycleController:
         t = time.time()
         ray.wait(f)
         logger.info(f'Inited workers in {time.time() - t}s')
-        logger.info(f'Workers writer network info: {[(ni.node_ip, ni.data_writer_port) for ni in workers_info.values()]}')
 
     def start_workers(self, execution_graph: ExecutionGraph):
         logger.info(f'Starting workers...')

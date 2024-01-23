@@ -1,9 +1,12 @@
 import inspect
 import sys
+import time
 from abc import ABC, abstractmethod
 from typing import Any
 
+import ray
 from ray import cloudpickle
+from ray.actor import ActorHandle
 
 from svoe.featurizer_v2.streaming.api.context.runtime_context import RuntimeContext
 
@@ -194,6 +197,20 @@ class LocalFileSourceFunction(SourceFunction):
                 line = f.readline()
             self.done = True
 
+class TimedCollectionSourceFunction(SourceFunction):
+    def __init__(self, values, time_period_s):
+        self.values = values
+        self.time_period_s = time_period_s
+
+    def init(self, parallel, index):
+        pass
+
+    def fetch(self, ctx: SourceContext):
+        for i in range(len(self.values)):
+            ctx.collect(self.values[i])
+            if i < len(self.values) - 1:
+                time.sleep(self.time_period_s)
+        self.values = []
 
 class SimpleMapFunction(MapFunction):
     def __init__(self, func):
@@ -284,6 +301,15 @@ class SimpleSinkFunction(SinkFunction):
 
     def sink(self, value):
         return self.func(value)
+
+
+class SinkToCacheFunction(SinkFunction):
+
+    def __init__(self, cache_actor: ActorHandle):
+        self.cache_actor = cache_actor
+
+    def sink(self, value):
+        self.cache_actor.append_value.remote(value)
 
 
 def serialize(func: Function):
