@@ -1,3 +1,4 @@
+import logging
 from typing import Optional, Dict
 
 import ray
@@ -8,6 +9,9 @@ from svoe.featurizer_v2.streaming.runtime.core.execution_graph.execution_graph i
 from svoe.featurizer_v2.streaming.runtime.master.context.job_master_runtime_context import JobMasterRuntimeContext
 from svoe.featurizer_v2.streaming.runtime.master.resource_manager.resource_manager import ResourceManager
 from svoe.featurizer_v2.streaming.runtime.master.scheduler.job_scheduler import JobScheduler
+
+
+logger = logging.getLogger("ray")
 
 
 @ray.remote
@@ -22,6 +26,8 @@ class JobMaster:
 
     def submit_job(self, job_graph: JobGraph) -> bool:
         execution_graph = ExecutionGraph.from_job_graph(job_graph)
+        logger.info('Execution graph:')
+        logger.info(f'\n{execution_graph.gen_digraph()}')
 
         # set resources
         execution_graph.set_resources(self.master_config.resource_config)

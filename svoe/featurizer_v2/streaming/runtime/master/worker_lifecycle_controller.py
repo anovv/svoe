@@ -118,8 +118,17 @@ class WorkerLifecycleController:
         logger.info(f'Started non-source workers in {time.time() - t}s')
 
     def delete_workers(self, vertices: List[ExecutionVertex]):
-        # TODO
-        raise NotImplementedError
+        # close workers first
+        workers = [v.worker for v in vertices]
+
+        # wait for close to finish
+        ray.get([w.close.remote() for w in workers])
+        logger.info('All workers closed gracefully')
+
+        for w in workers:
+            w.exit.remote()
+
+        # TODO verify and force kill actors if needed after timeout?
 
     def _gen_port(self, node_id) -> int:
         while True:

@@ -30,16 +30,16 @@ class DataWriter:
         self.out_channels = output_channels
         # TODO buffering
 
-        self.sockets = {}
+        self.sockets_and_contexts = {}
         for channel in self.out_channels:
-            if channel.channel_id in self.sockets:
+            if channel.channel_id in self.sockets_and_contexts:
                 raise RuntimeError('duplicate channel ids')
             context = zmq.Context()
 
             # TODO set HWM
             socket = context.socket(zmq.PUSH)
             socket.bind(f'tcp://127.0.0.1:{channel.source_port}')
-            self.sockets[channel.channel_id] = socket
+            self.sockets_and_contexts[channel.channel_id] = (socket, context)
 
     def write_record(self, channel_id: str, record: Record):
         # add sender operator_id
@@ -53,4 +53,14 @@ class DataWriter:
         json_str = json.dumps(message)
 
         # TODO depends on socket type, this can block or just throw exception, test this
-        self.sockets[channel_id].send_string(json_str)
+        socket = self.sockets_and_contexts[channel_id][0]
+        socket.send_string(json_str)
+
+    def close(self):
+        # cleanup sockets and contexts for all channels
+        for channel_id in self.sockets_and_contexts:
+            socket = self.sockets_and_contexts[channel_id][0]
+            context = self.sockets_and_contexts[channel_id][1]
+            socket.setsockopt(zmq.LINGER, 0)
+            socket.close()
+            context.destroy()

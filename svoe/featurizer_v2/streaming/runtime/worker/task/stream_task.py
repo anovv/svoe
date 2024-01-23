@@ -1,16 +1,19 @@
+import logging
 import time
 from abc import ABC, abstractmethod
 from threading import Thread
 
 from svoe.featurizer_v2.streaming.api.job_graph.job_graph import VertexType
 from svoe.featurizer_v2.streaming.api.message.message import Record, record_from_channel_message
-from svoe.featurizer_v2.streaming.api.operator.operator import JoinOperator
 from svoe.featurizer_v2.streaming.runtime.core.execution_graph.execution_graph import ExecutionVertex
 from svoe.featurizer_v2.streaming.runtime.worker.task.streaming_runtime_context import StreamingRuntimeContext
 from svoe.featurizer_v2.streaming.runtime.core.collector.output_collector import OutputCollector
 from svoe.featurizer_v2.streaming.runtime.core.processor.processor import Processor, TwoInputProcessor
 from svoe.featurizer_v2.streaming.runtime.transfer.data_reader import DataReader
 from svoe.featurizer_v2.streaming.runtime.transfer.data_writer import DataWriter
+
+
+logger = logging.getLogger("ray")
 
 
 class StreamTask(ABC):
@@ -98,6 +101,16 @@ class StreamTask(ABC):
 
     def close(self):
         self.running = False
+        self.processor.close()
+        if self.writer != None:
+            self.writer.close()
+            logger.info(f'Closed writer for task {self.execution_vertex.execution_vertex_id}')
+
+        if self.reader != None:
+            self.reader.close()
+            logger.info(f'Closed reader for task {self.execution_vertex.execution_vertex_id}')
+        self.thread.join(timeout=5)
+        logger.info(f'Closed task {self.execution_vertex.execution_vertex_id}')
 
 
 class SourceStreamTask(StreamTask):
@@ -113,6 +126,8 @@ class InputStreamTask(StreamTask):
     def run(self):
         while self.running:
             message = self.reader.read_message()
+            if message is None:
+                continue
             record = record_from_channel_message(message)
             # if isinstance(self.execution_vertex.stream_operator, JoinOperator):
             #     print(record)

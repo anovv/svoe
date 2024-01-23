@@ -1,6 +1,8 @@
 import logging
 from typing import Dict, List, Optional
 
+from ray.actor import ActorHandle
+
 from svoe.featurizer_v2.streaming.api.function.function import CollectionSourceFunction, LocalFileSourceFunction, \
     SourceFunction, TimedCollectionSourceFunction
 from svoe.featurizer_v2.streaming.api.job_graph.job_graph_builder import JobGraphBuilder
@@ -18,6 +20,7 @@ class StreamingContext:
         self.job_config = job_config
         self._id_generator = 0
         self.stream_sinks: List[StreamSink] = []
+        self.job_master: Optional[ActorHandle] = None
 
     def generate_id(self):
         self._id_generator += 1
@@ -52,7 +55,7 @@ class StreamingContext:
         logger.info(f'Built job graph for {job_graph.job_name}')
         logger.info(f'\n {job_graph.gen_digraph()}')
         job_client = JobClient()
-        job_client.submit(job_graph=job_graph, job_config=self.job_config)
+        self.job_master = job_client.submit(job_graph=job_graph, job_config=self.job_config)
 
 
     def execute(self, job_name: str):

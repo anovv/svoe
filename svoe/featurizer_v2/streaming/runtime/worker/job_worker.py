@@ -10,6 +10,7 @@ from svoe.featurizer_v2.streaming.runtime.worker.task.stream_task import StreamT
 # logger = logging.getLogger(__name__)
 logger = logging.getLogger("ray")
 
+
 @ray.remote
 class JobWorker:
 
@@ -23,7 +24,7 @@ class JobWorker:
     def init(self, execution_vertex: ExecutionVertex):
         self.execution_vertex = execution_vertex
 
-    def start_or_rollback(self) -> object:
+    def start_or_rollback(self):
         self.task = self._create_stream_task()
         self.task.start_or_recover()
 
@@ -56,3 +57,11 @@ class JobWorker:
                 right_stream_name=right_stream_name
             )
         return task
+
+    def close(self):
+        if self.task != None:
+            self.task.close()
+        logger.info(f'Closed worker {self.execution_vertex.execution_vertex_id}')
+
+    def exit(self):
+        ray.actor.exit_actor()

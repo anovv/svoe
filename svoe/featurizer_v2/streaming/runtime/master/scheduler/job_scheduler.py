@@ -7,6 +7,7 @@ from svoe.featurizer_v2.streaming.runtime.master.worker_lifecycle_controller imp
 # logger = logging.getLogger(__name__)
 logger = logging.getLogger("ray")
 
+
 class JobScheduler:
 
     def __init__(self, runtime_context: JobMasterRuntimeContext):
@@ -40,4 +41,7 @@ class JobScheduler:
         return True
 
     def destroy_job(self) -> bool:
-        pass
+        self.worker_lifecycle_controller.delete_workers(
+            list(self.runtime_context.execution_graph.execution_vertices_by_id.values())
+        )
+        return True
