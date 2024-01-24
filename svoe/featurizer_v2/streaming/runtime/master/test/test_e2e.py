@@ -37,9 +37,9 @@ class TestE2E(unittest.TestCase):
         s.sink(sink_function)
 
         ctx.submit()
-        time.sleep(5)
-        res = ray.get(sink_cache.get_values.remote())
-        print(res)
+        # time.sleep(5)
+        # res = ray.get(sink_cache.get_values.remote())
+        # print(res)
 
     def test_join_streams(self):
 
@@ -92,4 +92,5 @@ if __name__ == '__main__':
     finally:
         if job_master != None:
             ray.get(job_master.destroy.remote())
+        time.sleep(5)
         ray.shutdown()

@@ -121,14 +121,20 @@ class WorkerLifecycleController:
         # close workers first
         workers = [v.worker for v in vertices]
 
-        # wait for close to finish
-        ray.get([w.close.remote() for w in workers])
-        logger.info('All workers closed gracefully')
+        # wait for actors to properly close
+        timeout=5
+        closed_finished_refs, closed_pending_refs = ray.wait(
+            [w.close.remote() for w in workers],
+            timeout=timeout,
+            num_returns=len(workers)
+        )
+        if len(closed_finished_refs) == len(workers):
+            logger.info('All workers closed gracefully')
+        else:
+            logger.info(f'Timeout ({timeout}s) waiting for actors to close gracefully, {len(closed_pending_refs)} not ready')
 
         for w in workers:
             w.exit.remote()
-
-        # TODO verify and force kill actors if needed after timeout?
 
     def _gen_port(self, node_id) -> int:
         while True:

@@ -38,6 +38,7 @@ class DataWriter:
 
             # TODO set HWM
             socket = context.socket(zmq.PUSH)
+            socket.setsockopt(zmq.LINGER, 0)
             socket.bind(f'tcp://127.0.0.1:{channel.source_port}')
             self.sockets_and_contexts[channel.channel_id] = (socket, context)
 
@@ -61,6 +62,5 @@ class DataWriter:
         for channel_id in self.sockets_and_contexts:
             socket = self.sockets_and_contexts[channel_id][0]
             context = self.sockets_and_contexts[channel_id][1]
-            socket.setsockopt(zmq.LINGER, 0)
-            socket.close()
-            context.destroy()
+            socket.close(linger=0)
+            context.destroy(linger=0)

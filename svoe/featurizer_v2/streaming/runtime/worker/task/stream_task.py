@@ -100,6 +100,7 @@ class StreamTask(ABC):
         )
 
     def close(self):
+        logger.info(f'Closing task {self.execution_vertex.execution_vertex_id}...')
         self.running = False
         self.processor.close()
         if self.writer != None:
@@ -127,6 +128,7 @@ class InputStreamTask(StreamTask):
         while self.running:
             message = self.reader.read_message()
             if message is None:
+                # TODO indicate special message
                 continue
             record = record_from_channel_message(message)
             # if isinstance(self.execution_vertex.stream_operator, JoinOperator):

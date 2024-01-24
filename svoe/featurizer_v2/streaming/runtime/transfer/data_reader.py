@@ -25,12 +25,15 @@ class DataReader:
 
         self.cur_read_id = 0
 
+        self.running = True
+
         # TODO buffering
         self.sockets_and_contexts = {}
         for channel in self.input_channels:
             context = zmq.Context()
             # TODO set HWM
             socket = context.socket(zmq.PULL)
+            socket.setsockopt(zmq.LINGER, 0)
             socket.connect(f'tcp://{channel.source_ip}:{channel.source_port}')
             self.sockets_and_contexts[channel.channel_id] = (socket, context)
 
@@ -41,21 +44,32 @@ class DataReader:
         # round robin read
         channel_id = self.input_channels[self.cur_read_id].channel_id
         socket = self.sockets_and_contexts[channel_id][0]
-        try:
-            json_str = socket.recv_string()
-        except zmq.error.ContextTerminated:
-            logger.info('zmq recv interrupt due to ContextTerminated')
+        json_str = None
+        while self.running and json_str is None:
+            try:
+                json_str = socket.recv_string(zmq.NOBLOCK)
+            except zmq.error.ContextTerminated:
+                logger.info('zmq recv interrupt due to ContextTerminated')
+                json_str = None
+            except Exception as e:
+                # default if no data on the wire
+                json_str = None
+
+        # reader was stopped
+        if json_str is None:
+            assert self.running == False
             return None
+
         self.cur_read_id = (self.cur_read_id + 1)%len(self.input_channels)
 
         # TODO serialization perf
         return json.loads(json_str)
 
     def close(self):
+        self.running = False
         # cleanup sockets and contexts for all channels
         for channel_id in self.sockets_and_contexts:
             socket = self.sockets_and_contexts[channel_id][0]
             context = self.sockets_and_contexts[channel_id][1]
-            socket.setsockopt(zmq.LINGER, 0)
-            socket.close()
-            context.destroy()
+            socket.close(linger=0)
+            context.destroy(linger=0)
